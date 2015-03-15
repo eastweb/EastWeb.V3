@@ -21,7 +21,9 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import edu.sdstate.eastweb.prototype.util.GdalUtils;
+import version2.prototype.util.GdalUtils;
+
+
 
 public class ZonalSummaryCalculator implements SummaryCalculator {
 

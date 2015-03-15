@@ -90,7 +90,7 @@ public class Scheduler {
                         prepareProcessTask.getOutputFile(),
                         projectInfo)});
                 Method methodProcess = process.getClass().getMethod("run");
-                //methodProcess.invoke(process);
+                methodProcess.invoke(process);
             }
         }
     }
@@ -113,7 +113,7 @@ public class Scheduler {
                             indexCalculatorItem}
                     );
             Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
-            //methodIndicies.invoke(indexCalculator);
+            methodIndicies.invoke(indexCalculator);
         }
     }
 

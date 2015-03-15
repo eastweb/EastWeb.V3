@@ -2,10 +2,12 @@ package version2.prototype.indices.Nldas;
 
 import java.io.File;
 
-import edu.sdstate.eastweb.prototype.indices.IndicesFramework;
+
+
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.DirectoryLayout;
+import version2.prototype.indices.IndicesFramework;
 
 public class GdalNldasCalculator extends IndicesFramework{
 

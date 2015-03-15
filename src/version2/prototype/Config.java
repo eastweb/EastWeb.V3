@@ -13,8 +13,10 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Projection;
 import version2.prototype.Projection.*;
-import edu.sdstate.eastweb.prototype.download.Downloader.Mode;
-import edu.sdstate.eastweb.prototype.util.*;
+import version2.prototype.download.DownloaderFramework.Mode;
+import version2.prototype.util.LazyCachedReference;
+import version2.prototype.util.XmlUtils;
+
 
 public class Config {
     private static final String PROJECTS_DIR = ".\\projects";

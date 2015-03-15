@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import edu.sdstate.eastweb.prototype.DataDate;
+import version2.prototype.DataDate;
 
 public class TemporalSummaryCalculator implements SummaryCalculator {
 

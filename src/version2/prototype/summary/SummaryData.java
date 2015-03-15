@@ -5,7 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import edu.sdstate.eastweb.prototype.DataDate;
+import version2.prototype.DataDate;
+
 
 public class SummaryData {
     // ZonalSummaryCalculator variables

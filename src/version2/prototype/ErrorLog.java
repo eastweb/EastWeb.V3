@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import edu.sdstate.eastweb.prototype.Config;
 
 public final class ErrorLog {
     private ErrorLog() {
@@ -39,7 +38,7 @@ public final class ErrorLog {
                         cal.get(GregorianCalendar.HOUR_OF_DAY),
                         cal.get(GregorianCalendar.MINUTE),
                         cal.get(GregorianCalendar.SECOND)
-                ));
+                        ));
                 sErrorLogPrintStream = new PrintStream(fos);
             }
 

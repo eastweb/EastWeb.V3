@@ -32,9 +32,7 @@ public class SummariesCollectionTest {
      */
     @Test
     public void testSummariesCollection() throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        SummariesCollection col;
-
-        col = new SummariesCollection(new ArrayList<String>());
+        SummariesCollection col = new SummariesCollection(new ArrayList<String>());
 
     }
 
