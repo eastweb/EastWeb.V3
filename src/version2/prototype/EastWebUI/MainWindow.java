@@ -63,9 +63,10 @@ public class MainWindow {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 580, 410);
+        frame.setBounds(100, 100, 1000, 750);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
+        //frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
         CreateButton();
         ComboBox();
@@ -80,7 +81,7 @@ public class MainWindow {
             public void mouseClicked(MouseEvent arg0) {
             }
         });
-        menuBar.setBounds(10, 11, 200, 25);
+        menuBar.setBounds(0, 0, 200, 25);
         frame.getContentPane().add(menuBar);
     }
 
@@ -140,7 +141,7 @@ public class MainWindow {
             }
         });
 
-        btnNewButton.setBounds(419, 11, 135, 23);
+        btnNewButton.setBounds(250, 0, 135, 30);
         frame.getContentPane().add(btnNewButton);
     }
 
@@ -157,6 +158,7 @@ public class MainWindow {
     public JMenuBar createMenuBar() {
         //Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
+        menuBar.setBounds(0, 0, 500, 25);
 
         //Build the first menu.
         JMenu menu = new JMenu("A Menu");
@@ -227,6 +229,11 @@ public class MainWindow {
 
     class ButtonRenderer extends JButton implements TableCellRenderer {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         public ButtonRenderer() {
             setOpaque(true);
         }
@@ -246,8 +253,12 @@ public class MainWindow {
         }
     }
 
-
     class ButtonEditor extends DefaultCellEditor {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
         protected JButton button;
 
         private String label;
@@ -308,6 +319,5 @@ public class MainWindow {
             super.fireEditingStopped();
         }
     }
-
 
 }

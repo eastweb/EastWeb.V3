@@ -38,5 +38,6 @@
 	<classpathentry kind="lib" path="C:/Program Files (x86)/eclipse/plugins/org.eclipse.core.databinding.property_1.4.200.v20130515-1857.jar" sourcepath="C:/Program Files (x86)/eclipse/plugins/org.eclipse.core.databinding.property.source_1.4.200.v20130515-1857.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files (x86)/eclipse/plugins/org.eclipse.jface.databinding_1.6.200.v20130515-1857.jar" sourcepath="C:/Program Files (x86)/eclipse/plugins/org.eclipse.jface.databinding.source_1.6.200.v20130515-1857.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files (x86)/eclipse/plugins/com.ibm.icu_50.1.1.v201304230130.jar" sourcepath="C:/Program Files (x86)/eclipse/plugins/com.ibm.icu.source_50.1.1.v201304230130.jar"/>
+	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
