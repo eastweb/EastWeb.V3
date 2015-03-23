@@ -7,8 +7,9 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
 
-        SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
+        System.out.println("Hello, World");
+        //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
 
-        Scheduler.getInstance(data).run();
+        //Scheduler.getInstance(data).run();
     }
 }
