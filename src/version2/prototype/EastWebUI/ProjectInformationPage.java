@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JTextField;
 import javax.swing.JList;
+import javax.swing.JComboBox;
 
 public class ProjectInformationPage {
 
@@ -30,6 +31,13 @@ public class ProjectInformationPage {
     private JTextField projectName;
     private JTextField workingDirectory;
     private JTextField maskFile;
+    private JTextField textField;
+    private JTextField textField_1;
+    private JTextField textField_2;
+    private JTextField textField_3;
+    private JTextField textField_4;
+    private JTextField textField_5;
+    private JTextField textField_6;
 
     /**
      * Launch the application.
@@ -61,10 +69,14 @@ public class ProjectInformationPage {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 1080, 750);
+        frame.setBounds(100, 100, 1207, 730);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
+
+        JList list_1 = new JList();
+        list_1.setBounds(10, 40, 1182, 369);
+        frame.getContentPane().add(list_1);
 
         CreateNewProjectButton();
         PopulatePluginList();
@@ -83,7 +95,7 @@ public class ProjectInformationPage {
             }
         });
 
-        createButton.setBounds(804, 21, 175, 25);
+        createButton.setBounds(1017, 11, 175, 25);
         frame.getContentPane().add(createButton);
     }
 
@@ -166,7 +178,7 @@ public class ProjectInformationPage {
         JPanel panel_3 = new JPanel();
         panel_3.setLayout(null);
         panel_3.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_3.setBounds(280, 420, 275, 275);
+        panel_3.setBounds(276, 420, 275, 275);
         frame.getContentPane().add(panel_3);
 
         JButton btnNewButton_1 = new JButton("Edit Modis Tiles");
@@ -182,35 +194,110 @@ public class ProjectInformationPage {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(550, 420, 275, 275);
+        panel_2.setBounds(547, 420, 383, 275);
         frame.getContentPane().add(panel_2);
 
-        JLabel label_4 = new JLabel("Start Date: xx-xx-xxxx");
-        label_4.setBounds(6, 16, 245, 14);
+        JLabel label_4 = new JLabel("Coordinate System:");
+        label_4.setBounds(6, 16, 134, 14);
         panel_2.add(label_4);
 
-        JLabel label_5 = new JLabel("Project Name: ");
-        label_5.setBounds(6, 58, 71, 14);
+        JLabel label_5 = new JLabel("Re-sampling Type:");
+        label_5.setBounds(6, 41, 109, 14);
         panel_2.add(label_5);
 
-        JLabel label_6 = new JLabel("Working Directory: ");
-        label_6.setBounds(6, 100, 93, 14);
+        JLabel label_6 = new JLabel("Datum:");
+        label_6.setBounds(6, 66, 109, 14);
         panel_2.add(label_6);
 
-        JLabel label_7 = new JLabel("Masking File");
-        label_7.setBounds(6, 143, 57, 14);
+        JLabel label_7 = new JLabel("Pixel size meters:");
+        label_7.setBounds(6, 91, 109, 14);
         panel_2.add(label_7);
+
+        JLabel label = new JLabel("Standard parallel 1");
+        label.setBounds(6, 116, 109, 14);
+        panel_2.add(label);
+
+        JLabel label_1 = new JLabel("Cental meridian");
+        label_1.setBounds(6, 141, 109, 14);
+        panel_2.add(label_1);
+
+        JLabel label_2 = new JLabel("False easting");
+        label_2.setBounds(6, 166, 109, 14);
+        panel_2.add(label_2);
+
+        textField = new JTextField();
+        textField.setColumns(10);
+        textField.setBounds(146, 90, 140, 16);
+        panel_2.add(textField);
+
+        textField_1 = new JTextField();
+        textField_1.setColumns(10);
+        textField_1.setBounds(146, 115, 71, 16);
+        panel_2.add(textField_1);
+
+        textField_2 = new JTextField();
+        textField_2.setColumns(10);
+        textField_2.setBounds(146, 140, 71, 16);
+        panel_2.add(textField_2);
+
+        textField_3 = new JTextField();
+        textField_3.setColumns(10);
+        textField_3.setBounds(146, 165, 71, 16);
+        panel_2.add(textField_3);
+
+        JComboBox comboBox = new JComboBox();
+        comboBox.setBounds(146, 13, 140, 20);
+        panel_2.add(comboBox);
+
+        JComboBox comboBox_1 = new JComboBox();
+        comboBox_1.setBounds(146, 38, 140, 20);
+        panel_2.add(comboBox_1);
+
+        JComboBox comboBox_2 = new JComboBox();
+        comboBox_2.setBounds(146, 63, 140, 20);
+        panel_2.add(comboBox_2);
+
+        JLabel label_3 = new JLabel("Standard parallel 2");
+        label_3.setBounds(6, 191, 109, 14);
+        panel_2.add(label_3);
+
+        JLabel label_8 = new JLabel("Latitude of origin");
+        label_8.setBounds(6, 216, 109, 14);
+        panel_2.add(label_8);
+
+        JLabel label_9 = new JLabel("False nothing");
+        label_9.setBounds(6, 241, 109, 14);
+        panel_2.add(label_9);
+
+        textField_4 = new JTextField();
+        textField_4.setColumns(10);
+        textField_4.setBounds(146, 192, 71, 16);
+        panel_2.add(textField_4);
+
+        textField_5 = new JTextField();
+        textField_5.setColumns(10);
+        textField_5.setBounds(146, 215, 71, 16);
+        panel_2.add(textField_5);
+
+        textField_6 = new JTextField();
+        textField_6.setColumns(10);
+        textField_6.setBounds(146, 240, 71, 16);
+        panel_2.add(textField_6);
     }
 
     private void SummaryInformation() {
         JPanel panel_1 = new JPanel();
         panel_1.setLayout(null);
         panel_1.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_1.setBounds(804, 420, 228, 259);
+        panel_1.setBounds(921, 420, 275, 275);
         frame.getContentPane().add(panel_1);
 
-        JButton btnNewButton = new JButton("New button");
-        btnNewButton.setBounds(0, 21, 228, 35);
-        panel_1.add(btnNewButton);
+        JButton btnNewButton_1 = new JButton("Edit Summary");
+        btnNewButton_1.setBounds(15, 20, 245, 30);
+        panel_1.add(btnNewButton_1);
+
+        JList list = new JList();
+        list.setBounds(15, 70, 245, 180);
+        panel_1.add(list);
     }
 }
