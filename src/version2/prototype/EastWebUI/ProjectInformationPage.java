@@ -24,6 +24,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
@@ -35,6 +36,14 @@ import javax.swing.JComboBox;
 import version2.prototype.EastWebUI.MainWindow.ButtonEditor;
 import version2.prototype.EastWebUI.MainWindow.ButtonRenderer;
 
+/**
+ * @author sufi abdul
+ *
+ */
+/**
+ * @author sufi abdul
+ *
+ */
 public class ProjectInformationPage {
 
     private JFrame frame;
@@ -120,7 +129,10 @@ public class ProjectInformationPage {
         DefaultListModel<String> listOfAddedPluginModel = new DefaultListModel<String>();
 
         final JList<String> listOfAddedPlugin = new JList<String>(listOfAddedPluginModel);
-        listOfAddedPluginModel.addElement("Item 1");
+        listOfAddedPluginModel.addElement("<html>Plugin: Nldas Forcing<br>Indicies: </span> <span>Day</span> <span>Night</span> <span>Batman</span> <br>Quality: Level 3 </span></html>");
+        listOfAddedPluginModel.addElement("<html>Plugin: Nldas NOAH<br>Indicies: </span> <span>Day</span> <span>Night</span> <span>Batman</span> <br>Quality: Level 3 </span></html>");
+        listOfAddedPluginModel.addElement("<html>Plugin: Nldas Batman<br>Indicies: </span> <span>Day</span> <span>Night</span> <span>Batman</span> <br>Quality: Level 3 </span></html>");
+        listOfAddedPlugin.setBorder(new EmptyBorder(10,10, 10, 10));
 
         JButton addPluginButton = new JButton("Add Plugin");
         addPluginButton.setToolTipText("Add Plugin");
