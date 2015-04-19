@@ -141,10 +141,10 @@ public class ProjectInformationPage {
             public void actionPerformed(ActionEvent arg0) {
             }
         });
-        addPluginButton.setBounds(10, 12, 89, 23);
+        addPluginButton.setBounds(10, 12, 112, 23);
         frame.getContentPane().add(addPluginButton);
 
-        JButton deletePluginButton = new JButton("Delete Selected Plugin");
+        JButton deletePluginButton = new JButton("Delete Plugin");
         deletePluginButton.setToolTipText("Delete Plugin");
         deletePluginButton.addActionListener(new ActionListener() {
             @Override
@@ -156,7 +156,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deletePluginButton.setBounds(132, 12, 153, 23);
+        deletePluginButton.setBounds(132, 12, 112, 23);
         frame.getContentPane().add(deletePluginButton);
 
         JScrollPane scrollPane = new JScrollPane(listOfAddedPlugin);
@@ -247,7 +247,7 @@ public class ProjectInformationPage {
         final JList<DefaultListModel> modisList = new JList<DefaultListModel>(modisListModel);
         modisList.setBounds(15, 70, 245, 180);
 
-        JButton addNewModisButton = new JButton("Edit Modis Tiles");
+        JButton addNewModisButton = new JButton("Edit");
         addNewModisButton.addActionListener(new ActionListener() {
             @SuppressWarnings("unchecked")
             @Override
@@ -260,7 +260,7 @@ public class ProjectInformationPage {
         modisInformationPanel.add(addNewModisButton);
         modisInformationPanel.add(modisList);
 
-        JButton btnDeleteSelected = new JButton("Delete Selected");
+        JButton btnDeleteSelected = new JButton("Delete");
         btnDeleteSelected.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -381,15 +381,16 @@ public class ProjectInformationPage {
         final JList<?> summaryList = new JList<Object>(summaryListModel);
         summaryList.setBounds(15, 70, 245, 180);
 
-        JButton editSummaryButton = new JButton("Edit Summary");
+        JButton editSummaryButton = new JButton("Edit");
         editSummaryButton.addActionListener(new ActionListener() {
             @SuppressWarnings("unchecked")
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 JTextField xField = new JTextField(20);
                 final JTextField yField = new JTextField(20);
-                JPanel myPanel = new JPanel();
-                JButton browseButton = new JButton(". . .");
+                final JPanel myPanel = new JPanel();
+
+                final JButton browseButton = new JButton(". . .");
                 browseButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent evt) {
@@ -410,13 +411,34 @@ public class ProjectInformationPage {
                     }
                 });
 
-                myPanel.add(new JLabel("Title:"));
-                myPanel.add(xField);
+                final JComboBox temporalComboBox = new JComboBox();
+                temporalComboBox.addItem("Summary 1");
+                temporalComboBox.addItem("Summary 2" );
+
+                final JComboBox summaryComboBox = new JComboBox();
+                summaryComboBox.addItem("Zonal Summary");
+                summaryComboBox.addItem("Temporal Summary" );
+                summaryComboBox.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        String selectedItem = String.valueOf(summaryComboBox.getSelectedItem());
+                        if(selectedItem == "Zonal Summary"){
+                            myPanel.add(temporalComboBox);
+
+                        }else if(selectedItem == "Temporal Summary"){
+                            myPanel.add(new JLabel("File Path:"));
+                            myPanel.add(yField);
+                            myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+                            myPanel.add(browseButton);
+                        }
+                    }
+                });
+
+
+
+                myPanel.add(summaryComboBox);
                 myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-                myPanel.add(new JLabel("File Path:"));
-                myPanel.add(yField);
-                myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-                myPanel.add(browseButton);
+
 
                 int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Zonal Summary Information", JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
@@ -431,7 +453,7 @@ public class ProjectInformationPage {
         summaryPanel.add(editSummaryButton);
         summaryPanel.add(summaryList);
 
-        JButton deleteSummaryButton = new JButton("Delete Selected");
+        JButton deleteSummaryButton = new JButton("Delete");
         deleteSummaryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -446,197 +468,4 @@ public class ProjectInformationPage {
         summaryPanel.add(deleteSummaryButton);
 
     }
-
-    //  private void PopulatePluginList() {
-    //        String[] columnNames = {"Plugin Name", "Indicies Calculator", "Quality Control", "Vegetarian", "Buttons"};
-    //
-    //        DefaultListModel listModel = new DefaultListModel();
-    //
-    //        JList list_1 = new JList(listModel);
-    //        listModel.addElement("Item 1");
-    //
-    //
-    //
-    //        Object[][] data = {
-    //                {"Kathy", "Smith", false, list_1, "Button 1"},
-    //                {"John", "Doe", new Boolean(true), new Integer(3), "Button 1"},
-    //                {"Sue", "Black",new Boolean(true), new Integer(2), "Button 1"},
-    //                {"Jane", "White",new Boolean(true), new Integer(20), "Button 1"},
-    //                {"Joe", "Brown",new Boolean(true), new Integer(10), "Button 1"}
-    //        };
-    //
-    //
-    //
-    //        JTable table = new JTable(data, columnNames);
-    //        table.setFillsViewportHeight(true);
-    //        table.getColumn("Buttons").setCellRenderer(new ButtonRenderer());
-    //        table.getColumn("Buttons").setCellEditor(new ButtonEditor(new JCheckBox()));
-    //
-    //        table.getColumn("Vegetarian").setCellRenderer(new listRenderer());
-    //        table.getColumn("Vegetarian").setCellEditor(new DefaultCellEditor(new JCheckBox()));
-    //
-    //
-    //        table.getColumn("Quality Control").setCellRenderer(new CheckBoxRenderer());
-    //        table.getColumn("Quality Control").setCellEditor(new CheckBoxEditor(new JCheckBox()));
-    //
-    //        //table.getColumn("Vegetarian").setCellRenderer(new JScrollTableRenderer());
-    //        //table.getColumn("Vegetarian").setCellEditor(new JScrollTableEditor());
-    //
-    //
-    //        JScrollPane scrollPane = new JScrollPane(table);
-    //        scrollPane.setBounds(10, 40, 1182, 369);
-    //        frame.getContentPane().add(scrollPane);
-    //    }
-    //    class ButtonRenderer extends JButton implements TableCellRenderer {
-    //
-    //        /**
-    //         *
-    //         */
-    //        private static final long serialVersionUID = 1L;
-    //
-    //        public ButtonRenderer() {
-    //            setOpaque(true);
-    //        }
-    //
-    //        @Override
-    //        public Component getTableCellRendererComponent(JTable table, Object value,
-    //                boolean isSelected, boolean hasFocus, int row, int column) {
-    //            if (isSelected) {
-    //                setForeground(table.getSelectionForeground());
-    //                setBackground(table.getSelectionBackground());
-    //            } else {
-    //                setForeground(table.getForeground());
-    //                setBackground(UIManager.getColor("Button.background"));
-    //            }
-    //            setText((value == null) ? "" : value.toString());
-    //            return this;
-    //        }
-    //    }
-    //
-    //    class ButtonEditor extends DefaultCellEditor {
-    //        /**
-    //         *
-    //         */
-    //        private static final long serialVersionUID = 1L;
-    //
-    //        protected JButton button;
-    //
-    //        private String label;
-    //
-    //        private boolean isPushed;
-    //
-    //        public ButtonEditor(JCheckBox checkBox) {
-    //            super(checkBox);
-    //            button = new JButton();
-    //            button.setOpaque(true);
-    //            button.addActionListener(new ActionListener() {
-    //                @Override
-    //                public void actionPerformed(ActionEvent e) {
-    //                    fireEditingStopped();
-    //                }
-    //            });
-    //        }
-    //
-    //        @Override
-    //        public Component getTableCellEditorComponent(JTable table, Object value,
-    //                boolean isSelected, int row, int column) {
-    //            if (isSelected) {
-    //                button.setForeground(table.getSelectionForeground());
-    //                button.setBackground(table.getSelectionBackground());
-    //            } else {
-    //                button.setForeground(table.getForeground());
-    //                button.setBackground(table.getBackground());
-    //            }
-    //            label = (value == null) ? "" : value.toString();
-    //            button.setText(label);
-    //            isPushed = true;
-    //            return button;
-    //        }
-    //
-    //        @Override
-    //        public Object getCellEditorValue() {
-    //            if (isPushed) {
-    //                //
-    //                //
-    //                JOptionPane.showMessageDialog(button, label + ": Ouch!");
-    //                JFrame window = new JFrame();
-    //                window.setBounds(100, 100, 580, 410);
-    //                window.setVisible(true);
-    //                // System.out.println(label + ": Ouch!");
-    //            }
-    //            isPushed = false;
-    //            return new String(label);
-    //        }
-    //
-    //        @Override
-    //        public boolean stopCellEditing() {
-    //            isPushed = false;
-    //            return super.stopCellEditing();
-    //        }
-    //
-    //        @Override
-    //        protected void fireEditingStopped() {
-    //            super.fireEditingStopped();
-    //        }
-    //    }
-    //
-    //    class CheckBoxRenderer extends JCheckBox implements TableCellRenderer {
-    //
-    //        /**
-    //         *
-    //         */
-    //        private static final long serialVersionUID = 1L;
-    //
-    //        public CheckBoxRenderer() {
-    //            setOpaque(true);
-    //        }
-    //
-    //        @Override
-    //        public Component getTableCellRendererComponent(JTable table, Object value,
-    //                boolean isSelected, boolean hasFocus, int row, int column) {
-    //            if (isSelected) {
-    //                setForeground(table.getSelectionForeground());
-    //                setBackground(table.getSelectionBackground());
-    //            } else {
-    //                setForeground(table.getForeground());
-    //                setBackground(UIManager.getColor("Button.background"));
-    //            }
-    //            setText((value == null) ? "" : value.toString());
-    //            return this;
-    //        }
-    //    }
-    //
-    //    class CheckBoxEditor extends DefaultCellEditor {
-    //
-    //        public CheckBoxEditor(JCheckBox arg0) {
-    //            super(arg0);
-    //            // TODO Auto-generated constructor stub
-    //        }
-    //    }
-    //
-    //    class listRenderer extends JList<Object> implements TableCellRenderer {
-    //
-    //        /**
-    //         *
-    //         */
-    //        private static final long serialVersionUID = 1L;
-    //
-    //        public listRenderer() {
-    //            setOpaque(true);
-    //        }
-    //
-    //        @Override
-    //        public Component getTableCellRendererComponent(JTable table, Object value,
-    //                boolean isSelected, boolean hasFocus, int row, int column) {
-    //            if (isSelected) {
-    //                setForeground(table.getSelectionForeground());
-    //                setBackground(table.getSelectionBackground());
-    //            } else {
-    //                setForeground(table.getForeground());
-    //                setBackground(UIManager.getColor("Button.background"));
-    //            }
-    //
-    //            return this;
-    //        }
-    //    }
 }
