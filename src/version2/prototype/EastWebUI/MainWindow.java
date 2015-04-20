@@ -1,6 +1,7 @@
 package version2.prototype.EastWebUI;
 
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -12,13 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
@@ -28,12 +26,19 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.InputEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+
+import org.apache.commons.io.FileUtils;
+
+import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.Scheduler.SchedulerData;
 
 public class MainWindow {
 
@@ -42,6 +47,11 @@ public class MainWindow {
     private JMenu mnHelp;
     private JTextField intermidateDumpPath;
     private JMenuItem mntmEditProject;
+    private JMenuItem mntmOpenSetFolder;
+    private JMenuItem mntmDeleteAllFiles;
+    String freeSpaceString;
+    DefaultTableModel defaultTableModel;
+    JComboBox<String> projectList;
 
     /**
      * Launch the application.
@@ -77,75 +87,129 @@ public class MainWindow {
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
 
-        CreateButton();
-        ComboBox();
         FileMenu();
+        PopulateUIControl();
         TableView();
     }
 
     private void FileMenu() {
-        JMenuBar menuBar = createMenuBar();
-        menuBar.addMouseListener(new MouseAdapter() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu mnFile = new JMenu("File");
+        mnFile.setMnemonic(KeyEvent.VK_A);
+        mnFile.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
+        menuBar.add(mnFile);
+
+        mntmCreateNewProject = new JMenuItem("Create New Project", KeyEvent.VK_T);
+        mntmCreateNewProject.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_1, ActionEvent.ALT_MASK));
+        mntmCreateNewProject.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+        mntmCreateNewProject.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent arg0) {
+            public void actionPerformed(ActionEvent arg0) {
+                new ProjectInformationPage(true);
             }
         });
+        mnFile.add(mntmCreateNewProject);
+
+        mntmEditProject = new JMenuItem("Edit Project");
+        mntmEditProject.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.ALT_MASK));
+        mntmEditProject.setMnemonic(KeyEvent.VK_B);
+        mntmEditProject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                new ProjectInformationPage(false);
+            }
+        });
+        mnFile.add(mntmEditProject);
+        mnFile.addSeparator();
+
+        JMenuItem createNewPlugin = new JMenuItem("Create New Plugin Template");
+        createNewPlugin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String fileName = JOptionPane.showInputDialog("Enter plugin name", JOptionPane.YES_NO_OPTION );
+                File theDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\" + fileName + ".xml" );
+                try {
+                    theDir.createNewFile();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+        });
+        createNewPlugin.setMnemonic(KeyEvent.VK_B);
+        mnFile.add(createNewPlugin);
+        mnFile.addSeparator();
+
+        JMenu submenu = new JMenu("Manage Intermidiate Files");
+        submenu.setMnemonic(KeyEvent.VK_S);
+
+        mntmOpenSetFolder = new JMenuItem("Open set Folder");
+        mntmOpenSetFolder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    Desktop.getDesktop().open(new File(intermidateDumpPath.getText()));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        });
+        submenu.add(mntmOpenSetFolder);
+
+        mntmDeleteAllFiles = new JMenuItem("Delete All files");
+        mntmDeleteAllFiles.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete all files ?", "Delete Intermidate File", JOptionPane.YES_NO_OPTION);
+                if (reply == JOptionPane.YES_OPTION) {
+                    try {
+                        FileUtils.cleanDirectory(new File(intermidateDumpPath.getText()));
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+        submenu.add(mntmDeleteAllFiles);
+        mnFile.add(submenu);
+
+        //Build second menu in the menu bar.
+        mnHelp = new JMenu("Help");
+        mnHelp.setMnemonic(KeyEvent.VK_N);
+        mnHelp.getAccessibleContext().setAccessibleDescription("This menu does nothing");
+        menuBar.add(mnHelp);
+
+        JMenuItem mntmSettings = new JMenuItem("Settings", KeyEvent.VK_T);
+        mnHelp.add(mntmSettings);
+
+        JMenuItem mntmManual = new JMenuItem("Manual", KeyEvent.VK_T);
+        mnHelp.add(mntmManual);
+
         menuBar.setBounds(0, 0, 534, 25);
         frame.getContentPane().add(menuBar);
     }
 
-    private void ListView() {
-        String[] columnNames = {"First Name", "Last Name", "Sport", "# of Years", "Vegetarian"};
-
-        Object[][] data = {
-                {"Kathy", "Smith", "Snowboarding", new Integer(5), new JButton("Button 1")},
-                {"John", "Doe", "Rowing", new Integer(3), new JButton("Button 1")},
-                {"Sue", "Black","Knitting", new Integer(2), new JButton("Button 1")},
-                {"Jane", "White","Speed reading", new Integer(20), new JButton("Button 1")},
-                {"Joe", "Brown","Pool", new Integer(10), new JButton("Button 1")},
-                {"Kathy", "Smith", "Snowboarding", new Integer(5), new JButton("Button 1")},
-                {"John", "Doe", "Rowing", new Integer(3), new JButton("Button 1")},
-                {"Sue", "Black","Knitting", new Integer(2),new JButton("Button 1")},
-                {"Jane", "White","Speed reading", new Integer(20), new JButton("Button 1")},
-                {"Joe", "Brown","Pool", new Integer(10), new JButton("Button 1")}
-        };
-
-        JTable table = new JTable(data, columnNames);
-        table.setFillsViewportHeight(true);
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 200, 500, 100);
-        frame.getContentPane().add(scrollPane);
-    }
-
-    private void TableView()
+    private void PopulateUIControl()
     {
-        DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][] {
-                { "Sufi's Project", "total progress", "Progress Detail"},
-                { "Alpha", "total progress", "Progress Detail"},
-                { "Liu, Yi Project", "total progress", "Progress Detail"},
-                { "System Project", "total progress", "Progress Detail"},
-                { "Kate Jensen", "total progress", "Progress Detail"},
-                { "Project 6", "total progress", "Progress Detail"},
-        }, new Object[] { "Project Name", " Total Progress" ,"Technical Progress", });
-
-        JTable table = new JTable(dm);
-        table.getColumn("Technical Progress").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Technical Progress").setCellEditor(new ButtonEditor(new JCheckBox()));
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 123, 524, 262);
-        frame.getContentPane().add(scrollPane);
-
-        JLabel lblProjectList = new JLabel("Project List");
-        lblProjectList.setBounds(10, 95, 138, 14);
-        frame.getContentPane().add(lblProjectList);
+        final File diskPartition = new File(System.getProperty("user.dir"));
 
         final JLabel lblIntermidateDumpFolder = new JLabel("Intermidate dump folder");
         lblIntermidateDumpFolder.setEnabled(false);
         lblIntermidateDumpFolder.setBounds(10, 62, 138, 14);
         frame.getContentPane().add(lblIntermidateDumpFolder);
+
+        final JLabel lblHardDriveCapacity = new JLabel(String.format("Free Space Capacity: %s GB", diskPartition.getFreeSpace()/ (1024 *1024) / 1000 ));
+        lblHardDriveCapacity.setEnabled(false);
+        lblHardDriveCapacity.setBounds(185, 36, 349, 14);
+        frame.getContentPane().add(lblHardDriveCapacity);
+
+        intermidateDumpPath = new JTextField(System.getProperty("user.dir"));
+        intermidateDumpPath.setEditable(false);
+        intermidateDumpPath.setBounds(185, 59, 200, 20);
+        frame.getContentPane().add(intermidateDumpPath);
+        intermidateDumpPath.setColumns(10);
 
         final JButton btnBrowser = new JButton(". . .");
         btnBrowser.addActionListener(new ActionListener() {
@@ -154,28 +218,22 @@ public class MainWindow {
                 JFileChooser chooser = new JFileChooser();
                 chooser.setCurrentDirectory(new java.io.File("."));
                 chooser.setDialogTitle("Browse the folder to process");
-                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 chooser.setAcceptAllFileFilterUsed(false);
-
 
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
                     System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
                     intermidateDumpPath.setText(chooser.getSelectedFile().toString());
+                    lblHardDriveCapacity.setText(String.format("Free Space Capacity on %s: %s GB", chooser.getSelectedFile().toString(), new File(chooser.getSelectedFile().toString()).getFreeSpace()/ (1024 *1024) / 1000 ));
                 } else {
                     System.out.println("No Selection ");
                 }
             }
-
         });
         btnBrowser.setEnabled(false);
-        btnBrowser.setBounds(435, 58, 66, 23);
+        btnBrowser.setBounds(395, 58, 34, 23);
         frame.getContentPane().add(btnBrowser);
-
-        final JLabel lblHardDriveCapacity = new JLabel("Hard Drive Capacity ");
-        lblHardDriveCapacity.setEnabled(false);
-        lblHardDriveCapacity.setBounds(185, 36, 200, 14);
-        frame.getContentPane().add(lblHardDriveCapacity);
 
         final JCheckBox chckbxIntermidiateFiles = new JCheckBox("Intermidiate Files");
         chckbxIntermidiateFiles.addActionListener(new ActionListener() {
@@ -198,116 +256,81 @@ public class MainWindow {
         chckbxIntermidiateFiles.setBounds(10, 32, 141, 23);
         frame.getContentPane().add(chckbxIntermidiateFiles);
 
-        intermidateDumpPath = new JTextField();
-        intermidateDumpPath.setEditable(false);
-        intermidateDumpPath.setBounds(185, 59, 200, 20);
-        frame.getContentPane().add(intermidateDumpPath);
-        intermidateDumpPath.setColumns(10);
+        JLabel lblProjectList = new JLabel("Project List");
+        lblProjectList.setBounds(10, 95, 138, 14);
+        frame.getContentPane().add(lblProjectList);
+        populateProjectList();
+        runSelectedProject();
     }
 
-    private void CreateButton() {
-        JButton btnNewButton = new JButton("Run Project");
+    private void TableView()
+    {
+        defaultTableModel = new DefaultTableModel();
+        defaultTableModel.setDataVector(new Object[][] {
 
-        btnNewButton.addActionListener(new ActionListener() {
+        }, new Object[] { "Project Name", " Total Progress" ,"Technical Progress", });
+
+        JTable table = new JTable(defaultTableModel);
+        table.getColumn("Technical Progress").setCellRenderer(new ButtonRenderer());
+        table.getColumn("Technical Progress").setCellEditor(new ButtonEditor(new JCheckBox()));
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBounds(10, 123, 524, 262);
+        frame.getContentPane().add(scrollPane);
+    }
+
+    private void runSelectedProject() {
+        JButton runButton = new JButton("Run Project");
+        runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                JOptionPane.showInputDialog(frame,"What is your name?", null);
-                JOptionPane.showMessageDialog(frame, "Eggs are not supposed to be green.");
+                defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "total progress", "Progress Detail"});
+
+                //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
+                //Scheduler.getInstance(data).run();
             }
         });
 
-        btnNewButton.setBounds(395, 93, 139, 19);
-        frame.getContentPane().add(btnNewButton);
+        runButton.setBounds(395, 93, 139, 19);
+        frame.getContentPane().add(runButton);
     }
 
-    private void ComboBox() {
-        JComboBox<String> comboBox = new JComboBox<String>();
+    private void populateProjectList() {
+        projectList = new JComboBox<String>();
+        File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
 
-        comboBox.addItem("Sufi's Project");
-        comboBox.addItem("NEXT Project");
+        projectList.addItem("Sufi's Project");
+        projectList.addItem("NEXT Project");
+        projectList.setBounds(185, 93, 200, 19);
 
-        comboBox.setBounds(185, 93, 200, 19);
-        frame.getContentPane().add(comboBox);
+        for(File fXmlFile: getXMLFiles(fileDir)){
+            projectList.addItem(fXmlFile.getName().replace(".xml", ""));
+        }
+        frame.getContentPane().add(projectList);
     }
 
-    public JMenuBar createMenuBar() {
-        //Create the menu bar.
-        JMenuBar menuBar = new JMenuBar();
+    private File[] getXMLFiles(File folder) {
+        List<File> aList = new ArrayList<File>();
+        File[] files = folder.listFiles();
 
-        //Build the first menu.
-        JMenu mnFile = new JMenu("File");
-        mnFile.setMnemonic(KeyEvent.VK_A);
-        mnFile.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
-        menuBar.add(mnFile);
+        for (File pf : files) {
 
-        //a group of JMenuItems
-        JMenuItem menuItem;
-        mntmCreateNewProject = new JMenuItem("Create New Project", KeyEvent.VK_T);
-        mntmCreateNewProject.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                new ProjectInformationPage(true);
+            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
+                aList.add(pf);
             }
-        });
-        mntmCreateNewProject.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_1, ActionEvent.ALT_MASK));
-        mntmCreateNewProject.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
-        mnFile.add(mntmCreateNewProject);
+        }
+        return aList.toArray(new File[aList.size()]);
+    }
 
-        mntmEditProject = new JMenuItem("Edit Project");
-        mntmEditProject.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                new ProjectInformationPage(false);
-            }
-        });
-        mntmEditProject.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.ALT_MASK));
-        mntmEditProject.setMnemonic(KeyEvent.VK_B);
-        mnFile.add(mntmEditProject);
-        ButtonGroup group = new ButtonGroup();
-
-        //a group of check box menu items
-        mnFile.addSeparator();
-        JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
-        cbMenuItem.setMnemonic(KeyEvent.VK_C);
-        mnFile.add(cbMenuItem);
-
-        cbMenuItem = new JCheckBoxMenuItem("Another one");
-        cbMenuItem.setMnemonic(KeyEvent.VK_H);
-        mnFile.add(cbMenuItem);
-
-        //a submenu
-        mnFile.addSeparator();
-        JMenu submenu = new JMenu("A submenu");
-        submenu.setMnemonic(KeyEvent.VK_S);
-
-        menuItem = new JMenuItem("An item in the submenu");
-        menuItem.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_2, ActionEvent.ALT_MASK));
-        submenu.add(menuItem);
-
-        menuItem = new JMenuItem("Another item");
-        submenu.add(menuItem);
-        mnFile.add(submenu);
-
-        //Build second menu in the menu bar.
-        mnHelp = new JMenu("Help");
-        mnHelp.setMnemonic(KeyEvent.VK_N);
-        mnHelp.getAccessibleContext().setAccessibleDescription("This menu does nothing");
-        menuBar.add(mnHelp);
-
-        JMenuItem mntmSettings = new JMenuItem("Settings", KeyEvent.VK_T);
-        mnHelp.add(mntmSettings);
-
-        JMenuItem mntmManual = new JMenuItem("Manual", KeyEvent.VK_T);
-        mnHelp.add(mntmManual);
-
-        return menuBar;
+    private String getFileExtensionName(File f) {
+        if (f.getName().indexOf(".") == -1) {
+            return "";
+        } else {
+            return f.getName().substring(f.getName().length() - 3, f.getName().length());
+        }
     }
 
     class ButtonRenderer extends JButton implements TableCellRenderer {
-
-        /**
-         * 
-         */
         private static final long serialVersionUID = 1L;
 
         public ButtonRenderer() {
@@ -330,15 +353,9 @@ public class MainWindow {
     }
 
     class ButtonEditor extends DefaultCellEditor {
-        /**
-         * 
-         */
         private static final long serialVersionUID = 1L;
-
         protected JButton button;
-
         private String label;
-
         private boolean isPushed;
 
         public ButtonEditor(JCheckBox checkBox) {
@@ -372,13 +389,7 @@ public class MainWindow {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                //
-                //
-                //JOptionPane.showMessageDialog(button, label + ": Ouch!");
-                JFrame window = new JFrame();
-                window.setBounds(100, 100, 580, 410);
-                window.setVisible(true);
-                // System.out.println(label + ": Ouch!");
+                JOptionPane.showMessageDialog(button, label + ": Ouch!");
             }
             isPushed = false;
             return new String(label);

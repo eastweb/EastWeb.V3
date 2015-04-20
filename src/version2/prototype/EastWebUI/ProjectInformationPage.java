@@ -2,7 +2,6 @@ package version2.prototype.EastWebUI;
 
 import java.awt.EventQueue;
 
-import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -13,6 +12,7 @@ import javax.swing.JScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JLabel;
@@ -22,6 +22,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.JTextField;
 import javax.swing.JList;
 import javax.swing.JComboBox;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -33,6 +35,15 @@ import version2.prototype.EastWebUI.SummaryUI.AssociateSummaryPage;
 import version2.prototype.EastWebUI.SummaryUI.SummaryEventObject;
 import version2.prototype.EastWebUI.SummaryUI.SummaryListener;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.swing.ImageIcon;
 
@@ -54,14 +65,10 @@ public class ProjectInformationPage {
     private JTextField falseNothing;
 
     DefaultListModel<String> listOfAddedPluginModel;
+    DefaultListModel<String> summaryListModel;
 
     @SuppressWarnings("rawtypes")
     DefaultListModel modisListModel;
-
-    @SuppressWarnings("rawtypes")
-    DefaultListModel summaryListModel;
-
-    static ProjectInformationPage window;
 
     /**
      * Launch the application.
@@ -71,7 +78,7 @@ public class ProjectInformationPage {
             @Override
             public void run() {
                 try {
-                    window =  new ProjectInformationPage(true);
+                    ProjectInformationPage window =  new ProjectInformationPage(true);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -109,8 +116,7 @@ public class ProjectInformationPage {
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                // will do logic to ensure that all the information is correct
-                // will ensure that it will save this data to the project info xml
+                CreateNewProject();
                 JOptionPane.showMessageDialog(frame, "Project was saved");
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
@@ -252,7 +258,7 @@ public class ProjectInformationPage {
         modisListModel = new DefaultListModel();
         @SuppressWarnings("unchecked")
         final JList<DefaultListModel> modisList = new JList<DefaultListModel>(modisListModel);
-        modisList.setBounds(15, 70, 245, 180);
+        modisList.setBounds(15, 70, 245, 194);
 
         JButton addNewModisButton = new JButton("Edit");
         addNewModisButton.addActionListener(new ActionListener() {
@@ -294,9 +300,9 @@ public class ProjectInformationPage {
         panel_2.add(coordinateSystemLabel);
         JComboBox<String> coordinateSystemComboBox = new JComboBox<String>();
         coordinateSystemComboBox.setBounds(146, 13, 140, 20);
-        coordinateSystemComboBox.addItem("item 1");
-        coordinateSystemComboBox.addItem("item 2");
-        coordinateSystemComboBox.addItem("item 3");
+        coordinateSystemComboBox.addItem("ALBERS_EQUAL_AREA");
+        coordinateSystemComboBox.addItem("LAMBERT_CONFORMAL_CONIC");
+        coordinateSystemComboBox.addItem("TRANSVERSE_MERCATOR");
         panel_2.add(coordinateSystemComboBox);
 
         JLabel reSamplingLabel = new JLabel("Re-sampling Type:");
@@ -304,9 +310,9 @@ public class ProjectInformationPage {
         panel_2.add(reSamplingLabel);
         JComboBox<String> reSamplingComboBox = new JComboBox<String>();
         reSamplingComboBox.setBounds(146, 38, 140, 20);
-        reSamplingComboBox.addItem("item 1");
-        reSamplingComboBox.addItem("item 2");
-        reSamplingComboBox.addItem("item 3");
+        reSamplingComboBox.addItem("NEAREST_NEIGHBOR");
+        reSamplingComboBox.addItem("BILINEAR");
+        reSamplingComboBox.addItem("CUBIC_CONVOLUTION");
         panel_2.add(reSamplingComboBox);
 
         JLabel datumLabel = new JLabel("Datum:");
@@ -314,9 +320,10 @@ public class ProjectInformationPage {
         panel_2.add(datumLabel);
         JComboBox<String> datumComboBox = new JComboBox<String>();
         datumComboBox.setBounds(146, 63, 140, 20);
-        datumComboBox.addItem("item 1");
-        datumComboBox.addItem("item 2");
-        datumComboBox.addItem("item 3");
+        datumComboBox.addItem("NAD83");
+        datumComboBox.addItem("NAD27");
+        datumComboBox.addItem("WGS84");
+        datumComboBox.addItem("WGS72");
         panel_2.add(datumComboBox);
 
         JLabel pixelSizeLabel = new JLabel("Pixel size meters:");
@@ -376,7 +383,7 @@ public class ProjectInformationPage {
         panel_2.add(falseNothing);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void SummaryInformation() {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
@@ -385,12 +392,11 @@ public class ProjectInformationPage {
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
-        final JList<?> summaryList = new JList<Object>(summaryListModel);
-        summaryList.setBounds(15, 70, 245, 180);
+        final JList summaryList = new JList(summaryListModel);
+        summaryList.setBounds(15, 70, 245, 194);
 
         JButton editSummaryButton = new JButton("Edit");
         editSummaryButton.addActionListener(new ActionListener() {
-            @SuppressWarnings("unchecked")
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 new AssociateSummaryPage(new summaryListenerImplementation());
@@ -413,6 +419,72 @@ public class ProjectInformationPage {
         });
         deleteSummaryButton.setBounds(140, 20, 120, 30);
         summaryPanel.add(deleteSummaryButton);
+    }
+
+    private void CreateNewProject(){
+
+        File theDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\" + projectName.getText() + ".xml" );
+
+        try {
+
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+            // root elements
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("company");
+            doc.appendChild(rootElement);
+
+            // staff elements
+            Element staff = doc.createElement("Staff");
+            rootElement.appendChild(staff);
+
+            // set attribute to staff element
+            Attr attr = doc.createAttribute("id");
+            attr.setValue("1");
+            staff.setAttributeNode(attr);
+
+            // shorten way
+            // staff.setAttribute("id", "1");
+
+            // firstname elements
+            Element firstname = doc.createElement("firstname");
+            firstname.appendChild(doc.createTextNode("yong"));
+            staff.appendChild(firstname);
+
+            // lastname elements
+            Element lastname = doc.createElement("lastname");
+            lastname.appendChild(doc.createTextNode("mook kim"));
+            staff.appendChild(lastname);
+
+            // nickname elements
+            Element nickname = doc.createElement("nickname");
+            nickname.appendChild(doc.createTextNode("mkyong"));
+            staff.appendChild(nickname);
+
+            // salary elements
+            Element salary = doc.createElement("salary");
+            salary.appendChild(doc.createTextNode("100000"));
+            staff.appendChild(salary);
+
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(theDir);
+
+            // Output to console for testing
+            // StreamResult result = new StreamResult(System.out);
+
+            transformer.transform(source, result);
+
+            System.out.println("File saved!");
+
+        } catch (ParserConfigurationException pce) {
+            pce.printStackTrace();
+        } catch (TransformerException tfe) {
+            tfe.printStackTrace();
+        }
     }
 
     class indiciesListenerImplementation implements IndiciesListener{
