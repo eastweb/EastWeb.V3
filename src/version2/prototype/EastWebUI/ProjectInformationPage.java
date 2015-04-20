@@ -121,7 +121,7 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    new AssociatePluginPage(new tempClass());
+                    new AssociatePluginPage(new indiciesListenerImplementation());
                 } catch (ParserConfigurationException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -459,10 +459,9 @@ public class ProjectInformationPage {
         });
         deleteSummaryButton.setBounds(140, 20, 120, 30);
         summaryPanel.add(deleteSummaryButton);
-
     }
 
-    class tempClass implements IndiciesListener{
+    class indiciesListenerImplementation implements IndiciesListener{
 
         @Override
         public void AddPlugin(IndiciesEventObject e) {
