@@ -201,7 +201,7 @@ public class MainWindow {
 
         final JLabel lblHardDriveCapacity = new JLabel(String.format("Free Space Capacity: %s GB", diskPartition.getFreeSpace()/ (1024 *1024) / 1000 ));
         lblHardDriveCapacity.setEnabled(false);
-        lblHardDriveCapacity.setBounds(185, 36, 349, 14);
+        lblHardDriveCapacity.setBounds(185, 36, 244, 14);
         frame.getContentPane().add(lblHardDriveCapacity);
 
         intermidateDumpPath = new JTextField(System.getProperty("user.dir"));
@@ -281,6 +281,10 @@ public class MainWindow {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(10, 123, 524, 262);
         frame.getContentPane().add(scrollPane);
+
+        JButton btnRefresh = new JButton("refresh ");
+        btnRefresh.setBounds(445, 36, 89, 23);
+        frame.getContentPane().add(btnRefresh);
     }
 
     private void runSelectedProject() {
