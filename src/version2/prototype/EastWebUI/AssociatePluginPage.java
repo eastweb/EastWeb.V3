@@ -8,27 +8,39 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JButton;
+import javax.xml.parsers.ParserConfigurationException;
 
-import java.awt.List;
+import org.xml.sax.SAXException;
+
+import version2.prototype.PluginMetaData.PluginMetaDataCollection;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
+import java.io.IOException;
 
-public class tempUI {
+public class AssociatePluginPage {
 
-    private JFrame frame;
+    public JFrame frame;
+    IndiciesEvent indiciesEvent;
+    PluginMetaDataCollection pluginMetaDataCollection;
+    JComboBox<String> pluginComboBox ;
+    JComboBox<String> indiciesComboBox;
+    JComboBox<String> qcComboBox;
+    DefaultListModel indiciesListModel;
 
     /**
-     * Launch the application.
+     * Launch application for debug.
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
-                    tempUI window = new tempUI();
+                    AssociatePluginPage window = new AssociatePluginPage(null);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -39,22 +51,34 @@ public class tempUI {
 
     /**
      * Create the application.
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public tempUI() {
+    public AssociatePluginPage(IndiciesListener l) throws ParserConfigurationException, SAXException, IOException {
+        indiciesEvent = new IndiciesEvent();
+        indiciesEvent.addListener(l);
         initialize();
+        frame.setVisible(true);
     }
 
     /**
      * Initialize the contents of the frame.
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    private void initialize() {
+    private void initialize() throws ParserConfigurationException, SAXException, IOException {
         frame = new JFrame();
         frame.setBounds(100, 100, 401, 300);
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        pluginMetaDataCollection = PluginMetaDataCollection.getInstance();
         pluginInformation();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void pluginInformation() {
         JPanel pluginPanel = new JPanel();
         pluginPanel.setLayout(null);
@@ -62,41 +86,26 @@ public class tempUI {
         pluginPanel.setBounds(547, 420, 383, 275);
         frame.getContentPane().add(pluginPanel);
 
-        final DefaultListModel indiciesListModel = new DefaultListModel();
-        @SuppressWarnings("unchecked")
+        indiciesListModel = new DefaultListModel();
         final JList<DefaultListModel> listOfInndicies = new JList<DefaultListModel>(indiciesListModel);
         listOfInndicies.setBounds(10, 89, 365, 132);
         pluginPanel.add(listOfInndicies);
 
-        JLabel pluginLabel = new JLabel("Plugin");
-        pluginLabel.setBounds(10, 16, 80, 14);
-        pluginPanel.add(pluginLabel);
-        JComboBox<String> pluginComboBox = new JComboBox<String>();
-        pluginComboBox.setBounds(96, 13, 140, 20);
-        pluginComboBox.addItem("NLDAS Noah");
-        pluginComboBox.addItem("NLDAS Forcing");
-        pluginComboBox.addItem("Modis Reflectance");
-        pluginPanel.add(pluginComboBox);
-
         JLabel qcLabel = new JLabel("Quality Control");
         qcLabel.setBounds(10, 41, 80, 14);
         pluginPanel.add(qcLabel);
-        JComboBox<String> qcComboBox = new JComboBox<String>();
+        qcComboBox = new JComboBox<String>();
         qcComboBox.setBounds(96, 38, 140, 20);
-        qcComboBox.addItem("level 1");
-        qcComboBox.addItem("level 2");
-        qcComboBox.addItem("none");
         pluginPanel.add(qcComboBox);
 
         JLabel indiciesLabel = new JLabel("Indicies");
         indiciesLabel.setBounds(10, 66, 80, 14);
         pluginPanel.add(indiciesLabel);
-        final JComboBox<String> indiciesComboBox = new JComboBox<String>();
+        indiciesComboBox = new JComboBox<String>();
         indiciesComboBox.setBounds(96, 63, 140, 20);
-        indiciesComboBox.addItem("Mean Daily Snow Depth");
-        indiciesComboBox.addItem("Mean Daily Snow Depth 258");
-        indiciesComboBox.addItem("Mean Daily Snow Depth 89");
         pluginPanel.add(indiciesComboBox);
+
+        populatePluginComboBox(pluginPanel);
 
         final JButton btnAddIndicies = new JButton("Add Indicies");
         btnAddIndicies.addActionListener(new ActionListener() {
@@ -112,8 +121,12 @@ public class tempUI {
         btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                // fire event
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                String formatString = String.format("<html>Plugin: %s<br>Indicies: %s</span> <br>Quality: %s </span></html>",
+                        String.valueOf(pluginComboBox.getSelectedItem()),
+                        getIndiciesFormat(listOfInndicies.getModel()),
+                        String.valueOf(qcComboBox.getSelectedItem()));
+                indiciesEvent.fire(formatString);
+                frame.dispose();
             }
         });
         btnSave.setBounds(51, 227, 89, 23);
@@ -123,7 +136,7 @@ public class tempUI {
         btnCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                frame.dispose();
             }
         });
         btnCancel.setBounds(230, 227, 89, 23);
@@ -142,5 +155,48 @@ public class tempUI {
         });
         btnDeleteIndicies.setBounds(339, 62, 36, 23);
         pluginPanel.add(btnDeleteIndicies);
+    }
+
+    private void populatePluginComboBox(JPanel pluginPanel) {
+        JLabel pluginLabel = new JLabel("Plugin");
+        pluginLabel.setBounds(10, 16, 80, 14);
+        pluginPanel.add(pluginLabel);
+        pluginComboBox = new JComboBox<String>();
+        pluginComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                indiciesListModel.removeAllElements();
+                PluginMetaData plugin = pluginMetaDataCollection.pluginMetaDataMap.get(String.valueOf(pluginComboBox.getSelectedItem()));
+
+                indiciesComboBox.removeAllItems();
+                for(String indicies:plugin.IndicesMetaData) {
+                    indiciesComboBox.addItem(indicies);
+                }
+
+                qcComboBox.removeAllItems();
+                for(String qc:plugin.QualityControlMetaData) {
+                    qcComboBox.addItem(qc);
+                }
+            }
+        });
+        pluginComboBox.setBounds(96, 13, 140, 20);
+
+        for(String plugin: pluginMetaDataCollection.pluginList){
+            pluginComboBox.addItem(plugin);
+        }
+        pluginPanel.add(pluginComboBox);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private String getIndiciesFormat(ListModel m){
+        String formatString = "";
+
+        ListModel model = m;
+
+        for(int i=0; i < model.getSize(); i++){
+            formatString += String.format("<span>%s;</span>",   model.getElementAt(i).toString());
+        }
+
+        return formatString;
     }
 }

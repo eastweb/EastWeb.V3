@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
@@ -17,19 +19,29 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class PluginMetaDataCollection {
-    public static Map<String,PluginMetaData> instance;
-    public static ArrayList<String> pluginList;
+
+    public static PluginMetaDataCollection getInstance() throws ParserConfigurationException, SAXException, IOException
+    {
+        if(instance == null) {
+            instance = new PluginMetaDataCollection(null);
+        }
+        return instance;
+    }
+    private static PluginMetaDataCollection instance;
+
+    public Map<String,PluginMetaData> pluginMetaDataMap;
+    public ArrayList<String> pluginList;
 
     public PluginMetaDataCollection(ArrayList<String> listOfPluginMetaData) throws ParserConfigurationException, SAXException, IOException{
-
-        pluginList= listOfPluginMetaData;
-        instance = createMap(pluginList);
+        pluginList = new ArrayList<String>();
+        pluginMetaDataMap = createMap();
     }
 
-    Map<String, PluginMetaData> createMap(ArrayList<String> pluginList) throws ParserConfigurationException, SAXException, IOException{
+    private Map<String, PluginMetaData> createMap() throws ParserConfigurationException, SAXException, IOException{
         Map<String,PluginMetaData> myMap=new HashMap<String,PluginMetaData>();
-        for(String item: pluginList){
-            File fXmlFile = new File(System.getProperty("user.dir") + "PluginMetaData\\Plugin_"+item+".xml");
+        File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
+        for(File fXmlFile: getXMLFiles(fileDir)){
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -41,15 +53,50 @@ public class PluginMetaDataCollection {
             temp.Projection = new ProcessMetaData(doc.getElementsByTagName("Process"));
 
             temp.IndicesMetaData = new ArrayList<String>();
-            for(int i = 0; i < doc.getElementsByTagName("Indices").getLength(); i++)
+            NodeList tempIndices = doc.getElementsByTagName("Indices");
+            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
+            for(int i = 0; i < nodesIndices; i++)
             {
-                temp.IndicesMetaData.add( ((Element) doc.getElementsByTagName("Indices").item(i)).getElementsByTagName("ClassName").item(0).getTextContent());
+                temp.IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
             }
 
             temp.Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
-            myMap.put(item, temp);
+
+            temp.QualityControlMetaData = new ArrayList<String>();
+            NodeList tempQC = doc.getElementsByTagName("QualityControl");
+            int nodesQC = ((Element) tempQC.item(0)).getElementsByTagName("Level").getLength();
+            for(int i = 0; i < nodesQC; i++)
+            {
+                temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
+            }
+
+            @SuppressWarnings("unused")
+            String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
+            pluginList.add(pluginName);
+            myMap.put(pluginName, temp);
         }
         return myMap;
+    }
+
+    private File[] getXMLFiles(File folder) {
+        List<File> aList = new ArrayList<File>();
+
+        File[] files = folder.listFiles();
+        for (File pf : files) {
+
+            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
+                aList.add(pf);
+            }
+        }
+        return aList.toArray(new File[aList.size()]);
+    }
+
+    private String getFileExtensionName(File f) {
+        if (f.getName().indexOf(".") == -1) {
+            return "";
+        } else {
+            return f.getName().substring(f.getName().length() - 3, f.getName().length());
+        }
     }
 
     public class PluginMetaData {
@@ -58,6 +105,7 @@ public class PluginMetaDataCollection {
         public ProcessMetaData Projection;
         public SummaryMetaData Summary;
         public ArrayList<String> IndicesMetaData;
+        public ArrayList<String> QualityControlMetaData;
         public String Title;
     }
 
@@ -138,7 +186,7 @@ public class PluginMetaDataCollection {
                     mozaic.getTextContent());
 
             Node convertNode = ((Element) processNode).getElementsByTagName("convert").item(0);
-            convertHasConvert = ((Element) convertNode).getElementsByTagName("isConvert").item(0).getTextContent();
+            convertHasConvert = ((Element) convertNode).getElementsByTagName("isRunable").item(0).getTextContent();
             convertOriFormat = ((Element) convertNode).getElementsByTagName("oriFormat").item(0).getTextContent();
             convertToFormat = ((Element) convertNode).getElementsByTagName("toFormat").item(0).getTextContent();
             convertGeoTransform = ((Element) convertNode).getElementsByTagName("GeoTransform").item(0).getTextContent();

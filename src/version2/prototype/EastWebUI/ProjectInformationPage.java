@@ -1,49 +1,31 @@
 package version2.prototype.EastWebUI;
 
-import java.awt.Component;
 import java.awt.EventQueue;
 
-import javax.swing.AbstractCellEditor;
 import javax.swing.Box;
-import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
-import javax.swing.UIManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.JTextField;
 import javax.swing.JList;
 import javax.swing.JComboBox;
+import javax.xml.parsers.ParserConfigurationException;
 
-import version2.prototype.EastWebUI.MainWindow.ButtonEditor;
-import version2.prototype.EastWebUI.MainWindow.ButtonRenderer;
+import org.xml.sax.SAXException;
 
-/**
- * @author sufi abdul
- *
- */
-/**
- * @author sufi abdul
- *
- */
 public class ProjectInformationPage {
 
     private JFrame frame;
@@ -60,6 +42,8 @@ public class ProjectInformationPage {
     private JTextField standardParallel2;
     private JTextField latitudeOfOrigin;
     private JTextField falseNothing;
+
+    DefaultListModel<String> listOfAddedPluginModel;
 
     @SuppressWarnings("rawtypes")
     DefaultListModel modisListModel;
@@ -126,12 +110,9 @@ public class ProjectInformationPage {
     }
 
     private void PopulatePluginList() {
-        DefaultListModel<String> listOfAddedPluginModel = new DefaultListModel<String>();
+        listOfAddedPluginModel = new DefaultListModel<String>();
 
         final JList<String> listOfAddedPlugin = new JList<String>(listOfAddedPluginModel);
-        listOfAddedPluginModel.addElement("<html>Plugin: Nldas Forcing<br>Indicies: </span> <span>Day</span> <span>Night</span> <span>Batman</span> <br>Quality: Level 3 </span></html>");
-        listOfAddedPluginModel.addElement("<html>Plugin: Nldas NOAH<br>Indicies: </span> <span>Day</span> <span>Night</span> <span>Batman</span> <br>Quality: Level 3 </span></html>");
-        listOfAddedPluginModel.addElement("<html>Plugin: Nldas Batman<br>Indicies: </span> <span>Day</span> <span>Night</span> <span>Batman</span> <br>Quality: Level 3 </span></html>");
         listOfAddedPlugin.setBorder(new EmptyBorder(10,10, 10, 10));
 
         JButton addPluginButton = new JButton("Add Plugin");
@@ -139,6 +120,18 @@ public class ProjectInformationPage {
         addPluginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                try {
+                    new AssociatePluginPage(new tempClass());
+                } catch (ParserConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
         addPluginButton.setBounds(10, 12, 112, 23);
@@ -467,5 +460,13 @@ public class ProjectInformationPage {
         deleteSummaryButton.setBounds(140, 20, 120, 30);
         summaryPanel.add(deleteSummaryButton);
 
+    }
+
+    class tempClass implements IndiciesListener{
+
+        @Override
+        public void AddPlugin(IndiciesEventObject e) {
+            listOfAddedPluginModel.addElement(e.getPlugin());
+        }
     }
 }

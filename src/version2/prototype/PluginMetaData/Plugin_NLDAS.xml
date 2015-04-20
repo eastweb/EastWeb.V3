@@ -39,4 +39,10 @@
 	<Summary>
 		<TemporalSummary>true</TemporalSummary>
 	</Summary>
+	<QualityControl>
+		<Level>None</Level>
+		<Level>Level 1</Level>
+		<Level>Level 2</Level>
+		<Level>Level 3</Level>
+	</QualityControl>
 </PluginMetadata>

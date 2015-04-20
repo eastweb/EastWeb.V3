@@ -1,10 +1,15 @@
 package version2.prototype.Scheduler;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
@@ -58,21 +63,21 @@ public class Scheduler {
         }
     }
 
-    public void RunDownloader(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    public void RunDownloader(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         // uses reflection
         Class<?> clazzDownloader = Class.forName("version2.prototype.download."
-                + PluginMetaDataCollection.instance.get(pluginName).Title
-                + PluginMetaDataCollection.instance.get(pluginName).Download.className);
+                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Title
+                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Download.className);
         Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class);
-        Object downloader =  ctorDownloader.newInstance(new Object[] {projectInfo.getStartDate(), PluginMetaDataCollection.instance.get(pluginName).Download});
+        Object downloader =  ctorDownloader.newInstance(new Object[] {projectInfo.getStartDate(), PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Download});
         Method methodDownloader = downloader.getClass().getMethod("run");
         methodDownloader.invoke(downloader);
     }
 
-    public void RunProcess(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConfigReadException
+    public void RunProcess(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
-        ProcessMetaData temp = PluginMetaDataCollection.instance.get(pluginName).Projection;
+        ProcessMetaData temp = PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Projection;
         PrepareProcessTask prepareProcessTask = new PrepareProcessTask(projectInfo, "NBAR", projectInfo.getStartDate());
 
         for (int i = 1; i <= temp.processStep.size(); i++)
@@ -80,7 +85,7 @@ public class Scheduler {
             if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
             {
                 Class<?> clazzProcess = Class.forName("version2.prototype.projection."
-                        + PluginMetaDataCollection.instance.get(pluginName).Title
+                        + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Title
                         + temp.processStep.get(i));
                 Constructor<?> ctorProcess = clazzProcess.getConstructor(ProcessData.class);
                 Object process =  ctorProcess.newInstance(new Object[] {new ProcessData(
@@ -95,14 +100,14 @@ public class Scheduler {
         }
     }
 
-    public void RunIndicies(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    public void RunIndicies(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         // get data for data, file, and the last thing that i dont really know about
         // ask jiameng what the hell the file is suppose to do
-        for(String indexCalculatorItem: PluginMetaDataCollection.instance.get(pluginName).IndicesMetaData)
+        for(String indexCalculatorItem: PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).IndicesMetaData)
         {
             Class<?> clazzIndicies = Class.forName("version2.prototype.indices."
-                    + PluginMetaDataCollection.instance.get(pluginName).Title
+                    + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Title
                     + indexCalculatorItem);
             Constructor<?> ctorIndicies = clazzIndicies.getConstructor(String.class, DataDate.class, String.class, String.class);
             Object indexCalculator =  ctorIndicies.newInstance(
@@ -119,11 +124,11 @@ public class Scheduler {
 
     public void RunSummary(String pluginName) throws Exception
     {
-        if(PluginMetaDataCollection.instance.get(pluginName).Summary.IsTeamporalSummary)
+        if(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Summary.IsTeamporalSummary)
         {
             /**
              * <p>Use this when you want to send data to a TemporalSummaryCalculator object.</p>
-             * 
+             *
              * @param inRaster - Type: File[] - A File object for each DataDate.<br/>
              * Example:  <code>{@link #version2.prototype.DirectoryLayout.getIndexMetadata(ProjectInfo, String, DataDate, String)}<br/>
              * getIndexMetadata(mProject, mIndex, sDate, zone.getShapeFile())</code>
