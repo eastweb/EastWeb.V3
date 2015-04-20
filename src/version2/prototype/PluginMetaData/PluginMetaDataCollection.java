@@ -70,7 +70,6 @@ public class PluginMetaDataCollection {
                 temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
             }
 
-            @SuppressWarnings("unused")
             String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
             pluginList.add(pluginName);
             myMap.put(pluginName, temp);

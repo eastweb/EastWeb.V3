@@ -2,6 +2,7 @@ package version2.prototype.EastWebUI.SummaryUI;
 
 import java.util.EventObject;
 
+@SuppressWarnings("serial")
 public class SummaryEventObject extends EventObject {
     private String summary;
 

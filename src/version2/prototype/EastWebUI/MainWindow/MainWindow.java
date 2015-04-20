@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI;
+package version2.prototype.EastWebUI.MainWindow;
 
 import java.awt.Component;
 import java.awt.Desktop;
@@ -37,8 +37,7 @@ import javax.swing.JTextField;
 
 import org.apache.commons.io.FileUtils;
 
-import version2.prototype.Scheduler.Scheduler;
-import version2.prototype.Scheduler.SchedulerData;
+import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
 
 public class MainWindow {
 
@@ -105,7 +104,7 @@ public class MainWindow {
         mntmCreateNewProject.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new ProjectInformationPage(true);
+                new ProjectInformationPage(true,  new mainWindowListenerImplementation());
             }
         });
         mnFile.add(mntmCreateNewProject);
@@ -116,7 +115,7 @@ public class MainWindow {
         mntmEditProject.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new ProjectInformationPage(false);
+                new ProjectInformationPage(false, new mainWindowListenerImplementation());
             }
         });
         mnFile.add(mntmEditProject);
@@ -259,7 +258,12 @@ public class MainWindow {
         JLabel lblProjectList = new JLabel("Project List");
         lblProjectList.setBounds(10, 95, 138, 14);
         frame.getContentPane().add(lblProjectList);
+
+        projectList = new JComboBox<String>();
         populateProjectList();
+        frame.getContentPane().add(projectList);
+        projectList.setBounds(185, 93, 200, 19);
+
         runSelectedProject();
     }
 
@@ -285,7 +289,7 @@ public class MainWindow {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "total progress", "Progress Detail"});
-
+                populateProjectList();
                 //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
                 //Scheduler.getInstance(data).run();
             }
@@ -296,17 +300,16 @@ public class MainWindow {
     }
 
     private void populateProjectList() {
-        projectList = new JComboBox<String>();
+
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
 
+        projectList.removeAllItems();
         projectList.addItem("Sufi's Project");
         projectList.addItem("NEXT Project");
-        projectList.setBounds(185, 93, 200, 19);
 
         for(File fXmlFile: getXMLFiles(fileDir)){
             projectList.addItem(fXmlFile.getName().replace(".xml", ""));
         }
-        frame.getContentPane().add(projectList);
     }
 
     private File[] getXMLFiles(File folder) {
@@ -404,6 +407,14 @@ public class MainWindow {
         @Override
         protected void fireEditingStopped() {
             super.fireEditingStopped();
+        }
+    }
+
+    class mainWindowListenerImplementation implements MainWindowListener{
+
+        @Override
+        public void RefreshProjectList(MainWindowEventObject e) {
+
         }
     }
 }

@@ -21,6 +21,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+
 import javax.swing.ImageIcon;
 
 public class AssociatePluginPage {
@@ -31,6 +32,8 @@ public class AssociatePluginPage {
     JComboBox<String> pluginComboBox ;
     JComboBox<String> indiciesComboBox;
     JComboBox<String> qcComboBox;
+
+    @SuppressWarnings("rawtypes")
     DefaultListModel indiciesListModel;
 
     /**

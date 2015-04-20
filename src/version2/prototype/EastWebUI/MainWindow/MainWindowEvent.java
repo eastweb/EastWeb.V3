@@ -1,17 +1,20 @@
-package version2.prototype.EastWebUI.PluginIndiciesUI;
+package version2.prototype.EastWebUI.MainWindow;
 
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
-@SuppressWarnings("serial")
-public class IndiciesEvent implements Serializable {
+public class MainWindowEvent implements Serializable {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     @SuppressWarnings("rawtypes")
     private transient Vector listeners;
 
     /** Register a listener for SunEvents */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    synchronized public void addListener(IndiciesListener l) {
+    synchronized public void addListener(MainWindowListener l) {
         if (listeners == null) {
             listeners = new Vector();
         }
@@ -20,7 +23,7 @@ public class IndiciesEvent implements Serializable {
 
     /** Remove a listener for SunEvents */
     @SuppressWarnings("rawtypes")
-    synchronized public void removeListener(IndiciesListener l) {
+    synchronized public void removeListener(MainWindowListener l) {
         if (listeners == null) {
             listeners = new Vector();
         }
@@ -29,11 +32,11 @@ public class IndiciesEvent implements Serializable {
 
     /** Fire a SunEvent to all registered listeners */
     @SuppressWarnings("rawtypes")
-    protected void fire(String p) {
+    public void fire() {
         // if we have no listeners, do nothing...
         if (listeners != null && !listeners.isEmpty()) {
             // create the event object to send
-            IndiciesEventObject event = new IndiciesEventObject(this, p);
+            MainWindowEventObject event = new MainWindowEventObject(this);
 
             // make a copy of the listener list in case
             //   anyone adds/removes listeners
@@ -46,8 +49,8 @@ public class IndiciesEvent implements Serializable {
             //   call the sunMoved method in each
             Enumeration e = targets.elements();
             while (e.hasMoreElements()) {
-                IndiciesListener l = (IndiciesListener) e.nextElement();
-                l.AddPlugin(event);
+                MainWindowListener l = (MainWindowListener) e.nextElement();
+                l.RefreshProjectList(event);
             }
         }
     }

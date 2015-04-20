@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI;
+package version2.prototype.EastWebUI.ProjectInformationUI;
 
 import java.awt.EventQueue;
 
@@ -28,6 +28,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
+import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
 import version2.prototype.EastWebUI.PluginIndiciesUI.AssociatePluginPage;
 import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesEventObject;
 import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesListener;
@@ -63,6 +65,7 @@ public class ProjectInformationPage {
     private JTextField standardParallel2;
     private JTextField latitudeOfOrigin;
     private JTextField falseNothing;
+    MainWindowEvent mainWindowEvent;
 
     DefaultListModel<String> listOfAddedPluginModel;
     DefaultListModel<String> summaryListModel;
@@ -78,7 +81,7 @@ public class ProjectInformationPage {
             @Override
             public void run() {
                 try {
-                    ProjectInformationPage window =  new ProjectInformationPage(true);
+                    ProjectInformationPage window =  new ProjectInformationPage(true, null);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -90,7 +93,9 @@ public class ProjectInformationPage {
     /**
      * Create the application.
      */
-    public ProjectInformationPage(boolean isEditable) {
+    public ProjectInformationPage(boolean isEditable,  MainWindowListener l) {
+        mainWindowEvent = new MainWindowEvent();
+        mainWindowEvent.addListener(l);
         initialize();
         frame.setVisible(true);
     }
@@ -479,6 +484,7 @@ public class ProjectInformationPage {
             transformer.transform(source, result);
 
             System.out.println("File saved!");
+            mainWindowEvent.fire();
 
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();

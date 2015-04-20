@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.DirectoryLayout;
-import version2.prototype.ProjectInfo;
 import version2.prototype.projection.ProcessData;
 
 public class NldasProjectionTask {

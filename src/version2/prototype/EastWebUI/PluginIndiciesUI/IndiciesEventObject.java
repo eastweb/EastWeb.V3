@@ -2,6 +2,7 @@ package version2.prototype.EastWebUI.PluginIndiciesUI;
 
 import java.util.EventObject;
 
+@SuppressWarnings("serial")
 public class IndiciesEventObject extends EventObject {
     private String plugin;
 
