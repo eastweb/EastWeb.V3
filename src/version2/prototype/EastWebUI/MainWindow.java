@@ -16,6 +16,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JMenu;
@@ -29,10 +30,18 @@ import javax.swing.table.TableCellRenderer;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 public class MainWindow {
 
     private JFrame frame;
+    private JMenuItem mntmCreateNewProject;
+    private JMenu mnHelp;
+    private JTextField intermidateDumpPath;
+    private JMenuItem mntmEditProject;
 
     /**
      * Launch the application.
@@ -63,10 +72,10 @@ public class MainWindow {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 1000, 750);
+        frame.setBounds(100, 100, 550, 425);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
-        //frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        frame.setResizable(false);
 
         CreateButton();
         ComboBox();
@@ -81,7 +90,7 @@ public class MainWindow {
             public void mouseClicked(MouseEvent arg0) {
             }
         });
-        menuBar.setBounds(0, 0, 200, 25);
+        menuBar.setBounds(0, 0, 534, 25);
         frame.getContentPane().add(menuBar);
     }
 
@@ -113,21 +122,87 @@ public class MainWindow {
     {
         DefaultTableModel dm = new DefaultTableModel();
         dm.setDataVector(new Object[][] {
-                { "Project 1", "Sufi's Project", "Number 1", Boolean.TRUE },
-                { "Project 2", "bar 1", "Project 1","Check Box 2" },
-                { "Project 3", "var temp", "Project 1", "Check Box 3" },
-                { "Project 4", "body 2", "Project 1", "Check Box 4" },
-                { "Project 5", "Jensen", "Project 1" , "Check Box 5"},
-                { "Project 6", "kate", "Project 1" , "Check Box 6"}
-        }, new Object[] { "Button", "String", " Updater" , "CheckBox"});
+                { "Sufi's Project", "total progress", "Progress Detail"},
+                { "Alpha", "total progress", "Progress Detail"},
+                { "Liu, Yi Project", "total progress", "Progress Detail"},
+                { "System Project", "total progress", "Progress Detail"},
+                { "Kate Jensen", "total progress", "Progress Detail"},
+                { "Project 6", "total progress", "Progress Detail"},
+        }, new Object[] { "Project Name", " Total Progress" ,"Technical Progress", });
 
         JTable table = new JTable(dm);
-        table.getColumn("Button").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Button").setCellEditor(new ButtonEditor(new JCheckBox()));
+        table.getColumn("Technical Progress").setCellRenderer(new ButtonRenderer());
+        table.getColumn("Technical Progress").setCellEditor(new ButtonEditor(new JCheckBox()));
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 218, 544, 153);
+        scrollPane.setBounds(10, 123, 524, 262);
         frame.getContentPane().add(scrollPane);
+
+        JLabel lblProjectList = new JLabel("Project List");
+        lblProjectList.setBounds(10, 95, 138, 14);
+        frame.getContentPane().add(lblProjectList);
+
+        final JLabel lblIntermidateDumpFolder = new JLabel("Intermidate dump folder");
+        lblIntermidateDumpFolder.setEnabled(false);
+        lblIntermidateDumpFolder.setBounds(10, 62, 138, 14);
+        frame.getContentPane().add(lblIntermidateDumpFolder);
+
+        final JButton btnBrowser = new JButton(". . .");
+        btnBrowser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setCurrentDirectory(new java.io.File("."));
+                chooser.setDialogTitle("Browse the folder to process");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setAcceptAllFileFilterUsed(false);
+
+
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
+                    System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
+                    intermidateDumpPath.setText(chooser.getSelectedFile().toString());
+                } else {
+                    System.out.println("No Selection ");
+                }
+            }
+
+        });
+        btnBrowser.setEnabled(false);
+        btnBrowser.setBounds(435, 58, 66, 23);
+        frame.getContentPane().add(btnBrowser);
+
+        final JLabel lblHardDriveCapacity = new JLabel("Hard Drive Capacity ");
+        lblHardDriveCapacity.setEnabled(false);
+        lblHardDriveCapacity.setBounds(185, 36, 200, 14);
+        frame.getContentPane().add(lblHardDriveCapacity);
+
+        final JCheckBox chckbxIntermidiateFiles = new JCheckBox("Intermidiate Files");
+        chckbxIntermidiateFiles.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if(chckbxIntermidiateFiles.isSelected()){
+                    intermidateDumpPath.setEditable(true);
+                    lblIntermidateDumpFolder.setEnabled(true);
+                    btnBrowser.setEnabled(true);
+                    lblHardDriveCapacity.setEnabled(true);
+                }
+                else{
+                    intermidateDumpPath.setEditable(false);
+                    lblIntermidateDumpFolder.setEnabled(false);
+                    btnBrowser.setEnabled(false);
+                    lblHardDriveCapacity.setEnabled(false);
+                }
+            }
+        });
+        chckbxIntermidiateFiles.setBounds(10, 32, 141, 23);
+        frame.getContentPane().add(chckbxIntermidiateFiles);
+
+        intermidateDumpPath = new JTextField();
+        intermidateDumpPath.setEditable(false);
+        intermidateDumpPath.setBounds(185, 59, 200, 20);
+        frame.getContentPane().add(intermidateDumpPath);
+        intermidateDumpPath.setColumns(10);
     }
 
     private void CreateButton() {
@@ -141,7 +216,7 @@ public class MainWindow {
             }
         });
 
-        btnNewButton.setBounds(250, 0, 135, 30);
+        btnNewButton.setBounds(395, 93, 139, 19);
         frame.getContentPane().add(btnNewButton);
     }
 
@@ -151,62 +226,57 @@ public class MainWindow {
         comboBox.addItem("Sufi's Project");
         comboBox.addItem("NEXT Project");
 
-        comboBox.setBounds(10, 50, 200, 25);
+        comboBox.setBounds(185, 93, 200, 19);
         frame.getContentPane().add(comboBox);
     }
 
     public JMenuBar createMenuBar() {
         //Create the menu bar.
         JMenuBar menuBar = new JMenuBar();
-        menuBar.setBounds(0, 0, 500, 25);
 
         //Build the first menu.
-        JMenu menu = new JMenu("A Menu");
-        menu.setMnemonic(KeyEvent.VK_A);
-        menu.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
-        menuBar.add(menu);
+        JMenu mnFile = new JMenu("File");
+        mnFile.setMnemonic(KeyEvent.VK_A);
+        mnFile.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
+        menuBar.add(mnFile);
 
         //a group of JMenuItems
-        JMenuItem menuItem = new JMenuItem("A text-only menu item", KeyEvent.VK_T);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_1, ActionEvent.ALT_MASK));
-        menuItem.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
-        menu.add(menuItem);
+        JMenuItem menuItem;
+        mntmCreateNewProject = new JMenuItem("Create New Project", KeyEvent.VK_T);
+        mntmCreateNewProject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                new ProjectInformationPage(true);
+            }
+        });
+        mntmCreateNewProject.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_1, ActionEvent.ALT_MASK));
+        mntmCreateNewProject.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+        mnFile.add(mntmCreateNewProject);
 
-        menuItem = new JMenuItem("Both text and icon");
-        menuItem.setMnemonic(KeyEvent.VK_B);
-        menu.add(menuItem);
-
-        menuItem = new JMenuItem();
-        menuItem.setMnemonic(KeyEvent.VK_D);
-        menu.add(menuItem);
-
-        //a group of radio button menu items
-        menu.addSeparator();
+        mntmEditProject = new JMenuItem("Edit Project");
+        mntmEditProject.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                new ProjectInformationPage(false);
+            }
+        });
+        mntmEditProject.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.ALT_MASK));
+        mntmEditProject.setMnemonic(KeyEvent.VK_B);
+        mnFile.add(mntmEditProject);
         ButtonGroup group = new ButtonGroup();
 
-        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem("A radio button menu item");
-        rbMenuItem.setSelected(true);
-        rbMenuItem.setMnemonic(KeyEvent.VK_R);
-        group.add(rbMenuItem);
-        menu.add(rbMenuItem);
-
-        rbMenuItem = new JRadioButtonMenuItem("Another one");
-        rbMenuItem.setMnemonic(KeyEvent.VK_O);
-        group.add(rbMenuItem);
-        menu.add(rbMenuItem);
-
         //a group of check box menu items
-        menu.addSeparator();
+        mnFile.addSeparator();
         JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
         cbMenuItem.setMnemonic(KeyEvent.VK_C);
-        menu.add(cbMenuItem);
+        mnFile.add(cbMenuItem);
 
         cbMenuItem = new JCheckBoxMenuItem("Another one");
         cbMenuItem.setMnemonic(KeyEvent.VK_H);
-        menu.add(cbMenuItem);
+        mnFile.add(cbMenuItem);
 
         //a submenu
-        menu.addSeparator();
+        mnFile.addSeparator();
         JMenu submenu = new JMenu("A submenu");
         submenu.setMnemonic(KeyEvent.VK_S);
 
@@ -216,13 +286,19 @@ public class MainWindow {
 
         menuItem = new JMenuItem("Another item");
         submenu.add(menuItem);
-        menu.add(submenu);
+        mnFile.add(submenu);
 
         //Build second menu in the menu bar.
-        menu = new JMenu("Another Menu");
-        menu.setMnemonic(KeyEvent.VK_N);
-        menu.getAccessibleContext().setAccessibleDescription("This menu does nothing");
-        menuBar.add(menu);
+        mnHelp = new JMenu("Help");
+        mnHelp.setMnemonic(KeyEvent.VK_N);
+        mnHelp.getAccessibleContext().setAccessibleDescription("This menu does nothing");
+        menuBar.add(mnHelp);
+
+        JMenuItem mntmSettings = new JMenuItem("Settings", KeyEvent.VK_T);
+        mnHelp.add(mntmSettings);
+
+        JMenuItem mntmManual = new JMenuItem("Manual", KeyEvent.VK_T);
+        mnHelp.add(mntmManual);
 
         return menuBar;
     }
@@ -319,5 +395,4 @@ public class MainWindow {
             super.fireEditingStopped();
         }
     }
-
 }

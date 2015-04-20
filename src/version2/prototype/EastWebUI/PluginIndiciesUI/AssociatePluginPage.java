@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI;
+package version2.prototype.EastWebUI.PluginIndiciesUI;
 
 import java.awt.EventQueue;
 
@@ -21,6 +21,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import javax.swing.ImageIcon;
 
 public class AssociatePluginPage {
 
@@ -70,9 +71,9 @@ public class AssociatePluginPage {
      */
     private void initialize() throws ParserConfigurationException, SAXException, IOException {
         frame = new JFrame();
-        frame.setBounds(100, 100, 401, 300);
+        frame.setBounds(100, 100, 400, 300);
         frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance();
         pluginInformation();
@@ -107,7 +108,9 @@ public class AssociatePluginPage {
 
         populatePluginComboBox(pluginPanel);
 
-        final JButton btnAddIndicies = new JButton("Add Indicies");
+        final JButton btnAddIndicies = new JButton("");
+        btnAddIndicies.setToolTipText("add indicies");
+        btnAddIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         btnAddIndicies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -142,7 +145,9 @@ public class AssociatePluginPage {
         btnCancel.setBounds(230, 227, 89, 23);
         pluginPanel.add(btnCancel);
 
-        JButton btnDeleteIndicies = new JButton("Delete Indicies");
+        JButton btnDeleteIndicies = new JButton("");
+        btnDeleteIndicies.setToolTipText("delete selected indicies");
+        btnDeleteIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
         btnDeleteIndicies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {

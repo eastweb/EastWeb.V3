@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI;
+package version2.prototype.EastWebUI.PluginIndiciesUI;
 
 import java.util.EventListener;
 

@@ -1,0 +1,17 @@
+package version2.prototype.EastWebUI.SummaryUI;
+
+import java.util.EventObject;
+
+public class SummaryEventObject extends EventObject {
+    private String summary;
+
+    public SummaryEventObject(Object source, String summary) {
+        super(source);
+        this.summary = summary;
+    }
+
+    /** return whether the sun rose or set */
+    public String getPlugin() {
+        return summary;
+    }
+}

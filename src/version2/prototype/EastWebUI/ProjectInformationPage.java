@@ -26,6 +26,16 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.EastWebUI.PluginIndiciesUI.AssociatePluginPage;
+import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesEventObject;
+import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesListener;
+import version2.prototype.EastWebUI.SummaryUI.AssociateSummaryPage;
+import version2.prototype.EastWebUI.SummaryUI.SummaryEventObject;
+import version2.prototype.EastWebUI.SummaryUI.SummaryListener;
+
+
+import javax.swing.ImageIcon;
+
 public class ProjectInformationPage {
 
     private JFrame frame;
@@ -61,7 +71,7 @@ public class ProjectInformationPage {
             @Override
             public void run() {
                 try {
-                    window =  new ProjectInformationPage();
+                    window =  new ProjectInformationPage(true);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -73,8 +83,9 @@ public class ProjectInformationPage {
     /**
      * Create the application.
      */
-    public ProjectInformationPage() {
+    public ProjectInformationPage(boolean isEditable) {
         initialize();
+        frame.setVisible(true);
     }
 
     /**
@@ -83,7 +94,7 @@ public class ProjectInformationPage {
     private void initialize() {
         frame = new JFrame();
         frame.setBounds(100, 100, 1207, 730);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
 
@@ -115,7 +126,8 @@ public class ProjectInformationPage {
         final JList<String> listOfAddedPlugin = new JList<String>(listOfAddedPluginModel);
         listOfAddedPlugin.setBorder(new EmptyBorder(10,10, 10, 10));
 
-        JButton addPluginButton = new JButton("Add Plugin");
+        JButton addPluginButton = new JButton("");
+        addPluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         addPluginButton.setToolTipText("Add Plugin");
         addPluginButton.addActionListener(new ActionListener() {
             @Override
@@ -134,12 +146,14 @@ public class ProjectInformationPage {
                 }
             }
         });
-        addPluginButton.setBounds(10, 12, 112, 23);
+        addPluginButton.setBounds(10, 12, 34, 23);
         frame.getContentPane().add(addPluginButton);
 
-        JButton deletePluginButton = new JButton("Delete Plugin");
+        JButton deletePluginButton = new JButton("");
+        deletePluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
         deletePluginButton.setToolTipText("Delete Plugin");
         deletePluginButton.addActionListener(new ActionListener() {
+            @SuppressWarnings("rawtypes")
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 DefaultListModel model = (DefaultListModel) listOfAddedPlugin.getModel();
@@ -149,7 +163,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deletePluginButton.setBounds(132, 12, 112, 23);
+        deletePluginButton.setBounds(54, 12, 34, 23);
         frame.getContentPane().add(deletePluginButton);
 
         JScrollPane scrollPane = new JScrollPane(listOfAddedPlugin);
@@ -379,67 +393,7 @@ public class ProjectInformationPage {
             @SuppressWarnings("unchecked")
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                JTextField xField = new JTextField(20);
-                final JTextField yField = new JTextField(20);
-                final JPanel myPanel = new JPanel();
-
-                final JButton browseButton = new JButton(". . .");
-                browseButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent evt) {
-                        JFileChooser chooser = new JFileChooser();
-                        chooser.setCurrentDirectory(new java.io.File("."));
-                        chooser.setDialogTitle("Browse the folder to process");
-                        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                        chooser.setAcceptAllFileFilterUsed(false);
-
-
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
-                            System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
-                            yField.setText(chooser.getSelectedFile().toString());
-                        } else {
-                            System.out.println("No Selection ");
-                        }
-                    }
-                });
-
-                final JComboBox temporalComboBox = new JComboBox();
-                temporalComboBox.addItem("Summary 1");
-                temporalComboBox.addItem("Summary 2" );
-
-                final JComboBox summaryComboBox = new JComboBox();
-                summaryComboBox.addItem("Zonal Summary");
-                summaryComboBox.addItem("Temporal Summary" );
-                summaryComboBox.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent arg0) {
-                        String selectedItem = String.valueOf(summaryComboBox.getSelectedItem());
-                        if(selectedItem == "Zonal Summary"){
-                            myPanel.add(temporalComboBox);
-
-                        }else if(selectedItem == "Temporal Summary"){
-                            myPanel.add(new JLabel("File Path:"));
-                            myPanel.add(yField);
-                            myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-                            myPanel.add(browseButton);
-                        }
-                    }
-                });
-
-
-
-                myPanel.add(summaryComboBox);
-                myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-
-
-                int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Zonal Summary Information", JOptionPane.OK_CANCEL_OPTION);
-                if (result == JOptionPane.OK_OPTION) {
-                    System.out.println("x value: " + xField.getText());
-                    System.out.println("y value: " + yField.getText());
-                    String tile = xField.getText() + ":     " + yField.getText();
-                    summaryListModel.addElement(tile);
-                }
+                new AssociateSummaryPage(new summaryListenerImplementation());
             }
         });
         editSummaryButton.setBounds(15, 20, 120, 30);
@@ -466,6 +420,13 @@ public class ProjectInformationPage {
         @Override
         public void AddPlugin(IndiciesEventObject e) {
             listOfAddedPluginModel.addElement(e.getPlugin());
+        }
+    }
+
+    class summaryListenerImplementation implements SummaryListener{
+        @Override
+        public void AddSummary(SummaryEventObject e) {
+            summaryListModel.addElement(e.getPlugin());
         }
     }
 }
