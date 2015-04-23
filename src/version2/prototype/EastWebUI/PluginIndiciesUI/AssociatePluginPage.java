@@ -127,7 +127,7 @@ public class AssociatePluginPage {
         btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String formatString = String.format("<html>Plugin: %s<br>Indicies: %s</span> <br>Quality: %s </span></html>",
+                String formatString = String.format("<html>Plugin: %s;<br>Indicies: %s</span> <br>Quality: %s;</span></html>",
                         String.valueOf(pluginComboBox.getSelectedItem()),
                         getIndiciesFormat(listOfInndicies.getModel()),
                         String.valueOf(qcComboBox.getSelectedItem()));

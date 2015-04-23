@@ -65,13 +65,16 @@ public class ProjectInformationPage {
     private JTextField standardParallel2;
     private JTextField latitudeOfOrigin;
     private JTextField falseNothing;
+    private JComboBox<String> coordinateSystemComboBox;
+    private JComboBox<String> reSamplingComboBox;
+    private JComboBox<String> datumComboBox;
     MainWindowEvent mainWindowEvent;
 
     DefaultListModel<String> listOfAddedPluginModel;
     DefaultListModel<String> summaryListModel;
 
-    @SuppressWarnings("rawtypes")
-    DefaultListModel modisListModel;
+
+    DefaultListModel<String> modisListModel;
 
     /**
      * Launch the application.
@@ -260,12 +263,14 @@ public class ProjectInformationPage {
         modisInformationPanel.setBounds(276, 420, 275, 275);
         frame.getContentPane().add(modisInformationPanel);
 
-        modisListModel = new DefaultListModel();
-        @SuppressWarnings("unchecked")
-        final JList<DefaultListModel> modisList = new JList<DefaultListModel>(modisListModel);
+        modisListModel = new DefaultListModel<String>();
+
+        final JList<String> modisList = new JList<String>(modisListModel);
         modisList.setBounds(15, 70, 245, 194);
 
-        JButton addNewModisButton = new JButton("Edit");
+        JButton addNewModisButton = new JButton("");
+        addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
+        addNewModisButton.setToolTipText("Add modis");
         addNewModisButton.addActionListener(new ActionListener() {
             @SuppressWarnings("unchecked")
             @Override
@@ -274,11 +279,13 @@ public class ProjectInformationPage {
                 modisListModel.addElement(tile);
             }
         });
-        addNewModisButton.setBounds(15, 20, 120, 30);
+        addNewModisButton.setBounds(15, 29, 75, 30);
         modisInformationPanel.add(addNewModisButton);
         modisInformationPanel.add(modisList);
 
-        JButton btnDeleteSelected = new JButton("Delete");
+        JButton btnDeleteSelected = new JButton("");
+        btnDeleteSelected.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        btnDeleteSelected.setToolTipText("Delete Selected Modis");
         btnDeleteSelected.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -289,7 +296,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        btnDeleteSelected.setBounds(140, 20, 120, 30);
+        btnDeleteSelected.setBounds(185, 29, 75, 30);
         modisInformationPanel.add(btnDeleteSelected);
     }
 
@@ -303,7 +310,7 @@ public class ProjectInformationPage {
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
         coordinateSystemLabel.setBounds(6, 16, 134, 14);
         panel_2.add(coordinateSystemLabel);
-        JComboBox<String> coordinateSystemComboBox = new JComboBox<String>();
+        coordinateSystemComboBox = new JComboBox<String>();
         coordinateSystemComboBox.setBounds(146, 13, 140, 20);
         coordinateSystemComboBox.addItem("ALBERS_EQUAL_AREA");
         coordinateSystemComboBox.addItem("LAMBERT_CONFORMAL_CONIC");
@@ -313,7 +320,7 @@ public class ProjectInformationPage {
         JLabel reSamplingLabel = new JLabel("Re-sampling Type:");
         reSamplingLabel.setBounds(6, 41, 109, 14);
         panel_2.add(reSamplingLabel);
-        JComboBox<String> reSamplingComboBox = new JComboBox<String>();
+        reSamplingComboBox = new JComboBox<String>();
         reSamplingComboBox.setBounds(146, 38, 140, 20);
         reSamplingComboBox.addItem("NEAREST_NEIGHBOR");
         reSamplingComboBox.addItem("BILINEAR");
@@ -323,7 +330,7 @@ public class ProjectInformationPage {
         JLabel datumLabel = new JLabel("Datum:");
         datumLabel.setBounds(6, 66, 109, 14);
         panel_2.add(datumLabel);
-        JComboBox<String> datumComboBox = new JComboBox<String>();
+        datumComboBox = new JComboBox<String>();
         datumComboBox.setBounds(146, 63, 140, 20);
         datumComboBox.addItem("NAD83");
         datumComboBox.addItem("NAD27");
@@ -400,18 +407,22 @@ public class ProjectInformationPage {
         final JList summaryList = new JList(summaryListModel);
         summaryList.setBounds(15, 70, 245, 194);
 
-        JButton editSummaryButton = new JButton("Edit");
+        JButton editSummaryButton = new JButton("");
+        editSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
+        editSummaryButton.setToolTipText("Add summary");
         editSummaryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 new AssociateSummaryPage(new summaryListenerImplementation());
             }
         });
-        editSummaryButton.setBounds(15, 20, 120, 30);
+        editSummaryButton.setBounds(15, 29, 75, 30);
         summaryPanel.add(editSummaryButton);
         summaryPanel.add(summaryList);
 
-        JButton deleteSummaryButton = new JButton("Delete");
+        JButton deleteSummaryButton = new JButton("");
+        deleteSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        deleteSummaryButton.setToolTipText("Delete Selected Summary");
         deleteSummaryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -422,7 +433,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deleteSummaryButton.setBounds(140, 20, 120, 30);
+        deleteSummaryButton.setBounds(185, 29, 75, 30);
         summaryPanel.add(deleteSummaryButton);
     }
 
@@ -437,40 +448,144 @@ public class ProjectInformationPage {
 
             // root elements
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("company");
-            doc.appendChild(rootElement);
+            Element projectInfo = doc.createElement("ProjectInfo");
+            doc.appendChild(projectInfo);
 
-            // staff elements
-            Element staff = doc.createElement("Staff");
-            rootElement.appendChild(staff);
+            // Plugin elements
+            Element plugins = doc.createElement("Plugins");
+            projectInfo.appendChild(plugins);
 
-            // set attribute to staff element
-            Attr attr = doc.createAttribute("id");
-            attr.setValue("1");
-            staff.setAttributeNode(attr);
+            //list of plugin associate to project
+            for(Object item:listOfAddedPluginModel.toArray()){
+                Element plugin = doc.createElement("Plugin");
 
-            // shorten way
-            // staff.setAttribute("id", "1");
+                // set attribute to staff element
+                Attr attr = doc.createAttribute("name");
+                String noFormat = item.toString().replaceAll("<html>Plugin: ","");
+                noFormat = noFormat.replaceAll("<br>Indicies: ", "");
+                noFormat = noFormat.replaceAll("<br>Quality: ","");
+                noFormat = noFormat.replaceAll("</html>", "");
+                noFormat = noFormat.replaceAll("</span>", "");
+                noFormat = noFormat.replaceAll("<span>", "");
 
-            // firstname elements
-            Element firstname = doc.createElement("firstname");
-            firstname.appendChild(doc.createTextNode("yong"));
-            staff.appendChild(firstname);
+                String[] array = noFormat.split(";");
 
-            // lastname elements
-            Element lastname = doc.createElement("lastname");
-            lastname.appendChild(doc.createTextNode("mook kim"));
-            staff.appendChild(lastname);
+                attr.setValue(array[0].toString());
+                plugin.setAttributeNode(attr);
 
-            // nickname elements
-            Element nickname = doc.createElement("nickname");
-            nickname.appendChild(doc.createTextNode("mkyong"));
-            staff.appendChild(nickname);
+                if(array.length < 3){
+                    // start Date
+                    Element qc = doc.createElement("QC");
+                    qc.appendChild(doc.createTextNode(array[1].toString()));
+                    plugin.appendChild(qc);
+                }
+                else{
+                    for(int i = 1; i < array.length -1; i++){
+                        Element indicies = doc.createElement("Indicies");
+                        indicies.appendChild(doc.createTextNode(array[i].toString()));
+                        plugin.appendChild(indicies);
+                    }
 
-            // salary elements
-            Element salary = doc.createElement("salary");
-            salary.appendChild(doc.createTextNode("100000"));
-            staff.appendChild(salary);
+                    Element qc = doc.createElement("QC");
+                    qc.appendChild(doc.createTextNode(array[array.length - 1].toString()));
+                    plugin.appendChild(qc);
+                }
+
+                // add a new node for plugin element
+                plugins.appendChild(plugin);
+            }
+
+            // start Date
+            Element startDate = doc.createElement("StartDate");
+            startDate.appendChild(doc.createTextNode(this.startDate.getText()));
+            projectInfo.appendChild(startDate);
+
+            // project name
+            Element projectName = doc.createElement("ProjectName");
+            projectName.appendChild(doc.createTextNode(this.projectName.getText()));
+            projectInfo.appendChild(projectName);
+
+            // working directory
+            Element workingDirectory = doc.createElement("WorkingDir");
+            workingDirectory.appendChild(doc.createTextNode(this.workingDirectory.getText()));
+            projectInfo.appendChild(workingDirectory);
+
+            // masking file
+            Element maskingFile = doc.createElement("MaskingFile");
+            maskingFile.appendChild(doc.createTextNode(maskFile.getText()));
+            projectInfo.appendChild(maskingFile);
+
+            //list of modis tiles
+            Element modisTiles = doc.createElement("ModisTiles");
+            projectInfo.appendChild(modisTiles);
+
+            for(Object item:modisListModel.toArray()){
+                Element element = doc.createElement("Modis");
+                element.appendChild(doc.createTextNode(item.toString()));
+                modisTiles.appendChild(element);
+            }
+
+            // Coordinate System
+            Element coordinateSystem = doc.createElement("CoordinateSystem");
+            coordinateSystem.appendChild(doc.createTextNode(String.valueOf(coordinateSystemComboBox.getSelectedItem())));
+            projectInfo.appendChild(coordinateSystem);
+
+            // resampling
+            Element reSampling = doc.createElement("ReSampling");
+            reSampling.appendChild(doc.createTextNode(String.valueOf(reSamplingComboBox.getSelectedItem())));
+            projectInfo.appendChild(reSampling);
+
+            //datum
+            Element datum = doc.createElement("Datum");
+            datum.appendChild(doc.createTextNode(String.valueOf(datumComboBox.getSelectedItem())));
+            projectInfo.appendChild(datum);
+
+            //datum
+            Element pixelSize = doc.createElement("Datum");
+            pixelSize.appendChild(doc.createTextNode(String.valueOf(this.pixelSize.getText())));
+            projectInfo.appendChild(pixelSize);
+
+
+            //Standard Parallel1
+            Element standardParallel1 = doc.createElement("StandardParallel1");
+            standardParallel1.appendChild(doc.createTextNode(String.valueOf(this.standardParallel1.getText())));
+            projectInfo.appendChild(standardParallel1);
+
+
+            //cental Meridian
+            Element centalMeridian = doc.createElement("CentalMeridian");
+            centalMeridian.appendChild(doc.createTextNode(String.valueOf(this.centalMeridian.getText())));
+            projectInfo.appendChild(centalMeridian);
+
+            //false Easting
+            Element falseEasting = doc.createElement("FalseEasting");
+            falseEasting.appendChild(doc.createTextNode(String.valueOf(this.falseEasting.getText())));
+            projectInfo.appendChild(falseEasting);
+
+            //standard Parallel2
+            Element standardParallel2 = doc.createElement("StandardParallel2");
+            standardParallel2.appendChild(doc.createTextNode(String.valueOf(this.standardParallel2.getText())));
+            projectInfo.appendChild(standardParallel2);
+
+            //latitude Of Origin
+            Element latitudeOfOrigin = doc.createElement("LatitudeOfOrigin");
+            latitudeOfOrigin.appendChild(doc.createTextNode(String.valueOf(this.latitudeOfOrigin.getText())));
+            projectInfo.appendChild(latitudeOfOrigin);
+
+            //false Nothing
+            Element falseNothing = doc.createElement("FalseNothing");
+            falseNothing.appendChild(doc.createTextNode(String.valueOf(this.falseNothing.getText())));
+            projectInfo.appendChild(falseNothing);
+
+            //list of summary tiles
+            Element summaries = doc.createElement("Summaries");
+            projectInfo.appendChild(summaries);
+
+            for(Object item:modisListModel.toArray()){
+                Element summary = doc.createElement("Summary");
+                summary.appendChild(doc.createTextNode(item.toString()));
+                summaries.appendChild(summary);
+            }
 
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -478,11 +593,7 @@ public class ProjectInformationPage {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(theDir);
 
-            // Output to console for testing
-            // StreamResult result = new StreamResult(System.out);
-
             transformer.transform(source, result);
-
             System.out.println("File saved!");
             mainWindowEvent.fire();
 

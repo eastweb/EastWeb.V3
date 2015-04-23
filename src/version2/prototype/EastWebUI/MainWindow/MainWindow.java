@@ -281,10 +281,6 @@ public class MainWindow {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(10, 123, 524, 262);
         frame.getContentPane().add(scrollPane);
-
-        JButton btnRefresh = new JButton("refresh ");
-        btnRefresh.setBounds(445, 36, 89, 23);
-        frame.getContentPane().add(btnRefresh);
     }
 
     private void runSelectedProject() {
@@ -418,7 +414,7 @@ public class MainWindow {
 
         @Override
         public void RefreshProjectList(MainWindowEventObject e) {
-
+            populateProjectList();
         }
     }
 }
