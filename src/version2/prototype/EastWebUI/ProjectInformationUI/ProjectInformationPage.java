@@ -47,14 +47,17 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.toedter.calendar.JDateChooser;
+
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 
 public class ProjectInformationPage {
 
     private JFrame frame;
     final int windowHeight = 1000;
     final int windowWidth = 750;
-    private JTextField startDate;
+    private JDateChooser  startDate;
     private JTextField projectName;
     private JTextField workingDirectory;
     private JTextField maskFile;
@@ -68,6 +71,7 @@ public class ProjectInformationPage {
     private JComboBox<String> coordinateSystemComboBox;
     private JComboBox<String> reSamplingComboBox;
     private JComboBox<String> datumComboBox;
+    private boolean isEditable;
     MainWindowEvent mainWindowEvent;
 
     DefaultListModel<String> listOfAddedPluginModel;
@@ -75,6 +79,7 @@ public class ProjectInformationPage {
 
 
     DefaultListModel<String> modisListModel;
+    private JTextField masterShapeTextField;
 
     /**
      * Launch the application.
@@ -97,6 +102,7 @@ public class ProjectInformationPage {
      * Create the application.
      */
     public ProjectInformationPage(boolean isEditable,  MainWindowListener l) {
+        this.isEditable = isEditable;
         mainWindowEvent = new MainWindowEvent();
         mainWindowEvent.addListener(l);
         initialize();
@@ -119,7 +125,7 @@ public class ProjectInformationPage {
     }
 
     private void CreateNewProjectButton() {
-        JButton createButton = new JButton("Create New Project");
+        JButton createButton = new JButton(isEditable ? "Create New Project" : "Save Project");
 
         createButton.addActionListener(new ActionListener() {
             @Override
@@ -195,23 +201,23 @@ public class ProjectInformationPage {
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Basic Project Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(10, 420, 275, 275);
+        panel.setBounds(10, 420, 358, 275);
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 
         JLabel startDateLabel = new JLabel("Start Date:");
         startDateLabel.setBounds(6, 25, 100, 15);
         panel.add(startDateLabel);
-        startDate = new JTextField();
-        startDate.setColumns(10);
-        startDate.setBounds(116, 22, 140, 20);
+        startDate = new JDateChooser ();
+        //startDate.setColumns(10);
+        startDate.setBounds(116, 22, 232, 20);
         panel.add(startDate);
 
         JLabel projectNameLabel = new JLabel("Project Name: ");
         projectNameLabel.setBounds(6, 56, 100, 14);
         panel.add(projectNameLabel);
         projectName = new JTextField();
-        projectName.setBounds(116, 53, 140, 20);
+        projectName.setBounds(116, 53, 232, 20);
         panel.add(projectName);
         projectName.setColumns(10);
 
@@ -220,19 +226,42 @@ public class ProjectInformationPage {
         panel.add(workingDirLabel);
         workingDirectory = new JTextField();
         workingDirectory.setColumns(10);
-        workingDirectory.setBounds(116, 84, 140, 20);
+        workingDirectory.setBounds(116, 84, 190, 20);
         panel.add(workingDirectory);
+
+        JButton workingDirBrowsebutton = new JButton(". . .");
+        workingDirBrowsebutton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setCurrentDirectory(new java.io.File("."));
+                chooser.setDialogTitle("Browse the folder to process");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setAcceptAllFileFilterUsed(false);
+
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
+                    System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
+                    workingDirectory.setText(chooser.getSelectedFile().toString());
+                } else {
+                    System.out.println("No Selection ");
+                }
+            }
+        });
+
+        workingDirBrowsebutton.setBounds(316, 84, 32, 20);
+        panel.add(workingDirBrowsebutton);
 
         JLabel maskingFileLabel = new JLabel("Masking File");
         maskingFileLabel.setBounds(6, 118, 100, 15);
         panel.add(maskingFileLabel);
         maskFile = new JTextField();
         maskFile.setColumns(10);
-        maskFile.setBounds(116, 115, 100, 20);
+        maskFile.setBounds(116, 115, 190, 20);
         panel.add(maskFile);
 
-        JButton browseButton = new JButton(". . .");
-        browseButton.addActionListener(new ActionListener() {
+        JButton maskFileBrowseButton = new JButton(". . .");
+        maskFileBrowseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 JFileChooser chooser = new JFileChooser();
@@ -251,8 +280,24 @@ public class ProjectInformationPage {
                 }
             }
         });
-        browseButton.setBounds(226, 115, 32, 20);
-        panel.add(browseButton);
+        maskFileBrowseButton.setBounds(316, 115, 32, 20);
+        panel.add(maskFileBrowseButton);
+
+        JCheckBox chmasterShapeFileCheckbox = new JCheckBox("Master shp file");
+        chmasterShapeFileCheckbox.setBounds(6, 140, 97, 23);
+        panel.add(chmasterShapeFileCheckbox);
+
+        masterShapeTextField = new JTextField();
+        masterShapeTextField.setBounds(116, 141, 190, 20);
+        panel.add(masterShapeTextField);
+        masterShapeTextField.setColumns(10);
+
+        JButton masterShapeFileBrowseButton = new JButton(". . .");
+        masterShapeFileBrowseButton.setBounds(316, 141, 32, 20);
+        panel.add(masterShapeFileBrowseButton);
+
+
+
     }
 
     @SuppressWarnings("rawtypes")
@@ -260,7 +305,7 @@ public class ProjectInformationPage {
         JPanel modisInformationPanel = new JPanel();
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(276, 420, 275, 275);
+        modisInformationPanel.setBounds(361, 420, 275, 275);
         frame.getContentPane().add(modisInformationPanel);
 
         modisListModel = new DefaultListModel<String>();
@@ -304,7 +349,7 @@ public class ProjectInformationPage {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(547, 420, 383, 275);
+        panel_2.setBounds(633, 420, 297, 275);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -351,7 +396,7 @@ public class ProjectInformationPage {
         panel_2.add(standardParallel1label);
         standardParallel1 = new JTextField();
         standardParallel1.setColumns(10);
-        standardParallel1.setBounds(146, 115, 71, 16);
+        standardParallel1.setBounds(146, 115, 140, 16);
         panel_2.add(standardParallel1);
 
         JLabel centalMeridianLabel = new JLabel("Cental meridian");
@@ -359,7 +404,7 @@ public class ProjectInformationPage {
         panel_2.add(centalMeridianLabel);
         centalMeridian = new JTextField();
         centalMeridian.setColumns(10);
-        centalMeridian.setBounds(146, 140, 71, 16);
+        centalMeridian.setBounds(146, 140, 140, 16);
         panel_2.add(centalMeridian);
 
         JLabel falseEastingLabel = new JLabel("False easting");
@@ -367,7 +412,7 @@ public class ProjectInformationPage {
         panel_2.add(falseEastingLabel);
         falseEasting = new JTextField();
         falseEasting.setColumns(10);
-        falseEasting.setBounds(146, 165, 71, 16);
+        falseEasting.setBounds(146, 165, 140, 16);
         panel_2.add(falseEasting);
 
         JLabel standardParallel2Label = new JLabel("Standard parallel 2");
@@ -375,7 +420,7 @@ public class ProjectInformationPage {
         panel_2.add(standardParallel2Label);
         standardParallel2 = new JTextField();
         standardParallel2.setColumns(10);
-        standardParallel2.setBounds(146, 192, 71, 16);
+        standardParallel2.setBounds(146, 192, 140, 16);
         panel_2.add(standardParallel2);
 
         JLabel latitudeOfOriginLabel = new JLabel("Latitude of origin");
@@ -383,7 +428,7 @@ public class ProjectInformationPage {
         panel_2.add(latitudeOfOriginLabel);
         latitudeOfOrigin = new JTextField();
         latitudeOfOrigin.setColumns(10);
-        latitudeOfOrigin.setBounds(146, 215, 71, 16);
+        latitudeOfOrigin.setBounds(146, 215, 140, 16);
         panel_2.add(latitudeOfOrigin);
 
         JLabel falseNothingLabel = new JLabel("False nothing");
@@ -391,7 +436,7 @@ public class ProjectInformationPage {
         panel_2.add(falseNothingLabel);
         falseNothing = new JTextField();
         falseNothing.setColumns(10);
-        falseNothing.setBounds(146, 240, 71, 16);
+        falseNothing.setBounds(146, 240, 140, 16);
         panel_2.add(falseNothing);
     }
 
@@ -435,6 +480,10 @@ public class ProjectInformationPage {
         });
         deleteSummaryButton.setBounds(185, 29, 75, 30);
         summaryPanel.add(deleteSummaryButton);
+
+        JComboBox projectCollectionComboBox = new JComboBox();
+        projectCollectionComboBox.setBounds(507, 15, 229, 20);
+        frame.getContentPane().add(projectCollectionComboBox);
     }
 
     private void CreateNewProject(){
@@ -497,7 +546,7 @@ public class ProjectInformationPage {
 
             // start Date
             Element startDate = doc.createElement("StartDate");
-            startDate.appendChild(doc.createTextNode(this.startDate.getText()));
+            startDate.appendChild(doc.createTextNode(this.startDate.getDate().toString()));
             projectInfo.appendChild(startDate);
 
             // project name

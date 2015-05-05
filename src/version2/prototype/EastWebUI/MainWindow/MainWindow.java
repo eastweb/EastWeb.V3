@@ -272,7 +272,7 @@ public class MainWindow {
         defaultTableModel = new DefaultTableModel();
         defaultTableModel.setDataVector(new Object[][] {
 
-        }, new Object[] { "Project Name", " Total Progress" ,"Technical Progress", });
+        }, new Object[] { "Project Name", " Total Progress" ,"Technical Progress", "Summary Composite", "Intermidiate Selection" });
 
         JTable table = new JTable(defaultTableModel);
         table.getColumn("Technical Progress").setCellRenderer(new ButtonRenderer());
@@ -288,7 +288,7 @@ public class MainWindow {
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "total progress", "Progress Detail"});
+                defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "75 %", "Progress Detail", "Summary Quiries", true});
                 populateProjectList();
                 //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
                 //Scheduler.getInstance(data).run();
