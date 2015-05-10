@@ -81,7 +81,7 @@ public class MainWindow {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 550, 425);
+        frame.setBounds(100, 100, 1207, 730);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
@@ -186,7 +186,7 @@ public class MainWindow {
         JMenuItem mntmManual = new JMenuItem("Manual", KeyEvent.VK_T);
         mnHelp.add(mntmManual);
 
-        menuBar.setBounds(0, 0, 534, 25);
+        menuBar.setBounds(0, 0, 1201, 25);
         frame.getContentPane().add(menuBar);
     }
 
@@ -279,7 +279,7 @@ public class MainWindow {
         table.getColumn("Technical Progress").setCellEditor(new ButtonEditor(new JCheckBox()));
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 123, 524, 262);
+        scrollPane.setBounds(10, 123, 1181, 567);
         frame.getContentPane().add(scrollPane);
     }
 

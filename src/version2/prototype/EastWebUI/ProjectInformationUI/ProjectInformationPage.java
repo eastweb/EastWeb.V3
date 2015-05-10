@@ -206,27 +206,27 @@ public class ProjectInformationPage {
         panel.setLayout(null);
 
         JLabel startDateLabel = new JLabel("Start Date:");
-        startDateLabel.setBounds(6, 25, 100, 15);
+        startDateLabel.setBounds(6, 25, 132, 15);
         panel.add(startDateLabel);
         startDate = new JDateChooser ();
         //startDate.setColumns(10);
-        startDate.setBounds(116, 22, 232, 20);
+        startDate.setBounds(148, 22, 200, 20);
         panel.add(startDate);
 
         JLabel projectNameLabel = new JLabel("Project Name: ");
-        projectNameLabel.setBounds(6, 56, 100, 14);
+        projectNameLabel.setBounds(6, 56, 136, 14);
         panel.add(projectNameLabel);
         projectName = new JTextField();
-        projectName.setBounds(116, 53, 232, 20);
+        projectName.setBounds(148, 53, 200, 20);
         panel.add(projectName);
         projectName.setColumns(10);
 
         JLabel workingDirLabel = new JLabel("Working Dir: ");
-        workingDirLabel.setBounds(6, 87, 100, 15);
+        workingDirLabel.setBounds(6, 87, 132, 15);
         panel.add(workingDirLabel);
         workingDirectory = new JTextField();
         workingDirectory.setColumns(10);
-        workingDirectory.setBounds(116, 84, 190, 20);
+        workingDirectory.setBounds(148, 84, 158, 20);
         panel.add(workingDirectory);
 
         JButton workingDirBrowsebutton = new JButton(". . .");
@@ -253,11 +253,11 @@ public class ProjectInformationPage {
         panel.add(workingDirBrowsebutton);
 
         JLabel maskingFileLabel = new JLabel("Masking File");
-        maskingFileLabel.setBounds(6, 118, 100, 15);
+        maskingFileLabel.setBounds(6, 118, 132, 15);
         panel.add(maskingFileLabel);
         maskFile = new JTextField();
         maskFile.setColumns(10);
-        maskFile.setBounds(116, 115, 190, 20);
+        maskFile.setBounds(148, 115, 158, 20);
         panel.add(maskFile);
 
         JButton maskFileBrowseButton = new JButton(". . .");
@@ -284,11 +284,11 @@ public class ProjectInformationPage {
         panel.add(maskFileBrowseButton);
 
         JCheckBox chmasterShapeFileCheckbox = new JCheckBox("Master shp file");
-        chmasterShapeFileCheckbox.setBounds(6, 140, 97, 23);
+        chmasterShapeFileCheckbox.setBounds(6, 140, 136, 23);
         panel.add(chmasterShapeFileCheckbox);
 
         masterShapeTextField = new JTextField();
-        masterShapeTextField.setBounds(116, 141, 190, 20);
+        masterShapeTextField.setBounds(148, 141, 158, 20);
         panel.add(masterShapeTextField);
         masterShapeTextField.setColumns(10);
 
