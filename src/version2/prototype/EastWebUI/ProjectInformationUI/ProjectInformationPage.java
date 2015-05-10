@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -72,6 +74,7 @@ public class ProjectInformationPage {
     private JComboBox<String> reSamplingComboBox;
     private JComboBox<String> datumComboBox;
     private boolean isEditable;
+    JComboBox projectCollectionComboBox;
     MainWindowEvent mainWindowEvent;
 
     DefaultListModel<String> listOfAddedPluginModel;
@@ -122,6 +125,19 @@ public class ProjectInformationPage {
         PopulatePluginList();
         CreateNewProjectButton();
         RenderInformationGrid();
+
+        if(!isEditable)
+        {
+            projectCollectionComboBox = new JComboBox();
+            projectCollectionComboBox.setBounds(507, 15, 229, 20);
+            frame.getContentPane().add(projectCollectionComboBox);
+
+            File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
+
+            for(File fXmlFile: getXMLFiles(fileDir)){
+                projectCollectionComboBox.addItem(fXmlFile.getName().replace(".xml", ""));
+            }
+        }
     }
 
     private void CreateNewProjectButton() {
@@ -201,7 +217,7 @@ public class ProjectInformationPage {
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Basic Project Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(10, 420, 358, 275);
+        panel.setBounds(10, 420, 358, 259);
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 
@@ -236,7 +252,7 @@ public class ProjectInformationPage {
                 JFileChooser chooser = new JFileChooser();
                 chooser.setCurrentDirectory(new java.io.File("."));
                 chooser.setDialogTitle("Browse the folder to process");
-                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 chooser.setAcceptAllFileFilterUsed(false);
 
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -283,21 +299,52 @@ public class ProjectInformationPage {
         maskFileBrowseButton.setBounds(316, 115, 32, 20);
         panel.add(maskFileBrowseButton);
 
-        JCheckBox chmasterShapeFileCheckbox = new JCheckBox("Master shp file");
-        chmasterShapeFileCheckbox.setBounds(6, 140, 136, 23);
-        panel.add(chmasterShapeFileCheckbox);
-
         masterShapeTextField = new JTextField();
         masterShapeTextField.setBounds(148, 141, 158, 20);
         panel.add(masterShapeTextField);
         masterShapeTextField.setColumns(10);
+        masterShapeTextField.setEditable(false);
 
-        JButton masterShapeFileBrowseButton = new JButton(". . .");
+        final JButton masterShapeFileBrowseButton = new JButton(". . .");
+        masterShapeFileBrowseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setCurrentDirectory(new java.io.File("."));
+                chooser.setDialogTitle("Browse the folder to process");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setAcceptAllFileFilterUsed(false);
+
+
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
+                    System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
+                    masterShapeTextField.setText(chooser.getSelectedFile().toString());
+                } else {
+                    System.out.println("No Selection ");
+                }
+            }
+        });
         masterShapeFileBrowseButton.setBounds(316, 141, 32, 20);
         panel.add(masterShapeFileBrowseButton);
+        masterShapeFileBrowseButton.setEnabled(false);
 
-
-
+        final JCheckBox chmasterShapeFileCheckbox = new JCheckBox("Master shp file");
+        chmasterShapeFileCheckbox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if(chmasterShapeFileCheckbox.isSelected()){
+                    masterShapeTextField.setEditable(true);
+                    masterShapeFileBrowseButton.setEnabled(true);
+                }
+                else{
+                    masterShapeTextField.setEditable(false);
+                    masterShapeFileBrowseButton.setEnabled(false);
+                }
+            }
+        });
+        chmasterShapeFileCheckbox.setBounds(6, 140, 136, 23);
+        panel.add(chmasterShapeFileCheckbox);
     }
 
     @SuppressWarnings("rawtypes")
@@ -480,10 +527,27 @@ public class ProjectInformationPage {
         });
         deleteSummaryButton.setBounds(185, 29, 75, 30);
         summaryPanel.add(deleteSummaryButton);
+    }
 
-        JComboBox projectCollectionComboBox = new JComboBox();
-        projectCollectionComboBox.setBounds(507, 15, 229, 20);
-        frame.getContentPane().add(projectCollectionComboBox);
+    private File[] getXMLFiles(File folder) {
+        List<File> aList = new ArrayList<File>();
+        File[] files = folder.listFiles();
+
+        for (File pf : files) {
+
+            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
+                aList.add(pf);
+            }
+        }
+        return aList.toArray(new File[aList.size()]);
+    }
+
+    private String getFileExtensionName(File f) {
+        if (f.getName().indexOf(".") == -1) {
+            return "";
+        } else {
+            return f.getName().substring(f.getName().length() - 3, f.getName().length());
+        }
     }
 
     private void CreateNewProject(){
@@ -563,6 +627,10 @@ public class ProjectInformationPage {
             Element maskingFile = doc.createElement("MaskingFile");
             maskingFile.appendChild(doc.createTextNode(maskFile.getText()));
             projectInfo.appendChild(maskingFile);
+
+            Element masterShapeFile = doc.createElement("MasterShapeFile");
+            masterShapeFile.appendChild(doc.createTextNode(masterShapeTextField.getText()));
+            projectInfo.appendChild(masterShapeFile);
 
             //list of modis tiles
             Element modisTiles = doc.createElement("ModisTiles");

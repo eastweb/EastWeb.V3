@@ -305,8 +305,6 @@ public class MainWindow {
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
 
         projectList.removeAllItems();
-        projectList.addItem("Sufi's Project");
-        projectList.addItem("NEXT Project");
 
         for(File fXmlFile: getXMLFiles(fileDir)){
             projectList.addItem(fXmlFile.getName().replace(".xml", ""));
