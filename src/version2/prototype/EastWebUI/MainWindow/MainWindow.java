@@ -290,6 +290,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "75 %", "Progress Detail", "Summary Quiries", true});
                 populateProjectList();
+                // todo activate
                 //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
                 //Scheduler.getInstance(data).run();
             }
