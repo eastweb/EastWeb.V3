@@ -102,7 +102,7 @@ public class AssociatePluginPage {
         qcComboBox.setBounds(96, 38, 140, 20);
         pluginPanel.add(qcComboBox);
 
-        JLabel indiciesLabel = new JLabel("Indicies");
+        JLabel indiciesLabel = new JLabel("Indices");
         indiciesLabel.setBounds(10, 66, 80, 14);
         pluginPanel.add(indiciesLabel);
         indiciesComboBox = new JComboBox<String>();
@@ -112,7 +112,7 @@ public class AssociatePluginPage {
         populatePluginComboBox(pluginPanel);
 
         final JButton btnAddIndicies = new JButton("");
-        btnAddIndicies.setToolTipText("add indicies");
+        btnAddIndicies.setToolTipText("add indices ");
         btnAddIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         btnAddIndicies.addActionListener(new ActionListener() {
             @Override
@@ -127,7 +127,7 @@ public class AssociatePluginPage {
         btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String formatString = String.format("<html>Plugin: %s;<br>Indicies: %s</span> <br>Quality: %s;</span></html>",
+                String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>Quality: %s;</span></html>",
                         String.valueOf(pluginComboBox.getSelectedItem()),
                         getIndiciesFormat(listOfInndicies.getModel()),
                         String.valueOf(qcComboBox.getSelectedItem()));
@@ -149,7 +149,7 @@ public class AssociatePluginPage {
         pluginPanel.add(btnCancel);
 
         JButton btnDeleteIndicies = new JButton("");
-        btnDeleteIndicies.setToolTipText("delete selected indicies");
+        btnDeleteIndicies.setToolTipText("delete selected indices");
         btnDeleteIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
         btnDeleteIndicies.addActionListener(new ActionListener() {
             @Override
