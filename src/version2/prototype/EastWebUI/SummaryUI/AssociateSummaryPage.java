@@ -3,6 +3,7 @@ package version2.prototype.EastWebUI.SummaryUI;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.JButton;
@@ -21,6 +22,7 @@ import org.gdal.ogr.FeatureDefn;
 import org.gdal.ogr.DataSource;
 
 import version2.prototype.util.GdalUtils;
+import version2.prototype.util.ReadShapefile;
 
 
 public class AssociateSummaryPage {
@@ -69,7 +71,7 @@ public class AssociateSummaryPage {
         myPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         myPanel.setBounds(547, 420, 383, 275);
 
-        final JLabel filePathLabel = new JLabel("File Path");
+        final JLabel filePathLabel = new JLabel("ShapeFile Path");
         filePathLabel.setBounds(10, 60, 152, 14);
         myPanel.add(filePathLabel);
 
@@ -78,12 +80,12 @@ public class AssociateSummaryPage {
         myPanel.add(filePathText);
         filePathText.setColumns(10);
 
-        final JLabel shapeFileLabel = new JLabel("Shape");
-        shapeFileLabel.setBounds(20, 95, 92, 26);
+        final JLabel shapeFileLabel = new JLabel("Shape Type");
+        shapeFileLabel.setBounds(10, 94, 152, 14);
         myPanel.add(shapeFileLabel);
 
         final JComboBox shapeFileComboBox = new JComboBox();
-        shapeFileComboBox.setBounds(172, 92, 44, 32);
+        shapeFileComboBox.setBounds(172, 91, 150, 20);
         myPanel.add(shapeFileComboBox);
 
         final JButton browseButton = new JButton(". . .");
@@ -121,7 +123,7 @@ public class AssociateSummaryPage {
         myPanel.add(temporalComboBox);
 
         final JComboBox<String> summaryComboBox = new JComboBox<String>();
-        summaryComboBox.setBounds(10, 29, 161, 20);
+        summaryComboBox.setBounds(172, 26, 150, 20);
         summaryComboBox.addItem("Zonal Summary");
         summaryComboBox.addItem("Temporal Summary" );
         summaryComboBox.addActionListener(new ActionListener() {
@@ -182,35 +184,27 @@ public class AssociateSummaryPage {
 
         frame.getContentPane().add(myPanel);
 
+        JLabel lblTypeOfSummary = new JLabel("Type of Summary");
+        lblTypeOfSummary.setEnabled(true);
+        lblTypeOfSummary.setBounds(10, 29, 152, 14);
+        myPanel.add(lblTypeOfSummary);
+
 
     }
 
     private void populateShapeFiles(JComboBox shapeFileComboBox, String filePath){
 
-        //GdalUtils.register();
-        DataSource shapefile;
-
-
-        shapefile = ogr.Open(filePath);
-
-
-        if(shapefile != null){
-            synchronized (GdalUtils.lockObject) {
-                for (int iLayer=0; iLayer<shapefile.GetLayerCount(); iLayer++) {
-                    Layer layer = shapefile.GetLayer(iLayer);
-                    FeatureDefn layerDefn = layer.GetLayerDefn();
-
-                    shapeFileComboBox.removeAll();
-                    for (int iFeature=0; iFeature<layerDefn.GetFieldCount(); iFeature++) {
-                        FieldDefn fieldDefn = layerDefn.GetFieldDefn(iFeature);
-                        String type = fieldDefn.GetFieldTypeName(fieldDefn.GetFieldType()).toLowerCase();
-                        if (type.equals("string") || type.equals("integer")) { // FIXME: test! does this always work?
-                            shapeFileComboBox.addItem(layerDefn.GetFieldDefn(iFeature).GetName());
-                        }
-                    }
-                }
+        ReadShapefile shapfile = new ReadShapefile(filePath);
+        ArrayList<String[]> featureList = shapfile.getFeatureList();
+        for (int i = 0; i < featureList.size(); i++) {
+            String[] file = featureList.get(i);
+            for(String feature: file){
+                shapeFileComboBox.addItem(feature);
             }
         }
+
+
+
 
         shapeFileComboBox.setEnabled(true);
     }
