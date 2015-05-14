@@ -74,15 +74,15 @@ public class ProjectInformationPage {
     private JComboBox<String> reSamplingComboBox;
     private JComboBox<String> datumComboBox;
     private boolean isEditable;
-    JComboBox projectCollectionComboBox;
+    private JComboBox<String> projectCollectionComboBox;
+    private JTextField masterShapeTextField;
+
     MainWindowEvent mainWindowEvent;
 
     DefaultListModel<String> listOfAddedPluginModel;
     DefaultListModel<String> summaryListModel;
-
-
     DefaultListModel<String> modisListModel;
-    private JTextField masterShapeTextField;
+
 
     /**
      * Launch the application.
@@ -352,13 +352,13 @@ public class ProjectInformationPage {
         JPanel modisInformationPanel = new JPanel();
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(361, 420, 275, 275);
+        modisInformationPanel.setBounds(359, 420, 275, 259);
         frame.getContentPane().add(modisInformationPanel);
 
         modisListModel = new DefaultListModel<String>();
 
         final JList<String> modisList = new JList<String>(modisListModel);
-        modisList.setBounds(15, 70, 245, 194);
+        modisList.setBounds(15, 70, 245, 178);
 
         JButton addNewModisButton = new JButton("");
         addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
@@ -396,7 +396,7 @@ public class ProjectInformationPage {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(633, 420, 297, 275);
+        panel_2.setBounds(633, 420, 297, 259);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -492,12 +492,12 @@ public class ProjectInformationPage {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
         summaryPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        summaryPanel.setBounds(921, 420, 275, 275);
+        summaryPanel.setBounds(926, 420, 275, 259);
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
         final JList summaryList = new JList(summaryListModel);
-        summaryList.setBounds(15, 70, 245, 194);
+        summaryList.setBounds(15, 70, 245, 178);
 
         JButton editSummaryButton = new JButton("");
         editSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
