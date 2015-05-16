@@ -20,12 +20,24 @@ public class ProjectInfoParserTester {
             System.out.println("\tProject Name: " + file.projectName);
             if(file.error)
             {
-                for(String err : file.errorMsg)
+                for(String err : file.errorMsg) {
                     System.out.println("\tERROR: " + err);
+                }
             }
             else
             {
                 System.out.println("\tNo errors found while parsing.");
+                for(ProjectInfoPlugin plugin : file.plugins)
+                {
+                    System.out.println("\tplugin '" + plugin.GetName() + "':");
+                    System.out.println("\t\tQC: " + plugin.GetQC());
+                    System.out.println("\t\tIndicies: ");
+                    for(String index : plugin.GetIndicies())
+                    {
+                        System.out.println("\t\t\t" + index);
+                    }
+                }
+                System.out.println();
             }
         }
     }
