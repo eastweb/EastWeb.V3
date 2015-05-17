@@ -30,7 +30,8 @@ public class ProjectInfoFile {
     public final ArrayList<String> modisTiles;
     public final String coordinateSystem;
     public final String reSampling;
-    public final ArrayList<String> datums;
+    public final String datums;
+    public final String pixelSize;
     public final String stdParallel1;
     public final String stdParallel2;
     public final String centralMeridian;
@@ -61,6 +62,7 @@ public class ProjectInfoFile {
         coordinateSystem = GetCoordinateSystem();
         reSampling = GetReSampling();
         datums = GetDatums();
+        pixelSize = GetPixelSize();
         stdParallel1 = GetStandardParallel1();
         stdParallel2 = GetStandardParallel2();
         centralMeridian = GetCentralMeridian();
@@ -88,17 +90,19 @@ public class ProjectInfoFile {
 
                 ArrayList<String> values = GetNodeListValues(plugin.getElementsByTagName("QC"),
                         "Missing QC for plugin '" + name + "'");
-                if(values.size() > 0)
+                if(values.size() > 0) {
                     qc = values.get(0);
-                else
+                } else {
                     qc = null;
+                }
 
                 values = GetNodeListValues(plugin.getElementsByTagName("Indicies"), "Missing indicies for plugin '"
                         + name + "'");
-                if(values.size() > 0)
+                if(values.size() > 0) {
                     inidicies = values;
-                else
+                } else {
                     inidicies = null;
+                }
 
                 plugins.add(new ProjectInfoPlugin(name, inidicies, qc));
             }
@@ -113,8 +117,9 @@ public class ProjectInfoFile {
         try {
             // e.g. "Wed May 20 21:21:36 CDT 2015"
             ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
-            if(values.size() > 0)
+            if(values.size() > 0) {
                 return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
+            }
             return null;
         } catch (ParseException e) {
             error = true;
@@ -127,8 +132,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("ProjectName", "Missing project name.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing project name.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -136,8 +142,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("WorkingDir", "Missing working directory.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing working directory.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -145,8 +152,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("MaskingFile", "Missing masking file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -154,8 +162,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("MasterShapeFile", "Missing master shape file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing master shape file.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -163,8 +172,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("Modis", "Missing modis tiles.", "ModisTiles");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing modis tiles.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values;
+        }
         return null;
     }
 
@@ -172,8 +182,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("CoordinateSystem", "Missing coordinate system.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing coordinate system.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -181,17 +192,29 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("ReSampling", "Missing resampling.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing resampling.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
-    private ArrayList<String> GetDatums()
+    private String GetDatums()
     {
         NodeList nodes = GetUpperLevelNodeList("Datum", "Missing datums.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing datums.");
-        if(values.size() > 0)
-            return values;
+        if(values.size() > 0) {
+            return values.get(0);
+        }
+        return null;
+    }
+
+    private String GetPixelSize()
+    {
+        NodeList nodes = GetUpperLevelNodeList("PixelSize", "Missing PixelSize.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing PixelSize.");
+        if(values.size() > 0) {
+            return values.get(0);
+        }
         return null;
     }
 
@@ -199,8 +222,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("StandardParallel1", "Missing standard parallel 1.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 1.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -208,8 +232,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("StandardParallel2", "Missing standard parallel 2.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 2.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -217,8 +242,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("CentralMeridian", "Missing central meridian.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing central meridian.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -226,8 +252,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("FalseEasting", "Missing false easting.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing false easting.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -235,8 +262,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("LatitudeOfOrigin", "Missing latitude of origin.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing latitude of origin.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -244,8 +272,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("FalseNothing", "Missing false nothing.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing false nothing.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values.get(0);
+        }
         return null;
     }
 
@@ -253,8 +282,9 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("Summary", "Missing summaries.", "Summaries");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing summaries.");
-        if(values.size() > 0)
+        if(values.size() > 0) {
             return values;
+        }
         return null;
     }
 

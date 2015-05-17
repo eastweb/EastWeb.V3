@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,9 @@ import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesListener;
 import version2.prototype.EastWebUI.SummaryUI.AssociateSummaryPage;
 import version2.prototype.EastWebUI.SummaryUI.SummaryEventObject;
 import version2.prototype.EastWebUI.SummaryUI.SummaryListener;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -57,8 +61,6 @@ import javax.swing.JCheckBox;
 public class ProjectInformationPage {
 
     private JFrame frame;
-    final int windowHeight = 1000;
-    final int windowWidth = 750;
     private JDateChooser  startDate;
     private JTextField projectName;
     private JTextField workingDirectory;
@@ -73,16 +75,18 @@ public class ProjectInformationPage {
     private JComboBox<String> coordinateSystemComboBox;
     private JComboBox<String> reSamplingComboBox;
     private JComboBox<String> datumComboBox;
-    private boolean isEditable;
     private JComboBox<String> projectCollectionComboBox;
     private JTextField masterShapeTextField;
+    private JButton addNewModisButton;
+    private JButton deleteSelectedModisButton;
 
-    MainWindowEvent mainWindowEvent;
+    private boolean isEditable;
 
-    DefaultListModel<String> listOfAddedPluginModel;
-    DefaultListModel<String> summaryListModel;
-    DefaultListModel<String> modisListModel;
+    private MainWindowEvent mainWindowEvent;
 
+    private DefaultListModel<String> listOfAddedPluginModel;
+    private DefaultListModel<String> summaryListModel;
+    private DefaultListModel<String> modisListModel;
 
     /**
      * Launch the application.
@@ -103,8 +107,12 @@ public class ProjectInformationPage {
 
     /**
      * Create the application.
+     * @throws ParseException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    public ProjectInformationPage(boolean isEditable,  MainWindowListener l) {
+    public ProjectInformationPage(boolean isEditable,  MainWindowListener l) throws IOException, ParserConfigurationException, SAXException, ParseException {
         this.isEditable = isEditable;
         mainWindowEvent = new MainWindowEvent();
         mainWindowEvent.addListener(l);
@@ -114,8 +122,12 @@ public class ProjectInformationPage {
 
     /**
      * Initialize the contents of the frame.
+     * @throws ParseException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    private void initialize() {
+    private void initialize() throws IOException, ParserConfigurationException, SAXException, ParseException {
         frame = new JFrame();
         frame.setBounds(100, 100, 1207, 730);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -125,11 +137,38 @@ public class ProjectInformationPage {
         PopulatePluginList();
         CreateNewProjectButton();
         RenderInformationGrid();
+        uiConstrain();
+    }
 
+    /**
+     * constrains the UI base on editable tag
+     */
+    private void uiConstrain() {
         if(!isEditable)
         {
-            projectCollectionComboBox = new JComboBox();
+            // list of projects
+            projectCollectionComboBox = new JComboBox<String>();
             projectCollectionComboBox.setBounds(507, 15, 229, 20);
+            projectCollectionComboBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    try {
+                        PopulateProjectInfo();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (ParserConfigurationException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (SAXException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            });
             frame.getContentPane().add(projectCollectionComboBox);
 
             File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
@@ -138,6 +177,127 @@ public class ProjectInformationPage {
                 projectCollectionComboBox.addItem(fXmlFile.getName().replace(".xml", ""));
             }
         }
+    }
+
+    /**
+     * populate project info for edit
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseException
+     */
+    private void PopulateProjectInfo() throws IOException, ParserConfigurationException, SAXException, ParseException{
+
+        String selectedProject = String.valueOf(projectCollectionComboBox.getSelectedItem());
+        ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
+
+        //{{ clear all values and set edit/enable mode
+        listOfAddedPluginModel.clear();
+
+        startDate.setEnabled(false);
+        startDate.setDate(null);
+
+        projectName.setEditable(false);
+        projectName.setText("");
+
+        workingDirectory.setEditable(false);
+        workingDirectory.setText("");
+
+        maskFile.setEditable(false);
+        maskFile.setText("");
+
+        masterShapeTextField.setEditable(false);
+        masterShapeTextField.setText("");
+
+        addNewModisButton.setEnabled(false);
+        deleteSelectedModisButton.setEnabled(false);
+        modisListModel.clear();
+
+        coordinateSystemComboBox.setEnabled(false);
+        reSamplingComboBox.setEnabled(false);
+        datumComboBox.setEnabled(false);
+
+        pixelSize.setEditable(false);
+        pixelSize.setText("");
+
+        standardParallel1.setEditable(false);
+        standardParallel1.setText("");
+
+        centalMeridian.setEditable(false);
+        centalMeridian.setText("");
+
+        falseEasting.setEditable(false);
+        falseEasting.setText("");
+
+        standardParallel2.setEditable(false);
+        standardParallel2.setText("");
+
+        latitudeOfOrigin.setEditable(false);
+        latitudeOfOrigin.setText("");
+
+        falseNothing.setEditable(false);
+        falseNothing.setText("");
+
+        summaryListModel.clear();
+
+        // }}
+
+        if(project == null) {
+            return;
+        }
+
+        // set the plugin info
+        for(ProjectInfoPlugin plugin: project.plugins){
+            String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>Quality: %s;</span></html>",
+                    String.valueOf(plugin.GetName()),
+                    getIndiciesFormat(plugin.GetIndicies()),
+                    String.valueOf(plugin.GetQC()));
+            listOfAddedPluginModel.addElement(formatString);
+        }
+
+        // set basic project info
+        startDate.setDate(project.startDate);
+        projectName.setText(project.projectName);
+        workingDirectory.setText(project.workingDir);
+        maskFile.setText(project.maskingFile);
+        masterShapeTextField.setText(project.masterShapeFile);
+
+        // set modis info
+        for(String modis: project.modisTiles){
+            modisListModel.addElement(modis);
+        }
+
+        // set projection info
+        coordinateSystemComboBox.setSelectedItem(project.coordinateSystem);
+        reSamplingComboBox.setSelectedItem(project.reSampling);
+        datumComboBox.setSelectedItem(project);
+        pixelSize.setText(project.pixelSize);
+        standardParallel1.setText(project.stdParallel1);
+        centalMeridian.setText(project.centralMeridian);
+        falseEasting.setText(project.falseEasting);
+        standardParallel2.setText(project.stdParallel2);
+        latitudeOfOrigin.setText(project.latitudeOfOrigin);
+        falseNothing.setText(project.falseNothing);
+
+        // set summary info
+        for(String summary: project.summaries){
+            summaryListModel.addElement(summary);
+        }
+    }
+
+    /**
+     *  format indices for displaying in ui
+     * @param m
+     * @return
+     */
+    private String getIndiciesFormat(ArrayList<String> m){
+        String formatString = "";
+
+        for(String indici : m){
+            formatString += String.format("<span>%s;</span>",   indici);
+        }
+
+        return formatString;
     }
 
     private void CreateNewProjectButton() {
@@ -214,6 +374,7 @@ public class ProjectInformationPage {
         SummaryInformation();
     }
 
+
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Basic Project Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -225,7 +386,6 @@ public class ProjectInformationPage {
         startDateLabel.setBounds(6, 25, 132, 15);
         panel.add(startDateLabel);
         startDate = new JDateChooser ();
-        //startDate.setColumns(10);
         startDate.setBounds(148, 22, 200, 20);
         panel.add(startDate);
 
@@ -360,11 +520,10 @@ public class ProjectInformationPage {
         final JList<String> modisList = new JList<String>(modisListModel);
         modisList.setBounds(15, 70, 245, 178);
 
-        JButton addNewModisButton = new JButton("");
+        addNewModisButton = new JButton("");
         addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         addNewModisButton.setToolTipText("Add modis");
         addNewModisButton.addActionListener(new ActionListener() {
-            @SuppressWarnings("unchecked")
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tiles", null);
@@ -375,10 +534,10 @@ public class ProjectInformationPage {
         modisInformationPanel.add(addNewModisButton);
         modisInformationPanel.add(modisList);
 
-        JButton btnDeleteSelected = new JButton("");
-        btnDeleteSelected.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
-        btnDeleteSelected.setToolTipText("Delete Selected Modis");
-        btnDeleteSelected.addActionListener(new ActionListener() {
+        deleteSelectedModisButton = new JButton("");
+        deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        deleteSelectedModisButton.setToolTipText("Delete Selected Modis");
+        deleteSelectedModisButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 DefaultListModel model = (DefaultListModel) modisList.getModel();
@@ -388,8 +547,8 @@ public class ProjectInformationPage {
                 }
             }
         });
-        btnDeleteSelected.setBounds(185, 29, 75, 30);
-        modisInformationPanel.add(btnDeleteSelected);
+        deleteSelectedModisButton.setBounds(185, 29, 75, 30);
+        modisInformationPanel.add(deleteSelectedModisButton);
     }
 
     private void ProjectInformation() {
@@ -575,7 +734,7 @@ public class ProjectInformationPage {
                 // set attribute to staff element
                 Attr attr = doc.createAttribute("name");
                 String noFormat = item.toString().replaceAll("<html>Plugin: ","");
-                noFormat = noFormat.replaceAll("<br>Indicies: ", "");
+                noFormat = noFormat.replaceAll("<br>Indices: ", "");
                 noFormat = noFormat.replaceAll("<br>Quality: ","");
                 noFormat = noFormat.replaceAll("</html>", "");
                 noFormat = noFormat.replaceAll("</span>", "");
@@ -658,7 +817,7 @@ public class ProjectInformationPage {
             projectInfo.appendChild(datum);
 
             //datum
-            Element pixelSize = doc.createElement("Datum");
+            Element pixelSize = doc.createElement("PixelSize");
             pixelSize.appendChild(doc.createTextNode(String.valueOf(this.pixelSize.getText())));
             projectInfo.appendChild(pixelSize);
 
@@ -698,7 +857,7 @@ public class ProjectInformationPage {
             Element summaries = doc.createElement("Summaries");
             projectInfo.appendChild(summaries);
 
-            for(Object item:modisListModel.toArray()){
+            for(Object item:summaryListModel.toArray()){
                 Element summary = doc.createElement("Summary");
                 summary.appendChild(doc.createTextNode(item.toString()));
                 summaries.appendChild(summary);

@@ -27,45 +27,41 @@ import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
-/**
- * This class is a hack to read UTF-8 encoded property files. The implementation
- * is based on http://www.thoughtsabout.net/blog/archives/000044.html
- * 
- * @author Kai Toedter
- * 
- */
 public abstract class UTF8ResourceBundle {
 
-	public static final ResourceBundle getBundle(String baseName, Locale locale) {
-		ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale);
-		if (!(bundle instanceof PropertyResourceBundle))
-			return bundle;
+    public static final ResourceBundle getBundle(String baseName, Locale locale) {
+        ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale);
+        if (!(bundle instanceof PropertyResourceBundle)) {
+            return bundle;
+        }
 
-		return new UTF8PropertyResourceBundle((PropertyResourceBundle) bundle);
-	}
+        return new UTF8PropertyResourceBundle((PropertyResourceBundle) bundle);
+    }
 
-	private static class UTF8PropertyResourceBundle extends ResourceBundle {
-		PropertyResourceBundle propertyResourceBundle;
+    private static class UTF8PropertyResourceBundle extends ResourceBundle {
+        PropertyResourceBundle propertyResourceBundle;
 
-		private UTF8PropertyResourceBundle(PropertyResourceBundle bundle) {
-			this.propertyResourceBundle = bundle;
-		}
+        private UTF8PropertyResourceBundle(PropertyResourceBundle bundle) {
+            propertyResourceBundle = bundle;
+        }
 
-		public Enumeration getKeys() {
-			return propertyResourceBundle.getKeys();
-		}
+        @Override
+        public Enumeration<String> getKeys() {
+            return propertyResourceBundle.getKeys();
+        }
 
-		protected Object handleGetObject(String key) {
-			String value = (String) propertyResourceBundle.handleGetObject(key);
-			if (value != null) {
-				try {
-					return new String(value.getBytes("ISO-8859-1"), "UTF-8");
-				} catch (UnsupportedEncodingException exception) {
-					throw new RuntimeException(
-							"UTF-8 encoding is not supported.", exception);
-				}
-			}
-			return null;
-		}
-	}
+        @Override
+        protected Object handleGetObject(String key) {
+            String value = (String) propertyResourceBundle.handleGetObject(key);
+            if (value != null) {
+                try {
+                    return new String(value.getBytes("ISO-8859-1"), "UTF-8");
+                } catch (UnsupportedEncodingException exception) {
+                    throw new RuntimeException(
+                            "UTF-8 encoding is not supported.", exception);
+                }
+            }
+            return null;
+        }
+    }
 }
