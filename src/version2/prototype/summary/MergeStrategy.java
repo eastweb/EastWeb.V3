@@ -1,8 +1,9 @@
 package version2.prototype.summary;
 
 import java.io.File;
+import java.util.GregorianCalendar;
 
 public interface MergeStrategy {
 
-    File merge(File raster1, File raster2) throws Exception;
+    File Merge(GregorianCalendar firstDate, File shapeFile, File... rasterFiles) throws Exception;
 }

@@ -46,7 +46,10 @@
 		<ClassName>NldasMeanDailySoilTemp100_200Calculator</ClassName>
 	</Indices>
 	<Summary>
-		<TemporalSummary>false</TemporalSummary>
+		<UseTemporalSummary>false</UseTemporalSummary>
+		<Temporal>
+			<CompositionStrategyClassName>GregorianWeeklyStrategy</CompositionStrategyClassName>
+		</Temporal>
 	</Summary>
 	<QualityControl>
 		<Level>None</Level>

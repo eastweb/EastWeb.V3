@@ -7,7 +7,7 @@ import java.util.TimeZone;
 
 public final class DataDate implements Comparable<DataDate>, Serializable {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
     private final int day;
@@ -37,7 +37,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
     /**
      * Returns a GregorianCalendar initialized with this instance's date.
      */
-    private GregorianCalendar getCalendar() {
+    public GregorianCalendar getCalendar() {
         final GregorianCalendar cal = getClearedCalendar();
         cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
         return cal;
@@ -81,7 +81,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
 
     }
 
-    private DataDate(GregorianCalendar cal) {
+    public DataDate(GregorianCalendar cal) {
         day = cal.get(GregorianCalendar.DATE);
         month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
         year = cal.get(GregorianCalendar.YEAR);
@@ -115,9 +115,8 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         final String PARSE_ERROR_MESSAGE = "Failed to parse compact data date string";
 
         final String[] parts = str.split("-");
-        if (parts.length != 4) {
+        if (parts.length != 4)
             throw new IllegalArgumentException(PARSE_ERROR_MESSAGE);
-        }
 
         final int year, month, day,hour;
         try {
@@ -190,28 +189,25 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
      * Returns the lesser of two DataDates, as defined by compareTo().
      */
     public static DataDate max(DataDate a, DataDate b) {
-        if (a.compareTo(b) > 0) {
+        if (a.compareTo(b) > 0)
             return a;
-        } else {
+        else
             return b;
-        }
     }
 
     @Override
     public int compareTo(DataDate o) {
         // First, order by year
-        if (year < o.year) {
+        if (year < o.year)
             return -1;
-        } else if (year > o.year) {
+        else if (year > o.year)
             return 1;
-        }
 
         // Second, order by dayOfYear
-        if (dayOfYear < o.dayOfYear) {
+        if (dayOfYear < o.dayOfYear)
             return -1;
-        } else if (dayOfYear > o.dayOfYear) {
+        else if (dayOfYear > o.dayOfYear)
             return 1;
-        }
 
         // The objects are equal
         return 0;
@@ -219,11 +215,10 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DataDate) {
+        if (obj instanceof DataDate)
             return equals((DataDate)obj);
-        } else {
+        else
             return false;
-        }
     }
 
     public boolean equals(DataDate date) {

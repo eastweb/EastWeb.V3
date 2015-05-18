@@ -22,9 +22,8 @@ public class PluginMetaDataCollection {
 
     public static PluginMetaDataCollection getInstance() throws ParserConfigurationException, SAXException, IOException
     {
-        if(instance == null) {
+        if(instance == null)
             instance = new PluginMetaDataCollection(null);
-        }
         return instance;
     }
     private static PluginMetaDataCollection instance;
@@ -56,9 +55,7 @@ public class PluginMetaDataCollection {
             NodeList tempIndices = doc.getElementsByTagName("Indices");
             int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
             for(int i = 0; i < nodesIndices; i++)
-            {
                 temp.IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
-            }
 
             temp.Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
 
@@ -66,9 +63,7 @@ public class PluginMetaDataCollection {
             NodeList tempQC = doc.getElementsByTagName("QualityControl");
             int nodesQC = ((Element) tempQC.item(0)).getElementsByTagName("Level").getLength();
             for(int i = 0; i < nodesQC; i++)
-            {
                 temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
-            }
 
             String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
             pluginList.add(pluginName);
@@ -81,21 +76,17 @@ public class PluginMetaDataCollection {
         List<File> aList = new ArrayList<File>();
 
         File[] files = folder.listFiles();
-        for (File pf : files) {
-
-            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
+        for (File pf : files)
+            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1)
                 aList.add(pf);
-            }
-        }
         return aList.toArray(new File[aList.size()]);
     }
 
     private String getFileExtensionName(File f) {
-        if (f.getName().indexOf(".") == -1) {
+        if (f.getName().indexOf(".") == -1)
             return "";
-        } else {
+        else
             return f.getName().substring(f.getName().length() - 3, f.getName().length());
-        }
     }
 
     public class PluginMetaData {
@@ -126,11 +117,10 @@ public class PluginMetaDataCollection {
             mode=((Element) downloadNode).getElementsByTagName("mode").item(0).getTextContent();
             mode=mode.toUpperCase();
 
-            if(mode.equalsIgnoreCase("Ftp")){
+            if(mode.equalsIgnoreCase("Ftp"))
                 myFtp=new ftp(((Element)downloadNode).getElementsByTagName(mode).item(0));
-            }else{
+            else
                 myHttp=new http(((Element)downloadNode).getElementsByTagName(mode).item(0));
-            }
         }
     }
 
@@ -201,14 +191,23 @@ public class PluginMetaDataCollection {
     }
 
     public class SummaryMetaData{
-        public Boolean IsTeamporalSummary;
+        public Boolean IsTemporalSummary;
+        public String CompositionStrategyClassName;
         private NodeList nList;
 
         public SummaryMetaData(NodeList n){
             nList = n;
             Node projectionNode = nList.item(0);
 
-            IsTeamporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("TemporalSummary").item(0).getTextContent());
+            // Node: IsTemporalSummary
+            IsTemporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("UseTemporalSummary").item(0).getTextContent());
+
+            // Node: CompositionStrategyClassName
+            NodeList temporal = ((Element) nList).getElementsByTagName("Temporal");
+            Node NodeCompositionStrategyClassName = ((Element) temporal).getElementsByTagName("CompositionStrategyClassName").item(0);
+            NodeList tempList = NodeCompositionStrategyClassName.getChildNodes();
+            Node valueNode = tempList.item(0);
+            CompositionStrategyClassName = valueNode.getNodeValue().trim();
         }
     }
 

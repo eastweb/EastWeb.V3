@@ -3,22 +3,14 @@ package version2.prototype.summary;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import version2.prototype.DataDate;
 
 public class TemporalSummaryCalculator implements SummaryCalculator {
 
-    private File[] inRaster;
-    private File inShape;
-    private DataDate[] inDate;
-    private String outPath;
-    private int hrsPerInputData;
-    private int hrsPerOutputData;
-    private ArrayList<TemporalSummary> tempMethods;
-    private ArrayList<MergeSummary> mergMethods;
-    private MergeStrategy merStrategy;
-    private Calendar projectSDate;
-    private CalendarStrategy calStrategy;
+    private SummaryData data;
+    private TemporalSummaryRasterFileStore fileStore;
 
     /**
      * @param inRaster
@@ -33,23 +25,32 @@ public class TemporalSummaryCalculator implements SummaryCalculator {
      */
     public TemporalSummaryCalculator(SummaryData data)
     {
-        //inRaster = data.inRaster;
-        inShape = data.inShape;
-        inDate = data.inDate;
-        outPath = data.outTableFile.getPath();
-        hrsPerInputData = data.hrsPerInputData;
-        hrsPerOutputData = data.hrsPerOutputData;
-        tempMethods = data.tempMethods;
-        merStrategy = data.merStrategy;
-        projectSDate = data.projectSDate;
-        calStrategy = data.calStrategy;
-        mergMethods = data.mergMethods;
+        this.data = data;
+        fileStore = new TemporalSummaryRasterFileStore(SummaryData.compositions, data.compStrategy);
     }
 
     @Override
     public void run() throws Exception {
-        // TODO Auto-generated method stub
+        ArrayList<File> inputFileSet = new ArrayList<File>();
 
+        if(data.daysPerInputData > data.daysPerOutputData)
+            inputFileSet = data.intStrategy.Interpolate(data.inRaster, data.daysPerInputData);
+        else
+            inputFileSet.add(data.inRaster);
+
+        TemporalSummaryComposition tempComp;
+        for(File inRaster : inputFileSet)
+        {
+            tempComp = fileStore.addFile(inRaster, data.inDate, data.daysPerInputData);
+
+            if(tempComp != null)
+            {
+                ArrayList<File> files = new ArrayList<File>(tempComp.files.size());
+                for(FileDatePair fdPair : tempComp.files)
+                    files.add(fdPair.file);
+                data.mergeStrategy.Merge(tempComp.startDate, data.inShape, (File[])files.toArray());
+            }
+        }
     }
 
 }
