@@ -29,13 +29,16 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.xml.sax.SAXException;
 
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
 
@@ -48,9 +51,8 @@ public class MainWindow {
     private JMenuItem mntmEditProject;
     private JMenuItem mntmOpenSetFolder;
     private JMenuItem mntmDeleteAllFiles;
-    String freeSpaceString;
-    DefaultTableModel defaultTableModel;
-    JComboBox<String> projectList;
+    private DefaultTableModel defaultTableModel;
+    private JComboBox<String> projectList;
 
     /**
      * Launch the application.
@@ -70,6 +72,7 @@ public class MainWindow {
     }
 
     /**
+     * Constructor
      * Create the application.
      */
     public MainWindow() {
@@ -91,36 +94,71 @@ public class MainWindow {
         TableView();
     }
 
+    /**
+     * create file menu
+     */
     private void FileMenu() {
+        // menu bar item wrapper
         JMenuBar menuBar = new JMenuBar();
         JMenu mnFile = new JMenu("File");
         mnFile.setMnemonic(KeyEvent.VK_A);
         mnFile.getAccessibleContext().setAccessibleDescription("The only menu in this program that has menu items");
         menuBar.add(mnFile);
 
+        //create project button (opens the project info page )
         mntmCreateNewProject = new JMenuItem("Create New Project", KeyEvent.VK_T);
         mntmCreateNewProject.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_1, ActionEvent.ALT_MASK));
         mntmCreateNewProject.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
         mntmCreateNewProject.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new ProjectInformationPage(true,  new mainWindowListenerImplementation());
+                try {
+                    new ProjectInformationPage(true,  new mainWindowListenerImplementation());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ParserConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
         mnFile.add(mntmCreateNewProject);
 
+        //edit project info button (opens the project info on limited edition)
         mntmEditProject = new JMenuItem("Edit Project");
         mntmEditProject.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.ALT_MASK));
         mntmEditProject.setMnemonic(KeyEvent.VK_B);
         mntmEditProject.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new ProjectInformationPage(false, new mainWindowListenerImplementation());
+                try {
+                    new ProjectInformationPage(false, new mainWindowListenerImplementation());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ParserConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
         mnFile.add(mntmEditProject);
         mnFile.addSeparator();
 
+        // create a new plugin meta data file
         JMenuItem createNewPlugin = new JMenuItem("Create New Plugin Template");
         createNewPlugin.addActionListener(new ActionListener() {
             @Override
@@ -129,8 +167,8 @@ public class MainWindow {
                 File theDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\" + fileName + ".xml" );
                 try {
                     theDir.createNewFile();
+                    // TODO: could create a mock template
                 } catch (IOException e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
             }
@@ -139,9 +177,11 @@ public class MainWindow {
         mnFile.add(createNewPlugin);
         mnFile.addSeparator();
 
+        // wrapper for manage intermediate files
         JMenu submenu = new JMenu("Manage Intermidiate Files");
         submenu.setMnemonic(KeyEvent.VK_S);
 
+        // opens folder where intermediate file lives
         mntmOpenSetFolder = new JMenuItem("Open set Folder");
         mntmOpenSetFolder.addActionListener(new ActionListener() {
             @Override
@@ -156,6 +196,7 @@ public class MainWindow {
         });
         submenu.add(mntmOpenSetFolder);
 
+        // delete all intermediate files
         mntmDeleteAllFiles = new JMenuItem("Delete All files");
         mntmDeleteAllFiles.addActionListener(new ActionListener() {
             @Override
@@ -190,6 +231,9 @@ public class MainWindow {
         frame.getContentPane().add(menuBar);
     }
 
+    /**
+     * populate main window UI
+     */
     private void PopulateUIControl()
     {
         final File diskPartition = new File(System.getProperty("user.dir"));
@@ -199,17 +243,20 @@ public class MainWindow {
         lblIntermidateDumpFolder.setBounds(10, 62, 138, 14);
         frame.getContentPane().add(lblIntermidateDumpFolder);
 
+        // label to show free space on drive
         final JLabel lblHardDriveCapacity = new JLabel(String.format("Free Space Capacity: %s GB", diskPartition.getFreeSpace()/ (1024 *1024) / 1000 ));
         lblHardDriveCapacity.setEnabled(false);
         lblHardDriveCapacity.setBounds(185, 36, 244, 14);
         frame.getContentPane().add(lblHardDriveCapacity);
 
+        // set dump folder
         intermidateDumpPath = new JTextField(System.getProperty("user.dir"));
         intermidateDumpPath.setEditable(false);
         intermidateDumpPath.setBounds(185, 59, 200, 20);
         frame.getContentPane().add(intermidateDumpPath);
         intermidateDumpPath.setColumns(10);
 
+        // browser button for intermediate dump folder
         final JButton btnBrowser = new JButton(". . .");
         btnBrowser.addActionListener(new ActionListener() {
             @Override
@@ -234,6 +281,7 @@ public class MainWindow {
         btnBrowser.setBounds(395, 58, 34, 23);
         frame.getContentPane().add(btnBrowser);
 
+        // check box to control intermediate files process (true => creates intermediate files)
         final JCheckBox chckbxIntermidiateFiles = new JCheckBox("Intermidiate Files");
         chckbxIntermidiateFiles.addActionListener(new ActionListener() {
             @Override
@@ -267,22 +315,28 @@ public class MainWindow {
         runSelectedProject();
     }
 
+    /**
+     * set table rendering
+     * populated running projects
+     */
     private void TableView()
     {
         defaultTableModel = new DefaultTableModel();
-        defaultTableModel.setDataVector(new Object[][] {
-
-        }, new Object[] { "Project Name", " Total Progress" ,"Technical Progress", "Summary Composite", "Intermidiate Selection" });
+        defaultTableModel.setDataVector(new Object[][] {},
+                new Object[] { "Project Name", " Total Progress" ,"Technical Progress", "Summary Composite", "Intermidiate Selection" });
 
         JTable table = new JTable(defaultTableModel);
-        table.getColumn("Technical Progress").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Technical Progress").setCellEditor(new ButtonEditor(new JCheckBox()));
+        table.getColumn("Technical Progress").setCellRenderer(new TechnicalProgressButtonRenderer());
+        table.getColumn("Technical Progress").setCellEditor(new TechnicalProgressButtonEditor(new JCheckBox()));
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(10, 123, 1181, 567);
         frame.getContentPane().add(scrollPane);
     }
 
+    /**
+     * run projects
+     */
     private void runSelectedProject() {
         JButton runButton = new JButton("Run Project");
         runButton.addActionListener(new ActionListener() {
@@ -290,7 +344,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "75 %", "Progress Detail", "Summary Quiries", true});
                 populateProjectList();
-                // todo activate
+
                 //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
                 //Scheduler.getInstance(data).run();
             }
@@ -300,10 +354,12 @@ public class MainWindow {
         frame.getContentPane().add(runButton);
     }
 
+    /**
+     * populate project list
+     */
     private void populateProjectList() {
 
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
-
         projectList.removeAllItems();
 
         for(File fXmlFile: getXMLFiles(fileDir)){
@@ -311,6 +367,11 @@ public class MainWindow {
         }
     }
 
+    /**
+     * get all files in a folder
+     * @param folder
+     * @return
+     */
     private File[] getXMLFiles(File folder) {
         List<File> aList = new ArrayList<File>();
         File[] files = folder.listFiles();
@@ -324,6 +385,11 @@ public class MainWindow {
         return aList.toArray(new File[aList.size()]);
     }
 
+    /**
+     * get file extension
+     * @param f
+     * @return
+     */
     private String getFileExtensionName(File f) {
         if (f.getName().indexOf(".") == -1) {
             return "";
@@ -332,10 +398,15 @@ public class MainWindow {
         }
     }
 
-    class ButtonRenderer extends JButton implements TableCellRenderer {
+    /**
+     * button to be render for technical progress
+     * @author sufi
+     *
+     */
+    class TechnicalProgressButtonRenderer extends JButton implements TableCellRenderer {
         private static final long serialVersionUID = 1L;
 
-        public ButtonRenderer() {
+        public TechnicalProgressButtonRenderer() {
             setOpaque(true);
         }
 
@@ -354,13 +425,18 @@ public class MainWindow {
         }
     }
 
-    class ButtonEditor extends DefaultCellEditor {
+    /**
+     * editor for the technical progress
+     * @author sufi
+     *
+     */
+    class TechnicalProgressButtonEditor extends DefaultCellEditor {
         private static final long serialVersionUID = 1L;
         protected JButton button;
         private String label;
         private boolean isPushed;
 
-        public ButtonEditor(JCheckBox checkBox) {
+        public TechnicalProgressButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
             button.setOpaque(true);
@@ -409,6 +485,11 @@ public class MainWindow {
         }
     }
 
+    /**
+     * handles and trigger to the main window
+     * @author sufi
+     *
+     */
     class mainWindowListenerImplementation implements MainWindowListener{
 
         @Override

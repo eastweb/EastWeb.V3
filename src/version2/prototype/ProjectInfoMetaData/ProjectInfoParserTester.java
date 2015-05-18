@@ -16,6 +16,11 @@ public class ProjectInfoParserTester {
 
         for(ProjectInfoFile file : files)
         {
+            if(file.projectName != null && file.projectName.equalsIgnoreCase("actual project")) {
+                return;
+            }
+
+
             System.out.println("File: " + file.xmlLocation);
             System.out.println("\tProject Name: " + file.projectName);
             if(file.error)

@@ -1,6 +1,5 @@
 package version2.prototype.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import version2.prototype.util.GdalUtils;

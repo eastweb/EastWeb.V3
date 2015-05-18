@@ -5,9 +5,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 public class SummaryEvent implements Serializable {
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
     @SuppressWarnings("rawtypes")
     private transient Vector listeners;

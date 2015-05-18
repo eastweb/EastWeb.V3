@@ -6,6 +6,11 @@ import java.util.EventObject;
 public class IndiciesEventObject extends EventObject {
     private String plugin;
 
+    /**
+     * constructor
+     * @param source
+     * @param plugin
+     */
     public IndiciesEventObject(Object source, String plugin) {
         super(source);
         this.plugin = plugin;

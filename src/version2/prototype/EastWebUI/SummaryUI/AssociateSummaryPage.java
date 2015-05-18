@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -15,15 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
-import org.gdal.ogr.FieldDefn;
-import org.gdal.ogr.ogr;
-import org.gdal.ogr.Layer;
-import org.gdal.ogr.FeatureDefn;
-import org.gdal.ogr.DataSource;
-
-import version2.prototype.util.GdalUtils;
 import version2.prototype.util.ReadShapefile;
-
+import version2.prototype.util.ShapefileException;
 
 public class AssociateSummaryPage {
 
@@ -75,6 +67,7 @@ public class AssociateSummaryPage {
         filePathLabel.setBounds(10, 60, 152, 14);
         myPanel.add(filePathLabel);
 
+        // text field for shapefile
         final JTextField filePathText =  new JTextField();
         filePathText.setBounds(172, 57, 150, 20);
         myPanel.add(filePathText);
@@ -84,10 +77,12 @@ public class AssociateSummaryPage {
         shapeFileLabel.setBounds(10, 94, 152, 14);
         myPanel.add(shapeFileLabel);
 
-        final JComboBox shapeFileComboBox = new JComboBox();
+        // combo box populated by the selected shapefile
+        final JComboBox<String> shapeFileComboBox = new JComboBox<String>();
         shapeFileComboBox.setBounds(172, 91, 150, 20);
         myPanel.add(shapeFileComboBox);
 
+        // browse button for shape file
         final JButton browseButton = new JButton(". . .");
         browseButton.setToolTipText("browse file");
         browseButton.setBounds(344, 56, 41, 23);
@@ -104,7 +99,11 @@ public class AssociateSummaryPage {
                     System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
                     System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
                     filePathText.setText(chooser.getSelectedFile().toString());
-                    populateShapeFiles(shapeFileComboBox, filePathText.getText());
+                    try {
+                        populateShapeFiles(shapeFileComboBox, filePathText.getText());
+                    } catch (ShapefileException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     System.out.println("No Selection ");
                 }
@@ -116,12 +115,19 @@ public class AssociateSummaryPage {
         lblNewLabel_1.setBounds(10, 128, 152, 14);
         myPanel.add(lblNewLabel_1);
 
+        // combo box for temporal
         final JComboBox<String> temporalComboBox = new JComboBox<String>();
         temporalComboBox.setBounds(172, 125, 150, 20);
-        temporalComboBox.addItem("Temporal Summary 1");
-        temporalComboBox.addItem("Temporal Summary 2" );
+        temporalComboBox.addItem("Temporal Summary 1"); // TODO: need to actually populate for temporal summary
+        temporalComboBox.addItem("Temporal Summary 2" ); // TODO: need to actually populate for temporal summary
         myPanel.add(temporalComboBox);
 
+        JLabel lblTypeOfSummary = new JLabel("Type of Summary");
+        lblTypeOfSummary.setEnabled(true);
+        lblTypeOfSummary.setBounds(10, 29, 152, 14);
+        myPanel.add(lblTypeOfSummary);
+
+        // set enable base on which summary is added
         final JComboBox<String> summaryComboBox = new JComboBox<String>();
         summaryComboBox.setBounds(172, 26, 150, 20);
         summaryComboBox.addItem("Zonal Summary");
@@ -154,6 +160,7 @@ public class AssociateSummaryPage {
         filePathText.setEnabled(true);
         browseButton.setEnabled(true);
 
+        // save button to save summary
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
             @Override
@@ -172,6 +179,7 @@ public class AssociateSummaryPage {
         saveButton.setBounds(82, 237, 89, 23);
         myPanel.add(saveButton);
 
+        // cancel button
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             @Override
@@ -183,28 +191,23 @@ public class AssociateSummaryPage {
         myPanel.add(cancelButton);
 
         frame.getContentPane().add(myPanel);
-
-        JLabel lblTypeOfSummary = new JLabel("Type of Summary");
-        lblTypeOfSummary.setEnabled(true);
-        lblTypeOfSummary.setBounds(10, 29, 152, 14);
-        myPanel.add(lblTypeOfSummary);
-
-
     }
 
-    private void populateShapeFiles(JComboBox shapeFileComboBox, String filePath){
-
+    /**
+     *  populate shape file
+     * @param shapeFileComboBox
+     * @param filePath
+     * @throws ShapefileException
+     */
+    private void populateShapeFiles(JComboBox<String> shapeFileComboBox, String filePath) throws ShapefileException{
         ReadShapefile shapfile = new ReadShapefile(filePath);
         ArrayList<String[]> featureList = shapfile.getFeatureList();
+
         for (int i = 0; i < featureList.size(); i++) {
-            String[] file = featureList.get(i);
-            for(String feature: file){
+            for(String feature: featureList.get(i)){
                 shapeFileComboBox.addItem(feature);
             }
         }
-
-
-
 
         shapeFileComboBox.setEnabled(true);
     }

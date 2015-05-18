@@ -6,6 +6,11 @@ import java.util.EventObject;
 public class SummaryEventObject extends EventObject {
     private String summary;
 
+    /**
+     * constructor
+     * @param source
+     * @param summary
+     */
     public SummaryEventObject(Object source, String summary) {
         super(source);
         this.summary = summary;
