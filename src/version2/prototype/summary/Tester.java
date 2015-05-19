@@ -6,7 +6,70 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Tester {
+    private static class PersistanceTester{
+        private static ArrayList<Integer> values = new ArrayList<Integer>(0); // Needed
+        public PersistanceTester()
+        {
+        }
+
+        public void addValue(int n)
+        {
+            values.add(n);
+        }
+
+        public ArrayList<Integer> getList()
+        {
+            return values;
+        }
+    }
+
     public static void main(String[] args) {
+        //        test1();
+        testPersistance();
+    }
+
+    private static void testPersistance() {
+        PersistanceTester pTest = new PersistanceTester();
+        System.out.println(pTest.getList().size());
+        pTest.addValue(1);
+        System.out.println(pTest.getList().size());
+        pTest.addValue(2);
+        System.out.println(pTest.getList().size());
+
+        pTest = null;
+
+        pTest = new PersistanceTester();
+        System.out.println(pTest.getList().size());
+        pTest.addValue(1);
+        System.out.println(pTest.getList().size());
+        pTest.addValue(2);
+        System.out.println(pTest.getList().size());
+
+        pTest = null;
+
+        PersistanceTester pTest1 = new PersistanceTester();
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(1);
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(2);
+        System.out.println(pTest1.getList().size());
+
+        pTest1 = null;
+
+        pTest1 = new PersistanceTester();
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(1);
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(2);
+        System.out.println(pTest1.getList().size());
+
+        pTest1 = null;
+    }
+
+    /**
+     *
+     */
+    private static void test1() {
         SummariesCollection col = null;
         try {
             col = new SummariesCollection(new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev")));

@@ -15,16 +15,16 @@ public class SummaryData {
     public File outTableFile;
     public String zoneField;
     public SummariesCollection summaries;
+    public static ArrayList<TemporalSummaryComposition> compositions = new ArrayList<TemporalSummaryComposition>(0); // Needed
 
     // Remaining TemporalSummaryCalculator variables
-    public DataDate[] inDate;
-    public int hrsPerInputData;
-    public int hrsPerOutputData;
-    public ArrayList<TemporalSummary> tempMethods;
-    public ArrayList<MergeSummary> mergMethods;
-    public MergeStrategy merStrategy;
-    public Calendar projectSDate;
-    public CalendarStrategy calStrategy;
+    public DataDate inDate;
+    public int daysPerInputData;
+    public int daysPerOutputData;
+    public InterpolateStrategy intStrategy;
+    public MergeStrategy mergeStrategy;
+    public DataDate projectSDate;
+    public TemporalSummaryCompositionStrategy compStrategy;
 
     /**
      * <p>Accepts values for all inputs.</p>
@@ -40,15 +40,13 @@ public class SummaryData {
      * @param zone - Type: String - The zone name.<br/>
      * Example:  <code>for ({@link version2.prototype.ZonalSummary ZonalSummary} zone : mProject.{@link #version2.prototype.ProjectInfo.getSummaries()}) { zone.{@link #version2.prototype.ZonalSummary.getField()}; }<br/>
      * for (ZonalSummary zone : mProject.getSummaries())<br/>  { zone.getField(); }</code>
-     * @param summarySingletonNames - Type: ArrayList<String> - A list of the class names of the summaries to use in zonal summary.<br/>
+     * @param summarySingletonNames - Type: ArrayList<\String> - A list of the class names of the summaries to use in zonal summary.<br/>
      * @param inDate - Type: DataDate[] - An array of the dates of the downloaded data to be used in finding the data in the file system and in processing temporal summaries.<br/>
-     * @param hrsPerInputData - Type: int - The number of hours each piece of downloaded data represents.
-     * @param hrsPerOutputData - Type: int - The number of hours each piece of summary/output data will represent.
+     * @param daysPerInputData - Type: int - The number of hours each piece of downloaded data represents.
+     * @param daysPerOutputData - Type: int - The number of hours each piece of summary/output data will represent.
      * @param projectSDate - Type: Calendar - The projects start date.
      * @param calStrategy - Type: CalendarStrategy - The strategy to use when getting the starting date of the week.
      * @param merStrategy - Type: MergeStrategy - The strategy to use when merging downloaded data.
-     * @param tempMethods - Type: ArrayList<TemporalSummary> - The list of summary methods to calculate for temporal summary.
-     * @param mergMethods - Type: ArrayList<MergeSummary> - The list of summary methods to use during merging with the chosen MergeStrategy.
      * @throws ClassNotFoundException
      * @throws NoSuchMethodException
      * @throws SecurityException
@@ -57,25 +55,22 @@ public class SummaryData {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    public SummaryData(File inRaster, File inShape, File outTable, String zone,
-            ArrayList<String> summarySingletonNames, DataDate[] inDate, int hrsPerInputData,
-            int hrsPerOutputData, Calendar projectSDate, CalendarStrategy calStrategy,
-            MergeStrategy merStrategy, ArrayList<TemporalSummary> tempMethods,
-            ArrayList<MergeSummary> mergMethods) throws ClassNotFoundException, NoSuchMethodException,
-            SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException {
+    public SummaryData(File inRaster, File inShape, File outTable, String zone, ArrayList<String> summarySingletonNames,
+            DataDate inDate, int daysPerInputData, int daysPerOutputData, DataDate projectSDate,
+            TemporalSummaryCompositionStrategy compStrategy, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy)
+            throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException {
         this.inRaster = inRaster;
         this.inShape = inShape;
         outTableFile = outTable;
         zoneField = zone;
         summaries = new SummariesCollection(summarySingletonNames);
         this.inDate = inDate;
-        this.hrsPerInputData = hrsPerInputData;     // set to -1 when not used
-        this.hrsPerOutputData = hrsPerOutputData;   // set to -1 when not used
-        this.tempMethods = tempMethods;
-        this.merStrategy = merStrategy;
+        this.daysPerInputData = daysPerInputData;
+        this.daysPerOutputData = daysPerOutputData;
+        this.intStrategy = intStrategy;
+        this.mergeStrategy = mergeStrategy;
         this.projectSDate = projectSDate;
-        this.calStrategy = calStrategy;
-        this.mergMethods = mergMethods;
+        this.compStrategy = compStrategy;
     }
 }

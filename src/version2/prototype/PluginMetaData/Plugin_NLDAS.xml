@@ -37,7 +37,10 @@
 		<ClassName>GdalNldasCalculator</ClassName>
 	</Indices>
 	<Summary>
-		<TemporalSummary>true</TemporalSummary>
+		<UseTemporalSummary>false</UseTemporalSummary>
+		<Temporal>
+			<CompositionStrategyClassName>GregorianWeeklyStrategy</CompositionStrategyClassName>
+		</Temporal>
 	</Summary>
 	<QualityControl>
 		<Level>None</Level>
