@@ -24,7 +24,6 @@ public abstract class Composite {
     // run method for scheduler
     public void run(){
         composeFiles();
-
     }
 
     /*Override this:
@@ -40,7 +39,7 @@ public abstract class Composite {
      *   (2) fetch the number of files (e.g. 8 for 3-hour TRMM) and compose them into
      *       a result file and save the result file.
      *       the filename should follow the name convention to contain the time.
-     *   (3) repeat step (1) until all the files in the "working folder" are processed
+     *   (3) repeat step (2) until all the files in the "working folder" are processed
      *   (4) remove the original input files. Now the result files will be "inputArray"
      *       for the next processing stage
      */
