@@ -24,6 +24,7 @@ public abstract class Composite {
     // run method for scheduler
     public void run(){
         composeFiles();
+
     }
 
     /*Override this:
