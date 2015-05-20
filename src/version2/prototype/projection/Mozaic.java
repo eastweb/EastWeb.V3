@@ -28,15 +28,15 @@ public class Mozaic {
 
     public Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
         tempDictionary = new File(Config.getInstance().getTempDirectory());
-        band = data.bandArray.clone();
+        band = data.bands.clone();
         outputFiles = new ArrayList<File>();
 
         // read tile data and get size of tiles
-        tileNumber = data.inputArray.length;
+        tileNumber = data.inputFiles.length;
         tileList = new ModisTileData[tileNumber];
 
         for (int i = 0; i < tileNumber; i++) {
-            tileList[i] = new ModisTileData(data.inputArray[i]);
+            tileList[i] = new ModisTileData(data.inputFiles[i]);
         }
 
         xSize = tileList[0].xSize;

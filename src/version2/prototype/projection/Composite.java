@@ -12,13 +12,11 @@ public abstract class Composite {
     /* the input files fetched from the "working folder" for processing.
      * The input files contains ALL the archives from the download process.
      */
-    private File[] inputArray;
+    private File[] inputFiles;
 
     public Composite(ProcessData data) {
-        for (File f : data.inputArray){
-            assert(f.exists());
-        }
-
+        assert(data.inputFiles.length > 0);
+        inputFiles = data.inputFiles;
     }
 
     // run method for scheduler

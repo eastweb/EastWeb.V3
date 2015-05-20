@@ -6,8 +6,8 @@ import version2.prototype.ProjectInfo;
 
 public class ProcessData {
 
-    public File[] inputArray;
-    public int[] bandArray;
+    public File[] inputFiles;
+    public int[] bands;
     public File input;
     public File output;
     public ProjectInfo projectInfo;
@@ -17,10 +17,10 @@ public class ProcessData {
 
     }
 
-    public ProcessData(File[] inputArray, int[] bandArray, File input, File output, ProjectInfo project)
+    public ProcessData(File[] inputFiles, int[] bands, File input, File output, ProjectInfo project)
     {
-        this.inputArray = inputArray;
-        this.bandArray = bandArray;
+        this.inputFiles = inputFiles;
+        this.bands = bands;
         this.input = input;
         this.output = output;
         projectInfo = project;
