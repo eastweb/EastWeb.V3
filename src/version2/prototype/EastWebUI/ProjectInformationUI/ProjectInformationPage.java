@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -72,6 +73,7 @@ public class ProjectInformationPage {
     private JTextField standardParallel2;
     private JTextField latitudeOfOrigin;
     private JTextField falseNothing;
+    private JComboBox<String> timeZoneComboBox;
     private JComboBox<String> coordinateSystemComboBox;
     private JComboBox<String> reSamplingComboBox;
     private JComboBox<String> datumComboBox;
@@ -213,6 +215,7 @@ public class ProjectInformationPage {
         deleteSelectedModisButton.setEnabled(false);
         modisListModel.clear();
 
+        timeZoneComboBox.setEnabled(false);
         coordinateSystemComboBox.setEnabled(false);
         reSamplingComboBox.setEnabled(false);
         datumComboBox.setEnabled(false);
@@ -270,6 +273,7 @@ public class ProjectInformationPage {
         // set projection info
         coordinateSystemComboBox.setSelectedItem(project.coordinateSystem);
         reSamplingComboBox.setSelectedItem(project.reSampling);
+        timeZoneComboBox.setSelectedItem(project.timeZone);
         datumComboBox.setSelectedItem(project);
         pixelSize.setText(project.pixelSize);
         standardParallel1.setText(project.stdParallel1);
@@ -505,6 +509,22 @@ public class ProjectInformationPage {
         });
         chmasterShapeFileCheckbox.setBounds(6, 140, 136, 23);
         panel.add(chmasterShapeFileCheckbox);
+
+        JLabel lblTimeZone = new JLabel("Time Zone:");
+        lblTimeZone.setBounds(6, 170, 132, 14);
+        panel.add(lblTimeZone);
+
+        timeZoneComboBox = new JComboBox<String>();
+        timeZoneComboBox.setBounds(148, 167, 200, 20);
+        for (String id : TimeZone.getAvailableIDs()) {
+            TimeZone zone = TimeZone.getTimeZone(id);
+            int offset = zone.getRawOffset()/1000;
+            int hour = offset/3600;
+            int minutes = (offset % 3600)/60;
+            String timeZoneString = String.format("(GMT%+d:%02d) %s", hour, minutes, id);
+            timeZoneComboBox.addItem(timeZoneString);
+        }
+        panel.add(timeZoneComboBox);
     }
 
     @SuppressWarnings("rawtypes")
@@ -790,6 +810,10 @@ public class ProjectInformationPage {
             Element masterShapeFile = doc.createElement("MasterShapeFile");
             masterShapeFile.appendChild(doc.createTextNode(masterShapeTextField.getText()));
             projectInfo.appendChild(masterShapeFile);
+
+            Element timeZone = doc.createElement("TimeZone");
+            timeZone.appendChild(doc.createTextNode(String.valueOf(timeZoneComboBox.getSelectedItem())));
+            projectInfo.appendChild(timeZone);
 
             //list of modis tiles
             Element modisTiles = doc.createElement("ModisTiles");
