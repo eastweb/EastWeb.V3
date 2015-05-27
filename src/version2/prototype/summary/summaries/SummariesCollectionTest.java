@@ -1,7 +1,7 @@
 /**
  * 
  */
-package version2.prototype.summary;
+package version2.prototype.summary.summaries;
 
 import static org.junit.Assert.*;
 
@@ -21,7 +21,7 @@ public class SummariesCollectionTest {
     public ExpectedException thrown= ExpectedException.none();
 
     /**
-     * Test method for {@link version2.prototype.summary.SummariesCollection#SummariesCollection(java.lang.String[])}.
+     * Test method for {@link version2.prototype.summary.summaries.SummariesCollection#SummariesCollection(java.lang.String[])}.
      * @throws InvocationTargetException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
@@ -37,7 +37,7 @@ public class SummariesCollectionTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.summary.SummariesCollection#lookup(java.lang.String)}.
+     * Test method for {@link version2.prototype.summary.summaries.SummariesCollection#lookup(java.lang.String)}.
      */
     @Test
     public void testLookup() {
@@ -45,7 +45,7 @@ public class SummariesCollectionTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.summary.SummariesCollection#put(int, double)}.
+     * Test method for {@link version2.prototype.summary.summaries.SummariesCollection#put(int, double)}.
      */
     @Test
     public void testPut() {
@@ -53,7 +53,7 @@ public class SummariesCollectionTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.summary.SummariesCollection#register(version2.prototype.summary.SummaryNameInstancePair)}.
+     * Test method for {@link version2.prototype.summary.summaries.SummariesCollection#register(version2.prototype.summary.SummaryNameInstancePair)}.
      */
     @Test
     public void testRegister() {
@@ -61,7 +61,7 @@ public class SummariesCollectionTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.summary.SummariesCollection#getResults()}.
+     * Test method for {@link version2.prototype.summary.summaries.SummariesCollection#getResults()}.
      */
     @Test
     public void testGetResults() {

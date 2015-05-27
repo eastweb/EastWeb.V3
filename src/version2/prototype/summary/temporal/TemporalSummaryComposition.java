@@ -1,4 +1,4 @@
-package version2.prototype.summary;
+package version2.prototype.summary.temporal;
 
 import java.util.ArrayList;
 import java.util.Comparator;

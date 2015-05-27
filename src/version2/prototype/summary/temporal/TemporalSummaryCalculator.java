@@ -1,11 +1,10 @@
-package version2.prototype.summary;
+package version2.prototype.summary.temporal;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
-import version2.prototype.DataDate;
+import version2.prototype.summary.SummaryCalculator;
+import version2.prototype.summary.SummaryData;
 
 public class TemporalSummaryCalculator implements SummaryCalculator {
 
@@ -33,10 +32,11 @@ public class TemporalSummaryCalculator implements SummaryCalculator {
     public void run() throws Exception {
         ArrayList<File> inputFileSet = new ArrayList<File>();
 
-        if(data.daysPerInputData > data.daysPerOutputData)
+        if(data.daysPerInputData > data.daysPerOutputData) {
             inputFileSet = data.intStrategy.Interpolate(data.inRaster, data.daysPerInputData);
-        else
+        } else {
             inputFileSet.add(data.inRaster);
+        }
 
         TemporalSummaryComposition tempComp;
         for(File inRaster : inputFileSet)
@@ -46,9 +46,10 @@ public class TemporalSummaryCalculator implements SummaryCalculator {
             if(tempComp != null)
             {
                 ArrayList<File> files = new ArrayList<File>(tempComp.files.size());
-                for(FileDatePair fdPair : tempComp.files)
+                for(FileDatePair fdPair : tempComp.files) {
                     files.add(fdPair.file);
-                data.mergeStrategy.Merge(tempComp.startDate, data.inShape, (File[])files.toArray());
+                }
+                data.mergeStrategy.Merge(tempComp.startDate, (File[])files.toArray());
             }
         }
     }

@@ -22,11 +22,11 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessMetaDat
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
-import version2.prototype.summary.AvgGdalRasterFileMerge;
+import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.SummaryData;
-import version2.prototype.summary.TemporalSummaryCalculator;
-import version2.prototype.summary.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.ZonalSummaryCalculator;
+import version2.prototype.summary.temporal.TemporalSummaryCalculator;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.GeneralListener;
 import version2.prototype.util.GeneralUIEventObject;
 
@@ -140,6 +140,7 @@ public class Scheduler {
                 Object temporalSummaryCompositionStrategy = ctorStrategy.newInstance();
 
                 TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(new SummaryData(
+                        projectInfo.getName(),
                         DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
                         new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
                         null,
@@ -160,6 +161,7 @@ public class Scheduler {
         for(ZonalSummary zone: projectInfo.getZonalSummaries())
         {
             ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(new SummaryData(
+                    projectInfo.getName(),
                     DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
                     new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
                     outTable,

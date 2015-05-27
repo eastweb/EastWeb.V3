@@ -1,9 +1,13 @@
-package version2.prototype.summary;
+package version2.prototype.summary.zonal;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +25,12 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
+import version2.prototype.summary.SummaryCalculator;
+import version2.prototype.summary.SummaryData;
+import version2.prototype.summary.summaries.SummariesCollection;
+import version2.prototype.summary.summaries.SummaryNameResultPair;
 import version2.prototype.util.GdalUtils;
+import version2.prototype.util.PostgreSQLConnection;
 
 
 
@@ -32,6 +41,7 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
     private File mTableFile;
     private String mField;
     private SummariesCollection summaries;
+    private String projectName;
 
     /**
      * @param inRaster
@@ -55,6 +65,7 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
         mTableFile = data.outTableFile;
         mField = data.zoneField;
         summaries = data.summaries;
+        projectName = data.projectName;
     }
 
     @Override
@@ -94,10 +105,13 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
                 assert(raster.GetRasterYSize() == zoneRaster.GetRasterYSize());
 
                 // Calculate statistics
-                calculateStatistics(raster, zoneRaster, layer);
+                Map<Integer, Double> countMap = calculateStatistics(raster, zoneRaster);
 
                 // Write the table
-                writeTable(layer);
+                writeTable(layer, countMap);
+
+                // Write to database
+                uploadResultsToDb(projectName, mRasterFile.getPath(), layer, mLayerFile.getPath(), mField, countMap);
             } finally { // Clean up
                 if (raster != null) {
                     raster.delete(); GdalUtils.errorCheck();
@@ -117,7 +131,7 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
 
     /**
      * Checks whether the given raster and layer share the same projection.
-     * 
+     *
      * @param raster
      * @param layer
      * @return true if projections are the same
@@ -130,7 +144,6 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
         boolean same = layer.GetSpatialRef().IsSame(rasterRef) != 0; GdalUtils.errorCheck();
         return same;
     }
-
 
     private boolean isLayerSubsetOfRaster(Layer layer, Dataset raster)
             throws IllegalArgumentException, UnsupportedOperationException, IOException {
@@ -187,8 +200,8 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
 
 
     /**
-     * 
-     * 
+     *
+     *
      * @param layer
      * @param transform
      * @return
@@ -228,7 +241,7 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
     }
 
 
-    private void calculateStatistics(Dataset rasterDS, Dataset featureDS, Layer layer) throws Exception {
+    private Map<Integer, Double> calculateStatistics(Dataset rasterDS, Dataset featureDS) throws Exception {
         // Calculate zonal statistics
         Band zoneBand = featureDS.GetRasterBand(1); GdalUtils.errorCheck();
         Band rasterBand = rasterDS.GetRasterBand(1); GdalUtils.errorCheck();
@@ -258,26 +271,26 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
         }
 
         ArrayList<SummaryNameResultPair> results = summaries.getResults();
+        Map<Integer, Double> countMap = new HashMap<Integer, Double>(1);
         for(SummaryNameResultPair pair : results){
             System.out.println(pair.toString());
+            if(pair.getSimpleName().equalsIgnoreCase("count")) {
+                countMap = pair.getResult();
+            }
         }
+
+        return countMap;
     }
 
 
-    private void writeTable(Layer layer) throws Exception {
+    private void writeTable(Layer layer, Map<Integer, Double> countMap) throws Exception {
         // Write the table
         PrintWriter writer = new PrintWriter(mTableFile);
 
         layer.ResetReading(); GdalUtils.errorCheck();
         Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
         ArrayList<SummaryNameResultPair> results = summaries.getResults();
-        Map<Integer, Double> countMap = new HashMap<Integer, Double>(1);
-        for(SummaryNameResultPair pair : results){
-            if(pair.getSimpleName().equalsIgnoreCase("count")){
-                countMap = pair.getResult();
-                break;
-            }
-        }
+
         while (feature != null) {
             int zone = feature.GetFieldAsInteger(mField); GdalUtils.errorCheck();
             if (countMap.get(zone) != null && countMap.get(zone) != 0) {
@@ -295,5 +308,324 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
         }
 
         writer.close();
+    }
+
+    private void uploadResultsToDb(String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath,
+            String field, Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException
+    {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final boolean previousAutoCommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        ArrayList<SummaryNameResultPair> results = summaries.getResults();
+        String index = "";
+        int year = -1;
+        int day = -1;
+
+        // C:\Users\michael.devos\Desktop\eastweb-data\projects\tw_test\indices\trmm\2013\204\TW_DIS_F_P_Dis_REGION
+        // Get position of index folder found after project name folder and index folder name
+        int pos = rasterFilePath.indexOf("\\", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
+        if(pos == -1) {
+            pos = rasterFilePath.indexOf("/", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
+        }
+
+        index = rasterFilePath.substring(pos, rasterFilePath.indexOf(File.separator, pos));
+        year = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 1, rasterFilePath.indexOf(File.separator, pos + index.length() + 1)));
+        day = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 6, rasterFilePath.indexOf(File.separator, pos + index.length() + 6)));
+
+        try {
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+            int indexKey = -1;
+            String _query = String.format(
+                    "SELECT \"index\"\n" +
+                            "FROM \"%1$s\".\"Indicies\"\n" +
+                            "WHERE \"name\" = ?\n",
+                            mSchemaName
+                    );
+            final PreparedStatement ps = conn.prepareStatement(_query);
+            ps.setString(1, index);
+            final ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                indexKey = rs.getInt(1);
+                rs.close();
+            }
+            else{
+                _query = String.format(
+                        "INSERT INTO \"%1$s\".\"Indicies\" (\n" +
+                                "  \"name\"\n" +
+                                ") VALUES (\n" +
+                                "  ?\n" +
+                                ")",
+                                mSchemaName
+                        );
+                final PreparedStatement psInsert = conn.prepareStatement(_query);
+                psInsert.setString(1, index);
+                psInsert.executeQuery();
+
+                _query = String.format(
+                        "SELECT \"index\"\n" +
+                                "FROM \"%1$s\".\"Indicies\"\n" +
+                                "WHERE \"name\" = ?\n",
+                                mSchemaName
+                        );
+                final PreparedStatement psInserted = conn.prepareStatement(_query);
+                psInserted.setString(1, index);
+                final ResultSet rsInserted = ps.executeQuery();
+                indexKey = rsInserted.getInt(1);
+                rsInserted.close();
+            }
+
+            layer.ResetReading(); GdalUtils.errorCheck();
+            Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
+            Map<Integer, Double> sumMap = new HashMap<Integer, Double>();
+            Map<Integer, Double> meanMap = new HashMap<Integer, Double>();
+            Map<Integer, Double> stdDevMap = new HashMap<Integer, Double>();
+            while (feature != null)
+            {
+                int zone = feature.GetFieldAsInteger(mField); GdalUtils.errorCheck();
+                if (countMap.get(zone) != null && countMap.get(zone) != 0)
+                {
+                    for(SummaryNameResultPair pair : results){
+                        System.out.println(pair.toString());
+                        switch(pair.getSimpleName())
+                        {
+                        case "Sum": sumMap = pair.getResult(); break;
+                        case "Mean": meanMap = pair.getResult(); break;
+                        case "StdDev": stdDevMap = pair.getResult(); break;
+                        }
+
+                        if(pair.getSimpleName().equalsIgnoreCase("Count")) {
+                            countMap = pair.getResult();
+                        }
+                    }
+
+                    final int zoneId = getZoneId(conn, mSchemaName, getZoneFieldId(conn, mSchemaName, shapefilePath, field), zone);
+
+                    _query = String.format(
+                            "SELECT COUNT(*)\n" +
+                                    "FROM \"%1$s\".\"ZonalStats\"\n" +
+                                    "WHERE\n" +
+                                    "  \"index\" = ? AND\n" +
+                                    "  \"year\" = ? AND\n" +
+                                    "  \"day\" = ? AND\n" +
+                                    "  \"zoneID\" = ?\n",
+                                    mSchemaName
+                            );
+                    final PreparedStatement psExists = conn.prepareStatement(_query);
+                    psExists.setInt(1, indexKey);
+                    psExists.setInt(2, year);
+                    psExists.setInt(3, day);
+                    psExists.setInt(4, zoneId);
+                    final ResultSet rsExists = psExists.executeQuery();
+                    final int numMatchingRows;
+                    try {
+                        if (!rsExists.next()) {
+                            throw new SQLException("Expected one result row");
+                        }
+                        numMatchingRows = rsExists.getInt(1);
+                    } finally {
+                        rsExists.close();
+                    }
+
+                    if (numMatchingRows == 0) {
+                        _query = String.format(
+                                "INSERT INTO \"%1$s\".\"ZonalStats\" (\n" +
+                                        "  \"index\",\n" +
+                                        "  \"year\",\n" +
+                                        "  \"day\",\n" +
+                                        "  \"zoneID\",\n" +
+                                        "  \"Count\",\n" +
+                                        "  \"Sum\",\n" +
+                                        "  \"Mean\",\n" +
+                                        "  \"StdDev\"\n" +
+                                        ") VALUES (\n" +
+                                        "  ?,\n" +
+                                        "  ?,\n" +
+                                        "  ?,\n" +
+                                        "  ?,\n" +
+                                        "  ?,\n" +
+                                        "  ?,\n" +
+                                        "  ?,\n" +
+                                        "  ?\n" +
+                                        ")",
+                                        mSchemaName
+                                );
+                        final PreparedStatement psInsert = conn.prepareStatement(_query);
+                        psInsert.setInt(1, indexKey);
+                        psInsert.setInt(2, year);
+                        psInsert.setInt(3, day);
+                        psInsert.setInt(4, zoneId);
+                        psInsert.setDouble(5, countMap.get(zone));
+                        psInsert.setDouble(6, sumMap.get(zone));
+                        psInsert.setDouble(7, meanMap.get(zone));
+                        psInsert.setDouble(8, stdDevMap.get(zone));
+                        psInsert.executeUpdate();
+                    } else {
+                        _query = String.format(
+                                "UPDATE \"%1$s\".\"ZonalStats\"\n" +
+                                        "SET\n" +
+                                        "  \"count\" = ?,\n" +
+                                        "  \"sum\" = ?,\n" +
+                                        "  \"mean\" = ?,\n" +
+                                        "  \"stdev\" = ?\n" +
+                                        "WHERE\n" +
+                                        "  \"index\" = ? AND\n" +
+                                        "  \"year\" = ? AND\n" +
+                                        "  \"day\" = ? AND\n" +
+                                        "  \"zoneID\" = ?\n",
+                                        mSchemaName
+                                );
+                        final PreparedStatement psUpdate = conn.prepareStatement(_query);
+                        psUpdate.setDouble(1, countMap.get(zone));
+                        psUpdate.setDouble(2, sumMap.get(zone));
+                        psUpdate.setDouble(3, meanMap.get(zone));
+                        psUpdate.setDouble(4, stdDevMap.get(zone));
+                        psUpdate.setInt(5, indexKey);
+                        psUpdate.setInt(6, year);
+                        psUpdate.setInt(7, day);
+                        psUpdate.setInt(8, zoneId);
+                        psUpdate.executeUpdate();
+                    }
+                }
+
+                feature = layer.GetNextFeature(); GdalUtils.errorCheck();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(previousAutoCommit);
+        }
+    }
+
+    /**
+     * Looks up the zoneFieldID for the specified (shapefile, field) pair.
+     * Returns null if there is no matching record.
+     * @throws SQLException
+     */
+    public Integer lookupZoneFieldId(Connection conn, String mSchemaName, String shapefile, String field) throws SQLException {
+        String _query = String.format(
+                "SELECT \"zoneFieldID\"\n" +
+                        "FROM \"%1$s\".\"ZoneFields\"\n" +
+                        "WHERE \"shapefile\" = ? AND \"field\" = ?",
+                        mSchemaName
+                );
+        final PreparedStatement ps = conn.prepareStatement(_query);
+        ps.setString(1, shapefile);
+        ps.setString(2, field);
+
+        final ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Looks up the zoneFieldID for the specified (shapefile, field) pair.
+     * A new zoneFieldID is created if there is no matching record.
+     * Do this in a transaction!
+     * @throws SQLException
+     */
+    public int getZoneFieldId(Connection conn, String mSchemaName, String shapefile, String field) throws SQLException {
+        Integer lookup = lookupZoneFieldId(conn, mSchemaName, shapefile, field);
+        if (lookup != null) {
+            return lookup;
+        }
+
+        String _query = String.format(
+                "INSERT INTO \"%1$s\".\"ZoneFields\" (\n" +
+                        "  \"shapefile\",\n" +
+                        "  \"field\"\n" +
+                        ") VALUES (\n" +
+                        "  ?,\n" +
+                        "  ?\n" +
+                        ")",
+                        mSchemaName
+                );
+        final PreparedStatement ps = conn.prepareStatement(_query);
+        ps.setString(1, shapefile);
+        ps.setString(2, field);
+        ps.executeUpdate();
+
+        _query = String.format(
+                "SELECT currval(\"%1$s\".\"ZoneFields_zoneFieldID_seq\")",
+                mSchemaName
+                );
+        final ResultSet rs = conn.prepareStatement(_query).executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt(1);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Looks up the ZoneID for the specified (zoneFieldID, zone) pair.
+     * Returns null if there is no matching record.
+     * @throws SQLException
+     */
+    public Integer lookupZoneId(Connection conn, String mSchemaName, int zoneFieldId, int zone) throws SQLException {
+        String _query = String.format(
+                "SELECT \"zoneID\"\n" +
+                        "FROM \"%1$s\".\"Zones\"\n" +
+                        "WHERE \"zoneFieldID\" = ? AND \"name\" = ?",
+                        mSchemaName
+                );
+        final PreparedStatement ps = conn.prepareStatement(_query);
+        ps.setInt(1, zoneFieldId);
+        ps.setInt(2, zone);
+
+        final ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Looks up the zoneID for the specified (zoneFieldID, zone) pair.
+     * A new zoneID is created if there is no matching record.
+     * Do this in a transaction!
+     * @throws SQLException
+     */
+    public int getZoneId(Connection conn, String mSchemaName, int zoneFieldId, int zone) throws SQLException {
+        Integer lookup = lookupZoneId(conn, mSchemaName, zoneFieldId, zone);
+        if (lookup != null) {
+            return lookup;
+        }
+
+        String _query = String.format(
+                "INSERT INTO \"%1$s\".\"Zones\" (\n" +
+                        "  \"zoneFieldID\",\n" +
+                        "  \"fieldID\"\n" +
+                        ") VALUES (\n" +
+                        "  ?,\n" +
+                        "  ?,\n" +
+                        "  ?\n" +
+                        ")",
+                        mSchemaName
+                );
+        final PreparedStatement ps = conn.prepareStatement(_query);
+        ps.setInt(1, zoneFieldId);
+        ps.setInt(2, zone);
+        ps.executeUpdate();
+
+        _query = String.format(
+                "SELECT currval(\"%1$s\".\"Zones_zoneID_seq\")",
+                mSchemaName
+                );
+        final ResultSet rs = conn.prepareStatement(_query).executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt(1);
+        } else {
+            return 0;
+        }
     }
 }
