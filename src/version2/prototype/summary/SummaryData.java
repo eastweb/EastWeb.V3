@@ -6,10 +6,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import version2.prototype.DataDate;
+import version2.prototype.summary.summaries.SummariesCollection;
+import version2.prototype.summary.temporal.InterpolateStrategy;
+import version2.prototype.summary.temporal.MergeStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryComposition;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.util.GeneralListener;
+import version2.prototype.util.GeneralUIEvent;
 
 
 public class SummaryData {
+    public String projectName;
+
     // ZonalSummaryCalculator variables
+    public GeneralUIEvent generalUIEvent;
     public File inRaster;
     public File inShape;
     public File outTableFile;
@@ -55,11 +65,12 @@ public class SummaryData {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    public SummaryData(File inRaster, File inShape, File outTable, String zone, ArrayList<String> summarySingletonNames,
+    public SummaryData(String projectName, File inRaster, File inShape, File outTable, String zone, ArrayList<String> summarySingletonNames,
             DataDate inDate, int daysPerInputData, int daysPerOutputData, DataDate projectSDate,
-            TemporalSummaryCompositionStrategy compStrategy, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy)
-            throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException {
+            TemporalSummaryCompositionStrategy compStrategy, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy, GeneralListener l)
+                    throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+                    IllegalArgumentException, InvocationTargetException {
+        this.projectName = projectName;
         this.inRaster = inRaster;
         this.inShape = inShape;
         outTableFile = outTable;
@@ -72,5 +83,7 @@ public class SummaryData {
         this.mergeStrategy = mergeStrategy;
         this.projectSDate = projectSDate;
         this.compStrategy = compStrategy;
+        generalUIEvent = new GeneralUIEvent();
+        generalUIEvent.addListener(l);
     }
 }
