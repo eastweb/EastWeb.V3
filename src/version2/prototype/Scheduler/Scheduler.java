@@ -19,6 +19,7 @@ import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
 import version2.prototype.summary.AvgGdalRasterFileMerge;
@@ -26,10 +27,13 @@ import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.TemporalSummaryCalculator;
 import version2.prototype.summary.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.ZonalSummaryCalculator;
+import version2.prototype.util.GeneralListener;
+import version2.prototype.util.GeneralUIEventObject;
 
 public class Scheduler {
 
     private static Scheduler instance;
+    private SchedulerData data;
     public ProjectInfo projectInfo;
     public Config config;
     public PluginMetaDataCollection pluginMetaDataCollection;
@@ -38,6 +42,7 @@ public class Scheduler {
 
     private Scheduler(SchedulerData data)
     {
+        this.data = data;
         projectInfo = data.projectInfo;
         config = data.config;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
@@ -47,15 +52,16 @@ public class Scheduler {
 
     public static Scheduler getInstance(SchedulerData data)
     {
-        if(instance == null)
+        if(instance == null) {
             instance = new Scheduler(data);
+        }
 
         return instance;
     }
 
     public void run() throws Exception
     {
-        for(String item: projectInfo.getPlugin())
+        for(ProjectInfoPlugin item: data.projectInfoFile.plugins)
         {
             RunDownloader(item);
             RunProcess(item);
@@ -64,28 +70,31 @@ public class Scheduler {
         }
     }
 
-    public void RunDownloader(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    public void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         // uses reflection
         Class<?> clazzDownloader = Class.forName("version2.prototype.download."
-                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Title
-                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Download.className);
-        Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class);
-        Object downloader =  ctorDownloader.newInstance(new Object[] {projectInfo.getStartDate(), PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Download});
+                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Title
+                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Download.className);
+        Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class, GeneralListener.class);
+        Object downloader =  ctorDownloader.newInstance(new Object[] {
+                data.projectInfoFile.startDate,
+                PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Download,
+                new downloaderListener()});
         Method methodDownloader = downloader.getClass().getMethod("run");
         methodDownloader.invoke(downloader);
     }
 
-    public void RunProcess(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
-        ProcessMetaData temp = PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Projection;
-        PrepareProcessTask prepareProcessTask = new PrepareProcessTask(projectInfo, "NBAR", projectInfo.getStartDate());
+        ProcessMetaData temp = PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Projection;
+        PrepareProcessTask prepareProcessTask = new PrepareProcessTask(projectInfo, "NBAR", projectInfo.getStartDate(), new processListener());
 
-        for (int i = 1; i <= temp.processStep.size(); i++)
+        for (int i = 1; i <= temp.processStep.size(); i++) {
             if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
             {
                 Class<?> clazzProcess = Class.forName("version2.prototype.projection."
-                        + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Title
+                        + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Title
                         + temp.processStep.get(i));
                 Constructor<?> ctorProcess = clazzProcess.getConstructor(ProcessData.class);
                 Object process =  ctorProcess.newInstance(new Object[] {new ProcessData(
@@ -93,77 +102,112 @@ public class Scheduler {
                         prepareProcessTask.getBands(),
                         prepareProcessTask.getInputFile(),
                         prepareProcessTask.getOutputFile(),
-                        projectInfo)});
+                        data.projectInfoFile,
+                        prepareProcessTask.listener)});
                 Method methodProcess = process.getClass().getMethod("run");
                 methodProcess.invoke(process);
             }
+        }
     }
 
-    public void RunIndicies(String pluginName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
-        // get data for data, file, and the last thing that i dont really know about
-        // ask jiameng what the hell the file is suppose to do
-        for(String indexCalculatorItem: PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).IndicesMetaData)
+        for(String indicie: plugin.GetIndicies())
         {
-            Class<?> clazzIndicies = Class.forName("version2.prototype.indices."
-                    + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Title
-                    + indexCalculatorItem);
-            Constructor<?> ctorIndicies = clazzIndicies.getConstructor(String.class, DataDate.class, String.class, String.class);
+            Class<?> clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", plugin.GetName(), indicie));
+            Constructor<?> ctorIndicies = clazzIndicies.getConstructor(String.class, DataDate.class, String.class, String.class, GeneralListener.class);
             Object indexCalculator =  ctorIndicies.newInstance(
                     new Object[] {
-                            projectInfo.getName(),
-                            projectInfo.getStartDate(),
-                            new File(indexCalculatorItem).getName().split("\\.")[0],
-                            indexCalculatorItem}
-                    );
+                            plugin.GetName(),
+                            data.projectInfoFile.startDate,
+                            new File(indicie).getName().split("\\.")[0],
+                            indicie,
+                            new indiciesListener()});
             Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
             methodIndicies.invoke(indexCalculator);
         }
     }
 
-    public void RunSummary(String pluginName) throws Exception
+    public void RunSummary(ProjectInfoPlugin plugin) throws Exception
     {
-        if(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Summary.IsTemporalSummary)
+        if(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Summary.IsTemporalSummary)
+        {
             for(ZonalSummary zone: projectInfo.getZonalSummaries())
             {
-                Class<?> strategyClass = Class.forName(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(pluginName).Summary
+                Class<?> strategyClass = Class.forName(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Summary
                         .CompositionStrategyClassName);
                 Constructor<?> ctorStrategy = strategyClass.getConstructor();
                 Object temporalSummaryCompositionStrategy = ctorStrategy.newInstance();
 
                 TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(new SummaryData(
-                    DirectoryLayout.getIndexMetadata(projectInfo, pluginName, projectInfo.getStartDate(), zone.getShapeFile()),
-                    new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
-                    null,
-                    null,
-                    null,
-                    projectInfo.getStartDate(),
-                    0,
-                    0,
-                    projectInfo.getStartDate(),
-                    (TemporalSummaryCompositionStrategy) temporalSummaryCompositionStrategy,       // User selected
-                    null,   // InterpolateStrategy (Framework user defined)
-                    new AvgGdalRasterFileMerge()));       // (Framework user defined)
+                        DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
+                        new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
+                        null,
+                        null,
+                        null,
+                        projectInfo.getStartDate(),
+                        0,
+                        0,
+                        projectInfo.getStartDate(),
+                        (TemporalSummaryCompositionStrategy) temporalSummaryCompositionStrategy,       // User selected
+                        null,   // InterpolateStrategy (Framework user defined)
+                        new AvgGdalRasterFileMerge(),
+                        new summaryListener()));       // (Framework user defined)
                 temporalSummaryCal.run();
             }
+        }
 
         for(ZonalSummary zone: projectInfo.getZonalSummaries())
         {
             ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(new SummaryData(
-                DirectoryLayout.getIndexMetadata(projectInfo, pluginName, projectInfo.getStartDate(), zone.getShapeFile()),
-                new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
-                outTable,
-                zone.getField(),
-                summarySingletonNames,
-                projectInfo.getStartDate(),
-                0,
-                0,
-                projectInfo.getStartDate(),
-                null,
-                null,
-                null));
+                    DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
+                    new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
+                    outTable,
+                    zone.getField(),
+                    summarySingletonNames,
+                    projectInfo.getStartDate(),
+                    0,
+                    0,
+                    projectInfo.getStartDate(),
+                    null,
+                    null,
+                    null,
+                    new summaryListener()));
             zonalSummaryCal.run();
         }
     }
+
+    class downloaderListener implements GeneralListener{
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    class processListener implements GeneralListener{
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    class indiciesListener implements GeneralListener{
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    class summaryListener implements GeneralListener{
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
 }
 

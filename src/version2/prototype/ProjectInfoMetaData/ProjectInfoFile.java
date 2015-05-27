@@ -27,6 +27,7 @@ public class ProjectInfoFile {
     public final String workingDir;
     public final String maskingFile;
     public final String masterShapeFile;
+    public final String timeZone;
     public final ArrayList<String> modisTiles;
     public final String coordinateSystem;
     public final String reSampling;
@@ -58,6 +59,7 @@ public class ProjectInfoFile {
         workingDir = GetWorkingDir();
         maskingFile = GetMaskingFile();
         masterShapeFile = GetMasterShapeFile();
+        timeZone = GetTimeZone();
         modisTiles = GetModisTiles();
         coordinateSystem = GetCoordinateSystem();
         reSampling = GetReSampling();
@@ -162,6 +164,16 @@ public class ProjectInfoFile {
     {
         NodeList nodes = GetUpperLevelNodeList("MasterShapeFile", "Missing master shape file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing master shape file.");
+        if(values.size() > 0) {
+            return values.get(0);
+        }
+        return null;
+    }
+
+    private String GetTimeZone()
+    {
+        NodeList nodes = GetUpperLevelNodeList("TimeZone", "Missing time zone.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing time zone.");
         if(values.size() > 0) {
             return values.get(0);
         }

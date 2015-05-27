@@ -9,16 +9,20 @@ import version2.prototype.DataDate;
 import version2.prototype.DirectoryLayout;
 import version2.prototype.ModisTile;
 import version2.prototype.ProjectInfo;
+import version2.prototype.util.GeneralListener;
 
 public class PrepareProcessTask {
     private final ProjectInfo mProject;
     private final DataDate mDate;
     private String mProduct;
 
-    public PrepareProcessTask(ProjectInfo project, String mProduct, DataDate date) {
+    public GeneralListener listener;
+
+    public PrepareProcessTask(ProjectInfo project, String mProduct, DataDate date, GeneralListener l) {
         this.mProduct = mProduct;
         mProject = project;
         mDate = date;
+        listener = l;
     }
 
     public File getMetadataFile() throws ConfigReadException {

@@ -41,6 +41,10 @@ import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.Scheduler.SchedulerData;
 
 public class MainWindow {
 
@@ -345,8 +349,27 @@ public class MainWindow {
                 defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "75 %", "Progress Detail", "Summary Quiries", true});
                 populateProjectList();
 
-                //SchedulerData data = new SchedulerData(); // TODO: this will be replace by user interface
-                //Scheduler.getInstance(data).run();
+                String selectedProject = String.valueOf(projectList.getSelectedItem());
+                try {
+                    ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
+                    SchedulerData data = new SchedulerData(project); // TODO: this will be replace by user interface
+                    Scheduler.getInstance(data).run();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ParserConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
 

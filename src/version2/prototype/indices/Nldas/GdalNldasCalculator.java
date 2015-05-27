@@ -2,16 +2,17 @@ package version2.prototype.indices.Nldas;
 
 import java.io.File;
 
-
-
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.DirectoryLayout;
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GeneralListener;
+
 
 public class GdalNldasCalculator extends IndicesFramework{
 
-    public GdalNldasCalculator(String mProject, DataDate mDate, String feature, String mIndex ) throws ConfigReadException {
+    public GdalNldasCalculator(String mProject, DataDate mDate, String feature, String mIndex, GeneralListener l ) throws ConfigReadException {
+        super(l);
         setInputFiles(new File[] { getNldasReprojected(mProject, mDate) });
         setOutputFile(getIndex(mProject, mIndex, mDate, feature));
     }

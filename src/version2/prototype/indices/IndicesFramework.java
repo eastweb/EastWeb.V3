@@ -10,12 +10,21 @@ import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.util.GdalUtils;
+import version2.prototype.util.GeneralListener;
+import version2.prototype.util.GeneralUIEvent;
 
 public abstract class IndicesFramework implements IndexCalculator {
     private static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
+    private GeneralUIEvent event;
     private File[] mInputFiles;
     private File mOutputFile;
+
+    public IndicesFramework(GeneralListener l)
+    {
+        event = new GeneralUIEvent();
+        event.addListener(l);
+    }
 
     protected void setInputFiles(File[] inputFiles) {
         assert (inputFiles.length > 0);

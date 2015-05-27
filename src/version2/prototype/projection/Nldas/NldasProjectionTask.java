@@ -54,7 +54,7 @@ public class NldasProjectionTask {
             FileUtils.forceMkdir(outFile.getParentFile());
             System.out.println(inFile.getPath());
             System.out.println(outFile.getPath());
-            new NldasProjection(processData);
+
         } finally {
             if (tmpFile != null && tmpFile.exists()) {
                 FileUtils.deleteQuietly(tmpFile);

@@ -9,9 +9,10 @@ import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.ProjectInfo;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
 public class SchedulerData {
-
+    public ProjectInfoFile projectInfoFile;
     public ProjectInfo projectInfo;
     public Config config;
     public PluginMetaDataCollection pluginMetaDataCollection;
@@ -20,15 +21,17 @@ public class SchedulerData {
     public List<String> ListOfDisplaySummary;
     public ArrayList<String> SummarySingletonNames;
 
-    public SchedulerData() throws ConfigReadException, Exception
+    public SchedulerData(ProjectInfoFile projectInfoFile) throws ConfigReadException, Exception
     {
-        config = Config.getInstance();
-        projectInfo = config.loadProject("tw_test"); // load project should be abstract in a different place
+        this.projectInfoFile= projectInfoFile;
 
-        ShapeFile = new File("");
-        OutTableFile = new File("");
-        ListOfDisplaySummary = new ArrayList<String> ();
-        pluginMetaDataCollection = new PluginMetaDataCollection(projectInfo.getPlugin());
+        //config = Config.getInstance();
+        //projectInfo = config.loadProject("tw_test"); // load project should be abstract in a different place
+
+        //ShapeFile = new File("");
+        //OutTableFile = new File("");
+        //ListOfDisplaySummary = new ArrayList<String> ();
+        pluginMetaDataCollection = PluginMetaDataCollection.getInstance();
         SummarySingletonNames = new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev"));
     }
 }
