@@ -24,13 +24,6 @@ public class SchedulerData {
     public SchedulerData(ProjectInfoFile projectInfoFile) throws ConfigReadException, Exception
     {
         this.projectInfoFile= projectInfoFile;
-
-        //config = Config.getInstance();
-        //projectInfo = config.loadProject("tw_test"); // load project should be abstract in a different place
-
-        //ShapeFile = new File("");
-        //OutTableFile = new File("");
-        //ListOfDisplaySummary = new ArrayList<String> ();
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance();
         SummarySingletonNames = new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev"));
     }

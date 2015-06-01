@@ -30,18 +30,29 @@ import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.GeneralListener;
 import version2.prototype.util.GeneralUIEventObject;
 
-public class Scheduler {
+public class Scheduler implements Runnable {
 
-    private static Scheduler instance;
-    private SchedulerData data;
+    public int DownloadProgress;
+    public int ProcessProgress;
+    public int IndiciesProgress;
+    public int SummaryProgress;
+    public ArrayList<String> Log;
+
+    public SchedulerData data;
     public ProjectInfo projectInfo;
     public Config config;
     public PluginMetaDataCollection pluginMetaDataCollection;
     private File outTable;
     private ArrayList<String> summarySingletonNames;
 
-    private Scheduler(SchedulerData data)
+    public Scheduler(SchedulerData data)
     {
+        DownloadProgress = 0;
+        ProcessProgress = 0;
+        IndiciesProgress = 0;
+        SummaryProgress = 0;
+        Log = new ArrayList<String>();
+
         this.data = data;
         projectInfo = data.projectInfo;
         config = data.config;
@@ -50,23 +61,50 @@ public class Scheduler {
         summarySingletonNames = data.SummarySingletonNames;
     }
 
-    public static Scheduler getInstance(SchedulerData data)
-    {
-        if(instance == null) {
-            instance = new Scheduler(data);
-        }
-
-        return instance;
-    }
-
-    public void run() throws Exception
+    @Override
+    public void run()
     {
         for(ProjectInfoPlugin item: data.projectInfoFile.plugins)
         {
-            RunDownloader(item);
-            RunProcess(item);
-            RunIndicies(item);
-            RunSummary(item);
+            try {
+                RunDownloader(item);
+                RunProcess(item);
+                RunIndicies(item);
+                RunSummary(item);
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ParserConfigurationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SAXException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 
@@ -83,6 +121,9 @@ public class Scheduler {
                 new downloaderListener()});
         Method methodDownloader = downloader.getClass().getMethod("run");
         methodDownloader.invoke(downloader);
+
+        DownloadProgress = 100;
+        Log.add("Download Finish");
     }
 
     public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
@@ -108,6 +149,8 @@ public class Scheduler {
                 methodProcess.invoke(process);
             }
         }
+        ProcessProgress = 100;
+        Log.add("Process Finish");
     }
 
     public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
@@ -126,6 +169,8 @@ public class Scheduler {
             Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
             methodIndicies.invoke(indexCalculator);
         }
+        IndiciesProgress = 100;
+        Log.add("Indicies Finish");
     }
 
     public void RunSummary(ProjectInfoPlugin plugin) throws Exception
@@ -177,37 +222,40 @@ public class Scheduler {
                     new summaryListener()));
             zonalSummaryCal.run();
         }
+        SummaryProgress = 100;
+        Log.add("Summary Finish");
+
     }
 
     class downloaderListener implements GeneralListener{
         @Override
         public void NotifyUI(GeneralUIEventObject e) {
-            // TODO Auto-generated method stub
-
+            DownloadProgress = e.getProgress();
+            Log.add(e.getStatus());
         }
     }
 
     class processListener implements GeneralListener{
         @Override
         public void NotifyUI(GeneralUIEventObject e) {
-            // TODO Auto-generated method stub
-
+            ProcessProgress = e.getProgress();
+            Log.add(e.getStatus());
         }
     }
 
     class indiciesListener implements GeneralListener{
         @Override
         public void NotifyUI(GeneralUIEventObject e) {
-            // TODO Auto-generated method stub
-
+            IndiciesProgress = e.getProgress();
+            Log.add(e.getStatus());
         }
     }
 
     class summaryListener implements GeneralListener{
         @Override
         public void NotifyUI(GeneralUIEventObject e) {
-            // TODO Auto-generated method stub
-
+            SummaryProgress = e.getProgress();
+            Log.add(e.getStatus());
         }
     }
 

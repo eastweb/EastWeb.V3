@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.DefaultCellEditor;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
@@ -40,6 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import version2.prototype.EastWebUI.ProgressUI.ProjectProgress;
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -48,6 +50,7 @@ import version2.prototype.Scheduler.SchedulerData;
 
 public class MainWindow {
 
+    private ArrayList<Scheduler> ListOfProjectSchedule;
     private JFrame frame;
     private JMenuItem mntmCreateNewProject;
     private JMenu mnHelp;
@@ -57,6 +60,7 @@ public class MainWindow {
     private JMenuItem mntmDeleteAllFiles;
     private DefaultTableModel defaultTableModel;
     private JComboBox<String> projectList;
+    private JCheckBox chckbxIntermidiateFiles;
 
     /**
      * Launch the application.
@@ -80,6 +84,7 @@ public class MainWindow {
      * Create the application.
      */
     public MainWindow() {
+        ListOfProjectSchedule = new ArrayList<Scheduler>();
         initialize();
     }
 
@@ -286,7 +291,7 @@ public class MainWindow {
         frame.getContentPane().add(btnBrowser);
 
         // check box to control intermediate files process (true => creates intermediate files)
-        final JCheckBox chckbxIntermidiateFiles = new JCheckBox("Intermidiate Files");
+        chckbxIntermidiateFiles = new JCheckBox("Intermidiate Files");
         chckbxIntermidiateFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -327,11 +332,20 @@ public class MainWindow {
     {
         defaultTableModel = new DefaultTableModel();
         defaultTableModel.setDataVector(new Object[][] {},
-                new Object[] { "Project Name", " Total Progress" ,"Technical Progress", "Summary Composite", "Intermidiate Selection" });
+                new Object[] { "Projects", " Total Progress", "Summary Composite", "Intermidiate Selection", "Actions", "Delete" });
 
         JTable table = new JTable(defaultTableModel);
-        table.getColumn("Technical Progress").setCellRenderer(new TechnicalProgressButtonRenderer());
-        table.getColumn("Technical Progress").setCellEditor(new TechnicalProgressButtonEditor(new JCheckBox()));
+        table.getColumn("Projects").setCellRenderer(new ProgressButtonRenderer());
+        table.getColumn("Projects").setCellEditor(new ProgressButtonEditor(new JCheckBox()));
+
+        table.getColumn("Actions").setMaxWidth(50);
+        table.getColumn("Actions").setCellRenderer(new PlayButtonRenderer());
+        table.getColumn("Actions").setCellEditor(new PlayButtonEditor(new JCheckBox()));
+
+        table.getColumn("Delete").setMaxWidth(50);
+        table.getColumn("Delete").setCellRenderer(new DeleteButtonRenderer());
+        table.getColumn("Delete").setCellEditor(new DeleteButtonEditor(new JCheckBox()));
+
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(10, 123, 1181, 567);
@@ -346,14 +360,23 @@ public class MainWindow {
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                defaultTableModel.addRow(new Object[] { String.valueOf(projectList.getSelectedItem()), "75 %", "Progress Detail", "Summary Quiries", true});
-                populateProjectList();
+                defaultTableModel.addRow(new Object[] {
+                        String.valueOf(projectList.getSelectedItem()),
+                        "75 %",
+                        "Summary Quiries",
+                        chckbxIntermidiateFiles.isSelected(),
+                        String.valueOf(projectList.getSelectedItem()),
+                        String.valueOf(projectList.getSelectedItem())});
 
                 String selectedProject = String.valueOf(projectList.getSelectedItem());
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
-                    SchedulerData data = new SchedulerData(project); // TODO: this will be replace by user interface
-                    Scheduler.getInstance(data).run();
+                    SchedulerData data = new SchedulerData(project);
+                    Scheduler current = new Scheduler(data);
+                    Thread t = new Thread(current);
+                    t.start();
+
+                    ListOfProjectSchedule.add(current);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -381,7 +404,6 @@ public class MainWindow {
      * populate project list
      */
     private void populateProjectList() {
-
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
         projectList.removeAllItems();
 
@@ -426,10 +448,10 @@ public class MainWindow {
      * @author sufi
      *
      */
-    class TechnicalProgressButtonRenderer extends JButton implements TableCellRenderer {
+    class ProgressButtonRenderer extends JButton implements TableCellRenderer {
         private static final long serialVersionUID = 1L;
 
-        public TechnicalProgressButtonRenderer() {
+        public ProgressButtonRenderer() {
             setOpaque(true);
         }
 
@@ -453,13 +475,13 @@ public class MainWindow {
      * @author sufi
      *
      */
-    class TechnicalProgressButtonEditor extends DefaultCellEditor {
+    class ProgressButtonEditor extends DefaultCellEditor {
         private static final long serialVersionUID = 1L;
         protected JButton button;
         private String label;
         private boolean isPushed;
 
-        public TechnicalProgressButtonEditor(JCheckBox checkBox) {
+        public ProgressButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
             button.setOpaque(true);
@@ -490,7 +512,15 @@ public class MainWindow {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                JOptionPane.showMessageDialog(button, label + ": Ouch!");
+                for(Scheduler item : ListOfProjectSchedule)
+                {
+                    String currentProjectName = item.data.projectInfoFile.projectName.toString();
+                    String projectName = label.toString();
+
+                    if(currentProjectName.equals(projectName)) {
+                        new ProjectProgress(item);
+                    }
+                }
             }
             isPushed = false;
             return new String(label);
@@ -508,13 +538,207 @@ public class MainWindow {
         }
     }
 
+    /** button to be render for technical progress
+     * @author sufi
+     *
+     */
+    class PlayButtonRenderer extends JButton implements TableCellRenderer {
+        private static final long serialVersionUID = 1L;
+
+        public PlayButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else {
+                setForeground(table.getForeground());
+                setBackground(UIManager.getColor("Button.background"));
+            }
+            setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+            return this;
+        }
+    }
+
+    /**
+     * editor for the technical progress
+     * @author sufi
+     *
+     */
+    class PlayButtonEditor extends DefaultCellEditor {
+        private static final long serialVersionUID = 1L;
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public PlayButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(table.getBackground());
+            }
+            label = (value == null) ? "" : value.toString();
+            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                for(Scheduler item : ListOfProjectSchedule)
+                {
+                    String currentProjectName = item.data.projectInfoFile.projectName.toString();
+                    String projectName = label.toString();
+
+                    if(currentProjectName.equals(projectName)) {
+                        new ProjectProgress(item);
+                    }
+                }
+            }
+            isPushed = false;
+            return new String(label);
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        @Override
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
+    }
+
+    /** button to be render for technical progress
+     * @author sufi
+     *
+     */
+    class DeleteButtonRenderer extends JButton implements TableCellRenderer {
+        private static final long serialVersionUID = 1L;
+
+        public DeleteButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else {
+                setForeground(table.getForeground());
+                setBackground(UIManager.getColor("Button.background"));
+            }
+            setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            return this;
+        }
+    }
+
+    /**
+     * editor for the technical progress
+     * @author sufi
+     *
+     */
+    class DeleteButtonEditor extends DefaultCellEditor {
+        private static final long serialVersionUID = 1L;
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public DeleteButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(table.getBackground());
+            }
+            label = (value == null) ? "" : value.toString();
+            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                int removeProject = -1;
+                for(Scheduler item : ListOfProjectSchedule)
+                {
+                    String currentProjectName = item.data.projectInfoFile.projectName.toString();
+                    String projectName = label.toString();
+
+                    if(currentProjectName.equals(projectName)) {
+                        removeProject = ListOfProjectSchedule.indexOf(item);
+                    }
+                }
+                if(removeProject != -1) {
+
+                    ListOfProjectSchedule.remove(removeProject);
+                    defaultTableModel.removeRow(removeProject);
+                }
+            }
+            isPushed = false;
+            return new String(label);
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        @Override
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
+    }
+
+
     /**
      * handles and trigger to the main window
      * @author sufi
      *
      */
     class mainWindowListenerImplementation implements MainWindowListener{
-
         @Override
         public void RefreshProjectList(MainWindowEventObject e) {
             populateProjectList();

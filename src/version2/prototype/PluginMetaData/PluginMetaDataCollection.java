@@ -22,8 +22,9 @@ public class PluginMetaDataCollection {
 
     public static PluginMetaDataCollection getInstance() throws ParserConfigurationException, SAXException, IOException
     {
-        if(instance == null)
-            instance = new PluginMetaDataCollection(null);
+        if(instance == null) {
+            instance = new PluginMetaDataCollection();
+        }
         return instance;
     }
     private static PluginMetaDataCollection instance;
@@ -31,7 +32,7 @@ public class PluginMetaDataCollection {
     public Map<String,PluginMetaData> pluginMetaDataMap;
     public ArrayList<String> pluginList;
 
-    public PluginMetaDataCollection(ArrayList<String> listOfPluginMetaData) throws ParserConfigurationException, SAXException, IOException{
+    public PluginMetaDataCollection() throws ParserConfigurationException, SAXException, IOException{
         pluginList = new ArrayList<String>();
         pluginMetaDataMap = createMap();
     }
@@ -41,33 +42,41 @@ public class PluginMetaDataCollection {
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
         for(File fXmlFile: getXMLFiles(fileDir)){
 
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
+            try{
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(fXmlFile);
 
-            doc.getDocumentElement().normalize();
-            PluginMetaData temp=new PluginMetaData();
-            temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
-            temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
-            temp.Projection = new ProcessMetaData(doc.getElementsByTagName("Process"));
+                doc.getDocumentElement().normalize();
+                PluginMetaData temp=new PluginMetaData();
+                temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
+                temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
+                temp.Projection = new ProcessMetaData(doc.getElementsByTagName("Process"));
 
-            temp.IndicesMetaData = new ArrayList<String>();
-            NodeList tempIndices = doc.getElementsByTagName("Indices");
-            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
-            for(int i = 0; i < nodesIndices; i++)
-                temp.IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
+                temp.IndicesMetaData = new ArrayList<String>();
+                NodeList tempIndices = doc.getElementsByTagName("Indices");
+                int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
+                for(int i = 0; i < nodesIndices; i++) {
+                    temp.IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
+                }
 
-            temp.Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
+                temp.Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
 
-            temp.QualityControlMetaData = new ArrayList<String>();
-            NodeList tempQC = doc.getElementsByTagName("QualityControl");
-            int nodesQC = ((Element) tempQC.item(0)).getElementsByTagName("Level").getLength();
-            for(int i = 0; i < nodesQC; i++)
-                temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
+                temp.QualityControlMetaData = new ArrayList<String>();
+                NodeList tempQC = doc.getElementsByTagName("QualityControl");
+                int nodesQC = ((Element) tempQC.item(0)).getElementsByTagName("Level").getLength();
+                for(int i = 0; i < nodesQC; i++) {
+                    temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
+                }
 
-            String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
-            pluginList.add(pluginName);
-            myMap.put(pluginName, temp);
+                String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
+                pluginList.add(pluginName);
+                myMap.put(pluginName, temp);
+            }
+            catch(Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         return myMap;
     }
@@ -76,17 +85,20 @@ public class PluginMetaDataCollection {
         List<File> aList = new ArrayList<File>();
 
         File[] files = folder.listFiles();
-        for (File pf : files)
-            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1)
+        for (File pf : files) {
+            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
                 aList.add(pf);
+            }
+        }
         return aList.toArray(new File[aList.size()]);
     }
 
     private String getFileExtensionName(File f) {
-        if (f.getName().indexOf(".") == -1)
+        if (f.getName().indexOf(".") == -1) {
             return "";
-        else
+        } else {
             return f.getName().substring(f.getName().length() - 3, f.getName().length());
+        }
     }
 
     public class PluginMetaData {
@@ -117,10 +129,11 @@ public class PluginMetaDataCollection {
             mode=((Element) downloadNode).getElementsByTagName("mode").item(0).getTextContent();
             mode=mode.toUpperCase();
 
-            if(mode.equalsIgnoreCase("Ftp"))
+            if(mode.equalsIgnoreCase("Ftp")) {
                 myFtp=new ftp(((Element)downloadNode).getElementsByTagName(mode).item(0));
-            else
+            } else {
                 myHttp=new http(((Element)downloadNode).getElementsByTagName(mode).item(0));
+            }
         }
     }
 
