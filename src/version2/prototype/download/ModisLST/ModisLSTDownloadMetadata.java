@@ -5,7 +5,6 @@ import java.io.*;
 import org.w3c.dom.*;
 
 import version2.prototype.*;
-import version2.prototype.download.ModisId;
 import version2.prototype.util.XmlUtils;
 
 
@@ -13,21 +12,31 @@ import version2.prototype.util.XmlUtils;
 public final class ModisLSTDownloadMetadata implements Comparable<ModisLSTDownloadMetadata> {
     private static final String ROOT_ELEMENT_NAME = "ModisLSTDownloadMetadata";
     private static final String DOWNLOADED_ATTRIBUTE_NAME = "downloaded";
+    // private static final String DATE_ATTRIBUTE_NAME = "date";
+    private static final String PROCESSED_ATTRIBUTE_NAME = "processed";
 
-    private final ModisId mModisId;
+
     private final DataDate mDownloaded;
+    private final ModisTile mTile;
+    private final DataDate mProcessed;
 
-    public ModisLSTDownloadMetadata(ModisId modisId, DataDate downloaded) {
-        mModisId = modisId;
-        mDownloaded = downloaded;
-    }
 
-    public ModisId getModisId() {
-        return mModisId;
+    public ModisLSTDownloadMetadata(DataDate download, ModisTile tile, DataDate processed) {
+        mDownloaded=download;
+        mTile = tile;
+        mProcessed = processed;
     }
 
     public DataDate getDownloaded() {
         return mDownloaded;
+    }
+
+    public DataDate getProcessed() {
+        return mProcessed;
+    }
+
+    public ModisTile getTile() {
+        return mTile;
     }
 
     @Override
@@ -40,24 +49,24 @@ public final class ModisLSTDownloadMetadata implements Comparable<ModisLSTDownlo
     }
 
     public boolean equals(ModisLSTDownloadMetadata o) {
-        return mModisId.equals(o.mModisId) &&
+        return mTile.equals(o.mTile) &&
                 mDownloaded.equals(o.mDownloaded);
     }
 
     public boolean equalsIgnoreDownloaded(ModisLSTDownloadMetadata o) {
-        return mModisId.equals(o.mModisId);
+        return mDownloaded.equals(o.mDownloaded);
     }
 
     @Override
     public int hashCode() {
-        int hash = mModisId.hashCode();
+        int hash = mDownloaded.hashCode();
         hash = 17 * hash + mDownloaded.hashCode();
         return hash;
     }
 
     @Override
     public int compareTo(ModisLSTDownloadMetadata o) {
-        int cmp = mModisId.compareTo(o.mModisId);
+        int cmp = mDownloaded.compareTo(o.mDownloaded);
         if (cmp != 0) {
             return cmp;
         }
@@ -77,10 +86,11 @@ public final class ModisLSTDownloadMetadata implements Comparable<ModisLSTDownlo
             throw new IOException("Unexpected root element name");
         }
 
-        final ModisId modisId = ModisId.fromXml(XmlUtils.getChildElement(rootElement));
+        final ModisTile tile = ModisTile.fromXml(XmlUtils.getChildElement(rootElement));
+        final DataDate processed = DataDate.fromCompactString(rootElement.getAttribute(PROCESSED_ATTRIBUTE_NAME));
         final DataDate downloaded = DataDate.fromCompactString(rootElement.getAttribute(DOWNLOADED_ATTRIBUTE_NAME));
 
-        return new ModisLSTDownloadMetadata(modisId, downloaded);
+        return new ModisLSTDownloadMetadata(downloaded,tile,processed);
     }
 
     public void toFile(File file) throws IOException {
