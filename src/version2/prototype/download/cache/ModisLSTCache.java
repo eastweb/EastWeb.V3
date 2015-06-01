@@ -74,7 +74,7 @@ public class ModisLSTCache implements Cache {
                 mDates.equals(o.mDates);
     }
 
-    public static ModisNBARCache fromFile(File file) throws IOException {
+    public static ModisLSTCache fromFile(File file) throws IOException {
         final Element rootElement = XmlUtils.parseGzipped(file).getDocumentElement();
         System.out.println(file.getPath()+" is open");
 
@@ -124,7 +124,7 @@ public class ModisLSTCache implements Cache {
             tiles.add(new ModisTile(horizontalVal, verticalVal));
         }
 
-        return new ModisNBARCache(lastUpdated, startDate, dates, tiles);
+        return new ModisLSTCache(lastUpdated, startDate, dates, tiles);
     }
 
     public void toFile(File file) throws IOException {
