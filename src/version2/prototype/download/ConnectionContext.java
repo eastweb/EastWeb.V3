@@ -10,7 +10,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 
 public class ConnectionContext {
 
-    static Object getConnection(String mode, String dt, DownloadMetaData metadata) throws ConnectException{
+    public static Object getConnection(String mode, String dt, DownloadMetaData metadata) throws ConnectException{
         Object connection=null;
 
         try {
