@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PluginMetadata>
+	<title>ModisLST</title>
+	<Download>
+		<className>ModisLSTDownloadTask</className>
+		<mode>HTTP</mode>
+		<HTTP>
+			<url>http://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.005/</url>
+		</HTTP>
+	</Download>
+	<Process>
+		<Projection processStep="1">
+			
+		</Projection>
+		<mozaic processStep="2">
+			
+		</mozaic>
+		<convert processStep="3">
+			
+		</convert>
+		<filter processStep="4">
+			
+		</filter>
+	</Process>
+	<Indices>
+		
+	</Indices>
+	<Summary>
+	
+	</Summary>
+	<QualityControl>
+	
+	</QualityControl>
+</PluginMetadata>
