@@ -10,7 +10,7 @@ import org.gdal.ogr.ogr;
 
 import version2.prototype.ConfigReadException;
 import version2.prototype.DirectoryLayout;
-import version2.prototype.ProjectInfo;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Projection.ResamplingType;
 
 import java.io.File;
@@ -98,8 +98,8 @@ public class GdalUtils {
      * @throws ConfigReadException
      *             *
      **/
-    public static void project(File input, ProjectInfo project, File output) throws ConfigReadException {
-        assert (project.getShapeFiles().size() > 0);
+    public static void project(File input, ProjectInfoFile project, File output) throws ConfigReadException {
+        assert (project.masterShapeFile != null);
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
@@ -107,11 +107,18 @@ public class GdalUtils {
             Dataset inputDS = gdal.Open(input.getPath());
             // System.out.println(inputDS.GetProjectionRef().toString());
             // SpatialReference inputRef = new SpatialReference();
+
+            /* Original code : takes an array of shape files
             List<DataSource> features = new ArrayList<DataSource>();
             for (String filename : project.getShapeFiles()) {
                 features.add(ogr.Open(new File(DirectoryLayout
                         .getSettingsDirectory(project), filename).getPath()));
             }
+             */
+
+            List<DataSource> features = new ArrayList<DataSource>();
+            features.add(ogr.Open(new File(project.masterShapeFile).getPath()));
+
 
             // Find union of extents
             double[] extent = features.get(0).GetLayer(0).GetExtent(); // Ordered:
