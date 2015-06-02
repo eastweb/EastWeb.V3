@@ -2,21 +2,30 @@ package version2.prototype.projection;
 
 import java.io.File;
 
-/* Modified by YL on May 15th
+/* Modified by Y. L.  on June 2nd
  * changed Composite from Interface to abstract class
  * added constructor and run method
  */
 
 public abstract class Composite {
 
-    /* the input files fetched from the "working folder" for processing.
-     * The input files contains ALL the archives from the download process.
-     */
-    private File[] inputFiles;
+    //locations for the input files. for this step, will only use inputFolders[0]
+    private String [] inputFolders;
+    //location for the output file
+    private String outputFolder;
+    // the files in the input folder for composition
+    private File [] inputFiles;
 
     public Composite(ProcessData data) {
-        assert(data.inputFiles.length > 0);
-        inputFiles = data.inputFiles;
+        inputFolders = data.getInputFolders();
+        outputFolder = data.getOutputFolder();
+
+        //check if there is at least one input file in the given folder
+        File inputFolder = new File(inputFolders[0]);
+        File[] listOfFiles = inputFolder.listFiles();
+        assert (listOfFiles.length > 1);
+        //set the input files
+        inputFiles = listOfFiles;
     }
 
     // run method for scheduler
@@ -26,20 +35,15 @@ public abstract class Composite {
 
     /*Override this:
      * postcondition:
-     *        compose the input files (inputArray) into a collection of files
-     *        so that each file contains a composition of a number of input files.
-     *        For example, as for a 3-hour TRMM data, each result file is composed
-     *        from 8 input files
+     *        compose the files in the array inputFiles into a file that contains
+     *        a composition of a number of input files.
+     *        For example, as for a hourly NLDAS data, a result file is composed
+     *        from 24 input files.
      *
      * Steps for the implementation:
-     *   (1) if the intermediate files are requested to be stored, save the the input files
-     *       into a designated location.
-     *   (2) fetch the number of files (e.g. 8 for 3-hour TRMM) and compose them into
-     *       a result file and save the result file.
-     *       the filename should follow the name convention to contain the time.
-     *   (3) repeat step (2) until all the files in the "working folder" are processed
-     *   (4) remove the original input files. Now the result files will be "inputArray"
-     *       for the next processing stage
+     *   (1) check if there are enough number of files in the inputFiles array.(e.g. 24 for hourly NLDAS)
+     *   (2) compose the files into a result file and save the result file to outputFolder
+     *   (3) remove the inputFolder
      */
     public abstract void composeFiles();
 

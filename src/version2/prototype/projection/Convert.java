@@ -11,7 +11,7 @@ import java.io.File;
  */
 
 public abstract class Convert {
-    //locations for the input files. for this step, will only have one folder
+    //locations for the input files. for this step, will only use inputFolders[0]
     private String [] inputFolders;
     //location for the output file
     private String outputFolder;
@@ -32,7 +32,7 @@ public abstract class Convert {
 
     // run method for the scheduler
     public void run(){
-        convert();
+        convertFile();
     }
 
     /*Override this:
@@ -46,6 +46,6 @@ public abstract class Convert {
      *   (3) Write the result from (2) to outputFolder
      *   (4) Remove the inputFolder
      */
-    abstract void convert();
+    abstract void convertFile();
 
 }
