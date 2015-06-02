@@ -4,61 +4,65 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.DirectoryLayout;
-import version2.prototype.ModisTile;
-import version2.prototype.ProjectInfo;
+import version2.prototype.Projection;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.GeneralListener;
 
-public class PrepareProcessTask {
-    private final ProjectInfo mProject;
-    private final DataDate mDate;
-    private String mProduct;
+/* Overridden by each plugin's prepareProcessTask class
+ * name convention:  Plugin_namePrepareProcessTask.class
+ */
+public abstract class PrepareProcessTask {
+    private ProjectInfoFile project;
+    private final DataDate date;
+    private final ProjectInfoPlugin plugin;
 
     public GeneralListener listener;
 
-    public PrepareProcessTask(ProjectInfo project, String mProduct, DataDate date, GeneralListener l) {
-        this.mProduct = mProduct;
-        mProject = project;
-        mDate = date;
+    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
+        project = mProject;
+        date = mDate;
+        plugin = mPlugin;
         listener = l;
     }
 
-    public File getMetadataFile() throws ConfigReadException {
-        return DirectoryLayout.getModisReprojectedMetadata(mProject, mProduct, mDate);
+    /* pre-condition: input the ID of the step specified in the plugin metadata
+     * post-condition: return the temp folder(s) for getting the input files for processing step with "stepId"
+     */
+    public abstract String [] getInputFolders(int stepId);
+
+    /* pre-condition: input the ID of the step specified in the plugin metadata
+     * post-condition: return the temp folder to write the output to after the step with "stepId" is done
+     */
+    public abstract String getOutputFolder(int stepId);
+
+    /* post-condition: return the bands for the plugin */
+    public abstract int [] getBands();
+
+    /* post-condition: return the master shapefile given in the project */
+    public String getShapeFile() {
+        return project.masterShapeFile;
     }
 
-    public File getInputFile() throws ConfigReadException {
-        return DirectoryLayout.getNldasDownload(mDate);
+    /* post-condition: return the mask file given in the project */
+    public String getMaskFile() {
+        return project.maskingFile;
     }
 
-    public File getOutputFile() throws ConfigReadException {
-        return DirectoryLayout.getNldasReprojected(mProject, mDate);
+    // post-condition: return the set projection for the plugin in the project
+    public Projection getProjection(){
+        return project.getProjection();
     }
 
-    public File[] getInputFiles() throws ConfigReadException {
-        final List<File> files = new ArrayList<File>();
-
-        for (ModisTile tile : mProject.getModisTiles()) {
-            files.add(DirectoryLayout.getModisDownload(mProduct, mDate, tile));
-        }
-        return files.toArray(new File[0]);
+    // post-condition: return the set qcLevel for the plugin in the project
+    public String getQC(){
+        return plugin.GetQC();
     }
 
-    public int[] getBands() {
-
-        if(mProduct == "NBAR")
-        {
-            return new int[] { 1,2, 3, 4, 5, 6, 7 };
-        }
-        else if (mProduct == "LST")
-        {
-            return new int[] { 1,5 };
-        }
-        else
-        {
-            throw new IllegalArgumentException();
-        }
+    public GeneralListener getListener(){
+        return listener;
     }
+
 }
