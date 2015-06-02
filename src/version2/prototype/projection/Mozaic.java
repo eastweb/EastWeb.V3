@@ -19,6 +19,9 @@ import version2.prototype.util.GdalUtils;
 // Mosaic tiles together
 public class Mozaic {
 
+    //locations for the input files. for this step, will only use inputFolders[0]
+    String [] inputFolders ;
+
     //location for the output file
     private File outputFolder;
     // the bands need to be exacted.
@@ -42,7 +45,7 @@ public class Mozaic {
     private Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
 
         //locations for the input files. for this step, will only use inputFolders[0]
-        String [] inputFolders = data.getInputFolders();
+        inputFolders = data.getInputFolders();
 
         //check if there is at least one input file in the given folder
         File inputFolder = new File(inputFolders[0]);
@@ -79,6 +82,7 @@ public class Mozaic {
                 e.printStackTrace();
             }
         }
+
     }
 
 
@@ -198,5 +202,7 @@ public class Mozaic {
             // add this band mozaic product into outputFile arraylist
             outputFiles.add(temp);
         }
+
+        //TODO: delete input folder
     }
 }

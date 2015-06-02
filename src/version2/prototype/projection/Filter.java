@@ -7,49 +7,115 @@ import org.gdal.gdal.gdal;
 
 import version2.prototype.util.GdalUtils;
 
+// Modified and commented by Y.L. on June 2nd 2015
+
+// screen the files and filter out the "bad" data by given value or qcFlag in the data product
 public abstract class Filter {
-    private final File mInput;
-    private final File mOutput;
+
+    /* locations for the input files.
+     * inputFolders[0] stores the files to be filtered
+     * inputFolders[1] stores the QC file(s) if there is any
+     */
+    String [] inputFolders;
+
+    //location for the output file
+    private String outputFolder;
+    // the files in the input folder
+    private File [] inputFiles;
+    // the qcFiles in the inputFolders[1];
+    private File [] qcFiles = null;
+    // qc level
+    private String qcLevel;
 
     public Filter(ProcessData data) {
-        assert(data.input.exists());
-        assert(!data.output.exists());
-        assert(!data.input.equals(data.output));
 
-        mInput = data.input;
-        mOutput = data.output;
+        /* locations for the input files.
+         * inputFolders[0] stores the files to be filtered
+         * inputFolders[1] stores the QC file(s) if there is any
+         */
+        inputFolders = data.getInputFolders();
+
+        //check if there is ate least one input file in the given folder
+        File inputFolder1 = new File(inputFolders[0]);
+        File[] listOfFiles = inputFolder1.listFiles();
+        assert (listOfFiles.length >= 1);
+        //set the input files
+        inputFiles = listOfFiles;
+
+        //check if there is ate least one input file in the given folder
+        File inputFolder2 = new File(inputFolders[1]);
+        File[] listOfFiles2= inputFolder2.listFiles();
+
+        if (listOfFiles2.length >= 1) {
+            qcFiles = listOfFiles2;
+        }
+
+        // set qcLevel
+        qcLevel = data.getQcLevel();
+
+        outputFolder = data.getOutputFolder();
     }
 
-    public void filter() throws Exception {
+    // run method for the scheduler
+    public void run(){
+        if (qcFiles != null) {
+            try {
+                filterByValue();
+            } catch (Exception e) {
+                // TODO :write into log
+                e.printStackTrace();
+            }
+        } else {
+            filterByQCFlag(qcLevel);
+        }
+
+        // TODO: delete the input folders
+    }
+
+    public void filterByValue() throws Exception {
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
-            Dataset inputDS = gdal.Open(mInput.getPath());
-            assert(inputDS.GetRasterCount() == 1);
+            for (File mInput : inputFiles){
 
-            Dataset outputDS = createOutput(inputDS);
-            double[] array = new double[outputDS.GetRasterXSize()];
+                Dataset inputDS = gdal.Open(mInput.getPath());
+                assert(inputDS.GetRasterCount() == 1);
 
-            for (int y=0; y<outputDS.GetRasterYSize(); y++) {
-                outputDS.GetRasterBand(1).ReadRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+                Dataset outputDS = createOutput(inputDS);
+                double[] array = new double[outputDS.GetRasterXSize()];
 
-                for (int x=0; x<outputDS.GetRasterXSize(); x++) {
-                    array[x] = filterValue(array[x]);
+                for (int y=0; y<outputDS.GetRasterYSize(); y++) {
+                    outputDS.GetRasterBand(1).ReadRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+
+                    for (int x=0; x<outputDS.GetRasterXSize(); x++) {
+                        array[x] = filterValue(array[x]);
+                    }
+
+                    synchronized (GdalUtils.lockObject) {
+                        outputDS.GetRasterBand(1).WriteRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+                    }
                 }
 
-                synchronized (GdalUtils.lockObject) {
-                    outputDS.GetRasterBand(1).WriteRaster(0, y, outputDS.GetRasterXSize(), 1, array);
-                }
+                inputDS.delete();
+                outputDS.delete();
             }
-
-            inputDS.delete();
-            outputDS.delete();
         }
     }
 
     protected Dataset createOutput(Dataset inputDS) {
-        return gdal.GetDriverByName("GTiff").CreateCopy(mOutput.getPath(), inputDS);
+        return gdal.GetDriverByName("GTiff").CreateCopy(outputFolder, inputDS);
     }
 
+    /*Override this:
+     * @Param : value:  the given value
+     *
+     * postcondition:
+     *   return the result value after applying filtering strategy on the given value
+     */
     protected abstract double filterValue(double value);
+
+    /*Override this:
+     * use the qcFiles to filter the inputFiles based on the given qcLevel
+     */
+    protected abstract double filterByQCFlag(String qcLevel);
 }
