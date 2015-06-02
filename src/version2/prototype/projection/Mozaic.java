@@ -19,8 +19,6 @@ import version2.prototype.util.GdalUtils;
 // Mosaic tiles together
 public class Mozaic {
 
-    //locations for the input files. for this step, will only use inputFolders[0]
-    private String [] inputFolders;
     //location for the output file
     private File outputFolder;
     // the bands need to be exacted.
@@ -30,29 +28,31 @@ public class Mozaic {
     // hold the output files
     private ArrayList<File> outputFiles;
 
-    int xSize;
-    int ySize;
-    int outputXSize;
-    int outputYSize;
     private int tileNumber;
-    ModisTileData[] tileList;
-    ModisTileData[][] tileMetrix;
-    int tileMetrixRow;
-    int tileMetrixClo;
+
+    private int xSize;
+    private int ySize;
+    private int outputXSize;
+    private int outputYSize;
+    private ModisTileData[] tileList;
+    private  ModisTileData[][] tileMetrix;
+    private int tileMetrixRow;
+    private int tileMetrixClo;
 
     private Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
 
-        inputFolders = data.getInputFolders();
-        // create the output folder
-        outputFolder = new File(data.getOutputFolder());
+        //locations for the input files. for this step, will only use inputFolders[0]
+        String [] inputFolders = data.getInputFolders();
 
         //check if there is at least one input file in the given folder
         File inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
         tileNumber = listOfFiles.length;
-        assert (tileNumber > 1);
+        assert (tileNumber >= 1);
         //set the input files
         inputFiles = listOfFiles;
+
+        outputFolder = new File(data.getOutputFolder());
 
         bands = data.getBands();
         outputFiles = new ArrayList<File>();

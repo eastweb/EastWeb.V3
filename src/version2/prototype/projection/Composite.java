@@ -21,7 +21,7 @@ public abstract class Composite {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
 
-        //check if there is at least one input file in the given folder
+        //check if there are more than one input file in the given folder
         File inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
         assert (listOfFiles.length > 1);
