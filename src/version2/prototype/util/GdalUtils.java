@@ -88,7 +88,9 @@ public class GdalUtils {
      *            wkt string contains the projection information for the output
      *            file
      * @param input
-     *            input file.
+     *            input file for reprojection
+     * @param masterShapeFile
+     *            input mater shapefile
      * @param project
      *            store the shape file and project information
      * @param output
@@ -98,8 +100,8 @@ public class GdalUtils {
      * @throws ConfigReadException
      *             *
      **/
-    public static void project(File input, ProjectInfoFile project, File output) throws ConfigReadException {
-        assert (project.masterShapeFile != null);
+    public static void project(File input, String masterShapeFile, Projection projection, File output) {
+        assert (masterShapeFile != null);
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
@@ -117,7 +119,7 @@ public class GdalUtils {
              */
 
             List<DataSource> features = new ArrayList<DataSource>();
-            features.add(ogr.Open(new File(project.masterShapeFile).getPath()));
+            features.add(ogr.Open(new File(masterShapeFile).getPath()));
 
 
             // Find union of extents
@@ -149,9 +151,9 @@ public class GdalUtils {
                     gdal.GetDriverByName("GTiff").Create(
                             output.getPath(),
                             (int) Math.ceil((right - left)
-                                    / project.getProjection().getPixelSize()),
+                                    / projection.getPixelSize()),
                                     (int) Math.ceil((top - bottom)
-                                            / project.getProjection().getPixelSize()),
+                                            / projection.getPixelSize()),
                                             1, gdalconst.GDT_Float32);
 
             // TODO: get projection from project info, and get transform from
@@ -162,13 +164,13 @@ public class GdalUtils {
                     features.get(0).GetLayer(0).GetSpatialRef().ExportToWkt();
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] { left,
-                    project.getProjection().getPixelSize(), 0, top, 0,
-                    -project.getProjection().getPixelSize() });
+                    projection.getPixelSize(), 0, top, 0,
+                    -projection.getPixelSize() });
 
             // get resample argument
             int resampleAlg = -1;
             ResamplingType resample =
-                    project.getProjection().getResamplingType();
+                    projection.getResamplingType();
             switch (resample) {
             case NEAREST_NEIGHBOR:
                 resampleAlg = gdalconst.GRA_NearestNeighbour;
