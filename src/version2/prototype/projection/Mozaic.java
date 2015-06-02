@@ -12,45 +12,75 @@ import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.util.GdalUtils;
 
+
+/* Modified by YL on May 31st
+ */
+
+// Mosaic tiles together
 public class Mozaic {
+
+    //locations for the input files. for this step, will only use inputFolders[0]
+    private String [] inputFolders;
+    //location for the output file
+    private File outputFolder;
+    // the bands need to be exacted.
+    private int [] bands;
+    // the files in the input folder
+    private File [] inputFiles;
+    // hold the output files
+    private ArrayList<File> outputFiles;
+
     int xSize;
     int ySize;
     int outputXSize;
     int outputYSize;
-    int tileNumber;
+    private int tileNumber;
     ModisTileData[] tileList;
     ModisTileData[][] tileMetrix;
     int tileMetrixRow;
     int tileMetrixClo;
-    int[] band;
-    ArrayList<File> outputFiles;
-    private File tempDictionary;
 
-    public Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
-        tempDictionary = new File(Config.getInstance().getTempDirectory());
-        band = data.bands.clone();
+    private Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
+
+        inputFolders = data.getInputFolders();
+        // create the output folder
+        outputFolder = new File(data.getOutputFolder());
+
+        //check if there is at least one input file in the given folder
+        File inputFolder = new File(inputFolders[0]);
+        File[] listOfFiles = inputFolder.listFiles();
+        tileNumber = listOfFiles.length;
+        assert (tileNumber > 1);
+        //set the input files
+        inputFiles = listOfFiles;
+
+        bands = data.getBands();
         outputFiles = new ArrayList<File>();
 
         // read tile data and get size of tiles
-        tileNumber = data.inputFiles.length;
         tileList = new ModisTileData[tileNumber];
 
         for (int i = 0; i < tileNumber; i++) {
-            tileList[i] = new ModisTileData(data.inputFiles[i]);
+            tileList[i] = new ModisTileData(inputFiles[i]);
         }
 
         xSize = tileList[0].xSize;
         ySize = tileList[0].ySize;
     }
 
-    public ArrayList<File> run() throws IOException {
+    // run method for the scheduler
+    public void run(){
         synchronized (GdalUtils.lockObject) {
             sortTiles();
-            linkTiles();
-
-            return outputFiles;
+            try {
+                linkTiles();
+            } catch (IOException e) {
+                // TODO: Write to log
+                e.printStackTrace();
+            }
         }
     }
+
 
     void sortTiles() {
         int minH = tileList[0].horizon;
@@ -94,12 +124,11 @@ public class Mozaic {
     }
 
     private void linkTiles() throws IOException {
-        System.out.println("enter link");
 
         // loop for each band needed be reprojected
-        for (int i = 0; i < band.length; i++) {
-            int currentBand = band[i];
-            File temp = File.createTempFile("band" + currentBand, ".tif", tempDictionary);
+        for (int i = 0; i < bands.length; i++) {
+            int currentBand = bands[i];
+            File temp = File.createTempFile("band" + currentBand, ".tif", outputFolder);
 
             System.out.println("create temp: " + temp.toString());
             temp.deleteOnExit();

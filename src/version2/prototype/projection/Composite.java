@@ -7,6 +7,7 @@ import java.io.File;
  * added constructor and run method
  */
 
+// compose hourly data into a daily data
 public abstract class Composite {
 
     //locations for the input files. for this step, will only use inputFolders[0]
