@@ -14,7 +14,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.DirectoryLayout;
-import version2.prototype.ProjectInfo;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -39,8 +39,7 @@ public class Scheduler implements Runnable {
     public ArrayList<String> Log;
 
     public SchedulerData data;
-    public ProjectInfo projectInfo;
-    public Config config;
+    public ProjectInfoFile projectInfoFile;
     public PluginMetaDataCollection pluginMetaDataCollection;
     private File outTable;
     private ArrayList<String> summarySingletonNames;
@@ -54,10 +53,8 @@ public class Scheduler implements Runnable {
         Log = new ArrayList<String>();
 
         this.data = data;
-        projectInfo = data.projectInfo;
-        config = data.config;
+        projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
-        outTable = data.OutTableFile;
         summarySingletonNames = data.SummarySingletonNames;
     }
 
@@ -129,7 +126,10 @@ public class Scheduler implements Runnable {
     public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         ProcessMetaData temp = PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Projection;
-        PrepareProcessTask prepareProcessTask = new PrepareProcessTask(projectInfo, "NBAR", projectInfo.getStartDate(), new processListener());
+        // TODO: revise the "date"
+        PrepareProcessTask prepareProcessTask;
+        // TODO: initiate it with each plugin's implementation
+        //prepareProcessTask= new PrepareProcessTask(projectInfoFile, plugin.GetName(), projectInfoFile.startDate, new processListener());
 
         for (int i = 1; i <= temp.processStep.size(); i++) {
             if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
@@ -139,12 +139,14 @@ public class Scheduler implements Runnable {
                         + temp.processStep.get(i));
                 Constructor<?> ctorProcess = clazzProcess.getConstructor(ProcessData.class);
                 Object process =  ctorProcess.newInstance(new Object[] {new ProcessData(
-                        prepareProcessTask.getInputFiles(),
+                        prepareProcessTask.getInputFolders(i),
+                        prepareProcessTask.getOutputFolder(i),
+                        prepareProcessTask.getQC(),
+                        prepareProcessTask.getShapeFile(),
+                        prepareProcessTask.getMaskFile(),
                         prepareProcessTask.getBands(),
-                        prepareProcessTask.getInputFile(),
-                        prepareProcessTask.getOutputFile(),
-                        data.projectInfoFile,
-                        prepareProcessTask.listener)});
+                        prepareProcessTask.getProjection(),
+                        prepareProcessTask.getListener())});
                 Method methodProcess = process.getClass().getMethod("run");
                 methodProcess.invoke(process);
             }
