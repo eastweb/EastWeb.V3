@@ -52,7 +52,7 @@ public abstract class Filter {
         }
 
         // set qcLevel
-        qcLevel = data.getQcLevel();
+        qcLevel = data.getQCLevel();
 
         // set QC bands
         qcBands = data.getQCBands();
@@ -119,7 +119,8 @@ public abstract class Filter {
     protected abstract double filterValue(double value);
 
     /*Override this:
-     * use the qcFiles to filter the inputFiles based on the given qcLevel
+     * use the qcFiles to filter the inputFiles based on the given qcLevel by the end user
+     * the Set of the QC levels are defined in the plugin metadata.
      */
     protected abstract double filterByQCFlag(String qcLevel);
 }

@@ -41,7 +41,7 @@ public class ProcessData {
     public String getOutputFolder()
     {   return outputFolder;    }
 
-    public String getQcLevel()
+    public String getQCLevel()
     {   return qcLevel;     }
 
     public String getShapefile()

@@ -42,7 +42,7 @@ public class Mozaic {
     private int tileMetrixRow;
     private int tileMetrixClo;
 
-    private Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
+    public Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
 
         //locations for the input files. for this step, will only use inputFolders[0]
         inputFolders = data.getInputFolders();
