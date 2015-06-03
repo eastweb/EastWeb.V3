@@ -38,15 +38,23 @@ public abstract class PrepareProcessTask {
      */
     public abstract String getOutputFolder(int stepId);
 
-    /* post-condition: return the bands for the plugin */
-    public abstract int [] getBands();
+    /* post-condition: return the bands of the data of the plugin */
+    public abstract int [] getDataBands();
+
+    /* post-condition:
+     *          return the QC bands of the plugin if there is any
+     *          if no QC bands, return null
+     */
+    public abstract int [] getQCBands();
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
         return project.masterShapeFile;
     }
 
-    /* post-condition: return the mask file given in the project */
+    /* post-condition:
+     *          return the mask file given in the project if there is any
+     */
     public String getMaskFile() {
         return project.maskingFile;
     }

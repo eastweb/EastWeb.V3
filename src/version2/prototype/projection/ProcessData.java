@@ -14,21 +14,23 @@ public class ProcessData {
     private String qcLevel;
     private String shapefile;
     private String maskfile;
-    private int [] bands;
+    private int [] dataBands;
+    private int [] qcBands;
     private Projection projection;
     private GeneralListener generalListener;
 
     public ProcessData() { }
 
     public ProcessData(String [] inputFolders, String outputFolder, String qcLevel, String shapefile,
-            String maskfile, int bands[], Projection projection, GeneralListener generalListener)
+            String maskfile, int dataBands[], int qcBands[], Projection projection, GeneralListener generalListener)
     {
         this.inputFolders = inputFolders;
         this.outputFolder = outputFolder;
         this.qcLevel = qcLevel;
         this.shapefile = shapefile;
-        maskfile = maskfile;
-        this.bands = bands;
+        this.maskfile = maskfile;
+        this.dataBands = dataBands;
+        this.qcBands = qcBands;
         this.projection = projection;
         this.generalListener = generalListener;
     }
@@ -48,8 +50,11 @@ public class ProcessData {
     public String getMaskfile()
     {   return maskfile;      }
 
-    public int [] getBands()
-    {   return bands;       }
+    public int [] getDataBands()
+    {   return dataBands;       }
+
+    public int [] getQCBands()
+    {   return qcBands;       }
 
     public Projection getProjection()
     {   return projection;  }

@@ -57,7 +57,7 @@ public class Mozaic {
 
         outputFolder = new File(data.getOutputFolder());
 
-        bands = data.getBands();
+        bands = data.getDataBands();
         outputFiles = new ArrayList<File>();
 
         // read tile data and get size of tiles

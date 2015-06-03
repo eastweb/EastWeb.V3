@@ -16,18 +16,18 @@ public abstract class Convert {
     //location for the output file
     private String outputFolder;
     // the file in the input folder
-    private File inputFile;
+    private File [] inputFiles;
 
     public Convert(ProcessData data) {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
 
-        //check if there is one input file in the given folder
+        //check if there is more than one input file in the given folder
         File inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
-        assert (listOfFiles.length == 1);
+        assert (listOfFiles.length >= 1);
         //set the input files
-        inputFile = listOfFiles[0];
+        inputFiles = listOfFiles;
     }
 
     // run method for the scheduler
@@ -41,10 +41,11 @@ public abstract class Convert {
      *    the file is written into folder specified in variable outputFolder
      *
      * Steps for the implementation:
-     *   (1) Read the file (inputFile)
+     *   (1) Read each file (inputFile)
      *   (2) Convert it into the Tiff format
      *   (3) Write the result from (2) to outputFolder
-     *   (4) Remove the inputFolder
+     *   (4) repeat step (1) - (3)
+     *   (5) Remove the inputFolder
      */
     abstract void convertFile();
 

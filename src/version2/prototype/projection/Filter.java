@@ -26,6 +26,7 @@ public abstract class Filter {
     private File [] qcFiles = null;
     // qc level
     private String qcLevel;
+    private int [] qcBands;
 
     public Filter(ProcessData data) {
 
@@ -53,12 +54,15 @@ public abstract class Filter {
         // set qcLevel
         qcLevel = data.getQcLevel();
 
+        // set QC bands
+        qcBands = data.getQCBands();
+
         outputFolder = data.getOutputFolder();
     }
 
     // run method for the scheduler
     public void run(){
-        if (qcFiles != null) {
+        if (qcBands != null) {
             try {
                 filterByValue();
             } catch (Exception e) {

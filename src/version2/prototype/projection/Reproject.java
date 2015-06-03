@@ -11,7 +11,7 @@ import version2.prototype.util.GdalUtils;
  * Reproject the file from original projection to the specified projection
  */
 
-public class Reprojection {
+public class Reproject {
     //locations for the input files. for this step, will only have one folder
     private String [] inputFolders;
     //location for the output file
@@ -21,7 +21,7 @@ public class Reprojection {
     private String shapefile;
     private Projection projection;
 
-    public Reprojection(ProcessData data) {
+    public Reproject(ProcessData data) {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
         shapefile = data.getShapefile();
