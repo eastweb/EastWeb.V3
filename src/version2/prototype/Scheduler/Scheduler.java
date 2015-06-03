@@ -131,6 +131,7 @@ public class Scheduler implements Runnable {
         // TODO: initiate it with each plugin's implementation
         //prepareProcessTask= new PrepareProcessTask(projectInfoFile, plugin.GetName(), projectInfoFile.startDate, new processListener());
 
+        /* will move to the Projection framework
         for (int i = 1; i <= temp.processStep.size(); i++) {
             if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
             {
@@ -144,13 +145,15 @@ public class Scheduler implements Runnable {
                         prepareProcessTask.getQC(),
                         prepareProcessTask.getShapeFile(),
                         prepareProcessTask.getMaskFile(),
-                        prepareProcessTask.getBands(),
+                        prepareProcessTask.getDataBands(),
+                        prepareProcessTask.getQCBands(),
                         prepareProcessTask.getProjection(),
                         prepareProcessTask.getListener())});
                 Method methodProcess = process.getClass().getMethod("run");
                 methodProcess.invoke(process);
             }
         }
+         */
         ProcessProgress = 100;
         Log.add("Process Finish");
     }

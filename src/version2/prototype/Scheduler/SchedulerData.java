@@ -11,7 +11,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 public class SchedulerData {
     public ProjectInfoFile projectInfoFile;
     public PluginMetaDataCollection pluginMetaDataCollection;
-    public File ShapeFile;
     public ArrayList<String> SummarySingletonNames;
 
     public SchedulerData(ProjectInfoFile projectInfoFile) throws ConfigReadException, Exception
