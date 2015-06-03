@@ -1,7 +1,9 @@
 package version2.prototype.projection;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 
@@ -16,8 +18,10 @@ public abstract class Filter {
      * inputFolders[0] stores the files to be filtered
      * inputFolders[1] stores the QC file(s) if there is any
      */
-    String [] inputFolders;
+    private String [] inputFolders;
 
+    private File inputFolder1;
+    private File inputFolder2;
     //location for the output file
     private String outputFolder;
     // the files in the input folder
@@ -37,14 +41,14 @@ public abstract class Filter {
         inputFolders = data.getInputFolders();
 
         //check if there is ate least one input file in the given folder
-        File inputFolder1 = new File(inputFolders[0]);
+        inputFolder1 = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder1.listFiles();
         assert (listOfFiles.length >= 1);
         //set the input files
         inputFiles = listOfFiles;
 
         //check if there is ate least one input file in the given folder
-        File inputFolder2 = new File(inputFolders[1]);
+        inputFolder2 = new File(inputFolders[1]);
         File[] listOfFiles2= inputFolder2.listFiles();
 
         if (listOfFiles2.length >= 1) {
@@ -73,7 +77,15 @@ public abstract class Filter {
             filterByQCFlag(qcLevel);
         }
 
-        // TODO: delete the input folders
+        // remove the input folder
+        try {
+            FileUtils.deleteDirectory(inputFolder1);
+            FileUtils.deleteDirectory(inputFolder2);
+        } catch (IOException e) {
+            // TODO : write to log
+            e.printStackTrace();
+        }
+
     }
 
     public void filterByValue() throws Exception {
