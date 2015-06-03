@@ -1,8 +1,10 @@
 package version2.prototype.projection;
 
 import java.io.File;
+import java.io.IOException;
 
-import version2.prototype.ConfigReadException;
+import org.apache.commons.io.FileUtils;
+
 import version2.prototype.Projection;
 import version2.prototype.util.GdalUtils;
 
@@ -16,7 +18,8 @@ public class Reproject {
     private String [] inputFolders;
     //location for the output file
     private String outputFolder;
-    // the file in the input folder
+    private File inputFolder;
+    // the files in the input folder
     private File [] inputFiles;
     private String shapefile;
     private Projection projection;
@@ -28,7 +31,7 @@ public class Reproject {
         projection = data.getProjection();
 
         //check if there is at least one input file in the given folder
-        File inputFolder = new File(inputFolders[0]);
+        inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
         assert (listOfFiles.length >1);
         //set the input files
@@ -37,25 +40,27 @@ public class Reproject {
 
     // run method for the scheduler
     public void run(){
-        reprojection();
+        reprojectFiles();
+
+        // remove the input folder
+        try {
+            FileUtils.deleteDirectory(inputFolder);
+        } catch (IOException e) {
+            // TODO : write into log
+            e.printStackTrace();
+        }
     }
 
     /* (1) reproject all the input Files and save them to the outputFolder
      * (2) remove the inputFolder
      */
-    private void reprojection()  {
+    private void reprojectFiles()  {
         for (File f : inputFiles) {
             String fileName = f.getName();
             File outputFile = new File (outputFolder + fileName);
             // reproject
             GdalUtils.project(f, shapefile, projection, outputFile);
-
-            // delete the input file after processing
-            f.delete();
         }
-
-        // remove the inputFolder
-        (new File(outputFolder)).delete();
 
     }
 }

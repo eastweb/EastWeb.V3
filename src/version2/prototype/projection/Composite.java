@@ -1,6 +1,9 @@
 package version2.prototype.projection;
 
 import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
 
 /* Modified by Y. L.  on June 2nd
  * changed Composite from Interface to abstract class
@@ -14,6 +17,8 @@ public abstract class Composite {
     private String [] inputFolders;
     //location for the output file
     private String outputFolder;
+
+    private File inputFolder;
     // the files in the input folder for composition
     private File [] inputFiles;
 
@@ -22,7 +27,7 @@ public abstract class Composite {
         outputFolder = data.getOutputFolder();
 
         //check if there are more than one input file in the given folder
-        File inputFolder = new File(inputFolders[0]);
+        inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
         assert (listOfFiles.length > 1);
         //set the input files
@@ -32,6 +37,13 @@ public abstract class Composite {
     // run method for scheduler
     public void run(){
         composeFiles();
+        // remove the input folder
+        try {
+            FileUtils.deleteDirectory(inputFolder);
+        } catch (IOException e) {
+            // TODO : write to log
+            e.printStackTrace();
+        }
     }
 
     /*Override this:
@@ -44,7 +56,6 @@ public abstract class Composite {
      * Steps for the implementation:
      *   (1) check if there are enough number of files in the inputFiles array.(e.g. 24 for hourly NLDAS)
      *   (2) compose the files into a result file and save the result file to outputFolder
-     *   (3) remove the inputFolder
      */
     public abstract void composeFiles();
 

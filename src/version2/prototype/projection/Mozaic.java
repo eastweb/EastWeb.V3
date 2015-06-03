@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
-import version2.prototype.Config;
-import version2.prototype.ConfigReadException;
 import version2.prototype.util.GdalUtils;
 
 
@@ -26,6 +25,7 @@ public class Mozaic {
     private File outputFolder;
     // the bands need to be exacted.
     private int [] bands;
+    private File inputFolder;
     // the files in the input folder
     private File [] inputFiles;
     // hold the output files
@@ -42,13 +42,13 @@ public class Mozaic {
     private int tileMetrixRow;
     private int tileMetrixClo;
 
-    public Mozaic(ProcessData data) throws InterruptedException, ConfigReadException {
+    public Mozaic(ProcessData data) throws InterruptedException {
 
         //locations for the input files. for this step, will only use inputFolders[0]
         inputFolders = data.getInputFolders();
 
         //check if there is at least one input file in the given folder
-        File inputFolder = new File(inputFolders[0]);
+        inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
         tileNumber = listOfFiles.length;
         assert (tileNumber >= 1);
@@ -77,14 +77,15 @@ public class Mozaic {
             sortTiles();
             try {
                 linkTiles();
+
+                // remove the input folder
+                FileUtils.deleteDirectory(inputFolder);
             } catch (IOException e) {
                 // TODO: Write to log
                 e.printStackTrace();
             }
         }
-
     }
-
 
     void sortTiles() {
         int minH = tileList[0].horizon;
@@ -203,6 +204,5 @@ public class Mozaic {
             outputFiles.add(temp);
         }
 
-        //TODO: delete input folder
     }
 }

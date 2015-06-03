@@ -1,6 +1,9 @@
 package version2.prototype.projection;
 
 import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
 
 /* Modified by YL on May 31st
  * changed Covert from Interface to abstract class
@@ -13,6 +16,7 @@ import java.io.File;
 public abstract class Convert {
     //locations for the input files. for this step, will only use inputFolders[0]
     private String [] inputFolders;
+    private File inputFolder;
     //location for the output file
     private String outputFolder;
     // the file in the input folder
@@ -23,7 +27,7 @@ public abstract class Convert {
         outputFolder = data.getOutputFolder();
 
         //check if there is more than one input file in the given folder
-        File inputFolder = new File(inputFolders[0]);
+        inputFolder = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder.listFiles();
         assert (listOfFiles.length >= 1);
         //set the input files
@@ -33,6 +37,14 @@ public abstract class Convert {
     // run method for the scheduler
     public void run(){
         convertFile();
+
+        // remove the input folder
+        try {
+            FileUtils.deleteDirectory(inputFolder);
+        } catch (IOException e) {
+            // TODO : write to log
+            e.printStackTrace();
+        }
     }
 
     /*Override this:
@@ -45,7 +57,6 @@ public abstract class Convert {
      *   (2) Convert it into the Tiff format
      *   (3) Write the result from (2) to outputFolder
      *   (4) repeat step (1) - (3)
-     *   (5) Remove the inputFolder
      */
     abstract void convertFile();
 
