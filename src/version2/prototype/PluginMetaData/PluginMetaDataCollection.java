@@ -41,42 +41,36 @@ public class PluginMetaDataCollection {
         Map<String,PluginMetaData> myMap=new HashMap<String,PluginMetaData>();
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
         for(File fXmlFile: getXMLFiles(fileDir)){
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(fXmlFile);
 
-            try{
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                Document doc = dBuilder.parse(fXmlFile);
+            doc.getDocumentElement().normalize();
+            PluginMetaData temp=new PluginMetaData();
+            temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
+            temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
+            temp.Projection = new ProcessMetaData(doc.getElementsByTagName("Process"));
 
-                doc.getDocumentElement().normalize();
-                PluginMetaData temp=new PluginMetaData();
-                temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
-                temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
-                temp.Projection = new ProcessMetaData(doc.getElementsByTagName("Process"));
-
-                temp.IndicesMetaData = new ArrayList<String>();
-                NodeList tempIndices = doc.getElementsByTagName("Indices");
-                int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
-                for(int i = 0; i < nodesIndices; i++) {
-                    temp.IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
-                }
-
-                temp.Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
-
-                temp.QualityControlMetaData = new ArrayList<String>();
-                NodeList tempQC = doc.getElementsByTagName("QualityControl");
-                int nodesQC = ((Element) tempQC.item(0)).getElementsByTagName("Level").getLength();
-                for(int i = 0; i < nodesQC; i++) {
-                    temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
-                }
-
-                String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
-                pluginList.add(pluginName);
-                myMap.put(pluginName, temp);
+            temp.IndicesMetaData = new ArrayList<String>();
+            NodeList tempIndices = doc.getElementsByTagName("Indices");
+            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
+            for(int i = 0; i < nodesIndices; i++) {
+                temp.IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
             }
-            catch(Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+
+            temp.Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
+
+            temp.QualityControlMetaData = new ArrayList<String>();
+            NodeList tempQC = doc.getElementsByTagName("QualityControl");
+            int nodesQC = ((Element) tempQC.item(0)).getElementsByTagName("Level").getLength();
+            for(int i = 0; i < nodesQC; i++) {
+                temp.QualityControlMetaData.add( ((Element) tempQC.item(0)).getElementsByTagName("Level").item(i).getTextContent());
             }
+
+            String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
+            pluginList.add(pluginName);
+            myMap.put(pluginName, temp);
+
         }
         return myMap;
     }

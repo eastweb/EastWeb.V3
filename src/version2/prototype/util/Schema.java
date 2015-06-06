@@ -3,11 +3,11 @@ package version2.prototype.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import version2.prototype.ProjectInfo;
 import version2.prototype.ConfigReadException;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
 public class Schema {
-    public static void RecreateSchema(ProjectInfo project) throws ConfigReadException, SQLException
+    public static void RecreateSchema(ProjectInfoFile project) throws ConfigReadException, SQLException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final String mSchemaName = getSchemaName(project);
@@ -110,8 +110,8 @@ public class Schema {
      * Gets the name of the specified project's database schema.
      * The returned name does not need to be quoted to use in SQL.
      */
-    public static String getSchemaName(ProjectInfo project) {
-        final String name = project.getName();
+    public static String getSchemaName(ProjectInfoFile project) {
+        final String name = project.projectName;
         final StringBuilder builder = new StringBuilder("project_");
         for (int index = 0; index < name.length(); ) {
             final int codePointIn = name.codePointAt(index);

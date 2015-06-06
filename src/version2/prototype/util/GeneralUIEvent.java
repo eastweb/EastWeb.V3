@@ -30,11 +30,11 @@ public class GeneralUIEvent implements Serializable {
 
     /** Fire a SunEvent to all registered listeners */
     @SuppressWarnings("rawtypes")
-    protected void fire(String p) {
+    protected void fire(String log, int progress) {
         // if we have no listeners, do nothing...
         if (listeners != null && !listeners.isEmpty()) {
             // create the event object to send
-            GeneralUIEventObject event = new GeneralUIEventObject(this, p);
+            GeneralUIEventObject event = new GeneralUIEventObject(this, log, progress);
 
             // make a copy of the listener list in case
             //   anyone adds/removes listeners

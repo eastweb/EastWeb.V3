@@ -11,9 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import version2.prototype.Config;
 import version2.prototype.DataDate;
-import version2.prototype.DirectoryLayout;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -182,7 +180,7 @@ public class Scheduler implements Runnable {
     {
         if(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Summary.IsTemporalSummary)
         {
-            for(ZonalSummary zone: projectInfo.getZonalSummaries())
+            for(ZonalSummary zone: projectInfoFile.getZonalSummaries())
             {
                 Class<?> strategyClass = Class.forName(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Summary
                         .CompositionStrategyClassName);
@@ -190,16 +188,15 @@ public class Scheduler implements Runnable {
                 Object temporalSummaryCompositionStrategy = ctorStrategy.newInstance();
 
                 TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(new SummaryData(
-                        projectInfo.getName(),
+                        projectInfoFile.projectName,
                         DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
                         new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
                         null,
                         null,
                         null,
-                        projectInfo.getStartDate(),
+                        projectInfoFile.startDate,
                         0,
                         0,
-                        projectInfo.getStartDate(),
                         (TemporalSummaryCompositionStrategy) temporalSummaryCompositionStrategy,       // User selected
                         null,   // InterpolateStrategy (Framework user defined)
                         new AvgGdalRasterFileMerge(),
@@ -217,10 +214,10 @@ public class Scheduler implements Runnable {
                     outTable,
                     zone.getField(),
                     summarySingletonNames,
-                    projectInfo.getStartDate(),
+                    projectInfoFile.startDate,
                     0,
                     0,
-                    projectInfo.getStartDate(),
+                    projectInfoFile.startDate,
                     null,
                     null,
                     null,

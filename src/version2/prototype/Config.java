@@ -335,16 +335,6 @@ public class Config {
         return projects.toArray(new String[0]);
     }
 
-    public ProjectInfo[] getProjects() throws Exception {
-        String projectNames[] = getProjectNames();
-        ProjectInfo[] projects = new ProjectInfo[projectNames.length];
-        for (int i=0; i<projects.length; i++) {
-            projects[i] = loadProject(projectNames[i]);
-        }
-
-        return projects;
-    }
-
     public String getRootDirectory() {
         return rootDirectory;
     }
@@ -441,96 +431,6 @@ public class Config {
         return 5;
     }
 
-    public void saveProject(ProjectInfo projectInfo) throws Exception {
-        Document document = XmlUtils.newDocument("project");
-        Element project = document.getDocumentElement();
-
-        // Active
-        Element active = document.createElement("active");
-        active.appendChild(
-                document.createTextNode(Boolean.toString(projectInfo.isActive())));
-        project.appendChild(active);
-
-        // Name
-        Element projectName = document.createElement("name");
-        projectName.appendChild(
-                document.createTextNode(projectInfo.getName()));
-        project.appendChild(projectName);
-
-        // Start date
-        writeStartDate(document, project, projectInfo);
-
-        // Watermask
-        Element watermask = document.createElement("watermask");
-        watermask.appendChild(
-                document.createTextNode(projectInfo.getWatermask()));
-        project.appendChild(watermask);
-
-        // Elevation
-        Element elevation = document.createElement("elevation");
-        elevation.appendChild(
-                document.createTextNode(projectInfo.getElevation()));
-        project.appendChild(elevation);
-
-        // Minimum LST
-        Element minLst = document.createElement("min.lst");
-        minLst.appendChild(
-                document.createTextNode(Double.toString(projectInfo.getMinLst())));
-        project.appendChild(minLst);
-
-        // Maximum LST
-        Element maxLst = document.createElement("max.lst");
-        maxLst.appendChild(
-                document.createTextNode(Double.toString(projectInfo.getMaxLst())));
-        project.appendChild(maxLst);
-
-        // Calculate ETa?
-        Element calculateETa = document.createElement("calculate.eta");
-        calculateETa.appendChild(
-                document.createTextNode(
-                        Boolean.toString(projectInfo.shouldCalculateETa())));
-        project.appendChild(calculateETa);
-
-        // Projection
-        writeProjection(document, project, projectInfo.getProjection());
-
-        // Modis tiles
-        writeModisTiles(document, project, projectInfo);
-
-        // Zonal summaries
-        writeZonalSummaries(document, project, projectInfo);
-
-
-        // Save to file
-        XmlUtils.transformToFile(document, getProjectFilename(projectInfo.getName()));
-    }
-
-
-    private void writeStartDate(Document document, Element project,
-            ProjectInfo projectInfo) {
-
-        // Start date
-        Element startDate = document.createElement("start.date");
-        project.appendChild(startDate);
-
-        // Month
-        Element month = document.createElement("month");
-        month.appendChild(document.createTextNode(Integer
-                .toString(projectInfo.getStartDate().getMonth())));
-        startDate.appendChild(month);
-
-        // Day
-        Element day = document.createElement("day");
-        day.appendChild(document.createTextNode(
-                Integer.toString(projectInfo.getStartDate().getDay())));
-        startDate.appendChild(day);
-
-        // Year
-        Element year = document.createElement("year");
-        year.appendChild(document.createTextNode(
-                Integer.toString(projectInfo.getStartDate().getYear())));
-        startDate.appendChild(year);
-    }
 
 
     private void writeProjection(Document document, Element project,
@@ -613,45 +513,7 @@ public class Config {
         projection.appendChild(latitudeOfOrigin);
     }
 
-    private void writeModisTiles(Document document, Element project, ProjectInfo projectInfo) {
-        Element modisTiles = document.createElement("modis.tiles");
-        project.appendChild(modisTiles);
 
-        for (ModisTile tile : projectInfo.getModisTiles()) {
-            Element modisTile = document.createElement("tile");
-            modisTiles.appendChild(modisTile);
-
-            Element horz = document.createElement("horz");
-            horz.appendChild(document.createTextNode(Integer.toString(tile.getHTile())));
-            modisTile.appendChild(horz);
-
-            Element vert = document.createElement("vert");
-            vert.appendChild(document.createTextNode(Integer.toString(tile.getVTile())));
-            modisTile.appendChild(vert);
-        }
-    }
-
-    private void writeZonalSummaries(Document document, Element project, ProjectInfo projectInfo) {
-        Element zonalSummaries = document.createElement("zonal.summaries");
-        project.appendChild(zonalSummaries);
-
-        for (ZonalSummary summary : projectInfo.getZonalSummaries()) {
-            Element zonalSummary = document.createElement("summary");
-            zonalSummaries.appendChild(zonalSummary);
-
-            Element name = document.createElement("name");
-            name.appendChild(document.createTextNode(summary.getName()));
-            zonalSummary.appendChild(name);
-
-            Element shapefile = document.createElement("shapefile");
-            shapefile.appendChild(document.createTextNode(summary.getShapeFile()));
-            zonalSummary.appendChild(shapefile);
-
-            Element field = document.createElement("field");
-            field.appendChild(document.createTextNode(summary.getField()));
-            zonalSummary.appendChild(field);
-        }
-    }
 
     /**
      * Loads a project file from the projects directory.
@@ -660,84 +522,7 @@ public class Config {
      * @return ProjectInfo The specified project.
      * @throws Exception
      */
-    public ProjectInfo loadProject(String name) throws Exception {
-        ProjectInfo projectInfo = null;
 
-        boolean active = false;
-        String projectName = null;
-        DataDate startDate = null;
-        String watermask = null;
-        String elevation = null;
-        double minLst = 0.0;
-        boolean gotMinLst = false;
-        double maxLst = 0.0;
-        boolean gotMaxLst = false;
-        Projection projection = null;
-        ModisTile[] modisTiles = null;
-        ZonalSummary[] zonalSummaries = null;
-        boolean calculateETa = false;
-
-        Document document = XmlUtils.parse(getProjectFilename(name));
-
-        Node project = document.getElementsByTagName("project").item(0);
-
-        NodeList projectNodes = project.getChildNodes();
-        for (int i=0; i<projectNodes.getLength(); i++) {
-            if (projectNodes.item(i).getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
-            Element element = (Element)projectNodes.item(i);
-            String nodeName = element.getNodeName();
-
-            if (nodeName.equals("active")) {
-                active = Boolean.parseBoolean(element.getTextContent());
-            } else if (nodeName.equals("name")) {
-                projectName = element.getTextContent();
-            } else if (nodeName.equals("start.date")) {
-                startDate = readDate(element.getChildNodes());
-            } else if (nodeName.equals("watermask")) {
-                watermask = element.getTextContent();
-            } else if (nodeName.equals("elevation")) {
-                elevation = element.getTextContent();
-            } else if (nodeName.equals("min.lst")) {
-                minLst = Double.parseDouble(element.getTextContent());
-                gotMinLst = true;
-            } else if (nodeName.equals("max.lst")) {
-                maxLst = Double.parseDouble(element.getTextContent());
-                gotMaxLst = true;
-            } else if (nodeName.equals("projection")) {
-                projection = readProjection(element.getChildNodes());
-            } else if (nodeName.equals("modis.tiles")) {
-                modisTiles = readModisTiles(element.getElementsByTagName("tile"));
-            } else if (nodeName.equals("zonal.summaries")) {
-                zonalSummaries = readZonalSummaries(element.getElementsByTagName("summary"));
-            } else if (nodeName.equals("calculate.eta")) {
-                calculateETa = Boolean.parseBoolean(element.getTextContent());
-            }
-        }
-
-        if (name == null || startDate == null || watermask == null ||
-                elevation == null || !gotMinLst || !gotMaxLst ||
-                projection == null || modisTiles == null || zonalSummaries == null) {
-            throw new Exception("Project configuration file missing required values.");
-        }
-
-        projectInfo = new ProjectInfo(
-                projectName,
-                startDate,
-                watermask,
-                elevation,
-                minLst,
-                maxLst,
-                projection,
-                modisTiles,
-                zonalSummaries,
-                calculateETa
-                );
-        projectInfo.setActive(active); // TODO: rearrange
-
-        return projectInfo;
-    }
 
     private DataDate readDate(NodeList nodes) throws Exception {
         int day, month, year;
