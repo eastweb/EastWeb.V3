@@ -25,28 +25,28 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download -> Mozaic
-            folders.add(project.workingDir + String.format("ModisNBAR\\Download\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            folders.add(project.workingDir + String.format("ModisNBAR\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // QCDownload -> QCMozaic
-            folders.add(project.workingDir + String.format("ModisNBAR\\QCDownload\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.workingDir + String.format("ModisNBAR\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Mozaic -> Reproject
-            folders.add(project.workingDir + String.format("ModisNBAR\\Mozaic\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.workingDir + String.format("ModisNBAR\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         case 4:
             // QCMozaic -> QCReproject
-            folders.add(project.workingDir + String.format("ModisNBAR\\QCMozaic\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.workingDir + String.format("ModisNBAR\\4\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         case 5:
             // Reproject/QCReproject -> Filter
-            folders.add(project.workingDir + String.format("ModisNBAR\\Reproject\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            folders.add(project.workingDir + String.format("ModisNBAR\\QCReproject\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.workingDir + String.format("ModisNBAR\\5\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.workingDir + String.format("ModisNBAR\\5\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         case 6:
             // Filter -> Mask
-            folders.add(project.workingDir + String.format("ModisNBAR\\Filter\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.workingDir + String.format("ModisNBAR\\6\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         default:
             folders = null;
@@ -65,27 +65,27 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download -> Mozaic
-            outputFolder = project.workingDir + String.format("ModisNBAR\\Mozaic\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = project.workingDir + String.format("ModisNBAR\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // QCDownload -> QCMozaic
-            outputFolder = project.workingDir + String.format("ModisNBAR\\QCMozaic\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = project.workingDir + String.format("ModisNBAR\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 3:
             // Mozaic -> Reproject
-            outputFolder = project.workingDir + String.format("ModisNBAR\\Reproject\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = project.workingDir + String.format("ModisNBAR\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 4:
             // QCMozaic -> QCReproject
-            outputFolder = project.workingDir + String.format("ModisNBAR\\QCReproject\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = project.workingDir + String.format("ModisNBAR\\4\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 5:
             // Reproject/QCReproject -> Filter
-            outputFolder = project.workingDir + String.format("ModisNBAR\\Filter\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = project.workingDir + String.format("ModisNBAR\\5\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 6:
             // Filter -> Mask
-            outputFolder = project.workingDir + String.format("ModisNBAR\\Mask\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = project.workingDir + String.format("ModisNBAR\\6\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         default:
             outputFolder = null;
