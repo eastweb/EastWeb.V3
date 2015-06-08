@@ -29,12 +29,14 @@ public final class ModisNBARDownloader extends DownloaderFramework {
     private final DataDate mDate;
     private final ModisTile mTile;
     private final File mOutFile;
+    private final File mQCOutFile;
     private static DownloadMetaData metaData;
 
-    public ModisNBARDownloader(DataDate date, ModisTile tile, File outFile, DownloadMetaData data) {
+    public ModisNBARDownloader(DataDate date, ModisTile tile, File outFile, File qcOutFile, DownloadMetaData data) {
         mDate = date;
         mTile = tile;
         mOutFile = outFile;
+        mQCOutFile = qcOutFile;
         metaData = data;
     }
 
@@ -106,38 +108,47 @@ public final class ModisNBARDownloader extends DownloaderFramework {
 
     @Override
     public final void download() throws IOException, ConfigReadException,
-    DownloadFailedException, SAXException, Exception {
+    DownloadFailedException, SAXException, Exception
+    {
         String mode = metaData.mode;
 
-        if (mode == "http"){
-            URL fileURL = null;
-
-            String containingURL = metaData.myHttp.url + String.format("%04d.%02d.%.02d/", mDate.getYear(), mDate.getMonth(), mDate.getDay());
-            ByteArrayOutputStream directoryOutstream = new ByteArrayOutputStream();
-            DownloadUtils.downloadToStream(new URL(containingURL), directoryOutstream);
-
-            Iterable<String> folderContents = Arrays.asList(directoryOutstream.toString().split("[//r//n]+"));
-            for (String line : folderContents)
+        if (mode == "http")
+        {
+            try
             {
-                //Shorten the list as much as possible, restricting to only files that have ".hdf" extension
-                if(line.contains(".hdf") && !line.contains(".xml") &&
-                        line.contains(String.format("h%02dv%02d", mTile.getHTile(), mTile.getVTile())))
+                URL fileURL = getFileURL("MCD43B4.005");
+                URL qcFileURL = getFileURL("MCD43B2.005");
+
+                if(fileURL != null)
                 {
-                    fileURL = new URL(containingURL + line.substring(line.indexOf("MCD43B4"), line.indexOf(".hdf") + 4));
+                    DownloadUtils.downloadToFile(fileURL, mOutFile);
+                }
+
+                if(qcFileURL != null)
+                {
+                    DownloadUtils.downloadToFile(qcFileURL, mQCOutFile);
                 }
             }
-
-            if(fileURL != null) {
-                DownloadUtils.downloadToFile(fileURL, mOutFile);
+            catch (MalformedURLException e)
+            {
+                e.printStackTrace();
+                return;
             }
-        } else if(mode == "ftp"){
+            catch (IOException eIO)
+            {
+                eIO.printStackTrace();
+                return;
+            }
+        }
+        else if(mode == "ftp")
+        {
+            // Untested code, only in the case that the method should change (current access method is http) 6/7/2015
             FTPClient ftpClient = new FTPClient();
             ftpClient.connect(metaData.myFtp.hostName);
             ftpClient.login(metaData.myFtp.userName, metaData.myFtp.password);
-            ftpClient.changeWorkingDirectory(metaData.myFtp.rootDir + String.format("%04d.%02d.%02d/", mDate.getYear(), mDate.getMonth(), mDate.getDay()));
 
+            ftpClient.changeWorkingDirectory(metaData.myFtp.rootDir + String.format("MCD43B4.005/%04d.%02d.%02d/", mDate.getYear(), mDate.getMonth(), mDate.getDay()));
             FTPFile[] files = ftpClient.listFiles();
-
             for(FTPFile file : files)
             {
                 String details = file.getName();
@@ -145,6 +156,18 @@ public final class ModisNBARDownloader extends DownloaderFramework {
                         details.contains(String.format("h%02dv%02d", mTile.getHTile(), mTile.getVTile())))
                 {
                     DownloadUtils.download(ftpClient, details, mOutFile);
+                }
+            }
+
+            ftpClient.changeWorkingDirectory(metaData.myFtp.rootDir + String.format("MCD43B2.005/%04d.%02d.%02d/", mDate.getYear(), mDate.getMonth(), mDate.getDay()));
+            FTPFile[] qcFiles = ftpClient.listFiles();
+            for(FTPFile file : qcFiles)
+            {
+                String details = file.getName();
+                if(details.contains(".hdf") && !details.contains(".xml") &&
+                        details.contains(String.format("h%02dv%02d", mTile.getHTile(), mTile.getVTile())))
+                {
+                    DownloadUtils.download(ftpClient, details, mQCOutFile);
                 }
             }
         }
@@ -204,6 +227,27 @@ public final class ModisNBARDownloader extends DownloaderFramework {
         }
 
         return fullURLs;
+    }
+
+    private URL getFileURL(String parentFolder) throws MalformedURLException, IOException
+    {
+        URL fileURL = null;
+
+        String containingURL = metaData.myHttp.url + String.format("%s/%04d.%02d.%.02d/", parentFolder, mDate.getYear(), mDate.getMonth(), mDate.getDay());
+        ByteArrayOutputStream directoryOutstream = new ByteArrayOutputStream();
+        DownloadUtils.downloadToStream(new URL(containingURL), directoryOutstream);
+
+        Iterable<String> folderContents = Arrays.asList(directoryOutstream.toString().split("[//r//n]+"));
+        for (String line : folderContents)
+        {
+            //Shorten the list as much as possible, restricting to only files that have ".hdf" extension
+            if(line.contains(".hdf") && !line.contains(".xml") &&
+                    line.contains(String.format("h%02dv%02d", mTile.getHTile(), mTile.getVTile())))
+            {
+                fileURL = new URL(containingURL + line.substring(line.indexOf("MCD43B4"), line.indexOf(".hdf") + 4));
+            }
+        }
+        return fileURL;
     }
 }
 

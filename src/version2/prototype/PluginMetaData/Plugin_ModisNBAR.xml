@@ -2,33 +2,39 @@
 <PluginMetadata>
 	<title>ModisNBAR</title>
 	<Download>
-		<className>ModisNBARDownloadTask</className>
+		<ClassName>ModisNBARDownloadTask</ClassName>
 		<mode>http</mode>
 		<HTTP>
-			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/</url>
+			<url>http://e4ftl01.cr.usgs.gov/MOTA/</url>
 		</HTTP>
 	</Download>
 	<Process>
-		<Projection processStep="1">
-			
-		</Projection>
-		<mozaic processStep="2">
-			
-		</mozaic>
-		<convert processStep="3">
-			
-		</convert>
-		<filter processStep="4">
-			
-		</filter>
+		<Mozaic processStep="1">
+			<ClassName>Mozaic</ClassName>
+		</Mozaic>
+		<QCMozaic processStep="2">
+			<ClassName>Mozaic</ClassName>
+		</QCMozaic>
+		<Reproject processStep="3">
+			<ClassName>Reproject</ClassName>
+		</Reproject>
+		<QCReproject processStep="4">
+			<ClassName>Reproject</ClassName>
+		</QCReproject>
+		<Filter processStep="5">
+			<ClassName>ModisNBARFilter</ClassName>
+		</Filter>
+		<Mask processStep="6">
+			<ClassName>Mask</ClassName>
+		</Mask>
 	</Process>
 	<Indices>
-		
+		<ClassName></ClassName>
 	</Indices>
 	<Summary>
-	
+		<ClassName></ClassName>
 	</Summary>
 	<QualityControl>
-	
+		<ClassName></ClassName>
 	</QualityControl>
 </PluginMetadata>
