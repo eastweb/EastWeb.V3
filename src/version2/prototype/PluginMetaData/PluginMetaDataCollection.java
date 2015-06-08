@@ -41,6 +41,7 @@ public class PluginMetaDataCollection {
         Map<String,PluginMetaData> myMap=new HashMap<String,PluginMetaData>();
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
         for(File fXmlFile: getXMLFiles(fileDir)){
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -119,14 +120,18 @@ public class PluginMetaDataCollection {
             nList = n;
             Node downloadNode = nList.item(0);
 
-            className = ((Element) downloadNode).getElementsByTagName("className").item(0).getTextContent();
-            mode=((Element) downloadNode).getElementsByTagName("mode").item(0).getTextContent();
-            mode=mode.toUpperCase();
+            try{
+                className = ((Element) downloadNode).getElementsByTagName("className").item(0).getTextContent();
+                mode=((Element) downloadNode).getElementsByTagName("mode").item(0).getTextContent();
+                mode=mode.toUpperCase();
 
-            if(mode.equalsIgnoreCase("Ftp")) {
-                myFtp=new ftp(((Element)downloadNode).getElementsByTagName(mode).item(0));
-            } else {
-                myHttp=new http(((Element)downloadNode).getElementsByTagName(mode).item(0));
+                if(mode.equalsIgnoreCase("Ftp")) {
+                    myFtp=new ftp(((Element)downloadNode).getElementsByTagName(mode).item(0));
+                } else {
+                    myHttp=new http(((Element)downloadNode).getElementsByTagName(mode).item(0));
+                }
+            }catch(Exception e){
+
             }
         }
     }
@@ -173,27 +178,31 @@ public class PluginMetaDataCollection {
             processStep = new HashMap<Integer, String>();
             Node processNode = nList.item(0);
 
-            Node projection = ((Element) processNode).getElementsByTagName("Projection").item(0);
-            processStep.put(Integer.parseInt((projection.getAttributes().getNamedItem("processStep").getTextContent())),
-                    ((Element) projection).getElementsByTagName("className").item(0).getTextContent());
+            try{
+                Node projection = ((Element) processNode).getElementsByTagName("Projection").item(0);
+                processStep.put(Integer.parseInt((projection.getAttributes().getNamedItem("processStep").getTextContent())),
+                        ((Element) projection).getElementsByTagName("className").item(0).getTextContent());
 
-            Node mozaic = ((Element) processNode).getElementsByTagName("mozaic").item(0);
-            processStep.put(Integer.parseInt(mozaic.getAttributes().getNamedItem("processStep").getTextContent()),
-                    mozaic.getTextContent());
+                Node mozaic = ((Element) processNode).getElementsByTagName("mozaic").item(0);
+                processStep.put(Integer.parseInt(mozaic.getAttributes().getNamedItem("processStep").getTextContent()),
+                        mozaic.getTextContent());
 
-            Node convertNode = ((Element) processNode).getElementsByTagName("convert").item(0);
-            convertHasConvert = ((Element) convertNode).getElementsByTagName("isRunable").item(0).getTextContent();
-            convertOriFormat = ((Element) convertNode).getElementsByTagName("oriFormat").item(0).getTextContent();
-            convertToFormat = ((Element) convertNode).getElementsByTagName("toFormat").item(0).getTextContent();
-            convertGeoTransform = ((Element) convertNode).getElementsByTagName("GeoTransform").item(0).getTextContent();
-            convertProjectionStr = ((Element) convertNode).getElementsByTagName("projectionStr").item(0).getTextContent();
-            processStep.put(Integer.parseInt((convertNode.getAttributes().getNamedItem("processStep").getTextContent())),
-                    ((Element) convertNode).getElementsByTagName("className").item(0).getTextContent());
+                Node convertNode = ((Element) processNode).getElementsByTagName("convert").item(0);
+                convertHasConvert = ((Element) convertNode).getElementsByTagName("isRunable").item(0).getTextContent();
+                convertOriFormat = ((Element) convertNode).getElementsByTagName("oriFormat").item(0).getTextContent();
+                convertToFormat = ((Element) convertNode).getElementsByTagName("toFormat").item(0).getTextContent();
+                convertGeoTransform = ((Element) convertNode).getElementsByTagName("GeoTransform").item(0).getTextContent();
+                convertProjectionStr = ((Element) convertNode).getElementsByTagName("projectionStr").item(0).getTextContent();
+                processStep.put(Integer.parseInt((convertNode.getAttributes().getNamedItem("processStep").getTextContent())),
+                        ((Element) convertNode).getElementsByTagName("className").item(0).getTextContent());
 
-            Node filterNode = ((Element) processNode).getElementsByTagName("filter").item(0);
-            filterClassName = ((Element) filterNode).getElementsByTagName("className").item(0).getTextContent();
-            processStep.put(Integer.parseInt((filterNode.getAttributes().getNamedItem("processStep").getTextContent())),
-                    ((Element) filterNode).getElementsByTagName("className").item(0).getTextContent());
+                Node filterNode = ((Element) processNode).getElementsByTagName("filter").item(0);
+                filterClassName = ((Element) filterNode).getElementsByTagName("className").item(0).getTextContent();
+                processStep.put(Integer.parseInt((filterNode.getAttributes().getNamedItem("processStep").getTextContent())),
+                        ((Element) filterNode).getElementsByTagName("className").item(0).getTextContent());
+            }catch(Exception e){
+
+            }
         }
     }
 
@@ -206,15 +215,19 @@ public class PluginMetaDataCollection {
             nList = n;
             Node projectionNode = nList.item(0);
 
-            // Node: IsTemporalSummary
-            IsTemporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("UseTemporalSummary").item(0).getTextContent());
+            try{
+                // Node: IsTemporalSummary
+                IsTemporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("UseTemporalSummary").item(0).getTextContent());
 
-            // Node: CompositionStrategyClassName
-            NodeList temporal = ((Element) nList).getElementsByTagName("Temporal");
-            Node NodeCompositionStrategyClassName = ((Element) temporal).getElementsByTagName("CompositionStrategyClassName").item(0);
-            NodeList tempList = NodeCompositionStrategyClassName.getChildNodes();
-            Node valueNode = tempList.item(0);
-            CompositionStrategyClassName = valueNode.getNodeValue().trim();
+                // Node: CompositionStrategyClassName
+                NodeList temporal = ((Element) nList).getElementsByTagName("Temporal");
+                Node NodeCompositionStrategyClassName = ((Element) temporal).getElementsByTagName("CompositionStrategyClassName").item(0);
+                NodeList tempList = NodeCompositionStrategyClassName.getChildNodes();
+                Node valueNode = tempList.item(0);
+                CompositionStrategyClassName = valueNode.getNodeValue().trim();
+            }catch(Exception e){
+
+            }
         }
     }
 
