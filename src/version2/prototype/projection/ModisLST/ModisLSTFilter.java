@@ -22,6 +22,7 @@ public class ModisLSTFilter extends Filter{
     @Override
     protected double filterByQCFlag(String qcLevel) {
         // TODO Auto-generated method stub
+
         return 0;
     }
 
