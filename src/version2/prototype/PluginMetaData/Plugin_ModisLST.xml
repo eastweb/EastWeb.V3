@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <PluginMetadata>
 	<title>ModisLST</title>
 	<Download>
@@ -9,18 +9,18 @@
 		</HTTP>
 	</Download>
 	<Process>
-		<Projection processStep="1">
+		<Mozaic processStep="1">
 			
-		</Projection>
-		<mozaic processStep="2">
+		</Mozaic>
+		<Reproject processStep="2">
 			
-		</mozaic>
-		<convert processStep="3">
+		</Reproject>
+		<Filter processStep="3">
 			
-		</convert>
-		<filter processStep="4">
+		</Filter>
+		<Mask processStep="4">
 			
-		</filter>
+		</Mask>
 	</Process>
 	<Indices>
 		
