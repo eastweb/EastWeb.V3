@@ -8,25 +8,25 @@
 			<url>http://e4ftl01.cr.usgs.gov/MOTA/</url>
 		</HTTP>
 	</Download>
-	<Process>
-		<Mozaic processStep="1">
+	<Processes>
+		<Process processStep="1">
 			<ClassName>Mozaic</ClassName>
-		</Mozaic>
-		<QCMozaic processStep="2">
+		</Process>
+		<Process processStep="2">
 			<ClassName>Mozaic</ClassName>
-		</QCMozaic>
-		<Reproject processStep="3">
+		</Process>
+		<Process processStep="3">
 			<ClassName>Reproject</ClassName>
-		</Reproject>
-		<QCReproject processStep="4">
+		</Process>
+		<Process processStep="4">
 			<ClassName>Reproject</ClassName>
-		</QCReproject>
-		<Filter processStep="5">
+		</Process>
+		<Process processStep="5">
 			<ClassName>ModisNBARFilter</ClassName>
-		</Filter>
-		<Mask processStep="6">
+		</Process>
+		<Process processStep="6">
 			<ClassName>Mask</ClassName>
-		</Mask>
+		</Process>
 	</Process>
 	<Indices>
 		<ClassName></ClassName>
