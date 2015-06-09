@@ -87,7 +87,7 @@ public class Mozaic {
         }
     }
 
-    void sortTiles() {
+    private void sortTiles() {
         int minH = tileList[0].horizon;
         int maxH = tileList[0].horizon;
         int minV = tileList[0].vertical;
