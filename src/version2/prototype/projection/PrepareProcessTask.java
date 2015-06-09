@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import version2.prototype.DataDate;
-import version2.prototype.DirectoryLayout;
 import version2.prototype.Projection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
