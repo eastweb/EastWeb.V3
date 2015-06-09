@@ -36,7 +36,7 @@ public abstract class Convert {
 
     // run method for the scheduler
     public void run(){
-        convertFile();
+        convertFiles();
 
         // remove the input folder
         try {
@@ -58,6 +58,6 @@ public abstract class Convert {
      *   (3) Write the result from (2) to outputFolder
      *   (4) repeat step (1) - (3)
      */
-    abstract void convertFile();
+    abstract void convertFiles();
 
 }
