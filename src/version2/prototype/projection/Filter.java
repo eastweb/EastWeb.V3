@@ -88,7 +88,7 @@ public abstract class Filter {
 
     }
 
-    public void filterByValue() throws Exception {
+    protected void filterByValue() throws Exception {
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
@@ -134,5 +134,5 @@ public abstract class Filter {
      * use the qcFiles to filter the inputFiles based on the given qcLevel by the end user
      * the Set of the QC levels are defined in the plugin metadata.
      */
-    protected abstract double filterByQCFlag(String qcLevel);
+    protected abstract void filterByQCFlag(String qcLevel);
 }
