@@ -22,6 +22,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.projection.PrepareProcessTask;
@@ -115,16 +116,17 @@ public class Scheduler implements Runnable {
     IllegalArgumentException, InvocationTargetException
     {
         ExecutorService executor = Executors.newCachedThreadPool();
-        for(ProjectInfoPlugin info: data.projectInfoFile.GetPlugins())
+        for(ProjectInfoPlugin pluginInfo: data.projectInfoFile.GetPlugins())
         {
-            futures.add(executor.submit(SetupProcess(ProcessName.DOWNLOAD, info, null)));
-            futures.add(executor.submit(SetupProcess(ProcessName.PROCESSOR, info, ProcessName.DOWNLOAD)));
-            futures.add(executor.submit(SetupProcess(ProcessName.INDICES, info, ProcessName.PROCESSOR)));
-            futures.add(executor.submit(SetupProcess(ProcessName.SUMMARY, info, ProcessName.INDICES)));
+            PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
+            futures.add(executor.submit(SetupProcess(ProcessName.DOWNLOAD, pluginInfo, plMeta, null)));
+            futures.add(executor.submit(SetupProcess(ProcessName.PROCESSOR, pluginInfo, plMeta, ProcessName.DOWNLOAD)));
+            futures.add(executor.submit(SetupProcess(ProcessName.INDICES, pluginInfo, plMeta, ProcessName.PROCESSOR)));
+            futures.add(executor.submit(SetupProcess(ProcessName.SUMMARY, pluginInfo, plMeta, ProcessName.INDICES)));
         }
     }
 
-    public Process<?> SetupProcess(ProcessName processName, ProjectInfoPlugin pluginInfo, ProcessName previousProcess) throws NoSuchMethodException,
+    public Process<?> SetupProcess(ProcessName processName, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ProcessName previousProcess) throws NoSuchMethodException,
     SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         Class<?> classProcess;
@@ -141,7 +143,7 @@ public class Scheduler implements Runnable {
         case PROCESSOR:
             classProcess = Class.forName(String.format("version2.prototype.processor.Processor"));
             break;
-        default:
+        default:    // SUMMARY
             classProcess = Class.forName(String.format("version2.prototype.summary.Summary"));
             break;
         }
@@ -157,15 +159,15 @@ public class Scheduler implements Runnable {
         case INDICES:
             inputTableName = "Indices";
             break;
-        default:
+        default:    // SUMMARY
             inputTableName = null;
             break;
         }
 
-        Constructor<?> ctorProcess = classProcess.getConstructor(ProcessName.class, ThreadState.class, Scheduler.class, ProjectInfoPlugin.class,
-                ProjectInfoFile.class, PluginMetaDataCollection.class);
-        Process<?> process = (Process<?>)ctorProcess.newInstance(processName, ThreadState.RUNNING, this, pluginInfo, projectInfoFile,
-                pluginMetaDataCollection, inputTableName);
+        Constructor<?> ctorProcess = classProcess.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class,
+                Scheduler.class, ThreadState.class, ProcessName.class, String.class);
+        Process<?> process = (Process<?>)ctorProcess.newInstance(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
+                processName, inputTableName);
         mState.addObserver(process);
         return process;
     }
@@ -175,12 +177,12 @@ public class Scheduler implements Runnable {
     {
         // uses reflection
         Class<?> clazzDownloader = Class.forName("version2.prototype.download."
-                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Title
-                + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Download.className);
+                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
+                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download.className);
         Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class, GeneralListener.class);
         Object downloader =  ctorDownloader.newInstance(new Object[] {
                 data.projectInfoFile.GetStartDate(),
-                PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Download,
+                pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download,
                 new downloaderListener()});
         Method methodDownloader = downloader.getClass().getMethod("run");
         methodDownloader.invoke(downloader);
@@ -192,7 +194,7 @@ public class Scheduler implements Runnable {
     public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
-        ProcessMetaData temp = PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Projection;
+        ProcessMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
         // TODO: revise the "date"
         PrepareProcessTask prepareProcessTask;
         // TODO: initiate it with each plugin's implementation
@@ -203,7 +205,7 @@ public class Scheduler implements Runnable {
             if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
             {
                 Class<?> clazzProcess = Class.forName("version2.prototype.projection."
-                        + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Title
+                        + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
                         + temp.processStep.get(i));
                 Constructor<?> ctorProcess = clazzProcess.getConstructor(ProcessData.class);
                 Object process =  ctorProcess.newInstance(new Object[] {new ProcessData(

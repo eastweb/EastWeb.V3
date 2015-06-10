@@ -9,7 +9,7 @@ public final class FileSystem {
 
     public static String GetRootDirectoryPath(ProjectInfoFile data)
     {
-        String path = data.workingDir;
+        String path = data.GetWorkingDir();
         if(!path.endsWith("/") && path.endsWith("\\")) {
             path += "/";
         }

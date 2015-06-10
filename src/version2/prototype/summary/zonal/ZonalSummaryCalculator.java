@@ -3,7 +3,6 @@ package version2.prototype.summary.zonal;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,51 +24,38 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import version2.prototype.summary.SummaryCalculator;
+import version2.prototype.Process;
+import version2.prototype.ProcessWorker;
 import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.summaries.SummariesCollection;
 import version2.prototype.summary.summaries.SummaryNameResultPair;
+import version2.prototype.util.CachedDataFile;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
 
 
 
-public class ZonalSummaryCalculator implements SummaryCalculator {
-
+public class ZonalSummaryCalculator extends ProcessWorker<CachedDataFile> {
     private File mRasterFile;
     private File mLayerFile;
     private File mTableFile;
     private String mField;
-    private SummariesCollection summaries;
+    private SummariesCollection summariesCollection;
     private String projectName;
 
-    /**
-     * @param inRaster
-     * @param inShape
-     * @param outTable
-     * @param zone
-     * @param sumStrategy
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws SecurityException
-     * @throws NoSuchMethodException
-     * @throws ClassNotFoundException
-     */
-
-    public ZonalSummaryCalculator(SummaryData data)
+    public ZonalSummaryCalculator(SummaryData data, String processWorkerName, Process<?> process)
     {
-        mRasterFile = data.inRaster;
-        mLayerFile = data.inShape;
+        super(processWorkerName, process);
+        mRasterFile = data.inRasterFile;
+        mLayerFile = data.inShapeFile;
         mTableFile = data.outTableFile;
         mField = data.zoneField;
-        summaries = data.summaries;
+        summariesCollection = data.summariesCollection;
         projectName = data.projectName;
     }
 
     @Override
-    public void run() throws Exception {
+    public CachedDataFile call() throws Exception {
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
@@ -127,6 +113,7 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
                 }
             }
         }
+        return null;
     }
 
     /**
@@ -265,12 +252,12 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
                 int zone = zoneArray[i];
                 double value = rasterArray[i];
                 if (zone != 0 && value != NO_DATA) { // Neither are no data values
-                    summaries.put(zone, value);
+                    summariesCollection.put(zone, value);
                 }
             }
         }
 
-        ArrayList<SummaryNameResultPair> results = summaries.getResults();
+        ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
         Map<Integer, Double> countMap = new HashMap<Integer, Double>(1);
         for(SummaryNameResultPair pair : results){
             System.out.println(pair.toString());
@@ -289,7 +276,7 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
 
         layer.ResetReading(); GdalUtils.errorCheck();
         Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
-        ArrayList<SummaryNameResultPair> results = summaries.getResults();
+        ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
 
         while (feature != null) {
             int zone = feature.GetFieldAsInteger(mField); GdalUtils.errorCheck();
@@ -310,13 +297,14 @@ public class ZonalSummaryCalculator implements SummaryCalculator {
         writer.close();
     }
 
-    private void uploadResultsToDb(String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath,
-            String field, Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException
+    private void uploadResultsToDb(String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String field,
+            Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException,
+            ClassNotFoundException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final boolean previousAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
-        ArrayList<SummaryNameResultPair> results = summaries.getResults();
+        ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
         String index = "";
         int year = -1;
         int day = -1;

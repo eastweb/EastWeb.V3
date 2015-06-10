@@ -4,7 +4,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
 
-import version2.prototype.PluginMetaData.PluginMetaDataCollection;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
@@ -17,18 +17,18 @@ public abstract class Process<V> implements Callable<V>, Observer {
     protected Scheduler scheduler;
     protected ProjectInfoPlugin pluginInfo;
     protected ProjectInfoFile projectInfoFile;
-    protected PluginMetaDataCollection pluginMetaDataCollection;
+    protected PluginMetaData pluginMetaData;
     protected String mInputTableName;
 
-    protected Process(ProcessName processName, ThreadState state, Scheduler scheduler, ProjectInfoPlugin pluginInfo, ProjectInfoFile projectInfoFile,
-            PluginMetaDataCollection pluginMetaDataCollection, String inputTableName)
+    protected Process(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+            Scheduler scheduler, ThreadState state, ProcessName processName, String inputTableName)
     {
         this.processName = processName;
         mState = state;
         this.scheduler = scheduler;
         this.pluginInfo = pluginInfo;
         this.projectInfoFile = projectInfoFile;
-        this.pluginMetaDataCollection = pluginMetaDataCollection;
+        this.pluginMetaData = pluginMetaData;
         mInputTableName = inputTableName;
     }
 

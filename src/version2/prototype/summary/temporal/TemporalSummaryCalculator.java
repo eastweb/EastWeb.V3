@@ -2,46 +2,38 @@ package version2.prototype.summary.temporal;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Observable;
 
-import version2.prototype.summary.SummaryCalculator;
+import version2.prototype.Process;
+import version2.prototype.ProcessWorker;
 import version2.prototype.summary.SummaryData;
+import version2.prototype.util.CachedDataFile;
 
-public class TemporalSummaryCalculator implements SummaryCalculator {
-
+public class TemporalSummaryCalculator extends ProcessWorker<CachedDataFile> {
     private SummaryData data;
     private TemporalSummaryRasterFileStore fileStore;
 
-    /**
-     * @param inRaster
-     * @param inShape
-     * @param inDate
-     * @param outPath
-     * @param hrsPerInputData
-     * @param hrsPerOutputData
-     * @param sumStrategy
-     * @param merStrategy
-     * @param intStrategy
-     */
-    public TemporalSummaryCalculator(SummaryData data)
-    {
+    public TemporalSummaryCalculator(SummaryData data, String processWorkerName, Process<?> process) {
+        super(processWorkerName, process);
         this.data = data;
-        fileStore = new TemporalSummaryRasterFileStore(SummaryData.compositions, data.compStrategy);
+        fileStore = data.fileStore;
     }
 
     @Override
-    public void run() throws Exception {
+    public CachedDataFile call() throws Exception {
+        CachedDataFile output = null;
         ArrayList<File> inputFileSet = new ArrayList<File>();
 
         if(data.daysPerInputData > data.daysPerOutputData) {
-            inputFileSet = data.intStrategy.Interpolate(data.inRaster, data.daysPerInputData);
+            inputFileSet = data.intStrategy.Interpolate(data.inRasterFile, data.daysPerInputData);
         } else {
-            inputFileSet.add(data.inRaster);
+            inputFileSet.add(data.inRasterFile);
         }
 
         TemporalSummaryComposition tempComp;
         for(File inRaster : inputFileSet)
         {
-            tempComp = fileStore.addFile(inRaster, data.inDate, data.daysPerInputData);
+            tempComp = fileStore.addFile(inRaster, data.inDataDate, data.daysPerInputData);
 
             if(tempComp != null)
             {
@@ -49,9 +41,16 @@ public class TemporalSummaryCalculator implements SummaryCalculator {
                 for(FileDatePair fdPair : tempComp.files) {
                     files.add(fdPair.file);
                 }
-                data.mergeStrategy.Merge(tempComp.startDate, (File[])files.toArray());
+                output = data.mergeStrategy.Merge(data.projectName, data.pluginName, tempComp.startDate, (File[])files.toArray());
             }
         }
+        return output;
+    }
+
+    @Override
+    public void update(Observable arg0, Object arg1) {
+        // TODO Auto-generated method stub
+
     }
 
 }

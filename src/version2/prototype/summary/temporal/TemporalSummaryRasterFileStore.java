@@ -2,18 +2,16 @@ package version2.prototype.summary.temporal;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.GregorianCalendar;
 
 import version2.prototype.DataDate;
 
 public class TemporalSummaryRasterFileStore {
-    public final ArrayList<TemporalSummaryComposition> compositions;
     public final TemporalSummaryCompositionStrategy compStrategy;
+    private static ArrayList<TemporalSummaryComposition> compositions = new ArrayList<TemporalSummaryComposition>(0);
 
-    public TemporalSummaryRasterFileStore(ArrayList<TemporalSummaryComposition> compositions, TemporalSummaryCompositionStrategy compStrategy)
+    public TemporalSummaryRasterFileStore(TemporalSummaryCompositionStrategy compStrategy)
     {
-        this.compositions = compositions;
         this.compStrategy = compStrategy;
     }
 
@@ -31,26 +29,29 @@ public class TemporalSummaryRasterFileStore {
         GregorianCalendar gDate = compStrategy.getStartDate(d.getCalendar());
         int i;
         boolean matched = false;
-        for(i=0; i < compositions.size(); i++)
+        for(i=0; i < compositions.size(); i++) {
             if(compositions.get(i).startDate.compareTo(gDate) == 0)
             {
                 matched = true;
                 i = compositions.size();
             }
+        }
 
         if(matched)
         {
             compositions.get(i).addFilePair(new FileDatePair(f, d));
-            if(compositions.get(i).compositeFull())
+            if(compositions.get(i).compositeFull()) {
                 modifiedComp = compositions.remove(i);
+            }
         }
         else
         {
             TemporalSummaryComposition tempComp = new TemporalSummaryComposition(compStrategy, new FileDatePair(f, d));
-            if(compStrategy.getDaysInOneComposite(d.getCalendar()) == 1)
+            if(compStrategy.getDaysInOneComposite(d.getCalendar()) == 1) {
                 modifiedComp = tempComp;
-            else
+            } else {
                 compositions.add(tempComp);
+            }
         }
 
         return modifiedComp;

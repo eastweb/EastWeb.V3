@@ -2,34 +2,32 @@ package version2.prototype.summary;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
 import version2.prototype.DataDate;
 import version2.prototype.summary.summaries.SummariesCollection;
 import version2.prototype.summary.temporal.InterpolateStrategy;
 import version2.prototype.summary.temporal.MergeStrategy;
-import version2.prototype.summary.temporal.TemporalSummaryComposition;
-import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 
 
 public class SummaryData {
     public String projectName;
+    public String pluginName;
 
     // ZonalSummaryCalculator variables
-    public File inRaster;
-    public File inShape;
+    public File inRasterFile;
+    public File inShapeFile;
     public File outTableFile;
     public String zoneField;
-    public SummariesCollection summaries;
-    public static ArrayList<TemporalSummaryComposition> compositions = new ArrayList<TemporalSummaryComposition>(0); // Needed
+    public SummariesCollection summariesCollection;
+    public TemporalSummaryRasterFileStore fileStore;
 
     // Remaining TemporalSummaryCalculator variables
-    public DataDate inDate;
+    public DataDate inDataDate;
     public int daysPerInputData;
     public int daysPerOutputData;
     public InterpolateStrategy intStrategy;
     public MergeStrategy mergeStrategy;
-    public TemporalSummaryCompositionStrategy compStrategy;
 
     /**
      * <p>Accepts values for all inputs.</p>
@@ -60,21 +58,22 @@ public class SummaryData {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    public SummaryData(String projectName, File inRaster, File inShape, File outTable, String zone, ArrayList<String> summarySingletonNames,
-            DataDate inDate, int daysPerInputData, int daysPerOutputData, TemporalSummaryCompositionStrategy compStrategy,
-            InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) throws ClassNotFoundException, NoSuchMethodException, SecurityException,
-            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public SummaryData(String projectName, String pluginName, File inRasterFile, File inShapeFile, File outTableFile, String zoneField,
+            SummariesCollection summariesCollection, DataDate inDataDate, int daysPerInputData, int daysPerOutputData,
+            TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) throws ClassNotFoundException,
+            NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         this.projectName = projectName;
-        this.inRaster = inRaster;
-        this.inShape = inShape;
-        outTableFile = outTable;
-        zoneField = zone;
-        summaries = new SummariesCollection(summarySingletonNames);
-        this.inDate = inDate;
+        this.pluginName = pluginName;
+        this.inRasterFile = inRasterFile;
+        this.inShapeFile = inShapeFile;
+        this.outTableFile = outTableFile;
+        this.zoneField = zoneField;
+        this.summariesCollection = summariesCollection;
+        this.inDataDate = inDataDate;
         this.daysPerInputData = daysPerInputData;
         this.daysPerOutputData = daysPerOutputData;
+        this.fileStore = fileStore;
         this.intStrategy = intStrategy;
         this.mergeStrategy = mergeStrategy;
-        this.compStrategy = compStrategy;
     }
 }
