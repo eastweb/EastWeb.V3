@@ -1,98 +1,49 @@
 package version2.prototype.summary;
 
-
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
-
+import java.util.concurrent.ExecutorService;
 
 import version2.prototype.Process;
 import version2.prototype.ThreadState;
-import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
-import version2.prototype.summary.summaries.SummariesCollection;
-import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
-import version2.prototype.summary.temporal.TemporalSummaryCalculator;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
-import version2.prototype.summary.zonal.ZonalSummaryCalculator;
-import version2.prototype.util.CachedDataFile;
-import version2.prototype.util.DatabaseFileCache;
+import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 
 public class Summary<V> extends Process<V> {
     private TemporalSummaryRasterFileStore fileStore;
+    private ArrayList<SummaryWorker> workers;
 
     public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, ThreadState state, ProcessName processName, String inputTableName)
+            Scheduler scheduler, ThreadState state, ProcessName processName, String inputTableName, ExecutorService executor)
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, processName, inputTableName);
+        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, processName, inputTableName, executor);
+        workers = new ArrayList<SummaryWorker>(0);
     }
 
     @Override
     public V call() throws Exception {
-        SummaryData data;
+        SummaryWorker worker;
         Class<?> strategyClass = Class.forName(pluginMetaData.Summary.CompositionStrategyClassName);
         Constructor<?> ctorStrategy = strategyClass.getConstructor();
         TemporalSummaryCompositionStrategy tempSummaryCompStrategy = (TemporalSummaryCompositionStrategy)ctorStrategy.newInstance();
         fileStore = new TemporalSummaryRasterFileStore(tempSummaryCompStrategy);
 
-        ArrayList<CachedDataFile> cachedFiles = new ArrayList<CachedDataFile>();
-        cachedFiles = DatabaseFileCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), mInputTableName);
+        ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
+        cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), mInputTableName);
 
-        if(pluginMetaData.Summary.IsTemporalSummary)
+        if(cachedFiles.size() > 0)
         {
-            for(CachedDataFile cachedFile : cachedFiles)
-            {
-                for(ZonalSummary zone: projectInfoFile.GetZonalSummaries())
-                {
-                    data = new SummaryData(
-                            projectInfoFile.GetProjectName(),   // projectName
-                            pluginInfo.GetName(),   // pluginName
-                            new File(cachedFile.fullPath),     // inRasterFile
-                            new File(zone.GetShapeFile()),  // inShapeFile
-                            null,   // outTableFile     // TODO: Define output file
-                            null,   // zoneField
-                            null,   // summarySingletonNames
-                            null,   // inDataDate
-                            0,      // daysPerInputData
-                            0,      // daysPerOutputData
-                            fileStore,   // TemporalSummaryRasterFileStore
-                            null,   // InterpolateStrategy
-                            new AvgGdalRasterFileMerge() // (Framework user defined)
-                            );
-                    TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(data, "TemporalSummaryWorker", this);
-                    temporalSummaryCal.call();
-                }
-            }
-        }
-
-        for(CachedDataFile cachedFile : cachedFiles)
-        {
-            for(ZonalSummary zone: projectInfoFile.GetZonalSummaries())
-            {
-                data = new SummaryData(
-                        projectInfoFile.GetProjectName(),   // projectName
-                        pluginInfo.GetName(),   // pluginName
-                        new File(cachedFile.fullPath),   // inRasterFile
-                        new File(zone.GetShapeFile()),  // inShapeFile
-                        null,   // outTableFile
-                        zone.GetField(),    // zoneField
-                        new SummariesCollection(new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev"))), // summariesCollection
-                        null,  // inDataDate
-                        0,  // daysPerInputData
-                        0,  // daysPerOutputData
-                        null,   // TemporalSummaryRasterFileStore
-                        null,   // InterpolateStrategy
-                        null); // MergeStrategy
-                ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(data, "ZonalSummaryWorker", this);
-                zonalSummaryCal.call();
-            }
+            worker = new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, fileStore, cachedFiles);
+            workers.add(worker);
+            executor.submit(worker);
         }
 
         // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.

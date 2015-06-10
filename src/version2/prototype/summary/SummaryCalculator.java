@@ -1,6 +1,6 @@
 package version2.prototype.summary;
 
-public interface SummaryCalculator {
+public interface SummaryCalculator<V> {
 
-    void run() throws Exception;
+    V run() throws Exception;
 }

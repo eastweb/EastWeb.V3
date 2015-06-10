@@ -3,6 +3,7 @@ package version2.prototype.util;
 import java.util.regex.Pattern;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.Scheduler.ProcessName;
 
 public final class FileSystem {
     private FileSystem() {}
@@ -42,29 +43,58 @@ public final class FileSystem {
         return name;
     }
 
-    public static String GetProjectDirectoryPath(ProjectInfoFile data, String projectName)
+    public static String GetProjectDirectoryPath(String workingDir, String projectName)
     {
-        return GetRootDirectoryPath(data) + "Projects/" + StandardizeName(projectName) + "/";
+        return CheckWorkingDir(workingDir) + "Projects/" + StandardizeName(projectName) + "/";
     }
 
-    public static String GetProcessDirectoryPath(ProjectInfoFile data, String projectName, String pluginName, String processName)
+    public static String GetProcessDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return GetProjectDirectoryPath(data, projectName) + StandardizeName(pluginName) + "/" + StandardizeName(processName) + "/";
+        return GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "/" + GetProcessDirectoryName(processName) + "/";
     }
 
-    public static String GetProcessOutputDirectoryPath(ProjectInfoFile data, String projectName, String pluginName, String processName)
+    public static String GetProcessOutputDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return GetProcessDirectoryPath(data, projectName, pluginName, processName) + "Output/";
+        return GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output/";
     }
 
-    public static String GetProcessWorkerTempDirectoryPath(ProjectInfoFile data, String projectName, String pluginName, String processName,
-            String processWorkerName)
+    public static String GetProcessWorkerTempDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return GetProcessDirectoryPath(data, projectName, pluginName, processName) + StandardizeName(processWorkerName) + "_Temp/";
+        return GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp/";
     }
 
-    public static String GetDownloadDirectory(ProjectInfoFile data, String dataName)
+    public static String GetDownloadDirectory(String workingDir, String dataName)
     {
-        return GetRootDirectoryPath(data) + "Downloads/" + StandardizeName(dataName) + "/";
+        return CheckWorkingDir(workingDir) + "Downloads/" + StandardizeName(dataName) + "/";
+    }
+
+    private static String GetProcessDirectoryName(ProcessName name)
+    {
+        String dirName = null;
+
+        switch(name)
+        {
+        case DOWNLOAD:
+            dirName = "Download";
+            break;
+        case INDICES:
+            dirName = "Indices";
+            break;
+        case PROCESSOR:
+            dirName = "Processor";
+            break;
+        default:    // SUMMARY
+            dirName = "Summary";
+            break;
+        }
+        return dirName;
+    }
+
+    private static String CheckWorkingDir(String workingDir)
+    {
+        if(!workingDir.endsWith("/") && workingDir.endsWith("\\")) {
+            workingDir += "/";
+        }
+        return workingDir;
     }
 }

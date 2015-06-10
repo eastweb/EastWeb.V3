@@ -11,6 +11,7 @@ import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 
 
 public class SummaryData {
+    public String workingDir;
     public String projectName;
     public String pluginName;
 
@@ -58,10 +59,11 @@ public class SummaryData {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    public SummaryData(String projectName, String pluginName, File inRasterFile, File inShapeFile, File outTableFile, String zoneField,
+    public SummaryData(String workingDir, String projectName, String pluginName, File inRasterFile, File inShapeFile, File outTableFile, String zoneField,
             SummariesCollection summariesCollection, DataDate inDataDate, int daysPerInputData, int daysPerOutputData,
             TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) throws ClassNotFoundException,
             NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        this.workingDir = workingDir;
         this.projectName = projectName;
         this.pluginName = pluginName;
         this.inRasterFile = inRasterFile;

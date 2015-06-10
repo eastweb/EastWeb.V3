@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import version2.prototype.ConfigReadException;
 
 public class Schema {
-    public static void RecreateSchema(String projectName, String pluginName) throws ConfigReadException, SQLException
+    public static void RecreateSchema(String projectName, String pluginName) throws ConfigReadException, SQLException, ClassNotFoundException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final String mSchemaName = getSchemaName(projectName, pluginName);

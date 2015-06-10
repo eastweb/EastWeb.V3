@@ -24,18 +24,13 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import version2.prototype.Process;
-import version2.prototype.ProcessWorker;
 import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.summaries.SummariesCollection;
 import version2.prototype.summary.summaries.SummaryNameResultPair;
-import version2.prototype.util.CachedDataFile;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
 
-
-
-public class ZonalSummaryCalculator extends ProcessWorker<CachedDataFile> {
+public class ZonalSummaryCalculator {
     private File mRasterFile;
     private File mLayerFile;
     private File mTableFile;
@@ -43,9 +38,8 @@ public class ZonalSummaryCalculator extends ProcessWorker<CachedDataFile> {
     private SummariesCollection summariesCollection;
     private String projectName;
 
-    public ZonalSummaryCalculator(SummaryData data, String processWorkerName, Process<?> process)
+    public ZonalSummaryCalculator(SummaryData data)
     {
-        super(processWorkerName, process);
         mRasterFile = data.inRasterFile;
         mLayerFile = data.inShapeFile;
         mTableFile = data.outTableFile;
@@ -54,8 +48,7 @@ public class ZonalSummaryCalculator extends ProcessWorker<CachedDataFile> {
         projectName = data.projectName;
     }
 
-    @Override
-    public CachedDataFile call() throws Exception {
+    public void calculate() throws Exception {
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
@@ -113,7 +106,6 @@ public class ZonalSummaryCalculator extends ProcessWorker<CachedDataFile> {
                 }
             }
         }
-        return null;
     }
 
     /**

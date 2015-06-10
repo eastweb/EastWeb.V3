@@ -1,35 +1,25 @@
 package version2.prototype.summary.temporal;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-
-import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
-import org.gdal.ogr.DataSource;
-import org.gdal.ogr.Feature;
-import org.gdal.ogr.Layer;
-import org.gdal.ogr.ogr;
-
-import version2.prototype.summary.summaries.SummariesCollection;
-import version2.prototype.summary.summaries.SummaryNameResultPair;
+import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.GdalUtils;
 
 public class AvgGdalRasterFileMerge implements MergeStrategy {
 
     @Override
-    public File Merge(String projectName, String pluginName, GregorianCalendar firstDate, File... rasterFiles) throws Exception {
+    public DataFileMetaData Merge(String workingDir, String projectName, String pluginName, GregorianCalendar firstDate, File[] rasterFiles)
+            throws Exception {
         GdalUtils.register();
-        File mergedFile = null;
+        DataFileMetaData mergedFile = null;
 
         synchronized (GdalUtils.lockObject) {
             double[] outTransform = null;
@@ -60,14 +50,14 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
                 outTransform[i] = sum / transforms.size();
             }
 
-            String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(projectName, pluginName, "Summary", "Temporal") +
+            String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, ProcessName.SUMMARY) +
                     String.format("%04d%03d.tif",
                             firstDate.get(Calendar.YEAR),
                             firstDate.get(Calendar.DAY_OF_YEAR)
                             );
             rasterCopy.SetGeoTransform(outTransform);
             rasterCopy.GetDriver().CreateCopy(newFilePath, rasterCopy, 1);
-            mergedFile = new File(newFilePath);
+            mergedFile = DatabaseCache.Parse(newFilePath);
         }
         return mergedFile;
     }

@@ -2,26 +2,21 @@ package version2.prototype.summary.temporal;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Observable;
 
-import version2.prototype.Process;
-import version2.prototype.ProcessWorker;
 import version2.prototype.summary.SummaryData;
-import version2.prototype.util.CachedDataFile;
+import version2.prototype.util.DataFileMetaData;
 
-public class TemporalSummaryCalculator extends ProcessWorker<CachedDataFile> {
+public class TemporalSummaryCalculator {
     private SummaryData data;
     private TemporalSummaryRasterFileStore fileStore;
 
-    public TemporalSummaryCalculator(SummaryData data, String processWorkerName, Process<?> process) {
-        super(processWorkerName, process);
+    public TemporalSummaryCalculator(SummaryData data) {
         this.data = data;
         fileStore = data.fileStore;
     }
 
-    @Override
-    public CachedDataFile call() throws Exception {
-        CachedDataFile output = null;
+    public DataFileMetaData calculate() throws Exception {
+        DataFileMetaData output = null;
         ArrayList<File> inputFileSet = new ArrayList<File>();
 
         if(data.daysPerInputData > data.daysPerOutputData) {
@@ -41,16 +36,9 @@ public class TemporalSummaryCalculator extends ProcessWorker<CachedDataFile> {
                 for(FileDatePair fdPair : tempComp.files) {
                     files.add(fdPair.file);
                 }
-                output = data.mergeStrategy.Merge(data.projectName, data.pluginName, tempComp.startDate, (File[])files.toArray());
+                output = data.mergeStrategy.Merge(data.workingDir, data.projectName, data.pluginName, tempComp.startDate, (File[])files.toArray());
             }
         }
         return output;
     }
-
-    @Override
-    public void update(Observable arg0, Object arg1) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

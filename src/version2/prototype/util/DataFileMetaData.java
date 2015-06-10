@@ -1,20 +1,18 @@
 package version2.prototype.util;
 
-public class CachedDataFile {
-    public final int rowID;
+public class DataFileMetaData {
     public final String fullPath;
     public final String dateDirectory;
     public final int dataGroupID;
-    public final int day;
     public final int year;
+    public final int day;
 
-    public CachedDataFile(int rowID, String fullPath, String dateDirectory, int dataGroupID, int day, int year)
+    public DataFileMetaData(String fullPath, String dateDirectory, int dataGroupID, int year, int day)
     {
-        this.rowID = rowID;
         this.fullPath = fullPath;
         this.dateDirectory = dateDirectory;
         this.dataGroupID = dataGroupID;
-        this.day = day;
         this.year = year;
+        this.day = day;
     }
 }

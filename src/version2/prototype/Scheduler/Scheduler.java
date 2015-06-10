@@ -50,8 +50,9 @@ public class Scheduler implements Runnable {
 
     private SchedulerState mState;
     private ArrayList<Future<?>> futures;
+    private ExecutorService executor;
 
-    public Scheduler(SchedulerData data)
+    public Scheduler(SchedulerData data, ExecutorService executor)
     {
         DownloadProgress = 0;
         ProcessProgress = 0;
@@ -63,6 +64,7 @@ public class Scheduler implements Runnable {
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
         mState = new SchedulerState();
+        this.executor = executor;
     }
 
     @Override
@@ -115,7 +117,6 @@ public class Scheduler implements Runnable {
     public void RunProcesses() throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
     IllegalArgumentException, InvocationTargetException
     {
-        ExecutorService executor = Executors.newCachedThreadPool();
         for(ProjectInfoPlugin pluginInfo: data.projectInfoFile.GetPlugins())
         {
             PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
@@ -165,9 +166,9 @@ public class Scheduler implements Runnable {
         }
 
         Constructor<?> ctorProcess = classProcess.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class,
-                Scheduler.class, ThreadState.class, ProcessName.class, String.class);
+                Scheduler.class, ThreadState.class, ProcessName.class, String.class, ExecutorService.class);
         Process<?> process = (Process<?>)ctorProcess.newInstance(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
-                processName, inputTableName);
+                processName, inputTableName, executor);
         mState.addObserver(process);
         return process;
     }

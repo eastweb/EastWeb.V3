@@ -3,6 +3,7 @@ package version2.prototype;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -19,9 +20,10 @@ public abstract class Process<V> implements Callable<V>, Observer {
     protected ProjectInfoFile projectInfoFile;
     protected PluginMetaData pluginMetaData;
     protected String mInputTableName;
+    protected ExecutorService executor;
 
     protected Process(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, ThreadState state, ProcessName processName, String inputTableName)
+            Scheduler scheduler, ThreadState state, ProcessName processName, String inputTableName, ExecutorService executor)
     {
         this.processName = processName;
         mState = state;
@@ -30,6 +32,7 @@ public abstract class Process<V> implements Callable<V>, Observer {
         this.projectInfoFile = projectInfoFile;
         this.pluginMetaData = pluginMetaData;
         mInputTableName = inputTableName;
+        this.executor = executor;
     }
 
     public void NotifyUI(GeneralUIEventObject e)
