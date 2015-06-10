@@ -3,38 +3,28 @@ package version2.prototype;
 import java.io.Serializable;
 
 public class ZonalSummary implements Serializable {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
-    private final String name;
     private final String shapeFile;
     private final String field;
 
-    public ZonalSummary(String name, String shapeFile, String field) {
-        this.name = name;
+    public ZonalSummary(String shapeFile, String field) {
         this.shapeFile = shapeFile;
         this.field = field;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getShapeFile() {
+    public String GetShapeFile() {
         return shapeFile;
     }
 
-    public String getField() {
+    public String GetField() {
         return field;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "[name=%s, shapefile=%s, field=%s]",
-                name, shapeFile, field
+                "[shapefile=%s, field=%s]",
+                shapeFile, field
                 );
     }
-
 }

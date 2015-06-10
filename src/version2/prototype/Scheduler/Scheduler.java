@@ -6,12 +6,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
+import version2.prototype.Process;
+import version2.prototype.ThreadState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -21,6 +27,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
 import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
+import version2.prototype.summary.Summary;
 import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
@@ -39,8 +46,9 @@ public class Scheduler implements Runnable {
     public SchedulerData data;
     public ProjectInfoFile projectInfoFile;
     public PluginMetaDataCollection pluginMetaDataCollection;
-    private File outTable;
-    private ArrayList<String> summarySingletonNames;
+
+    private SchedulerState mState;
+    private ArrayList<Future<Void>> futures;
 
     public Scheduler(SchedulerData data)
     {
@@ -53,13 +61,13 @@ public class Scheduler implements Runnable {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
-        summarySingletonNames = data.SummarySingletonNames;
+        mState = new SchedulerState();
     }
 
     @Override
     public void run()
     {
-        for(ProjectInfoPlugin item: data.projectInfoFile.plugins)
+        for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
             try {
                 RunDownloader(item);
@@ -103,6 +111,42 @@ public class Scheduler implements Runnable {
         }
     }
 
+    public void RunProcesses()
+    {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        for(ProjectInfoPlugin info: data.projectInfoFile.GetPlugins())
+        {
+            futures.add(executor.submit(SetupProcess(ProcessName.DOWNLOAD, info, null)));
+            futures.add(executor.submit(SetupProcess(ProcessName.PROCESSOR, info, ProcessName.DOWNLOAD)));
+            futures.add(executor.submit(SetupProcess(ProcessName.INDICES, info, ProcessName.PROCESSOR)));
+            futures.add(executor.submit(SetupProcess(ProcessName.SUMMARY, info, ProcessName.INDICES)));
+        }
+    }
+
+    public Process<Void> SetupProcess(ProcessName processName, ProjectInfoPlugin pluginInfo, ProcessName previousProcess)
+    {
+        String inputTableName;
+        switch(previousProcess)
+        {
+        case DOWNLOAD:
+            inputTableName = "Download";
+            break;
+        case PROCESSOR:
+            inputTableName = "Processor";
+            break;
+        case INDICES:
+            inputTableName = "Indices";
+            break;
+        default:
+            inputTableName = null;
+            break;
+        }
+
+        Process<Void> process = new Summary<Void>(processName, this, pluginInfo, projectInfoFile, pluginMetaDataCollection, inputTableName);
+        mState.addObserver(process);
+        return process;
+    }
+
     public void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         // uses reflection
@@ -111,7 +155,7 @@ public class Scheduler implements Runnable {
                 + PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Download.className);
         Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class, GeneralListener.class);
         Object downloader =  ctorDownloader.newInstance(new Object[] {
-                data.projectInfoFile.startDate,
+                data.projectInfoFile.GetStartDate(),
                 PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Download,
                 new downloaderListener()});
         Method methodDownloader = downloader.getClass().getMethod("run");
@@ -165,7 +209,7 @@ public class Scheduler implements Runnable {
             Object indexCalculator =  ctorIndicies.newInstance(
                     new Object[] {
                             plugin.GetName(),
-                            data.projectInfoFile.startDate,
+                            data.projectInfoFile.GetStartDate(),
                             new File(indicie).getName().split("\\.")[0],
                             indicie,
                             new indiciesListener()});
@@ -176,57 +220,20 @@ public class Scheduler implements Runnable {
         Log.add("Indicies Finish");
     }
 
-    public void RunSummary(ProjectInfoPlugin plugin) throws Exception
+    public void NotifyUI(GeneralUIEventObject e)
     {
-        if(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Summary.IsTemporalSummary)
-        {
-            for(ZonalSummary zone: projectInfoFile.getZonalSummaries())
-            {
-                Class<?> strategyClass = Class.forName(PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Summary
-                        .CompositionStrategyClassName);
-                Constructor<?> ctorStrategy = strategyClass.getConstructor();
-                Object temporalSummaryCompositionStrategy = ctorStrategy.newInstance();
+        ProcessName processName = ((Process<?>)e.getSource()).processName;
+        Log.add(e.getStatus());
+    }
 
-                TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(new SummaryData(
-                        projectInfoFile.projectName,
-                        DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
-                        new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
-                        null,
-                        null,
-                        null,
-                        projectInfoFile.startDate,
-                        0,
-                        0,
-                        (TemporalSummaryCompositionStrategy) temporalSummaryCompositionStrategy,       // User selected
-                        null,   // InterpolateStrategy (Framework user defined)
-                        new AvgGdalRasterFileMerge(),
-                        new summaryListener()));       // (Framework user defined)
-                temporalSummaryCal.run();
-            }
-        }
+    public void Stop()
+    {
+        mState.ChangeState(ThreadState.STOPPED);
+    }
 
-        for(ZonalSummary zone: projectInfo.getZonalSummaries())
-        {
-            ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(new SummaryData(
-                    projectInfo.getName(),
-                    DirectoryLayout.getIndexMetadata(projectInfo, plugin.GetName(), projectInfo.getStartDate(), zone.getShapeFile()),
-                    new File(DirectoryLayout.getSettingsDirectory(projectInfo), zone.getShapeFile()),
-                    outTable,
-                    zone.getField(),
-                    summarySingletonNames,
-                    projectInfoFile.startDate,
-                    0,
-                    0,
-                    projectInfoFile.startDate,
-                    null,
-                    null,
-                    null,
-                    new summaryListener()));
-            zonalSummaryCal.run();
-        }
-        SummaryProgress = 100;
-        Log.add("Summary Finish");
-
+    public void Start()
+    {
+        mState.ChangeState(ThreadState.RUNNING);
     }
 
     class downloaderListener implements GeneralListener{
@@ -260,6 +267,5 @@ public class Scheduler implements Runnable {
             Log.add(e.getStatus());
         }
     }
-
 }
 

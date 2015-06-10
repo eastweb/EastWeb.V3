@@ -8,6 +8,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.ZonalSummary;
+
 public class ProjectInfoParserTester {
 
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, ParseException {
@@ -16,13 +18,13 @@ public class ProjectInfoParserTester {
 
         for(ProjectInfoFile file : files)
         {
-            if(file.projectName != null && file.projectName.equalsIgnoreCase("actual project")) {
+            if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase("actual project")) {
                 return;
             }
 
 
             System.out.println("File: " + file.xmlLocation);
-            System.out.println("\tProject Name: " + file.projectName);
+            System.out.println("\tProject Name: " + file.GetProjectName());
             if(file.error)
             {
                 for(String err : file.errorMsg) {
@@ -32,7 +34,7 @@ public class ProjectInfoParserTester {
             else
             {
                 System.out.println("\tNo errors found while parsing.");
-                for(ProjectInfoPlugin plugin : file.plugins)
+                for(ProjectInfoPlugin plugin : file.GetPlugins())
                 {
                     System.out.println("\tplugin '" + plugin.GetName() + "':");
                     System.out.println("\t\tQC: " + plugin.GetQC());
@@ -43,6 +45,13 @@ public class ProjectInfoParserTester {
                     }
                 }
                 System.out.println();
+            }
+
+            System.out.println("\tZonal Summaries:");
+            for(ZonalSummary summary : file.GetZonalSummaries())
+            {
+                System.out.println("\t\tShape File: " + summary.getShapeFile());
+                System.out.println("\t\tField: " + summary.getField());
             }
         }
     }

@@ -35,11 +35,11 @@
             <vert>5</vert>
         </tile>
     </modis.tiles>
-    <zonal.summaries>
-        <summary>
+    <Summaries>
+        <Summary>
             <name>counties</name>
             <shapefile>shapefiles\shapefile\shapefile.shp</shapefile>
             <field>COUNTYFP10</field>
-        </summary>
-    </zonal.summaries>
+        </Summary>
+    </Summaries>
 </project>

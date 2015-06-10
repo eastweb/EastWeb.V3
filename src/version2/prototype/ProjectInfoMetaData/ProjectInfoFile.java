@@ -11,6 +11,8 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import version2.prototype.ZonalSummary;
+
 public class ProjectInfoFile {
     private DocumentBuilderFactory domFactory;
     private DocumentBuilder builder;
@@ -20,26 +22,26 @@ public class ProjectInfoFile {
     // Project info data
     public boolean error;
     public ArrayList<String> errorMsg;
-    public final String rootElement = "ProjectInfo";
-    public final ArrayList<ProjectInfoPlugin> plugins;
-    public final Date startDate;
-    public final String projectName;
-    public final String workingDir;
-    public final String maskingFile;
-    public final String masterShapeFile;
-    public final String timeZone;
-    public final ArrayList<String> modisTiles;
-    public final String coordinateSystem;
-    public final String reSampling;
-    public final String datums;
-    public final String pixelSize;
-    public final String stdParallel1;
-    public final String stdParallel2;
-    public final String centralMeridian;
-    public final String falseEasting;
-    public final String latitudeOfOrigin;
-    public final String falseNothing;
-    public final ArrayList<String> summaries;
+    private final String rootElement = "ProjectInfo";
+    private final ArrayList<ProjectInfoPlugin> plugins;
+    private final Date startDate;
+    private final String projectName;
+    private final String workingDir;
+    private final String maskingFile;
+    private final String masterShapeFile;
+    private final String timeZone;
+    private final ArrayList<String> modisTiles;
+    private final String coordinateSystem;
+    private final String reSampling;
+    private final String datums;
+    private final String pixelSize;
+    private final String stdParallel1;
+    private final String stdParallel2;
+    private final String centralMeridian;
+    private final String falseEasting;
+    private final String latitudeOfOrigin;
+    private final String falseNothing;
+    private final ArrayList<ZonalSummary> zonalSummaries;
 
     public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException
     {
@@ -53,28 +55,48 @@ public class ProjectInfoFile {
         doc.getDocumentElement().normalize();
 
         // Get file data
-        plugins = GetPlugins();
-        startDate = GetStartDate();
-        projectName = GetProjectName();
-        workingDir = GetWorkingDir();
-        maskingFile = GetMaskingFile();
-        masterShapeFile = GetMasterShapeFile();
-        timeZone = GetTimeZone();
-        modisTiles = GetModisTiles();
-        coordinateSystem = GetCoordinateSystem();
-        reSampling = GetReSampling();
-        datums = GetDatums();
-        pixelSize = GetPixelSize();
-        stdParallel1 = GetStandardParallel1();
-        stdParallel2 = GetStandardParallel2();
-        centralMeridian = GetCentralMeridian();
-        falseEasting = GetFalseEasting();
-        latitudeOfOrigin = GetLatitudeOfOrigin();
-        falseNothing = GetFalseNothing();
-        summaries = GetSummaries();
+        plugins = ReadPlugins();
+        startDate = ReadStartDate();
+        projectName = ReadProjectName();
+        workingDir = ReadWorkingDir();
+        maskingFile = ReadMaskingFile();
+        masterShapeFile = ReadMasterShapeFile();
+        timeZone = ReadTimeZone();
+        modisTiles = ReadModisTiles();
+        coordinateSystem = ReadCoordinateSystem();
+        reSampling = ReadReSampling();
+        datums = ReadDatums();
+        pixelSize = ReadPixelSize();
+        stdParallel1 = ReadStandardParallel1();
+        stdParallel2 = ReadStandardParallel2();
+        centralMeridian = ReadCentralMeridian();
+        falseEasting = ReadFalseEasting();
+        latitudeOfOrigin = ReadLatitudeOfOrigin();
+        falseNothing = ReadFalseNothing();
+        zonalSummaries = ReadSummaries();
     }
 
-    private ArrayList<ProjectInfoPlugin> GetPlugins()
+    public ArrayList<ProjectInfoPlugin> GetPlugins() { return plugins; }
+    public Date GetStartDate() { return startDate; }
+    public String GetProjectName() { return projectName; }
+    public String GetWorkingDir() { return workingDir; }
+    public String GetMaskingFile() { return maskingFile; }
+    public String GetMasterShapeFile() { return masterShapeFile; }
+    public String GetTimeZone() { return timeZone; }
+    public ArrayList<String> GetModisTiles() { return modisTiles; }
+    public String GetCoordinateSystem() { return coordinateSystem; }
+    public String GetReSampling() { return reSampling; }
+    public String GetDatums() { return datums; }
+    public String GetPixelSize() { return pixelSize; }
+    public String GetStandardParallel1() { return stdParallel1; }
+    public String GetStandardParallel2() { return stdParallel2; }
+    public String GetCentralMeridian() { return centralMeridian; }
+    public String GetFalseEasting() { return falseEasting; }
+    public String GetLatitudeOfOrigin() { return latitudeOfOrigin; }
+    public String GetFalseNothing() { return falseNothing; }
+    public ArrayList<ZonalSummary> GetZonalSummaries() { return zonalSummaries; }
+
+    private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
         ArrayList<ProjectInfoPlugin> plugins = new ArrayList<ProjectInfoPlugin>();
         String name;
@@ -91,7 +113,7 @@ public class ProjectInfoFile {
                 name = plugin.getAttribute("name");
 
                 ArrayList<String> values = GetNodeListValues(plugin.getElementsByTagName("QC"),
-                        "Missing QC for plugin '" + name + "'");
+                        "Missing QC for plugin '" + name + "'.");
                 if(values.size() > 0) {
                     qc = values.get(0);
                 } else {
@@ -99,7 +121,7 @@ public class ProjectInfoFile {
                 }
 
                 values = GetNodeListValues(plugin.getElementsByTagName("Indicies"), "Missing indicies for plugin '"
-                        + name + "'");
+                        + name + "'.");
                 if(values.size() > 0) {
                     inidicies = values;
                 } else {
@@ -113,7 +135,7 @@ public class ProjectInfoFile {
         return plugins;
     }
 
-    private Date GetStartDate()
+    private Date ReadStartDate()
     {
         NodeList nodes = GetUpperLevelNodeList("StartDate", "Missing start date.");
         try {
@@ -130,7 +152,7 @@ public class ProjectInfoFile {
         }
     }
 
-    private String GetProjectName()
+    private String ReadProjectName()
     {
         NodeList nodes = GetUpperLevelNodeList("ProjectName", "Missing project name.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing project name.");
@@ -140,7 +162,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetWorkingDir()
+    private String ReadWorkingDir()
     {
         NodeList nodes = GetUpperLevelNodeList("WorkingDir", "Missing working directory.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing working directory.");
@@ -150,7 +172,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetMaskingFile()
+    private String ReadMaskingFile()
     {
         NodeList nodes = GetUpperLevelNodeList("MaskingFile", "Missing masking file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
@@ -160,7 +182,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetMasterShapeFile()
+    private String ReadMasterShapeFile()
     {
         NodeList nodes = GetUpperLevelNodeList("MasterShapeFile", "Missing master shape file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing master shape file.");
@@ -170,7 +192,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetTimeZone()
+    private String ReadTimeZone()
     {
         NodeList nodes = GetUpperLevelNodeList("TimeZone", "Missing time zone.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing time zone.");
@@ -180,7 +202,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private ArrayList<String> GetModisTiles()
+    private ArrayList<String> ReadModisTiles()
     {
         NodeList nodes = GetUpperLevelNodeList("Modis", "Missing modis tiles.", "ModisTiles");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing modis tiles.");
@@ -190,7 +212,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetCoordinateSystem()
+    private String ReadCoordinateSystem()
     {
         NodeList nodes = GetUpperLevelNodeList("CoordinateSystem", "Missing coordinate system.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing coordinate system.");
@@ -200,7 +222,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetReSampling()
+    private String ReadReSampling()
     {
         NodeList nodes = GetUpperLevelNodeList("ReSampling", "Missing resampling.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing resampling.");
@@ -210,7 +232,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetDatums()
+    private String ReadDatums()
     {
         NodeList nodes = GetUpperLevelNodeList("Datum", "Missing datums.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing datums.");
@@ -220,7 +242,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetPixelSize()
+    private String ReadPixelSize()
     {
         NodeList nodes = GetUpperLevelNodeList("PixelSize", "Missing PixelSize.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing PixelSize.");
@@ -230,7 +252,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetStandardParallel1()
+    private String ReadStandardParallel1()
     {
         NodeList nodes = GetUpperLevelNodeList("StandardParallel1", "Missing standard parallel 1.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 1.");
@@ -240,7 +262,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetStandardParallel2()
+    private String ReadStandardParallel2()
     {
         NodeList nodes = GetUpperLevelNodeList("StandardParallel2", "Missing standard parallel 2.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 2.");
@@ -250,7 +272,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetCentralMeridian()
+    private String ReadCentralMeridian()
     {
         NodeList nodes = GetUpperLevelNodeList("CentralMeridian", "Missing central meridian.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing central meridian.");
@@ -260,7 +282,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetFalseEasting()
+    private String ReadFalseEasting()
     {
         NodeList nodes = GetUpperLevelNodeList("FalseEasting", "Missing false easting.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing false easting.");
@@ -270,7 +292,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetLatitudeOfOrigin()
+    private String ReadLatitudeOfOrigin()
     {
         NodeList nodes = GetUpperLevelNodeList("LatitudeOfOrigin", "Missing latitude of origin.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing latitude of origin.");
@@ -280,7 +302,7 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String GetFalseNothing()
+    private String ReadFalseNothing()
     {
         NodeList nodes = GetUpperLevelNodeList("FalseNothing", "Missing false nothing.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing false nothing.");
@@ -290,14 +312,39 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private ArrayList<String> GetSummaries()
+    private ArrayList<ZonalSummary> ReadSummaries()
     {
-        NodeList nodes = GetUpperLevelNodeList("Summary", "Missing summaries.", "Summaries");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing summaries.");
-        if(values.size() > 0) {
-            return values;
+        ArrayList<ZonalSummary> summaries = new ArrayList<ZonalSummary>();
+        String shapeFile;
+        String field;
+
+        NodeList summaryList = GetUpperLevelNodeList("Summary", "Missing zonal summaries.", "Summaries");
+        if(summaryList != null)
+        {
+            ArrayList<String> values;
+            Element summary;
+
+            for(int i=0; i < summaryList.getLength(); i++)
+            {
+                summary = (Element)summaryList.item(i);
+                values = GetNodeListValues(summary.getElementsByTagName("ShapeFile"), "Missing summary shape file.");
+                if(values.size() > 0) {
+                    shapeFile = values.get(0);
+                } else {
+                    shapeFile = null;
+                }
+
+                values = GetNodeListValues(summary.getElementsByTagName("Field"), "Missing summary field.");
+                if(values.size() > 0) {
+                    field = values.get(0);
+                } else {
+                    field = null;
+                }
+
+                summaries.add(new ZonalSummary(shapeFile, field));
+            }
         }
-        return null;
+        return summaries;
     }
 
     private NodeList GetUpperLevelNodeList(String element, String errorMsg, String...parents)

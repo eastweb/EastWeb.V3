@@ -11,12 +11,10 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 public class SchedulerData {
     public ProjectInfoFile projectInfoFile;
     public PluginMetaDataCollection pluginMetaDataCollection;
-    public ArrayList<String> SummarySingletonNames;
 
     public SchedulerData(ProjectInfoFile projectInfoFile) throws ConfigReadException, Exception
     {
         this.projectInfoFile= projectInfoFile;
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance();
-        SummarySingletonNames = new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev"));
     }
 }
