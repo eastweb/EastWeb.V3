@@ -168,7 +168,7 @@ public class Scheduler implements Runnable {
         Constructor<?> ctorProcess = classProcess.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class,
                 Scheduler.class, ThreadState.class, ProcessName.class, String.class, ExecutorService.class);
         Process<?> process = (Process<?>)ctorProcess.newInstance(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
-                processName, inputTableName, executor);
+                inputTableName, executor);
         mState.addObserver(process);
         return process;
     }

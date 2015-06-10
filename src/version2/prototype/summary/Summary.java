@@ -31,14 +31,16 @@ public class Summary<V> extends Process<V> {
     @Override
     public V call() throws Exception {
         SummaryWorker worker;
+
+        // Custom to Summary
         Class<?> strategyClass = Class.forName(pluginMetaData.Summary.CompositionStrategyClassName);
         Constructor<?> ctorStrategy = strategyClass.getConstructor();
         TemporalSummaryCompositionStrategy tempSummaryCompStrategy = (TemporalSummaryCompositionStrategy)ctorStrategy.newInstance();
         fileStore = new TemporalSummaryRasterFileStore(tempSummaryCompStrategy);
 
+        // General get data files
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), mInputTableName);
-
         if(cachedFiles.size() > 0)
         {
             worker = new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, fileStore, cachedFiles);

@@ -19,7 +19,7 @@ import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.FileSystem;
 
-public class SummaryWorker extends ProcessWorker<DataFileMetaData> {
+public class SummaryWorker extends ProcessWorker<Void> {
     private ProjectInfoFile projectInfoFile;
     private ProjectInfoPlugin pluginInfo;
     private PluginMetaData pluginMetaData;
@@ -38,7 +38,7 @@ public class SummaryWorker extends ProcessWorker<DataFileMetaData> {
     }
 
     @Override
-    public DataFileMetaData call() throws Exception {
+    public Void call() throws Exception {
         SummaryData data;
 
         if(pluginMetaData.Summary.IsTemporalSummary)

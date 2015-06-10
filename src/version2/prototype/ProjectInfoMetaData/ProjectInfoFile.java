@@ -11,6 +11,8 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Projection;
+import version2.prototype.Projection.ProjectionType;
 import version2.prototype.ZonalSummary;
 
 public class ProjectInfoFile {
@@ -95,6 +97,20 @@ public class ProjectInfoFile {
     public String GetLatitudeOfOrigin() { return latitudeOfOrigin; }
     public String GetFalseNothing() { return falseNothing; }
     public ArrayList<ZonalSummary> GetZonalSummaries() { return zonalSummaries; }
+    public Projection GetProjection()
+    {
+        ProjectionType pType;
+        switch(coordinateSystem)
+        {
+        case "ALBERS_EQUAL_AREA":
+            pType = ProjectionType.ALBERS_EQUAL_AREA;
+            break;
+        case "LAMBERT_CONFORMAL_CONIC":
+            break;
+        case "TRANSVERSE_MERCATOR":
+            break;
+        }
+    }
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
