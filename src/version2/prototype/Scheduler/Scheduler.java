@@ -48,7 +48,7 @@ public class Scheduler implements Runnable {
     public PluginMetaDataCollection pluginMetaDataCollection;
 
     private SchedulerState mState;
-    private ArrayList<Future<Void>> futures;
+    private ArrayList<Future<?>> futures;
 
     public Scheduler(SchedulerData data)
     {
@@ -111,7 +111,8 @@ public class Scheduler implements Runnable {
         }
     }
 
-    public void RunProcesses()
+    public void RunProcesses() throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+    IllegalArgumentException, InvocationTargetException
     {
         ExecutorService executor = Executors.newCachedThreadPool();
         for(ProjectInfoPlugin info: data.projectInfoFile.GetPlugins())
@@ -123,9 +124,28 @@ public class Scheduler implements Runnable {
         }
     }
 
-    public Process<Void> SetupProcess(ProcessName processName, ProjectInfoPlugin pluginInfo, ProcessName previousProcess)
+    public Process<?> SetupProcess(ProcessName processName, ProjectInfoPlugin pluginInfo, ProcessName previousProcess) throws NoSuchMethodException,
+    SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
+        Class<?> classProcess;
         String inputTableName;
+
+        switch(processName)
+        {
+        case DOWNLOAD:
+            classProcess = Class.forName(String.format("version2.prototype.download.Download"));
+            break;
+        case INDICES:
+            classProcess = Class.forName(String.format("version2.prototype.indices.Indices"));
+            break;
+        case PROCESSOR:
+            classProcess = Class.forName(String.format("version2.prototype.processor.Processor"));
+            break;
+        default:
+            classProcess = Class.forName(String.format("version2.prototype.summary.Summary"));
+            break;
+        }
+
         switch(previousProcess)
         {
         case DOWNLOAD:
@@ -142,12 +162,16 @@ public class Scheduler implements Runnable {
             break;
         }
 
-        Process<Void> process = new Summary<Void>(processName, this, pluginInfo, projectInfoFile, pluginMetaDataCollection, inputTableName);
+        Constructor<?> ctorProcess = classProcess.getConstructor(ProcessName.class, ThreadState.class, Scheduler.class, ProjectInfoPlugin.class,
+                ProjectInfoFile.class, PluginMetaDataCollection.class);
+        Process<?> process = (Process<?>)ctorProcess.newInstance(processName, ThreadState.RUNNING, this, pluginInfo, projectInfoFile,
+                pluginMetaDataCollection, inputTableName);
         mState.addObserver(process);
         return process;
     }
 
-    public void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    public void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
+    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         // uses reflection
         Class<?> clazzDownloader = Class.forName("version2.prototype.download."
@@ -165,7 +189,8 @@ public class Scheduler implements Runnable {
         Log.add("Download Finish");
     }
 
-    public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
+    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         ProcessMetaData temp = PluginMetaDataCollection.getInstance().pluginMetaDataMap.get(plugin.GetName()).Projection;
         // TODO: revise the "date"
