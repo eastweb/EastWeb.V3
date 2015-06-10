@@ -5,6 +5,13 @@ import java.util.regex.Pattern;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.ProcessName;
 
+/**
+ * Handles getting and creating all directories used by the program, creating files, and deleting files.
+ * Names are also used in a SQL compliant database. So, all names are standardized to be valid identifiers for it.
+ * @author michael.devos
+ *
+ */
+
 public final class FileSystem {
     private FileSystem() {}
 
