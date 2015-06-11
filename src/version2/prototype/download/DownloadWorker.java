@@ -1,4 +1,4 @@
-package version2.prototype.processor;
+package version2.prototype.download;
 
 import java.util.ArrayList;
 
@@ -9,12 +9,11 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
 
-public class ProcessorWorker extends ProcessWorker<Void> {
-
-    protected ProcessorWorker(Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+public class DownloadWorker extends ProcessWorker<Void> {
+    public DownloadWorker(Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
-        super("ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
+        super("DownloadWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
         // TODO Auto-generated constructor stub
     }
 

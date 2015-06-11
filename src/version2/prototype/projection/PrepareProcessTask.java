@@ -48,7 +48,7 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
-        return project.masterShapeFile;
+        return project.GetMasterShapeFile();
     }
 
     /* post-condition:

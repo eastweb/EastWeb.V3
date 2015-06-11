@@ -17,7 +17,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 
-public class Summary<V> extends Process<V> {
+public class Summary extends Process<Void> {
     private TemporalSummaryRasterFileStore fileStore;
     private ArrayList<SummaryWorker> workers;
 
@@ -29,7 +29,7 @@ public class Summary<V> extends Process<V> {
     }
 
     @Override
-    public V call() throws Exception {
+    public Void call() throws Exception {
         SummaryWorker worker;
 
         // Custom to Summary
@@ -43,9 +43,12 @@ public class Summary<V> extends Process<V> {
         cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), mInputTableName);
         if(cachedFiles.size() > 0)
         {
-            worker = new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, fileStore, cachedFiles);
-            workers.add(worker);
-            executor.submit(worker);
+            if(mState == ThreadState.RUNNING)
+            {
+                worker = new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, fileStore, cachedFiles);
+                workers.add(worker);
+                executor.submit(worker);
+            }
         }
 
         // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.

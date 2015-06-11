@@ -130,7 +130,7 @@ public class DatabaseCache {
         }
     }
 
-    public static void CacheFile(String filePath) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public static void CacheFile(String[] filePath) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
         String projectName, pluginName, tableName, dateDirectory;
         int year, day;

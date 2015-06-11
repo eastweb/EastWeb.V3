@@ -25,6 +25,9 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.download.Download;
+import version2.prototype.indices.Indices;
+import version2.prototype.processor.Processor;
 import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
 import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
@@ -73,10 +76,7 @@ public class Scheduler implements Runnable {
         for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
             try {
-                RunDownloader(item);
-                RunProcess(item);
-                RunIndicies(item);
-                RunSummary(item);
+                RunProcesses(item);
             } catch (ClassNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -98,15 +98,6 @@ public class Scheduler implements Runnable {
             } catch (InvocationTargetException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            } catch (ParserConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -114,61 +105,40 @@ public class Scheduler implements Runnable {
         }
     }
 
-    public void RunProcesses() throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+    private void RunProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
     IllegalArgumentException, InvocationTargetException
     {
-        for(ProjectInfoPlugin pluginInfo: data.projectInfoFile.GetPlugins())
-        {
-            PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
-            futures.add(executor.submit(SetupProcess(ProcessName.DOWNLOAD, pluginInfo, plMeta, null)));
-            futures.add(executor.submit(SetupProcess(ProcessName.PROCESSOR, pluginInfo, plMeta, ProcessName.DOWNLOAD)));
-            futures.add(executor.submit(SetupProcess(ProcessName.INDICES, pluginInfo, plMeta, ProcessName.PROCESSOR)));
-            futures.add(executor.submit(SetupProcess(ProcessName.SUMMARY, pluginInfo, plMeta, ProcessName.INDICES)));
-        }
+        PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
+        futures.add(executor.submit(SetupDownloadProcess(pluginInfo, plMeta)));
+        futures.add(executor.submit(SetupIndicesProcess(pluginInfo, plMeta)));
+        futures.add(executor.submit(SetupProcessorProcess(pluginInfo, plMeta)));
+        futures.add(executor.submit(SetupSummaryProcess(pluginInfo, plMeta)));
     }
 
-    public Process<?> SetupProcess(ProcessName processName, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ProcessName previousProcess) throws NoSuchMethodException,
-    SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    private Process<Void> SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Class<?> classProcess;
-        String inputTableName;
+        Process<Void> process = new Download(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        mState.addObserver(process);
+        return process;
+    }
 
-        switch(processName)
-        {
-        case DOWNLOAD:
-            classProcess = Class.forName(String.format("version2.prototype.download.Download"));
-            break;
-        case INDICES:
-            classProcess = Class.forName(String.format("version2.prototype.indices.Indices"));
-            break;
-        case PROCESSOR:
-            classProcess = Class.forName(String.format("version2.prototype.processor.Processor"));
-            break;
-        default:    // SUMMARY
-            classProcess = Class.forName(String.format("version2.prototype.summary.Summary"));
-            break;
-        }
+    private Process<Void> SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    {
+        Process<Void> process = new Indices(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        mState.addObserver(process);
+        return process;
+    }
 
-        switch(previousProcess)
-        {
-        case DOWNLOAD:
-            inputTableName = "Download";
-            break;
-        case PROCESSOR:
-            inputTableName = "Processor";
-            break;
-        case INDICES:
-            inputTableName = "Indices";
-            break;
-        default:    // SUMMARY
-            inputTableName = null;
-            break;
-        }
+    private Process<Void> SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    {
+        Process<Void> process = new Processor(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        mState.addObserver(process);
+        return process;
+    }
 
-        Constructor<?> ctorProcess = classProcess.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class,
-                Scheduler.class, ThreadState.class, ProcessName.class, String.class, ExecutorService.class);
-        Process<?> process = (Process<?>)ctorProcess.newInstance(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
-                inputTableName, executor);
+    private Process<Void> SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    {
+        Process<Void> process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
         mState.addObserver(process);
         return process;
     }
@@ -262,38 +232,6 @@ public class Scheduler implements Runnable {
     public void Start()
     {
         mState.ChangeState(ThreadState.RUNNING);
-    }
-
-    class downloaderListener implements GeneralListener{
-        @Override
-        public void NotifyUI(GeneralUIEventObject e) {
-            DownloadProgress = e.getProgress();
-            Log.add(e.getStatus());
-        }
-    }
-
-    class processListener implements GeneralListener{
-        @Override
-        public void NotifyUI(GeneralUIEventObject e) {
-            ProcessProgress = e.getProgress();
-            Log.add(e.getStatus());
-        }
-    }
-
-    class indiciesListener implements GeneralListener{
-        @Override
-        public void NotifyUI(GeneralUIEventObject e) {
-            IndiciesProgress = e.getProgress();
-            Log.add(e.getStatus());
-        }
-    }
-
-    class summaryListener implements GeneralListener{
-        @Override
-        public void NotifyUI(GeneralUIEventObject e) {
-            SummaryProgress = e.getProgress();
-            Log.add(e.getStatus());
-        }
     }
 }
 
