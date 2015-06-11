@@ -110,8 +110,8 @@ public class Scheduler implements Runnable {
     {
         PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
         futures.add(executor.submit(SetupDownloadProcess(pluginInfo, plMeta)));
-        futures.add(executor.submit(SetupIndicesProcess(pluginInfo, plMeta)));
         futures.add(executor.submit(SetupProcessorProcess(pluginInfo, plMeta)));
+        futures.add(executor.submit(SetupIndicesProcess(pluginInfo, plMeta)));
         futures.add(executor.submit(SetupSummaryProcess(pluginInfo, plMeta)));
     }
 
@@ -122,16 +122,16 @@ public class Scheduler implements Runnable {
         return process;
     }
 
-    private Process<Void> SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    private Process<Void> SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Process<Void> process = new Indices(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        Process<Void> process = new Processor(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
         mState.addObserver(process);
         return process;
     }
 
-    private Process<Void> SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    private Process<Void> SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Process<Void> process = new Processor(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        Process<Void> process = new Indices(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
         mState.addObserver(process);
         return process;
     }
