@@ -18,13 +18,10 @@ public abstract class PrepareProcessTask {
     private final DataDate date;
     private final ProjectInfoPlugin plugin;
 
-    public GeneralListener listener;
-
     public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
         project = mProject;
         date = mDate;
         plugin = mPlugin;
-        listener = l;
     }
 
     /* pre-condition: input the ID of the step specified in the plugin metadata
@@ -48,19 +45,19 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
-        return project.masterShapeFile;
+        return project.GetMasterShapeFile() ;
     }
 
     /* post-condition:
      *          return the mask file given in the project if there is any
      */
     public String getMaskFile() {
-        return project.maskingFile;
+        return project.GetMaskingFile();
     }
 
     // post-condition: return the set projection for the plugin in the project
     public Projection getProjection(){
-        return project.getProjection();
+        return project.GetProjection();
     }
 
     // post-condition: return the set qcLevel for the plugin in the project
@@ -68,8 +65,5 @@ public abstract class PrepareProcessTask {
         return plugin.GetQC();
     }
 
-    public GeneralListener getListener(){
-        return listener;
-    }
 
 }
