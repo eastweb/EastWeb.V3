@@ -56,11 +56,11 @@ public class ProjectInfoCollection {
 
     public ProjectInfoFile GetProject(String projectName) throws IOException, ParserConfigurationException, SAXException, ParseException{
         for(ProjectInfoFile file : ReadInAllProjectInfoFiles()){
-            if(file.projectName != null && file.projectName.equalsIgnoreCase(projectName)) {
+            if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase(projectName)) {
                 return file;
             }
             else{
-                System.out.println(file.projectName);
+                System.out.println(file.GetProjectName());
                 System.out.println(projectName);
             }
         }

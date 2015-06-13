@@ -22,7 +22,7 @@ public class ProjectInfoFile {
     // Project info data
     public boolean error;
     public ArrayList<String> errorMsg;
-    private final String rootElement = "ProjectInfo";
+    //private final String rootElement = "ProjectInfo";
     private final ArrayList<ProjectInfoPlugin> plugins;
     private final Date startDate;
     private final String projectName;

@@ -32,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.ZonalSummary;
 import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
 import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
 import version2.prototype.EastWebUI.PluginIndiciesUI.AssociatePluginPage;
@@ -250,7 +251,7 @@ public class ProjectInformationPage {
         }
 
         // set the plugin info
-        for(ProjectInfoPlugin plugin: project.plugins){
+        for(ProjectInfoPlugin plugin: project.GetPlugins()){
             String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>Quality: %s;</span></html>",
                     String.valueOf(plugin.GetName()),
                     getIndiciesFormat(plugin.GetIndicies()),
@@ -259,33 +260,33 @@ public class ProjectInformationPage {
         }
 
         // set basic project info
-        startDate.setDate(project.startDate);
-        projectName.setText(project.projectName);
-        workingDirectory.setText(project.workingDir);
-        maskFile.setText(project.maskingFile);
-        masterShapeTextField.setText(project.masterShapeFile);
+        startDate.setDate(project.GetStartDate());
+        projectName.setText(project.GetProjectName());
+        workingDirectory.setText(project.GetWorkingDir());
+        maskFile.setText(project.GetMaskingFile());
+        masterShapeTextField.setText(project.GetMasterShapeFile());
 
         // set modis info
-        for(String modis: project.modisTiles){
+        for(String modis: project.GetModisTiles()){
             modisListModel.addElement(modis);
         }
 
         // set projection info
-        coordinateSystemComboBox.setSelectedItem(project.coordinateSystem);
-        reSamplingComboBox.setSelectedItem(project.reSampling);
-        timeZoneComboBox.setSelectedItem(project.timeZone);
+        coordinateSystemComboBox.setSelectedItem(project.GetCoordinateSystem());
+        reSamplingComboBox.setSelectedItem(project.GetReSampling());
+        timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         datumComboBox.setSelectedItem(project);
-        pixelSize.setText(project.pixelSize);
-        standardParallel1.setText(project.stdParallel1);
-        centalMeridian.setText(project.centralMeridian);
-        falseEasting.setText(project.falseEasting);
-        standardParallel2.setText(project.stdParallel2);
-        latitudeOfOrigin.setText(project.latitudeOfOrigin);
-        falseNothing.setText(project.falseNothing);
+        pixelSize.setText(project.GetPixelSize());
+        standardParallel1.setText(project.GetStandardParallel1());
+        centalMeridian.setText(project.GetCentralMeridian());
+        falseEasting.setText(project.GetFalseEasting());
+        standardParallel2.setText(project.GetStandardParallel2());
+        latitudeOfOrigin.setText(project.GetLatitudeOfOrigin());
+        falseNothing.setText(project.GetFalseNothing());
 
         // set summary info
-        for(String summary: project.summaries){
-            summaryListModel.addElement(summary);
+        for(ZonalSummary summary: project.GetZonalSummaries()){
+            summaryListModel.addElement(String.format("Shape File Path: %s; %s", summary.GetShapeFile(), summary.GetField()));
         }
     }
 

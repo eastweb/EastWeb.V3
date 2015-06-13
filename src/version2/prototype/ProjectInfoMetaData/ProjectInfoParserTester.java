@@ -50,8 +50,8 @@ public class ProjectInfoParserTester {
             System.out.println("\tZonal Summaries:");
             for(ZonalSummary summary : file.GetZonalSummaries())
             {
-                System.out.println("\t\tShape File: " + summary.getShapeFile());
-                System.out.println("\t\tField: " + summary.getField());
+                System.out.println("\t\tShape File: " + summary.GetShapeFile());
+                System.out.println("\t\tField: " + summary.GetField());
             }
         }
     }

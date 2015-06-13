@@ -13,6 +13,12 @@ import version2.prototype.util.GdalUtils;
 import version2.prototype.util.GeneralListener;
 import version2.prototype.util.GeneralUIEvent;
 
+/**
+ * Indicies Framework;
+ * User will have to use this framework for each indices
+ * @author sufi
+ *
+ */
 public abstract class IndicesFramework implements IndexCalculator {
     private static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
@@ -20,21 +26,26 @@ public abstract class IndicesFramework implements IndexCalculator {
     private File[] mInputFiles;
     private File mOutputFile;
 
+    // constructor which takes the listener to talk back to the UI
+    // listener will come from the scheduler
     public IndicesFramework(GeneralListener l)
     {
         event = new GeneralUIEvent();
         event.addListener(l);
     }
 
+    // set input file property
     protected void setInputFiles(File[] inputFiles) {
         assert (inputFiles.length > 0);
         mInputFiles = inputFiles;
     }
 
+    // set output file property
     protected void setOutputFile(File outputFile) {
         mOutputFile = outputFile;
     }
 
+    // creates the output file
     private Dataset createOutput(Dataset[] inputs) throws IOException {
         System.out.println("inputs 0 is  "+inputs[0]);
         System.out.println(inputs[0].GetRasterXSize());
@@ -87,6 +98,7 @@ public abstract class IndicesFramework implements IndexCalculator {
 
             outputDS.delete();
         }
+        event.fire(String.format("%s is Complete", className()), 100);
     }
 
     private void process(Dataset[] inputs, Dataset output) throws Exception {
@@ -115,4 +127,6 @@ public abstract class IndicesFramework implements IndexCalculator {
     }
 
     protected abstract double calculatePixelValue(double[] values) throws Exception;
+
+    protected abstract String className();
 }

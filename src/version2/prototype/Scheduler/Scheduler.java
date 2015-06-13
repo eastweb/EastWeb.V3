@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EmptyStackException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -76,7 +77,7 @@ public class Scheduler implements Runnable {
                 RunDownloader(item);
                 RunProcess(item);
                 RunIndicies(item);
-                RunSummary(item);
+                //RunSummary(item);
             } catch (ClassNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -232,7 +233,16 @@ public class Scheduler implements Runnable {
     {
         for(String indicie: plugin.GetIndicies())
         {
-            Class<?> clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", plugin.GetName(), indicie));
+            Class<?> clazzIndicies;
+            try{
+                clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", plugin.GetName(), indicie));
+            }catch(Exception e){
+                try{
+                    clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S", indicie));
+                }catch(Exception ex){
+                    throw new EmptyStackException(); // class not found
+                }
+            }
             Constructor<?> ctorIndicies = clazzIndicies.getConstructor(String.class, DataDate.class, String.class, String.class, GeneralListener.class);
             Object indexCalculator =  ctorIndicies.newInstance(
                     new Object[] {
@@ -251,6 +261,21 @@ public class Scheduler implements Runnable {
     public void NotifyUI(GeneralUIEventObject e)
     {
         ProcessName processName = ((Process<?>)e.getSource()).processName;
+        switch(processName)
+        {
+        case DOWNLOAD:
+            DownloadProgress =e.getProgress();
+            break;
+        case PROCESSOR:
+            ProcessProgress = e.getProgress();
+            break;
+        case INDICES:
+            IndiciesProgress = e.getProgress();
+            break;
+        default:    // SUMMARY
+            SummaryProgress = e.getProgress();
+            break;
+        }
         Log.add(e.getStatus());
     }
 
