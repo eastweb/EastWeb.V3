@@ -7,6 +7,7 @@ import version2.prototype.util.GeneralListener;
 
 /* rewritten by Y.L. on May 31st */
 
+@SuppressWarnings("unused")
 public class ProcessData {
 
     private String[] inputFolders;

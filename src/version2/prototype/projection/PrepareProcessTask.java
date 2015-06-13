@@ -14,9 +14,9 @@ import version2.prototype.util.GeneralListener;
  * name convention:  Plugin_namePrepareProcessTask.class
  */
 public abstract class PrepareProcessTask {
-    private ProjectInfoFile project;
-    private final DataDate date;
-    private final ProjectInfoPlugin plugin;
+    protected ProjectInfoFile project;
+    protected final DataDate date;
+    protected final ProjectInfoPlugin plugin;
 
     public GeneralListener listener;
 
@@ -48,19 +48,19 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
-        return project.masterShapeFile;
+        return project.GetMasterShapeFile();
     }
 
     /* post-condition:
      *          return the mask file given in the project if there is any
      */
     public String getMaskFile() {
-        return project.maskingFile;
+        return project.GetMaskingFile();
     }
 
     // post-condition: return the set projection for the plugin in the project
     public Projection getProjection(){
-        return project.getProjection();
+        return plugin.getProjection();
     }
 
     // post-condition: return the set qcLevel for the plugin in the project
