@@ -16,11 +16,12 @@
 	<Datum>NAD83</Datum>
 	<PixelSize>12</PixelSize>
 	<StandardParallel1>112.1</StandardParallel1>
+	<StandardParallel2>122.2</StandardParallel2>
+	<ScalingFactor>00.00</ScalingFactor>
 	<CentalMeridian>121</CentalMeridian>
 	<FalseEasting>151</FalseEasting>
-	<StandardParallel2>122.2</StandardParallel2>
+	<FalseNorthing>33</FalseNorthing>
 	<LatitudeOfOrigin>111</LatitudeOfOrigin>
-	<FalseNothing>33</FalseNothing>
 	<Summaries>
         <Summary>
             <ShapeFile>C:\Users\sufi\Desktop\shapefile\shapefile.shp</ShapeFile>

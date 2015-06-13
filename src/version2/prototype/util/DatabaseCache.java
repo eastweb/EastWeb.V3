@@ -10,16 +10,46 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import version2.prototype.ConfigReadException;
+import version2.prototype.Scheduler.ProcessName;
 
+/**
+ * Database cache system interface. Frameworks use this to get and submit files from and to the database cache. Internally tracks and logs acquired and available
+ * files for each of the four frameworks and the global downloaders.
+ *
+ * @author michael.devos
+ *
+ */
 public class DatabaseCache {
     static final Pattern filePathPattern = Pattern.compile("(\\w+)\\\\(\\w+)\\\\(\\w+)\\\\(\\d{4})\\\\(\\d{3})\\\\");   // To save time
     static final Pattern dateStringPattern = Pattern.compile("(\\d{4})\\\\(\\d{3})\\\\");   // To save time
 
+    // Don't allow instantiation of class.
     private DatabaseCache(){}
 
-    public static ArrayList<DataFileMetaData> GetAvailableFiles(String projectName, String pluginName, String tableName) throws
+    /**
+     * Retrieves a list of files from the desired table that have yet to be retrieved by a ProcessWorker.
+     *
+     * @param projectName  - project schema to look under
+     * @param pluginName  - plugin schema to look under
+     * @param process  - name of process to check output of for available files to process
+     * @return a list of available files to process
+     * @throws SQLException
+     * @throws ConfigReadException
+     * @throws ClassNotFoundException
+     */
+    public static ArrayList<DataFileMetaData> GetAvailableFiles(String projectName, String pluginName, ProcessName process) throws
     SQLException, ConfigReadException, ClassNotFoundException
     {
+        String tableName = null;
+
+        switch(process)
+        {
+        case DOWNLOAD: tableName = "Download"; break;
+        case INDICES: tableName = "Indices"; break;
+        case PROCESSOR: tableName = "Processor"; break;
+        case SUMMARY: tableName = "Summary"; break;
+        }
+
         String schemaName = Schema.getSchemaName(projectName, pluginName);
         ArrayList<DataFileMetaData> files = new ArrayList<DataFileMetaData>();
         Connection conn = PostgreSQLConnection.getConnection();
@@ -62,6 +92,19 @@ public class DatabaseCache {
         return files;
     }
 
+    /**
+     * Add the given file and associated information to the appropriate global downloads table.
+     *
+     * @param projectName  - project schema to look under
+     * @param dataName  - name of the downloaded file's data type
+     * @param year  - year of the downloaded file
+     * @param day  - day of the downloaded file
+     * @param filePath  - path to the downloaded file
+     * @throws SQLException
+     * @throws ParseException
+     * @throws ConfigReadException
+     * @throws ClassNotFoundException
+     */
     public static void AddDownloadFile(String projectName, String dataName, int year, int day, String filePath) throws SQLException,
     ParseException, ConfigReadException, ClassNotFoundException
     {
@@ -130,6 +173,15 @@ public class DatabaseCache {
         }
     }
 
+    /**
+     * Add file(s) to their cache table. Paths are parsed for project, plugin, and process information. All files will be submitted as a single transaction.
+     *
+     * @param filePath  - path to the cached data file
+     * @throws SQLException
+     * @throws ParseException
+     * @throws ConfigReadException
+     * @throws ClassNotFoundException
+     */
     public static void CacheFile(String[] filePath) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
         String projectName, pluginName, tableName, dateDirectory;
@@ -227,6 +279,15 @@ public class DatabaseCache {
         }
     }
 
+    /**
+     * Can be used to get the associated DataFileMetaData object for the given file path.
+     *
+     * @param fullPath  - path to the data file
+     * @return returns the DataFileMetaData equivalent to the information that could be parsed from the path string passed in
+     * @throws SQLException
+     * @throws ParseException
+     * @throws ClassNotFoundException
+     */
     public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException
     {
         String projectName, pluginName, tableName, dateDirectory;

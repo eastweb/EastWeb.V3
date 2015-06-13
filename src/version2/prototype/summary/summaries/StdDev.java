@@ -3,15 +3,29 @@ package version2.prototype.summary.summaries;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * Represents a standard deviation summary based on indexed double values.
+ *
+ * @author michael.devos
+ *
+ */
 public class StdDev extends SummarySingleton {
     private SummarySingleton sqrSum;
     private SummarySingleton count;
     private SummarySingleton mean;
 
+    /**
+     * Creates a StdDev object representing a standard deviation summary.
+     *
+     * @param col  - the SummariesCollection to register itself to
+     */
     public StdDev(SummariesCollection col) {
         super(col);
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.summaries.SummarySingleton#put(int, double)
+     */
     @Override
     public void put(int index, double value) {
         sqrSum.put(index, value);
@@ -19,6 +33,9 @@ public class StdDev extends SummarySingleton {
         mean.put(index, value);
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.summaries.SummarySingleton#getResult()
+     */
     @Override
     public Map<Integer, Double> getResult() {
         if(map.size() == 0 || map.size() < count.map.size()){
@@ -33,6 +50,9 @@ public class StdDev extends SummarySingleton {
         return map;
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.summaries.SummarySingleton#getDistinctLeaflets()
+     */
     @Override
     public ArrayList<SummarySingleton> getDistinctLeaflets() {
         ArrayList<SummarySingleton> temp = new ArrayList<SummarySingleton>(3);
@@ -47,6 +67,9 @@ public class StdDev extends SummarySingleton {
         return temp;
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.summaries.SummarySingleton#registerDependencies()
+     */
     @Override
     protected void registerDependencies() {
         sqrSum = new SqrSum(col);

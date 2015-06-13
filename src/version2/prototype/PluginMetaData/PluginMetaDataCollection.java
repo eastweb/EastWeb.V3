@@ -209,28 +209,38 @@ public class PluginMetaDataCollection {
     public class SummaryMetaData{
         public Boolean IsTemporalSummary;
         public String CompositionStrategyClassName;
+        public int DaysPerInputData;
+        public int DaysPerOutputData;
         private NodeList nList;
 
-        public SummaryMetaData(NodeList n){
+        public SummaryMetaData(NodeList n)
+        {
             nList = n;
             Node projectionNode = nList.item(0);
+            Node tmp;
+            NodeList tempList;
 
-            try{
-                // Node: IsTemporalSummary
-                IsTemporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("UseTemporalSummary").item(0).getTextContent());
+            // Element: IsTemporalSummary
+            IsTemporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("UseTemporalSummary").item(0).getTextContent());
 
-                // Node: CompositionStrategyClassName
-                NodeList temporal = ((Element) nList).getElementsByTagName("Temporal");
-                Node NodeCompositionStrategyClassName = ((Element) temporal).getElementsByTagName("CompositionStrategyClassName").item(0);
-                NodeList tempList = NodeCompositionStrategyClassName.getChildNodes();
-                Node valueNode = tempList.item(0);
-                CompositionStrategyClassName = valueNode.getNodeValue().trim();
-            }catch(Exception e){
-
-            }
+            // Temporal elements
+            NodeList temporal = ((Element) nList).getElementsByTagName("Temporal");
+            // Element: CompositionStrategyClassName
+            tmp = ((Element) temporal).getElementsByTagName("CompositionStrategyClassName").item(0);
+            tempList = tmp.getChildNodes();
+            tmp = tempList.item(0);
+            CompositionStrategyClassName = tmp.getNodeValue().trim();
+            // Element: DaysPerInputData
+            tmp = ((Element) temporal).getElementsByTagName("DaysPerInputData").item(0);
+            tempList = tmp.getChildNodes();
+            tmp = tempList.item(0);
+            DaysPerInputData = Integer.parseInt(tmp.getNodeValue().trim());
+            // Element: DaysPerOutputData
+            tmp = ((Element) temporal).getElementsByTagName("DaysPerOutputData").item(0);
+            tempList = tmp.getChildNodes();
+            tmp = tempList.item(0);
+            DaysPerOutputData = Integer.parseInt(tmp.getNodeValue().trim());
         }
     }
-
-
 }
 

@@ -16,6 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
+import version2.prototype.GenericFrameworkProcess;
 import version2.prototype.Process;
 import version2.prototype.ThreadState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -25,14 +26,13 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.download.Download;
-import version2.prototype.indices.Indices;
-import version2.prototype.processor.Processor;
+import version2.prototype.download.DownloadWorker;
+import version2.prototype.indices.IndicesWorker;
+import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
 import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.Summary;
-import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
@@ -105,8 +105,23 @@ public class Scheduler implements Runnable {
         }
     }
 
-    private void RunProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-    IllegalArgumentException, InvocationTargetException
+    /**
+     * Creates and executes a set of ProcesWorker Managers for each of the four frameworks for each ProjectInfoPlugin given adding each to a shared list
+     * of futures.
+     *
+     * @author michael.devos
+     *
+     * @param pluginInfo  - plugin information
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+    private void RunProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException,
+    InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
         futures.add(executor.submit(SetupDownloadProcess(pluginInfo, plMeta)));
@@ -115,30 +130,72 @@ public class Scheduler implements Runnable {
         futures.add(executor.submit(SetupSummaryProcess(pluginInfo, plMeta)));
     }
 
-    private Process<Void> SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    /**
+     * Sets up a {@link GenericFrameworkProcess GenericFrameworkProcess} object to manage DownloadWorkers.
+     *
+     * @author michael.devos
+     *
+     * @param pluginInfo  - plugin information
+     * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @return general concrete Process object for managing ProcessWorkers
+     */
+    private Process<?> SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Process<Void> process = new Download(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
+        Process<?> process = new GenericFrameworkProcess<Void, DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
+                ProcessName.DOWNLOAD, null, executor);
         mState.addObserver(process);
         return process;
     }
 
-    private Process<Void> SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    /**
+     * Sets up a {@link GenericFrameworkProcess GenericFrameworkProcess} object to manage ProcessorWorkers.
+     *
+     * @author michael.devos
+     *
+     * @param pluginInfo  - plugin information
+     * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @return general concrete Process object for managing ProcessWorkers
+     */
+    private Process<?> SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Process<Void> process = new Processor(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
+        Process<?> process = new GenericFrameworkProcess<Void, ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
+                ProcessName.PROCESSOR, ProcessName.DOWNLOAD, executor);
         mState.addObserver(process);
         return process;
     }
 
-    private Process<Void> SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    /**
+     * Sets up a {@link GenericFrameworkProcess GenericFrameworkProcess} object to manage IndicesWorkers.
+     *
+     * @author michael.devos
+     *
+     * @param pluginInfo  - plugin information
+     * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @return general concrete Process object for managing ProcessWorkers
+     */
+    private Process<?> SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Process<Void> process = new Indices(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
+        Process<?> process = new GenericFrameworkProcess<Void, IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
+                ProcessName.INDICES, ProcessName.PROCESSOR, executor);
         mState.addObserver(process);
         return process;
     }
 
-    private Process<Void> SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    /**
+     * Sets up a {@link version2.prototype.summary.Summary Summary} object to manage SummaryWorkers.
+     *
+     * @author michael.devos
+     *
+     * @param pluginInfo  - plugin information
+     * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @return {@link Summary Summary}  - the manager object of SummaryWorkers for the current project and given plugin
+     */
+    private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
     {
-        Process<Void> process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.DOWNLOAD, null, executor);
+        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.INDICES, executor);
         mState.addObserver(process);
         return process;
     }
@@ -198,7 +255,8 @@ public class Scheduler implements Runnable {
         Log.add("Process Finish");
     }
 
-    public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
+    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         for(String indicie: plugin.GetIndicies())
         {
@@ -218,17 +276,34 @@ public class Scheduler implements Runnable {
         Log.add("Indicies Finish");
     }
 
+    /**
+     * Used by the executed frameworks ({@link Process Process} objects) to send information up to the GUI.
+     *
+     * @param e  - GUI update information
+     */
     public void NotifyUI(GeneralUIEventObject e)
     {
         ProcessName processName = ((Process<?>)e.getSource()).processName;
         Log.add(e.getStatus());
     }
 
+    /**
+     * Updates the Scheduler's {@link ThreadState ThreadState} to STOPPED notifying all observers of said state of the change.
+     *
+     * @author michael.devos
+     *
+     */
     public void Stop()
     {
         mState.ChangeState(ThreadState.STOPPED);
     }
 
+    /**
+     * Updates the Scheduler's {@link ThreadState ThreadState} to RUNNING notifying all observers of said state of the change.
+     *
+     * @author michael.devos
+     *
+     */
     public void Start()
     {
         mState.ChangeState(ThreadState.RUNNING);

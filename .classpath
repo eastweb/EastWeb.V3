@@ -22,7 +22,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/prototype/lib/commons-compress/commons-compress-1.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/gdal/gdal.jar" sourcepath="C:/Users/general/Desktop/EASTWeb/prototype-workspace/prototype/lib/gdal/gdal.jar"/>
 	<classpathentry kind="lib" path="lib/jface/org.eclipse.core.commands_3.6.0.I20100512-1500.jar"/>
@@ -33,5 +32,6 @@
 	<classpathentry kind="lib" path="lib/postgresql-jdbc/postgresql-9.0-801.jdbc4.jar"/>
 	<classpathentry kind="lib" path="forms-1.3.0.jar" sourcepath="forms-1.3.0-src.zip"/>
 	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.8.0_45"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

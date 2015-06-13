@@ -3,6 +3,7 @@ package version2.prototype.summary;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import version2.prototype.Process;
 import version2.prototype.ThreadState;
@@ -17,21 +18,40 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 
+/**
+ * The custom Summary framework, Process extending class. Manages SummaryWorker objects.
+ *
+ * @author michael.devos
+ *
+ */
 public class Summary extends Process<Void> {
     private TemporalSummaryRasterFileStore fileStore;
-    private ArrayList<SummaryWorker> workers;
+    private ArrayList<Future<Void>> futures;
 
-    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, ThreadState state, ProcessName processName, String inputTableName, ExecutorService executor)
+    /**
+     * Creates a Summary object with the defined initial ThreadState, owned by the given Scheduler, and acquiring its input from the specified process,
+     * inputProcessName.
+     *
+     * @param projectInfoFile  - the current project's information
+     * @param pluginInfo  - the current plugin's general information
+     * @param pluginMetaData  - the current plugin's xml data mapped
+     * @param scheduler  - reference to the controlling Scheduler object
+     * @param state  - ThreadState to initialize this object to
+     * @param inputProcessName  - name of process to use the output of for its input
+     * @param executor  - executor service to use to spawn worker threads
+     */
+    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, ThreadState state,
+            ProcessName inputProcessName, ExecutorService executor)
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, processName, inputTableName, executor);
-        workers = new ArrayList<SummaryWorker>(0);
+        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, ProcessName.SUMMARY, inputProcessName, executor);
+        futures = new ArrayList<Future<Void>>(0);
     }
 
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
     @Override
     public Void call() throws Exception {
-        SummaryWorker worker;
-
         // Custom to Summary
         Class<?> strategyClass = Class.forName(pluginMetaData.Summary.CompositionStrategyClassName);
         Constructor<?> ctorStrategy = strategyClass.getConstructor();
@@ -40,14 +60,12 @@ public class Summary extends Process<Void> {
 
         // General get data files
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), mInputTableName);
+        cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), inputProcessName);
         if(cachedFiles.size() > 0)
         {
             if(mState == ThreadState.RUNNING)
             {
-                worker = new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, fileStore, cachedFiles);
-                workers.add(worker);
-                executor.submit(worker);
+                futures.add(executor.submit(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, fileStore, cachedFiles)));
             }
         }
 

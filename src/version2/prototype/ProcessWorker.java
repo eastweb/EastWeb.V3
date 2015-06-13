@@ -10,6 +10,13 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
 
+/**
+ * Abstract framework worker class. Frameworks are to use a concrete class that extends this class to handle doing their required processing work.
+ *
+ * @author michael.devos
+ *
+ * @param <V>  - return type of the Callable
+ */
 public abstract class ProcessWorker<V> implements Callable<V>, Observer {
     public String processWorkerName;
     protected Process<?> process;
@@ -19,6 +26,16 @@ public abstract class ProcessWorker<V> implements Callable<V>, Observer {
     protected PluginMetaData pluginMetaData;
     protected ArrayList<DataFileMetaData> cachedFiles;
 
+    /**
+     * Creates a ProcessWorker object labeled by the given processWorkerName, owned by the given process, and set to work on the given cachedFiles.
+     *
+     * @param processWorkerName  - name of this worker
+     * @param process  - reference to the owning process object
+     * @param projectInfoFile  - the current project's information
+     * @param pluginInfo  - the current plugin's general information
+     * @param pluginMetaData  - the current plugin's xml data mapped
+     * @param cachedFiles  - the files to process
+     */
     protected ProcessWorker(String processWorkerName, Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
@@ -30,6 +47,9 @@ public abstract class ProcessWorker<V> implements Callable<V>, Observer {
         this.cachedFiles = cachedFiles;
     }
 
+    /* (non-Javadoc)
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
     @Override
     public void update(Observable o, Object arg) {
         if(arg instanceof ThreadState)

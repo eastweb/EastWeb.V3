@@ -1,10 +1,18 @@
 package version2.prototype.summary.temporal;
 
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+/**
+ * An implementation of TemporalSummaryCompositionStrategy representing a strategy for creating weekly composites based on the WHO calendar.
+ *
+ * @author michael.devos
+ *
+ */
 public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy#getStartDate(java.util.GregorianCalendar)
+     */
     @Override
     public GregorianCalendar getStartDate(GregorianCalendar sDate) throws Exception {
         int firstDay = GregorianCalendar.MONDAY;
@@ -22,6 +30,9 @@ public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
         return sDate;
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy#getDaysInOneComposite(java.util.GregorianCalendar)
+     */
     @Override
     public int getDaysInOneComposite(GregorianCalendar dateInComposite) {
         return 7;
