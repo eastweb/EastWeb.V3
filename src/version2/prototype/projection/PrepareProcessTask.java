@@ -14,17 +14,14 @@ import version2.prototype.util.GeneralListener;
  * name convention:  Plugin_namePrepareProcessTask.class
  */
 public abstract class PrepareProcessTask {
-    protected ProjectInfoFile project;
-    protected final DataDate date;
-    protected final ProjectInfoPlugin plugin;
-
-    public GeneralListener listener;
+    private ProjectInfoFile project;
+    private final DataDate date;
+    private final ProjectInfoPlugin plugin;
 
     public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
         project = mProject;
         date = mDate;
         plugin = mPlugin;
-        listener = l;
     }
 
     /* pre-condition: input the ID of the step specified in the plugin metadata
@@ -48,7 +45,7 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
-        return project.GetMasterShapeFile();
+        return project.GetMasterShapeFile() ;
     }
 
     /* post-condition:
@@ -60,7 +57,7 @@ public abstract class PrepareProcessTask {
 
     // post-condition: return the set projection for the plugin in the project
     public Projection getProjection(){
-        return plugin.getProjection();
+        return project.GetProjection();
     }
 
     // post-condition: return the set qcLevel for the plugin in the project
@@ -68,8 +65,5 @@ public abstract class PrepareProcessTask {
         return plugin.GetQC();
     }
 
-    public GeneralListener getListener(){
-        return listener;
-    }
 
 }

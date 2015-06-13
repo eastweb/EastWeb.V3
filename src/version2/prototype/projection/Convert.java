@@ -58,6 +58,6 @@ public abstract class Convert {
      *   (3) Write the result from (2) to outputFolder
      *   (4) repeat step (1) - (3)
      */
-    abstract void convertFile();
+    protected abstract void convertFile();
 
 }
