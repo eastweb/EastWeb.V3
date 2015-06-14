@@ -14,11 +14,11 @@ import version2.prototype.util.GeneralListener;
  * name convention:  Plugin_namePrepareProcessTask.class
  */
 public abstract class PrepareProcessTask {
-    private ProjectInfoFile project;
-    private final DataDate date;
-    private final ProjectInfoPlugin plugin;
+    protected ProjectInfoFile project;
+    protected final DataDate date;
+    protected final ProjectInfoPlugin plugin;
 
-    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
+    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate) {
         project = mProject;
         date = mDate;
         plugin = mPlugin;
