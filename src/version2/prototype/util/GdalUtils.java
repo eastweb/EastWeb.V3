@@ -20,9 +20,10 @@ public class GdalUtils {
     private GdalUtils() {
     }
 
+    public static final double NoValue = -99999.0;
     /**
      * All GDAL operations should be done while holding a lock on this object.
-     * GDAL is "not competely thread-safe", so this may be critical.
+     * GDAL is "not completely thread-safe", so this may be critical.
      */
     public static final Object lockObject = new Object();
 

@@ -18,19 +18,19 @@ public abstract class Filter {
      * inputFolders[0] stores the files to be filtered
      * inputFolders[1] stores the QC file(s) if there is any
      */
-    private String [] inputFolders;
+    protected String [] inputFolders;
 
-    private File inputFolder1;
-    private File inputFolder2;
+    protected File inputFolder1;
+    protected File inputFolder2;
     //location for the output file
-    private String outputFolder;
+    protected String outputFolder;
     // the files in the input folder
-    private File [] inputFiles;
+    protected File [] inputFiles;
     // the qcFiles in the inputFolders[1];
-    private File [] qcFiles = null;
+    protected File [] qcFiles = null;
     // qc level
-    private String qcLevel;
-    private int [] qcBands;
+    protected String qcLevel;
+    protected int [] qcBands;
 
     public Filter(ProcessData data) {
 
