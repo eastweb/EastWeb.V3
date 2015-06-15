@@ -47,28 +47,43 @@ public class ModisLSTFilter extends Filter{
 
     public String getQCLevel()
     {
-        int []i=new int[8];
-        i=qcBands;
+        int []i=qcBands;
+        //convert the integer qcband value into binary
+        String qcbandValue=Integer.toBinaryString(i[0]);
+        int size=qcbandValue.length();
+        char[]convertValue=new char[8];
+        //convert the general binary order into 8-digit format
+        for(int m=0;m<8-size;m++)
+        {
+            convertValue[m]='0';
+        }
+        int k=0;
+        for(int n=8-size;n<8;n++)
+        {
+            convertValue[n]=qcbandValue.charAt(k);
+            k++;
+        }
+
         boolean h=false;
         boolean m=false;
         boolean l=false;
         String qclevel=null;
-        if(i[6]==0 && i[7]==0)
+        if(qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='0')
         {
             h=true;
             qclevel="HIGHEST";
         }
-        if((i[6]==0 && i[7]==1 && i[0]==0)||h==true)
+        if((qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='1' && qcbandValue.charAt(0)=='0')||h==true)
         {
             m=true;
             qclevel="MODERATE";
         }
-        if((i[6]==0 && i[7]==1 && i[0]==1 && i[1]==0)||m==true)
+        if((qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='1' && qcbandValue.charAt(0)=='1' && qcbandValue.charAt(7)=='0')||m==true)
         {
             l=true;
             qclevel="LOW";
         }
-        if((i[6]==0 && i[7]==1 && i[0]==1 && i[1]==1)||l==true)
+        if((qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='1' && qcbandValue.charAt(0)=='1' && qcbandValue.charAt(1)=='1')||l==true)
         {
             qclevel="NONE";// no screening
         }
