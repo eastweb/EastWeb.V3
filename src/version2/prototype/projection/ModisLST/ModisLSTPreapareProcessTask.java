@@ -94,6 +94,7 @@ public class ModisLSTPreapareProcessTask extends PrepareProcessTask {
         return outputFolder;
     }
 
+
     @Override
     public int[] getDataBands() {
         return new int[] { 1,5};
