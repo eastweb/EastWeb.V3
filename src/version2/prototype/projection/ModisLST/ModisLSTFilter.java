@@ -68,22 +68,22 @@ public class ModisLSTFilter extends Filter{
         boolean m=false;
         boolean l=false;
         String qclevel=null;
-        if(qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='0')
+        if(convertValue[6]=='0' && convertValue[7]=='0')
         {
             h=true;
             qclevel="HIGHEST";
         }
-        if((qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='1' && qcbandValue.charAt(0)=='0')||h==true)
+        if((convertValue[6]=='0' && convertValue[7]=='1' &&convertValue[0]=='0')||h==true)
         {
             m=true;
             qclevel="MODERATE";
         }
-        if((qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='1' && qcbandValue.charAt(0)=='1' && qcbandValue.charAt(7)=='0')||m==true)
+        if((convertValue[6]=='0' && convertValue[7]=='1' && convertValue[0]=='1' && convertValue[1]=='0')||m==true)
         {
             l=true;
             qclevel="LOW";
         }
-        if((qcbandValue.charAt(6)=='0' && qcbandValue.charAt(7)=='1' && qcbandValue.charAt(0)=='1' && qcbandValue.charAt(1)=='1')||l==true)
+        if((convertValue[6]=='0' && convertValue[7]=='1' && convertValue[0]=='1' && convertValue[1]=='1')||l==true)
         {
             qclevel="NONE";// no screening
         }
