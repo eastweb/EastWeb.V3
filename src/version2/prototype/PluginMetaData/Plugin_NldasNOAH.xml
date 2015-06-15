@@ -11,50 +11,31 @@
 			<passWord>anonymous</passWord>
 		</FTP>
 	</Download>	
-	<Process>
-		<Projection processStep="1">
-			<className>NldasProjection</className>
-			<isRunable>true</isRunable>
-		</Projection>
-		<mozaic processStep="2">
-			<className>NldasMozaic</className>
-			<isRunable>true</isRunable>
-		</mozaic>
-		<convert processStep="3">
-			<className>NldasConvertor</className>
-			<isRunable>false</isRunable>
-			<oriFormat>grb</oriFormat>
-			<toFormat></toFormat>
-			<GeoTransform> 0.125, 0.25, 0,-49.8750000, 0, 0.25</GeoTransform>
-			<projectionStr>"GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");</projectionStr>
-		</convert>
-		<filter processStep="4">
-			<isRunable>false</isRunable>		
-			<className>NldasFilter</className>
-		</filter>
-	</Process>
+	<Processes>
+		<Process processStep="1">
+			<className>NldasNOAHComposite</className>
+		</Process>
+		<Process processStep="2">
+			<className>Reproject</className>
+		</Process>
+		<Process processStep="3">
+			<className>Mask</className>
+		</Process>
+	</Processes>
 	<Indices>
-		<ClassName>NldasMeanDailySnowDepthCalculator</ClassName>
-		<ClassName>NldasMeanDailySnowCoverCalculator</ClassName>
-		<ClassName>NldasMeanDailyVolumetric0_10Calculator</ClassName>
-		<ClassName>NldasMeanDailyVolumetric10_40Calculator</ClassName>
-		<ClassName>NldasMeanDailyVolumetric40_100Calculator</ClassName>
-		<ClassName>NldasMeanDailyVolumetric100_200Calculator</ClassName>
-		<ClassName>NldasMeanDailySoilTemp0_10Calculator</ClassName>
-		<ClassName>NldasMeanDailySoilTemp10_40Calculator</ClassName>
-		<ClassName>NldasMeanDailySoilTemp40_100Calculator</ClassName>
-		<ClassName>NldasMeanDailySoilTemp100_200Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySnowDepthCalculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySnowCoverCalculator</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric0_10Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric10_40Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric40_100Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric100_200Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp0_10Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp10_40Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp40_100Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp100_200Calculator</ClassName>
 	</Indices>
 	<Summary>
-		<UseTemporalSummary>false</UseTemporalSummary>
-		<Temporal>
-			<CompositionStrategyClassName>GregorianWeeklyStrategy</CompositionStrategyClassName>
-		</Temporal>
-	</Summary>
+		<ClassName></ClassName></Summary>
 	<QualityControl>
-		<Level>None</Level>
-		<Level>Level 1</Level>
-		<Level>Level 2</Level>
-		<Level>Level 3</Level>
-	</QualityControl>
+		<ClassName></ClassName></QualityControl>
 </PluginMetadata>
