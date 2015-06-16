@@ -10,10 +10,10 @@
 	</Download>
 	<Processes>
 		<Process processStep="1">
-			<ClassName>Mozaic</ClassName>
+			<ClassName>Mosaic</ClassName>
 		</Process>
 		<Process processStep="2">
-			<ClassName>Mozaic</ClassName>
+			<ClassName>Mosaic</ClassName>
 		</Process>
 		<Process processStep="3">
 			<ClassName>Reproject</ClassName>
@@ -35,6 +35,9 @@
 		<ClassName></ClassName>
 	</Summary>
 	<QualityControl>
-		<ClassName></ClassName>
+		<Level>Highest</Level>
+		<Level>Moderate</Level>
+		<Level>Low</Level>
+		<Level>No QC screening</Level>
 	</QualityControl>
 </PluginMetadata>
