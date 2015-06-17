@@ -9,6 +9,7 @@ import org.gdal.ogr.DataSource;
 import org.gdal.ogr.ogr;
 
 import version2.prototype.ConfigReadException;
+import version2.prototype.Projection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Projection.ResamplingType;
 
@@ -100,7 +101,7 @@ public class GdalUtils {
      * @throws ConfigReadException
      *             *
      **/
-    public static void project(File input, String masterShapeFile, ProjectInfoFile projection, File output) {
+    public static void project(File input, String masterShapeFile, Projection projection, File output) {
         assert (masterShapeFile != null);
         GdalUtils.register();
 
@@ -151,9 +152,9 @@ public class GdalUtils {
                     gdal.GetDriverByName("GTiff").Create(
                             output.getPath(),
                             (int) Math.ceil((right - left)
-                                    / Double.parseDouble(projection.pixelSize)),
+                                    / (projection.getPixelSize())),
                                     (int) Math.ceil((top - bottom)
-                                            / Double.parseDouble(projection.pixelSize)),
+                                            / (projection.getPixelSize())),
                                             1, gdalconst.GDT_Float32);
 
             // TODO: get projection from project info, and get transform from
@@ -164,13 +165,12 @@ public class GdalUtils {
                     features.get(0).GetLayer(0).GetSpatialRef().ExportToWkt();
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] { left,
-                    Double.parseDouble(projection.pixelSize), 0, top, 0,
-                    -Double.parseDouble(projection.pixelSize) });
+                    (projection.getPixelSize()), 0, top, 0,
+                    - (double)(projection.getPixelSize()) });
 
             // get resample argument
             int resampleAlg = -1;
-            ResamplingType resample =
-                    ResamplingType.valueOf(projection.reSampling);
+            ResamplingType resample = projection.getResamplingType();
             switch (resample) {
             case NEAREST_NEIGHBOR:
                 resampleAlg = gdalconst.GRA_NearestNeighbour;
