@@ -1,7 +1,9 @@
-package version2.prototype.summary.temporal;
+package version2.prototype.summary.temporal.CalendarStrategies;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
 public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrategy {
 

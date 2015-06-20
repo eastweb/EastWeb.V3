@@ -1,12 +1,15 @@
-package version2.prototype.summary.temporal;
+package version2.prototype.summary.temporal.CalendarStrategies;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class CDCWeeklyStrategy implements TemporalSummaryCompositionStrategy {
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+
+public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
 
     @Override
     public GregorianCalendar getStartDate(GregorianCalendar sDate) throws Exception {
-        int firstDay = GregorianCalendar.SUNDAY;
+        int firstDay = GregorianCalendar.MONDAY;
         int currentDay = sDate.get(GregorianCalendar.DAY_OF_WEEK);
         if(currentDay !=  firstDay){
             GregorianCalendar newDate = (GregorianCalendar) sDate.clone();

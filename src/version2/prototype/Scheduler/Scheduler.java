@@ -24,7 +24,7 @@ import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessMetaData;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
@@ -196,7 +196,7 @@ public class Scheduler implements Runnable {
     public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
-        ProcessMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
+        ProcessorMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
         // TODO: revise the "date"
         PrepareProcessTask prepareProcessTask;
         // TODO: initiate it with each plugin's implementation
