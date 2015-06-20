@@ -1,6 +1,8 @@
 package version2.prototype.ProjectInfoMetaData;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import version2.prototype.Projection;
 import version2.prototype.Projection.Datum;
 import version2.prototype.Projection.ProjectionType;
 import version2.prototype.Projection.ResamplingType;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.ZonalSummary;
 
 /**
@@ -40,18 +44,9 @@ public class ProjectInfoFile {
     private final String masterShapeFile;
     private final String timeZone;
     private final ArrayList<String> modisTiles;
-    private final ProjectionType projectionType;
-    private final ResamplingType resamplingType;
-    private final Datum datum;
-    private final int pixelSize;
-    private final double stdParallel1;
-    private final double stdParallel2;
-    private final double scalingFactor;
-    private final double centralMeridian;
-    private final double falseEasting;
-    private final double falseNorthing;
-    private final double latitudeOfOrigin;
-    private final ArrayList<ZonalSummary> zonalSummaries;
+    private final Projection projection;
+    private final ArrayList<ProjectInfoSummary> summaries;
+    private final int totModisTiles;
 
     /**
      * Creates a ProjectInfoFile object from parsing the given xml file. Doesn't allow its data to be changed and doesn't dynamically update its
@@ -61,8 +56,16 @@ public class ProjectInfoFile {
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws ClassNotFoundException
      */
-    public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException
+    public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException,
+    NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         error = false;
         errorMsg = new ArrayList<String>();
@@ -81,19 +84,12 @@ public class ProjectInfoFile {
         maskingFile = ReadMaskingFile();
         masterShapeFile = ReadMasterShapeFile();
         timeZone = ReadTimeZone();
+        totModisTiles = ReadTotalModisTiles();
         modisTiles = ReadModisTiles();
-        projectionType = ReadProjectionType();
-        resamplingType = ReadResamplingType();
-        datum = ReadDatum();
-        pixelSize = ReadPixelSize();
-        stdParallel1 = ReadStandardParallel1();
-        stdParallel2 = ReadStandardParallel2();
-        scalingFactor = ReadScalingFactor();
-        centralMeridian = ReadCentralMeridian();
-        falseEasting = ReadFalseEasting();
-        latitudeOfOrigin = ReadLatitudeOfOrigin();
-        falseNorthing = ReadFalseNorthing();
-        zonalSummaries = ReadSummaries();
+        projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
+                ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
+                ReadLatitudeOfOrigin());
+        summaries = ReadSummaries();
     }
 
     /**
@@ -146,106 +142,34 @@ public class ProjectInfoFile {
     public String GetTimeZone() { return timeZone; }
 
     /**
+     * Gets the total number of modies tiles expected per input data downloaded.
+     *
+     * @return number of modies tiles associated with a single downloaded data unit.
+     */
+    public int GetTotModisTiles() { return totModisTiles; }
+
+    /**
      * Gets the modis tiles gotten from the once parsed xml file.
      *
      * @return modis tile names gotten from the xml's data.
      */
     public ArrayList<String> GetModisTiles() { return modisTiles; }
 
-    /**
-     * Gets the projection type gotten from the once parsed xml file.
-     *
-     * @return ProjectionType object created from the xml's data.
-     */
-    public ProjectionType GetProjectionType() { return projectionType; }
+
 
     /**
-     * Gets the resampling type gotten from the once parsed xml file.
+     * Gets the list of summaries gotten from the once parsed xml file.
      *
-     * @return ResamplingType object created from the xml's data.
+     * @return list of ProjectInfoSummary objects created from the xml's data.
      */
-    public ResamplingType GetReSampling() { return resamplingType; }
-
-    /**
-     * Gets the datum gotten from the once parsed xml file.
-     *
-     * @return Datum object created from the xml's data.
-     */
-    public Datum GetDatum() { return datum; }
-
-    /**
-     * Gets the pixel size gotten from the once parsed xml file.
-     *
-     * @return pixel size gotten from the xml's data.
-     */
-    public int GetPixelSize() { return pixelSize; }
-
-    /**
-     * Gets the standard parallel 1 gotten from the once parsed xml file.
-     *
-     * @return standard parallel 1 gotten from the xml's data.
-     */
-    public double GetStandardParallel1() { return stdParallel1; }
-
-    /**
-     * Gets the standard parallel 2 gotten from the once parsed xml file.
-     *
-     * @return standard parallel 2 gotten from the xml's data.
-     */
-    public double GetStandardParallel2() { return stdParallel2; }
-
-    /**
-     * Gets the scaling factor gotten from the once parsed xml file.
-     *
-     * @return scaling factor gotten from the xml's data.
-     */
-    public double GetScalingFactor() { return scalingFactor; }
-
-    /**
-     * Gets the central meridian gotten from the once parsed xml file.
-     *
-     * @return central meridian gotten from the xml's data.
-     */
-    public double GetCentralMeridian() { return centralMeridian; }
-
-    /**
-     * Gets the false Easting value gotten from the once parsed xml file.
-     *
-     * @return false Easting value gotten from the xml's data.
-     */
-    public double GetFalseEasting() { return falseEasting; }
-
-    /**
-     * Gets the false Northing value gotten from the once parsed xml file.
-     *
-     * @return false Northign value gotten from the xml's data.
-     */
-    public double GetFalseNorthing() { return falseNorthing; }
-
-    /**
-     * Gets the latitude of the origin gotten from the once parsed xml file.
-     *
-     * @return latitude of the origin gotten from the xml's data.
-     */
-    public double GetLatitudeOfOrigin() { return latitudeOfOrigin; }
-
-    /**
-     * Gets the list of zonal summaries gotten from the once parsed xml file.
-     *
-     * @return list of ZonalSummary objects created from the xml's data.
-     */
-    public ArrayList<ZonalSummary> GetZonalSummaries() { return zonalSummaries; }
+    public ArrayList<ProjectInfoSummary> GetSummaries() { return summaries; }
 
     /**
      * Gets the projection information gotten from the once parsed xml file.
      *
      * @return Projection object created from the xml's data.
      */
-    public Projection GetProjection()
-    {
-        return new Projection(projectionType, resamplingType, datum, pixelSize, stdParallel1, stdParallel2, scalingFactor, centralMeridian,
-                falseEasting, falseNorthing, latitudeOfOrigin);
-    }
+    public Projection GetProjection() { return projection; }
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
@@ -351,6 +275,16 @@ public class ProjectInfoFile {
             return values.get(0);
         }
         return null;
+    }
+
+    private int ReadTotalModisTiles()
+    {
+        NodeList nodes = GetUpperLevelNodeList("TotalModisTiles", "Missing total number of modis tiles per input data.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing total number of modis tiles per input data.");
+        if(values.size() > 0) {
+            return Integer.parseInt(values.get(0));
+        }
+        return 0;
     }
 
     private ArrayList<String> ReadModisTiles()
@@ -517,39 +451,47 @@ public class ProjectInfoFile {
         return 0;
     }
 
-    private ArrayList<ZonalSummary> ReadSummaries()
+    private ArrayList<ProjectInfoSummary> ReadSummaries() throws ClassNotFoundException, NoSuchMethodException, SecurityException,
+    InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        ArrayList<ZonalSummary> summaries = new ArrayList<ZonalSummary>();
-        String shapeFile;
-        String field;
+        ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
 
         NodeList summaryList = GetUpperLevelNodeList("Summary", "Missing zonal summaries.", "Summaries");
-        if(summaryList != null)
-        {
-            ArrayList<String> values;
-            Element summary;
+        ArrayList<String> summaryStrings = GetNodeListValues(summaryList, "Missing zonal summaries.");
+        if(summaryStrings.size() > 0) {
+            String shapefile;
+            String field;
+            String temporalSummaryCompositionStrategyClassName;
+            TemporalSummaryRasterFileStore fileStore;
+            Class<?> strategyClass;
+            Constructor<?> ctorStrategy;
 
-            for(int i=0; i < summaryList.getLength(); i++)
+            for(String summary : summaryStrings)
             {
-                summary = (Element)summaryList.item(i);
-                values = GetNodeListValues(summary.getElementsByTagName("ShapeFile"), "Missing summary shape file.");
-                if(values.size() > 0) {
-                    shapeFile = values.get(0);
-                } else {
-                    shapeFile = null;
+                // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy
+                // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; COUNTYNS10
+                shapefile = summary.substring(summary.indexOf("Shape File Path: ") + "Shape File Path: ".length(), summary.indexOf(";"));
+                if(summary.indexOf("Temporal Summary") == -1)
+                {
+                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length());
+                    temporalSummaryCompositionStrategyClassName = null;
+                    fileStore = null;
                 }
-
-                values = GetNodeListValues(summary.getElementsByTagName("Field"), "Missing summary field.");
-                if(values.size() > 0) {
-                    field = values.get(0);
-                } else {
-                    field = null;
+                else
+                {
+                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length(), summary.indexOf("Field: ")
+                            + summary.indexOf(";"));
+                    temporalSummaryCompositionStrategyClassName = summary.substring(summary.lastIndexOf("; " + 2));
+                    strategyClass = Class.forName(temporalSummaryCompositionStrategyClassName);
+                    ctorStrategy = strategyClass.getConstructor();
+                    fileStore = new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance());
                 }
-
-                summaries.add(new ZonalSummary(shapeFile, field));
+                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, field), fileStore));
             }
+            return summaries;
         }
-        return summaries;
+        return null;
+
     }
 
     /**

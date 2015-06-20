@@ -1,6 +1,7 @@
 package version2.prototype.summary.temporal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 
@@ -24,19 +25,20 @@ public class TemporalSummaryComposition {
         if((strategy.getDaysInOneComposite(startDate) > files.size()) && (FDPair.date.getCalendar().compareTo(startDate) >= 0))
         {
             files.add(FDPair);
-            files.sort(new AscComp());
-        }
-        else
+            Collections.sort(files, new AscComp());
+        } else {
             success = false;
+        }
         return success;
     }
 
     public boolean compositeFull() throws Exception
     {
-        if(strategy.getDaysInOneComposite(startDate) == files.size())
+        if(strategy.getDaysInOneComposite(startDate) == files.size()) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
     public class AscComp implements Comparator<FileDatePair>

@@ -24,7 +24,6 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.summaries.SummariesCollection;
 import version2.prototype.summary.summaries.SummaryNameResultPair;
 import version2.prototype.util.GdalUtils;
@@ -38,14 +37,15 @@ public class ZonalSummaryCalculator {
     private SummariesCollection summariesCollection;
     private String projectName;
 
-    public ZonalSummaryCalculator(SummaryData data)
+    public ZonalSummaryCalculator(String workingDir, String projectName, String pluginName, File inRasterFile, File inShapeFile, File outTableFile,
+            String zoneField, SummariesCollection summariesCollection)
     {
-        mRasterFile = data.inRasterFile;
-        mLayerFile = data.inShapeFile;
-        mTableFile = data.outTableFile;
-        mField = data.zoneField;
-        summariesCollection = data.summariesCollection;
-        projectName = data.projectName;
+        mRasterFile = inRasterFile;
+        mLayerFile = inShapeFile;
+        mTableFile = outTableFile;
+        mField = zoneField;
+        this.summariesCollection = summariesCollection;
+        this.projectName = projectName;
     }
 
     public void calculate() throws Exception {
