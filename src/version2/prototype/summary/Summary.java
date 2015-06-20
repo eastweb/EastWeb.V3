@@ -45,10 +45,8 @@ public class Summary extends Process<Void> {
 
     @Override
     public Void call() throws Exception {
-        SummaryWorker worker;
-
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), mInputTableName);
+        cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), inputProcessName);
 
         if(cachedFiles.size() > 0)
         {

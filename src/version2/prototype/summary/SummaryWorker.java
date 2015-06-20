@@ -18,7 +18,7 @@ import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.FileSystem;
 
-public class SummaryWorker extends ProcessWorker<DataFileMetaData> {
+public class SummaryWorker extends ProcessWorker<Void> {
     private ProjectInfoFile projectInfoFile;
     private ProjectInfoPlugin pluginInfo;
     private PluginMetaData pluginMetaData;
@@ -27,7 +27,7 @@ public class SummaryWorker extends ProcessWorker<DataFileMetaData> {
     protected SummaryWorker(Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
-        super("SummaryWorker", process);
+        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
         this.projectInfoFile = projectInfoFile;
         this.pluginInfo = pluginInfo;
         this.pluginMetaData = pluginMetaData;
@@ -39,7 +39,7 @@ public class SummaryWorker extends ProcessWorker<DataFileMetaData> {
      */
     @Override
     // TODO: Need to fix this to run on a specified plugin. Fix after adding database cache information.
-    public DataFileMetaData call() throws Exception {
+    public Void call() throws Exception {
         ArrayList<DataFileMetaData> tempFiles = new ArrayList<DataFileMetaData>(0);
 
         for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())

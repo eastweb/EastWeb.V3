@@ -5,7 +5,6 @@ import version2.prototype.DataDate;
 import version2.prototype.Projection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.util.GeneralListener;
 
 /* Overridden by each plugin's prepareProcessTask class
  * name convention:  Plugin_namePrepareProcessTask.class
@@ -42,11 +41,7 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
-<<<<<<< HEAD
-        return project.GetMasterShapeFile() ;
-=======
         return project.GetMasterShapeFile();
->>>>>>> refs/heads/Threading
     }
 
     /* post-condition:
