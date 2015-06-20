@@ -50,7 +50,7 @@ public class PluginMetaDataCollection {
             PluginMetaData temp=new PluginMetaData();
             temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
             temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
-            temp.Projection = new ProcessorMetaData(doc.getElementsByTagName("Process"));
+            temp.Projection = new ProcessorMetaData(doc.getElementsByTagName("Processor"));
 
             temp.IndicesMetaData = new ArrayList<String>();
             NodeList tempIndices = doc.getElementsByTagName("Indices");

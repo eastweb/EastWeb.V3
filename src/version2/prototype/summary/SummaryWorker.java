@@ -34,6 +34,9 @@ public class SummaryWorker extends ProcessWorker<DataFileMetaData> {
         this.cachedFiles = cachedFiles;
     }
 
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
     @Override
     // TODO: Need to fix this to run on a specified plugin. Fix after adding database cache information.
     public DataFileMetaData call() throws Exception {

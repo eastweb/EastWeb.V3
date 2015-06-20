@@ -4,7 +4,25 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+/**
+ * Represents a collection of registered summaries as SummarySingletons facilitating interaction between summaries to share computations.
+ *
+ * @author michael.devos
+ *
+ */
 public class SummariesCollection {
+    /**
+     * Creates a SummariesCollection object.
+     *
+     * @param summaryNames  - case-sensitive names of the classes of SummarySingleton objects to create
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
     public SummariesCollection(ArrayList<String> summaryNames) throws ClassNotFoundException, NoSuchMethodException, SecurityException,
     InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
         summaries = new ArrayList<SummarySingleton>();
@@ -47,6 +65,12 @@ public class SummariesCollection {
         }
     }
 
+    /**
+     * Retrieve a reference to the SummarySingleton object (if there is one) with the given canonical name in the stored collection.
+     *
+     * @param canonicalName  - SummarySingleton object's registered canonical name as gotten with SummarySingleton.getCanonicalName()
+     * @return reference to the registered SummarySingleton
+     */
     public SummarySingleton lookup(String canonicalName){
         boolean found = false;
         int i = 0;
@@ -65,6 +89,12 @@ public class SummariesCollection {
         return instance;
     }
 
+    /**
+     * Inserts a new value into the collection by inserting the value into all distinct leaflet SummarySingleton objects registered to the collection.
+     *
+     * @param index  - index of given value
+     * @param value  - double value to insert
+     */
     public void put(int index, double value){
         ArrayList<SummarySingleton> leavesFromSummaries = new ArrayList<SummarySingleton>();
         ArrayList<SummarySingleton> temp = null;
@@ -84,6 +114,13 @@ public class SummariesCollection {
         }
     }
 
+    /**
+     * Registers a SummaryNameInstancePair into the collection.
+     *
+     * @param pair  - SummaryNameInstancePair to register
+     * @return reference to SummarySingleton that is registered with the given name; if none then this will return the same reference as in the given
+     * SummaryNameInstancePair
+     */
     public SummarySingleton register(SummaryNameInstancePair pair){
         SummarySingleton temp = lookup(pair.getCanonicalName());
         if(temp == null){
@@ -93,6 +130,11 @@ public class SummariesCollection {
         return temp;
     }
 
+    /**
+     * Gets the results of all registered summaries.
+     *
+     * @return list of all registered summary results
+     */
     public ArrayList<SummaryNameResultPair> getResults(){
         ArrayList<SummaryNameResultPair> results = new ArrayList<SummaryNameResultPair>();
         for(SummarySingleton summary : summaries){

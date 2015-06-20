@@ -1,8 +1,5 @@
 package version2.prototype.projection;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import version2.prototype.DataDate;
 import version2.prototype.Projection;
@@ -45,7 +42,11 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
+<<<<<<< HEAD
         return project.GetMasterShapeFile() ;
+=======
+        return project.GetMasterShapeFile();
+>>>>>>> refs/heads/Threading
     }
 
     /* post-condition:

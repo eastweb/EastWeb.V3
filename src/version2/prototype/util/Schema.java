@@ -5,7 +5,23 @@ import java.sql.SQLException;
 
 import version2.prototype.ConfigReadException;
 
+/**
+ * Represents a schema in the PostgreSQL database. Allows for recreating/creating of required schemas for EASTWeb.
+ *
+ * @author michael.devos
+ *
+ */
 public class Schema {
+    /**
+     * Recreates or creates a schema full schema identified by the given project name and plugin name. Creates all database cache tables required by frameworks and
+     * download classes.
+     *
+     * @param projectName  - name of project to create schema for
+     * @param pluginName  - name of plugin to create schema for
+     * @throws ConfigReadException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
     public static void RecreateSchema(String projectName, String pluginName) throws ConfigReadException, SQLException, ClassNotFoundException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
@@ -164,8 +180,11 @@ public class Schema {
     }
 
     /**
-     * Gets the name of the specified project's database schema.
-     * The returned name does not need to be quoted to use in SQL.
+     * Gets the name of the specified project's database schema. The returned name does not need to be quoted to use in SQL.
+     *
+     * @param project  - project name the schema is for
+     * @param pluginName  - plugin name the schema is for
+     * @return name of schema within database formatted as seen in database
      */
     public static String getSchemaName(String project, String pluginName) {
         final String name = project + "_" + pluginName;

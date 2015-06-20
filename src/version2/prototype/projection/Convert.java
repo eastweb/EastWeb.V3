@@ -35,8 +35,13 @@ public abstract class Convert {
     }
 
     // run method for the scheduler
+<<<<<<< HEAD
     public void run() throws Exception, IOException{
         convertFiles();
+=======
+    public void run(){
+        convertFile();
+>>>>>>> refs/heads/Threading
 
         // remove the input folder
         FileUtils.deleteDirectory(inputFolder);
@@ -54,6 +59,10 @@ public abstract class Convert {
      *   (3) Write the result from (2) to outputFolder
      *   (4) repeat step (1) - (3)
      */
+<<<<<<< HEAD
     abstract protected void convertFiles() throws Exception;
+=======
+    abstract void convertFile();
+>>>>>>> refs/heads/Threading
 
 }

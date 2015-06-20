@@ -17,8 +17,11 @@ import version2.prototype.Projection;
 import version2.prototype.Projection.Datum;
 import version2.prototype.Projection.ProjectionType;
 import version2.prototype.Projection.ResamplingType;
+<<<<<<< HEAD
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
+=======
+>>>>>>> refs/heads/Threading
 import version2.prototype.ZonalSummary;
 
 /**
@@ -44,9 +47,24 @@ public class ProjectInfoFile {
     private final String masterShapeFile;
     private final String timeZone;
     private final ArrayList<String> modisTiles;
+<<<<<<< HEAD
     private final Projection projection;
     private final ArrayList<ProjectInfoSummary> summaries;
     private final int totModisTiles;
+=======
+    private final ProjectionType projectionType;
+    private final ResamplingType resamplingType;
+    private final Datum datum;
+    private final int pixelSize;
+    private final double stdParallel1;
+    private final double stdParallel2;
+    private final double scalingFactor;
+    private final double centralMeridian;
+    private final double falseEasting;
+    private final double falseNorthing;
+    private final double latitudeOfOrigin;
+    private final ArrayList<ZonalSummary> zonalSummaries;
+>>>>>>> refs/heads/Threading
 
     /**
      * Creates a ProjectInfoFile object from parsing the given xml file. Doesn't allow its data to be changed and doesn't dynamically update its
@@ -56,6 +74,7 @@ public class ProjectInfoFile {
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+<<<<<<< HEAD
      * @throws InvocationTargetException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
@@ -66,6 +85,10 @@ public class ProjectInfoFile {
      */
     public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException,
     NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+=======
+     */
+    public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException
+>>>>>>> refs/heads/Threading
     {
         error = false;
         errorMsg = new ArrayList<String>();
@@ -86,10 +109,25 @@ public class ProjectInfoFile {
         timeZone = ReadTimeZone();
         totModisTiles = ReadTotalModisTiles();
         modisTiles = ReadModisTiles();
+<<<<<<< HEAD
         projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
                 ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
                 ReadLatitudeOfOrigin());
         summaries = ReadSummaries();
+=======
+        projectionType = ReadProjectionType();
+        resamplingType = ReadResamplingType();
+        datum = ReadDatum();
+        pixelSize = ReadPixelSize();
+        stdParallel1 = ReadStandardParallel1();
+        stdParallel2 = ReadStandardParallel2();
+        scalingFactor = ReadScalingFactor();
+        centralMeridian = ReadCentralMeridian();
+        falseEasting = ReadFalseEasting();
+        latitudeOfOrigin = ReadLatitudeOfOrigin();
+        falseNorthing = ReadFalseNorthing();
+        zonalSummaries = ReadSummaries();
+>>>>>>> refs/heads/Threading
     }
 
     /**
@@ -142,6 +180,7 @@ public class ProjectInfoFile {
     public String GetTimeZone() { return timeZone; }
 
     /**
+<<<<<<< HEAD
      * Gets the total number of modies tiles expected per input data downloaded.
      *
      * @return number of modies tiles associated with a single downloaded data unit.
@@ -149,12 +188,15 @@ public class ProjectInfoFile {
     public int GetTotModisTiles() { return totModisTiles; }
 
     /**
+=======
+>>>>>>> refs/heads/Threading
      * Gets the modis tiles gotten from the once parsed xml file.
      *
      * @return modis tile names gotten from the xml's data.
      */
     public ArrayList<String> GetModisTiles() { return modisTiles; }
 
+<<<<<<< HEAD
 
 
     /**
@@ -170,6 +212,102 @@ public class ProjectInfoFile {
      * @return Projection object created from the xml's data.
      */
     public Projection GetProjection() { return projection; }
+=======
+    /**
+     * Gets the projection type gotten from the once parsed xml file.
+     *
+     * @return ProjectionType object created from the xml's data.
+     */
+    public ProjectionType GetProjectionType() { return projectionType; }
+
+    /**
+     * Gets the resampling type gotten from the once parsed xml file.
+     *
+     * @return ResamplingType object created from the xml's data.
+     */
+    public ResamplingType GetReSampling() { return resamplingType; }
+
+    /**
+     * Gets the datum gotten from the once parsed xml file.
+     *
+     * @return Datum object created from the xml's data.
+     */
+    public Datum GetDatum() { return datum; }
+
+    /**
+     * Gets the pixel size gotten from the once parsed xml file.
+     *
+     * @return pixel size gotten from the xml's data.
+     */
+    public int GetPixelSize() { return pixelSize; }
+
+    /**
+     * Gets the standard parallel 1 gotten from the once parsed xml file.
+     *
+     * @return standard parallel 1 gotten from the xml's data.
+     */
+    public double GetStandardParallel1() { return stdParallel1; }
+
+    /**
+     * Gets the standard parallel 2 gotten from the once parsed xml file.
+     *
+     * @return standard parallel 2 gotten from the xml's data.
+     */
+    public double GetStandardParallel2() { return stdParallel2; }
+
+    /**
+     * Gets the scaling factor gotten from the once parsed xml file.
+     *
+     * @return scaling factor gotten from the xml's data.
+     */
+    public double GetScalingFactor() { return scalingFactor; }
+
+    /**
+     * Gets the central meridian gotten from the once parsed xml file.
+     *
+     * @return central meridian gotten from the xml's data.
+     */
+    public double GetCentralMeridian() { return centralMeridian; }
+
+    /**
+     * Gets the false Easting value gotten from the once parsed xml file.
+     *
+     * @return false Easting value gotten from the xml's data.
+     */
+    public double GetFalseEasting() { return falseEasting; }
+
+    /**
+     * Gets the false Northing value gotten from the once parsed xml file.
+     *
+     * @return false Northign value gotten from the xml's data.
+     */
+    public double GetFalseNorthing() { return falseNorthing; }
+
+    /**
+     * Gets the latitude of the origin gotten from the once parsed xml file.
+     *
+     * @return latitude of the origin gotten from the xml's data.
+     */
+    public double GetLatitudeOfOrigin() { return latitudeOfOrigin; }
+
+    /**
+     * Gets the list of zonal summaries gotten from the once parsed xml file.
+     *
+     * @return list of ZonalSummary objects created from the xml's data.
+     */
+    public ArrayList<ZonalSummary> GetZonalSummaries() { return zonalSummaries; }
+
+    /**
+     * Gets the projection information gotten from the once parsed xml file.
+     *
+     * @return Projection object created from the xml's data.
+     */
+    public Projection GetProjection()
+    {
+        return new Projection(projectionType, resamplingType, datum, pixelSize, stdParallel1, stdParallel2, scalingFactor, centralMeridian,
+                falseEasting, falseNorthing, latitudeOfOrigin);
+    }
+>>>>>>> refs/heads/Threading
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
