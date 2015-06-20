@@ -629,7 +629,11 @@ public class MainWindow {
 
                     if(currentProjectName.equals(projectName)) {
 
-
+                        if(isPlay) {
+                            item.Stop();
+                        } else {
+                            item.Start();
+                        }
 
                     }
                 }
