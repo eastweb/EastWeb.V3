@@ -1,6 +1,7 @@
 package version2.prototype.ProjectInfoMetaData;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -12,7 +13,7 @@ import version2.prototype.ZonalSummary;
 
 public class ProjectInfoParserTester {
 
-    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, ParseException {
+    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         ProjectInfoCollection projectInfoFiles = new ProjectInfoCollection();
         ArrayList<ProjectInfoFile> files = projectInfoFiles.ReadInAllProjectInfoFiles();
 
@@ -48,10 +49,10 @@ public class ProjectInfoParserTester {
             }
 
             System.out.println("\tZonal Summaries:");
-            for(ZonalSummary summary : file.GetZonalSummaries())
+            for(ProjectInfoSummary summary : file.GetSummaries())
             {
-                System.out.println("\t\tShape File: " + summary.GetShapeFile());
-                System.out.println("\t\tField: " + summary.GetField());
+                System.out.println("\t\tShape File: " + summary.GetZonalSummary().GetShapeFile());
+                System.out.println("\t\tField: " + summary.GetZonalSummary().GetField());
             }
         }
     }

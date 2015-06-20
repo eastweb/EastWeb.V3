@@ -64,28 +64,45 @@ public class AssociateSummaryPage {
         myPanel.setBounds(547, 420, 383, 275);
 
         final JLabel filePathLabel = new JLabel("ShapeFile Path");
-        filePathLabel.setBounds(10, 60, 152, 14);
+        filePathLabel.setBounds(10, 27, 152, 14);
         myPanel.add(filePathLabel);
 
         // text field for shapefile
         final JTextField filePathText =  new JTextField();
-        filePathText.setBounds(172, 57, 150, 20);
+        filePathText.setBounds(172, 24, 150, 20);
         myPanel.add(filePathText);
         filePathText.setColumns(10);
 
         final JLabel shapeFileLabel = new JLabel("Shape Type");
-        shapeFileLabel.setBounds(10, 94, 152, 14);
+        shapeFileLabel.setBounds(10, 58, 152, 14);
         myPanel.add(shapeFileLabel);
+
+        // combo box for temporal
+        final JComboBox<String> temporalComboBox = new JComboBox<String>();
+        temporalComboBox.setBounds(172, 86, 150, 20);
+        temporalComboBox.addItem("Gregorian Weekly");
+        myPanel.add(temporalComboBox);
 
         // combo box populated by the selected shapefile
         final JComboBox<String> shapeFileComboBox = new JComboBox<String>();
-        shapeFileComboBox.setBounds(172, 91, 150, 20);
+        shapeFileComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                String temporal = String.valueOf(shapeFileComboBox.getSelectedItem());
+                if(temporal != null & !temporal.isEmpty()) {
+                    temporalComboBox.setEnabled(true);
+                }
+            }
+        });
+        shapeFileComboBox.setBounds(172, 55, 150, 20);
         myPanel.add(shapeFileComboBox);
+
+
 
         // browse button for shape file
         final JButton browseButton = new JButton(". . .");
         browseButton.setToolTipText("browse file");
-        browseButton.setBounds(344, 56, 41, 23);
+        browseButton.setBounds(344, 23, 41, 23);
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -112,48 +129,10 @@ public class AssociateSummaryPage {
         myPanel.add(browseButton);
 
         JLabel lblNewLabel_1 = new JLabel("Temporal Summary");
-        lblNewLabel_1.setBounds(10, 128, 152, 14);
+        lblNewLabel_1.setBounds(10, 89, 152, 14);
         myPanel.add(lblNewLabel_1);
 
-        // combo box for temporal
-        final JComboBox<String> temporalComboBox = new JComboBox<String>();
-        temporalComboBox.setBounds(172, 125, 150, 20);
-        temporalComboBox.addItem("Temporal Summary 1"); // TODO: need to actually populate for temporal summary
-        temporalComboBox.addItem("Temporal Summary 2" ); // TODO: need to actually populate for temporal summary
-        myPanel.add(temporalComboBox);
 
-        JLabel lblTypeOfSummary = new JLabel("Type of Summary");
-        lblTypeOfSummary.setEnabled(true);
-        lblTypeOfSummary.setBounds(10, 29, 152, 14);
-        myPanel.add(lblTypeOfSummary);
-
-        // set enable base on which summary is added
-        final JComboBox<String> summaryComboBox = new JComboBox<String>();
-        summaryComboBox.setBounds(172, 26, 150, 20);
-        summaryComboBox.addItem("Zonal Summary");
-        summaryComboBox.addItem("Temporal Summary" );
-        summaryComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                String selectedItem = String.valueOf(summaryComboBox.getSelectedItem());
-                if(selectedItem == "Zonal Summary"){
-                    temporalComboBox.setEnabled(false);
-                    filePathLabel.setEnabled(true);
-                    filePathText.setEnabled(true);
-                    browseButton.setEnabled(true);
-                    shapeFileComboBox.setEnabled(true);
-                    shapeFileLabel.setEnabled(true);
-                }else if(selectedItem == "Temporal Summary"){
-                    temporalComboBox.setEnabled(true);
-                    filePathLabel.setEnabled(false);
-                    filePathText.setEnabled(false);
-                    browseButton.setEnabled(false);
-                    shapeFileComboBox.setEnabled(false);
-                    shapeFileLabel.setEnabled(false);
-                }
-            }
-        });
-        myPanel.add(summaryComboBox);
 
         temporalComboBox.setEnabled(false);
         filePathLabel.setEnabled(true);
@@ -165,13 +144,16 @@ public class AssociateSummaryPage {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String selectedItem = String.valueOf(summaryComboBox.getSelectedItem());
+
                 String summary = "";
-                if(selectedItem == "Zonal Summary"){
-                    summary = String.format("Shape File Path: %s; %s", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
-                }else if(selectedItem == "Temporal Summary"){
-                    summary = String.format("Temporal Summary Type: %s", String.valueOf(temporalComboBox.getSelectedItem()));
+                String temporal = String.valueOf(temporalComboBox.getSelectedItem());
+
+                summary = String.format("Shape File Path: %s; %s", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
+
+                if(temporal != null & !temporal.isEmpty() ) {
+                    summary = String.format("%s; Temporal Summary: %s",summary, String.valueOf(temporalComboBox.getSelectedItem()));
                 }
+
                 summaryEvent.fire(summary);
                 frame.dispose();
             }

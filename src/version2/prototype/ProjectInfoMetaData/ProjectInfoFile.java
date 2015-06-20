@@ -43,6 +43,7 @@ public class ProjectInfoFile {
     private final String maskingFile;
     private final String masterShapeFile;
     private final String timeZone;
+    private final boolean clipping;
     private final ArrayList<String> modisTiles;
     private final Projection projection;
     private final ArrayList<ProjectInfoSummary> summaries;
@@ -84,6 +85,7 @@ public class ProjectInfoFile {
         maskingFile = ReadMaskingFile();
         masterShapeFile = ReadMasterShapeFile();
         timeZone = ReadTimeZone();
+        clipping = ReadClipping();
         totModisTiles = ReadTotalModisTiles();
         modisTiles = ReadModisTiles();
         projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
@@ -140,6 +142,13 @@ public class ProjectInfoFile {
      * @return time zone string gotten from the xml's data.
      */
     public String GetTimeZone() { return timeZone; }
+
+    /**
+     * Gets the clipping gotten from the once parsed xml file.
+     *
+     * @return get clipping value gotten from the xml's data.
+     */
+    public boolean GetClipping() { return clipping; }
 
     /**
      * Gets the total number of modies tiles expected per input data downloaded.
@@ -275,6 +284,16 @@ public class ProjectInfoFile {
             return values.get(0);
         }
         return null;
+    }
+
+    private boolean ReadClipping()
+    {
+        NodeList nodes = GetUpperLevelNodeList("Clipping", "Missing clipping.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing clipping.");
+        if(values.size() > 0) {
+            return Boolean.valueOf(values.get(0));
+        }
+        return false;
     }
 
     private int ReadTotalModisTiles()
