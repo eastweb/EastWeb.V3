@@ -18,38 +18,49 @@ public class ModisLSTFilter extends Filter{
     @Override
     protected double filterByQCFlag(String qcLevel) {
         // TODO Auto-generated method stub
-        //the value of qcBands is a 8-didit value
-        // int[] value=qcBands;
-        // QCLevel qc=ConvertQCLevel(getQCLevel());
-        String qclevel=getQCLevel();
-        if(qcLevel.equals(qclevel)==true) {
-            return 0;
-        } else {
-            return -9999;
+        // filter pixel by pixel
+
+        GdalUtils.register();
+
+        synchronized (GdalUtils.lockObject) {
+            for (File mInput : inputFiles){
+
+                Dataset inputDS = gdal.Open(mInput.getPath());
+                assert(inputDS.GetRasterCount() == 2);
+
+                Dataset outputDS = createOutput(inputDS);
+                double[] array = new double[outputDS.GetRasterXSize()];
+
+                for (int y=0; y<outputDS.GetRasterYSize(); y++) {
+                    outputDS.GetRasterBand(2).ReadRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+
+                    for (int x=0; x<outputDS.GetRasterXSize(); x++) {
+                        String qclevel=getQCLevel(array[x]);
+                        if(qcLevel.equals(qclevel)==true)
+                        {
+                            return array[x];
+                        }
+                        else
+                        {
+                            return -9999;
+                        }
+                    }
+
+                    synchronized (GdalUtils.lockObject) {
+                        outputDS.GetRasterBand(2).WriteRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+                    }
+                }
+                inputDS.delete();
+                outputDS.delete();
+            }
         }
     }
 
 
-    public QCLevel ConvertQCLevel(String qclevel)
+    public String getQCLevel(int value)
     {
-        if(qclevel=="HIGHEST") {
-            return QCLevel.HIGHEST;
-        } else if(qclevel=="MODERATE") {
-            return QCLevel.MODERATE;
-        } else if(qclevel=="LOW") {
-            return QCLevel.LOW;
-        } else if(qclevel=="NONE"){
-            return QCLevel.NONE;
-        } else {
-            return null;
-        }
-    }
-
-    public String getQCLevel()
-    {
-        int []i=qcBands;
         //convert the integer qcband value into binary
-        String qcbandValue=Integer.toBinaryString(i[0]);
+        String qcbandValue=Integer.toBinaryString(value);
         int size=qcbandValue.length();
         char[]convertValue=new char[8];
         //convert the general binary order into 8-digit format
