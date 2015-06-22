@@ -63,7 +63,7 @@ public class ModisLSTDownloader extends DownloaderFramework{
             throws IOException {
         String mode = metaData.mode;
         Object conn =
-                ConnectionContext.getConnection(mode, ConvertDT(DataType.MODIS),metaData);
+                ConnectionContext.getConnection(mode, "ModisLST",metaData);
         if(mode=="HTTP")
         {
             final Pattern re = Pattern.compile("(\\d{4})\\.(\\d{2})\\.(\\d{2})(/)");
@@ -113,22 +113,6 @@ public class ModisLSTDownloader extends DownloaderFramework{
         }
     }
 
-
-    public static String ConvertDT(DataType dt){
-        if(dt==DataType.MODIS) {
-            return "MODIS";
-        } else if(dt==DataType.TRMM) {
-            return "TRMM";
-        } else if(dt==DataType.ETO) {
-            return "ETO";
-        } else if(dt==DataType.TRMM_3B42) {
-            return "TRMM_3B42";
-        } else if(dt==DataType.NLDAS) {
-            return "NLDAS";
-        } else {
-            return null;
-        }
-    }
 
     @Override
     public final void download() throws IOException, ConfigReadException,
@@ -219,7 +203,4 @@ public class ModisLSTDownloader extends DownloaderFramework{
         }
     }
 
-    protected String getProduct() {
-        return PRODUCT;
-    }
 }
