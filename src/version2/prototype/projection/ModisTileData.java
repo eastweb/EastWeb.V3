@@ -11,13 +11,13 @@ import org.gdal.gdal.gdal;
 import version2.prototype.util.GdalUtils;
 
 public class ModisTileData {
-    int horizon;
-    int vertical;
-    int bandNumber;
-    int xSize;
-    int ySize;
-    String[] sdsName;
-    ArrayList<ImageArray> imageSet;
+    public int horizon;
+    public int vertical;
+    public int bandNumber;
+    public int xSize;
+    public int ySize;
+    public String[] sdsName;
+    public ArrayList<ImageArray> imageSet;
 
     ModisTileData(int bandNumber, int x, int y) {
         this.bandNumber = bandNumber;
@@ -26,7 +26,7 @@ public class ModisTileData {
     }
 
     @SuppressWarnings("unchecked")
-    ModisTileData(File file) throws InterruptedException {
+    public ModisTileData(File file) throws InterruptedException {
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {

@@ -10,7 +10,7 @@
 	</Download>
 	<Processes>
 		<Process processStep="1">
-			<ClassName>Mosaic</ClassName>
+			<ClassName>ModisNBARFilter</ClassName>
 		</Process>
 		<Process processStep="2">
 			<ClassName>Mosaic</ClassName>
@@ -19,17 +19,15 @@
 			<ClassName>Reproject</ClassName>
 		</Process>
 		<Process processStep="4">
-			<ClassName>Reproject</ClassName>
-		</Process>
-		<Process processStep="5">
-			<ClassName>ModisNBARFilter</ClassName>
-		</Process>
-		<Process processStep="6">
 			<ClassName>Mask</ClassName>
 		</Process>
-	</Process>
+	</Processes>
 	<Indices>
-		<ClassName></ClassName>
+		<ClassName>GdalNDVICalculator</ClassName>
+		<ClassName>GdalEVICalculator</ClassName>
+		<ClassName>GdalNDWI5Calculator</ClassName>
+		<ClassName>GdalNDWI6Calculator</ClassName>
+		<ClassName>GdalSAVICalculator</ClassName>
 	</Indices>
 	<Summary>
 		<ClassName></ClassName>
