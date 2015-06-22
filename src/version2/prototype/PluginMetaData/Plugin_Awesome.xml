@@ -34,7 +34,6 @@
 			<DaysPerInputData>1</DaysPerInputData>
 		</Temporal>
 	</Summary>
-	<QualityContro
 	<QualityControl>
 		<Level>None</Level>
 		<Level>Level 1</Level>
