@@ -98,18 +98,32 @@ public abstract class Filter {
                 assert(inputDS.GetRasterCount() == 1);
 
                 Dataset outputDS = createOutput(inputDS);
-                double[] array = new double[outputDS.GetRasterXSize()];
 
+                int xSize = outputDS.GetRasterXSize();
+                int ySize = outputDS.GetRasterYSize();
+
+                //FIXME: assume the dataset is double.  If not, need to define different array type and buf-type.
+                // maybe in an abstract class?
+                double[] array = new double[xSize * ySize];
+
+                // use GDT_Float32 (6) for the buffer
+                // read the whole raster out into the array
+                int readReturn = outputDS.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, 6, array);
+                if (readReturn != 0) {
+                    throw new Exception("Cant read the Raster band : " + mInput.getPath());
+                }
+
+                // get each unit out and filter it
                 for (int y=0; y<outputDS.GetRasterYSize(); y++) {
-                    outputDS.GetRasterBand(1).ReadRaster(0, y, outputDS.GetRasterXSize(), 1, array);
-
                     for (int x=0; x<outputDS.GetRasterXSize(); x++) {
-                        array[x] = filterValue(array[x]);
+                        int index = y * xSize + x;
+                        array[index] = filterValue(array[index]);
                     }
+                }
 
-                    synchronized (GdalUtils.lockObject) {
-                        outputDS.GetRasterBand(1).WriteRaster(0, y, outputDS.GetRasterXSize(), 1, array);
-                    }
+                synchronized (GdalUtils.lockObject) {
+                    outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 6, array);
+
                 }
 
                 inputDS.delete();
