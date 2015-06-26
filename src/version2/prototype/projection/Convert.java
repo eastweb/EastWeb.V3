@@ -15,12 +15,12 @@ import org.apache.commons.io.FileUtils;
 
 public abstract class Convert {
     //locations for the input files. for this step, will only use inputFolders[0]
-    private String [] inputFolders;
-    private File inputFolder;
+    protected String [] inputFolders;
+    protected File inputFolder;
     //location for the output file
-    private String outputFolder;
+    protected String outputFolder;
     // the file in the input folder
-    private File [] inputFiles;
+    protected File [] inputFiles;
 
     public Convert(ProcessData data) {
         inputFolders = data.getInputFolders();
@@ -35,16 +35,12 @@ public abstract class Convert {
     }
 
     // run method for the scheduler
-    public void run(){
+    public void run() throws Exception, IOException{
         convertFile();
 
         // remove the input folder
-        try {
-            FileUtils.deleteDirectory(inputFolder);
-        } catch (IOException e) {
-            // TODO : write to log
-            e.printStackTrace();
-        }
+        FileUtils.deleteDirectory(inputFolder);
+
     }
 
     /*Override this:
@@ -58,6 +54,7 @@ public abstract class Convert {
      *   (3) Write the result from (2) to outputFolder
      *   (4) repeat step (1) - (3)
      */
-    protected abstract void convertFile();
+    abstract protected void convertFiles() throws Exception;
+    abstract void convertFile();
 
 }

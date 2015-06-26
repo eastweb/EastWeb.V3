@@ -24,12 +24,17 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.summaries.SummariesCollection;
 import version2.prototype.summary.summaries.SummaryNameResultPair;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
 
+/**
+ * Calculates the zonal summary for a given raster file using the defined SummariesCollection object.
+ *
+ * @author michael.devos
+ *
+ */
 public class ZonalSummaryCalculator {
     private File mRasterFile;
     private File mLayerFile;
@@ -38,16 +43,32 @@ public class ZonalSummaryCalculator {
     private SummariesCollection summariesCollection;
     private String projectName;
 
-    public ZonalSummaryCalculator(SummaryData data)
+    /**
+     * Creates a ZonalSummaryCalculator.
+     *
+     * @param projectName  - current project's name
+     * @param inRasterFile  - input raster file
+     * @param inShapeFile  - input shape file
+     * @param outTableFile  - where to write output to
+     * @param zoneField  - zone field name to use
+     * @param summariesCollection  - collection of summary calculations to run on raster data
+     */
+    public ZonalSummaryCalculator(String workingDir, String projectName, String pluginName, File inRasterFile, File inShapeFile, File outTableFile,
+            String zoneField, SummariesCollection summariesCollection)
     {
-        mRasterFile = data.inRasterFile;
-        mLayerFile = data.inShapeFile;
-        mTableFile = data.outTableFile;
-        mField = data.zoneField;
-        summariesCollection = data.summariesCollection;
-        projectName = data.projectName;
+        mRasterFile = inRasterFile;
+        mLayerFile = inShapeFile;
+        mTableFile = outTableFile;
+        mField = zoneField;
+        this.summariesCollection = summariesCollection;
+        this.projectName = projectName;
     }
 
+    /**
+     * Run ZonalSummaryCalculator.
+     *
+     * @throws Exception
+     */
     public void calculate() throws Exception {
         GdalUtils.register();
 
@@ -111,8 +132,8 @@ public class ZonalSummaryCalculator {
     /**
      * Checks whether the given raster and layer share the same projection.
      *
-     * @param raster
-     * @param layer
+     * @param raster  - input raster file
+     * @param layer  -  input shape file
      * @return true if projections are the same
      * @throws IOException
      * @throws UnsupportedOperationException
@@ -179,11 +200,11 @@ public class ZonalSummaryCalculator {
 
 
     /**
+     * Rasterizes data creating Dataset object. Uses GDal library to do calculation.
      *
-     *
-     * @param layer
-     * @param transform
-     * @return
+     * @param layer  - shape file
+     * @param transform  - raster data in single double array
+     * @return all data after rasterization
      * @throws Exception
      */
     private Dataset rasterize(Layer layer, double[] transform) throws Exception {
@@ -481,8 +502,14 @@ public class ZonalSummaryCalculator {
     }
 
     /**
-     * Looks up the zoneFieldID for the specified (shapefile, field) pair.
-     * Returns null if there is no matching record.
+     * Looks up the zoneFieldID for the specified (shapefile, field) pair. Returns null if there is no matching record.
+     *
+     * @throws SQLException
+     * @param conn  - database connection
+     * @param mSchemaName  - name of schema for this zonal summary
+     * @param shapefile  - the currently used shape file
+     * @param field  - zonal field to use
+     * @return field ID of zone field.
      * @throws SQLException
      */
     public Integer lookupZoneFieldId(Connection conn, String mSchemaName, String shapefile, String field) throws SQLException {
@@ -505,9 +532,14 @@ public class ZonalSummaryCalculator {
     }
 
     /**
-     * Looks up the zoneFieldID for the specified (shapefile, field) pair.
-     * A new zoneFieldID is created if there is no matching record.
-     * Do this in a transaction!
+     * Looks up the zoneFieldID for the specified (shapefile, field) pair. A new zoneFieldID is created if there is no matching record. Do this in a transaction!
+     *
+     * @throws SQLException
+     * @param conn  - database connection
+     * @param mSchemaName  - name of schema for this zonal summary
+     * @param shapefile  - the currently used shape file
+     * @param field  - zonal field to use
+     * @return ID of a zone field
      * @throws SQLException
      */
     public int getZoneFieldId(Connection conn, String mSchemaName, String shapefile, String field) throws SQLException {
@@ -545,8 +577,14 @@ public class ZonalSummaryCalculator {
     }
 
     /**
-     * Looks up the ZoneID for the specified (zoneFieldID, zone) pair.
-     * Returns null if there is no matching record.
+     * Looks up the ZoneID for the specified (zoneFieldID, zone) pair. Returns null if there is no matching record.
+     *
+     * @throws SQLException
+     * @param conn  - database connection
+     * @param mSchemaName  - name of schema for this zonal summary
+     * @param zoneFieldId  - ID of zone field within database
+     * @param zone  - field name associated with the zoneFieldId
+     * @return zone ID for zoneFieldID and zone pairing, null if none exists.
      * @throws SQLException
      */
     public Integer lookupZoneId(Connection conn, String mSchemaName, int zoneFieldId, int zone) throws SQLException {
@@ -569,9 +607,14 @@ public class ZonalSummaryCalculator {
     }
 
     /**
-     * Looks up the zoneID for the specified (zoneFieldID, zone) pair.
-     * A new zoneID is created if there is no matching record.
-     * Do this in a transaction!
+     * Looks up the zoneID for the specified (zoneFieldID, zone) pair. A new zoneID is created if there is no matching record. Do this in a transaction!
+     *
+     * @throws SQLException
+     * @param conn  - database connection
+     * @param mSchemaName  - name of schema for this zonal summary
+     * @param zoneFieldId  - ID of zone field within database
+     * @param zone  - field name associated with the zoneFieldId
+     * @return zone ID for zoneFieldID and zone pairing, null if none exists.
      * @throws SQLException
      */
     public int getZoneId(Connection conn, String mSchemaName, int zoneFieldId, int zone) throws SQLException {

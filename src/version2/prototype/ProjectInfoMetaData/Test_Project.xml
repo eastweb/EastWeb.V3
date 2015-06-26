@@ -10,6 +10,7 @@
 	</Masking>
 	<MasterShapeFile>C:\Users\sufi\Desktop\shapefile\shapefile.shp</MasterShapeFile>
 	<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+	<TotalModisTiles>120</TotalModisTiles>
 	<ModisTiles>
 		<Modis>v12H42</Modis>
 		<Modis>V11H11</Modis>
@@ -23,12 +24,13 @@
 	<ScalingFactor>00.00</ScalingFactor>
 	<CentalMeridian>121</CentalMeridian>
 	<FalseEasting>151</FalseEasting>
+<<<<<<< HEAD
+=======
+	<FalseNorthing>33</FalseNorthing>
+>>>>>>> refs/heads/Threading
 	<LatitudeOfOrigin>111</LatitudeOfOrigin>
-	<FalseNothing>33</FalseNothing>
 	<Summaries>
-        <Summary>
-            <ShapeFile>C:\Users\sufi\Desktop\shapefile\shapefile.shp</ShapeFile>
-            <Field>COUNTYNS10</Field>
-        </Summary>
+        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10</Summary>
 	</Summaries>
 </ProjectInfo>

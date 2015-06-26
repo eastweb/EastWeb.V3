@@ -11,8 +11,8 @@ import version2.prototype.util.GeneralListener;
 public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
 
     public ModisNBARPrepareProcessTask(ProjectInfoFile mProject,
-            ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
-        super(mProject, mPlugin, mDate, l);
+            ProjectInfoPlugin mPlugin, DataDate mDate) {
+        super(mProject, mPlugin, mDate);
         // TODO Auto-generated constructor stub
     }
 

@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ import version2.prototype.EastWebUI.SummaryUI.SummaryListener;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -81,6 +83,7 @@ public class ProjectInformationPage {
     private JTextField masterShapeTextField;
     private JButton addNewModisButton;
     private JButton deleteSelectedModisButton;
+    private  JCheckBox isClippingCheckBox;
 
     private boolean isEditable;
 
@@ -168,6 +171,27 @@ public class ProjectInformationPage {
                     } catch (ParseException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (SecurityException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
                 }
             });
@@ -187,8 +211,15 @@ public class ProjectInformationPage {
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws ParseException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws ClassNotFoundException
      */
-    private void PopulateProjectInfo() throws IOException, ParserConfigurationException, SAXException, ParseException{
+    private void PopulateProjectInfo() throws IOException, ParserConfigurationException, SAXException, ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 
         String selectedProject = String.valueOf(projectCollectionComboBox.getSelectedItem());
         ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
@@ -216,6 +247,7 @@ public class ProjectInformationPage {
         modisListModel.clear();
 
         timeZoneComboBox.setEnabled(false);
+        isClippingCheckBox.setEnabled(false);
         coordinateSystemComboBox.setEnabled(false);
         reSamplingComboBox.setEnabled(false);
         datumComboBox.setEnabled(false);
@@ -250,7 +282,7 @@ public class ProjectInformationPage {
         }
 
         // set the plugin info
-        for(ProjectInfoPlugin plugin: project.plugins){
+        for(ProjectInfoPlugin plugin: project.GetPlugins()){
             String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>Quality: %s;</span></html>",
                     String.valueOf(plugin.GetName()),
                     getIndiciesFormat(plugin.GetIndicies()),
@@ -259,33 +291,35 @@ public class ProjectInformationPage {
         }
 
         // set basic project info
-        startDate.setDate(project.startDate);
-        projectName.setText(project.projectName);
-        workingDirectory.setText(project.workingDir);
-        maskFile.setText(project.maskingFile);
-        masterShapeTextField.setText(project.masterShapeFile);
+        startDate.setDate(project.GetStartDate());
+        projectName.setText(project.GetProjectName());
+        workingDirectory.setText(project.GetWorkingDir());
+        maskFile.setText(project.GetMaskingFile());
+        masterShapeTextField.setText(project.GetMasterShapeFile());
+        timeZoneComboBox.setSelectedItem(project.GetTimeZone());
+        isClippingCheckBox.setSelected(project.GetClipping());
 
         // set modis info
-        for(String modis: project.modisTiles){
+        for(String modis: project.GetModisTiles()){
             modisListModel.addElement(modis);
         }
 
         // set projection info
-        coordinateSystemComboBox.setSelectedItem(project.coordinateSystem);
-        reSamplingComboBox.setSelectedItem(project.reSampling);
-        timeZoneComboBox.setSelectedItem(project.timeZone);
-        datumComboBox.setSelectedItem(project);
-        pixelSize.setText(project.pixelSize);
-        standardParallel1.setText(project.stdParallel1);
-        centalMeridian.setText(project.centralMeridian);
-        falseEasting.setText(project.falseEasting);
-        standardParallel2.setText(project.stdParallel2);
-        latitudeOfOrigin.setText(project.latitudeOfOrigin);
-        falseNothing.setText(project.falseNothing);
+        coordinateSystemComboBox.setSelectedItem(project.GetProjection().getProjectionType());
+        reSamplingComboBox.setSelectedItem(project.GetProjection().getResamplingType());
+
+        datumComboBox.setSelectedItem(project.GetProjection().getDatum());
+        pixelSize.setText(String.valueOf(project.GetProjection().getPixelSize()));
+        standardParallel1.setText(String.valueOf(project.GetProjection().getStandardParallel1()));
+        centalMeridian.setText(String.valueOf(project.GetProjection().getCentralMeridian()));
+        falseEasting.setText(String.valueOf(project.GetProjection().getFalseEasting()));
+        standardParallel2.setText(String.valueOf(project.GetProjection().getStandardParallel2()));
+        latitudeOfOrigin.setText(String.valueOf(project.GetProjection().getLatitudeOfOrigin()));
+        falseNothing.setText(String.valueOf(project.GetProjection().getFalseNorthing()));
 
         // set summary info
-        for(String summary: project.summaries){
-            summaryListModel.addElement(summary);
+        for(ProjectInfoSummary summary: project.GetSummaries()){
+            summaryListModel.addElement(String.format("Shape File Path: %s; %s", summary.GetZonalSummary().GetShapeFile(), summary.GetZonalSummary().GetField()));
         }
     }
 
@@ -432,7 +466,7 @@ public class ProjectInformationPage {
         workingDirBrowsebutton.setBounds(316, 84, 32, 20);
         panel.add(workingDirBrowsebutton);
 
-        JLabel maskingFileLabel = new JLabel("Masking File");
+        JLabel maskingFileLabel = new JLabel("Masking File:");
         maskingFileLabel.setBounds(6, 118, 132, 15);
         panel.add(maskingFileLabel);
         maskFile = new JTextField();
@@ -464,10 +498,9 @@ public class ProjectInformationPage {
         panel.add(maskFileBrowseButton);
 
         masterShapeTextField = new JTextField();
-        masterShapeTextField.setBounds(148, 141, 158, 20);
+        masterShapeTextField.setBounds(148, 145, 158, 20);
         panel.add(masterShapeTextField);
         masterShapeTextField.setColumns(10);
-        masterShapeTextField.setEditable(false);
 
         final JButton masterShapeFileBrowseButton = new JButton(". . .");
         masterShapeFileBrowseButton.addActionListener(new ActionListener() {
@@ -489,33 +522,19 @@ public class ProjectInformationPage {
                 }
             }
         });
-        masterShapeFileBrowseButton.setBounds(316, 141, 32, 20);
+        masterShapeFileBrowseButton.setBounds(316, 146, 32, 20);
         panel.add(masterShapeFileBrowseButton);
-        masterShapeFileBrowseButton.setEnabled(false);
 
-        final JCheckBox chmasterShapeFileCheckbox = new JCheckBox("Master shp file");
-        chmasterShapeFileCheckbox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                if(chmasterShapeFileCheckbox.isSelected()){
-                    masterShapeTextField.setEditable(true);
-                    masterShapeFileBrowseButton.setEnabled(true);
-                }
-                else{
-                    masterShapeTextField.setEditable(false);
-                    masterShapeFileBrowseButton.setEnabled(false);
-                }
-            }
-        });
-        chmasterShapeFileCheckbox.setBounds(6, 140, 136, 23);
-        panel.add(chmasterShapeFileCheckbox);
+        final JLabel chmasterShapeFileLabel = new JLabel("Master shape file:");
+        chmasterShapeFileLabel.setBounds(6, 144, 136, 23);
+        panel.add(chmasterShapeFileLabel);
 
         JLabel lblTimeZone = new JLabel("Time Zone:");
-        lblTimeZone.setBounds(6, 170, 132, 14);
+        lblTimeZone.setBounds(6, 179, 132, 14);
         panel.add(lblTimeZone);
 
         timeZoneComboBox = new JComboBox<String>();
-        timeZoneComboBox.setBounds(148, 167, 200, 20);
+        timeZoneComboBox.setBounds(148, 176, 200, 20);
         for (String id : TimeZone.getAvailableIDs()) {
             TimeZone zone = TimeZone.getTimeZone(id);
             int offset = zone.getRawOffset()/1000;
@@ -525,10 +544,64 @@ public class ProjectInformationPage {
             timeZoneComboBox.addItem(timeZoneString);
         }
         panel.add(timeZoneComboBox);
+
+        isClippingCheckBox = new JCheckBox("");
+        isClippingCheckBox.setBounds(219, 203, 87, 23);
+        panel.add(isClippingCheckBox);
+
+        JLabel lblClipping = new JLabel("Clipping:");
+        lblClipping.setBounds(6, 204, 132, 14);
+        panel.add(lblClipping);
     }
 
     @SuppressWarnings("rawtypes")
     private void ModisInformation() {
+        JPanel modisInformationPanel = new JPanel();
+        modisInformationPanel.setLayout(null);
+        modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        modisInformationPanel.setBounds(359, 420, 275, 259);
+        frame.getContentPane().add(modisInformationPanel);
+
+        modisListModel = new DefaultListModel<String>();
+
+        addNewModisButton = new JButton("");
+        addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
+        addNewModisButton.setToolTipText("Add modis");
+        addNewModisButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tiles", null);
+                modisListModel.addElement(tile);
+            }
+        });
+        addNewModisButton.setBounds(15, 29, 75, 30);
+        modisInformationPanel.add(addNewModisButton);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(15, 70, 245, 178);
+        modisInformationPanel.add(scrollPane);
+
+        final JList<String> modisList = new JList<String>(modisListModel);
+        scrollPane.setViewportView(modisList);
+
+        deleteSelectedModisButton = new JButton("");
+        deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        deleteSelectedModisButton.setToolTipText("Delete Selected Modis");
+        deleteSelectedModisButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                DefaultListModel model = (DefaultListModel) modisList.getModel();
+                int selectedIndex = modisList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    model.remove(selectedIndex);
+                }
+            }
+        });
+        deleteSelectedModisButton.setBounds(185, 29, 75, 30);
+        modisInformationPanel.add(deleteSelectedModisButton);
+    }
+
+    /*private void ModisInformation() {
         JPanel modisInformationPanel = new JPanel();
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -569,13 +642,14 @@ public class ProjectInformationPage {
         });
         deleteSelectedModisButton.setBounds(185, 29, 75, 30);
         modisInformationPanel.add(deleteSelectedModisButton);
-    }
+    }*/
+
 
     private void ProjectInformation() {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(633, 420, 297, 259);
+        panel_2.setBounds(631, 420, 297, 259);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -671,12 +745,10 @@ public class ProjectInformationPage {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
         summaryPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        summaryPanel.setBounds(926, 420, 275, 259);
+        summaryPanel.setBounds(920, 420, 281, 259);
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
-        final JList summaryList = new JList(summaryListModel);
-        summaryList.setBounds(15, 70, 245, 178);
 
         JButton editSummaryButton = new JButton("");
         editSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
@@ -689,7 +761,13 @@ public class ProjectInformationPage {
         });
         editSummaryButton.setBounds(15, 29, 75, 30);
         summaryPanel.add(editSummaryButton);
-        summaryPanel.add(summaryList);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(15, 70, 245, 178);
+        summaryPanel.add(scrollPane);
+        final JList summaryList = new JList(summaryListModel);
+        scrollPane.setViewportView(summaryList);
+        summaryList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
         JButton deleteSummaryButton = new JButton("");
         deleteSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
@@ -814,6 +892,10 @@ public class ProjectInformationPage {
             Element timeZone = doc.createElement("TimeZone");
             timeZone.appendChild(doc.createTextNode(String.valueOf(timeZoneComboBox.getSelectedItem())));
             projectInfo.appendChild(timeZone);
+
+            Element isClipping = doc.createElement("Clipping");
+            isClipping.appendChild(doc.createTextNode(String.valueOf(isClippingCheckBox.isSelected())));
+            projectInfo.appendChild(isClipping);
 
             //list of modis tiles
             Element modisTiles = doc.createElement("ModisTiles");

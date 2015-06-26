@@ -13,14 +13,14 @@ import org.apache.commons.io.FileUtils;
 
 public class Mask {
     //locations for the input files. for this step, will only use inputFolders[0]
-    private String[] inputFolders;
+    protected String[] inputFolders;
     //location for the output file
-    private String outputFolder;
-    private File inputFolder;
+    protected String outputFolder;
+    protected File inputFolder;
     // the files in the input folder for composition
-    private File [] inputFiles;
+    protected File [] inputFiles;
     // mask file
-    private File maskFile;
+    protected File maskFile;
 
     public Mask(ProcessData data) {
         inputFolders = data.getInputFolders();

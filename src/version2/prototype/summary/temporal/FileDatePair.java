@@ -4,10 +4,22 @@ import java.io.File;
 
 import version2.prototype.DataDate;
 
+/**
+ * Pairing object of a File object and a DataDate object.
+ *
+ * @author michael.devos
+ *
+ */
 public class FileDatePair {
     public File file;
     public DataDate date;
 
+    /**
+     * Creates a FileDatePair object for given File and DataDate objects.
+     *
+     * @param f  - raster file for pairing
+     * @param d  - associated DataDate of paired raster file
+     */
     public FileDatePair(File f, DataDate d)
     {
         file = f;

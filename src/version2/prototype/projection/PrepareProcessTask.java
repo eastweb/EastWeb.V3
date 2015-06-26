@@ -1,24 +1,20 @@
 package version2.prototype.projection;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import version2.prototype.DataDate;
 import version2.prototype.Projection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.util.GeneralListener;
 
 /* Overridden by each plugin's prepareProcessTask class
  * name convention:  Plugin_namePrepareProcessTask.class
  */
 public abstract class PrepareProcessTask {
-    private ProjectInfoFile project;
-    private final DataDate date;
-    private final ProjectInfoPlugin plugin;
+    protected ProjectInfoFile project;
+    protected final DataDate date;
+    protected final ProjectInfoPlugin plugin;
 
-    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
+    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate) {
         project = mProject;
         date = mDate;
         plugin = mPlugin;
@@ -45,7 +41,7 @@ public abstract class PrepareProcessTask {
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {
-        return project.GetMasterShapeFile() ;
+        return project.GetMasterShapeFile();
     }
 
     /* post-condition:

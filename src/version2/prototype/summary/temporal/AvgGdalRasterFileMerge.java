@@ -13,8 +13,17 @@ import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.GdalUtils;
 
+/**
+ * Concrete MergeStrategy. Represents a merging based on averages of values in raster files.
+ *
+ * @author michael.devos
+ *
+ */
 public class AvgGdalRasterFileMerge implements MergeStrategy {
 
+    /* (non-Javadoc)
+     * @see version2.prototype.summary.temporal.MergeStrategy#Merge(java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.io.File[])
+     */
     @Override
     public DataFileMetaData Merge(String workingDir, String projectName, String pluginName, GregorianCalendar firstDate, File[] rasterFiles)
             throws Exception {

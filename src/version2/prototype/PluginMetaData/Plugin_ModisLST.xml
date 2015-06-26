@@ -9,26 +9,32 @@
 		</HTTP>
 	</Download>
 	<Process>
-		<Mozaic processStep="1">
-		
-		</Mozaic>
-		<Reproject processStep="2">
-			
-		</Reproject>
-		<Filter processStep="3">
-			
-		</Filter>
-		<Mask processStep="4">
-			
-		</Mask>
+		<Process processStep="1">
+			<ClassName>Mozaic</ClassName>
+		</Process>
+		<Process processStep="2">
+			<ClassName>Mozaic</ClassName>
+		</Process>
+		<Process processStep="3">
+			<ClassName>Reproject</ClassName>
+		</Process>
+		<Process processStep="4">
+			<ClassName>Reproject</ClassName>
+		</Process>
+		<Process processStep="5">
+			<ClassName>ModisLSTFilter</ClassName>
+		</Process>
+		<Process processStep="6">
+			<ClassName>Mask</ClassName>
+		</Process>
 	</Process>
 	<Indices>
-		
+		<ClassName></ClassName>
 	</Indices>
 	<Summary>
-	
+		<ClassName></ClassName>
 	</Summary>
 	<QualityControl>
-	
+		<ClassName></ClassName>
 	</QualityControl>
 </PluginMetadata>

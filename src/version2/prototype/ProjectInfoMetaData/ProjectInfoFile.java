@@ -1,6 +1,8 @@
 package version2.prototype.ProjectInfoMetaData;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,18 +13,29 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Projection;
+import version2.prototype.Projection.Datum;
+import version2.prototype.Projection.ProjectionType;
+import version2.prototype.Projection.ResamplingType;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.ZonalSummary;
 
+/**
+ * Represents data parsed from a project info xml file. Does not update itself with changes in the xml or update the xml with its changes.
+ *
+ * @author michael.devos
+ *
+ */
 public class ProjectInfoFile {
     private DocumentBuilderFactory domFactory;
     private DocumentBuilder builder;
     private Document doc;
     public String xmlLocation;
 
-    // Project info data
     public boolean error;
     public ArrayList<String> errorMsg;
-    private final String rootElement = "ProjectInfo";
+    //    private final String rootElement = "ProjectInfo";
     private final ArrayList<ProjectInfoPlugin> plugins;
     private final Date startDate;
     private final String projectName;
@@ -30,20 +43,30 @@ public class ProjectInfoFile {
     private final String maskingFile;
     private final String masterShapeFile;
     private final String timeZone;
+    private final boolean clipping;
     private final ArrayList<String> modisTiles;
-    private final String coordinateSystem;
-    private final String reSampling;
-    private final String datums;
-    private final String pixelSize;
-    private final String stdParallel1;
-    private final String stdParallel2;
-    private final String centralMeridian;
-    private final String falseEasting;
-    private final String latitudeOfOrigin;
-    private final String falseNothing;
-    private final ArrayList<ZonalSummary> zonalSummaries;
+    private final Projection projection;
+    private final ArrayList<ProjectInfoSummary> summaries;
+    private final int totModisTiles;
 
-    public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException
+    /**
+     * Creates a ProjectInfoFile object from parsing the given xml file. Doesn't allow its data to be changed and doesn't dynamically update its
+     * data if the file changes.
+     *
+     * @param xmlLocation  - file path of xml to parse
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws ClassNotFoundException
+     */
+    public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException,
+    NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         error = false;
         errorMsg = new ArrayList<String>();
@@ -62,39 +85,101 @@ public class ProjectInfoFile {
         maskingFile = ReadMaskingFile();
         masterShapeFile = ReadMasterShapeFile();
         timeZone = ReadTimeZone();
+        clipping = ReadClipping();
+        totModisTiles = ReadTotalModisTiles();
         modisTiles = ReadModisTiles();
-        coordinateSystem = ReadCoordinateSystem();
-        reSampling = ReadReSampling();
-        datums = ReadDatums();
-        pixelSize = ReadPixelSize();
-        stdParallel1 = ReadStandardParallel1();
-        stdParallel2 = ReadStandardParallel2();
-        centralMeridian = ReadCentralMeridian();
-        falseEasting = ReadFalseEasting();
-        latitudeOfOrigin = ReadLatitudeOfOrigin();
-        falseNothing = ReadFalseNothing();
-        zonalSummaries = ReadSummaries();
+        projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
+                ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
+                ReadLatitudeOfOrigin());
+        summaries = ReadSummaries();
     }
 
+    /**
+     * Gets an ArrayList of ProjectInfoPlugins gotten from the once parsed xml file.
+     *
+     * @return list of ProjectInfoPlugin objects that could be created from the xml's data.
+     */
     public ArrayList<ProjectInfoPlugin> GetPlugins() { return plugins; }
+
+    /**
+     * Gets the start date gotten from the once parsed xml file.
+     *
+     * @return Date object representing the start date that could be created from the xml's data.
+     */
     public Date GetStartDate() { return startDate; }
+
+    /**
+     * Gets the project name gotten from the once parsed xml file.
+     *
+     * @return project name gotten from the xml's data.
+     */
     public String GetProjectName() { return projectName; }
+
+    /**
+     * Gets the working directory gotten from the once parsed xml file.
+     *
+     * @return working directory string gotten from the xml's data.
+     */
     public String GetWorkingDir() { return workingDir; }
+
+    /**
+     * Gets the path to masking file gotten from the once parsed xml file.
+     *
+     * @return masking file path string gotten from the xml's data.
+     */
     public String GetMaskingFile() { return maskingFile; }
+
+    /**
+     * Gets the master shape file gotten from the once parsed xml file. This shape file is not meant to be used in zonal summary calculations.
+     *
+     * @return master shape file path string gotten from the xml's data.
+     */
     public String GetMasterShapeFile() { return masterShapeFile; }
+
+    /**
+     * Gets the time zone gotten from the once parsed xml file.
+     *
+     * @return time zone string gotten from the xml's data.
+     */
     public String GetTimeZone() { return timeZone; }
+
+    /**
+     * Gets the clipping gotten from the once parsed xml file.
+     *
+     * @return get clipping value gotten from the xml's data.
+     */
+    public boolean GetClipping() { return clipping; }
+
+    /**
+<<<<<<< HEAD
+     * Gets the total number of modies tiles expected per input data downloaded.
+     *
+     * @return number of modies tiles associated with a single downloaded data unit.
+     */
+    public int GetTotModisTiles() { return totModisTiles; }
+
+    /**
+=======
+>>>>>>> refs/heads/Threading
+     * Gets the modis tiles gotten from the once parsed xml file.
+     *
+     * @return modis tile names gotten from the xml's data.
+     */
     public ArrayList<String> GetModisTiles() { return modisTiles; }
-    public String GetCoordinateSystem() { return coordinateSystem; }
-    public String GetReSampling() { return reSampling; }
-    public String GetDatums() { return datums; }
-    public String GetPixelSize() { return pixelSize; }
-    public String GetStandardParallel1() { return stdParallel1; }
-    public String GetStandardParallel2() { return stdParallel2; }
-    public String GetCentralMeridian() { return centralMeridian; }
-    public String GetFalseEasting() { return falseEasting; }
-    public String GetLatitudeOfOrigin() { return latitudeOfOrigin; }
-    public String GetFalseNothing() { return falseNothing; }
-    public ArrayList<ZonalSummary> GetZonalSummaries() { return zonalSummaries; }
+
+    /**
+     * Gets the list of summaries gotten from the once parsed xml file.
+     *
+     * @return list of ProjectInfoSummary objects created from the xml's data.
+     */
+    public ArrayList<ProjectInfoSummary> GetSummaries() { return summaries; }
+
+    /**
+     * Gets the projection information gotten from the once parsed xml file.
+     *
+     * @return Projection object created from the xml's data.
+     */
+    public Projection GetProjection() { return projection; }
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
@@ -202,6 +287,26 @@ public class ProjectInfoFile {
         return null;
     }
 
+    private boolean ReadClipping()
+    {
+        NodeList nodes = GetUpperLevelNodeList("Clipping", "Missing clipping.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing clipping.");
+        if(values.size() > 0) {
+            return Boolean.valueOf(values.get(0));
+        }
+        return false;
+    }
+
+    private int ReadTotalModisTiles()
+    {
+        NodeList nodes = GetUpperLevelNodeList("TotalModisTiles", "Missing total number of modis tiles per input data.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing total number of modis tiles per input data.");
+        if(values.size() > 0) {
+            return Integer.parseInt(values.get(0));
+        }
+        return 0;
+    }
+
     private ArrayList<String> ReadModisTiles()
     {
         NodeList nodes = GetUpperLevelNodeList("Modis", "Missing modis tiles.", "ModisTiles");
@@ -212,141 +317,213 @@ public class ProjectInfoFile {
         return null;
     }
 
-    private String ReadCoordinateSystem()
+    private ProjectionType ReadProjectionType()
     {
         NodeList nodes = GetUpperLevelNodeList("CoordinateSystem", "Missing coordinate system.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing coordinate system.");
         if(values.size() > 0) {
-            return values.get(0);
+            ProjectionType pType = null;
+            switch(values.get(0))
+            {
+            case "ALBERS_EQUAL_AREA":
+                pType = ProjectionType.ALBERS_EQUAL_AREA;
+                break;
+            case "LAMBERT_CONFORMAL_CONIC":
+                pType = ProjectionType.LAMBERT_CONFORMAL_CONIC;
+                break;
+            case "TRANSVERSE_MERCATOR":
+                pType = ProjectionType.TRANSVERSE_MERCATOR;
+                break;
+            }
+            return pType;
         }
         return null;
     }
 
-    private String ReadReSampling()
+    private ResamplingType ReadResamplingType()
     {
         NodeList nodes = GetUpperLevelNodeList("ReSampling", "Missing resampling.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing resampling.");
         if(values.size() > 0) {
-            return values.get(0);
+            ResamplingType rType = null;
+            switch(values.get(0))
+            {
+            case "NEAREST_NEIGHBOR":
+                rType = ResamplingType.NEAREST_NEIGHBOR;
+                break;
+            case "BILINEAR":
+                rType = ResamplingType.BILINEAR;
+                break;
+            case "CUBIC_CONVOLUTION":
+                rType = ResamplingType.CUBIC_CONVOLUTION;
+                break;
+            }
+            return rType;
         }
         return null;
     }
 
-    private String ReadDatums()
+    private Datum ReadDatum()
     {
         NodeList nodes = GetUpperLevelNodeList("Datum", "Missing datums.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing datums.");
         if(values.size() > 0) {
-            return values.get(0);
+            Datum d = null;
+            switch(values.get(0))
+            {
+            case "NAD27":
+                d = Datum.NAD27;
+                break;
+            case "NAD83":
+                d = Datum.NAD83;
+                break;
+            case "WGS66":
+                d = Datum.WGS66;
+                break;
+            case "WGS72":
+                d = Datum.WGS72;
+                break;
+            case "WGS84":
+                d = Datum.WGS84;
+                break;
+            }
+            return d;
         }
         return null;
     }
 
-    private String ReadPixelSize()
+    private int ReadPixelSize()
     {
         NodeList nodes = GetUpperLevelNodeList("PixelSize", "Missing PixelSize.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing PixelSize.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Integer.parseInt(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private String ReadStandardParallel1()
+    private double ReadStandardParallel1()
     {
         NodeList nodes = GetUpperLevelNodeList("StandardParallel1", "Missing standard parallel 1.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 1.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Double.parseDouble(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private String ReadStandardParallel2()
+    private double ReadStandardParallel2()
     {
         NodeList nodes = GetUpperLevelNodeList("StandardParallel2", "Missing standard parallel 2.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 2.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Double.parseDouble(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private String ReadCentralMeridian()
+    private double ReadScalingFactor() {
+        NodeList nodes = GetUpperLevelNodeList("ScalingFactor", "Missing scaling factor.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing scaling factor.");
+        if(values.size() > 0) {
+            return Double.parseDouble(values.get(0));
+        }
+        return 0;
+    }
+
+    private double ReadCentralMeridian()
     {
         NodeList nodes = GetUpperLevelNodeList("CentralMeridian", "Missing central meridian.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing central meridian.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Double.parseDouble(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private String ReadFalseEasting()
+    private double ReadFalseEasting()
     {
         NodeList nodes = GetUpperLevelNodeList("FalseEasting", "Missing false easting.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing false easting.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Double.parseDouble(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private String ReadLatitudeOfOrigin()
+    private double ReadLatitudeOfOrigin()
     {
         NodeList nodes = GetUpperLevelNodeList("LatitudeOfOrigin", "Missing latitude of origin.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing latitude of origin.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Double.parseDouble(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private String ReadFalseNothing()
+    private double ReadFalseNorthing()
     {
-        NodeList nodes = GetUpperLevelNodeList("FalseNothing", "Missing false nothing.");
+        NodeList nodes = GetUpperLevelNodeList("FalseNorthing", "Missing false nothing.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing false nothing.");
         if(values.size() > 0) {
-            return values.get(0);
+            return Double.parseDouble(values.get(0));
         }
-        return null;
+        return 0;
     }
 
-    private ArrayList<ZonalSummary> ReadSummaries()
+    private ArrayList<ProjectInfoSummary> ReadSummaries() throws ClassNotFoundException, NoSuchMethodException, SecurityException,
+    InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
-        ArrayList<ZonalSummary> summaries = new ArrayList<ZonalSummary>();
-        String shapeFile;
-        String field;
+        ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
 
         NodeList summaryList = GetUpperLevelNodeList("Summary", "Missing zonal summaries.", "Summaries");
-        if(summaryList != null)
-        {
-            ArrayList<String> values;
-            Element summary;
+        ArrayList<String> summaryStrings = GetNodeListValues(summaryList, "Missing zonal summaries.");
+        if(summaryStrings.size() > 0) {
+            String shapefile;
+            String field;
+            String temporalSummaryCompositionStrategyClassName;
+            TemporalSummaryRasterFileStore fileStore;
+            Class<?> strategyClass;
+            Constructor<?> ctorStrategy;
 
-            for(int i=0; i < summaryList.getLength(); i++)
+            for(String summary : summaryStrings)
             {
-                summary = (Element)summaryList.item(i);
-                values = GetNodeListValues(summary.getElementsByTagName("ShapeFile"), "Missing summary shape file.");
-                if(values.size() > 0) {
-                    shapeFile = values.get(0);
-                } else {
-                    shapeFile = null;
+                // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy
+                // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; COUNTYNS10
+                shapefile = summary.substring(summary.indexOf("Shape File Path: ") + "Shape File Path: ".length(), summary.indexOf(";"));
+                if(summary.indexOf("Temporal Summary") == -1)
+                {
+                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length());
+                    temporalSummaryCompositionStrategyClassName = null;
+                    fileStore = null;
                 }
-
-                values = GetNodeListValues(summary.getElementsByTagName("Field"), "Missing summary field.");
-                if(values.size() > 0) {
-                    field = values.get(0);
-                } else {
-                    field = null;
+                else
+                {
+                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length(), summary.indexOf("Field: ")
+                            + summary.indexOf(";"));
+                    temporalSummaryCompositionStrategyClassName = summary.substring(summary.lastIndexOf("; " + 2));
+                    strategyClass = Class.forName(temporalSummaryCompositionStrategyClassName);
+                    ctorStrategy = strategyClass.getConstructor();
+                    fileStore = new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance());
                 }
-
-                summaries.add(new ZonalSummary(shapeFile, field));
+                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, field), fileStore));
             }
+            return summaries;
         }
-        return summaries;
+        return null;
+
     }
 
+    /**
+     * Used to get the NodeList object pertaining to an element containing the list of elements desired. Used even if desired element does not
+     * contain a list of elements but only the value desired. Send the returned NodeList object into {@link #GetNodeListValues(NodeList, String)
+     * GetNodeListValues(NodeList, String)} to get its value(s).
+     *
+     * @param element
+     * @param errorMsg
+     * @param parents
+     * @return
+     */
     private NodeList GetUpperLevelNodeList(String element, String errorMsg, String...parents)
     {
         NodeList nodes = null;
@@ -376,6 +553,14 @@ public class ProjectInfoFile {
         return nodes;
     }
 
+    /**
+     * Used to get the values of the NodeList that's passed in. Used for both single value and multiple value cases where there is no lower
+     * hierarchy of elements (i.e. the passed in NodeList must be the lowest elements in the list).
+     *
+     * @param nList
+     * @param errorMsg
+     * @return
+     */
     private ArrayList<String> GetNodeListValues(NodeList nList, String errorMsg)
     {
         ArrayList<String> values = new ArrayList<String>();

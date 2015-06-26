@@ -372,7 +372,7 @@ public class MainWindow {
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
                     SchedulerData data = new SchedulerData(project);
-                    Scheduler current = new Scheduler(data);
+                    Scheduler current = new Scheduler(data, null);
                     Thread t = new Thread(current);
                     t.start();
 
@@ -514,7 +514,7 @@ public class MainWindow {
             if (isPushed) {
                 for(Scheduler item : ListOfProjectSchedule)
                 {
-                    String currentProjectName = item.data.projectInfoFile.projectName.toString();
+                    String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
                     String projectName = label.toString();
 
                     if(currentProjectName.equals(projectName)) {
@@ -544,9 +544,11 @@ public class MainWindow {
      */
     class PlayButtonRenderer extends JButton implements TableCellRenderer {
         private static final long serialVersionUID = 1L;
+        private boolean isPlay;
 
         public PlayButtonRenderer() {
             setOpaque(true);
+            isPlay = true;
         }
 
         @Override
@@ -559,7 +561,13 @@ public class MainWindow {
                 setForeground(table.getForeground());
                 setBackground(UIManager.getColor("Button.background"));
             }
-            setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+            isPlay = !isPlay;
+
+            if(isPlay){
+                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+            }else{
+                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            }
             return this;
         }
     }
@@ -574,9 +582,11 @@ public class MainWindow {
         protected JButton button;
         private String label;
         private boolean isPushed;
+        private boolean isPlay;
 
         public PlayButtonEditor(JCheckBox checkBox) {
             super(checkBox);
+            isPlay = true;
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(new ActionListener() {
@@ -598,7 +608,13 @@ public class MainWindow {
                 button.setBackground(table.getBackground());
             }
             label = (value == null) ? "" : value.toString();
-            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+            isPlay = !isPlay;
+
+            if(isPlay){
+                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+            }else{
+                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            }
             isPushed = true;
             return button;
         }
@@ -608,11 +624,17 @@ public class MainWindow {
             if (isPushed) {
                 for(Scheduler item : ListOfProjectSchedule)
                 {
-                    String currentProjectName = item.data.projectInfoFile.projectName.toString();
+                    String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
                     String projectName = label.toString();
 
                     if(currentProjectName.equals(projectName)) {
-                        new ProjectProgress(item);
+
+                        if(isPlay) {
+                            item.Stop();
+                        } else {
+                            item.Start();
+                        }
+
                     }
                 }
             }
@@ -703,7 +725,7 @@ public class MainWindow {
                 int removeProject = -1;
                 for(Scheduler item : ListOfProjectSchedule)
                 {
-                    String currentProjectName = item.data.projectInfoFile.projectName.toString();
+                    String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
                     String projectName = label.toString();
 
                     if(currentProjectName.equals(projectName)) {

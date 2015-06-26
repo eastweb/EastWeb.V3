@@ -40,6 +40,8 @@
 		<UseTemporalSummary>false</UseTemporalSummary>
 		<Temporal>
 			<CompositionStrategyClassName>GregorianWeeklyStrategy</CompositionStrategyClassName>
+			<DaysPerInputData>1</DaysPerInputData>
+			<DaysPerOutputData>7</DaysPerOutputData>
 		</Temporal>
 	</Summary>
 	<QualityControl>

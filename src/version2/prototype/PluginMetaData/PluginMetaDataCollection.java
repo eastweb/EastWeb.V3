@@ -50,7 +50,7 @@ public class PluginMetaDataCollection {
             PluginMetaData temp=new PluginMetaData();
             temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
             temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
-            temp.Projection = new ProcessMetaData(doc.getElementsByTagName("Process"));
+            temp.Projection = new ProcessorMetaData(doc.getElementsByTagName("Processor"));
 
             temp.IndicesMetaData = new ArrayList<String>();
             NodeList tempIndices = doc.getElementsByTagName("Indices");
@@ -99,7 +99,7 @@ public class PluginMetaDataCollection {
     public class PluginMetaData {
 
         public DownloadMetaData Download;
-        public ProcessMetaData Projection;
+        public ProcessorMetaData Projection;
         public SummaryMetaData Summary;
         public ArrayList<String> IndicesMetaData;
         public ArrayList<String> QualityControlMetaData;
@@ -157,7 +157,7 @@ public class PluginMetaDataCollection {
         }
     }
 
-    public class ProcessMetaData {
+    public class ProcessorMetaData {
 
         private NodeList nList;
 
@@ -173,7 +173,7 @@ public class PluginMetaDataCollection {
 
         public Map<Integer, String> processStep;
 
-        public ProcessMetaData(NodeList n){
+        public ProcessorMetaData(NodeList n){
             nList = n;
             processStep = new HashMap<Integer, String>();
             Node processNode = nList.item(0);
@@ -207,24 +207,19 @@ public class PluginMetaDataCollection {
     }
 
     public class SummaryMetaData{
-        public Boolean IsTemporalSummary;
-        public String CompositionStrategyClassName;
+        public int daysPerInputData;
         private NodeList nList;
 
         public SummaryMetaData(NodeList n){
             nList = n;
-            Node projectionNode = nList.item(0);
 
             try{
-                // Node: IsTemporalSummary
-                IsTemporalSummary = Boolean.valueOf(((Element) projectionNode).getElementsByTagName("UseTemporalSummary").item(0).getTextContent());
-
-                // Node: CompositionStrategyClassName
+                // Node: DaysPerInputData
                 NodeList temporal = ((Element) nList).getElementsByTagName("Temporal");
-                Node NodeCompositionStrategyClassName = ((Element) temporal).getElementsByTagName("CompositionStrategyClassName").item(0);
+                Node NodeCompositionStrategyClassName = ((Element) temporal).getElementsByTagName("DaysPerInputData").item(0);
                 NodeList tempList = NodeCompositionStrategyClassName.getChildNodes();
                 Node valueNode = tempList.item(0);
-                CompositionStrategyClassName = valueNode.getNodeValue().trim();
+                daysPerInputData = Integer.parseInt(valueNode.getNodeValue().trim());
             }catch(Exception e){
 
             }

@@ -2,6 +2,7 @@ package version2.prototype.ProjectInfoMetaData;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,8 @@ public class ProjectInfoCollection {
     }
 
     public ArrayList<ProjectInfoFile> ReadInAllProjectInfoFiles() throws IOException, ParserConfigurationException,
-    SAXException, ParseException
+    SAXException, ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+    IllegalArgumentException, InvocationTargetException
     {
         File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
         File[] fl = getXMLFiles(fileDir);
@@ -54,13 +56,15 @@ public class ProjectInfoCollection {
         }
     }
 
-    public ProjectInfoFile GetProject(String projectName) throws IOException, ParserConfigurationException, SAXException, ParseException{
+    public ProjectInfoFile GetProject(String projectName) throws IOException, ParserConfigurationException, SAXException, ParseException,
+    ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+    InvocationTargetException{
         for(ProjectInfoFile file : ReadInAllProjectInfoFiles()){
-            if(file.projectName != null && file.projectName.equalsIgnoreCase(projectName)) {
+            if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase(projectName)) {
                 return file;
             }
             else{
-                System.out.println(file.projectName);
+                System.out.println(file.GetProjectName());
                 System.out.println(projectName);
             }
         }
