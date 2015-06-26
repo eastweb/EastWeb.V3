@@ -7,6 +7,7 @@ package version2.prototype.util;
  *
  */
 public class DataFileMetaData {
+    public final int rowID;
     public final String dataFilePath;
     public final String qcFilePath;
     public final String dateDirectoryPath;
@@ -17,6 +18,7 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object initialized with the given metadata.
      *
+     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
      * @param qcFilePath  - full path to the QC file associated to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")
@@ -24,8 +26,9 @@ public class DataFileMetaData {
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public DataFileMetaData(String dataFilePath, String qcFilePath, String dateDirectoryPath, int dataGroupID, int year, int day)
+    public DataFileMetaData(int rowID, String dataFilePath, String qcFilePath, String dateDirectoryPath, int dataGroupID, int year, int day)
     {
+        this.rowID = rowID;
         this.dataFilePath = dataFilePath;
         this.qcFilePath = qcFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
@@ -37,14 +40,16 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object, defaults the QC file path to null and others to that given.
      *
+     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")
      * @param dataGroupID  - unique ID associated with the combination of the year and day
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public DataFileMetaData(String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day)
+    public DataFileMetaData(int rowID, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day)
     {
+        this.rowID = rowID;
         this.dataFilePath = dataFilePath;
         qcFilePath = null;
         this.dateDirectoryPath = dateDirectoryPath;

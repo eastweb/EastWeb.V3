@@ -13,8 +13,8 @@ import version2.prototype.ConfigReadException;
  */
 public class Schema {
     /**
-     * Recreates or creates a schema full schema identified by the given project name and plugin name. Creates all database cache tables required by frameworks and
-     * download classes.
+     * Recreates or creates a full schema identified by the given project name and plugin name.
+     * Creates all database cache tables required by frameworks and download classes.
      *
      * @param projectName  - name of project to create schema for
      * @param pluginName  - name of plugin to create schema for
@@ -22,7 +22,7 @@ public class Schema {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static void RecreateSchema(String projectName, String pluginName) throws ConfigReadException, SQLException, ClassNotFoundException
+    public static void CreateProjectPluginSchema(String projectName, String pluginName) throws ConfigReadException, SQLException, ClassNotFoundException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final String mSchemaName = getSchemaName(projectName, pluginName);
@@ -126,7 +126,8 @@ public class Schema {
                 "CREATE TABLE \"%1$s\".\"DownloadCache\"\n" +
                         "(\n" +
                         "  \"DownloadCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"FullPath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
                         "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
                         "  \"Retrieved\" boolean DEFAULT FALSE\n" +
@@ -137,11 +138,12 @@ public class Schema {
         conn.prepareStatement(query).executeUpdate();
 
         query = String.format(
-                "CREATE TABLE \"%1$s\".\"ProcessCache\"\n" +
+                "CREATE TABLE \"%1$s\".\"ProcessorCache\"\n" +
                         "(\n" +
-                        "  \"ProcessCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"FullPath\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
+                        "  \"ProcessorCacheID\" serial PRIMARY KEY,\n" +
+                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
+                        "  \"DateDirectoryPath\" varchar(255) NOT NULL,\n" +
                         "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
                         "  \"Retrieved\" boolean DEFAULT FALSE\n" +
                         "  \"Processed\" boolean DEFAULT FALSE\n" +
@@ -154,7 +156,8 @@ public class Schema {
                 "CREATE TABLE \"%1$s\".\"IndicesCache\"\n" +
                         "(\n" +
                         "  \"IndicesCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"FullPath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
                         "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
                         "  \"Retrieved\" boolean DEFAULT FALSE\n" +
@@ -168,7 +171,8 @@ public class Schema {
                 "CREATE TABLE \"%1$s\".\"SummaryCache\"\n" +
                         "(\n" +
                         "  \"SummaryCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"FullPath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
                         "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
                         "  \"Retrieved\" boolean DEFAULT FALSE\n" +
@@ -177,6 +181,15 @@ public class Schema {
                         mSchemaName
                 );
         conn.prepareStatement(query).executeUpdate();
+    }
+
+    /**
+     * Creates, or recreates, a schema to be used by a GlobalDownloader object.
+     *
+     * @param pluginName  - name of plugin to the GlobalDownloader is getting data for
+     */
+    public static void CreateSchemaForGlobalDownloader(String pluginName) {
+        // TODO: Unfinished method.
     }
 
     /**

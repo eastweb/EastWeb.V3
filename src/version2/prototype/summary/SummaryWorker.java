@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
+import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -16,18 +17,19 @@ import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 
-public class SummaryWorker extends ProcessWorker<Void> {
+public class SummaryWorker extends ProcessWorker {
     private ProjectInfoFile projectInfoFile;
     private ProjectInfoPlugin pluginInfo;
     private PluginMetaData pluginMetaData;
     private ArrayList<DataFileMetaData> cachedFiles;
 
-    protected SummaryWorker(Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
+    protected SummaryWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
-        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
+        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         this.projectInfoFile = projectInfoFile;
         this.pluginInfo = pluginInfo;
         this.pluginMetaData = pluginMetaData;
@@ -39,7 +41,7 @@ public class SummaryWorker extends ProcessWorker<Void> {
      */
     @Override
     // TODO: Need to fix this to run on a specified plugin. Fix after adding database cache information.
-    public Void call() throws Exception {
+    public ProcessWorkerReturn call() throws Exception {
         ArrayList<DataFileMetaData> tempFiles = new ArrayList<DataFileMetaData>(0);
 
         for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())

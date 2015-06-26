@@ -14,11 +14,11 @@ public class SchedulerState extends Observable{
     private ThreadState state;
 
     /**
-     * Create a SchedulerState object defaulted to ThreadState.STOPPED.
+     * Create a SchedulerState object defaulted to ThreadState.RUNNING.
      */
     public SchedulerState()
     {
-        state = ThreadState.STOPPED;
+        state = ThreadState.RUNNING;
     }
 
     /**
@@ -33,7 +33,7 @@ public class SchedulerState extends Observable{
             this.state = state;
         }
         setChanged();
-        notifyObservers(state);
+        notifyObservers(state);     // Automatically calls clearChanged
     }
 
     /**

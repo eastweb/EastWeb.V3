@@ -1,9 +1,11 @@
 package version2.prototype.summary;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.Observable;
 
+import version2.prototype.ConfigReadException;
+import version2.prototype.EASTWebManager;
 import version2.prototype.Process;
 import version2.prototype.ThreadState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -21,12 +23,11 @@ import version2.prototype.util.GeneralUIEventObject;
  * @author michael.devos
  *
  */
-public class Summary extends Process<Void> {
-    private ArrayList<Future<Void>> futures;
+public class Summary extends Process {
 
     /**
-     * Creates a Summary object with the defined initial ThreadState, owned by the given Scheduler, and acquiring its input from the specified process,
-     * inputProcessName.
+     * Creates a Summary object with the defined initial ThreadState, owned by the given Scheduler, and acquiring its input from the specified
+     * process, inputProcessName.
      *
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
@@ -36,29 +37,47 @@ public class Summary extends Process<Void> {
      * @param inputProcessName  - name of process to use the output of for its input
      * @param executor  - executor service to use to spawn worker threads
      */
-    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, ThreadState state, ProcessName inputTableName, ExecutorService executor)
+    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            ThreadState state)
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, ProcessName.SUMMARY, inputTableName, executor);
-        futures = new ArrayList<Future<Void>>(0);
+        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, ProcessName.SUMMARY, null);
     }
 
     @Override
-    public Void call() throws Exception {
-        ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles = DatabaseCache.GetAvailableFiles(projectInfoFile.GetProjectName(), pluginInfo.GetName(), inputProcessName);
+    public void start() {
 
-        if(cachedFiles.size() > 0)
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        super.update(o, arg);
+        if(arg instanceof DatabaseCache)
         {
-            if(mState == ThreadState.RUNNING)
-            {
-                futures.add(executor.submit(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles)));
+            ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
+            DatabaseCache inputCache = (DatabaseCache) arg;
+            try {
+                cachedFiles = inputCache.GetUnprocessedCacheFiles();
+
+                if(cachedFiles.size() > 0)
+                {
+                    if(mState == ThreadState.RUNNING)
+                    {
+                        EASTWebManager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData,
+                                cachedFiles, outputCache));
+                    }
+                }
+
+                // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
+                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
+            }
+            catch (ConfigReadException | ClassNotFoundException | SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
-
-        // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
-        scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100));
-        return null;
     }
 
 }

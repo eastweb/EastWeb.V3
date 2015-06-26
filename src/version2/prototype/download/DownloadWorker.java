@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
+import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 
 
 /**
@@ -16,7 +18,7 @@ import version2.prototype.util.DataFileMetaData;
  * @author michael.devos
  *
  */
-public class DownloadWorker extends ProcessWorker<Void> {
+public class DownloadWorker extends ProcessWorker {
     /**
      * An implementation of ProcessWorker that handles the "caching" of a list of raster files after being handled by the global downloaders. Does not download
      * files from the server. Only sets up a listing of files that have been downloaded and are available to be processed by the other frameworks for the running
@@ -28,10 +30,10 @@ public class DownloadWorker extends ProcessWorker<Void> {
      * @param pluginMetaData  - information relevant to this ProcessWorker about the plugin being used gotten from the plugin's info xml.
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      */
-    public DownloadWorker(Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
+    public DownloadWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
-        super("DownloadWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
+        super("DownloadWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         // TODO Auto-generated constructor stub
     }
 
@@ -39,7 +41,7 @@ public class DownloadWorker extends ProcessWorker<Void> {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public Void call() throws Exception {
+    public ProcessWorkerReturn call() throws Exception {
         // TODO Auto-generated method stub
         return null;
     }

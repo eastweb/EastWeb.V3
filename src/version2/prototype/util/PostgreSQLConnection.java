@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import version2.prototype.Config;
+import version2.prototype.ConfigReadException;
 
 
 /**
@@ -20,8 +21,9 @@ public class PostgreSQLConnection {
      * @return valid Connection object if successfully connected, otherwise null
      * @throws ClassNotFoundException
      * @throws SQLException
+     * @throws ConfigReadException
      */
-    public static Connection getConnection() throws ClassNotFoundException, SQLException {
+    public static Connection getConnection() throws ClassNotFoundException, SQLException, ConfigReadException {
         // Driver Connection Check
         try {
             Class.forName("org.postgresql.Driver");

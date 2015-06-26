@@ -24,10 +24,7 @@
 	<ScalingFactor>00.00</ScalingFactor>
 	<CentalMeridian>121</CentalMeridian>
 	<FalseEasting>151</FalseEasting>
-<<<<<<< HEAD
-=======
 	<FalseNorthing>33</FalseNorthing>
->>>>>>> refs/heads/Threading
 	<LatitudeOfOrigin>111</LatitudeOfOrigin>
 	<Summaries>
         <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
