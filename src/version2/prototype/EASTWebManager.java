@@ -510,6 +510,30 @@ public class EASTWebManager implements Runnable{
         return output;
     }
 
+    /**
+     * Gets the SchedulerStatus currently known for a Scheduler with the given unique ID, if it exists. If not, then returns null.
+     *
+     * @param schedulerID  - unique ID of the target Scheduler instance
+     * @return the currently known SchedulerStatus for the target Scheduler if found, otherwise null returned.
+     */
+    public static SchedulerStatus GetSchedulerStatus(int schedulerID)
+    {
+        SchedulerStatus status = null;
+
+        synchronized (schedulerStatuses)
+        {
+            for(SchedulerStatus aStatus : schedulerStatuses)
+            {
+                if(aStatus.schedulerID == schedulerID) {
+                    status = aStatus;
+                    break;
+                }
+            }
+        }
+
+        return status;
+    }
+
     private void handleNewSchedulerRequests(SchedulerData data)
     {
         synchronized (schedulers)
