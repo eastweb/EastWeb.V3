@@ -27,22 +27,22 @@ public class GenericFrameworkProcess<WorkerType extends ProcessWorker> extends P
     private Class<?> processWorkerClass;
 
     /**
-     * Creates a GenericFrameworkProcess object with the defined initial ThreadState, owned by the given Scheduler, labeled by the given processName,
+     * Creates a GenericFrameworkProcess object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName,
      * and acquiring its input from the specified process (inputProcessName).
      *
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param state  - ThreadState to initialize this object to
+     * @param state  - TaskState to initialize this object to
      * @param processName  - name of this threaded process
      * @param inputProcessName  - name of process to use the output of for its input
      * @param executor  - executor service to use to spawn worker threads
      */
     public GenericFrameworkProcess(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            ThreadState state, ProcessName processName, DatabaseCache outputCache)
+            ProcessName processName, DatabaseCache outputCache)
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, processName, outputCache);
+        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, processName, outputCache);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class GenericFrameworkProcess<WorkerType extends ProcessWorker> extends P
 
                 if(cachedFiles.size() > 0)
                 {
-                    if(mState == ThreadState.RUNNING)
+                    if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
                     {
                         Constructor<?> cstr = processWorkerClass.getConstructor(Process.class, ProjectInfoFile.class, ProjectInfoPlugin.class,
                                 PluginMetaData.class, ArrayList.class);

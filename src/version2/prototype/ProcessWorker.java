@@ -1,8 +1,6 @@
 package version2.prototype;
 
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.Callable;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -18,10 +16,9 @@ import version2.prototype.util.DatabaseCache;
  *
  * @param <V>  - return type of the Callable
  */
-public abstract class ProcessWorker implements Callable<ProcessWorkerReturn>, Observer {
+public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
     public String processWorkerName;
     protected Process process;
-    protected ThreadState mState;
     protected ProjectInfoFile projectInfoFile;
     protected ProjectInfoPlugin pluginInfo;
     protected PluginMetaData pluginMetaData;
@@ -48,25 +45,5 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn>, Ob
         this.pluginMetaData = pluginMetaData;
         this.cachedFiles = cachedFiles;
         this.outputCache = outputCache;
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    @Override
-    public void update(Observable o, Object arg) {
-        if(arg instanceof ThreadState)
-        {
-            ThreadState state = (ThreadState) arg;
-            switch(state)
-            {
-            case RUNNING:
-                mState = ThreadState.RUNNING;
-                break;
-            case STOPPED:
-                mState = ThreadState.STOPPED;
-                break;
-            }
-        }
     }
 }

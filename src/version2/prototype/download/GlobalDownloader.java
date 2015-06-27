@@ -1,6 +1,6 @@
 package version2.prototype.download;
 
-import version2.prototype.ThreadState;
+import version2.prototype.TaskState;
 
 
 /**
@@ -10,11 +10,11 @@ import version2.prototype.ThreadState;
  */
 public abstract class GlobalDownloader implements Runnable{
     protected GlobalDownloader instance;
-    protected ThreadState state;
+    protected TaskState state;
     protected final int ID;
     protected final String pluginName;
 
-    protected GlobalDownloader(ThreadState initialState, String pluginName, int myID)
+    protected GlobalDownloader(TaskState initialState, String pluginName, int myID)
     {
         state = initialState;
         ID = myID;

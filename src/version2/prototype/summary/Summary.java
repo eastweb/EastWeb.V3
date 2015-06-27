@@ -7,7 +7,7 @@ import java.util.Observable;
 import version2.prototype.ConfigReadException;
 import version2.prototype.EASTWebManager;
 import version2.prototype.Process;
-import version2.prototype.ThreadState;
+import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -26,21 +26,20 @@ import version2.prototype.util.GeneralUIEventObject;
 public class Summary extends Process {
 
     /**
-     * Creates a Summary object with the defined initial ThreadState, owned by the given Scheduler, and acquiring its input from the specified
+     * Creates a Summary object with the defined initial TaskState, owned by the given Scheduler, and acquiring its input from the specified
      * process, inputProcessName.
      *
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param state  - ThreadState to initialize this object to
+     * @param state  - TaskState to initialize this object to
      * @param inputProcessName  - name of process to use the output of for its input
      * @param executor  - executor service to use to spawn worker threads
      */
-    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            ThreadState state)
+    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler)
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, ProcessName.SUMMARY, null);
+        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, ProcessName.SUMMARY, null);
     }
 
     @Override
@@ -63,7 +62,7 @@ public class Summary extends Process {
 
                 if(cachedFiles.size() > 0)
                 {
-                    if(mState == ThreadState.RUNNING)
+                    if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
                     {
                         EASTWebManager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData,
                                 cachedFiles, outputCache));

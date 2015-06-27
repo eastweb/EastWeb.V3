@@ -18,7 +18,7 @@ import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.GenericFrameworkProcess;
 import version2.prototype.Process;
-import version2.prototype.ThreadState;
+import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -115,24 +115,24 @@ public class Scheduler {
     }
 
     /**
-     * Updates the Scheduler's {@link ThreadState ThreadState} to RUNNING notifying all observers of said state of the change.
+     * Updates the Scheduler's {@link TaskState TaskState} to RUNNING notifying all observers of said state of the change.
      *
      * @author michael.devos
      */
     public void Start()
     {
-        mState.ChangeState(ThreadState.RUNNING);
+        mState.ChangeState(TaskState.RUNNING);
     }
 
     /**
-     * Updates the Scheduler's {@link ThreadState ThreadState} to STOPPED notifying all observers of said state of the change.
+     * Updates the Scheduler's {@link TaskState TaskState} to STOPPED notifying all observers of said state of the change.
      *
      * @author michael.devos
      *
      */
     public void Stop()
     {
-        mState.ChangeState(ThreadState.STOPPED);
+        mState.ChangeState(TaskState.STOPPED);
     }
 
     /**
@@ -141,7 +141,7 @@ public class Scheduler {
      * @author michael.devos
      * @return scheduler's current thread state
      */
-    public ThreadState GetState()
+    public TaskState GetState()
     {
         return mState.GetState();
     }
@@ -178,8 +178,8 @@ public class Scheduler {
         {
             if(plugins.get(i).GetName().equals(e.getPluginName()))
             {
-                i = plugins.size();
                 progressList.set(i, e.getProgress());
+                i = plugins.size();
             }
         }
 
@@ -229,7 +229,7 @@ public class Scheduler {
     private Process SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache)
     {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.STOPPED,
+        Process process = new GenericFrameworkProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED,
                 ProcessName.DOWNLOAD, outputCache);
         mState.addObserver(process);
         return process;
@@ -250,7 +250,7 @@ public class Scheduler {
             DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
         Process process = new GenericFrameworkProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this,
-                ThreadState.STOPPED, ProcessName.PROCESSOR, outputCache);
+                TaskState.STOPPED, ProcessName.PROCESSOR, outputCache);
         mState.addObserver(process);
         inputCache.addObserver(process);
         return process;
@@ -270,7 +270,7 @@ public class Scheduler {
     private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.STOPPED,
+        Process process = new GenericFrameworkProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED,
                 ProcessName.INDICES, outputCache);
         mState.addObserver(process);
         inputCache.addObserver(process);
@@ -289,7 +289,7 @@ public class Scheduler {
      */
     private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
     {
-        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.STOPPED);
+        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED);
         mState.addObserver(process);
         inputCache.addObserver(process);
         return process;

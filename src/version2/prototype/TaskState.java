@@ -1,13 +1,13 @@
 package version2.prototype;
 
 /**
- * Defined states the system/threads can be in.
+ * Defined states the system tasks can be in.
  *
  * @author michael.devos
  *
  */
 
-public enum ThreadState {
+public enum TaskState {
     RUNNING,
     STOPPED
 }
