@@ -2,7 +2,7 @@ package version2.prototype.Scheduler;
 
 import java.util.Observable;
 
-import version2.prototype.ThreadState;
+import version2.prototype.TaskState;
 
 /**
  * Observable state object specific to Scheduler class. Allows those listening to updates to the state to automatically be notified of any changes to it.
@@ -11,37 +11,37 @@ import version2.prototype.ThreadState;
  *
  */
 public class SchedulerState extends Observable{
-    private ThreadState state;
+    private TaskState state;
 
     /**
-     * Create a SchedulerState object defaulted to ThreadState.STOPPED.
+     * Create a SchedulerState object defaulted to TaskState.RUNNING.
      */
     public SchedulerState()
     {
-        state = ThreadState.STOPPED;
+        state = TaskState.RUNNING;
     }
 
     /**
-     * Changes the state of the internal ThreadState object to that specified.
+     * Changes the state of the internal TaskState object to that specified.
      *
-     * @param state  - ThreadState to change internal state object to.
+     * @param state  - TaskState to change internal state object to.
      */
-    public void ChangeState(ThreadState state)
+    public void ChangeState(TaskState state)
     {
         synchronized(this)
         {
             this.state = state;
         }
         setChanged();
-        notifyObservers(state);
+        notifyObservers(state);     // Automatically calls clearChanged. Actively updates observers (the calling thread executes observer Update methods)
     }
 
     /**
-     * Gets the current value of the internal ThreadState object.
+     * Gets the current value of the internal TaskState object.
      *
-     * @return value of internal ThreadState object representing the state of a Scheduler.
+     * @return value of internal TaskState object representing the state of a Scheduler.
      */
-    public ThreadState GetState()
+    public TaskState GetState()
     {
         return state;
     }

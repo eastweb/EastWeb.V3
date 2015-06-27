@@ -5,24 +5,21 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EmptyStackException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.GenericFrameworkProcess;
 import version2.prototype.Process;
-import version2.prototype.ThreadState;
-import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesEvent;
+import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
-import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -32,81 +29,161 @@ import version2.prototype.download.DownloadWorker;
 import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.projection.PrepareProcessTask;
-import version2.prototype.projection.ProcessData;
-import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.Summary;
-import version2.prototype.summary.temporal.TemporalSummaryCalculator;
-import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.zonal.ZonalSummaryCalculator;
+import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralListener;
 import version2.prototype.util.GeneralUIEventObject;
+import version2.prototype.util.Schema;
 
-public class Scheduler implements Runnable {
+public class Scheduler {
+    public ArrayList<Integer> downloadProgresses;
+    public ArrayList<Integer> processorProgresses;
+    public ArrayList<Integer> indiciesProgresses;
+    public ArrayList<Integer> summaryProgresses;
+    public ArrayList<String> log;
 
-    public int DownloadProgress;
-    public int ProcessProgress;
-    public int IndiciesProgress;
-    public int SummaryProgress;
-    public ArrayList<String> Log;
-    public boolean isRunning;
-
-    public SchedulerData data;
-    public ProjectInfoFile projectInfoFile;
-    public PluginMetaDataCollection pluginMetaDataCollection;
+    public final SchedulerData data;
+    public final ProjectInfoFile projectInfoFile;
+    public final PluginMetaDataCollection pluginMetaDataCollection;
 
     private SchedulerState mState;
-    private ArrayList<Future<?>> futures;
-    private ExecutorService executor;
+    private ArrayList<Process> downloadProcesses;
+    private ArrayList<Process> processorProcesses;
+    private ArrayList<Process> indicesProcesses;
+    private ArrayList<Process> summaryProcesses;
 
-    public Scheduler(SchedulerData data, ExecutorService executor)
+    private final int ID;
+
+    /**
+     * Creates and sets up a Scheduler instance with the given project data. Does not start the Scheduler and Processes.
+     * To start processing call start().
+     *
+     * @param data  - SchedulerData describing the project to setup for
+     */
+    public Scheduler(SchedulerData data, int myID)
     {
-        DownloadProgress = 0;
-        ProcessProgress = 0;
-        IndiciesProgress = 0;
-        SummaryProgress = 0;
-        Log = new ArrayList<String>();
-        isRunning = true;
+        downloadProgresses = new ArrayList<Integer>(1);
+        processorProgresses = new ArrayList<Integer>(1);
+        indiciesProgresses = new ArrayList<Integer>(1);
+        summaryProgresses = new ArrayList<Integer>(1);
+        log = new ArrayList<String>();
 
         this.data = data;
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
-        mState = new SchedulerState();
-        this.executor = executor;
-    }
 
-    @Override
-    public void run()
-    {
+        mState = new SchedulerState();
+        downloadProcesses = new ArrayList<Process>(1);
+        processorProcesses = new ArrayList<Process>(1);
+        indicesProcesses = new ArrayList<Process>(1);
+        summaryProcesses = new ArrayList<Process>(1);
+
+        ID = myID;
+
         for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
-            try {
+            try
+            {
+                Schema.CreateProjectPluginSchema(projectInfoFile.GetProjectName(), item.GetName());
                 RunProcesses(item);
-            } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
+            }
+            catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
+                    | IllegalArgumentException | InvocationTargetException | ParseException | ConfigReadException | SQLException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Returns this Scheduler's ID number that acts similar to a system process ID.
+     *
+     * @author michael.devos
+     * @return unique ID number
+     */
+    public int GetID() { return ID; }
+
+    /**
+     * Returns the current status of this Scheduler.
+     *
+     * @author michael.devos
+     * @return SchedulerStatus - represents status of this Scheduler instance at that point in time
+     */
+    public SchedulerStatus GetSchedulerStatus()
+    {
+        return new SchedulerStatus(ID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), downloadProgresses, processorProgresses,
+                indiciesProgresses, summaryProgresses, log, mState.GetState());
+    }
+
+    /**
+     * Updates the Scheduler's {@link TaskState TaskState} to RUNNING notifying all observers of said state of the change.
+     *
+     * @author michael.devos
+     */
+    public void Start()
+    {
+        mState.ChangeState(TaskState.RUNNING);
+    }
+
+    /**
+     * Updates the Scheduler's {@link TaskState TaskState} to STOPPED notifying all observers of said state of the change.
+     *
+     * @author michael.devos
+     *
+     */
+    public void Stop()
+    {
+        mState.ChangeState(TaskState.STOPPED);
+    }
+
+    /**
+     * Gets this scheduler's thread state.
+     *
+     * @author michael.devos
+     * @return scheduler's current thread state
+     */
+    public TaskState GetState()
+    {
+        return mState.GetState();
+    }
+
+    /**
+     * Used by the executed frameworks ({@link Process Process} objects) to send information up to the GUI.
+     *
+     * @param e  - GUI update information
+     */
+    public void NotifyUI(GeneralUIEventObject e)
+    {
+        ProcessName processName = ((Process)e.getSource()).processName;
+        ArrayList<Integer> progressList = null;
+
+        switch(processName)
+        {
+        case DOWNLOAD:
+            progressList = downloadProgresses;
+            break;
+        case PROCESSOR:
+            progressList = processorProgresses;
+            break;
+        case INDICES:
+            progressList = indiciesProgresses;
+            break;
+        default:    // SUMMARY
+            progressList = summaryProgresses;
+            break;
+        }
+
+        ArrayList<ProjectInfoPlugin> plugins = data.projectInfoFile.GetPlugins();
+
+        for(int i=0; i < plugins.size(); i++)
+        {
+            if(plugins.get(i).GetName().equals(e.getPluginName()))
+            {
+                progressList.set(i, e.getProgress());
+                i = plugins.size();
+            }
+        }
+
+        log.add(e.getStatus());
     }
 
     /**
@@ -123,15 +200,20 @@ public class Scheduler implements Runnable {
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
+     * @throws ParseException
      */
     private void RunProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException,
-    InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException
     {
         PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
-        futures.add(executor.submit(SetupDownloadProcess(pluginInfo, plMeta)));
-        futures.add(executor.submit(SetupProcessorProcess(pluginInfo, plMeta)));
-        futures.add(executor.submit(SetupIndicesProcess(pluginInfo, plMeta)));
-        futures.add(executor.submit(SetupSummaryProcess(pluginInfo, plMeta)));
+        DatabaseCache downloadCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.DOWNLOAD);
+        DatabaseCache processorCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.PROCESSOR);
+        DatabaseCache indicesCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.INDICES);
+
+        downloadProcesses.add(SetupDownloadProcess(pluginInfo, plMeta, downloadCache));
+        processorProcesses.add(SetupProcessorProcess(pluginInfo, plMeta, downloadCache, processorCache));
+        indicesProcesses.add(SetupIndicesProcess(pluginInfo, plMeta, processorCache, indicesCache));
+        summaryProcesses.add(SetupSummaryProcess(pluginInfo, plMeta, indicesCache));
     }
 
     /**
@@ -141,13 +223,14 @@ public class Scheduler implements Runnable {
      *
      * @param pluginInfo  - plugin information
      * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @param outputCache  - DatabaseCache object used to cache output files from a LocaldDownloader
      * @return general concrete Process object for managing ProcessWorkers
      */
-    private Process<?> SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    private Process SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache)
     {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process<?> process = new GenericFrameworkProcess<Void, DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
-                ProcessName.DOWNLOAD, null, executor);
+        Process process = new GenericFrameworkProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED,
+                ProcessName.DOWNLOAD, outputCache);
         mState.addObserver(process);
         return process;
     }
@@ -159,14 +242,17 @@ public class Scheduler implements Runnable {
      *
      * @param pluginInfo  - plugin information
      * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @param inputCache  - DatabaseCache object used to acquire files available for processor processing
+     * @param outputCache  - DatabaseCache object used to cache output files from processor processing
      * @return general concrete Process object for managing ProcessWorkers
      */
-    private Process<?> SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
-    {
+    private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
+            DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process<?> process = new GenericFrameworkProcess<Void, ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
-                ProcessName.PROCESSOR, ProcessName.DOWNLOAD, executor);
+        Process process = new GenericFrameworkProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this,
+                TaskState.STOPPED, ProcessName.PROCESSOR, outputCache);
         mState.addObserver(process);
+        inputCache.addObserver(process);
         return process;
     }
 
@@ -177,14 +263,17 @@ public class Scheduler implements Runnable {
      *
      * @param pluginInfo  - plugin information
      * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
+     * @param inputCache  - DatabacheCache object used to acquire files available for indices processing
+     * @param outputCache  - DatabaseCache object used to cache output files from indices processing
      * @return general concrete Process object for managing ProcessWorkers
      */
-    private Process<?> SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
-    {
+    private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
+            DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process<?> process = new GenericFrameworkProcess<Void, IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING,
-                ProcessName.INDICES, ProcessName.PROCESSOR, executor);
+        Process process = new GenericFrameworkProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED,
+                ProcessName.INDICES, outputCache);
         mState.addObserver(process);
+        inputCache.addObserver(process);
         return process;
     }
 
@@ -196,14 +285,32 @@ public class Scheduler implements Runnable {
      * @param pluginInfo  - plugin information
      * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
      * @return {@link Summary Summary}  - the manager object of SummaryWorkers for the current project and given plugin
+     * @param inputCache  - the DatabaseCache object used to acquire files available for summary processing
      */
-    private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData)
+    private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
     {
-        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, ThreadState.RUNNING, ProcessName.INDICES, executor);
+        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED);
         mState.addObserver(process);
+        inputCache.addObserver(process);
         return process;
     }
 
+    /**
+     * @deprecated
+     *
+     * @param plugin
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    @Deprecated
     public void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
@@ -214,15 +321,30 @@ public class Scheduler implements Runnable {
         Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class, GeneralListener.class);
         Object downloader =  ctorDownloader.newInstance(new Object[] {
                 data.projectInfoFile.GetStartDate(),
-                pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download,
-                new DownloadWorker(null, projectInfoFile, plugin, null, null)});
+                pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download});
         Method methodDownloader = downloader.getClass().getMethod("run");
         methodDownloader.invoke(downloader);
 
-        DownloadProgress = 100;
-        Log.add("Download Finish");
+        //        DownloadProgress = 100;
+        log.add("Download Finish");
     }
 
+    /**
+     * @deprecated
+     *
+     * @param plugin
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    @Deprecated
     public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
@@ -255,11 +377,28 @@ public class Scheduler implements Runnable {
             }
         }
          */
-        ProcessProgress = 100;
-        Log.add("Process Finish");
+        //        ProcessorProgress = 100;
+        log.add("Process Finish");
     }
 
-    public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    /**
+     * @deprecated
+     *
+     * @param plugin
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    @Deprecated
+    public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
+    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
         for(String indicie: plugin.GetIndicies())
         {
@@ -279,63 +418,12 @@ public class Scheduler implements Runnable {
                             plugin.GetName(),
                             data.projectInfoFile.GetStartDate(),
                             new File(indicie).getName().split("\\.")[0],
-                            indicie,
-                            new IndiciesEvent()});
+                            indicie});
             Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
             methodIndicies.invoke(indexCalculator);
         }
-        IndiciesProgress = 100;
-        Log.add("Indicies Finish");
-    }
-
-    /**
-     * Used by the executed frameworks ({@link Process Process} objects) to send information up to the GUI.
-     *
-     * @param e  - GUI update information
-     */
-    public void NotifyUI(GeneralUIEventObject e)
-    {
-        ProcessName processName = ((Process<?>)e.getSource()).processName;
-        switch(processName)
-        {
-        case DOWNLOAD:
-            DownloadProgress =e.getProgress();
-            break;
-        case PROCESSOR:
-            ProcessProgress = e.getProgress();
-            break;
-        case INDICES:
-            IndiciesProgress = e.getProgress();
-            break;
-        default:    // SUMMARY
-            SummaryProgress = e.getProgress();
-            break;
-        }
-        Log.add(e.getStatus());
-    }
-
-    /**
-     * Updates the Scheduler's {@link ThreadState ThreadState} to STOPPED notifying all observers of said state of the change.
-     *
-     * @author michael.devos
-     *
-     */
-    public void Stop()
-    {
-        isRunning = false;
-        mState.ChangeState(ThreadState.STOPPED);
-    }
-
-    /**
-     * Updates the Scheduler's {@link ThreadState ThreadState} to RUNNING notifying all observers of said state of the change.
-     *
-     * @author michael.devos
-     *
-     */
-    public void Start()
-    {
-        isRunning = true;
-        mState.ChangeState(ThreadState.RUNNING);
+        //        IndiciesProgress = 100;
+        log.add("Indicies Finish");
     }
 }
 
