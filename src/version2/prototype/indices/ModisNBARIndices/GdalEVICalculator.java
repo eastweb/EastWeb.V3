@@ -1,5 +1,6 @@
-package version2.prototype.indices;
+package version2.prototype.indices.ModisNBARIndices;
 
+import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GeneralListener;
 
 /**
@@ -34,6 +35,11 @@ public class GdalEVICalculator extends IndicesFramework {
             return G * (values[NIR] - values[RED])
                     / (values[NIR] + C1 * values[RED] - C2 * values[BLUE] + L);
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 
 }

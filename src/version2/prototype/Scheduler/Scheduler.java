@@ -20,6 +20,7 @@ import version2.prototype.DataDate;
 import version2.prototype.GenericFrameworkProcess;
 import version2.prototype.Process;
 import version2.prototype.ThreadState;
+import version2.prototype.EastWebUI.PluginIndiciesUI.IndiciesEvent;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -34,7 +35,6 @@ import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.projection.ProcessData;
 import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.Summary;
-import version2.prototype.summary.SummaryData;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
@@ -98,15 +98,6 @@ public class Scheduler implements Runnable {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (ParserConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (Exception e) {
@@ -222,7 +213,7 @@ public class Scheduler implements Runnable {
         Object downloader =  ctorDownloader.newInstance(new Object[] {
                 data.projectInfoFile.GetStartDate(),
                 pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download,
-                new downloaderListener()});
+                new DownloadWorker(null, projectInfoFile, plugin, null, null)});
         Method methodDownloader = downloader.getClass().getMethod("run");
         methodDownloader.invoke(downloader);
 
@@ -287,7 +278,7 @@ public class Scheduler implements Runnable {
                             data.projectInfoFile.GetStartDate(),
                             new File(indicie).getName().split("\\.")[0],
                             indicie,
-                            new indiciesListener()});
+                            new IndiciesEvent()});
             Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
             methodIndicies.invoke(indexCalculator);
         }
@@ -295,7 +286,7 @@ public class Scheduler implements Runnable {
         Log.add("Indicies Finish");
     }
 
-	/**
+    /**
      * Used by the executed frameworks ({@link Process Process} objects) to send information up to the GUI.
      *
      * @param e  - GUI update information

@@ -1,14 +1,16 @@
 package version2.prototype.indices.ModisLSTIndices;
 
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GeneralListener;
 
 public class GdalModisLST_MEANCalculator extends IndicesFramework{
     final int DAY_LST = 0;
     final int NIGHT_LST = 1;
-    final double mMin;
-    final double mMax;
+    double mMin;
+    double mMax;
 
-    public GdalModisLST_MEANCalculator(){
+    public GdalModisLST_MEANCalculator(GeneralListener l){
+        super (l);
     }
 
     @Override
@@ -20,5 +22,10 @@ public class GdalModisLST_MEANCalculator extends IndicesFramework{
         } else {
             return (values[DAY_LST] + values[NIGHT_LST]) / 2;
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 }

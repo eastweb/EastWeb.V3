@@ -1,5 +1,6 @@
-package version2.prototype.indices;
+package version2.prototype.indices.ModisNBARIndices;
 
+import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GeneralListener;
 
 /**
@@ -25,6 +26,11 @@ public class GdalNDWI5Calculator extends IndicesFramework {
         } else {
             return (values[NIR] - values[SWIR]) / (values[SWIR] + values[NIR]);
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 
 }

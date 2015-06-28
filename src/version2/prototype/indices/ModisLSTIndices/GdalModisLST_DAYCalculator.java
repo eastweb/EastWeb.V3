@@ -1,15 +1,16 @@
 package version2.prototype.indices.ModisLSTIndices;
 
-import version2.prototype.DataDate;
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GeneralListener;
 
 public class GdalModisLST_DAYCalculator extends IndicesFramework{
 
     final static int INPUT = 0;
-    final double mMin;
-    final double mMax;
+    double mMin;
+    double mMax;
 
-    public GdalModisLST_DAYCalculator(){
+    public GdalModisLST_DAYCalculator(GeneralListener l){
+        super(l);
     }
 
     @Override
@@ -19,5 +20,10 @@ public class GdalModisLST_DAYCalculator extends IndicesFramework{
         } else {
             return values[INPUT];
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 }

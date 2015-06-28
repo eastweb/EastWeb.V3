@@ -1,13 +1,15 @@
 package version2.prototype.indices.ModisLSTIndices;
 
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GeneralListener;
 
 public class GdalModisLST_NIGHTCalculator extends IndicesFramework {
     final static int INPUT = 0;
-    final double mMin;
-    final double mMax;
+    double mMin;
+    double mMax;
 
-    public GdalModisLST_NIGHTCalculator(){
+    public GdalModisLST_NIGHTCalculator(GeneralListener l){
+        super(l);
     }
 
     @Override
@@ -17,5 +19,10 @@ public class GdalModisLST_NIGHTCalculator extends IndicesFramework {
         } else {
             return values[INPUT];
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 }

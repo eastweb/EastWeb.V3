@@ -630,7 +630,7 @@ public class Config {
             final String field = XmlUtils.getElementByTagName(
                     summaryElement, "field").getTextContent();
 
-            zonalSummaries[i] = new ZonalSummary(name, shapefile, field);
+            zonalSummaries[i] = new ZonalSummary(name, shapefile);
         }
 
         return zonalSummaries;

@@ -1,5 +1,6 @@
-package version2.prototype.indices;
+package version2.prototype.indices.ModisNBARIndices;
 
+import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GeneralListener;
 
 public class GdalNDVICalculator extends IndicesFramework {
@@ -18,6 +19,11 @@ public class GdalNDVICalculator extends IndicesFramework {
         } else {
             return (values[NIR] - values[RED]) / (values[RED] + values[NIR]);
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 
 }

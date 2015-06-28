@@ -1,5 +1,6 @@
-package version2.prototype.indices;
+package version2.prototype.indices.ModisNBARIndices;
 
+import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GeneralListener;
 
 public class GdalSAVICalculator extends IndicesFramework {
@@ -20,6 +21,11 @@ public class GdalSAVICalculator extends IndicesFramework {
             return (values[NIR] - values[RED] * (1 + L))
                     / (values[NIR] + values[RED] + L);
         }
+    }
+
+    @Override
+    protected String className() {
+        return getClass().getName();
     }
 
 }
