@@ -339,8 +339,8 @@ public class MainWindow {
         table.getColumn("Projects").setCellEditor(new ProgressButtonEditor(new JCheckBox()));
 
         table.getColumn("Actions").setMaxWidth(50);
-        table.getColumn("Actions").setCellRenderer(new PlayButtonRenderer());
-        table.getColumn("Actions").setCellEditor(new PlayButtonEditor(new JCheckBox()));
+        table.getColumn("Actions").setCellRenderer(new ActionButtonRenderer());
+        table.getColumn("Actions").setCellEditor(new ActionButtonEditor(new JCheckBox()));
 
         table.getColumn("Delete").setMaxWidth(50);
         table.getColumn("Delete").setCellRenderer(new DeleteButtonRenderer());
@@ -542,13 +542,11 @@ public class MainWindow {
      * @author sufi
      *
      */
-    class PlayButtonRenderer extends JButton implements TableCellRenderer {
+    class ActionButtonRenderer extends JButton implements TableCellRenderer {
         private static final long serialVersionUID = 1L;
-        private boolean isPlay;
 
-        public PlayButtonRenderer() {
+        public ActionButtonRenderer() {
             setOpaque(true);
-            isPlay = true;
         }
 
         @Override
@@ -561,12 +559,21 @@ public class MainWindow {
                 setForeground(table.getForeground());
                 setBackground(UIManager.getColor("Button.background"));
             }
-            isPlay = !isPlay;
+            for(Scheduler item : ListOfProjectSchedule)
+            {
+                String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
+                String projectName = value.toString();
 
-            if(isPlay){
-                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
-            }else{
-                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+                if(currentProjectName.equals(projectName)) {
+
+                    if(item.isRunning) {
+                        setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+
+                    } else {
+                        setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+                    }
+
+                }
             }
             return this;
         }
@@ -577,16 +584,14 @@ public class MainWindow {
      * @author sufi
      *
      */
-    class PlayButtonEditor extends DefaultCellEditor {
+    class ActionButtonEditor extends DefaultCellEditor {
         private static final long serialVersionUID = 1L;
         protected JButton button;
         private String label;
         private boolean isPushed;
-        private boolean isPlay;
 
-        public PlayButtonEditor(JCheckBox checkBox) {
+        public ActionButtonEditor(JCheckBox checkBox) {
             super(checkBox);
-            isPlay = true;
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(new ActionListener() {
@@ -608,12 +613,24 @@ public class MainWindow {
                 button.setBackground(table.getBackground());
             }
             label = (value == null) ? "" : value.toString();
-            isPlay = !isPlay;
 
-            if(isPlay){
-                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
-            }else{
-                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            for(Scheduler item : ListOfProjectSchedule)
+            {
+                String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
+                String projectName = label.toString();
+
+                if(currentProjectName.equals(projectName)) {
+
+                    if(item.isRunning) {
+                        button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+
+
+                    } else {
+                        button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+
+                    }
+
+                }
             }
             isPushed = true;
             return button;
@@ -629,10 +646,13 @@ public class MainWindow {
 
                     if(currentProjectName.equals(projectName)) {
 
-                        if(isPlay) {
+                        if(item.isRunning) {
                             item.Stop();
+                            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
+
                         } else {
                             item.Start();
+                            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
                         }
 
                     }

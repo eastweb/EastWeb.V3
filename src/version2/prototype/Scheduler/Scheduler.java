@@ -48,6 +48,7 @@ public class Scheduler implements Runnable {
     public int IndiciesProgress;
     public int SummaryProgress;
     public ArrayList<String> Log;
+    public boolean isRunning;
 
     public SchedulerData data;
     public ProjectInfoFile projectInfoFile;
@@ -64,6 +65,7 @@ public class Scheduler implements Runnable {
         IndiciesProgress = 0;
         SummaryProgress = 0;
         Log = new ArrayList<String>();
+        isRunning = true;
 
         this.data = data;
         projectInfoFile = data.projectInfoFile;
@@ -320,6 +322,7 @@ public class Scheduler implements Runnable {
      */
     public void Stop()
     {
+        isRunning = false;
         mState.ChangeState(ThreadState.STOPPED);
     }
 
@@ -331,6 +334,7 @@ public class Scheduler implements Runnable {
      */
     public void Start()
     {
+        isRunning = true;
         mState.ChangeState(ThreadState.RUNNING);
     }
 }

@@ -84,6 +84,8 @@ public class ProjectInformationPage {
     private JButton addNewModisButton;
     private JButton deleteSelectedModisButton;
     private  JCheckBox isClippingCheckBox;
+    private JDateChooser freezingDateChooser;
+    private JDateChooser heatingDateChooser;
 
     private boolean isEditable;
 
@@ -416,7 +418,7 @@ public class ProjectInformationPage {
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Basic Project Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(10, 420, 358, 259);
+        panel.setBounds(10, 420, 358, 270);
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 
@@ -552,6 +554,20 @@ public class ProjectInformationPage {
         JLabel lblClipping = new JLabel("Clipping:");
         lblClipping.setBounds(6, 204, 132, 14);
         panel.add(lblClipping);
+
+        JLabel lblFreezingStartDate = new JLabel("Freezing Start Date: ");
+        lblFreezingStartDate.setBounds(6, 229, 132, 14);
+        panel.add(lblFreezingStartDate);
+        freezingDateChooser = new JDateChooser();
+        freezingDateChooser.setBounds(148, 223, 200, 20);
+        panel.add(freezingDateChooser);
+
+        JLabel lblHeatingStartDate = new JLabel("Heating Start Date:");
+        lblHeatingStartDate.setBounds(6, 254, 132, 14);
+        panel.add(lblHeatingStartDate);
+        heatingDateChooser = new JDateChooser();
+        heatingDateChooser.setBounds(148, 254, 200, 20);
+        panel.add(heatingDateChooser);
     }
 
     @SuppressWarnings("rawtypes")
@@ -559,7 +575,7 @@ public class ProjectInformationPage {
         JPanel modisInformationPanel = new JPanel();
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(359, 420, 275, 259);
+        modisInformationPanel.setBounds(359, 420, 275, 270);
         frame.getContentPane().add(modisInformationPanel);
 
         modisListModel = new DefaultListModel<String>();
@@ -601,55 +617,11 @@ public class ProjectInformationPage {
         modisInformationPanel.add(deleteSelectedModisButton);
     }
 
-    /*private void ModisInformation() {
-        JPanel modisInformationPanel = new JPanel();
-        modisInformationPanel.setLayout(null);
-        modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(359, 420, 275, 259);
-        frame.getContentPane().add(modisInformationPanel);
-
-        modisListModel = new DefaultListModel<String>();
-
-        final JList<String> modisList = new JList<String>(modisListModel);
-        modisList.setBounds(15, 70, 245, 178);
-
-        addNewModisButton = new JButton("");
-        addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
-        addNewModisButton.setToolTipText("Add modis");
-        addNewModisButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tiles", null);
-                modisListModel.addElement(tile);
-            }
-        });
-        addNewModisButton.setBounds(15, 29, 75, 30);
-        modisInformationPanel.add(addNewModisButton);
-        modisInformationPanel.add(modisList);
-
-        deleteSelectedModisButton = new JButton("");
-        deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
-        deleteSelectedModisButton.setToolTipText("Delete Selected Modis");
-        deleteSelectedModisButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                DefaultListModel model = (DefaultListModel) modisList.getModel();
-                int selectedIndex = modisList.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    model.remove(selectedIndex);
-                }
-            }
-        });
-        deleteSelectedModisButton.setBounds(185, 29, 75, 30);
-        modisInformationPanel.add(deleteSelectedModisButton);
-    }*/
-
-
     private void ProjectInformation() {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(631, 420, 297, 259);
+        panel_2.setBounds(631, 420, 297, 270);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -745,7 +717,7 @@ public class ProjectInformationPage {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
         summaryPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        summaryPanel.setBounds(920, 420, 281, 259);
+        summaryPanel.setBounds(920, 420, 281, 270);
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
@@ -896,6 +868,16 @@ public class ProjectInformationPage {
             Element isClipping = doc.createElement("Clipping");
             isClipping.appendChild(doc.createTextNode(String.valueOf(isClippingCheckBox.isSelected())));
             projectInfo.appendChild(isClipping);
+
+            // Freezing start Date
+            Element freezingstartDate = doc.createElement("Freezing");
+            startDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
+            projectInfo.appendChild(freezingstartDate);
+
+            // Freezing start Date
+            Element heatingstartDate = doc.createElement("Heating");
+            startDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
+            projectInfo.appendChild(heatingstartDate);
 
             //list of modis tiles
             Element modisTiles = doc.createElement("ModisTiles");
