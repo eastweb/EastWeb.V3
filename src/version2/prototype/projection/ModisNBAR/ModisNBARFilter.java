@@ -1,6 +1,11 @@
 package version2.prototype.projection.ModisNBAR;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -8,6 +13,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -19,7 +25,6 @@ import version2.prototype.util.GdalUtils;
 
 public class ModisNBARFilter extends Filter {
 
-
     public ModisNBARFilter(ProcessData data) {
         super(data);
     }
@@ -27,7 +32,7 @@ public class ModisNBARFilter extends Filter {
     @Override
     protected double filterValue(double value) {
         if(value < 0 || value > 32766) {
-            return 32767;
+            return GdalUtils.NoValue;
         } else {
             return value;
         }
@@ -46,7 +51,9 @@ public class ModisNBARFilter extends Filter {
             // Find the associated QC File
             for(File dataFile : inputFiles)
             {
-                String identifier = dataFile.getName().split(".")[1] + dataFile.getName().split(".")[2];
+                String[] nameParts = dataFile.getName().split("\\.");
+
+                String identifier = nameParts[1] + "." + nameParts[2];
                 String associatedQCFile = new String();
                 for(File qcFile : qcFiles)
                 {
@@ -64,10 +71,10 @@ public class ModisNBARFilter extends Filter {
                     String qaBandName = GetQABandName(hdf);
 
                     // Read the desired band
-                    Dataset temp = gdal.Open(qaBandName);
-                    int xSize = temp.getRasterXSize();
-                    int ySize = temp.getRasterYSize();
-                    Band b = temp.GetRasterBand(1);
+                    Dataset qaDS = gdal.Open(qaBandName);
+                    int xSize = qaDS.getRasterXSize();
+                    int ySize = qaDS.getRasterYSize();
+                    Band b = qaDS.GetRasterBand(1);
 
                     // Read the entire raster
                     int[] array = new int[xSize * ySize];
@@ -88,6 +95,9 @@ public class ModisNBARFilter extends Filter {
                         List<Entry<Integer, Integer>> pairList = GetPixelsThatNeedFiltering(allowedFlags, i+1, array, xSize, ySize);
                         Dataset data = gdal.Open(tileData.sdsName[i]);
 
+                        /*Driver driver = gdal.GetDriverByName("HDF5");
+                        Dataset outputDS = driver.CreateCopy(outputFolder + "\\" + dataFile.getName(), data);*/
+
                         if(data != null)
                         {
                             int dataX = data.GetRasterXSize();
@@ -101,13 +111,13 @@ public class ModisNBARFilter extends Filter {
 
                             // Replace each "bad" pixel with the fill value.
                             for(Entry<Integer, Integer> pair : pairList) {
-                                dataArray[((pair.getKey() * dataY) + pair.getValue())] = -9999;
+                                dataArray[((pair.getKey() * dataY) + pair.getValue())] = GdalUtils.NoValue;
                             }
 
                             try {
                                 // Write the changes.
                                 synchronized (GdalUtils.lockObject) {
-                                    data.GetRasterBand(1).WriteRaster(0, 0, dataX, dataY, dataArray);
+                                    data.GetRasterBand(1).WriteRaster(0, 0, dataX, dataY, 5, dataArray);
                                 }
                             } catch(UnsatisfiedLinkError e) {
                                 e.printStackTrace();
@@ -115,11 +125,16 @@ public class ModisNBARFilter extends Filter {
 
                             dataBand.delete();
                             data.delete();
+                            //outputDS.delete();
                         }
                     }
                 }
-
-
+                try {
+                    copyFile(outputFolder + "\\", dataFile);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -192,7 +207,7 @@ public class ModisNBARFilter extends Filter {
     }
 
     @SuppressWarnings("unchecked")
-    private static String  GetQABandName(Dataset hdf)
+    private static String GetQABandName(Dataset hdf)
     {
         Hashtable<String, String> sdsdict = null;
         String qaBandName = new String();
@@ -219,5 +234,39 @@ public class ModisNBARFilter extends Filter {
         }
 
         return qaBandName;
+    }
+
+    private static void  copyFile(String destinationFolder, File source) throws IOException
+    {
+        if(!(new File(destinationFolder).exists())) {
+            try {
+                FileUtils.forceMkdir(new File(destinationFolder));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        InputStream inStream = null;
+        OutputStream outStream = null;
+        File destination = new File(destinationFolder + "\\" + source.getName());
+
+        try {
+            inStream = new FileInputStream(source);
+            outStream = new FileOutputStream(destination);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        byte[] buffer = new byte[1024];
+        int length;
+
+        while ((length = inStream.read(buffer)) > 0)
+        {
+            outStream.write(buffer, 0, length);
+        }
+
+        inStream.close();
+        outStream.close();
     }
 }

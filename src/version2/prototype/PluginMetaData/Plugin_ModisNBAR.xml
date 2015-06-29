@@ -9,18 +9,10 @@
 		</HTTP>
 	</Download>
 	<Processes>
-		<Process processStep="1">
-			<ClassName>ModisNBARFilter</ClassName>
-		</Process>
-		<Process processStep="2">
-			<ClassName>Mosaic</ClassName>
-		</Process>
-		<Process processStep="3">
-			<ClassName>Reproject</ClassName>
-		</Process>
-		<Process processStep="4">
-			<ClassName>Mask</ClassName>
-		</Process>
+		<ClassName>ModisNBARFilter</ClassName>
+		<ClassName>Mosaic</ClassName>
+		<ClassName>Reproject</ClassName>
+		<ClassName>Mask</ClassName>
 	</Processes>
 	<Indices>
 		<ClassName>GdalNDVICalculator</ClassName>
@@ -36,6 +28,6 @@
 		<Level>Highest</Level>
 		<Level>Moderate</Level>
 		<Level>Low</Level>
-		<Level>No QC screening</Level>
+		<Level>None</Level>
 	</QualityControl>
 </PluginMetadata>

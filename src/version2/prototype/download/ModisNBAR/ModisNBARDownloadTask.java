@@ -14,21 +14,23 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.cache.*;
 import version2.prototype.ConfigReadException;
-import version2.prototype.DirectoryLayout;
 import version2.prototype.ModisTile;
 
 public class ModisNBARDownloadTask implements Runnable {
-    DataDate startDate;
-    static final String downloadedCache = Paths.get("").toAbsolutePath() + "\\ModisNBAR\\downloaded.xml.gz";
-    static final String onlineAvaliableCache = Paths.get("").toAbsolutePath() + "ModisNBAR\\avaliable.xml.gz";
-    List<DataDate> available;
-    List<DataDate> finished;
-    List<ModisTile> modisTilesDesired;
-    DownloadMetaData mode;
+    private ProjectInfoFile projectInfo;
+    private DataDate startDate;
+    private static final String downloadedCache = Paths.get("").toAbsolutePath() + "\\ModisNBAR\\downloaded.xml.gz";
+    private static final String onlineAvaliableCache = Paths.get("").toAbsolutePath() + "ModisNBAR\\avaliable.xml.gz";
+    private List<DataDate> available;
+    private List<DataDate> finished;
+    private List<ModisTile> modisTilesDesired;
+    private DownloadMetaData mode;
 
-    public ModisNBARDownloadTask(DataDate dataDate, DownloadMetaData metaData) {
+    public ModisNBARDownloadTask(DataDate dataDate, DownloadMetaData metaData, ProjectInfoFile project) {
+        projectInfo = project;
         startDate = dataDate;
         mode = metaData;
     }
@@ -49,19 +51,20 @@ public class ModisNBARDownloadTask implements Runnable {
             return;
         }
 
-        for (DataDate item : download) {
+        for (DataDate date : download) {
             for(ModisTile tile : modisTiles)
             {
                 try {
-                    FileUtils.forceMkdir(getoutFile(item, tile).getParentFile());
-                    new ModisNBARDownloader(item, tile, getoutFile(item, tile), mode).download();
+                    FileUtils.forceMkdir(new File(getOutFolder(date)));
+                    FileUtils.forceMkdir(new File(getQCOutFolder(date)));
+                    new ModisNBARDownloader(date, tile, getOutFolder(date), getQCOutFolder(date), mode).download();
                 } catch (Exception e) {
                     // update the downloadedCache
                     updateDownloadedCache();
                     e.printStackTrace();
                 }
                 // add into finished
-                finished.add(item);
+                finished.add(date);
             }
         }
         // update the downloadedCache
@@ -93,8 +96,12 @@ public class ModisNBARDownloadTask implements Runnable {
         stop();
     }
 
-    private File getoutFile(DataDate date, ModisTile tile) throws ConfigReadException {
-        return DirectoryLayout.getModisDownload("NBAR", date, tile);
+    private String getOutFolder(DataDate date) throws ConfigReadException {
+        return projectInfo.GetWorkingDir() + String.format("ModisNBAR\\Download\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+    }
+
+    private String getQCOutFolder(DataDate date) throws ConfigReadException {
+        return projectInfo.GetWorkingDir() + String.format("ModisNBAR\\QCDownload\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
     }
 
     private ArrayList<DataDate> getDownloadList() throws IOException {
