@@ -67,14 +67,14 @@ public abstract class Filter {
     // run method for the scheduler
     public void run(){
         if (qcBands != null) {
+             filterByQCFlag(qcLevel);
+        } else {
             try {
                 filterByValue();
             } catch (Exception e) {
                 // TODO :write into log
                 e.printStackTrace();
             }
-        } else {
-            filterByQCFlag(qcLevel);
         }
 
         // remove the input folder
