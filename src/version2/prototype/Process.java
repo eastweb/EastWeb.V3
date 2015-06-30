@@ -8,7 +8,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
-import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.GlobalDownloaderState;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 
@@ -21,10 +21,10 @@ import version2.prototype.util.GeneralUIEventObject;
  */
 public abstract class Process implements Observer {
     public ProcessName processName;
+    public final ProjectInfoPlugin pluginInfo;
+    public final ProjectInfoFile projectInfoFile;
+    public final PluginMetaData pluginMetaData;
     protected Scheduler scheduler;
-    protected ProjectInfoPlugin pluginInfo;
-    protected ProjectInfoFile projectInfoFile;
-    protected PluginMetaData pluginMetaData;
     protected DatabaseCache outputCache;
 
     /**
@@ -71,7 +71,7 @@ public abstract class Process implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        if(arg instanceof GlobalDownloader)
+        if(arg instanceof GlobalDownloaderState)
         {
 
         }

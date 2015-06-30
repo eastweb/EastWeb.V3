@@ -24,8 +24,8 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import version2.prototype.summary.summaries.SummariesCollection;
-import version2.prototype.summary.summaries.SummaryNameResultPair;
+import version2.prototype.summary.SummariesCollection;
+import version2.prototype.summary.SummaryNameResultPair;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
 
@@ -291,18 +291,28 @@ public class ZonalSummaryCalculator {
         Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
 
+        writer.print("Zone ID, Value Count, ");
+        for(int i=0; i < results.size(); i++)
+        {
+            String name = results.get(i).getSimpleName();
+            if(i < results.size() - 1) {
+                writer.print(name + ", ");
+            } else {
+                writer.println(name);
+            }
+        }
+
         while (feature != null) {
             int zone = feature.GetFieldAsInteger(mField); GdalUtils.errorCheck();
             if (countMap.get(zone) != null && countMap.get(zone) != 0) {
                 writer.print(zone + ",");
                 for(int i=0; i < results.size(); i++){
                     if(i < results.size() - 1) {
-                        System.out.println(results.get(i).toString(",") + ", ");
+                        writer.print(results.get(i).getResult().get(zone) + ", ");
                     } else {
-                        System.out.println(results.get(i).toString(","));
+                        writer.println(results.get(i).getResult().get(zone));
                     }
                 }
-                writer.println();
             }
             feature = layer.GetNextFeature(); GdalUtils.errorCheck();
         }
@@ -338,9 +348,9 @@ public class ZonalSummaryCalculator {
 
             int indexKey = -1;
             String _query = String.format(
-                    "SELECT \"index\"\n" +
-                            "FROM \"%1$s\".\"Indicies\"\n" +
-                            "WHERE \"name\" = ?\n",
+                    "SELECT \"IndexID\"\n" +
+                            "FROM \"%1$s\".\"Index\"\n" +
+                            "WHERE \"Name\" = ?\n",
                             mSchemaName
                     );
             final PreparedStatement ps = conn.prepareStatement(_query);
@@ -352,8 +362,8 @@ public class ZonalSummaryCalculator {
             }
             else{
                 _query = String.format(
-                        "INSERT INTO \"%1$s\".\"Indicies\" (\n" +
-                                "  \"name\"\n" +
+                        "INSERT INTO \"%1$s\".\"Index\" (\n" +
+                                "  \"Name\"\n" +
                                 ") VALUES (\n" +
                                 "  ?\n" +
                                 ")",
@@ -364,9 +374,9 @@ public class ZonalSummaryCalculator {
                 psInsert.executeQuery();
 
                 _query = String.format(
-                        "SELECT \"index\"\n" +
-                                "FROM \"%1$s\".\"Indicies\"\n" +
-                                "WHERE \"name\" = ?\n",
+                        "SELECT \"IndexID\"\n" +
+                                "FROM \"%1$s\".\"Index\"\n" +
+                                "WHERE \"Name\" = ?\n",
                                 mSchemaName
                         );
                 final PreparedStatement psInserted = conn.prepareStatement(_query);

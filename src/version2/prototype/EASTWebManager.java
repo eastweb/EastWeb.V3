@@ -48,6 +48,7 @@ public class EASTWebManager implements Runnable{
     private static List<SchedulerStatus> schedulerStatuses;
     private static BitSet schedulerIDs;
     private static BitSet globalDLIDs;
+    private static Boolean schedulerStatesChanged;
     private boolean manualUpdate;
     private final int msBeetweenUpdates;
 
@@ -200,19 +201,6 @@ public class EASTWebManager implements Runnable{
                 }
             }
 
-            // Handle updating Scheduler statuses
-            if(schedulers.size() > 0)
-            {
-                synchronized (schedulerStatuses) {
-                    schedulerStatuses.clear();
-                    synchronized (schedulers) {
-                        for(Scheduler scheduler : schedulers) {
-                            schedulerStatuses.add(scheduler.GetSchedulerStatus());
-                        }
-                    }
-                }
-            }
-
             // Handle stopping GlobalDownloaders whose using projects are all stopped.
             // Handle deleting GlobalDownloaders that don't have any currently existing projects using them.
             if(globalDLs.size() > 0)
@@ -222,49 +210,69 @@ public class EASTWebManager implements Runnable{
                     boolean allStopped;
                     boolean noneExisting;
 
-                    synchronized (schedulers)
+                    if(schedulers.size() > 0)
                     {
-                        for(GlobalDownloader gdl : globalDLs)
+                        synchronized (schedulers)
                         {
-                            allStopped = true;
-                            noneExisting = true;
-
-                            for(Scheduler scheduler : schedulers)
+                            for(GlobalDownloader gdl : globalDLs)
                             {
-                                for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
+                                allStopped = true;
+                                noneExisting = true;
+
+                                for(Scheduler scheduler : schedulers)
                                 {
-                                    if(pluginInfo.GetName().equals(gdl.GetPluginName()))
+                                    for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
                                     {
-                                        noneExisting = false;
-                                        if(scheduler.GetState() == TaskState.RUNNING) {
-                                            allStopped = false;
+                                        if(pluginInfo.GetName().equals(gdl.GetPluginName()))
+                                        {
+                                            noneExisting = false;
+                                            if(scheduler.GetState() == TaskState.RUNNING) {
+                                                allStopped = false;
+                                            }
+                                            break;
                                         }
+                                    }
+
+                                    if(!noneExisting && !allStopped) {
                                         break;
                                     }
                                 }
 
-                                if(!noneExisting && !allStopped) {
-                                    break;
-                                }
-                            }
-
-                            if(noneExisting)
-                            {
-                                gdl.Stop();
-                                globalDLs.remove(gdl.GetID());
-                                releaseGlobalDLID(gdl.GetID());
-                                globalDLFutures.get(gdl.GetID()).cancel(false);
-
-                                synchronized (numOfCreatedGDLs) {
-                                    numOfCreatedGDLs = globalDLs.size();
+                                if(noneExisting)
+                                {
+                                    gdl.Stop();
+                                    globalDLs.remove(gdl.GetID());
+                                    releaseGlobalDLID(gdl.GetID());
+                                    globalDLFutures.get(gdl.GetID()).cancel(false);
                                 }
                             }
                         }
                     }
+                    else
+                    {
+                        for(GlobalDownloader gdl : globalDLs)
+                        {
+                            gdl.Stop();
+                            globalDLs.remove(gdl.GetID());
+                            releaseGlobalDLID(gdl.GetID());
+                            globalDLFutures.get(gdl.GetID()).cancel(false);
+                        }
+                    }
+
+                    synchronized (numOfCreatedGDLs) {
+                        numOfCreatedGDLs = globalDLs.size();
+                    }
                 }
             }
 
-            runGUIUpdateHandlers();
+            if(schedulerStatesChanged)
+            {
+                synchronized (schedulerStatesChanged)
+                {
+                    runGUIUpdateHandlers();
+                    schedulerStatesChanged = false;
+                }
+            }
         }while((msBeetweenUpdates > 0) && !manualUpdate);
         manualUpdate = false;
     }
@@ -509,10 +517,36 @@ public class EASTWebManager implements Runnable{
         }
     }
 
+    /**
+     * Updates the local SchedulerStatus listing and sets a boolean flag to signal that the UI needs to be updated.
+     *
+     * @param updatedScheduler  - reference to the Scheduler instance for whom the stored SchedulerStatus object is now out of date
+     */
+    public static void NotifyUI(Scheduler updatedScheduler)
+    {
+        synchronized (schedulerStatesChanged)
+        {
+            schedulerStatesChanged = true;
+
+            synchronized (schedulerStatuses)
+            {
+                for(int i=0; i < schedulerStatuses.size(); i++)
+                {
+                    if(schedulerStatuses.get(i).schedulerID == updatedScheduler.GetID())
+                    {
+                        schedulerStatuses.set(i, updatedScheduler.GetSchedulerStatus());
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     private EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
     {
         manualUpdate = false;
         this.msBeetweenUpdates = msBeetweenUpdates;
+        schedulerStatesChanged = false;
 
         ThreadFactory gDLFactory = new ThreadFactory() {
             @Override

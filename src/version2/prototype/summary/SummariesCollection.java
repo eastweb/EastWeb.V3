@@ -1,8 +1,16 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+
+import version2.prototype.summary.summaries.Count;
+import version2.prototype.summary.summaries.Max;
+import version2.prototype.summary.summaries.Mean;
+import version2.prototype.summary.summaries.Min;
+import version2.prototype.summary.summaries.SqrSum;
+import version2.prototype.summary.summaries.StdDev;
+import version2.prototype.summary.summaries.Sum;
 
 /**
  * Represents a collection of registered summaries as SummarySingletons facilitating interaction between summaries to share computations.
@@ -141,6 +149,24 @@ public class SummariesCollection {
             results.add(new SummaryNameResultPair(summary.getClass().getSimpleName(), summary.getResult()));
         }
         return results;
+    }
+
+    /**
+     * Provides a list of the names of the framework supplied SummarySingleton implementations.
+     *
+     * @return String list of the provided SummarySingleton implementation's canonical names
+     */
+    public static ArrayList<String> providedSummarySingletons()
+    {
+        ArrayList<String> list = new ArrayList<String>(7);
+        list.add(new Count(null).getCanonicalName());
+        list.add(new Max(null).getCanonicalName());
+        list.add(new Mean(null).getCanonicalName());
+        list.add(new Min(null).getCanonicalName());
+        list.add(new SqrSum(null).getCanonicalName());
+        list.add(new StdDev(null).getCanonicalName());
+        list.add(new Sum(null).getCanonicalName());
+        return list;
     }
 
     private ArrayList<SummaryNameInstancePair> registry;

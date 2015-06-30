@@ -22,6 +22,14 @@ public class SchedulerState extends Observable{
     }
 
     /**
+     * Create a SchedulerState object initialized to the given TaskState.
+     */
+    public SchedulerState(TaskState state)
+    {
+        this.state = state;
+    }
+
+    /**
      * Changes the state of the internal TaskState object to that specified.
      *
      * @param state  - TaskState to change internal state object to.

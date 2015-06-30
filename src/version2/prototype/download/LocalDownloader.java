@@ -3,7 +3,6 @@ package version2.prototype.download;
 import java.util.Observable;
 
 import version2.prototype.Process;
-import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -18,8 +17,8 @@ import version2.prototype.util.DatabaseCache;
 public abstract class LocalDownloader extends Process {
 
     protected LocalDownloader(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, TaskState state, ProcessName processName, DatabaseCache outputCache) {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, state, processName, outputCache);
+            Scheduler scheduler, DatabaseCache outputCache) {
+        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, ProcessName.DOWNLOAD, outputCache);
         // TODO Auto-generated constructor stub
     }
 

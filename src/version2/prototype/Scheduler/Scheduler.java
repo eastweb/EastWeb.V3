@@ -23,12 +23,10 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadWorker;
 import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
-import version2.prototype.projection.PrepareProcessTask;
 import version2.prototype.summary.Summary;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralListener;
@@ -36,43 +34,46 @@ import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.Schema;
 
 public class Scheduler {
-    public ArrayList<Integer> downloadProgresses;
-    public ArrayList<Integer> processorProgresses;
-    public ArrayList<Integer> indiciesProgresses;
-    public ArrayList<Integer> summaryProgresses;
-    public ArrayList<String> log;
-
     public final SchedulerData data;
     public final ProjectInfoFile projectInfoFile;
     public final PluginMetaDataCollection pluginMetaDataCollection;
 
+    private final int ID;
+    private SchedulerStatus status;
     private SchedulerState mState;
     private ArrayList<Process> downloadProcesses;
     private ArrayList<Process> processorProcesses;
     private ArrayList<Process> indicesProcesses;
     private ArrayList<Process> summaryProcesses;
 
-    private final int ID;
-
     /**
      * Creates and sets up a Scheduler instance with the given project data. Does not start the Scheduler and Processes.
      * To start processing call start().
      *
      * @param data  - SchedulerData describing the project to setup for
+     * @param myID  - a unique ID for this Scheduler instance
      */
     public Scheduler(SchedulerData data, int myID)
     {
-        downloadProgresses = new ArrayList<Integer>(1);
-        processorProgresses = new ArrayList<Integer>(1);
-        indiciesProgresses = new ArrayList<Integer>(1);
-        summaryProgresses = new ArrayList<Integer>(1);
-        log = new ArrayList<String>();
+        this(data, myID, TaskState.STOPPED);
+    }
 
+    /**
+     * Creates and sets up a Scheduler instance with the given project data. Sets the Scheduler's running state to the given TaskState.
+     * Call Start() eventually, if initState is TaskState.STOPPED, to start the project processing.
+     *
+     * @param data  - SchedulerData describing the project to setup for
+     * @param myID  - a unique ID for this Scheduler instance
+     * @param initState  - Initial TaskState to set this Scheduler to. Process ob
+     */
+    public Scheduler(SchedulerData data, int myID, TaskState initState)
+    {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
-        mState = new SchedulerState();
+        status = new SchedulerStatus(myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), initState);
+        mState = new SchedulerState(initState);
         downloadProcesses = new ArrayList<Process>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
@@ -110,8 +111,7 @@ public class Scheduler {
      */
     public SchedulerStatus GetSchedulerStatus()
     {
-        return new SchedulerStatus(ID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), downloadProgresses, processorProgresses,
-                indiciesProgresses, summaryProgresses, log, mState.GetState());
+        return status;
     }
 
     /**
@@ -153,37 +153,28 @@ public class Scheduler {
      */
     public void NotifyUI(GeneralUIEventObject e)
     {
-        ProcessName processName = ((Process)e.getSource()).processName;
-        ArrayList<Integer> progressList = null;
+        Process process = (Process)e.getSource();
 
-        switch(processName)
+        synchronized (status)
         {
-        case DOWNLOAD:
-            progressList = downloadProgresses;
-            break;
-        case PROCESSOR:
-            progressList = processorProgresses;
-            break;
-        case INDICES:
-            progressList = indiciesProgresses;
-            break;
-        default:    // SUMMARY
-            progressList = summaryProgresses;
-            break;
-        }
-
-        ArrayList<ProjectInfoPlugin> plugins = data.projectInfoFile.GetPlugins();
-
-        for(int i=0; i < plugins.size(); i++)
-        {
-            if(plugins.get(i).GetName().equals(e.getPluginName()))
+            switch(process.processName)
             {
-                progressList.set(i, e.getProgress());
-                i = plugins.size();
+            case DOWNLOAD:
+                status.UpdateDownloadProgress(e.getProgress(), e.getPluginName());
+                break;
+            case PROCESSOR:
+                status.UpdateProcessorProgress(e.getProgress(), e.getPluginName());
+                break;
+            case INDICES:
+                status.UpdateIndicesProgress(e.getProgress(), e.getPluginName());
+                break;
+            default:    // SUMMARY
+                status.UpdateSummaryProgress(e.getProgress(), e.getPluginName());
+                break;
             }
-        }
 
-        log.add(e.getStatus());
+            status.AddToLog(e.getStatus());
+        }
     }
 
     /**
@@ -229,8 +220,7 @@ public class Scheduler {
     private Process SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache)
     {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED,
-                ProcessName.DOWNLOAD, outputCache);
+        Process process = new GenericFrameworkProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.DOWNLOAD, outputCache);
         mState.addObserver(process);
         return process;
     }
@@ -249,8 +239,7 @@ public class Scheduler {
     private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this,
-                TaskState.STOPPED, ProcessName.PROCESSOR, outputCache);
+        Process process = new GenericFrameworkProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.PROCESSOR, outputCache);
         mState.addObserver(process);
         inputCache.addObserver(process);
         return process;
@@ -270,8 +259,7 @@ public class Scheduler {
     private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED,
-                ProcessName.INDICES, outputCache);
+        Process process = new GenericFrameworkProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.INDICES, outputCache);
         mState.addObserver(process);
         inputCache.addObserver(process);
         return process;
@@ -289,7 +277,7 @@ public class Scheduler {
      */
     private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
     {
-        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, TaskState.STOPPED);
+        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this);
         mState.addObserver(process);
         inputCache.addObserver(process);
         return process;
@@ -326,7 +314,7 @@ public class Scheduler {
         methodDownloader.invoke(downloader);
 
         //        DownloadProgress = 100;
-        log.add("Download Finish");
+        //        log.add("Download Finish");
     }
 
     /**
@@ -348,9 +336,9 @@ public class Scheduler {
     public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
     {
-        ProcessorMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
+        //        ProcessorMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
         // TODO: revise the "date"
-        PrepareProcessTask prepareProcessTask;
+        //        PrepareProcessTask prepareProcessTask;
         // TODO: initiate it with each plugin's implementation
         //prepareProcessTask= new PrepareProcessTask(projectInfoFile, plugin.GetName(), projectInfoFile.startDate, new processListener());
 
@@ -378,7 +366,7 @@ public class Scheduler {
         }
          */
         //        ProcessorProgress = 100;
-        log.add("Process Finish");
+        //        log.add("Process Finish");
     }
 
     /**
@@ -423,7 +411,7 @@ public class Scheduler {
             methodIndicies.invoke(indexCalculator);
         }
         //        IndiciesProgress = 100;
-        log.add("Indicies Finish");
+        //        log.add("Indicies Finish");
     }
 }
 

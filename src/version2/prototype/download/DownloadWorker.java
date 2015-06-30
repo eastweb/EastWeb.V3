@@ -9,7 +9,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
-import version2.prototype.util.DatabaseCache;
 
 
 /**
@@ -31,9 +30,9 @@ public class DownloadWorker extends ProcessWorker {
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      */
     public DownloadWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
+            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
-        super("DownloadWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        super("DownloadWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
         // TODO Auto-generated constructor stub
     }
 

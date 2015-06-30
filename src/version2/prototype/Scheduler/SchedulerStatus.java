@@ -70,6 +70,8 @@ public class SchedulerStatus extends Observable {
                 i = pluginInfo.size();
             }
         }
+        setChanged();
+        notifyObservers();
     }
 
     public void UpdateProcessorProgress(int progress, String pluginName)
@@ -82,6 +84,8 @@ public class SchedulerStatus extends Observable {
                 i = pluginInfo.size();
             }
         }
+        setChanged();
+        notifyObservers();
     }
 
     public void UpdateIndicesProgress(int progress, String pluginName)
@@ -94,6 +98,8 @@ public class SchedulerStatus extends Observable {
                 i = pluginInfo.size();
             }
         }
+        setChanged();
+        notifyObservers();
     }
 
     public void UpdateSummaryProgress(int progress, String pluginName)
@@ -106,15 +112,21 @@ public class SchedulerStatus extends Observable {
                 i = pluginInfo.size();
             }
         }
+        setChanged();
+        notifyObservers();
     }
 
     public void UpdateSchedulerTaskState(TaskState state)
     {
         this.state = state;
+        setChanged();
+        notifyObservers();
     }
 
     public void AddToLog(String logText)
     {
         log.add(logText);
+        setChanged();
+        notifyObservers();
     }
 }

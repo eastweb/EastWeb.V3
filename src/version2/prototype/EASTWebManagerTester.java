@@ -9,8 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class EASTWebManagerTester {
+    private static ArrayList<String> myList;
 
     public static void main(String[] args) {
+        myList = new ArrayList<String>();
+        myList.add("Hello World.");
+        myList.add("Hello again.");
+
         ArrayList<Watcher> watchers = new ArrayList<Watcher>(1);
         EASTWebManagerTester tester = new EASTWebManagerTester();
         Watcher watcher = tester.new Watcher();
@@ -26,6 +31,13 @@ public class EASTWebManagerTester {
 
         watched.ChangeState(true);
         watched.ChangeState(false);
+
+
+        for(String str :  GetList())
+        {
+            System.out.println(str);
+        }
+        System.out.println(myList.size());
 
         //        EASTWebManager em = EASTWebManager.GetInstance();
         //        ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
@@ -48,6 +60,13 @@ public class EASTWebManagerTester {
         //        System.out.println();
         //        System.out.println("Global Downloaders Running: " + EASTWebManager.GetNumberOfGlobalDownloaders());
         //        System.out.println("Schedulers Running: " + EASTWebManager.GetNumberOfSchedulerResources());
+    }
+
+    private static ArrayList<String> GetList()
+    {
+        ArrayList<String> output = new ArrayList<String>(myList);
+        myList.clear();
+        return output;
     }
 
     private static Watcher CreateWatcher(EASTWebManagerTester tester)
