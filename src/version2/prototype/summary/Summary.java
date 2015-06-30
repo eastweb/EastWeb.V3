@@ -64,8 +64,7 @@ public class Summary extends Process {
                 {
                     if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
                     {
-                        EASTWebManager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData,
-                                cachedFiles, outputCache));
+                        EASTWebManager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles));
                     }
                 }
 

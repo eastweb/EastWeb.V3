@@ -1,4 +1,4 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary;
 
 import java.util.Map;
 

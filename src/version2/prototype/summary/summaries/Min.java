@@ -3,6 +3,9 @@ package version2.prototype.summary.summaries;
 import java.util.ArrayList;
 import java.util.Map;
 
+import version2.prototype.summary.SummariesCollection;
+import version2.prototype.summary.SummarySingleton;
+
 /**
  * Represents a minimum summary based on indexed double values.
  *

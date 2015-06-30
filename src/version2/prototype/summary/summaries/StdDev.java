@@ -3,6 +3,10 @@ package version2.prototype.summary.summaries;
 import java.util.ArrayList;
 import java.util.Map;
 
+import version2.prototype.summary.SummariesCollection;
+import version2.prototype.summary.SummaryNameInstancePair;
+import version2.prototype.summary.SummarySingleton;
+
 /**
  * Represents a standard deviation summary based on indexed double values.
  *
@@ -38,7 +42,7 @@ public class StdDev extends SummarySingleton {
      */
     @Override
     public Map<Integer, Double> getResult() {
-        if(map.size() == 0 || map.size() < count.map.size()){
+        if(map.size() == 0 || map.size() < count.getResult().size()){
             Map<Integer, Double> sqrSumRs = sqrSum.getResult();
             Map<Integer, Double> countRs = count.getResult();
             Map<Integer, Double> meanRs = mean.getResult();

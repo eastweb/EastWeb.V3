@@ -76,7 +76,7 @@ public final class FileSystem {
     /**
      * Gets the project's directory path.
      *
-     * @param workingDir  - path of the working directory for EASTWeb data
+     * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
      * @param projectName  - name of the project in use
      * @return path to the project's directory
      */
@@ -88,7 +88,7 @@ public final class FileSystem {
     /**
      * Gets the process' directory path.
      *
-     * @param workingDir  - path of the working directory for EASTWeb data
+     * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
      * @param projectName  - name of the project in use
      * @param pluginName  - name of the plugin in use
      * @param processName  - name of the process in use
@@ -102,7 +102,7 @@ public final class FileSystem {
     /**
      * Gets the process' output directory path.
      *
-     * @param workingDir  - path of the working directory for EASTWeb data
+     * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
      * @param projectName  - name of the project in use
      * @param pluginName  - name of the plugin in use
      * @param processName  - name of the process in use
@@ -116,7 +116,7 @@ public final class FileSystem {
     /**
      * Gets the ProcessWorker's temp directory path.
      *
-     * @param workingDir  - path of the working directory for EASTWeb data
+     * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
      * @param projectName  - name of the project in use
      * @param pluginName  - name of the plugin in use
      * @param processName  - name of the process in use
@@ -130,7 +130,7 @@ public final class FileSystem {
     /**
      * Gets the download directory path for the given type of data downloaded.
      *
-     * @param workingDir  - path of the working directory for EASTWeb data
+     * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
      * @param dataName  - name of the data type as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
      * @return path to the download directory for the data
      */
