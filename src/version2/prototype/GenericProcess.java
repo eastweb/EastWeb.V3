@@ -23,7 +23,7 @@ import version2.prototype.util.GeneralUIEventObject;
  *
  * @param <WorkerType>  - the ProcessWorker extending class the spawned worker threads should be created as
  */
-public class GenericFrameworkProcess<WorkerType extends ProcessWorker> extends Process {
+public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
     private Class<?> processWorkerClass;
 
     /**
@@ -39,15 +39,10 @@ public class GenericFrameworkProcess<WorkerType extends ProcessWorker> extends P
      * @param inputProcessName  - name of process to use the output of for its input
      * @param executor  - executor service to use to spawn worker threads
      */
-    public GenericFrameworkProcess(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public GenericProcess(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             ProcessName processName, DatabaseCache outputCache)
     {
         super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, processName, outputCache);
-    }
-
-    @Override
-    public void start() {
-
     }
 
     /* (non-Javadoc)
@@ -93,5 +88,28 @@ public class GenericFrameworkProcess<WorkerType extends ProcessWorker> extends P
                 e.printStackTrace();
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void process(ArrayList<DataFileMetaData> cachedFiles) {
+        Constructor<?> cstr;
+        try {
+            cstr = processWorkerClass.getConstructor(Process.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, ArrayList.class);
+            EASTWebManager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
+        String name = null;
+        switch(processName)
+        {
+        case DOWNLOAD: name = "Download"; break;
+        case INDICES: name = "Indices"; break;
+        case PROCESSOR: name = "Processor"; break;
+        case SUMMARY: name = "Summary"; break;
+        }
+        scheduler.NotifyUI(new GeneralUIEventObject(this, name + " Finished", 100, pluginInfo.GetName()));
     }
 }

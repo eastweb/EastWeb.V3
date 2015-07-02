@@ -24,8 +24,6 @@ import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 
-import version2.prototype.summary.SummariesCollection;
-import version2.prototype.summary.SummaryNameResultPair;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
 

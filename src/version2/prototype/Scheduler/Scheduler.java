@@ -16,7 +16,8 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
-import version2.prototype.GenericFrameworkProcess;
+import version2.prototype.EASTWebManager;
+import version2.prototype.GenericProcess;
 import version2.prototype.Process;
 import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -40,11 +41,14 @@ public class Scheduler {
 
     private final int ID;
     private SchedulerStatus status;
-    private SchedulerState mState;
+    private TaskState mState;
     private ArrayList<Process> downloadProcesses;
     private ArrayList<Process> processorProcesses;
     private ArrayList<Process> indicesProcesses;
     private ArrayList<Process> summaryProcesses;
+    private ArrayList<DatabaseCache> downloadCaches;
+    private ArrayList<DatabaseCache> processorCaches;
+    private ArrayList<DatabaseCache> indicesCaches;
 
     /**
      * Creates and sets up a Scheduler instance with the given project data. Does not start the Scheduler and Processes.
@@ -73,11 +77,14 @@ public class Scheduler {
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
         status = new SchedulerStatus(myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), initState);
-        mState = new SchedulerState(initState);
+        mState = initState;
         downloadProcesses = new ArrayList<Process>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
         summaryProcesses = new ArrayList<Process>(1);
+        downloadCaches = new ArrayList<DatabaseCache>(1);
+        processorCaches = new ArrayList<DatabaseCache>(1);
+        indicesCaches = new ArrayList<DatabaseCache>(1);
 
         ID = myID;
 
@@ -86,7 +93,7 @@ public class Scheduler {
             try
             {
                 Schema.CreateProjectPluginSchema(projectInfoFile.GetProjectName(), item.GetName());
-                RunProcesses(item);
+                SetupProcesses(item);
             }
             catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException | ParseException | ConfigReadException | SQLException e) {
@@ -121,7 +128,19 @@ public class Scheduler {
      */
     public void Start()
     {
-        mState.ChangeState(TaskState.RUNNING);
+        mState = TaskState.RUNNING;
+        for(DatabaseCache cache : downloadCaches)
+        {
+            cache.NotifyObserversToCheckForPastUpdates();
+        }
+        for(DatabaseCache cache : processorCaches)
+        {
+            cache.NotifyObserversToCheckForPastUpdates();
+        }
+        for(DatabaseCache cache : indicesCaches)
+        {
+            cache.NotifyObserversToCheckForPastUpdates();
+        }
     }
 
     /**
@@ -132,7 +151,7 @@ public class Scheduler {
      */
     public void Stop()
     {
-        mState.ChangeState(TaskState.STOPPED);
+        mState = TaskState.STOPPED;
     }
 
     /**
@@ -143,7 +162,7 @@ public class Scheduler {
      */
     public TaskState GetState()
     {
-        return mState.GetState();
+        return mState;
     }
 
     /**
@@ -175,11 +194,12 @@ public class Scheduler {
 
             status.AddToLog(e.getStatus());
         }
+
+        EASTWebManager.NotifyUI(this);
     }
 
     /**
-     * Creates and executes a set of ProcesWorker Managers for each of the four frameworks for each ProjectInfoPlugin given adding each to a shared list
-     * of futures.
+     * Sets up a set of Process extending classes to act as ProcesWorker Managers for each of the four frameworks for each ProjectInfoPlugin given.
      *
      * @author michael.devos
      *
@@ -193,7 +213,7 @@ public class Scheduler {
      * @throws InvocationTargetException
      * @throws ParseException
      */
-    private void RunProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException,
+    private void SetupProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException,
     InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException
     {
         PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
@@ -205,6 +225,10 @@ public class Scheduler {
         processorProcesses.add(SetupProcessorProcess(pluginInfo, plMeta, downloadCache, processorCache));
         indicesProcesses.add(SetupIndicesProcess(pluginInfo, plMeta, processorCache, indicesCache));
         summaryProcesses.add(SetupSummaryProcess(pluginInfo, plMeta, indicesCache));
+
+        downloadCaches.add(downloadCache);
+        processorCaches.add(processorCache);
+        indicesCaches.add(indicesCache);
     }
 
     /**
@@ -220,8 +244,7 @@ public class Scheduler {
     private Process SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache)
     {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.DOWNLOAD, outputCache);
-        mState.addObserver(process);
+        Process process = new GenericProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.DOWNLOAD, outputCache);
         return process;
     }
 
@@ -239,8 +262,7 @@ public class Scheduler {
     private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.PROCESSOR, outputCache);
-        mState.addObserver(process);
+        Process process = new GenericProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.PROCESSOR, outputCache);
         inputCache.addObserver(process);
         return process;
     }
@@ -259,8 +281,7 @@ public class Scheduler {
     private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) {
         // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericFrameworkProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.INDICES, outputCache);
-        mState.addObserver(process);
+        Process process = new GenericProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.INDICES, outputCache);
         inputCache.addObserver(process);
         return process;
     }
@@ -278,7 +299,6 @@ public class Scheduler {
     private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
     {
         Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this);
-        mState.addObserver(process);
         inputCache.addObserver(process);
         return process;
     }

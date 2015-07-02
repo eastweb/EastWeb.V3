@@ -1,5 +1,7 @@
 package version2.prototype;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -8,7 +10,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
-import version2.prototype.download.GlobalDownloaderState;
+import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 
@@ -16,8 +18,6 @@ import version2.prototype.util.GeneralUIEventObject;
  * Abstract framework thread management class. Frameworks are to use a concrete class that extends this class to handle creating their worker threads.
  *
  * @author michael.devos
- *
- * @param <V>
  */
 public abstract class Process implements Observer {
     public ProcessName processName;
@@ -51,10 +51,11 @@ public abstract class Process implements Observer {
     }
 
     /**
-     * Starts the Process running. Initial work after setup is done here (check for available input). After this is done further input should be handled
-     * by the update method.
+     * Method to override to handle processing new input files. Called only when Scheduler TaskState is set to RUNNING and there is at least 1 available cached file to process.
+     *
+     * @param cachedFiles  - List of cache files available to process. Can always assume size is 1 or greater when called.
      */
-    public abstract void start();
+    public abstract void process(ArrayList<DataFileMetaData> cachedFiles);
 
     /**
      * Bubbles up progress update information to the GUI.
@@ -70,10 +71,23 @@ public abstract class Process implements Observer {
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     @Override
-    public void update(Observable o, Object arg) {
-        if(arg instanceof GlobalDownloaderState)
+    public final void update(Observable o, Object arg) {
+        if((scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING) && (o instanceof DatabaseCache))
         {
+            ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
+            DatabaseCache inputCache = (DatabaseCache) o;
+            try {
+                cachedFiles = inputCache.GetUnprocessedCacheFiles();
+                if(cachedFiles.size() > 0) {
+                    process(cachedFiles);
+                }
 
+                // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
+                //                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
+            }
+            catch (ConfigReadException | ClassNotFoundException | SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

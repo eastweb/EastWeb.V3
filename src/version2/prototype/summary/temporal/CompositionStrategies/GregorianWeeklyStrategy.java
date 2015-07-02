@@ -1,4 +1,4 @@
-package version2.prototype.summary.temporal.CalendarStrategies;
+package version2.prototype.summary.temporal.CompositionStrategies;
 
 import java.util.GregorianCalendar;
 

@@ -1,25 +1,25 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import version2.prototype.summary.SummariesCollection;
-import version2.prototype.summary.SummarySingleton;
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummarySingleton;
 
 /**
- * Represents a minimum summary based on indexed double values.
+ * Represents a maximum summary based on indexed double values.
  *
  * @author michael.devos
  *
  */
-public class Min extends SummarySingleton {
+public class Max extends SummarySingleton {
 
     /**
-     * Creates a Min object representing a minimum summary.
+     * Creates a Max object representing a maximum summary.
      *
      * @param col  - the SummariesCollection to register itself to
      */
-    public Min(SummariesCollection col) {
+    public Max(SummariesCollection col) {
         super(col);
     }
 
@@ -30,7 +30,7 @@ public class Min extends SummarySingleton {
     public void put(int index, double value) {
         if(map.get(index) == null) {
             map.put(index, value);
-        } else if(map.get(index) > value) {
+        } else if(map.get(index) < value) {
             map.put(index, value);
         }
     }

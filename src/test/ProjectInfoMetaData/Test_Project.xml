@@ -22,12 +22,16 @@
 	<StandardParallel1>112.1</StandardParallel1>
 	<StandardParallel2>122.2</StandardParallel2>
 	<ScalingFactor>00.00</ScalingFactor>
-	<CentalMeridian>121</CentalMeridian>
+	<CentralMeridian>121</CentralMeridian>
 	<FalseEasting>151</FalseEasting>
 	<FalseNorthing>33</FalseNorthing>
 	<LatitudeOfOrigin>111</LatitudeOfOrigin>
+	<Freezing>Tue Jun 02 23:17:37 CDT 2015</Freezing>
+	<Heating>Tue Jun 02 23:17:37 CDT 2015</Heating>
 	<Summaries>
         <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
         <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10</Summary>
+        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10;</Summary>
 	</Summaries>
 </ProjectInfo>

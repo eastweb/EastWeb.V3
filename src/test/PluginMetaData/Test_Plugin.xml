@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<PluginMetadata>
+	<title>Test Plugin</title>
+	<Download>
+		<Class>NldasDownloadTask</Class>
+		<Mode>ftp</Mode>
+		<FTP>
+			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
+			<RootDir>/data/s4pa/NLDAS/NLDAS_FORA0125_H.002</RootDir>
+			<UserName>anonymous</UserName>
+			<PassWord>anonymous</PassWord>
+		</FTP>
+	</Download>	
+	<Processor>
+		<ProcessStep>NldasProjection</ProcessStep>
+		<ProcessStep>NldasMozaic</ProcessStep>
+		<ProcessStep>NldasConvertor</ProcessStep>
+		<ProcessStep>NldasFilter</ProcessStep>
+	</Processor>
+	<Indices>
+		<Class>GdalNldasCalculator</Class>
+	</Indices>
+	<Summary>
+		<Temporal>
+			<DaysPerInputData>1</DaysPerInputData>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass></InterpolateStrategyClass>
+		</Temporal>
+		<Zonal>
+			<SummarySingleton>Count</SummarySingleton>
+			<SummarySingleton>Max</SummarySingleton>
+			<SummarySingleton>Mean</SummarySingleton>
+			<SummarySingleton>Min</SummarySingleton>
+			<SummarySingleton>SqrSum</SummarySingleton>
+			<SummarySingleton>StdDev</SummarySingleton>
+			<SummarySingleton>Sum</SummarySingleton>
+		</Zonal>
+	</Summary>
+	<QualityControl>
+		<Level>None</Level>
+		<Level>Level 1</Level>
+		<Level>Level 2</Level>
+		<Level>Level 3</Level>
+	</QualityControl>
+</PluginMetadata>

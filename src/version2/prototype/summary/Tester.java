@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummaryNameResultPair;
+
 public class Tester {
     private static class PersistanceTester{
         private static ArrayList<Integer> values = new ArrayList<Integer>(0); // Needed

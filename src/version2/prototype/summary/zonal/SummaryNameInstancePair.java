@@ -1,4 +1,5 @@
-package version2.prototype.summary;
+package version2.prototype.summary.zonal;
+
 
 /**
  * Container object holding the pairing of a summary with a name and an instance.

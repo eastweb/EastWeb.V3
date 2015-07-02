@@ -1,11 +1,11 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import version2.prototype.summary.SummariesCollection;
-import version2.prototype.summary.SummaryNameInstancePair;
-import version2.prototype.summary.SummarySingleton;
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummaryNameInstancePair;
+import version2.prototype.summary.zonal.SummarySingleton;
 
 /**
  * Represents a standard deviation summary based on indexed double values.

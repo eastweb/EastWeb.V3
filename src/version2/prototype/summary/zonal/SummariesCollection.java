@@ -1,16 +1,16 @@
-package version2.prototype.summary;
+package version2.prototype.summary.zonal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import version2.prototype.summary.summaries.Count;
-import version2.prototype.summary.summaries.Max;
-import version2.prototype.summary.summaries.Mean;
-import version2.prototype.summary.summaries.Min;
-import version2.prototype.summary.summaries.SqrSum;
-import version2.prototype.summary.summaries.StdDev;
-import version2.prototype.summary.summaries.Sum;
+import version2.prototype.summary.zonal.summaries.Count;
+import version2.prototype.summary.zonal.summaries.Max;
+import version2.prototype.summary.zonal.summaries.Mean;
+import version2.prototype.summary.zonal.summaries.Min;
+import version2.prototype.summary.zonal.summaries.SqrSum;
+import version2.prototype.summary.zonal.summaries.StdDev;
+import version2.prototype.summary.zonal.summaries.Sum;
 
 /**
  * Represents a collection of registered summaries as SummarySingletons facilitating interaction between summaries to share computations.

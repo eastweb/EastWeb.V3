@@ -2,7 +2,6 @@ package version2.prototype.summary;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
@@ -12,8 +11,9 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
-import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
+import version2.prototype.summary.temporal.MergeStrategies.AvgGdalRasterFileMerge;
+import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
@@ -77,7 +77,7 @@ public class SummaryWorker extends ProcessWorker {
                         new File(summary.GetZonalSummary().GetShapeFile()),  // inShapeFile
                         outputFile,   // outTableFile
                         summary.GetZonalSummary().GetField(),    // zoneField
-                        new SummariesCollection(new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev")))); // summariesCollection
+                        new SummariesCollection(pluginMetaData.Summary.summarySingletons)); // summariesCollection
                 zonalSummaryCal.calculate();
                 outputFiles.add(DatabaseCache.Parse(outputFile.getCanonicalPath()));
             }

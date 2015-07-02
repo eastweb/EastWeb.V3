@@ -1,25 +1,25 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import version2.prototype.summary.SummariesCollection;
-import version2.prototype.summary.SummarySingleton;
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummarySingleton;
 
 /**
- * Represents a summation summary based on indexed double values.
+ * Represents a minimum summary based on indexed double values.
  *
  * @author michael.devos
  *
  */
-public class SqrSum extends SummarySingleton {
+public class Min extends SummarySingleton {
 
     /**
-     * Creates a Sum object representing a summation summary.
+     * Creates a Min object representing a minimum summary.
      *
      * @param col  - the SummariesCollection to register itself to
      */
-    public SqrSum(SummariesCollection col) {
+    public Min(SummariesCollection col) {
         super(col);
     }
 
@@ -30,8 +30,8 @@ public class SqrSum extends SummarySingleton {
     public void put(int index, double value) {
         if(map.get(index) == null) {
             map.put(index, value);
-        } else {
-            map.put(index, map.get(index) + value*value);
+        } else if(map.get(index) > value) {
+            map.put(index, value);
         }
     }
 

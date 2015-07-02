@@ -31,4 +31,13 @@ public class ProjectInfoSummary {
      * @return TemporalSummaryCompositionStrategy instance
      */
     public TemporalSummaryRasterFileStore GetTemporalFileStore() { return fileStore; }
+
+    @Override
+    public String toString() {
+        if(fileStore != null) {
+            return "Shape File Path: " + zonalSummary.GetShapeFile() + "; Field: " + zonalSummary.GetField() + "; Temporal Summary: " + fileStore.compStrategy.getClass().getSimpleName();
+        } else {
+            return "Shape File Path: " + zonalSummary.GetShapeFile() + "; Field: " + zonalSummary.GetField();
+        }
+    }
 }

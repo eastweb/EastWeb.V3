@@ -41,13 +41,16 @@ public class ProjectInfoFile {
     private final String projectName;
     private final String workingDir;
     private final String maskingFile;
+    private final int maskingResolution;
     private final String masterShapeFile;
     private final String timeZone;
     private final boolean clipping;
+    private final int totModisTiles;
     private final ArrayList<String> modisTiles;
     private final Projection projection;
+    private final Date freezingDate;
+    private final Date heatingDate;
     private final ArrayList<ProjectInfoSummary> summaries;
-    private final int totModisTiles;
 
     /**
      * Creates a ProjectInfoFile object from parsing the given xml file. Doesn't allow its data to be changed and doesn't dynamically update its
@@ -83,6 +86,7 @@ public class ProjectInfoFile {
         projectName = ReadProjectName();
         workingDir = ReadWorkingDir();
         maskingFile = ReadMaskingFile();
+        maskingResolution = ReadMaskingResolution();
         masterShapeFile = ReadMasterShapeFile();
         timeZone = ReadTimeZone();
         clipping = ReadClipping();
@@ -91,6 +95,8 @@ public class ProjectInfoFile {
         projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
                 ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
                 ReadLatitudeOfOrigin());
+        freezingDate = ReadFreezing();
+        heatingDate = ReadHeating();
         summaries = ReadSummaries();
     }
 
@@ -130,6 +136,13 @@ public class ProjectInfoFile {
     public String GetMaskingFile() { return maskingFile; }
 
     /**
+     * Gets the path to masking resolution gotten from the once parsed xml file.
+     *
+     * @return masking resolution size gotten from the xml's data.
+     */
+    public Integer GetMaskingResolution() { return maskingResolution; }
+
+    /**
      * Gets the master shape file gotten from the once parsed xml file. This shape file is not meant to be used in zonal summary calculations.
      *
      * @return master shape file path string gotten from the xml's data.
@@ -151,7 +164,6 @@ public class ProjectInfoFile {
     public boolean GetClipping() { return clipping; }
 
     /**
-<<<<<<< HEAD
      * Gets the total number of modies tiles expected per input data downloaded.
      *
      * @return number of modies tiles associated with a single downloaded data unit.
@@ -159,8 +171,6 @@ public class ProjectInfoFile {
     public int GetTotModisTiles() { return totModisTiles; }
 
     /**
-=======
->>>>>>> refs/heads/Threading
      * Gets the modis tiles gotten from the once parsed xml file.
      *
      * @return modis tile names gotten from the xml's data.
@@ -180,6 +190,20 @@ public class ProjectInfoFile {
      * @return Projection object created from the xml's data.
      */
     public Projection GetProjection() { return projection; }
+
+    /**
+     * Gets the freezing date gotten from the once parsed xml file.
+     *
+     * @return Date - the freezing date read from the xml's data.
+     */
+    public Date GetFreezingDate() { return freezingDate; }
+
+    /**
+     * Gets the heating date gotten from the once parsed xml file.
+     *
+     * @return Date - the heating date read from the xml's data.
+     */
+    public Date GetHeatingDate() { return heatingDate; }
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
@@ -259,10 +283,20 @@ public class ProjectInfoFile {
 
     private String ReadMaskingFile()
     {
-        NodeList nodes = GetUpperLevelNodeList("MaskingFile", "Missing masking file.");
+        NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.", "Masking");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
         if(values.size() > 0) {
             return values.get(0);
+        }
+        return null;
+    }
+
+    private Integer ReadMaskingResolution()
+    {
+        NodeList nodes = GetUpperLevelNodeList("Resolution", "Missing masking file.", "Masking");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing masking resolution.");
+        if(values.size() > 0) {
+            return Integer.parseInt(values.get(0));
         }
         return null;
     }
@@ -294,7 +328,7 @@ public class ProjectInfoFile {
         if(values.size() > 0) {
             return Boolean.valueOf(values.get(0));
         }
-        return false;
+        return false;   // Default to false when element is missing.
     }
 
     private int ReadTotalModisTiles()
@@ -451,6 +485,16 @@ public class ProjectInfoFile {
         return 0;
     }
 
+    private double ReadFalseNorthing()
+    {
+        NodeList nodes = GetUpperLevelNodeList("FalseNorthing", "Missing false nothing.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing false nothing.");
+        if(values.size() > 0) {
+            return Double.parseDouble(values.get(0));
+        }
+        return 0;
+    }
+
     private double ReadLatitudeOfOrigin()
     {
         NodeList nodes = GetUpperLevelNodeList("LatitudeOfOrigin", "Missing latitude of origin.");
@@ -461,14 +505,38 @@ public class ProjectInfoFile {
         return 0;
     }
 
-    private double ReadFalseNorthing()
+    private Date ReadFreezing()
     {
-        NodeList nodes = GetUpperLevelNodeList("FalseNorthing", "Missing false nothing.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing false nothing.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
+        NodeList nodes = GetUpperLevelNodeList("Freezing", "Missing heating date.");
+        try {
+            // e.g. "Wed May 20 21:21:36 CDT 2015"
+            ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
+            if(values.size() > 0) {
+                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
+            }
+            return null;
+        } catch (ParseException e) {
+            error = true;
+            errorMsg.add(e.getMessage());
+            return null;
         }
-        return 0;
+    }
+
+    private Date ReadHeating()
+    {
+        NodeList nodes = GetUpperLevelNodeList("Heating", "Missing freezing date.");
+        try {
+            // e.g. "Wed May 20 21:21:36 CDT 2015"
+            ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
+            if(values.size() > 0) {
+                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
+            }
+            return null;
+        } catch (ParseException e) {
+            error = true;
+            errorMsg.add(e.getMessage());
+            return null;
+        }
     }
 
     private ArrayList<ProjectInfoSummary> ReadSummaries() throws ClassNotFoundException, NoSuchMethodException, SecurityException,
@@ -494,15 +562,20 @@ public class ProjectInfoFile {
                 if(summary.indexOf("Temporal Summary") == -1)
                 {
                     field = summary.substring(summary.indexOf("Field: ") + "Field: ".length());
+                    if(field.endsWith(";")) {
+                        field = field.substring(0, field.length() - 1);
+                    }
                     temporalSummaryCompositionStrategyClassName = null;
                     fileStore = null;
                 }
                 else
                 {
-                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length(), summary.indexOf("Field: ")
-                            + summary.indexOf(";"));
-                    temporalSummaryCompositionStrategyClassName = summary.substring(summary.lastIndexOf("; " + 2));
-                    strategyClass = Class.forName(temporalSummaryCompositionStrategyClassName);
+                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length(), summary.indexOf(";", summary.indexOf(";") + 1));
+                    temporalSummaryCompositionStrategyClassName = summary.substring(summary.indexOf("Temporal Summary: ") + "Temporal Summary: ".length());
+                    if(temporalSummaryCompositionStrategyClassName.endsWith(";")) {
+                        temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName.substring(0, temporalSummaryCompositionStrategyClassName.length() - 1);
+                    }
+                    strategyClass = Class.forName("version2.prototype.summary.temporal.CompositionStrategies." + temporalSummaryCompositionStrategyClassName);
                     ctorStrategy = strategyClass.getConstructor();
                     fileStore = new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance());
                 }

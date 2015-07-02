@@ -1,13 +1,16 @@
-package version2.prototype.summary.temporal;
+package version2.prototype.summary.temporal.MergeStrategies;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.summary.temporal.MergeStrategy;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;

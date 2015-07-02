@@ -1,25 +1,25 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import version2.prototype.summary.SummariesCollection;
-import version2.prototype.summary.SummarySingleton;
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummarySingleton;
 
 /**
- * Represents a summation summary based on indexed double values.
+ * Represents a counting summary based on the count of indexed double values.
  *
  * @author michael.devos
  *
  */
-public class Sum extends SummarySingleton {
+public class Count extends SummarySingleton {
 
     /**
-     * Creates a Sum object representing a summation summary.
+     * Creates a Count object representing a counting summary.
      *
      * @param col  - the SummariesCollection to register itself to
      */
-    public Sum(SummariesCollection col) {
+    public Count(SummariesCollection col) {
         super(col);
     }
 
@@ -29,9 +29,9 @@ public class Sum extends SummarySingleton {
     @Override
     public void put(int index, double value) {
         if(map.get(index) == null) {
-            map.put(index, value);
+            map.put(index, 1.0);
         } else {
-            map.put(index, map.get(index) + value);
+            map.put(index, map.get(index) + 1);
         }
     }
 

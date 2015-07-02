@@ -358,6 +358,24 @@ public class EASTWebManager implements Runnable{
     }
 
     /**
+     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to have its
+     * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
+     * cache information in the database.
+     *
+     * @param schedulerID  - targeted Scheduler's ID
+     */
+    public static void StartExistingScheduler(String projectName)
+    {
+
+        if(schedulerIDs.get(schedulerID))
+        {
+            synchronized (startExistingSchedulerRequests) {
+                startExistingSchedulerRequests.add(schedulerID);
+            }
+        }
+    }
+
+    /**
      * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} of the given type to be started up. GlobalDownloader objects are
      * singletons and are shared amongst Schedulers. If the GlobalDownloader associated pluginName is not currently associated with an existing
      * GlobalDownloader then the given one is stored and added to the running list of them.
@@ -480,6 +498,31 @@ public class EASTWebManager implements Runnable{
             for(SchedulerStatus aStatus : schedulerStatuses)
             {
                 if(aStatus.schedulerID == schedulerID) {
+                    status = aStatus;
+                    break;
+                }
+            }
+        }
+
+        return status;
+    }
+
+    /**
+     * Gets the {@link version2.Scheduler#SchedulerStatus SchedulerStatus} currently known for a {@link version2.Scheduler#Scheduler Scheduler} with the
+     * given unique ID, if it exists. If not, then returns null.
+     *
+     * @param schedulerID  - unique ID of the target {@link version2.Scheduler#Scheduler Scheduler} instance
+     * @return the currently known {@link version2.Scheduler#SchedulerStatus SchedulerStatus} for the target Scheduler if found, otherwise null returned.
+     */
+    public static SchedulerStatus GetSchedulerStatus(String projectName)
+    {
+        SchedulerStatus status = null;
+
+        synchronized (schedulerStatuses)
+        {
+            for(SchedulerStatus aStatus : schedulerStatuses)
+            {
+                if(aStatus.projectName.equals(projectName)) {
                     status = aStatus;
                     break;
                 }
@@ -722,7 +765,7 @@ public class EASTWebManager implements Runnable{
         {
             for(GUIUpdateHandler handler : guiHandlers)
             {
-                handler.run(GetSchedulerStatuses());
+                handler.run();
             }
         }
     }
