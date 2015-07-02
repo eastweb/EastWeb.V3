@@ -2,8 +2,8 @@ package version2.prototype.summary;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
@@ -12,12 +12,14 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
-import version2.prototype.summary.temporal.AvgGdalRasterFileMerge;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
+import version2.prototype.summary.temporal.MergeStrategies.AvgGdalRasterFileMerge;
+import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
+import version2.prototype.util.IndicesFileMetaData;
 
 public class SummaryWorker extends ProcessWorker {
 
@@ -31,10 +33,10 @@ public class SummaryWorker extends ProcessWorker {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    // TODO: Need to fix this to run on a specified plugin. Fix after adding database cache information.
     public ProcessWorkerReturn call() throws Exception {
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
         ArrayList<DataFileMetaData> tempFiles = new ArrayList<DataFileMetaData>(0);
+        IndicesFileMetaData cachedFileData;
 
         for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
         {
@@ -43,14 +45,14 @@ public class SummaryWorker extends ProcessWorker {
             {
                 for(DataFileMetaData cachedFile : cachedFiles)
                 {
+                    cachedFileData = cachedFile.ReadMetaDataForSummary();
                     TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
                             projectInfoFile.GetWorkingDir(),
                             projectInfoFile.GetProjectName(),   // projectName
                             pluginInfo.GetName(),   // pluginName
-                            new File(cachedFile.dataFilePath),     // inRasterFile
+                            new File(cachedFileData.dataFilePath),     // inRasterFile
                             null,   // inDataDate
-                            0,      // daysPerInputData
-                            0,      // daysPerOutputData
+                            pluginMetaData.DaysPerInputData,      // daysPerInputData
                             summary.GetTemporalFileStore(),   // TemporalSummaryRasterFileStore
                             null,   // InterpolateStrategy
                             new AvgGdalRasterFileMerge() // (Framework user defined)
@@ -58,26 +60,29 @@ public class SummaryWorker extends ProcessWorker {
                     tempFiles.add(temporalSummaryCal.calculate());
                 }
             }
-
         }
         cachedFiles = tempFiles;
 
         File outputFile;
         for(DataFileMetaData cachedFile : cachedFiles)
         {
+            cachedFileData = cachedFile.ReadMetaDataForSummary();
             for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
             {
                 outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
-                        pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%04d%03d.csv", cachedFile.year, cachedFile.day));
+                        pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
                 ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
                         projectInfoFile.GetWorkingDir(),
                         projectInfoFile.GetProjectName(),   // projectName
                         pluginInfo.GetName(),   // pluginName
-                        new File(cachedFile.dataFilePath),   // inRasterFile
+                        cachedFileData.indexNm,
+                        cachedFileData.year,
+                        cachedFileData.day,
+                        new File(cachedFileData.dataFilePath),   // inRasterFile
                         new File(summary.GetZonalSummary().GetShapeFile()),  // inShapeFile
                         outputFile,   // outTableFile
                         summary.GetZonalSummary().GetField(),    // zoneField
-                        new SummariesCollection(new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev")))); // summariesCollection
+                        new SummariesCollection(Config.getInstance().SummaryCalculations())); // summariesCollection
                 zonalSummaryCal.calculate();
                 outputFiles.add(DatabaseCache.Parse(outputFile.getCanonicalPath()));
             }

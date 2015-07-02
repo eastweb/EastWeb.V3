@@ -1,10 +1,10 @@
-package version2.prototype.summary.summaries;
+package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import version2.prototype.summary.SummariesCollection;
-import version2.prototype.summary.SummarySingleton;
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a summation summary based on indexed double values.
@@ -12,31 +12,31 @@ import version2.prototype.summary.SummarySingleton;
  * @author michael.devos
  *
  */
-public class SqrSum extends SummarySingleton {
+public class Sum extends SummaryCalculation {
 
     /**
      * Creates a Sum object representing a summation summary.
      *
      * @param col  - the SummariesCollection to register itself to
      */
-    public SqrSum(SummariesCollection col) {
+    public Sum(SummariesCollection col) {
         super(col);
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#put(int, double)
+     * @see version2.prototype.summary.summaries.SummaryCalculation#put(int, double)
      */
     @Override
     public void put(int index, double value) {
         if(map.get(index) == null) {
             map.put(index, value);
         } else {
-            map.put(index, map.get(index) + value*value);
+            map.put(index, map.get(index) + value);
         }
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#getResult()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#getResult()
      */
     @Override
     public Map<Integer, Double> getResult() {
@@ -44,11 +44,11 @@ public class SqrSum extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#getDistinctLeaflets()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#getDistinctLeaflets()
      */
     @Override
-    public ArrayList<SummarySingleton> getDistinctLeaflets() {
-        ArrayList<SummarySingleton> temp = new ArrayList<SummarySingleton>();
+    public ArrayList<SummaryCalculation> getDistinctLeaflets() {
+        ArrayList<SummaryCalculation> temp = new ArrayList<SummaryCalculation>();
         temp.add(this);
         return temp;
     }

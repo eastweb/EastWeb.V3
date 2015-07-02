@@ -219,7 +219,7 @@ public class DatabaseCache extends Observable{
                 filesAvailable = true;
             }
             setChanged();
-            notifyObservers(filesAvailable);
+            notifyObservers();
         } finally {
             rs.close();
         }
@@ -315,5 +315,11 @@ public class DatabaseCache extends Observable{
         }
 
         return new DataFileMetaData(fullPath, dateDirectory, dataGroupID, year, day);
+    }
+
+    public void NotifyObserversToCheckForPastUpdates()
+    {
+        setChanged();
+        notifyObservers();
     }
 }

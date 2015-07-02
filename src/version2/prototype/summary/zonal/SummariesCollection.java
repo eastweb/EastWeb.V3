@@ -1,19 +1,19 @@
-package version2.prototype.summary;
+package version2.prototype.summary.zonal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import version2.prototype.summary.summaries.Count;
-import version2.prototype.summary.summaries.Max;
-import version2.prototype.summary.summaries.Mean;
-import version2.prototype.summary.summaries.Min;
-import version2.prototype.summary.summaries.SqrSum;
-import version2.prototype.summary.summaries.StdDev;
-import version2.prototype.summary.summaries.Sum;
+import version2.prototype.summary.zonal.summaries.Count;
+import version2.prototype.summary.zonal.summaries.Max;
+import version2.prototype.summary.zonal.summaries.Mean;
+import version2.prototype.summary.zonal.summaries.Min;
+import version2.prototype.summary.zonal.summaries.SqrSum;
+import version2.prototype.summary.zonal.summaries.StdDev;
+import version2.prototype.summary.zonal.summaries.Sum;
 
 /**
- * Represents a collection of registered summaries as SummarySingletons facilitating interaction between summaries to share computations.
+ * Represents a collection of registered summaries as SummaryCalculations facilitating interaction between summaries to share computations.
  *
  * @author michael.devos
  *
@@ -22,7 +22,7 @@ public class SummariesCollection {
     /**
      * Creates a SummariesCollection object.
      *
-     * @param summaryNames  - case-sensitive names of the classes of SummarySingleton objects to create
+     * @param summaryNames  - case-sensitive names of the classes of SummaryCalculation objects to create
      * @throws ClassNotFoundException
      * @throws NoSuchMethodException
      * @throws SecurityException
@@ -33,9 +33,9 @@ public class SummariesCollection {
      */
     public SummariesCollection(ArrayList<String> summaryNames) throws ClassNotFoundException, NoSuchMethodException, SecurityException,
     InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-        summaries = new ArrayList<SummarySingleton>();
+        summaries = new ArrayList<SummaryCalculation>();
         registry = new ArrayList<SummaryNameInstancePair>();
-        SummarySingleton temp = null;
+        SummaryCalculation temp = null;
         String canonicalPath = this.getClass().getCanonicalName().substring(0, this.getClass().getCanonicalName().lastIndexOf(".") + 1);
         boolean alreadyRegistered = false;
 
@@ -46,7 +46,7 @@ public class SummariesCollection {
                     Constructor<?> summaryCons = summary.getConstructor(SummariesCollection.class);
 
                     if(registry.size() == 0){
-                        temp = (SummarySingleton)summaryCons.newInstance(this);
+                        temp = (SummaryCalculation)summaryCons.newInstance(this);
                         summaries.add(temp);
                         registry.add(new SummaryNameInstancePair(temp.getCanonicalName(), temp));
                     }
@@ -63,7 +63,7 @@ public class SummariesCollection {
                             summaries.add(temp);
                         }
                         else {
-                            temp = (SummarySingleton)summaryCons.newInstance(this);
+                            temp = (SummaryCalculation)summaryCons.newInstance(this);
                             summaries.add(temp);
                             registry.add(new SummaryNameInstancePair(temp.getCanonicalName(), temp));
                         }
@@ -74,15 +74,15 @@ public class SummariesCollection {
     }
 
     /**
-     * Retrieve a reference to the SummarySingleton object (if there is one) with the given canonical name in the stored collection.
+     * Retrieve a reference to the SummaryCalculation object (if there is one) with the given canonical name in the stored collection.
      *
-     * @param canonicalName  - SummarySingleton object's registered canonical name as gotten with SummarySingleton.getCanonicalName()
-     * @return reference to the registered SummarySingleton
+     * @param canonicalName  - SummaryCalculation object's registered canonical name as gotten with SummaryCalculation.getCanonicalName()
+     * @return reference to the registered SummaryCalculation
      */
-    public SummarySingleton lookup(String canonicalName){
+    public SummaryCalculation lookup(String canonicalName){
         boolean found = false;
         int i = 0;
-        SummarySingleton instance = null;
+        SummaryCalculation instance = null;
         SummaryNameInstancePair pair = null;
 
         while(!found && (i < registry.size())){
@@ -98,18 +98,18 @@ public class SummariesCollection {
     }
 
     /**
-     * Inserts a new value into the collection by inserting the value into all distinct leaflet SummarySingleton objects registered to the collection.
+     * Inserts a new value into the collection by inserting the value into all distinct leaflet SummaryCalculation objects registered to the collection.
      *
      * @param index  - index of given value
      * @param value  - double value to insert
      */
     public void put(int index, double value){
-        ArrayList<SummarySingleton> leavesFromSummaries = new ArrayList<SummarySingleton>();
-        ArrayList<SummarySingleton> temp = null;
-        for(SummarySingleton summary : summaries){
+        ArrayList<SummaryCalculation> leavesFromSummaries = new ArrayList<SummaryCalculation>();
+        ArrayList<SummaryCalculation> temp = null;
+        for(SummaryCalculation summary : summaries){
             temp = summary.getDistinctLeaflets();
             if(temp != null){
-                for(SummarySingleton s : temp){
+                for(SummaryCalculation s : temp){
                     if(!leavesFromSummaries.contains(s)) {
                         leavesFromSummaries.add(s);
                     }
@@ -117,7 +117,7 @@ public class SummariesCollection {
             }
         }
 
-        for(SummarySingleton summary : leavesFromSummaries){
+        for(SummaryCalculation summary : leavesFromSummaries){
             summary.put(index, value);
         }
     }
@@ -126,11 +126,11 @@ public class SummariesCollection {
      * Registers a SummaryNameInstancePair into the collection.
      *
      * @param pair  - SummaryNameInstancePair to register
-     * @return reference to SummarySingleton that is registered with the given name; if none then this will return the same reference as in the given
+     * @return reference to SummaryCalculation that is registered with the given name; if none then this will return the same reference as in the given
      * SummaryNameInstancePair
      */
-    public SummarySingleton register(SummaryNameInstancePair pair){
-        SummarySingleton temp = lookup(pair.getCanonicalName());
+    public SummaryCalculation register(SummaryNameInstancePair pair){
+        SummaryCalculation temp = lookup(pair.getCanonicalName());
         if(temp == null){
             registry.add(pair);
             temp = pair.getInstance();
@@ -145,18 +145,18 @@ public class SummariesCollection {
      */
     public ArrayList<SummaryNameResultPair> getResults(){
         ArrayList<SummaryNameResultPair> results = new ArrayList<SummaryNameResultPair>();
-        for(SummarySingleton summary : summaries){
+        for(SummaryCalculation summary : summaries){
             results.add(new SummaryNameResultPair(summary.getClass().getSimpleName(), summary.getResult()));
         }
         return results;
     }
 
     /**
-     * Provides a list of the names of the framework supplied SummarySingleton implementations.
+     * Provides a list of the names of the framework supplied SummaryCalculation implementations.
      *
-     * @return String list of the provided SummarySingleton implementation's canonical names
+     * @return String list of the provided SummaryCalculation implementation's canonical names
      */
-    public static ArrayList<String> providedSummarySingletons()
+    public static ArrayList<String> providedSummaryCalculations()
     {
         ArrayList<String> list = new ArrayList<String>(7);
         list.add(new Count(null).getCanonicalName());
@@ -170,5 +170,5 @@ public class SummariesCollection {
     }
 
     private ArrayList<SummaryNameInstancePair> registry;
-    private ArrayList<SummarySingleton> summaries;
+    private ArrayList<SummaryCalculation> summaries;
 }
