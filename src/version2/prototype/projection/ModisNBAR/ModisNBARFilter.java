@@ -65,10 +65,10 @@ public class ModisNBARFilter extends Filter {
                 }
 
                 // Open the QC File
-                Dataset hdf = gdal.Open(associatedQCFile);
-                if(hdf != null)
+                Dataset qaHdf = gdal.Open(associatedQCFile);
+                if(qaHdf != null)
                 {
-                    String qaBandName = GetQABandName(hdf);
+                    String qaBandName = GetQABandName(qaHdf);
 
                     // Read the desired band
                     Dataset qaDS = gdal.Open(qaBandName);
@@ -95,9 +95,6 @@ public class ModisNBARFilter extends Filter {
                         List<Entry<Integer, Integer>> pairList = GetPixelsThatNeedFiltering(allowedFlags, i+1, array, xSize, ySize);
                         Dataset data = gdal.Open(tileData.sdsName[i]);
 
-                        /*Driver driver = gdal.GetDriverByName("HDF5");
-                        Dataset outputDS = driver.CreateCopy(outputFolder + "\\" + dataFile.getName(), data);*/
-
                         if(data != null)
                         {
                             int dataX = data.GetRasterXSize();
@@ -117,15 +114,14 @@ public class ModisNBARFilter extends Filter {
                             try {
                                 // Write the changes.
                                 synchronized (GdalUtils.lockObject) {
-                                    data.GetRasterBand(1).WriteRaster(0, 0, dataX, dataY, 5, dataArray);
+                                    data.GetRasterBand(1).WriteRaster(0, 0, dataX, dataY, 4, dataArray);
                                 }
                             } catch(UnsatisfiedLinkError e) {
                                 e.printStackTrace();
                             }
 
-                            dataBand.delete();
+                            //dataBand.delete();
                             data.delete();
-                            //outputDS.delete();
                         }
                     }
                 }

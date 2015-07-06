@@ -12,7 +12,6 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
     public ModisNBARPrepareProcessTask(ProjectInfoFile mProject,
             ProjectInfoPlugin mPlugin, DataDate mDate) {
         super(mProject, mPlugin, mDate);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
@@ -44,33 +43,6 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
             break;
         }
         return folders.toArray(new String[folders.size()]);
-
-        /*// Format: Input (of this step) -> Output (of this step)
-        switch(stepId)
-        {
-        case 1:
-            // Download -> Mozaic
-            folders.add(project.GetWorkingDir() + String.format("ModisNBAR\\Download\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            break;
-        case 2:
-            // Mozaic -> Reproject
-            folders.add(project.GetWorkingDir() + String.format("ModisNBAR\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            break;
-        case 3:
-            // Reproject -> Filter
-            folders.add(project.GetWorkingDir() + String.format("ModisNBAR\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            folders.add(project.GetWorkingDir() + String.format("ModisNBAR\\QCDownload\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            break;
-        case 4:
-            // Filter -> Mask
-            folders.add(project.GetWorkingDir() + String.format("ModisNBAR\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            break;
-        default:
-            folders = null;
-            break;
-        }
-        return folders.toArray(new String[folders.size()]);*/
-
     }
 
     @Override
@@ -102,32 +74,6 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         }
 
         return outputFolder;
-
-        /*// Format: Input (of this step) -> Output (of this step)
-        switch(stepId)
-        {
-        case 1:
-            // Download -> Mozaic
-            outputFolder = project.GetWorkingDir() + String.format("ModisNBAR\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear());
-            break;
-        case 2:
-            // Mozaic -> Reproject
-            outputFolder = project.GetWorkingDir() + String.format("ModisNBAR\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear());
-            break;
-        case 3:
-            // Reproject/QCDownload -> Filter
-            outputFolder = project.GetWorkingDir() + String.format("ModisNBAR\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear());
-            break;
-        case 4:
-            // Filter -> Mask
-            outputFolder = project.GetWorkingDir() + String.format("ModisNBAR\\4\\%4d\\%03d", date.getYear(), date.getDayOfYear());
-            break;
-        default:
-            outputFolder = null;
-            break;
-        }
-
-        return outputFolder;*/
     }
 
     @Override
