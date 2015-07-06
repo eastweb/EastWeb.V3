@@ -23,36 +23,27 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
         switch(stepId)
         {
         case 1:
-            // Download -> Mozaic
+            // Download -> Filter
             folders.add(project.GetWorkingDir() + String.format("ModisLST\\Download\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            folders.add(project.GetWorkingDir() + String.format("ModisLST\\QCDownload\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
-            // QCDownload -> QCMozaic
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\QCDownload\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            // Filter -> Mozaic
+            folders.add(project.GetWorkingDir() + String.format("ModisLST\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Mozaic -> Reproject
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            break;
-        case 4:
-            // QCMozaic -> QCReproject
             folders.add(project.GetWorkingDir() + String.format("ModisLST\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
-        case 5:
-            // Reproject/QCReproject -> Filter
+        case 4:
+            // Reproject -> Mask
             folders.add(project.GetWorkingDir() + String.format("ModisLST\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\4\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            break;
-        case 6:
-            // Filter -> Mask
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\5\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
             break;
         default:
             folders = null;
             break;
         }
         return folders.toArray(new String[folders.size()]);
-
     }
 
     @Override
@@ -63,11 +54,11 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
         switch(stepId)
         {
         case 1:
-            // Download -> Mozaic
+            // Download -> Filter
             outputFolder = project.GetWorkingDir() + String.format("ModisLST\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            // QCDownload -> QCMozaic
+            // Filter -> Mozaic
             outputFolder = project.GetWorkingDir() + String.format("ModisLST\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 3:
@@ -75,16 +66,8 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
             outputFolder = project.GetWorkingDir() + String.format("ModisLST\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         case 4:
-            // QCMozaic -> QCReproject
+            // Reproject -> Mask
             outputFolder = project.GetWorkingDir() + String.format("ModisLST\\4\\%4d\\%03d", date.getYear(), date.getDayOfYear());
-            break;
-        case 5:
-            // Reproject/QCReproject -> Filter
-            outputFolder = project.GetWorkingDir() + String.format("ModisLST\\5\\%4d\\%03d", date.getYear(), date.getDayOfYear());
-            break;
-        case 6:
-            // Filter -> Mask
-            outputFolder = project.GetWorkingDir() + String.format("ModisLST\\6\\%4d\\%03d", date.getYear(), date.getDayOfYear());
             break;
         default:
             outputFolder = null;
