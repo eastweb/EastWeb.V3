@@ -1,7 +1,13 @@
 package version2.prototype.projection.ModisLST;
 
+import java.io.File;
+
+import org.gdal.gdal.Dataset;
+import org.gdal.gdal.gdal;
+
 import version2.prototype.projection.Filter;
 import version2.prototype.projection.ProcessData;
+import version2.prototype.util.GdalUtils;
 
 public class ModisLSTFilter extends Filter{
 
@@ -16,40 +22,51 @@ public class ModisLSTFilter extends Filter{
     }
 
     @Override
-    protected double filterByQCFlag(String qcLevel) {
+    protected void filterByQCFlag(String qcLevel) {
         // TODO Auto-generated method stub
         // filter pixel by pixel
 
         GdalUtils.register();
-
         synchronized (GdalUtils.lockObject) {
             for (File mInput : inputFiles){
 
                 Dataset inputDS = gdal.Open(mInput.getPath());
-                assert(inputDS.GetRasterCount() == 2);
+                assert(inputDS.GetRasterCount() == 1);
 
                 Dataset outputDS = createOutput(inputDS);
-                double[] array = new double[outputDS.GetRasterXSize()];
 
-                for (int y=0; y<outputDS.GetRasterYSize(); y++) {
-                    outputDS.GetRasterBand(2).ReadRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+                int xSize = outputDS.GetRasterXSize();
+                int ySize = outputDS.GetRasterYSize();
 
-                    for (int x=0; x<outputDS.GetRasterXSize(); x++) {
-                        String qclevel=getQCLevel(array[x]);
-                        if(qcLevel.equals(qclevel)==true)
-                        {
-                            return array[x];
-                        }
-                        else
-                        {
-                            return -9999;
-                        }
-                    }
+                //FIXME: assume the dataset is double.  If not, need to define different array type and buf-type.
+                // maybe in an abstract class?
+                double[] array = new double[xSize * ySize];
 
-                    synchronized (GdalUtils.lockObject) {
-                        outputDS.GetRasterBand(2).WriteRaster(0, y, outputDS.GetRasterXSize(), 1, array);
+                // use GDT_Float32 (6) for the buffer
+                // read the whole raster out into the array
+                int readReturn = outputDS.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, 6, array);
+                if (readReturn != 0) {
+                    try {
+                        throw new Exception("Cant read the Raster band : " + mInput.getPath());
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
                 }
+
+                // get each unit out and filter it
+                for (int y=0; y<outputDS.GetRasterYSize(); y++) {
+                    for (int x=0; x<outputDS.GetRasterXSize(); x++) {
+                        int index = y * xSize + x;
+                        array[index] = filterQCValue(array[index],qcLevel);
+                    }
+                }
+
+                synchronized (GdalUtils.lockObject) {
+                    outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 6, array);
+
+                }
+
                 inputDS.delete();
                 outputDS.delete();
             }
@@ -57,10 +74,24 @@ public class ModisLSTFilter extends Filter{
     }
 
 
-    public String getQCLevel(int value)
+    private double filterQCValue(double array, String qcLevel) {
+        // TODO Auto-generated method stub
+        String qclevel=getQCLevel(array);
+        if(qclevel.equalsIgnoreCase(qcLevel))
+        {
+            return array;
+        } else {
+            return
+                    -9999;
+        }
+    }
+
+    public String getQCLevel(double value)
     {
         //convert the integer qcband value into binary
-        String qcbandValue=Integer.toBinaryString(value);
+        Double v=new Double(value);
+        int iValue=v.intValue();
+        String qcbandValue=Integer.toBinaryString(iValue);
         int size=qcbandValue.length();
         char[]convertValue=new char[8];
         //convert the general binary order into 8-digit format
