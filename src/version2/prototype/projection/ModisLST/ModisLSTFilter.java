@@ -14,7 +14,6 @@ public class ModisLSTFilter extends Filter{
     public ModisLSTFilter(ProcessData data) {
         super(data);
     }
-
     @Override
     protected double filterValue(double value) {
         //in data bands the data type is 16bits unsigned integer
