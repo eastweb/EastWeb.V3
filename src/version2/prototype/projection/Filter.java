@@ -65,9 +65,9 @@ public abstract class Filter {
     }
 
     // run method for the scheduler
-    public void run(){
+    public void run() throws IOException{
         if (qcBands != null) {
-             filterByQCFlag(qcLevel);
+            filterByQCFlag(qcLevel);
         } else {
             try {
                 filterByValue();
@@ -78,13 +78,8 @@ public abstract class Filter {
         }
 
         // remove the input folder
-        try {
-            FileUtils.deleteDirectory(inputFolder1);
-            FileUtils.deleteDirectory(inputFolder2);
-        } catch (IOException e) {
-            // TODO : write to log
-            e.printStackTrace();
-        }
+        FileUtils.deleteDirectory(inputFolder1);
+        FileUtils.deleteDirectory(inputFolder2);
 
     }
 

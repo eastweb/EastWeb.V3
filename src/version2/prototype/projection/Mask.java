@@ -22,7 +22,8 @@ public class Mask {
     // mask file
     protected File maskFile;
 
-    public Mask(ProcessData data) {
+    public Mask(ProcessData data)
+    {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
 
@@ -37,18 +38,15 @@ public class Mask {
     }
 
     // run method for the scheduler
-    public void run(){
-        try {
-            masking();
-            // remove the input folder
-            FileUtils.deleteDirectory(inputFolder);
-        } catch (IOException e) {
-            // TODO :write into log
-            e.printStackTrace();
-        }
+    public void run() throws IOException
+    {
+        masking();
+        // remove the input folder
+        FileUtils.deleteDirectory(inputFolder);
     }
 
-    private void masking() throws IOException{
+    private void masking() throws IOException
+    {
         synchronized (GdalUtils.lockObject) {
             for (File mInput : inputFiles){
                 Dataset mInputDS = gdal.Open(mInput.getPath());
@@ -86,6 +84,7 @@ public class Mask {
                 int intersectWidth = intersectRight - intersectX;
                 int intersectHeight = intersectBottom - intersectY;
 
+                // FIXME: optimize line 88 - line 102
                 double[] output = new double[intersectWidth];
                 double[] mask = new double[intersectWidth];
 
@@ -95,14 +94,14 @@ public class Mask {
 
                     for (int x=0; x<intersectWidth; x++) {
                         if (mask[x] == 0) {
-                            output[x] = 32767; // FIXME: variable no data values
+                            output[x] = GdalUtils.NoValue;
                         }
                     }
 
                     mOutputDS.GetRasterBand(1).WriteRaster(intersectX, intersectY + y, intersectWidth, 1, output);
                 }
 
-                mOutputDS.GetRasterBand(1).SetNoDataValue(32767);
+                mOutputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
                 mOutputDS.GetRasterBand(1).ComputeStatistics(false);
                 mInputDS.delete();
                 mMaskDS.delete();

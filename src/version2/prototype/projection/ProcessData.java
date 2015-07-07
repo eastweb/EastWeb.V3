@@ -1,9 +1,6 @@
 package version2.prototype.projection;
 
-import java.io.File;
-
 import version2.prototype.Projection;
-import version2.prototype.util.GeneralListener;
 
 /* rewritten by Y.L. on May 31st */
 
@@ -17,12 +14,11 @@ public class ProcessData {
     private int [] dataBands;
     private int [] qcBands;
     private Projection projection;
-    private GeneralListener generalListener;
 
     public ProcessData() { }
 
     public ProcessData(String [] inputFolders, String outputFolder, String qcLevel, String shapefile,
-            String maskfile, int dataBands[], int qcBands[], Projection projection, GeneralListener generalListener)
+            String maskfile, int dataBands[], int qcBands[], Projection projection)
     {
         this.inputFolders = inputFolders;
         this.outputFolder = outputFolder;
@@ -32,7 +28,6 @@ public class ProcessData {
         this.dataBands = dataBands;
         this.qcBands = qcBands;
         this.projection = projection;
-        this.generalListener = generalListener;
     }
 
     public String [] getInputFolders()

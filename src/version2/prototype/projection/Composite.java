@@ -35,15 +35,12 @@ public abstract class Composite {
     }
 
     // run method for scheduler
-    public void run(){
+    public void run() throws IOException{
         composeFiles();
+
         // remove the input folder
-        try {
-            FileUtils.deleteDirectory(inputFolder);
-        } catch (IOException e) {
-            // TODO : write to log
-            e.printStackTrace();
-        }
+        FileUtils.deleteDirectory(inputFolder);
+
     }
 
     /*Override this:

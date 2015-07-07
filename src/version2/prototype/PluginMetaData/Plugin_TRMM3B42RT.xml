@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<PluginMetadata>
+	<title>TRMM3B42RT</title>
+	<Download>
+		<className>TRMM3B42RTDownloader</className>
+		<mode>ftp</mode>
+		<FTP>
+			<hostName>disc2.nascom.nasa.gov</hostName>
+			<rootDir>
+			  /data/TRMM/Gridded/Derived_Products/3B42RT/Daily/
+			</rootDir>
+			<userName>anonymous</userName>
+			<passWord>anonymous</passWord>
+		</FTP>
+	</Download>	
+	<Process>
+		<className>TRMM3B42RTConvert</className>
+		<className>TRMM3B42RTReproject</className>
+		<className>TRMM3B42RTClip</className>
+		<className>TRMM3B42RTMask</className>
+	</Process>
+	<Indices>
+		<ClassName>TRMM3B42RTIndices</ClassName>
+	</Indices>
+	<Summary>
+		<Temporal>
+			<DaysPerInputData>1</DaysPerInputData>
+		</Temporal>
+	</Summary>
+</PluginMetadata>
+
