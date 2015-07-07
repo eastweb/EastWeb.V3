@@ -148,7 +148,7 @@ public class AssociateSummaryPage {
                 String summary = "";
                 String temporal = String.valueOf(temporalComboBox.getSelectedItem());
 
-                summary = String.format("Shape File Path: %s; %s", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
+                summary = String.format("Shape File Path: %s; Field: %s", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
 
                 if(temporal != null & !temporal.isEmpty() ) {
                     summary = String.format("%s; Temporal Summary: %s",summary, String.valueOf(temporalComboBox.getSelectedItem()));

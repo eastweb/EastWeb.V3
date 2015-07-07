@@ -486,7 +486,7 @@ public class ProjectInfoFile {
             Class<?> strategyClass;
             Constructor<?> ctorStrategy;
 
-            for(String summary : summaryStrings)
+            /* for(String summary : summaryStrings)
             {
                 // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy
                 // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; COUNTYNS10
@@ -508,7 +508,7 @@ public class ProjectInfoFile {
                 }
                 summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, field), fileStore));
             }
-            return summaries;
+            return summaries;*/
         }
         return null;
 

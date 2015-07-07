@@ -136,7 +136,7 @@ public class ProjectInformationPage {
      */
     private void initialize() throws IOException, ParserConfigurationException, SAXException, ParseException {
         frame = new JFrame();
-        frame.setBounds(100, 100, 1207, 730);
+        frame.setBounds(100, 100, 1207, 800);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
@@ -418,7 +418,7 @@ public class ProjectInformationPage {
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Basic Project Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(10, 420, 358, 270);
+        panel.setBounds(10, 420, 358, 340);
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 
@@ -548,7 +548,7 @@ public class ProjectInformationPage {
         panel.add(timeZoneComboBox);
 
         isClippingCheckBox = new JCheckBox("");
-        isClippingCheckBox.setBounds(219, 203, 87, 23);
+        isClippingCheckBox.setBounds(148, 203, 200, 15);
         panel.add(isClippingCheckBox);
 
         JLabel lblClipping = new JLabel("Clipping:");
@@ -575,7 +575,7 @@ public class ProjectInformationPage {
         JPanel modisInformationPanel = new JPanel();
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(359, 420, 275, 270);
+        modisInformationPanel.setBounds(359, 420, 275, 340);
         frame.getContentPane().add(modisInformationPanel);
 
         modisListModel = new DefaultListModel<String>();
@@ -590,7 +590,7 @@ public class ProjectInformationPage {
                 modisListModel.addElement(tile);
             }
         });
-        addNewModisButton.setBounds(15, 29, 75, 30);
+        addNewModisButton.setBounds(15, 299, 75, 30);
         modisInformationPanel.add(addNewModisButton);
 
         JScrollPane scrollPane = new JScrollPane();
@@ -613,7 +613,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deleteSelectedModisButton.setBounds(185, 29, 75, 30);
+        deleteSelectedModisButton.setBounds(185, 299, 75, 30);
         modisInformationPanel.add(deleteSelectedModisButton);
     }
 
@@ -621,7 +621,7 @@ public class ProjectInformationPage {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(631, 420, 297, 270);
+        panel_2.setBounds(631, 420, 297, 340);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -717,7 +717,7 @@ public class ProjectInformationPage {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
         summaryPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        summaryPanel.setBounds(920, 420, 281, 270);
+        summaryPanel.setBounds(920, 420, 281, 340);
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
@@ -731,7 +731,7 @@ public class ProjectInformationPage {
                 new AssociateSummaryPage(new summaryListenerImplementation());
             }
         });
-        editSummaryButton.setBounds(15, 29, 75, 30);
+        editSummaryButton.setBounds(15, 299, 75, 30);
         summaryPanel.add(editSummaryButton);
 
         JScrollPane scrollPane = new JScrollPane();
@@ -754,7 +754,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deleteSummaryButton.setBounds(185, 29, 75, 30);
+        deleteSummaryButton.setBounds(185, 299, 75, 30);
         summaryPanel.add(deleteSummaryButton);
     }
 

@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.EastWebUI.ProgressUI.ProjectProgress;
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
+import version2.prototype.EastWebUI.QueryUI.QueryUI;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.Scheduler;
@@ -165,6 +166,22 @@ public class MainWindow {
             }
         });
         mnFile.add(mntmEditProject);
+        mnFile.addSeparator();
+
+
+        //edit project info button (opens the project info on limited edition)
+        JMenuItem mntmRunQuery = new JMenuItem("Run Query");
+        mntmRunQuery.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.ALT_MASK));
+        mntmRunQuery.setMnemonic(KeyEvent.VK_B);
+        mntmRunQuery.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+
+                new QueryUI(projectList);
+
+            }
+        });
+        mnFile.add(mntmRunQuery);
         mnFile.addSeparator();
 
         // create a new plugin meta data file
