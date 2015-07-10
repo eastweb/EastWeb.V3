@@ -6,15 +6,13 @@ import java.net.ConnectException;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 
-
-
 public class ConnectionContext {
 
-    public static Object getConnection(String mode, String dt, DownloadMetaData metadata) throws ConnectException{
+    public static Object getConnection(DownloadMetaData metadata) throws ConnectException{
         Object connection=null;
 
         try {
-
+            String mode = metadata.mode;
             String classnameInfo="version2.prototype.download."+mode+"ConnectionInfo";
             Class<?> clsInfo = Class.forName(classnameInfo);
 
@@ -25,7 +23,7 @@ public class ConnectionContext {
             //create connectionInfo object according to mode type.
             Constructor<?> ctor= clsInfo.getDeclaredConstructor(String.class, DownloadMetaData.class);
             ctor.setAccessible(true);
-            ConnectionInfo ci=(ConnectionInfo)ctor.newInstance(dt, metadata);
+            ConnectionInfo ci=(ConnectionInfo)ctor.newInstance(metadata);
 
             //build and return connection
             paramDatadate[0]=Class.forName("version2.prototype.download.ConnectionInfo");
@@ -39,7 +37,6 @@ public class ConnectionContext {
         return connection;
     }
 
-    static void close(Object conn){
-
-    }
+    // removed
+    //static void close(Object conn){}
 }

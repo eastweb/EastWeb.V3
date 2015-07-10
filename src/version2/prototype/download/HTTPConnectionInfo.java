@@ -8,12 +8,11 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.download.DownloaderFramework.DataType;
 
 public class HTTPConnectionInfo extends ConnectionInfo{
     String url;
 
-    HTTPConnectionInfo(DataType dt, DownloadMetaData metadata) throws ParserConfigurationException, SAXException, IOException {
+    HTTPConnectionInfo(DownloadMetaData metadata) throws ParserConfigurationException, SAXException, IOException {
         mode="HTTP";
         url=metadata.myHttp.url;
     }

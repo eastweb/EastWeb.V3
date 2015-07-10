@@ -8,17 +8,17 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 
-
 public class FTPConnectionInfo extends ConnectionInfo {
 
     String hostName;
     String userName;
     String password;
 
-    FTPConnectionInfo(String dt, DownloadMetaData metadata) throws ParserConfigurationException, SAXException, IOException{
+    FTPConnectionInfo(DownloadMetaData metadata) throws ParserConfigurationException, SAXException, IOException{
         mode="FTP";
         hostName=metadata.myFtp.hostName;
         userName=metadata.myFtp.userName;
         password=metadata.myFtp.password;
     }
+
 }
