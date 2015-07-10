@@ -12,6 +12,9 @@
 			<userName>anonymous</userName>
 			<passWord>anonymous</passWord>
 		</FTP>
+		<datePattern>\\d{4}</datePattern>
+		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>
+		<filesPerDay>1<filesPerDay>
 	</Download>	
 	<Process>
 		<className>TRMM3B42RTConvert</className>
