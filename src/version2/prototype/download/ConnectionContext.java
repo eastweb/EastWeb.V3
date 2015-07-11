@@ -4,7 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 
+
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+
 
 public class ConnectionContext {
 
@@ -21,7 +23,7 @@ public class ConnectionContext {
             Class<?>[] paramDatadate=new Class[1];
 
             //create connectionInfo object according to mode type.
-            Constructor<?> ctor= clsInfo.getDeclaredConstructor(String.class, DownloadMetaData.class);
+            Constructor<?> ctor= clsInfo.getDeclaredConstructor(DownloadMetaData.class);
             ctor.setAccessible(true);
             ConnectionInfo ci=(ConnectionInfo)ctor.newInstance(metadata);
 
