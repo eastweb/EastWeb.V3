@@ -22,25 +22,25 @@ public class Mozaic {
     String [] inputFolders ;
 
     //location for the output file
-    private File outputFolder;
+    protected File outputFolder;
     // the bands need to be exacted.
-    private int [] bands;
-    private File inputFolder;
+    protected int [] bands;
+    protected File inputFolder;
     // the files in the input folder
-    private File [] inputFiles;
+    protected File [] inputFiles;
     // hold the output files
-    private ArrayList<File> outputFiles;
+    protected ArrayList<File> outputFiles;
 
-    private int tileNumber;
+    protected int tileNumber;
 
-    private int xSize;
-    private int ySize;
-    private int outputXSize;
-    private int outputYSize;
-    private ModisTileData[] tileList;
-    private  ModisTileData[][] tileMetrix;
-    private int tileMetrixRow;
-    private int tileMetrixClo;
+    protected int xSize;
+    protected int ySize;
+    protected int outputXSize;
+    protected int outputYSize;
+    protected ModisTileData[] tileList;
+    protected ModisTileData[][] tileMetrix;
+    protected int tileMetrixRow;
+    protected int tileMetrixClo;
 
     public Mozaic(ProcessData data) throws InterruptedException {
 
@@ -87,7 +87,7 @@ public class Mozaic {
         }
     }
 
-    private void sortTiles() {
+    protected void sortTiles() {
         int minH = tileList[0].horizon;
         int maxH = tileList[0].horizon;
         int minV = tileList[0].vertical;

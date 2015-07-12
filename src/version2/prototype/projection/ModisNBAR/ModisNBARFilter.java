@@ -1,19 +1,12 @@
 package version2.prototype.projection.ModisNBAR;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -58,8 +51,7 @@ public class ModisNBARFilter extends Filter {
                 for(File qcFile : qcFiles)
                 {
                     if(qcFile.getName().contains(identifier)) {
-                        try { associatedQCFile = qcFile.getCanonicalPath(); }
-                        catch (IOException e) { associatedQCFile = qcFile.getAbsolutePath(); }
+                        associatedQCFile = qcFile.getAbsolutePath();
                         break;
                     }
                 }
@@ -68,10 +60,8 @@ public class ModisNBARFilter extends Filter {
                 Dataset qaHdf = gdal.Open(associatedQCFile);
                 if(qaHdf != null)
                 {
-                    String qaBandName = GetQABandName(qaHdf);
-
                     // Read the desired band
-                    Dataset qaDS = gdal.Open(qaBandName);
+                    Dataset qaDS = gdal.Open(GetQABandName(qaHdf));
                     int xSize = qaDS.getRasterXSize();
                     int ySize = qaDS.getRasterYSize();
                     Band b = qaDS.GetRasterBand(1);
@@ -81,7 +71,6 @@ public class ModisNBARFilter extends Filter {
                     b.ReadRaster(0, 0, xSize, ySize, 5, array);
 
                     ModisTileData tileData = null;
-
                     try {
                         tileData = new ModisTileData(dataFile);
                     } catch (InterruptedException e1) {
@@ -89,17 +78,17 @@ public class ModisNBARFilter extends Filter {
                         e1.printStackTrace();
                     }
 
-                    for(int i = 0; i < tileData.bandNumber; i++)
+                    for(int currentBand = 0; currentBand < tileData.bandNumber; currentBand++)
                     {
                         // Get the pixels that don't meet the desired QC level
-                        List<Entry<Integer, Integer>> pairList = GetPixelsThatNeedFiltering(allowedFlags, i+1, array, xSize, ySize);
-                        Dataset data = gdal.Open(tileData.sdsName[i]);
+                        List<Entry<Integer, Integer>> pairList = GetPixelsThatNeedFiltering(allowedFlags, currentBand+1, array, xSize, ySize);
+                        Dataset bandData = gdal.Open(tileData.sdsName[currentBand]);
 
-                        if(data != null)
+                        if(bandData != null)
                         {
-                            int dataX = data.GetRasterXSize();
-                            int dataY = data.GetRasterYSize();
-                            Band dataBand = data.GetRasterBand(1);
+                            int dataX = bandData.GetRasterXSize();
+                            int dataY = bandData.GetRasterYSize();
+                            Band dataBand = bandData.GetRasterBand(1);
 
                             // Read the full data band.
                             int[] dataArray = new int[dataX * dataY];
@@ -114,22 +103,14 @@ public class ModisNBARFilter extends Filter {
                             try {
                                 // Write the changes.
                                 synchronized (GdalUtils.lockObject) {
-                                    data.GetRasterBand(1).WriteRaster(0, 0, dataX, dataY, 4, dataArray);
+                                    bandData.GetRasterBand(1).WriteRaster(0, 0, dataX, dataY, 4, dataArray);
                                 }
                             } catch(UnsatisfiedLinkError e) {
                                 e.printStackTrace();
                             }
-
-                            //dataBand.delete();
-                            data.delete();
+                            bandData.delete();
                         }
                     }
-                }
-                try {
-                    copyFile(outputFolder + "\\", dataFile);
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
             }
         }
@@ -230,39 +211,5 @@ public class ModisNBARFilter extends Filter {
         }
 
         return qaBandName;
-    }
-
-    private static void  copyFile(String destinationFolder, File source) throws IOException
-    {
-        if(!(new File(destinationFolder).exists())) {
-            try {
-                FileUtils.forceMkdir(new File(destinationFolder));
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        InputStream inStream = null;
-        OutputStream outStream = null;
-        File destination = new File(destinationFolder + "\\" + source.getName());
-
-        try {
-            inStream = new FileInputStream(source);
-            outStream = new FileOutputStream(destination);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        byte[] buffer = new byte[1024];
-        int length;
-
-        while ((length = inStream.read(buffer)) > 0)
-        {
-            outStream.write(buffer, 0, length);
-        }
-
-        inStream.close();
-        outStream.close();
     }
 }

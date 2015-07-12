@@ -9,7 +9,7 @@ public class ImageArray {
     private int xSize;
     private int ySize;
 
-    ImageArray(Band band){
+    public ImageArray(Band band){
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject) {
@@ -21,10 +21,17 @@ public class ImageArray {
         }
     }
 
-    ImageArray(int x, int y){
+    public ImageArray(int x, int y){
         xSize=x;
         ySize=y;
         array=new double[x*y];
+    }
+
+    public ImageArray(int x, int y, double[] dataArray){
+        xSize = x;
+        ySize = y;
+        array = new double[x*y];
+        System.arraycopy(dataArray, 0, array, 0, (x*y));
     }
 
     public double[] getArray(){

@@ -9,8 +9,7 @@
 		</HTTP>
 	</Download>
 	<Processes>
-		<ClassName>ModisNBARFilter</ClassName>
-		<ClassName>Mosaic</ClassName>
+		<ClassName>ModisNBARFilterMozaic</ClassName>
 		<ClassName>Reproject</ClassName>
 		<ClassName>Mask</ClassName>
 	</Processes>

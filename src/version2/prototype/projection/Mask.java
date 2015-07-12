@@ -54,58 +54,61 @@ public class Mask {
                 String filename = mInput.getName();
                 File mOutput = new File(outputFolder,filename);
 
-                Dataset mOutputDS = mInputDS.GetDriver().CreateCopy(mOutput.getPath(), mInputDS); // FIXME: create 32bit new raster instead?
+                if(mInputDS != null && mMaskDS != null)
+                {
+                    Dataset mOutputDS = mInputDS.GetDriver().CreateCopy(mOutput.getPath(), mInputDS); // FIXME: create 32bit new raster instead?
 
-                assert(mInputDS.GetRasterCount() == 1);
-                assert(mMaskDS.GetRasterCount() == 1);
+                    assert(mInputDS.GetRasterCount() == 1);
+                    assert(mMaskDS.GetRasterCount() == 1);
 
-                int rasterX = 0;
-                int rasterY = 0;
-                int rasterWidth = mInputDS.GetRasterXSize();
-                int rasterHeight = mInputDS.GetRasterYSize();
-                int rasterRight = rasterWidth;
-                int rasterBottom = rasterHeight;
-                Transformer transformer = new Transformer(mMaskDS, mInputDS, null);
-                double[] point = new double[] {-0.5, -0.5, 0}; // Location of corner of first zone raster pixel
+                    int rasterX = 0;
+                    int rasterY = 0;
+                    int rasterWidth = mInputDS.GetRasterXSize();
+                    int rasterHeight = mInputDS.GetRasterYSize();
+                    int rasterRight = rasterWidth;
+                    int rasterBottom = rasterHeight;
+                    Transformer transformer = new Transformer(mMaskDS, mInputDS, null);
+                    double[] point = new double[] {-0.5, -0.5, 0}; // Location of corner of first zone raster pixel
 
-                transformer.TransformPoint(0, point);
+                    transformer.TransformPoint(0, point);
 
-                int maskX = (int) Math.round(point[0]);
-                int maskY = (int) Math.round(point[1]);
-                int maskWidth = mMaskDS.GetRasterXSize();
-                int maskHeight = mMaskDS.GetRasterYSize();
-                int maskRight = maskX + maskWidth;
-                int maskBottom = maskY + maskHeight;
+                    int maskX = (int) Math.round(point[0]);
+                    int maskY = (int) Math.round(point[1]);
+                    int maskWidth = mMaskDS.GetRasterXSize();
+                    int maskHeight = mMaskDS.GetRasterYSize();
+                    int maskRight = maskX + maskWidth;
+                    int maskBottom = maskY + maskHeight;
 
-                int intersectX = Math.max(rasterX, maskX);
-                int intersectY = Math.max(rasterY, maskY);
-                int intersectRight = Math.min(rasterRight, maskRight);
-                int intersectBottom = Math.min(rasterBottom, maskBottom);
-                int intersectWidth = intersectRight - intersectX;
-                int intersectHeight = intersectBottom - intersectY;
+                    int intersectX = Math.max(rasterX, maskX);
+                    int intersectY = Math.max(rasterY, maskY);
+                    int intersectRight = Math.min(rasterRight, maskRight);
+                    int intersectBottom = Math.min(rasterBottom, maskBottom);
+                    int intersectWidth = intersectRight - intersectX;
+                    int intersectHeight = intersectBottom - intersectY;
 
-                // FIXME: optimize line 88 - line 102
-                double[] output = new double[intersectWidth];
-                double[] mask = new double[intersectWidth];
+                    // FIXME: optimize line 88 - line 102
+                    double[] output = new double[intersectWidth];
+                    double[] mask = new double[intersectWidth];
 
-                for (int y=0; y<intersectHeight; y++) {
-                    mInputDS.GetRasterBand(1).ReadRaster(intersectX, intersectY + y, intersectWidth, 1, output);
-                    mMaskDS.GetRasterBand(1).ReadRaster(intersectX - maskX, intersectY - maskY + y, intersectWidth, 1, mask);
+                    for (int y=0; y<intersectHeight; y++) {
+                        mInputDS.GetRasterBand(1).ReadRaster(intersectX, intersectY + y, intersectWidth, 1, output);
+                        mMaskDS.GetRasterBand(1).ReadRaster(intersectX - maskX, intersectY - maskY + y, intersectWidth, 1, mask);
 
-                    for (int x=0; x<intersectWidth; x++) {
-                        if (mask[x] == 0) {
-                            output[x] = GdalUtils.NoValue;
+                        for (int x=0; x<intersectWidth; x++) {
+                            if (mask[x] == 0) {
+                                output[x] = GdalUtils.NoValue;
+                            }
                         }
+
+                        mOutputDS.GetRasterBand(1).WriteRaster(intersectX, intersectY + y, intersectWidth, 1, output);
                     }
 
-                    mOutputDS.GetRasterBand(1).WriteRaster(intersectX, intersectY + y, intersectWidth, 1, output);
+                    mOutputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+                    mOutputDS.GetRasterBand(1).ComputeStatistics(false);
+                    mInputDS.delete();
+                    mMaskDS.delete();
+                    mOutputDS.delete();
                 }
-
-                mOutputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
-                mOutputDS.GetRasterBand(1).ComputeStatistics(false);
-                mInputDS.delete();
-                mMaskDS.delete();
-                mOutputDS.delete();
             }
         }
     }
