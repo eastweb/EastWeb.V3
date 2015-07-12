@@ -17,7 +17,6 @@ import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.cache.*;
 import version2.prototype.ConfigReadException;
-import version2.prototype.DirectoryLayout;
 import version2.prototype.ModisTile;
 import version2.prototype.download.ModisLST.ModisLSTDownloader;
 

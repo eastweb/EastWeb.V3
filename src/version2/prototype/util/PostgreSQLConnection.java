@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import version2.prototype.Config;
+import version2.prototype.ConfigReadException;
 
 
 /**
@@ -29,10 +30,16 @@ public class PostgreSQLConnection {
             throw new ClassNotFoundException("Failed to find the PostgreSQL JDBC driver", e);
         }
 
-        return DriverManager.getConnection(
-                Config.getInstance().getDatabaseHost(),
-                Config.getInstance().getDatabaseUsername(),
-                Config.getInstance().getDatabasePassword()
-                );
+        try {
+            return DriverManager.getConnection(
+                    Config.getInstance().getDatabaseHost(),
+                    Config.getInstance().getDatabaseUsername(),
+                    Config.getInstance().getDatabasePassword()
+                    );
+        } catch (ConfigReadException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 }

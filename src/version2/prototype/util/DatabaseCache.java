@@ -182,7 +182,7 @@ public class DatabaseCache {
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public static void CacheFile(String[] filePath) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public static void CacheFile(CharSequence filePath) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
         String projectName, pluginName, tableName, dateDirectory;
         int year, day;
@@ -191,7 +191,7 @@ public class DatabaseCache {
         Matcher matcher = filePathPattern.matcher(filePath);
         if(matcher.find()) {
             projectName = matcher.group(1);
-            dateDirectory = filePath.substring(0, matcher.end());
+            dateDirectory = ((String) filePath).substring(0, matcher.end());
 
             switch(matcher.group(2))
             {
