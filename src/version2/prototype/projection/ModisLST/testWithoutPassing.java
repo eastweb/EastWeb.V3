@@ -50,7 +50,7 @@ public class testWithoutPassing {
         }
 
         int num=0;
-        for(int y=iYSize-1; y<iYSize; y++)
+        for(int y=0; y<iYSize; y++)
         {
             // band.ReadRaster(0, y, iXSize, 1, buf); //read data for one line
             // the pixel values stored in array[index]
