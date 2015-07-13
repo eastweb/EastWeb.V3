@@ -5,7 +5,7 @@ import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.SummaryNameInstancePair;
-import version2.prototype.summary.zonal.SummarySingleton;
+import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a mean summary based on indexed double values.
@@ -13,9 +13,9 @@ import version2.prototype.summary.zonal.SummarySingleton;
  * @author michael.devos
  *
  */
-public class Mean extends SummarySingleton {
-    private SummarySingleton sum;
-    private SummarySingleton count;
+public class Mean extends SummaryCalculation {
+    private SummaryCalculation sum;
+    private SummaryCalculation count;
 
     /**
      * Creates a Mean object representing a mean summary.
@@ -27,7 +27,7 @@ public class Mean extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#put(int, double)
+     * @see version2.prototype.summary.summaries.SummaryCalculation#put(int, double)
      */
     @Override
     public void put(int index, double value) {
@@ -36,7 +36,7 @@ public class Mean extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#getResult()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#getResult()
      */
     @Override
     public Map<Integer, Double> getResult() {
@@ -52,18 +52,18 @@ public class Mean extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#getDistinctLeaflets()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#getDistinctLeaflets()
      */
     @Override
-    public ArrayList<SummarySingleton> getDistinctLeaflets() {
-        ArrayList<SummarySingleton> temp = new ArrayList<SummarySingleton>(2);
+    public ArrayList<SummaryCalculation> getDistinctLeaflets() {
+        ArrayList<SummaryCalculation> temp = new ArrayList<SummaryCalculation>(2);
         temp.add(count);
         temp.add(sum);
         return temp;
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#registerDependencies()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#registerDependencies()
      */
     @Override
     protected void registerDependencies() {

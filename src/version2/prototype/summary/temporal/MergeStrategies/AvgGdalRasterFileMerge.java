@@ -1,10 +1,7 @@
 package version2.prototype.summary.temporal.MergeStrategies;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
+import java.time.LocalDate;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
@@ -28,47 +25,58 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
      * @see version2.prototype.summary.temporal.MergeStrategy#Merge(java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.io.File[])
      */
     @Override
-    public DataFileMetaData Merge(String workingDir, String projectName, String pluginName, GregorianCalendar firstDate, File[] rasterFiles)
+    public DataFileMetaData Merge(String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles)
             throws Exception {
         GdalUtils.register();
         DataFileMetaData mergedFile = null;
+        String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, ProcessName.SUMMARY) +
+                String.format("%04d%03d.tif",
+                        firstDate.getYear(),
+                        firstDate.getDayOfYear()
+                        );
 
         synchronized (GdalUtils.lockObject) {
-            double[] outTransform = null;
-            ArrayList<double[]> transforms = new ArrayList<double[]>(1);
+            // Create output copy based on rasterFiles[0]
+            Dataset inputRasterDs = gdal.Open(rasterFiles[0].getPath(), gdalconst.GA_ReadOnly);
+            GdalUtils.errorCheck();
+            Dataset avgRasterDs = gdal.GetDriverByName("GTiff").CreateCopy(newFilePath, inputRasterDs);
+            //            Dataset outputRasterDs = originRasterDs.GetDriver().CreateCopy(newFilePath, inputRasterDs);
+            double[][] avgArray = new double[avgRasterDs.GetRasterYSize()][avgRasterDs.GetRasterXSize()];
 
-            // Open inputs
-            for(File raster : rasterFiles)
+            // Populate avgArray with first file's data
+            for(int y=0; y < avgRasterDs.GetRasterYSize(); y++) {
+                avgRasterDs.GetRasterBand(1).ReadRaster(0, y, avgRasterDs.GetRasterXSize(), 1, avgArray[y]);
+            }
+
+            // Sum up values from the rest of the files
+            double[] tempArray;
+            for(int i=1; i < rasterFiles.length; i++)
             {
-                // Prepare raster file data
-                Dataset rasterDs = gdal.Open(raster.getPath(), gdalconst.GA_ReadOnly);
+                inputRasterDs = gdal.Open(rasterFiles[i].getPath(), gdalconst.GA_ReadOnly);
                 GdalUtils.errorCheck();
-
-                // Create the zone raster
-                transforms.add(rasterDs.GetGeoTransform());
-            }
-
-            // Get averages
-            Dataset rasterCopy = gdal.Open(rasterFiles[1].getPath(), gdalconst.GA_ReadOnly);
-            outTransform = new double[transforms.get(1).length];
-            int sum;
-            for(int i=0; i < transforms.get(1).length; i++)
-            {
-                sum = 0;
-                for(int t=0; t < transforms.size(); t++)
-                {
-                    sum += transforms.get(t)[i];
+                tempArray = new double[inputRasterDs.GetRasterXSize()];
+                for(int y=0; y < avgRasterDs.GetRasterYSize(); y++) {
+                    inputRasterDs.GetRasterBand(1).ReadRaster(0, y, inputRasterDs.GetRasterXSize(), 1, tempArray);
+                    for(int x=0; x < tempArray.length; x++) {
+                        avgArray[y][x] += tempArray[x];
+                    }
                 }
-                outTransform[i] = sum / transforms.size();
+                inputRasterDs.delete();
+                tempArray = null;
             }
 
-            String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, ProcessName.SUMMARY) +
-                    String.format("%04d%03d.tif",
-                            firstDate.get(Calendar.YEAR),
-                            firstDate.get(Calendar.DAY_OF_YEAR)
-                            );
-            rasterCopy.SetGeoTransform(outTransform);
-            rasterCopy.GetDriver().CreateCopy(newFilePath, rasterCopy, 1);
+            // Average values
+            for(int y=0; y < avgArray.length; y++) {
+                for(int x=0; x < avgArray[y].length; x++) {
+                    avgArray[y][x] = avgArray[y][x] / rasterFiles.length;
+                }
+
+                // Write averaged array to raster file
+                avgRasterDs.GetRasterBand(1).WriteRaster(0, y, avgRasterDs.GetRasterXSize(), 1, avgArray[y]);
+            }
+            avgArray = null;
+            avgRasterDs.delete();
+
             mergedFile = DatabaseCache.Parse(newFilePath);
         }
         return mergedFile;

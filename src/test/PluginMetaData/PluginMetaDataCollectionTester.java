@@ -7,11 +7,19 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -43,6 +51,7 @@ public class PluginMetaDataCollectionTester {
         assertTrue("First plugin title is " + instance.pluginList.get(0), instance.pluginMetaDataMap.get(instance.pluginList.get(0)).Title.equals("Test Plugin"));
         PluginMetaData pluginMetaData = instance.pluginMetaDataMap.get(instance.pluginList.get(0));
         assertNotNull(pluginMetaData);
+        assertTrue("Plugin DaysPerInputData is " + pluginMetaData.DaysPerInputData, pluginMetaData.DaysPerInputData == 1);
 
         // Test getting DownloadMetaData
         DownloadMetaData downloadData = pluginMetaData.Download;
@@ -52,6 +61,52 @@ public class PluginMetaDataCollectionTester {
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        ZoneId zid = ZoneId.of(downloadData.timeZone);
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
+        Pattern datePattern = null;
+        try {
+            //            String dateString = "";
+            //            int expectedYear = 0;
+            //            int expectedMonth = 0;
+            //            int expectedDay = 0;
+
+            datePattern = Pattern.compile(downloadData.datePattern);
+            //            Matcher matcher = datePattern.matcher(dateString);
+            //            if(matcher.find())
+            //            {
+            //                assertTrue("Year is " + matcher.group(1), Integer.parseInt(matcher.group(1)) == expectedYear);
+            //                assertTrue("Month is " + matcher.group(3), Integer.parseInt(matcher.group(3)) == expectedMonth);
+            //                assertTrue("Day is " + matcher.group(4), Integer.parseInt(matcher.group(4)) == expectedDay);
+            //            } else {
+            //                fail("DatePattern didn't match date test string.");
+            //            }
+        }
+        catch(PatternSyntaxException e) {
+            fail("DatePattern compiling throws PatternSyntaxException.");
+        }
+        Pattern fileNamePattern = null;
+        try {
+            //            String dateString = "";
+            //            int expectedYear = 0;
+            //            int expectedMonth = 0;
+            //            int expectedDay = 0;
+
+            fileNamePattern = Pattern.compile(downloadData.fileNamePattern);
+            //            Matcher matcher = datePattern.matcher(dateString);
+            //            if(matcher.find())
+            //            {
+            //                assertTrue("Year is " + matcher.group(1), Integer.parseInt(matcher.group(1)) == expectedYear);
+            //                assertTrue("Month is " + matcher.group(3), Integer.parseInt(matcher.group(3)) == expectedMonth);
+            //                assertTrue("Day is " + matcher.group(4), Integer.parseInt(matcher.group(4)) == expectedDay);
+            //            } else {
+            //                fail("DatePattern didn't match date test string.");
+            //            }
+        }
+        catch(PatternSyntaxException e) {
+            fail("FileNamePattern compiling throws PatternSyntaxException.");
+        }
 
         // Test getting ProcessorMetaData
         ProcessorMetaData processorData = pluginMetaData.Processor;
@@ -70,17 +125,8 @@ public class PluginMetaDataCollectionTester {
 
         // Test getting SummaryMetaData
         SummaryMetaData summaryData = pluginMetaData.Summary;
-        assertTrue("DaysPerInputData is " + summaryData.daysPerInputData,summaryData.daysPerInputData == 1);
+        //        assertTrue("DaysPerInputData is " + summaryData.daysPerInputData,summaryData.daysPerInputData == 1);
         assertTrue("MergeStrategyClass is " + summaryData.mergeStrategyClass, summaryData.mergeStrategyClass.equals("AvgGdalRasterFileMerge"));
         assertTrue("InterpolateStrategyClass is not empty string but " + summaryData.interpolateStrategyClass, summaryData.interpolateStrategyClass.equals(""));
-        ArrayList<String> summariesExpected = new ArrayList<String>();
-        summariesExpected.add("Count");
-        summariesExpected.add("Max");
-        summariesExpected.add("Mean");
-        summariesExpected.add("Min");
-        summariesExpected.add("SqrSum");
-        summariesExpected.add("StdDev");
-        summariesExpected.add("Sum");
-        assertTrue("SummarySingleton list is " + summaryData.summarySingletons.toString(), summaryData.summarySingletons.equals(summariesExpected));
     }
 }

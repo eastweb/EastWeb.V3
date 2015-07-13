@@ -1,60 +1,72 @@
 package version2.prototype;
 
 import java.io.Serializable;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.LocalDate;
 
 public final class DataDate implements Comparable<DataDate>, Serializable {
     /**
      *
      */
     private static final long serialVersionUID = 1L;
-    private final int day;
+    private final int dayOfMonth;
     private final int month;
     private final int year;
     private final int dayOfYear;
     //the range of hour is 0-23. default value is 0
     private final int hour;
+
+    public static DataDate DataDateWithHour(int hour, int dayOfYear, int year){
+        // Compute day, month
+        //        GregorianCalendar cal = getClearedCalendar();
+        //        cal.set(GregorianCalendar.YEAR, year);
+        //        cal.set(GregorianCalendar.DAY_OF_YEAR, dayOfYear);
+        //        int dayOfMonth = cal.get(GregorianCalendar.DAY_OF_MONTH);
+        //        int month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
+        int dayOfMonth = LocalDate.now().getDayOfMonth();
+        int month = LocalDate.now().getMonthValue();
+        return new DataDate(hour,dayOfMonth,month,year);
+    }
+
     /**
      * Returns a GregorianCalendar initialized with today's date.
      */
-    private static GregorianCalendar getTodayCalendar() {
-        final GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"), Locale.ROOT);
-        cal.setLenient(false);
-        return cal;
+    private static LocalDate getTodayCalendar() {
+        LocalDate date = LocalDate.now();
+        //        final GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"), Locale.ROOT);
+        //        cal.setLenient(false);
+        return date;
     }
 
     /**
      * Returns a cleared GregorianCalendar.
      */
-    private static GregorianCalendar getClearedCalendar() {
-        final GregorianCalendar cal = getTodayCalendar();
-        cal.clear();
-        return cal;
-    }
+    //    private static LocalDate getClearedCalendar() {
+    //        final GregorianCalendar cal = getTodayCalendar();
+    //        cal.clear();
+    //        return cal;
+    //    }
 
     /**
      * Returns a GregorianCalendar initialized with this instance's date.
      */
-    public GregorianCalendar getCalendar() {
-        final GregorianCalendar cal = getClearedCalendar();
-        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
-        return cal;
+    public LocalDate getCalendar() {
+        //        final GregorianCalendar cal = getClearedCalendar();
+        //        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
+        LocalDate date = LocalDate.of(year, month, dayOfMonth);
+        return date;
     }
 
-    public DataDate(int day, int month, int year) {
-        this.day = day;
+    public DataDate(int dayOfMonth, int month, int year) {
+        this.dayOfMonth = dayOfMonth;
         this.month = month;
         this.year = year;
         hour=0;
         // Compute dayOfYear
-        GregorianCalendar cal = getClearedCalendar();
-        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
-        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
+        //        GregorianCalendar cal = getClearedCalendar();
+        //        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
+        //        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
+        dayOfYear = LocalDate.now().getDayOfYear();
     }
-
-
 
     public DataDate(int dayOfYear, int year) {
         this.dayOfYear = dayOfYear;
@@ -62,43 +74,39 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         hour=0;
 
         // Compute day, month
-        GregorianCalendar cal = getClearedCalendar();
-        cal.set(GregorianCalendar.YEAR, year);
-        cal.set(GregorianCalendar.DAY_OF_YEAR, dayOfYear);
-        day = cal.get(GregorianCalendar.DAY_OF_MONTH);
-        month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
+        //        GregorianCalendar cal = getClearedCalendar();
+        //        cal.set(GregorianCalendar.YEAR, year);
+        //        cal.set(GregorianCalendar.DAY_OF_YEAR, dayOfYear);
+        //        dayOfMonth = cal.get(GregorianCalendar.DAY_OF_MONTH);
+        //        month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
+        dayOfMonth = LocalDate.now().getDayOfMonth();
+        month = LocalDate.now().getMonthValue();
     }
 
-
-    public static DataDate DataDateWithHour(int hour, int day, int year){
-        // Compute day, month
-        GregorianCalendar cal = getClearedCalendar();
-        cal.set(GregorianCalendar.YEAR, year);
-        cal.set(GregorianCalendar.DAY_OF_YEAR, day);
-        int dayOfMonth = cal.get(GregorianCalendar.DAY_OF_MONTH);
-        int month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
-        return new DataDate(hour,dayOfMonth,month,year);
-
-    }
-
-    public DataDate(GregorianCalendar cal) {
-        day = cal.get(GregorianCalendar.DATE);
-        month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
-        year = cal.get(GregorianCalendar.YEAR);
-        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
+    public DataDate(LocalDate date) {
+        //        dayOfMonth = cal.get(GregorianCalendar.DATE);
+        //        month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
+        //        year = cal.get(GregorianCalendar.YEAR);
+        //        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
+        dayOfMonth = date.getDayOfMonth();
+        dayOfYear = date.getDayOfYear();
+        month = date.getMonthValue();
+        year = date.getYear();
         hour=0;
     }
 
     //construct for date which contains hour
-    public DataDate(int hour,int day, int month, int year) {
-        this.day = day;
+    public DataDate(int hour, int dayOfMonth, int month, int year) {
+        this.dayOfMonth = dayOfMonth;
         this.month = month;
         this.year = year;
         this.hour=hour;
+
         // Compute dayOfYear
-        GregorianCalendar cal = getClearedCalendar();
-        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
-        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
+        //        GregorianCalendar cal = getClearedCalendar();
+        //        cal.set(year, month - 1, dayOfMonth); // Subtract 1 to convert from 1-based months to 0-based months
+        //        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
+        dayOfYear = LocalDate.now().getDayOfYear();
     }
 
     /**
@@ -115,8 +123,9 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         final String PARSE_ERROR_MESSAGE = "Failed to parse compact data date string";
 
         final String[] parts = str.split("-");
-        if (parts.length != 4)
+        if (parts.length != 4) {
             throw new IllegalArgumentException(PARSE_ERROR_MESSAGE);
+        }
 
         final int year, month, day,hour;
         try {
@@ -135,7 +144,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
      * Gets this instance's day (of the month).
      */
     public int getDay() {
-        return day;
+        return dayOfMonth;
     }
 
     /**
@@ -171,43 +180,48 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
     }
 
     public DataDate next(int days) {
-        final GregorianCalendar cal = getCalendar();
-        cal.add(GregorianCalendar.DAY_OF_YEAR, days);
-        return new DataDate(cal);
+        //        final GregorianCalendar cal = getCalendar();
+        //        cal.add(GregorianCalendar.DAY_OF_YEAR, days);
+        //        return new DataDate(cal);
+        return new DataDate(LocalDate.of(year, month, dayOfMonth).plusDays(days));
     }
 
     public DataDate lastDayOfMonth() {
-        final GregorianCalendar cal = getCalendar();
-        // Jump back to the first day of this month
-        cal.set(GregorianCalendar.DATE, 1);
-        // Roll around to the last day of this month
-        cal.roll(GregorianCalendar.DATE, -1);
-        return new DataDate(cal);
+        //        final GregorianCalendar cal = getCalendar();
+        //        // Jump back to the first day of this month
+        //        cal.set(GregorianCalendar.DATE, 1);
+        //        // Roll around to the last day of this month
+        //        cal.roll(GregorianCalendar.DATE, -1);
+        //        return new DataDate(cal);
+        return new DataDate(LocalDate.of(year, month, LocalDate.of(year, month, dayOfMonth).lengthOfMonth()));
     }
 
     /**
      * Returns the lesser of two DataDates, as defined by compareTo().
      */
     public static DataDate max(DataDate a, DataDate b) {
-        if (a.compareTo(b) > 0)
+        if (a.compareTo(b) > 0) {
             return a;
-        else
+        } else {
             return b;
+        }
     }
 
     @Override
     public int compareTo(DataDate o) {
         // First, order by year
-        if (year < o.year)
+        if (year < o.year) {
             return -1;
-        else if (year > o.year)
+        } else if (year > o.year) {
             return 1;
+        }
 
         // Second, order by dayOfYear
-        if (dayOfYear < o.dayOfYear)
+        if (dayOfYear < o.dayOfYear) {
             return -1;
-        else if (dayOfYear > o.dayOfYear)
+        } else if (dayOfYear > o.dayOfYear) {
             return 1;
+        }
 
         // The objects are equal
         return 0;
@@ -215,10 +229,11 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DataDate)
+        if (obj instanceof DataDate) {
             return equals((DataDate)obj);
-        else
+        } else {
             return false;
+        }
     }
 
     public boolean equals(DataDate date) {
@@ -237,13 +252,13 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         return new StringBuilder()
         .append("{year: ").append(year)
         .append(", month: ").append(month)
-        .append(", day: ").append(day)
+        .append(", day: ").append(dayOfMonth)
         .append(", dayOfYear: ").append(dayOfYear)
         .append("}").toString();
     }
 
 
     public String toCompactString() {
-        return String.format("%04d-%02d-%02d-%02d", year, month, day,hour);
+        return String.format("%04d-%02d-%02d-%02d", year, month, dayOfMonth, hour);
     }
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.SummaryNameInstancePair;
-import version2.prototype.summary.zonal.SummarySingleton;
+import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a standard deviation summary based on indexed double values.
@@ -13,10 +13,10 @@ import version2.prototype.summary.zonal.SummarySingleton;
  * @author michael.devos
  *
  */
-public class StdDev extends SummarySingleton {
-    private SummarySingleton sqrSum;
-    private SummarySingleton count;
-    private SummarySingleton mean;
+public class StdDev extends SummaryCalculation {
+    private SummaryCalculation sqrSum;
+    private SummaryCalculation count;
+    private SummaryCalculation mean;
 
     /**
      * Creates a StdDev object representing a standard deviation summary.
@@ -28,7 +28,7 @@ public class StdDev extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#put(int, double)
+     * @see version2.prototype.summary.summaries.SummaryCalculation#put(int, double)
      */
     @Override
     public void put(int index, double value) {
@@ -38,7 +38,7 @@ public class StdDev extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#getResult()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#getResult()
      */
     @Override
     public Map<Integer, Double> getResult() {
@@ -55,14 +55,14 @@ public class StdDev extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#getDistinctLeaflets()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#getDistinctLeaflets()
      */
     @Override
-    public ArrayList<SummarySingleton> getDistinctLeaflets() {
-        ArrayList<SummarySingleton> temp = new ArrayList<SummarySingleton>(3);
+    public ArrayList<SummaryCalculation> getDistinctLeaflets() {
+        ArrayList<SummaryCalculation> temp = new ArrayList<SummaryCalculation>(3);
         temp.add(count);
         temp.add(sqrSum);
-        ArrayList<SummarySingleton> fromMean = mean.getDistinctLeaflets();
+        ArrayList<SummaryCalculation> fromMean = mean.getDistinctLeaflets();
         if(fromMean.get(0).getClass().getSimpleName().equalsIgnoreCase("sum")) {
             temp.add(fromMean.get(0));
         } else {
@@ -72,7 +72,7 @@ public class StdDev extends SummarySingleton {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.summaries.SummarySingleton#registerDependencies()
+     * @see version2.prototype.summary.summaries.SummaryCalculation#registerDependencies()
      */
     @Override
     protected void registerDependencies() {

@@ -1,5 +1,6 @@
 package version2.prototype.util;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -14,6 +15,8 @@ import version2.prototype.Scheduler.ProcessName;
  */
 
 public final class FileSystem {
+    private static final Pattern rule2Pattern = Pattern.compile("^[a-zA-Z_]\\S+");
+
     private FileSystem() {}
 
     /**
@@ -65,8 +68,12 @@ public final class FileSystem {
      */
     public static String StandardizeName(String name)
     {
+        // Rule 3: Replace any characters that aren't letters, numbers, or an underscore
         name = name.replaceAll("[^a-zA-Z0-9_]", "_");
-        if(!Pattern.matches("^[a-zA-Z_]", name))
+
+        // Rule 2: Check that name starts with either a letter or an underscore
+        Matcher matcher = rule2Pattern.matcher(name);
+        if(!matcher.matches())
         {
             name = "_" + name.substring(1);
         }

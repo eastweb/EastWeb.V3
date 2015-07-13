@@ -1,8 +1,18 @@
 <?xml version="1.0"?>
 <config>
-<DataBase>
-  <hostName>localhost:5432</hostName>
-  <userName>postgres</userName>
-  <passWord>eastweb</passWord>
-</DataBase>
+	<DataBase>
+		<globalSchema>EASTWeb</globalSchema>
+		<hostName>localhost:5432</hostName>
+		<userName>postgres</userName>
+		<passWord>eastweb</passWord>
+	</DataBase>
+	<Output>
+		<SummaryCalculation>Count</SummaryCalculation>
+		<SummaryCalculation>Max</SummaryCalculation>
+		<SummaryCalculation>Mean</SummaryCalculation>
+		<SummaryCalculation>Min</SummaryCalculation>
+		<SummaryCalculation>SqrSum</SummaryCalculation>
+		<SummaryCalculation>StdDev</SummaryCalculation>
+		<SummaryCalculation>Sum</SummaryCalculation>
+	</Output>
 </config>

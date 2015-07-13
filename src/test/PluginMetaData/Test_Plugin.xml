@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <PluginMetadata>
 	<title>Test Plugin</title>
+	<DaysPerInputData>1</DaysPerInputData>
 	<Download>
 		<Class>NldasDownloadTask</Class>
 		<Mode>ftp</Mode>
@@ -10,6 +11,10 @@
 			<UserName>anonymous</UserName>
 			<PassWord>anonymous</PassWord>
 		</FTP>
+		<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+		<FilesPerDay>1</FilesPerDay>
+		<DatePattern>\\d{4}</DatePattern>
+		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
 	</Download>	
 	<Processor>
 		<ProcessStep>NldasProjection</ProcessStep>
@@ -22,19 +27,9 @@
 	</Indices>
 	<Summary>
 		<Temporal>
-			<DaysPerInputData>1</DaysPerInputData>
 			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
 			<InterpolateStrategyClass></InterpolateStrategyClass>
 		</Temporal>
-		<Zonal>
-			<SummarySingleton>Count</SummarySingleton>
-			<SummarySingleton>Max</SummarySingleton>
-			<SummarySingleton>Mean</SummarySingleton>
-			<SummarySingleton>Min</SummarySingleton>
-			<SummarySingleton>SqrSum</SummarySingleton>
-			<SummarySingleton>StdDev</SummarySingleton>
-			<SummarySingleton>Sum</SummarySingleton>
-		</Zonal>
 	</Summary>
 	<QualityControl>
 		<Level>None</Level>

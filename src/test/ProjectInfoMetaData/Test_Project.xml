@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ProjectInfo>
-	<Plugins/>
+	<Plugins>
+		<Plugin name="Test Plugin">
+			<QC>Level 1</QC>
+			<Indicies>GdalModisLST_DAYCalculator</Indicies>
+			<Indicies>GdalModisLST_MEANCalculator</Indicies>
+			<Indicies>GdalModisLST_NIGHTCalculator</Indicies>
+		</Plugin>
+	</Plugins>
 	<StartDate>Tue Jun 02 23:17:37 CDT 2015</StartDate>
 	<ProjectName>sufi_Project</ProjectName>
 	<WorkingDir>C:\Users\sufi</WorkingDir>
@@ -29,9 +36,9 @@
 	<Freezing>Tue Jun 02 23:17:37 CDT 2015</Freezing>
 	<Heating>Tue Jun 02 23:17:37 CDT 2015</Heating>
 	<Summaries>
-        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
-        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
-        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10</Summary>
-        <Summary>Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10;</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10;</Summary>
 	</Summaries>
 </ProjectInfo>

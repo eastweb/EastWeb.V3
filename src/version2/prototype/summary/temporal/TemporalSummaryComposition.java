@@ -1,9 +1,9 @@
 package version2.prototype.summary.temporal;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.GregorianCalendar;
 
 
 /**
@@ -13,7 +13,7 @@ import java.util.GregorianCalendar;
  *
  */
 public class TemporalSummaryComposition {
-    public final GregorianCalendar startDate;
+    public final LocalDate startDate;
     public final ArrayList<FileDatePair> files;
     private final TemporalSummaryCompositionStrategy strategy;
 
@@ -41,7 +41,7 @@ public class TemporalSummaryComposition {
     public boolean addFilePair(FileDatePair FDPair)
     {
         boolean success = true;
-        if((strategy.getDaysInOneComposite(startDate) > files.size()) && (FDPair.date.getCalendar().compareTo(startDate) >= 0))
+        if((strategy.getDaysInThisComposite(startDate) > files.size()) && (FDPair.date.getCalendar().compareTo(startDate) >= 0))
         {
             files.add(FDPair);
             Collections.sort(files, new AscComp());
@@ -59,7 +59,7 @@ public class TemporalSummaryComposition {
      */
     public boolean compositeFull() throws Exception
     {
-        if(strategy.getDaysInOneComposite(startDate) == files.size()) {
+        if(strategy.getDaysInThisComposite(startDate) == files.size()) {
             return true;
         } else {
             return false;

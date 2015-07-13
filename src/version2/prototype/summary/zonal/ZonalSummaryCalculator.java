@@ -34,12 +34,15 @@ import version2.prototype.util.PostgreSQLConnection;
  *
  */
 public class ZonalSummaryCalculator {
-    private File mRasterFile;
-    private File mLayerFile;
-    private File mTableFile;
-    private String mField;
-    private SummariesCollection summariesCollection;
-    private String projectName;
+    private final File mRasterFile;
+    private final File mLayerFile;
+    private final File mTableFile;
+    private final String mField;
+    private final SummariesCollection summariesCollection;
+    private final String projectName;
+    private final String indexNm;
+    private final int year;
+    private final int day;
 
     /**
      * Creates a ZonalSummaryCalculator.
@@ -51,7 +54,7 @@ public class ZonalSummaryCalculator {
      * @param zoneField  - zone field name to use
      * @param summariesCollection  - collection of summary calculations to run on raster data
      */
-    public ZonalSummaryCalculator(String workingDir, String projectName, String pluginName, File inRasterFile, File inShapeFile, File outTableFile,
+    public ZonalSummaryCalculator(String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile, File inShapeFile, File outTableFile,
             String zoneField, SummariesCollection summariesCollection)
     {
         mRasterFile = inRasterFile;
@@ -60,6 +63,9 @@ public class ZonalSummaryCalculator {
         mField = zoneField;
         this.summariesCollection = summariesCollection;
         this.projectName = projectName;
+        this.indexNm = indexNm;
+        this.year = year;
+        this.day = day;
     }
 
     /**
@@ -234,7 +240,6 @@ public class ZonalSummaryCalculator {
 
         gdal.RasterizeLayer(zoneRaster, new int[] {1}, layer, null, options); GdalUtils.errorCheck();
 
-
         return zoneRaster;
     }
 
@@ -326,20 +331,20 @@ public class ZonalSummaryCalculator {
         final boolean previousAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
-        String index = "";
-        int year = -1;
-        int day = -1;
-
-        // C:\Users\michael.devos\Desktop\eastweb-data\projects\tw_test\indices\trmm\2013\204\TW_DIS_F_P_Dis_REGION
-        // Get position of index folder found after project name folder and index folder name
-        int pos = rasterFilePath.indexOf("\\", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
-        if(pos == -1) {
-            pos = rasterFilePath.indexOf("/", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
-        }
-
-        index = rasterFilePath.substring(pos, rasterFilePath.indexOf(File.separator, pos));
-        year = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 1, rasterFilePath.indexOf(File.separator, pos + index.length() + 1)));
-        day = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 6, rasterFilePath.indexOf(File.separator, pos + index.length() + 6)));
+        //        String index = "";
+        //        int year = -1;
+        //        int day = -1;
+        //
+        //        // C:\Users\michael.devos\Desktop\eastweb-data\projects\tw_test\indices\trmm\2013\204\TW_DIS_F_P_Dis_REGION
+        //        // Get position of index folder found after project name folder and index folder name
+        //        int pos = rasterFilePath.indexOf("\\", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
+        //        if(pos == -1) {
+        //            pos = rasterFilePath.indexOf("/", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
+        //        }
+        //
+        //        index = rasterFilePath.substring(pos, rasterFilePath.indexOf(File.separator, pos));
+        //        year = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 1, rasterFilePath.indexOf(File.separator, pos + index.length() + 1)));
+        //        day = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 6, rasterFilePath.indexOf(File.separator, pos + index.length() + 6)));
 
         try {
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -352,7 +357,7 @@ public class ZonalSummaryCalculator {
                             mSchemaName
                     );
             final PreparedStatement ps = conn.prepareStatement(_query);
-            ps.setString(1, index);
+            ps.setString(1, indexNm);
             final ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 indexKey = rs.getInt(1);
@@ -368,7 +373,7 @@ public class ZonalSummaryCalculator {
                                 mSchemaName
                         );
                 final PreparedStatement psInsert = conn.prepareStatement(_query);
-                psInsert.setString(1, index);
+                psInsert.setString(1, indexNm);
                 psInsert.executeQuery();
 
                 _query = String.format(
@@ -378,7 +383,7 @@ public class ZonalSummaryCalculator {
                                 mSchemaName
                         );
                 final PreparedStatement psInserted = conn.prepareStatement(_query);
-                psInserted.setString(1, index);
+                psInserted.setString(1, indexNm);
                 final ResultSet rsInserted = ps.executeQuery();
                 indexKey = rsInserted.getInt(1);
                 rsInserted.close();
@@ -636,7 +641,6 @@ public class ZonalSummaryCalculator {
                         "  \"zoneFieldID\",\n" +
                         "  \"fieldID\"\n" +
                         ") VALUES (\n" +
-                        "  ?,\n" +
                         "  ?,\n" +
                         "  ?\n" +
                         ")",

@@ -87,6 +87,7 @@ public class PluginMetaDataCollection {
             doc.getDocumentElement().normalize();
             PluginMetaData temp=new PluginMetaData();
             temp.Title = doc.getElementsByTagName("title").item(0).getTextContent();
+            temp.DaysPerInputData = Integer.parseInt(doc.getElementsByTagName("DaysPerInputData").item(0).getTextContent());
             temp.Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
             temp.Processor = new ProcessorMetaData(doc.getElementsByTagName("Processor"));
 
@@ -142,6 +143,7 @@ public class PluginMetaDataCollection {
         public ArrayList<String> IndicesMetaData;
         public ArrayList<String> QualityControlMetaData;
         public String Title;
+        public int DaysPerInputData;
     }
 
     public class DownloadMetaData{
@@ -151,6 +153,10 @@ public class PluginMetaDataCollection {
         public ftp myFtp;
         public http myHttp;
         public String className;
+        public String timeZone;
+        public int filesPerDay;
+        public String datePattern;
+        public String fileNamePattern;
 
         public DownloadMetaData(NodeList n){
             myFtp=null;
@@ -159,6 +165,8 @@ public class PluginMetaDataCollection {
             Node downloadNode = nList.item(0);
 
             try{
+                timeZone = ((Element) downloadNode).getElementsByTagName("TimeZone").item(0).getTextContent();
+                timeZone = timeZone.substring(timeZone.indexOf(") ") + 2);
                 className = ((Element) downloadNode).getElementsByTagName("Class").item(0).getTextContent();
                 mode=((Element) downloadNode).getElementsByTagName("Mode").item(0).getTextContent();
                 mode=mode.toUpperCase();
@@ -168,6 +176,10 @@ public class PluginMetaDataCollection {
                 } else {
                     myHttp=new http(((Element)downloadNode).getElementsByTagName(mode).item(0));
                 }
+
+                filesPerDay = Integer.parseInt(((Element) downloadNode).getElementsByTagName("FilesPerDay").item(0).getTextContent());
+                datePattern = ((Element) downloadNode).getElementsByTagName("DatePattern").item(0).getTextContent();
+                fileNamePattern = ((Element) downloadNode).getElementsByTagName("FileNamePattern").item(0).getTextContent();
             }catch(Exception e){
 
             }
@@ -220,10 +232,8 @@ public class PluginMetaDataCollection {
     }
 
     public class SummaryMetaData{
-        public final int daysPerInputData;
         public final String mergeStrategyClass;
         public final String interpolateStrategyClass;
-        public final ArrayList<String> summarySingletons;
 
         private NodeList nList;
 
@@ -239,23 +249,13 @@ public class PluginMetaDataCollection {
             //            NodeList tempList = DaysPerInputData.getChildNodes();
             //            Node valueNode = tempList.item(0);
             //            daysPerInputData = Integer.parseInt(valueNode.getNodeValue().trim());
-            daysPerInputData = Integer.parseInt(((Element) temporalNode).getElementsByTagName("DaysPerInputData").item(0).getTextContent());
+            //            daysPerInputData = Integer.parseInt(((Element) temporalNode).getElementsByTagName("DaysPerInputData").item(0).getTextContent());
 
             // Node: MergeStrategyClass
             mergeStrategyClass = (((Element) temporalNode).getElementsByTagName("MergeStrategyClass").item(0).getTextContent());
 
             // Node: InterpolateStrategyClass
             interpolateStrategyClass = (((Element) temporalNode).getElementsByTagName("InterpolateStrategyClass").item(0).getTextContent());
-
-            // Node: zonal
-            Node zonalNode = ((Element) summaryNode).getElementsByTagName("Zonal").item(0);
-
-            // Node(s): SummarySingleton
-            summarySingletons = new ArrayList<String>(1);
-            NodeList summaryList = ((Element) zonalNode).getElementsByTagName("SummarySingleton");
-            for(int i=0; i < summaryList.getLength(); i++) {
-                summarySingletons.add(summaryList.item(i).getTextContent());
-            }
         }
     }
 

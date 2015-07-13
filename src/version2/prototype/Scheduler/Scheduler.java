@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.EASTWebManager;
@@ -87,12 +88,15 @@ public class Scheduler {
         indicesCaches = new ArrayList<DatabaseCache>(1);
 
         ID = myID;
-
+        PluginMetaData pluginMetaData;
         for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
             try
             {
-                Schema.CreateProjectPluginSchema(projectInfoFile.GetProjectName(), item.GetName());
+                pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
+                // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
+                Schema.CreateProjectPluginSchema("EASTWeb", projectInfoFile.GetProjectName(), item.GetName(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData,
+                        item.GetIndicies().size(), projectInfoFile.GetSummaries(), Config.getInstance().SummaryCalculations());
                 SetupProcesses(item);
             }
             catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
@@ -240,11 +244,12 @@ public class Scheduler {
      * @param pluginMetaData  - plugin information gotten from a PluginMetaData.*.xml
      * @param outputCache  - DatabaseCache object used to cache output files from a LocaldDownloader
      * @return general concrete Process object for managing ProcessWorkers
+     * @throws ClassNotFoundException
      */
-    private Process SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache)
+    private Process SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache) throws ClassNotFoundException
     {
-        // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.DOWNLOAD, outputCache);
+        // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
+        Process process = new GenericProcess<DownloadWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.DOWNLOAD, null, outputCache);
         return process;
     }
 
@@ -258,12 +263,13 @@ public class Scheduler {
      * @param inputCache  - DatabaseCache object used to acquire files available for processor processing
      * @param outputCache  - DatabaseCache object used to cache output files from processor processing
      * @return general concrete Process object for managing ProcessWorkers
+     * @throws ClassNotFoundException
      */
     private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
-            DatabaseCache outputCache) {
-        // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.PROCESSOR, outputCache);
-        inputCache.addObserver(process);
+            DatabaseCache outputCache) throws ClassNotFoundException {
+        // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
+        Process process = new GenericProcess<ProcessorWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.PROCESSOR, inputCache, outputCache);
+        //        inputCache.addObserver(process);
         return process;
     }
 
@@ -277,12 +283,13 @@ public class Scheduler {
      * @param inputCache  - DatabacheCache object used to acquire files available for indices processing
      * @param outputCache  - DatabaseCache object used to cache output files from indices processing
      * @return general concrete Process object for managing ProcessWorkers
+     * @throws ClassNotFoundException
      */
     private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
-            DatabaseCache outputCache) {
-        // If desired GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.INDICES, outputCache);
-        inputCache.addObserver(process);
+            DatabaseCache outputCache) throws ClassNotFoundException {
+        // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
+        Process process = new GenericProcess<IndicesWorker>(projectInfoFile, pluginInfo, pluginMetaData, this, ProcessName.INDICES, inputCache, outputCache);
+        //        inputCache.addObserver(process);
         return process;
     }
 
@@ -298,8 +305,8 @@ public class Scheduler {
      */
     private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
     {
-        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this);
-        inputCache.addObserver(process);
+        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
+        //        inputCache.addObserver(process);
         return process;
     }
 

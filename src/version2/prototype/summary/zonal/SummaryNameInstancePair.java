@@ -11,10 +11,10 @@ public class SummaryNameInstancePair {
     /**
      * Creates a SummaryNameInstancePair.
      *
-     * @param canonicalName  - canonical name of the given SummarySingleton object
-     * @param instance  - SummarySingleton object to pair to a name
+     * @param canonicalName  - canonical name of the given SummaryCalculation object
+     * @param instance  - SummaryCalculation object to pair to a name
      */
-    public SummaryNameInstancePair(String canonicalName, SummarySingleton instance){
+    public SummaryNameInstancePair(String canonicalName, SummaryCalculation instance){
         this.canonicalName = canonicalName;
         this.instance = instance;
     }
@@ -33,10 +33,10 @@ public class SummaryNameInstancePair {
      *
      * @return the summary's instance reference
      */
-    public SummarySingleton getInstance() {
+    public SummaryCalculation getInstance() {
         return instance;
     }
 
     private String canonicalName;
-    private SummarySingleton instance;
+    private SummaryCalculation instance;
 }
