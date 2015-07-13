@@ -54,7 +54,7 @@ public class SchemaTest {
                 ));
 
         // Run method under test - defined for MODIS plugin
-        Schema.CreateProjectPluginSchema(testGlobalSchema, "Test_Project", "Test_Plugin", LocalDate.now(), 8, 3, summaryNames);
+        //        Schema.CreateProjectPluginSchema(testGlobalSchema, "Test_Project", "Test_Plugin", LocalDate.now(), 8, 3, summaryNames);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
