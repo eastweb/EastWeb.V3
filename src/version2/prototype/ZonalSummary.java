@@ -12,6 +12,7 @@ public class ZonalSummary implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String shapeFile;
     private final String field;
+    private final String zone;
 
     /**
      * Creates a ZonalSummary object pairing of shape file and zone field.
@@ -19,9 +20,10 @@ public class ZonalSummary implements Serializable {
      * @param shapeFile  - shape file to be used in this zonal summary
      * @param field  - zone field to be used in this zonal summary
      */
-    public ZonalSummary(String shapeFile, String field) {
+    public ZonalSummary(String shapeFile, String field, String zone) {
         this.shapeFile = shapeFile;
         this.field = field;
+        this.zone = zone;
     }
 
     /**
@@ -40,6 +42,15 @@ public class ZonalSummary implements Serializable {
      */
     public String GetField() {
         return field;
+    }
+
+    /**
+     * Gets the zone name.
+     *
+     * @return zone name
+     */
+    public String GetZone() {
+        return zone;
     }
 
     /* (non-Javadoc)

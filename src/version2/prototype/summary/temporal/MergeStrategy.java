@@ -1,7 +1,7 @@
 package version2.prototype.summary.temporal;
 
 import java.io.File;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
 
 import version2.prototype.util.DataFileMetaData;
 
@@ -23,5 +23,5 @@ public interface MergeStrategy {
      * @return metadata about single merged file created
      * @throws Exception
      */
-    DataFileMetaData Merge(String workingDir, String projectName, String pluginName, GregorianCalendar firstDate, File[] rasterFiles) throws Exception;
+    DataFileMetaData Merge(String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles) throws Exception;
 }

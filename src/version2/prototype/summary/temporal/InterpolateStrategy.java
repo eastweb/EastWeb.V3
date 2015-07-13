@@ -10,13 +10,19 @@ import java.util.ArrayList;
  *
  */
 public interface InterpolateStrategy {
-
     /**
-     * Concrete classes will implement Interpolate(File, in) to define how to split single data files which contain multiple days worth of data into multiple files.
+     * Concrete classes will implement this method to define how to split single, or more, data files which contain multiple days worth of data into multiple files.
      *
-     * @param rasterFile  - raster file to split
      * @param days  - days the raster file should be split into
+     * @param rasterFiles  - raster files to interpolate
      * @return  - list of files creates from the given rasterFile
      */
-    ArrayList<File> Interpolate(File rasterFile, int days);
+    public abstract ArrayList<File> Interpolate(int days, File... rasterFiles);
+
+    /**
+     * Gets the expected count of the number of files resulting after running this interpolation strategy on a single file.
+     *
+     * @return the expected number of resulting files
+     */
+    public abstract int GetResultingNumOfFiles();
 }

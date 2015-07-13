@@ -1,19 +1,64 @@
-package version2.prototype;
+package test;
+
 
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-public class EASTWebManagerTester {
+public class SandboxTesting {
     private static ArrayList<String> myList;
 
     public static void main(String[] args) {
+        testPersistance();
+        Test3();
+    }
+
+    private static void testPersistance() {
+        PersistanceTester pTest = new PersistanceTester();
+        System.out.println(pTest.getList().size());
+        pTest.addValue(1);
+        System.out.println(pTest.getList().size());
+        pTest.addValue(2);
+        System.out.println(pTest.getList().size());
+
+        pTest = null;
+
+        pTest = new PersistanceTester();
+        System.out.println(pTest.getList().size());
+        pTest.addValue(1);
+        System.out.println(pTest.getList().size());
+        pTest.addValue(2);
+        System.out.println(pTest.getList().size());
+
+        pTest = null;
+
+        PersistanceTester pTest1 = new PersistanceTester();
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(1);
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(2);
+        System.out.println(pTest1.getList().size());
+
+        pTest1 = null;
+
+        pTest1 = new PersistanceTester();
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(1);
+        System.out.println(pTest1.getList().size());
+        pTest1.addValue(2);
+        System.out.println(pTest1.getList().size());
+
+        pTest1 = null;
+    }
+
+    private static void Test3()
+    {
         myList = new ArrayList<String>();
         myList.add("Hello World.");
         myList.add("Hello again.");
 
         ArrayList<Watcher> watchers = new ArrayList<Watcher>(1);
-        EASTWebManagerTester tester = new EASTWebManagerTester();
+        SandboxTesting tester = new SandboxTesting();
         Watcher watcher = tester.new Watcher();
         Watched watched = tester.new Watched(watcher);
 
@@ -34,28 +79,6 @@ public class EASTWebManagerTester {
             System.out.println(str);
         }
         System.out.println(myList.size());
-
-        //        EASTWebManager em = EASTWebManager.GetInstance();
-        //        ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-        //            @Override
-        //            public Thread newThread(Runnable target) {
-        //                final Thread thread = new Thread(target);
-        //                //                log.debug("Creating new worker thread");
-        //                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-        //                    @Override
-        //                    public void uncaughtException(Thread t, Throwable e) {
-        //                        //                        log.error("Uncaught Exception", e);
-        //                    }
-        //                });
-        //                return thread;
-        //            }
-        //        });
-        //        executor.execute(em);
-        //        executor.shutdown();
-        //
-        //        System.out.println();
-        //        System.out.println("Global Downloaders Running: " + EASTWebManager.GetNumberOfGlobalDownloaders());
-        //        System.out.println("Schedulers Running: " + EASTWebManager.GetNumberOfSchedulerResources());
     }
 
     private static ArrayList<String> GetList()
@@ -63,16 +86,6 @@ public class EASTWebManagerTester {
         ArrayList<String> output = new ArrayList<String>(myList);
         myList.clear();
         return output;
-    }
-
-    private static Watcher CreateWatcher(EASTWebManagerTester tester)
-    {
-        return tester.new Watcher();
-    }
-
-    private static Watched CreateWatched(EASTWebManagerTester tester, Watcher watcher)
-    {
-        return tester.new Watched(watcher);
     }
 
     private class Watcher implements Observer
@@ -114,6 +127,23 @@ public class EASTWebManagerTester {
         public Boolean GetState()
         {
             return state;
+        }
+    }
+
+    private static class PersistanceTester{
+        private static ArrayList<Integer> values = new ArrayList<Integer>(0); // Needed
+        public PersistanceTester()
+        {
+        }
+
+        public void addValue(int n)
+        {
+            values.add(n);
+        }
+
+        public ArrayList<Integer> getList()
+        {
+            return values;
         }
     }
 }

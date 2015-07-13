@@ -19,7 +19,6 @@ public class TemporalSummaryCalculator {
     private File inRasterFile;
     private DataDate inDataDate;
     private int daysPerInputData;
-    private int daysPerOutputData;
     private TemporalSummaryRasterFileStore fileStore;
     private InterpolateStrategy intStrategy;
     private MergeStrategy mergeStrategy;
@@ -40,7 +39,7 @@ public class TemporalSummaryCalculator {
      * @param fileStore  - common storage object to hold files waiting to be merged together into a single composite
      */
     public TemporalSummaryCalculator(String workingDir, String projectName, String pluginName, File inRasterFile, DataDate inDataDate,
-            int daysPerInputData, int daysPerOutputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy,
+            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy,
             MergeStrategy mergeStrategy) {
         this.workingDir = workingDir;
         this.projectName = projectName;
@@ -48,7 +47,6 @@ public class TemporalSummaryCalculator {
         this.inRasterFile = inRasterFile;
         this.inDataDate = inDataDate;
         this.daysPerInputData = daysPerInputData;
-        this.daysPerOutputData = daysPerOutputData;
         this.fileStore = fileStore;
         this.intStrategy = intStrategy;
         this.mergeStrategy = mergeStrategy;
@@ -65,10 +63,18 @@ public class TemporalSummaryCalculator {
         DataFileMetaData output = null;
         ArrayList<File> inputFileSet = new ArrayList<File>();
 
-        if(daysPerInputData > daysPerOutputData) {
-            inputFileSet = intStrategy.Interpolate(inRasterFile, daysPerInputData);
-        } else {
+        // Check if interpolation is needed
+        if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getCalendar()) % daysPerInputData == 0) {
             inputFileSet.add(inRasterFile);
+        } else {
+            // If the given interpolation strategy is be able to complete the required composites..
+            if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getCalendar()) % intStrategy.GetResultingNumOfFiles() == 0) {
+                inputFileSet = intStrategy.Interpolate(inRasterFile, daysPerInputData);
+            }
+            // Else, if it isn't then the default daily interpolation strategy.
+            else {
+
+            }
         }
 
         TemporalSummaryComposition tempComp;

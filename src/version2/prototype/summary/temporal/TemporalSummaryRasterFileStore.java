@@ -1,8 +1,8 @@
 package version2.prototype.summary.temporal;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 
 import version2.prototype.DataDate;
 
@@ -39,11 +39,11 @@ public class TemporalSummaryRasterFileStore {
     public TemporalSummaryComposition addFile(File f, DataDate d, int daysPerInputData) throws Exception
     {
         TemporalSummaryComposition modifiedComp = null;
-        GregorianCalendar gDate = compStrategy.getStartDate(d.getCalendar());
+        LocalDate lDate = compStrategy.getStartDate(d.getCalendar());
         int i;
         boolean matched = false;
         for(i=0; i < compositions.size(); i++) {
-            if(compositions.get(i).startDate.compareTo(gDate) == 0)
+            if(compositions.get(i).startDate.compareTo(lDate) == 0)
             {
                 matched = true;
                 i = compositions.size();
@@ -60,7 +60,7 @@ public class TemporalSummaryRasterFileStore {
         else
         {
             TemporalSummaryComposition tempComp = new TemporalSummaryComposition(compStrategy, new FileDatePair(f, d));
-            if(compStrategy.getDaysInOneComposite(d.getCalendar()) == 1) {
+            if(compStrategy.getDaysInThisComposite(d.getCalendar()) == 1) {
                 modifiedComp = tempComp;
             } else {
                 compositions.add(tempComp);

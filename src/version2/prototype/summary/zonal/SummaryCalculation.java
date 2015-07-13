@@ -11,14 +11,18 @@ import java.util.Map;
  * @author michael.devos
  *
  */
-public abstract class SummarySingleton {
+public abstract class SummaryCalculation {
+    protected String canonicalName;
+    protected Map<Integer, Double> map;
+    protected SummariesCollection col;
+
     /**
-     * Create a SummarySingleton. Registers this instance to the given SummariesCollection object along with all its dependencies. Implementing classes have to take
+     * Create a SummaryCalculation. Registers this instance to the given SummariesCollection object along with all its dependencies. Implementing classes have to take
      * care of defining the dependencies and the calculation this instance will do with acquired doubles.
      *
      * @param col
      */
-    public SummarySingleton(SummariesCollection col){
+    public SummaryCalculation(SummariesCollection col){
         map = new HashMap<Integer, Double>();
         this.col = col;
         canonicalName = this.getClass().getCanonicalName();
@@ -26,8 +30,8 @@ public abstract class SummarySingleton {
     }
 
     /**
-     * Implementing classes will override this method and register required dependencies by creating instances of required SummarySingletons and registering them.
-     * The SummariesCollection object will handle returning the correct reference to the stored SummarySingleton to use. If a SummarySingleton has no dependencies
+     * Implementing classes will override this method and register required dependencies by creating instances of required SummaryCalculations and registering them.
+     * The SummariesCollection object will handle returning the correct reference to the stored SummaryCalculation to use. If a SummaryCalculation has no dependencies
      * then it need not override this method.
      */
     protected void registerDependencies(){    }
@@ -48,7 +52,7 @@ public abstract class SummarySingleton {
     public abstract Map<Integer, Double> getResult();
 
     /**
-     * A full name to this calculation. Not to be abbreviated. SummarySingletons are looked up in SummariesCollections using this value.
+     * A full name to this calculation. Not to be abbreviated. SummaryCalculations are looked up in SummariesCollections using this value.
      *
      * @return a name to identify this calculation by
      */
@@ -57,15 +61,11 @@ public abstract class SummarySingleton {
     }
 
     /**
-     * Gets the list of SummarySingleton objects that are this object's dependencies. Must return the list of unique dependencies amongst all of its dependencies and
-     * itself. Only SummarySingleton objects that have no dependencies are to be included in this list (hence distinct leaflets, or leaves of the tree structure).
-     * These can be found from dependencies by finding SummarySingleton objects which return a list of only themselves for this method.
+     * Gets the list of SummaryCalculation objects that are this object's dependencies. Must return the list of unique dependencies amongst all of its dependencies and
+     * itself. Only SummaryCalculation objects that have no dependencies are to be included in this list (hence distinct leaflets, or leaves of the tree structure).
+     * These can be found from dependencies by finding SummaryCalculation objects which return a list of only themselves for this method.
      *
      * @return
      */
-    public abstract ArrayList<SummarySingleton> getDistinctLeaflets();
-
-    protected String canonicalName;
-    protected Map<Integer, Double> map;
-    protected SummariesCollection col;
+    public abstract ArrayList<SummaryCalculation> getDistinctLeaflets();
 }
