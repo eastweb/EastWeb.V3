@@ -1,8 +1,6 @@
 package version2.prototype;
 
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.Callable;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -17,10 +15,9 @@ import version2.prototype.util.DataFileMetaData;
  *
  * @param <V>  - return type of the Callable
  */
-public abstract class ProcessWorker<V> implements Callable<V>, Observer {
+public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
     public String processWorkerName;
-    protected Process<?> process;
-    protected ThreadState mState;
+    protected Process process;
     protected ProjectInfoFile projectInfoFile;
     protected ProjectInfoPlugin pluginInfo;
     protected PluginMetaData pluginMetaData;
@@ -36,7 +33,7 @@ public abstract class ProcessWorker<V> implements Callable<V>, Observer {
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param cachedFiles  - the files to process
      */
-    protected ProcessWorker(String processWorkerName, Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    protected ProcessWorker(String processWorkerName, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
         this.processWorkerName = processWorkerName;
@@ -45,25 +42,5 @@ public abstract class ProcessWorker<V> implements Callable<V>, Observer {
         this.pluginInfo = pluginInfo;
         this.pluginMetaData = pluginMetaData;
         this.cachedFiles = cachedFiles;
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    @Override
-    public void update(Observable o, Object arg) {
-        if(arg instanceof ThreadState)
-        {
-            ThreadState state = (ThreadState) arg;
-            switch(state)
-            {
-            case RUNNING:
-                mState = ThreadState.RUNNING;
-                break;
-            case STOPPED:
-                mState = ThreadState.STOPPED;
-                break;
-            }
-        }
     }
 }

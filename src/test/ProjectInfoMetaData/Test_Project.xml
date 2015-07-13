@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="Test Plugin">
+			<QC>Level 1</QC>
+			<Indicies>GdalModisLST_DAYCalculator</Indicies>
+			<Indicies>GdalModisLST_MEANCalculator</Indicies>
+			<Indicies>GdalModisLST_NIGHTCalculator</Indicies>
+		</Plugin>
+	</Plugins>
+	<StartDate>Tue Jun 02 23:17:37 CDT 2015</StartDate>
+	<ProjectName>sufi_Project</ProjectName>
+	<WorkingDir>C:\Users\sufi</WorkingDir>
+	<Masking>
+		<File>C:\Users\Public\Desktop\3D Vision Photo Viewer.lnk</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>C:\Users\sufi\Desktop\shapefile\shapefile.shp</MasterShapeFile>
+	<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+	<TotalModisTiles>120</TotalModisTiles>
+	<ModisTiles>
+		<Modis>v12H42</Modis>
+		<Modis>V11H11</Modis>
+	</ModisTiles>
+	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
+	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+	<Datum>NAD83</Datum>
+	<PixelSize>12</PixelSize>
+	<StandardParallel1>112.1</StandardParallel1>
+	<StandardParallel2>122.2</StandardParallel2>
+	<ScalingFactor>00.00</ScalingFactor>
+	<CentralMeridian>121</CentralMeridian>
+	<FalseEasting>151</FalseEasting>
+	<FalseNorthing>33</FalseNorthing>
+	<LatitudeOfOrigin>111</LatitudeOfOrigin>
+	<Freezing>Tue Jun 02 23:17:37 CDT 2015</Freezing>
+	<Heating>Tue Jun 02 23:17:37 CDT 2015</Heating>
+	<Summaries>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10</Summary>
+        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10;</Summary>
+	</Summaries>
+</ProjectInfo>

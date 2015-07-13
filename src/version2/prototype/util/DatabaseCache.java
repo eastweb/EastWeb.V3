@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Observable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,43 +20,59 @@ import version2.prototype.Scheduler.ProcessName;
  * @author michael.devos
  *
  */
-public class DatabaseCache {
+public class DatabaseCache extends Observable{
     static final Pattern filePathPattern = Pattern.compile("(\\w+)\\\\(\\w+)\\\\(\\w+)\\\\(\\d{4})\\\\(\\d{3})\\\\");   // To save time
     static final Pattern dateStringPattern = Pattern.compile("(\\d{4})\\\\(\\d{3})\\\\");   // To save time
 
-    // Don't allow instantiation of class.
-    private DatabaseCache(){}
+    private final String projectName;
+    private final String pluginName;
+    private final String tableName;
+    private final ProcessName process;
+    private boolean filesAvailable;
+
+    /**
+     * Creates a DatabaseCache object set to cache files to and get file listings from the table identified by the given information.
+     *
+     * @param projectName  - project schema to look under
+     * @param pluginName  - plugin schema to look under
+     * @param dataComingFrom  - name of process to check output of for available files to process
+     * @throws ParseException
+     */
+    public DatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom) throws ParseException
+    {
+        this.projectName = projectName;
+        this.pluginName = pluginName;
+        process = dataComingFrom;
+        filesAvailable = false;
+
+        switch(process)
+        {
+        case DOWNLOAD: tableName = "DownloadCache"; break;
+        case INDICES: tableName = "IndicesCache"; break;
+        case PROCESSOR: tableName = "ProcessCache"; break;
+        case SUMMARY: tableName = "SummaryCache"; break;
+        default: throw new ParseException("Filepath doesn't contain an expected framework identifier.", 0);
+        }
+    }
 
     /**
      * Retrieves a list of files from the desired table that have yet to be retrieved by a ProcessWorker.
      *
-     * @param projectName  - project schema to look under
-     * @param pluginName  - plugin schema to look under
-     * @param process  - name of process to check output of for available files to process
      * @return a list of available files to process
      * @throws SQLException
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public static ArrayList<DataFileMetaData> GetAvailableFiles(String projectName, String pluginName, ProcessName process) throws
+    public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws
     SQLException, ConfigReadException, ClassNotFoundException
     {
-        String tableName = null;
-
-        switch(process)
-        {
-        case DOWNLOAD: tableName = "Download"; break;
-        case INDICES: tableName = "Indices"; break;
-        case PROCESSOR: tableName = "Processor"; break;
-        case SUMMARY: tableName = "Summary"; break;
-        }
-
         String schemaName = Schema.getSchemaName(projectName, pluginName);
         ArrayList<DataFileMetaData> files = new ArrayList<DataFileMetaData>();
         Connection conn = PostgreSQLConnection.getConnection();
         conn.createStatement().execute("BEGIN");
         String query = String.format(
-                "SELECT \"A\".\"%1$sID\", \"A\".\"FullPath\", \"A\".\"DateDirectory\", \"A\".\"DataGroupID\", \"B\".\"Year\", \"B\".\"Day\"\n" +
+                "SELECT \"A\".\"%1$sID\", \"A\".\"DataFilePath\", \"A\".\"QCFilePath\",  \"A\".\"DateDirectory\", \"A\".\"DataGroupID\", \"B\".\"Year\", " +
+                        "\"B\".\"Day\"\n" +
                         "FROM \"%2$s\".\"%1$s\" \"A\" INNER JOIN \"%2$s\".\"DateGroup\" \"B\" ON (\"A\".\"DataGroupID\" = \"B\".\"DataGroupID\")\n" +
                         "WHERE \"Retrieved\" != TRUE\n" +
                         "FOR UPDATE",
@@ -67,7 +84,8 @@ public class DatabaseCache {
         ArrayList<Integer> rows = new ArrayList<Integer>();
         try {
             while(rs.next()) {
-                files.add(new DataFileMetaData(rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5), rs.getInt(6)));
+                files.add(new DataFileMetaData(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getInt(5), rs.getInt(56),
+                        rs.getInt(7)));
                 rows.add(rs.getInt(1));
             }
 
@@ -83,6 +101,10 @@ public class DatabaseCache {
                         ));
             }
             conn.createStatement().execute("COMMIT");
+            synchronized(this)
+            {
+                filesAvailable = false;
+            }
         } catch(Exception e) {
             conn.createStatement().execute("ROLLBACK");
         } finally {
@@ -93,118 +115,35 @@ public class DatabaseCache {
     }
 
     /**
-     * Add the given file and associated information to the appropriate global downloads table.
+     * Gets a list of rows from the desired GlobalDownload table which have yet to be written to the LocalDownload cache.
      *
-     * @param projectName  - project schema to look under
-     * @param dataName  - name of the downloaded file's data type
-     * @param year  - year of the downloaded file
-     * @param day  - day of the downloaded file
-     * @param filePath  - path to the downloaded file
-     * @throws SQLException
-     * @throws ParseException
-     * @throws ConfigReadException
-     * @throws ClassNotFoundException
+     * @return list of row data to copy from GlobalDownload table for the plugin data this DatabaseCache is tied to.
      */
-    public static void AddDownloadFile(String projectName, String dataName, int year, int day, String filePath) throws SQLException,
-    ParseException, ConfigReadException, ClassNotFoundException
+    public ArrayList<DataFileMetaData> GetUnprocessedGlobalDownloadFiles()
     {
-        String tableName = "Download";
-        Connection conn = PostgreSQLConnection.getConnection();
-        String query = String.format(
-                "INSERT INTO \"%1$s\" (\n" +
-                        "\"FullPath\",\n" +
-                        "\"DateDirectory\",\n" +
-                        "\"DataGroupID\"\n" +
-                        ") VALUES (\n" +
-                        "\"%2$s\",\n" +
-                        "?,\n" +
-                        "?\n" +
-                        ")",
-                        tableName,
-                        filePath
-                );
-        PreparedStatement psInsertFile = conn.prepareStatement(query);
-
-        // Get data group ID
-        query = String.format(
-                "SELECT DataGroupdID FROM \"%1$s\"\n" +
-                        "WHERE \"Year\" = ? AND \n" +
-                        "\"Day\" = ?",
-                        tableName
-                );
-        PreparedStatement psDG = conn.prepareStatement(query);
-        psDG.setString(1, String.valueOf(year));
-        psDG.setString(2, String.valueOf(day));
-        ResultSet rs = psDG.executeQuery();
-        try {
-            if(rs.next()) {
-                psInsertFile.setString(2, rs.getString(1));
-            }
-            else
-            {
-                query = String.format(
-                        "INSERT INTO \"%1$s\" (\n" +
-                                "\"Year\",\n" +
-                                "\"Day\")\n" +
-                                "VALUES (" +
-                                "%2$d,\n" +
-                                "%3$d)",
-                                tableName,
-                                year,
-                                day
-                        );
-                psDG = conn.prepareStatement(query);
-                rs = psDG.executeQuery();
-                query = String.format(
-                        "SELECT currval(\"%1$s\")",
-                        tableName + "_" + tableName + "ID_seq"
-                        );
-                rs = conn.prepareStatement(query).executeQuery();
-
-                if (rs.next()) {
-                    psInsertFile.setString(2, rs.getString(1));
-                } else {
-                    throw new SQLException("Couldn't get ID of inserted DataGroup row.");
-                }
-            }
-            rs = psInsertFile.executeQuery();
-        } finally {
-            rs.close();
-        }
+        // TODO: unifinished method.
     }
 
     /**
-     * Add file(s) to their cache table. Paths are parsed for project, plugin, and process information. All files will be submitted as a single transaction.
+     * Add file(s) to the cache table this DatabaseCache object is mapped to. Notifies observers that files are available for further processing.
+     * All files will be submitted as a single transaction and associated to the given year and day.
      *
-     * @param filePath  - path to the cached data file
+     * @param year  - 4 digit Gregorian year the data file(s) are for
+     * @param day  - day of the year the data file(s) are for
+     * @param filePaths  - file paths to add to the cache table
      * @throws SQLException
      * @throws ParseException
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public static void CacheFile(CharSequence filePath) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public void CacheFile(int year, int day, String... filePaths) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
-        String projectName, pluginName, tableName, dateDirectory;
-        int year, day;
+        String dateDirectory;
 
         // Parse out date directory
         Matcher matcher = filePathPattern.matcher(filePath);
         if(matcher.find()) {
-            projectName = matcher.group(1);
-            dateDirectory = ((String) filePath).substring(0, matcher.end());
-
-            switch(matcher.group(2))
-            {
-            case "download": tableName = "DownloadCache"; break;
-            case "indices": tableName = "IndicesCache"; break;
-            case "process": tableName = "ProcessCache"; break;
-            case "summary": tableName = "SummaryCache"; break;
-            default: throw new ParseException("Filepath doesn't contain an expected framework identifier.", 0);
-            }
-
-            pluginName = matcher.group(3);
-            year = Integer.parseInt(matcher.group(4));
-            day = Integer.parseInt(matcher.group(5));
+            dateDirectory = filePath.substring(0, matcher.end());
         } else {
             throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day.", 0);
         }
@@ -274,21 +213,29 @@ public class DatabaseCache {
                 }
             }
             rs = psInsertFile.executeQuery();
+
+            synchronized(this)
+            {
+                filesAvailable = true;
+            }
+            setChanged();
+            notifyObservers();
         } finally {
             rs.close();
         }
     }
 
     /**
-     * Can be used to get the associated DataFileMetaData object for the given file path.
+     * Can be used to get a DataFileMetaData object created from parsing the given file path.
      *
      * @param fullPath  - path to the data file
      * @return returns the DataFileMetaData equivalent to the information that could be parsed from the path string passed in
      * @throws SQLException
      * @throws ParseException
      * @throws ClassNotFoundException
+     * @throws ConfigReadException
      */
-    public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException
+    public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException, ConfigReadException
     {
         String projectName, pluginName, tableName, dateDirectory;
         int dataGroupID = -1, year, day;
@@ -368,5 +315,11 @@ public class DatabaseCache {
         }
 
         return new DataFileMetaData(fullPath, dateDirectory, dataGroupID, year, day);
+    }
+
+    public void NotifyObserversToCheckForPastUpdates()
+    {
+        setChanged();
+        notifyObservers();
     }
 }

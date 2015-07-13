@@ -1,9 +1,5 @@
 package version2.prototype.Scheduler;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import version2.prototype.ConfigReadException;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
+import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -16,7 +17,7 @@ import version2.prototype.util.DataFileMetaData;
  * @author michael.devos
  *
  */
-public class IndicesWorker extends ProcessWorker<Void>{
+public class IndicesWorker extends ProcessWorker{
 
     /**
      * An implementation of ProcessWorker that handles the indexing of a list of raster files after being handled by the Processor framework. Output used by the
@@ -28,7 +29,7 @@ public class IndicesWorker extends ProcessWorker<Void>{
      * @param pluginMetaData  - information relevant to this ProcessWorker about the plugin being used gotten from the plugin's info xml.
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      */
-    public IndicesWorker(Process<?> process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    public IndicesWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
         super("IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
@@ -39,7 +40,7 @@ public class IndicesWorker extends ProcessWorker<Void>{
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public Void call() throws Exception {
+    public ProcessWorkerReturn call() throws Exception {
         // TODO Auto-generated method stub
         return null;
     }
