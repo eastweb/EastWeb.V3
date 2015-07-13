@@ -48,9 +48,9 @@ public final class ModisNBARDownloader extends DownloaderFramework {
         metaData = data;
         mMode = metaData.mode;
 
-        if(metaData.mode == "http") {
+        if(metaData.mode.equals("http")) {
             mHostURL = metaData.myHttp.url;
-        } else if(metaData.mode == "ftp"){
+        } else if(metaData.mode.equals("ftp")) {
             mHostName = metaData.myFtp.hostName;
             mUsername = metaData.myFtp.userName;
             mPassword = metaData.myFtp.password;
@@ -156,7 +156,7 @@ public final class ModisNBARDownloader extends DownloaderFramework {
             FileUtils.forceMkdir(new File(mOutQCFolder));
         }
 
-        if (mMode == "http")
+        if (mMode.equals("http"))
         {
             try
             {
@@ -189,7 +189,7 @@ public final class ModisNBARDownloader extends DownloaderFramework {
                 return;
             }
         }
-        else if(mMode == "ftp")
+        else if(mMode.equals("ftp"))
         {
             // Untested code, only in the case that the method should change (current access method is http) 6/7/2015
             FTPClient ftpClient = new FTPClient();
