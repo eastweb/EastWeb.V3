@@ -164,14 +164,22 @@ public class ProjectInfoFile {
      */
     public boolean GetClipping() { return clipping; }
 
+<<<<<<< HEAD
     /**
+=======
+    /**
+>>>>>>> branch 'Mike's_Mods' of https://github.com/eastweb/EastWeb.V2.git
      * Gets the total number of modies tiles expected per input data downloaded.
      *
      * @return number of modies tiles associated with a single downloaded data unit.
      */
     public int GetTotModisTiles() { return totModisTiles; }
 
+<<<<<<< HEAD
     /**
+=======
+    /**
+>>>>>>> branch 'Mike's_Mods' of https://github.com/eastweb/EastWeb.V2.git
      * Gets the modis tiles gotten from the once parsed xml file.
      *
      * @return modis tile names gotten from the xml's data.
@@ -204,7 +212,11 @@ public class ProjectInfoFile {
      *
      * @return Date - the heating date read from the xml's data.
      */
+<<<<<<< HEAD
     public LocalDate GetHeatingDate() { return heatingDate; }
+=======
+    public LocalDate GetHeatingDate() { return heatingDate; }
+>>>>>>> branch 'Mike's_Mods' of https://github.com/eastweb/EastWeb.V2.git
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
