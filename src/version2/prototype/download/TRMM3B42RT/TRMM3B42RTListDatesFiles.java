@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -34,6 +33,7 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
     {
+        System.out.println(sDate);
         final Pattern yearDirPattern = Pattern.compile("\\d{4}");
 
         FTPClient ftpC = null;
@@ -55,9 +55,6 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
             {
                 throw new IOException("Couldn't navigate to directory: " + mRoot);
             }
-
-
-            final List<DataDate> list = new ArrayList<DataDate>();
 
             mapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
 
@@ -96,6 +93,7 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
                         /* pattern of TRMM 3B42RT
                          * {productname}.%y4.%m2.%d2.7.bin
                          */
+
                         ArrayList<String> fileNames = new ArrayList<String>();
                         fileNames.add(file.getName());
 
@@ -105,12 +103,11 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
                         DataDate dataDate = new DataDate(day, month, year);
                         if (dataDate.compareTo(sDate) >= 0)
                         {
-                            list.add(dataDate);
-
                             mapDatesFiles.put(dataDate, fileNames);
                         }
                     }
                 }
+
             }
 
             ftpC.disconnect();
