@@ -65,7 +65,9 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         //        GregorianCalendar cal = getClearedCalendar();
         //        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
         //        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
-        dayOfYear = LocalDate.now().getDayOfYear();
+        LocalDate date = getCalendar();
+        //dayOfYear = LocalDate.now().getDayOfYear();
+        dayOfYear = date.getDayOfYear();
     }
 
     public DataDate(int dayOfYear, int year) {
