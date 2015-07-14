@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 
 public abstract class ListDatesFiles
 {
+    public final Pattern fileNamePattern;
+    public final Pattern datePattern;
     protected List<DataDate> lDates;
     protected DataDate sDate;
     protected DownloadMetaData mData;
@@ -21,6 +24,8 @@ public abstract class ListDatesFiles
         mData = data;
         lDates = null;
         mapDatesFiles =  null;
+        fileNamePattern = Pattern.compile(mData.fileNamePattern);
+        datePattern = Pattern.compile(mData.datePattern);
 
         if ((mData.mode).equalsIgnoreCase("FTP"))
         {

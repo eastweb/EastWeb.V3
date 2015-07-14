@@ -14,9 +14,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.ConnectionContext;
-import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.util.ParallelUtils.Parallel;
 
 public class TRMM3B42RTListDatesFiles extends ListDatesFiles
 {
@@ -92,11 +90,8 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
 
                 for (FTPFile file : ftpC.listFiles())
                 {
-                    Pattern tPattern =
-                            Pattern.compile("3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin");
-
                     if (file.isFile() &&
-                            tPattern.matcher(file.getName()).matches())
+                            fileNamePattern.matcher(file.getName()).matches())
                     {
                         /* pattern of TRMM 3B42RT
                          * {productname}.%y4.%m2.%d2.7.bin
