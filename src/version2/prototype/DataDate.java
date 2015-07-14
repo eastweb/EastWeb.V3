@@ -22,8 +22,8 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         //        cal.set(GregorianCalendar.DAY_OF_YEAR, dayOfYear);
         //        int dayOfMonth = cal.get(GregorianCalendar.DAY_OF_MONTH);
         //        int month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
-        int dayOfMonth = LocalDate.now().getDayOfMonth();
-        int month = LocalDate.now().getMonthValue();
+        int dayOfMonth = LocalDate.ofYearDay(year, dayOfYear).getDayOfMonth();
+        int month = LocalDate.ofYearDay(year, dayOfYear).getMonthValue();
         return new DataDate(hour,dayOfMonth,month,year);
     }
 
@@ -65,7 +65,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         //        GregorianCalendar cal = getClearedCalendar();
         //        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
         //        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
-        LocalDate date = getCalendar();
+        LocalDate date = LocalDate.of(year, month, dayOfMonth);
         //dayOfYear = LocalDate.now().getDayOfYear();
         dayOfYear = date.getDayOfYear();
     }
@@ -81,8 +81,8 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         //        cal.set(GregorianCalendar.DAY_OF_YEAR, dayOfYear);
         //        dayOfMonth = cal.get(GregorianCalendar.DAY_OF_MONTH);
         //        month = cal.get(GregorianCalendar.MONTH) + 1; // Add 1 to convert from 0-based months to 1-based months
-        dayOfMonth = LocalDate.now().getDayOfMonth();
-        month = LocalDate.now().getMonthValue();
+        dayOfMonth = LocalDate.ofYearDay(year, dayOfYear).getDayOfMonth();
+        month = LocalDate.ofYearDay(year, dayOfYear).getMonthValue();
     }
 
     public DataDate(LocalDate date) {
@@ -108,7 +108,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         //        GregorianCalendar cal = getClearedCalendar();
         //        cal.set(year, month - 1, dayOfMonth); // Subtract 1 to convert from 1-based months to 0-based months
         //        dayOfYear = cal.get(GregorianCalendar.DAY_OF_YEAR);
-        dayOfYear = LocalDate.now().getDayOfYear();
+        dayOfYear = LocalDate.of(year, month, dayOfMonth).getDayOfYear();
     }
 
     /**
