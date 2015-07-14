@@ -558,8 +558,8 @@ public class ProjectInfoFile {
         ArrayList<String> summaryStrings = GetNodeListValues(summaryList, "Missing zonal summaries.");
         if(summaryStrings.size() > 0) {
             String shapefile;
-            String field;
-            String zone;
+            String areaValueField;
+            String areaNameField;
             String temporalSummaryCompositionStrategyClassName;
             TemporalSummaryRasterFileStore fileStore;
             Class<?> strategyClass;
@@ -569,21 +569,25 @@ public class ProjectInfoFile {
             {
                 // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy
                 // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; COUNTYNS10
-                zone = summary.substring(summary.indexOf("Zone: ") + "Zone: ".length(), summary.indexOf(";"));
-                shapefile = summary.substring(summary.indexOf("Shape File Path: ") + "Shape File Path: ".length(), summary.indexOf(";", summary.indexOf("Shape File Path: ")));
-                if(summary.indexOf("Temporal Summary") == -1)
+                areaNameField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_NAME_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_NAME_FIELD_TAG + ": ").length(),
+                        summary.indexOf(";"));
+                shapefile = summary.substring(summary.indexOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ") + String.valueOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ").length(), summary.indexOf(";",
+                        summary.indexOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ")));
+                if(summary.indexOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG) == -1)
                 {
-                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length());
-                    if(field.endsWith(";")) {
-                        field = field.substring(0, field.length() - 1);
+                    areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ").length());
+                    if(areaValueField.endsWith(";")) {
+                        areaValueField = areaValueField.substring(0, areaValueField.length() - 1);
                     }
                     temporalSummaryCompositionStrategyClassName = null;
                     fileStore = null;
                 }
                 else
                 {
-                    field = summary.substring(summary.indexOf("Field: ") + "Field: ".length(), summary.indexOf(";", summary.indexOf("Field: ")));
-                    temporalSummaryCompositionStrategyClassName = summary.substring(summary.indexOf("Temporal Summary: ") + "Temporal Summary: ".length());
+                    areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ").length(),
+                            summary.indexOf(";", summary.indexOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ")));
+                    temporalSummaryCompositionStrategyClassName = summary.substring(summary.indexOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG + ": ") +
+                            String.valueOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG + ": ").length());
                     if(temporalSummaryCompositionStrategyClassName.endsWith(";")) {
                         temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName.substring(0, temporalSummaryCompositionStrategyClassName.length() - 1);
                     }
@@ -591,7 +595,7 @@ public class ProjectInfoFile {
                     ctorStrategy = strategyClass.getConstructor();
                     fileStore = new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance());
                 }
-                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, field, zone), fileStore, temporalSummaryCompositionStrategyClassName));
+                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, areaValueField, areaNameField), fileStore, temporalSummaryCompositionStrategyClassName));
             }
             return summaries;
         }
