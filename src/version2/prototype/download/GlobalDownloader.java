@@ -5,10 +5,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Observable;
 
 import version2.prototype.ConfigReadException;
+import version2.prototype.DataDate;
 import version2.prototype.TaskState;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.PostgreSQLConnection;
 
 
@@ -17,27 +26,80 @@ import version2.prototype.util.PostgreSQLConnection;
  *
  */
 public abstract class GlobalDownloader extends Observable implements Runnable{
-    protected GlobalDownloader instance;
     protected TaskState state;
     protected final int ID;
     protected final String pluginName;
+    protected final DownloadMetaData metaData;
+    protected final ListDatesFiles listDatesFiles;
 
-    protected GlobalDownloader(TaskState initialState, String pluginName, int myID)
+    private static BitSet keys;
+    private Map<Integer, Boolean> udpateStates;
+
+
+    protected GlobalDownloader(int myID, String pluginName, TaskState initialState, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
     {
         state = initialState;
         ID = myID;
         this.pluginName = pluginName;
+        this.metaData = metaData;
+        keys = new BitSet(1000);
+        udpateStates = new HashMap<Integer, Boolean>(0);
+        this.listDatesFiles = listDatesFiles;
     }
 
-    public abstract GlobalDownloader GetInstance(int myID);
+    public final void Stop()
+    {
+        state = TaskState.STOPPED;
+    }
 
-    public abstract void Stop();
+    public final void Start()
+    {
+        state = TaskState.RUNNING;
+    }
 
-    public abstract void Start();
+    public final LocalDate GetOriginDate() { return metaData.originDate; }
 
-    public int GetID() { return ID; }
+    public final int GetID() { return ID; }
 
-    public String GetPluginName() { return pluginName; }
+    public final String GetPluginName() { return pluginName; }
+
+    public final int GetAnUpdateKey()
+    {
+        synchronized(keys)
+        {
+            int registerKey = keys.nextClearBit(0);
+            keys.set(registerKey);
+            udpateStates.put(registerKey, true);
+            return registerKey;
+        }
+    }
+
+    public final void ReleaseUpdateKey(int key)
+    {
+        synchronized(keys)
+        {
+            if((key >= 0) && (key < keys.size()))
+            {
+                keys.clear(key);
+                udpateStates.remove(key);
+            }
+        }
+    }
+
+    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles()
+    {
+
+    }
+
+    public final ArrayList<DataFileMetaData> CheckForUpdate(int key)
+    {
+
+    }
+
+    public final DataFileMetaData GetSpecificDownload(LocalDate ld)
+    {
+
+    }
 
     /**
      * Add the given file and associated information to the appropriate global downloads table.
@@ -52,7 +114,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    protected void AddDownloadFile(String projectName, String dataName, int year, int day, String filePath) throws SQLException,
+    protected void AddDownloadFile(String dataName, int year, int day, String filePath) throws SQLException,
     ParseException, ConfigReadException, ClassNotFoundException
     {
         String tableName = "Download";
@@ -115,18 +177,25 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
                 }
             }
             rs = psInsertFile.executeQuery();
+
+            // Update states
+            Iterator<Integer> it = udpateStates.keySet().iterator();
+            while(it.hasNext())
+            {
+                keys.set(it.next());
+            }
         } finally {
             rs.close();
         }
     }
 
     @Override
-    public void notifyObservers(Object arg0) {
+    public final void notifyObservers(Object arg0) {
         super.notifyObservers(arg0);
     }
 
     @Override
-    public void notifyObservers() {
+    public final void notifyObservers() {
         super.notifyObservers();
     }
 }

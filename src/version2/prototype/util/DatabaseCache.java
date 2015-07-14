@@ -66,7 +66,7 @@ public class DatabaseCache extends Observable{
     public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws
     SQLException, ConfigReadException, ClassNotFoundException
     {
-        String schemaName = Schema.getSchemaName(projectName, pluginName);
+        String schemaName = Schemas.getSchemaName(projectName, pluginName);
         ArrayList<DataFileMetaData> files = new ArrayList<DataFileMetaData>();
         Connection conn = PostgreSQLConnection.getConnection();
         conn.createStatement().execute("BEGIN");
@@ -148,7 +148,7 @@ public class DatabaseCache extends Observable{
             throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day.", 0);
         }
 
-        String schemaName = Schema.getSchemaName(projectName, pluginName);
+        String schemaName = Schemas.getSchemaName(projectName, pluginName);
         Connection conn = PostgreSQLConnection.getConnection();
         String query = String.format(
                 "INSERT INTO \"%1$s\".\"%2$s\" (\n" +
@@ -262,7 +262,7 @@ public class DatabaseCache extends Observable{
             throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day.", 0);
         }
 
-        String schemaName = Schema.getSchemaName(projectName, pluginName);
+        String schemaName = Schemas.getSchemaName(projectName, pluginName);
         Connection conn = PostgreSQLConnection.getConnection();
 
         // Get data group ID

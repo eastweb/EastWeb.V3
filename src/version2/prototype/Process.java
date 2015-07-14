@@ -20,7 +20,7 @@ import version2.prototype.util.GeneralUIEventObject;
  * @author michael.devos
  */
 public abstract class Process implements Observer {
-    public ProcessName processName;
+    public final ProcessName processName;
     public final ProjectInfoPlugin pluginInfo;
     public final ProjectInfoFile projectInfoFile;
     public final PluginMetaData pluginMetaData;
@@ -39,8 +39,8 @@ public abstract class Process implements Observer {
      * @param processName  - name of this threaded process
      * @param outputCache  - DatabaseCache object to use when storing output of this process to notify next process of files available for processing
      */
-    protected Process(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, ProcessName processName, DatabaseCache outputCache)
+    protected Process(ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+            Scheduler scheduler, DatabaseCache outputCache)
     {
         this.processName = processName;
         this.scheduler = scheduler;
@@ -62,7 +62,7 @@ public abstract class Process implements Observer {
      *
      * @param e  - progress update
      */
-    public void NotifyUI(GeneralUIEventObject e)
+    public final void NotifyUI(GeneralUIEventObject e)
     {
         scheduler.NotifyUI(e);
     }
@@ -71,11 +71,11 @@ public abstract class Process implements Observer {
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     @Override
-    public final void update(Observable o, Object arg) {
+    public void update(Observable o, Object arg) {
         if((scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING) && (o instanceof DatabaseCache))
         {
-            ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
             DatabaseCache inputCache = (DatabaseCache) o;
+            ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
             try {
                 cachedFiles = inputCache.GetUnprocessedCacheFiles();
                 if(cachedFiles.size() > 0) {

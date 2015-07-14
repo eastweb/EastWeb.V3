@@ -2,6 +2,7 @@ package test;
 
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -9,8 +10,18 @@ public class SandboxTesting {
     private static ArrayList<String> myList;
 
     public static void main(String[] args) {
-        testPersistance();
-        Test3();
+        //        testPersistance();
+        //        Test3();
+        test4();
+    }
+    private static void test4()
+    {
+        BitSet bits = new BitSet(1);
+        System.out.println("Next clear bit: " + bits.nextClearBit(0));
+        bits.set(0);
+        System.out.println("Next clear bit: " + bits.nextClearBit(0));
+        bits.set(bits.nextClearBit(0));
+        System.out.println("Next clear bit: " + bits.nextClearBit(0));
     }
 
     private static void testPersistance() {

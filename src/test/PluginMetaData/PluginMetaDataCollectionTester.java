@@ -59,7 +59,7 @@ public class PluginMetaDataCollectionTester {
         // Test getting DownloadMetaData
         DownloadMetaData downloadData = pluginMetaData.Download;
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("Data"));
-        assertTrue("Class is " + downloadData.className, downloadData.className.equals("NldasDownloadTask"));
+        assertTrue("Class is " + downloadData.className, downloadData.className.equals("TRMM3B42RTFactory"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("hydro1.sci.gsfc.nasa.gov"));
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
@@ -70,7 +70,7 @@ public class PluginMetaDataCollectionTester {
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
-        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
+        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2000-03-01"));
 
         Matcher matcher;
         // TODO: Test downloadData.datePattern.
@@ -137,7 +137,7 @@ public class PluginMetaDataCollectionTester {
         assertTrue("ExtraDownloads list is null", downloadData.extraDownloads != null);
         assertTrue("ExtraDownloads list is " + downloadData.extraDownloads.toString(), downloadData.extraDownloads.size() == 1);
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("Data"));
-        assertTrue("Class is " + downloadData.className, downloadData.className.equals("NldasDownloadTask"));
+        assertTrue("Class is " + downloadData.className, downloadData.className.equals("TRMM3B42RTFactory"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("hydro1.sci.gsfc.nasa.gov"));
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
@@ -147,7 +147,7 @@ public class PluginMetaDataCollectionTester {
         zid = ZoneId.of(downloadData.timeZone);
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
-        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
+        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2000-03-01"));
 
         downloadData = downloadData.extraDownloads.get(0);
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("QC"));

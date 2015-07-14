@@ -138,12 +138,12 @@ public final class FileSystem {
      * Gets the download directory path for the given type of data downloaded.
      *
      * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
-     * @param dataName  - name of the data type as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
+     * @param pluginName  - name of the data type as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
      * @return path to the download directory for the data
      */
-    public static String GetDownloadDirectory(String workingDir, String dataName)
+    public static String GetDownloadDirectory(String workingDir, String pluginName)
     {
-        return CheckWorkingDir(workingDir) + "Downloads/" + StandardizeName(dataName) + "/";
+        return CheckWorkingDir(workingDir) + "Downloads/" + StandardizeName(pluginName) + "/";
     }
 
     private static String GetProcessDirectoryName(ProcessName name)

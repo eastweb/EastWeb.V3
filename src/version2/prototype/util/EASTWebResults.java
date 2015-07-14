@@ -35,7 +35,7 @@ public class EASTWebResults {
 
         // Build query
         ArrayList<String> summaries = Config.getInstance().SummaryCalculations();
-        String schemaName = Schema.getSchemaName(projectName, pluginName);
+        String schemaName = Schemas.getSchemaName(projectName, pluginName);
         StringBuilder query = new StringBuilder("SELECT F.\"Field\", F.\"ShapeFile\", Z.\"ZoneName\", C.\"Year\", C.\"Day\", I.\"IndexName\", T.\"ExpectedTotalResults\", " +
                 "A.\"TemporalSummaryCompositionStrategyClass\", A." + summaries.get(0));
         for(int i=1; i < summaries.size(); i++)

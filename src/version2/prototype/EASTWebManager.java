@@ -729,10 +729,23 @@ public class EASTWebManager implements Runnable{
             int id = getLowestAvailableGlobalDLID();
             if(IsIDValid(id, globalDLIDs))
             {
-                if(!globalDLs.contains(gdl.GetInstance(id)))
+                int idx = -1;
+                for(int i=0; i < globalDLs.size(); i++)
                 {
-                    globalDLs.set(id, gdl.GetInstance(id));
-                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl.GetInstance(id), 0, 1, TimeUnit.DAYS));
+                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+
+                if(idx >= 0)
+                {
+                    globalDLs.set(id, gdl);
+                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                }
+                else {
+                    releaseGlobalDLID(id);
                 }
 
                 synchronized (numOfCreatedGDLs) {

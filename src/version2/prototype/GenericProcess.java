@@ -22,7 +22,7 @@ import version2.prototype.util.GeneralUIEventObject;
  * @param <WorkerType>  - the ProcessWorker extending class the spawned worker threads should be created as
  */
 public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
-    private Class<?> processWorkerClass;
+    private ArrayList<Class<?>> processWorkerClasses;
 
     /**
      * Creates a GenericFrameworkProcess object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName,
@@ -38,21 +38,28 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * @param executor  - executor service to use to spawn worker threads
      * @throws ClassNotFoundException
      */
-    public GenericProcess(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            ProcessName processName, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException
+    public GenericProcess(ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache inputCache, DatabaseCache outputCache, String... classNames) throws ClassNotFoundException
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, processName, outputCache);
+        super(processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
 
         if(inputCache != null) {
             inputCache.addObserver(this);
         }
 
+        String packageOfWorker = "";
         switch(processName)
         {
-        case DOWNLOAD: processWorkerClass = Class.forName("version2.prototype.download.DownloadWorker"); break;
-        case INDICES: processWorkerClass = Class.forName("version2.prototype.indices.IndicesWorker"); break;
-        case PROCESSOR: processWorkerClass = Class.forName("version2.prototype.processor.ProcessorWorker"); break;
-        case SUMMARY: processWorkerClass = Class.forName("version2.prototype.summary.SummaryWorker"); break;
+        case DOWNLOAD: packageOfWorker = "version2.prototype.download."; break;
+        case INDICES: packageOfWorker = "version2.prototype.indices.IndicesWorker"; break;
+        case PROCESSOR: packageOfWorker = "version2.prototype.processor.ProcessorWorker"; break;
+        case SUMMARY: packageOfWorker = "version2.prototype.summary.SummaryWorker"; break;
+        }
+
+        processWorkerClasses = new ArrayList<Class<?>>(1);
+        for(String className : classNames)
+        {
+            processWorkerClasses.add(Class.forName(packageOfWorker + className));
         }
     }
 
@@ -61,8 +68,11 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
         Constructor<?> cstr;
         try {
-            cstr = processWorkerClass.getConstructor(Process.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, ArrayList.class);
-            EASTWebManager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
+            for(Class<?> cl : processWorkerClasses)
+            {
+                cstr = cl.getConstructor(Process.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, ArrayList.class);
+                EASTWebManager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
+            }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             e.printStackTrace();
         }

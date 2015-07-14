@@ -4,7 +4,7 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<Class>NldasDownloadTask</Class>
+		<Class>TRMM3B42RTFactory</Class>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
@@ -16,7 +16,7 @@
 		<FilesPerDay>1</FilesPerDay>
 		<DatePattern>\\d{4}</DatePattern>
 		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
-		<OriginDate>Tue Jun 02 23:17:37 CDT 2015</OriginDate>
+		<OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate>
 	</Download>
 	<Processor>
 		<ProcessStep>NldasProjection</ProcessStep>

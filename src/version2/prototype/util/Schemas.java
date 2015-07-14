@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
 import version2.prototype.ConfigReadException;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
@@ -15,19 +16,26 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
  * @author michael.devos
  *
  */
-public class Schema {
+public class Schemas {
     /**
      * Recreates or creates a full schema identified by the given project name and plugin name.
      * Creates all database cache tables required by frameworks and download classes.
      *
+     * @param globalEASTWebSchema  - the global schema name (can be gotten from Config.getInstance().getGlobalSchema()
      * @param projectName  - name of project to create schema for
      * @param pluginName  - name of plugin to create schema for
+     * @param startDate
+     * @param daysPerInputFile
+     * @param numOfIndices
+     * @param summaries
+     * @param summaryNames
+     * @param extraDownloadFiles
      * @throws ConfigReadException
      * @throws SQLException
      * @throws ClassNotFoundException
      */
     public static void CreateProjectPluginSchema(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, int daysPerInputFile, int numOfIndices,
-            ArrayList<ProjectInfoSummary> summaries, ArrayList<String> summaryNames) throws ConfigReadException, SQLException, ClassNotFoundException
+            ArrayList<ProjectInfoSummary> summaries, ArrayList<String> summaryNames, ArrayList<String> extraDownloadFiles) throws ConfigReadException, SQLException, ClassNotFoundException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
@@ -131,17 +139,25 @@ public class Schema {
         stmt.executeUpdate(query);
 
         // Create Download table
-        query = String.format(
-                "CREATE TABLE IF NOT EXISTS \"%1$s\".\"Download\"\n" +
-                        "(\n" +
-                        "  \"DownloadID\" serial PRIMARY KEY,\n" +
-                        "  \"GlobalDownloaderID\" integer REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") NOT NULL,\n" +
-                        "  \"FullPath\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"DateGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL\n" +
+        StringBuilder query_ = new StringBuilder(
+                String.format(
+                        "CREATE TABLE IF NOT EXISTS \"%1$s\".\"Download\"\n" +
+                                "(\n" +
+                                "  \"DownloadID\" serial PRIMARY KEY,\n" +
+                                "  \"GlobalDownloaderID\" integer REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") NOT NULL,\n" +
+                                "  \"DataFileFullPath\" varchar(255) UNIQUE NOT NULL,\n",
+                                globalEASTWebSchema
+                        ));
+        for(String fileName : extraDownloadFiles)
+        {
+            query_.append("  \"" + fileName + "FullPath\" varchar(255) UNIQUE NOT NULL,\n");
+        }
+        query_.append(
+                String.format("  \"DateGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
-                );
-        stmt.executeUpdate(query);
+                        ));
+        stmt.executeUpdate(query_.toString());
 
         // Create Environmental Index table
         query = String.format(
@@ -231,7 +247,7 @@ public class Schema {
         //                        ")",
         //                        mSchemaName
         //                );
-        StringBuilder query_ = new StringBuilder(
+        query_ = new StringBuilder(
                 String.format(
                         "CREATE TABLE \"%1$s\".\"ZonalStat\"\n" +
                                 "(\n" +
@@ -254,53 +270,74 @@ public class Schema {
         stmt.executeUpdate(query);
 
         // Create cache tables for each framework
-        query = String.format(
-                "CREATE TABLE \"%1$s\".\"DownloadCache\"\n" +
-                        "(\n" +
-                        "  \"DownloadCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
+        query_ = new StringBuilder(
+                String.format(
+                        "CREATE TABLE \"%1$s\".\"DownloadCache\"\n" +
+                                "(\n" +
+                                "  \"DownloadCacheID\" serial PRIMARY KEY,\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n",
+                                mSchemaName
+                        ));
+        for(String fileName : extraDownloadFiles)
+        {
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+        }
+        query_.append(
+                String.format(
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                        "  \"DataGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
-                        "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
-                        "  \"Processed\" boolean DEFAULT FALSE\n" +
-                        ")",
-                        mSchemaName,
-                        globalEASTWebSchema
-                );
-        stmt.executeUpdate(query);
+                                "  \"DataGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
+                                "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
+                                "  \"Processed\" boolean DEFAULT FALSE\n" +
+                                ")",
+                                globalEASTWebSchema
+                        ));
+        stmt.executeUpdate(query_.toString());
 
-        query = String.format(
-                "CREATE TABLE \"%1$s\".\"ProcessorCache\"\n" +
-                        "(\n" +
-                        "  \"ProcessorCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
-                        "  \"DateDirectoryPath\" varchar(255) NOT NULL,\n" +
-                        "  \"DataGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
-                        "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
-                        "  \"Processed\" boolean DEFAULT FALSE\n" +
-                        ")",
-                        mSchemaName,
-                        globalEASTWebSchema
-                );
-        stmt.executeUpdate(query);
-
-        query = String.format(
-                "CREATE TABLE \"%1$s\".\"IndicesCache\"\n" +
-                        "(\n" +
-                        "  \"IndicesCacheID\" serial PRIMARY KEY,\n" +
-                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"QCFilePath\" varchar(255) UNIQUE DEFAULT NULL,\n" +
+        query_ = new StringBuilder(
+                String.format(
+                        "CREATE TABLE \"%1$s\".\"ProcessorCache\"\n" +
+                                "(\n" +
+                                "  \"ProcessorCacheID\" serial PRIMARY KEY,\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n",
+                                mSchemaName
+                        ));
+        for(String fileName : extraDownloadFiles)
+        {
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+        }
+        query_.append(
+                String.format(
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                        "  \"DataGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
-                        "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
-                        "  \"Processed\" boolean DEFAULT FALSE\n" +
-                        ")",
-                        mSchemaName,
-                        globalEASTWebSchema
-                );
-        stmt.executeUpdate(query);
+                                "  \"DataGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
+                                "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
+                                "  \"Processed\" boolean DEFAULT FALSE\n" +
+                                ")",
+                                globalEASTWebSchema
+                        ));
+        stmt.executeUpdate(query_.toString());
+
+        query_ = new StringBuilder(
+                String.format(
+                        "CREATE TABLE \"%1$s\".\"IndicesCache\"\n" +
+                                "(\n" +
+                                "  \"IndicesCacheID\" serial PRIMARY KEY,\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n",
+                                mSchemaName
+                        ));
+        for(String fileName : extraDownloadFiles)
+        {
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+        }
+        query_.append(
+                String.format(
+                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
+                                "  \"DataGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
+                                "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
+                                "  \"Processed\" boolean DEFAULT FALSE\n" +
+                                ")",
+                                globalEASTWebSchema
+                        ));
+        stmt.executeUpdate(query_.toString());
 
         // Get DateGroupID
         int dateGroupID = -1;

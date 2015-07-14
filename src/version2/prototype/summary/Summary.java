@@ -34,7 +34,7 @@ public class Summary extends Process {
      */
     public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
     {
-        super(projectInfoFile, pluginInfo, pluginMetaData, scheduler, ProcessName.SUMMARY, null);
+        super(ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, null);
         inputCache.addObserver(this);
     }
 

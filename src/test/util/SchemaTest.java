@@ -14,20 +14,20 @@ import org.junit.Test;
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.util.PostgreSQLConnection;
-import version2.prototype.util.Schema;
+import version2.prototype.util.Schemas;
 
 public class SchemaTest {
     private String testGlobalSchema = "Test_EASTWeb";
 
     @Test
     public final void testGetSchemaName() {
-        String schemaName = Schema.getSchemaName("Test_Project", "Test_Plugin");
+        String schemaName = Schemas.getSchemaName("Test_Project", "Test_Plugin");
         assertTrue("Schema name is " + schemaName, schemaName.equals("test_project_test_plugin"));
 
-        schemaName = Schema.getSchemaName("1Test_Project", "Test_Plugin");
+        schemaName = Schemas.getSchemaName("1Test_Project", "Test_Plugin");
         assertTrue("Schema name is " + schemaName, schemaName.equals("_test_project_test_plugin"));
 
-        schemaName = Schema.getSchemaName(" ", " ");
+        schemaName = Schemas.getSchemaName(" ", " ");
         assertTrue("Schema name is " + schemaName, schemaName.equals("___"));
     }
 
@@ -41,7 +41,7 @@ public class SchemaTest {
         summaryNames.add("Sum");
         summaryNames.add("Mean");
         summaryNames.add("StdDev");
-        String testSchemaName = Schema.getSchemaName("Test_Project", "Test_Plugin");
+        String testSchemaName = Schemas.getSchemaName("Test_Project", "Test_Plugin");
 
         // Remove test schemas if they exist
         stmt.execute(String.format(
@@ -54,7 +54,7 @@ public class SchemaTest {
                 ));
 
         // Run method under test - defined for MODIS plugin
-        //        Schema.CreateProjectPluginSchema(testGlobalSchema, "Test_Project", "Test_Plugin", LocalDate.now(), 8, 3, summaryNames);
+        Schemas.CreateProjectPluginSchema(testGlobalSchema, "Test_Project", "Test_Plugin", LocalDate.now(), 8, 3, summaryNames);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
