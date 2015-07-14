@@ -28,7 +28,7 @@ import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
  */
 public class TRMM3B42RTListDatesFilesTest {
 
-    private static DataDate date;
+    //    private static DataDate date;
     private static DownloadMetaData data;
 
     /**
@@ -37,7 +37,7 @@ public class TRMM3B42RTListDatesFilesTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         // date = new DataDate(LocalDate.now().minusDays(1));
-        date = new DataDate(22, 3, 2015);
+        //        date = new DataDate(22, 3, 2015);
 
         String mode = "FTP";// the protocol type: ftp or http
         FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
@@ -49,6 +49,7 @@ public class TRMM3B42RTListDatesFilesTest {
         String datePatternStr = "\\d{4}";
         String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
         LocalDate ld = LocalDate.parse("Wed Mar 01 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
+        System.out.println(ld.toString());
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
     }
 
@@ -57,7 +58,7 @@ public class TRMM3B42RTListDatesFilesTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        date = null;
+        //        date = null;
         data = null;
     }
 
@@ -67,7 +68,7 @@ public class TRMM3B42RTListDatesFilesTest {
      */
     @Test
     public final void testListDatesFilesFTP() throws IOException {
-        TRMM3B42RTListDatesFiles testy = new TRMM3B42RTListDatesFiles(date, data);
+        TRMM3B42RTListDatesFiles testy = new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data);
 
         Map<DataDate, ArrayList<String>> datesFiles = testy.getListDatesFiles();
 
