@@ -2,17 +2,12 @@ package version2.prototype.download.TRMM3B42RT;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.ftp;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.DownloadUtils;
@@ -21,7 +16,6 @@ import version2.prototype.download.FTPClientPool;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 
 /*
  * @Author: Yi Liu
@@ -48,7 +42,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
     private void setFTPValues(DownloadMetaData data)
     {
         mMode = data.mode;
-        ftp f = data.myFtp;
+        FTP f = data.myFtp;
         mHost = f.hostName;
         mRoot = f.rootDir;
     }
