@@ -55,12 +55,12 @@ public class ProjectInfoFileTester {
         assertTrue("Freezing is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("2015-06-02"));
         assertTrue("Heating is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("2015-06-02"));
         assertTrue("Summary 1 is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
-                .equals("Zone: Blah; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary 2 is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
-                .equals("Zone: Blah; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary 3 is " + projectInfo.GetSummaries().get(2).toString(), projectInfo.GetSummaries().get(2).toString()
-                .equals("Zone: Blah; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; Field: COUNTYNS10"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10"));
         assertTrue("Summary 4 is " + projectInfo.GetSummaries().get(3).toString(), projectInfo.GetSummaries().get(3).toString()
-                .equals("Zone: Blah; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; Field: COUNTYNS10"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10"));
     }
 }

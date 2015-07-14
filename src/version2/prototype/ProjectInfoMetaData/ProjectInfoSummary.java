@@ -10,6 +10,10 @@ import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
  *
  */
 public class ProjectInfoSummary {
+    public static final String AREA_NAME_FIELD_TAG = "AreaNameField";
+    public static final String SHAPE_FILE_TAG = "Shape File Path";
+    public static final String AREA_VALUE_FIELD_TAG = "AreaValueField";
+    public static final String TEMPORAL_SUMMARY_TAG = "Temporal Summary";
     private ZonalSummary zonalSummary;
     private TemporalSummaryRasterFileStore fileStore;
     private String temporalSummaryCompositionStrategyClassName;
@@ -50,10 +54,11 @@ public class ProjectInfoSummary {
     @Override
     public String toString() {
         if(fileStore != null) {
-            return "Zone: " + zonalSummary.GetZone() + "; Shape File Path: " + zonalSummary.GetShapeFile() + "; Field: " + zonalSummary.GetField() + "; Temporal Summary: "
-                    + fileStore.compStrategy.getClass().getSimpleName();
+            return AREA_NAME_FIELD_TAG + ": " + zonalSummary.GetAreaNameField() + "; " + SHAPE_FILE_TAG + ": " + zonalSummary.GetShapeFile() + "; " + AREA_VALUE_FIELD_TAG + ": " +
+                    zonalSummary.GetAreaValueField() + "; " + TEMPORAL_SUMMARY_TAG + ": " + fileStore.compStrategy.getClass().getSimpleName();
         } else {
-            return "Zone: " + zonalSummary.GetZone() + "; Shape File Path: " + zonalSummary.GetShapeFile() + "; Field: " + zonalSummary.GetField();
+            return AREA_NAME_FIELD_TAG + ": " + zonalSummary.GetAreaNameField() + "; " + SHAPE_FILE_TAG + ": " + zonalSummary.GetShapeFile() + "; " + AREA_VALUE_FIELD_TAG + ": " +
+                    zonalSummary.GetAreaValueField();
         }
     }
 }

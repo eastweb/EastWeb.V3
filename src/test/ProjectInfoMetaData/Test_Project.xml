@@ -36,9 +36,9 @@
 	<Freezing>Tue Jun 02 23:17:37 CDT 2015</Freezing>
 	<Heating>Tue Jun 02 23:17:37 CDT 2015</Heating>
 	<Summaries>
-        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
-        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
-        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10</Summary>
-        <Summary>Zone: Blah; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10;</Summary>
+        <Summary>AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary>AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
+        <Summary>AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10</Summary>
+        <Summary>AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10;</Summary>
 	</Summaries>
 </ProjectInfo>
