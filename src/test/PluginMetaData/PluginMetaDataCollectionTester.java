@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
@@ -69,6 +70,7 @@ public class PluginMetaDataCollectionTester {
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
+        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
 
         Matcher matcher;
         // TODO: Test downloadData.datePattern.
@@ -145,6 +147,7 @@ public class PluginMetaDataCollectionTester {
         zid = ZoneId.of(downloadData.timeZone);
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
+        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
 
         downloadData = downloadData.extraDownloads.get(0);
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("QC"));
@@ -159,6 +162,7 @@ public class PluginMetaDataCollectionTester {
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
+        assertNull("OriginDate is not null", downloadData.originDate);
 
         // TODO: Test downloadData.datePattern.
         //            String dateString = "";

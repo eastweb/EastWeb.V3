@@ -2,6 +2,8 @@ package version2.prototype.PluginMetaData;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,11 +103,11 @@ public class PluginMetaDataCollection {
      * @throws SAXException
      * @throws IOException
      */
-    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr)
+    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
             throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr);
+        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
     }
 
     /**
@@ -126,10 +128,10 @@ public class PluginMetaDataCollection {
      * @throws IOException
      */
     public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr,
-            String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads) throws ParserConfigurationException, SAXException, IOException
+            String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, extraDownloads);
+        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, extraDownloads, originDate);
     }
 
     /**
@@ -149,10 +151,10 @@ public class PluginMetaDataCollection {
      * @throws IOException
      */
     public static DownloadMetaData CreateDownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr,
-            String fileNamePatternStr) throws ParserConfigurationException, SAXException, IOException
+            String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(name, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr);
+        return collection.new DownloadMetaData(name, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
     }
 
     /**
@@ -331,6 +333,7 @@ public class PluginMetaDataCollection {
         public final Pattern datePattern;
         public final Pattern fileNamePattern;
         public final ArrayList<DownloadMetaData> extraDownloads;
+        public final LocalDate originDate;
 
         public DownloadMetaData(NodeList n) throws Exception{
             String tempName = null;
@@ -423,9 +426,12 @@ public class PluginMetaDataCollection {
             } else {
                 extraDownloads = null;
             }
+
+            DateTimeFormatter datesFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu");
+            originDate = LocalDate.parse(((Element) dataNode).getElementsByTagName("OriginDate").item(0).getTextContent(), datesFormatter);
         }
 
-        public DownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr)
+        public DownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
         {
             name = "Data";
             this.mode = mode;
@@ -437,10 +443,11 @@ public class PluginMetaDataCollection {
             datePattern = Pattern.compile(datePatternStr);
             fileNamePattern = Pattern.compile(fileNamePatternStr);
             extraDownloads = null;
+            this.originDate = originDate;
         }
 
         public DownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
-                ArrayList<DownloadMetaData> extraDownloads)
+                ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate)
         {
             name = "Data";
             this.mode = mode;
@@ -452,9 +459,10 @@ public class PluginMetaDataCollection {
             datePattern = Pattern.compile(datePatternStr);
             fileNamePattern = Pattern.compile(fileNamePatternStr);
             this.extraDownloads = extraDownloads;
+            this.originDate = originDate;
         }
 
-        public DownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr)
+        public DownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
         {
             this.name = name;
             this.mode = mode;
@@ -466,6 +474,7 @@ public class PluginMetaDataCollection {
             datePattern = Pattern.compile(datePatternStr);
             fileNamePattern = Pattern.compile(fileNamePatternStr);
             extraDownloads = null;
+            this.originDate = originDate;
         }
 
         private DownloadMetaData(Node extraDownloadNode, String defaultTimeZone, int defaultFilesPerDay) throws Exception
@@ -520,6 +529,7 @@ public class PluginMetaDataCollection {
             filesPerDay = tempFilesPerDay;
             datePattern = tempDatePattern;
             fileNamePattern = tempFileNamePattern;
+            originDate = null;
         }
     }
 
