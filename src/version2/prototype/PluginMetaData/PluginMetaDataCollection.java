@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,7 +42,8 @@ public class PluginMetaDataCollection {
     public static PluginMetaDataCollection getInstance() throws ParserConfigurationException, SAXException, IOException
     {
         if(instance == null) {
-            instance = new PluginMetaDataCollection();
+            File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
+            instance = new PluginMetaDataCollection(getXMLFiles(fileDir));
         }
         return instance;
     }
@@ -58,22 +60,107 @@ public class PluginMetaDataCollection {
     public static PluginMetaDataCollection getInstance(File xmlFile) throws ParserConfigurationException, SAXException, IOException
     {
         if(instance == null) {
-            instance = new PluginMetaDataCollection(xmlFile);
+            File[] xmlFileArr = new File[1];
+            xmlFileArr[0] = xmlFile;
+            instance = new PluginMetaDataCollection(xmlFileArr);
         }
         return instance;
     }
 
-    private PluginMetaDataCollection(File xmlFile) throws ParserConfigurationException, SAXException, IOException{
+    /**
+     * Provides a means to create a custom DownloadMetaData object mainly for testing purposes.
+     *
+     * @param mode
+     * @param myFtp
+     * @param myHttp
+     * @param className
+     * @param timeZone
+     * @param filesPerDay
+     * @param datePatternStr
+     * @param fileNamePatternStr
+     * @return a customized DownloadMetaData object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr)
+            throws ParserConfigurationException, SAXException, IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr);
+    }
+
+    /**
+     * Provides a means to create a custom FTP object mainly for testing purposes.
+     *
+     * @param hostName
+     * @param rootDir
+     * @param userName
+     * @param password
+     * @return a customized FTP object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static FTP CreateFTP(String hostName, String rootDir, String userName, String password) throws ParserConfigurationException, SAXException, IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new FTP(hostName, rootDir, userName, password);
+    }
+
+    /**
+     * Provides a means to create a custom HTTP object mainly for testing purposes.
+     *
+     * @param url
+     * @return a customized HTTP object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static HTTP CreateHTTP(String url) throws ParserConfigurationException, SAXException, IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new HTTP(url);
+    }
+
+    /**
+     * Provides a means to create a custom ProcessorMetaData mainly object for testing purposes.
+     *
+     * @param processSteps
+     * @return a customized ProcessorMetaData object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static ProcessorMetaData CreateProcessorMetaData(Map<Integer, String> processSteps) throws ParserConfigurationException, SAXException, IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new ProcessorMetaData(processSteps);
+    }
+
+    /**
+     * Provides a means to create a custom SummaryMetaData mainly object for testing purposes.
+     *
+     * @param mergeStrategyClass
+     * @param interpolateStrategyClass
+     * @return a customized SummaryMetaData object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static SummaryMetaData CreateSummaryMetaData(String mergeStrategyClass, String interpolateStrategyClass) throws ParserConfigurationException, SAXException, IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new SummaryMetaData(mergeStrategyClass, interpolateStrategyClass);
+    }
+
+    private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException{
         pluginList = new ArrayList<String>();
-        File[] xmlFileArr = new File[1];
-        xmlFileArr[0] = xmlFile;
-        pluginMetaDataMap = createMap(xmlFileArr);
+        pluginMetaDataMap = createMap(xmlFiles);
     }
 
     private PluginMetaDataCollection() throws ParserConfigurationException, SAXException, IOException{
         pluginList = new ArrayList<String>();
-        File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
-        pluginMetaDataMap = createMap(getXMLFiles(fileDir));
     }
 
     private Map<String, PluginMetaData> createMap(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException{
@@ -115,7 +202,7 @@ public class PluginMetaDataCollection {
         return myMap;
     }
 
-    private File[] getXMLFiles(File folder) {
+    private static File[] getXMLFiles(File folder) {
         List<File> aList = new ArrayList<File>();
 
         File[] files = folder.listFiles();
@@ -127,7 +214,7 @@ public class PluginMetaDataCollection {
         return aList.toArray(new File[aList.size()]);
     }
 
-    private String getFileExtensionName(File f) {
+    private static String getFileExtensionName(File f) {
         if (f.getName().indexOf(".") == -1) {
             return "";
         } else {
@@ -149,61 +236,102 @@ public class PluginMetaDataCollection {
     public class DownloadMetaData{
         private NodeList nList;
 
-        public String mode;// the protocol type: ftp or http
-        public ftp myFtp;
-        public http myHttp;
-        public String className;
-        public String timeZone;
-        public int filesPerDay;
-        public String datePattern;
-        public String fileNamePattern;
+        public final String mode;// the protocol type: ftp or http
+        public final FTP myFtp;
+        public final HTTP myHttp;
+        public final String className;
+        public final String timeZone;
+        public final int filesPerDay;
+        public final Pattern datePattern;
+        public final Pattern fileNamePattern;
 
         public DownloadMetaData(NodeList n){
-            myFtp=null;
-            myHttp=null;
+            String tempMode = null;
+            FTP tempFtp = null;
+            HTTP tempHttp = null;
+            String tempClassName = null;
+            String tempTimeZone = null;
+            int tempFilesPerDay = -1;
+            Pattern tempDatePattern = null;
+            Pattern tempFileNamePattern = null;
+
             nList = n;
             Node downloadNode = nList.item(0);
 
             try{
-                timeZone = ((Element) downloadNode).getElementsByTagName("TimeZone").item(0).getTextContent();
-                timeZone = timeZone.substring(timeZone.indexOf(") ") + 2);
-                className = ((Element) downloadNode).getElementsByTagName("Class").item(0).getTextContent();
-                mode=((Element) downloadNode).getElementsByTagName("Mode").item(0).getTextContent();
-                mode=mode.toUpperCase();
+                tempTimeZone = ((Element) downloadNode).getElementsByTagName("TimeZone").item(0).getTextContent();
+                tempTimeZone = tempTimeZone.substring(tempTimeZone.indexOf(") ") + 2);
+                tempClassName = ((Element) downloadNode).getElementsByTagName("Class").item(0).getTextContent();
+                tempMode = ((Element) downloadNode).getElementsByTagName("Mode").item(0).getTextContent();
+                tempMode = tempMode.toUpperCase();
 
-                if(mode.equalsIgnoreCase("FTP")) {
-                    myFtp=new ftp(((Element)downloadNode).getElementsByTagName(mode).item(0));
+                if(tempMode.equalsIgnoreCase("FTP")) {
+                    tempFtp = new FTP(((Element)downloadNode).getElementsByTagName(tempMode).item(0));
                 } else {
-                    myHttp=new http(((Element)downloadNode).getElementsByTagName(mode).item(0));
+                    tempHttp = new HTTP(((Element)downloadNode).getElementsByTagName(tempMode).item(0));
                 }
 
-                filesPerDay = Integer.parseInt(((Element) downloadNode).getElementsByTagName("FilesPerDay").item(0).getTextContent());
-                datePattern = ((Element) downloadNode).getElementsByTagName("DatePattern").item(0).getTextContent();
-                fileNamePattern = ((Element) downloadNode).getElementsByTagName("FileNamePattern").item(0).getTextContent();
+                tempFilesPerDay = Integer.parseInt(((Element) downloadNode).getElementsByTagName("FilesPerDay").item(0).getTextContent());
+                tempDatePattern = Pattern.compile(((Element) downloadNode).getElementsByTagName("DatePattern").item(0).getTextContent());
+                tempFileNamePattern = Pattern.compile(((Element) downloadNode).getElementsByTagName("FileNamePattern").item(0).getTextContent());
             }catch(Exception e){
 
             }
+            mode = tempMode;
+            myFtp = tempFtp;
+            myHttp = tempHttp;
+            className = tempClassName;
+            timeZone = tempTimeZone;
+            filesPerDay = tempFilesPerDay;
+            datePattern = tempDatePattern;
+            fileNamePattern = tempFileNamePattern;
+        }
+
+        public DownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr)
+        {
+            this.mode = mode;
+            this.myFtp = myFtp;
+            this.myHttp = myHttp;
+            this.className = className;
+            this.timeZone = timeZone;
+            this.filesPerDay = filesPerDay;
+            datePattern = Pattern.compile(datePatternStr);
+            fileNamePattern = Pattern.compile(fileNamePatternStr);
         }
     }
 
-    public class ftp {
-        public String hostName;
-        public String rootDir;
-        public String userName;
-        public String password;
+    public class FTP {
+        public final String hostName;
+        public final String rootDir;
+        public final String userName;
+        public final String password;
 
-        public ftp(Node e){
+        public FTP(Node e){
             hostName=((Element)e).getElementsByTagName("HostName").item(0).getTextContent();
             rootDir=((Element)e).getElementsByTagName("RootDir").item(0).getTextContent();
             userName=((Element)e).getElementsByTagName("UserName").item(0).getTextContent();
             password=((Element)e).getElementsByTagName("PassWord").item(0).getTextContent();
         }
+
+        public FTP(String hostName, String rootDir, String userName, String password)
+        {
+            this.hostName = hostName;
+            this.rootDir = rootDir;
+            this.userName = userName;
+            this.password = password;
+        }
     }
 
-    public class http {
-        public String url;
-        public http(Node e){
+    public class HTTP {
+        public final String url;
+
+        public HTTP(Node e){
             url=((Element)e).getElementsByTagName("url").item(0).getTextContent();
+        }
+
+        public HTTP(String url)
+        {
+            this.url = url;
         }
     }
 
@@ -211,7 +339,7 @@ public class PluginMetaDataCollection {
 
         private NodeList nList;
 
-        public Map<Integer, String> processStep;
+        public final Map<Integer, String> processStep;
 
         public ProcessorMetaData(NodeList n){
             nList = n;
@@ -228,6 +356,11 @@ public class PluginMetaDataCollection {
             }catch(Exception e){
 
             }
+        }
+
+        public ProcessorMetaData(Map<Integer, String> processSteps)
+        {
+            processStep = processSteps;
         }
     }
 
@@ -257,8 +390,12 @@ public class PluginMetaDataCollection {
             // Node: InterpolateStrategyClass
             interpolateStrategyClass = (((Element) temporalNode).getElementsByTagName("InterpolateStrategyClass").item(0).getTextContent());
         }
+
+        public SummaryMetaData(String mergeStrategyClass, String interpolateStrategyClass)
+        {
+            this.mergeStrategyClass = mergeStrategyClass;
+            this.interpolateStrategyClass = interpolateStrategyClass;
+        }
     }
-
-
 }
 

@@ -65,48 +65,39 @@ public class PluginMetaDataCollectionTester {
         ZoneId zid = ZoneId.of(downloadData.timeZone);
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
-        Pattern datePattern = null;
-        try {
-            //            String dateString = "";
-            //            int expectedYear = 0;
-            //            int expectedMonth = 0;
-            //            int expectedDay = 0;
 
-            datePattern = Pattern.compile(downloadData.datePattern);
-            //            Matcher matcher = datePattern.matcher(dateString);
-            //            if(matcher.find())
-            //            {
-            //                assertTrue("Year is " + matcher.group(1), Integer.parseInt(matcher.group(1)) == expectedYear);
-            //                assertTrue("Month is " + matcher.group(3), Integer.parseInt(matcher.group(3)) == expectedMonth);
-            //                assertTrue("Day is " + matcher.group(4), Integer.parseInt(matcher.group(4)) == expectedDay);
-            //            } else {
-            //                fail("DatePattern didn't match date test string.");
-            //            }
-        }
-        catch(PatternSyntaxException e) {
-            fail("DatePattern compiling throws PatternSyntaxException.");
-        }
-        Pattern fileNamePattern = null;
-        try {
-            //            String dateString = "";
-            //            int expectedYear = 0;
-            //            int expectedMonth = 0;
-            //            int expectedDay = 0;
+        Matcher matcher;
+        // TODO: Test downloadData.datePattern.
+        //            String dateString = "";
+        //            int expectedYear = 0;
+        //            int expectedMonth = 0;
+        //            int expectedDay = 0;
 
-            fileNamePattern = Pattern.compile(downloadData.fileNamePattern);
-            //            Matcher matcher = datePattern.matcher(dateString);
-            //            if(matcher.find())
-            //            {
-            //                assertTrue("Year is " + matcher.group(1), Integer.parseInt(matcher.group(1)) == expectedYear);
-            //                assertTrue("Month is " + matcher.group(3), Integer.parseInt(matcher.group(3)) == expectedMonth);
-            //                assertTrue("Day is " + matcher.group(4), Integer.parseInt(matcher.group(4)) == expectedDay);
-            //            } else {
-            //                fail("DatePattern didn't match date test string.");
-            //            }
-        }
-        catch(PatternSyntaxException e) {
-            fail("FileNamePattern compiling throws PatternSyntaxException.");
-        }
+        matcher = downloadData.datePattern.matcher("");
+        //            if(matcher.find())
+        //            {
+        //                assertTrue("Year is " + matcher.group(1), Integer.parseInt(matcher.group(1)) == expectedYear);
+        //                assertTrue("Month is " + matcher.group(3), Integer.parseInt(matcher.group(3)) == expectedMonth);
+        //                assertTrue("Day is " + matcher.group(4), Integer.parseInt(matcher.group(4)) == expectedDay);
+        //            } else {
+        //                fail("DatePattern didn't match date test string.");
+        //            }
+
+        // TODO: Test downloadData.fileNamePattern
+        //            String dateString = "";
+        //            int expectedYear = 0;
+        //            int expectedMonth = 0;
+        //            int expectedDay = 0;
+
+        matcher = downloadData.fileNamePattern.matcher("");
+        //            if(matcher.find())
+        //            {
+        //                assertTrue("Year is " + matcher.group(1), Integer.parseInt(matcher.group(1)) == expectedYear);
+        //                assertTrue("Month is " + matcher.group(3), Integer.parseInt(matcher.group(3)) == expectedMonth);
+        //                assertTrue("Day is " + matcher.group(4), Integer.parseInt(matcher.group(4)) == expectedDay);
+        //            } else {
+        //                fail("DatePattern didn't match date test string.");
+        //            }
 
         // Test getting ProcessorMetaData
         ProcessorMetaData processorData = pluginMetaData.Processor;

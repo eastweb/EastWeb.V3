@@ -91,7 +91,7 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
                 for (FTPFile file : ftpC.listFiles())
                 {
                     if (file.isFile() &&
-                            fileNamePattern.matcher(file.getName()).matches())
+                            mData.fileNamePattern.matcher(file.getName()).matches())
                     {
                         /* pattern of TRMM 3B42RT
                          * {productname}.%y4.%m2.%d2.7.bin
