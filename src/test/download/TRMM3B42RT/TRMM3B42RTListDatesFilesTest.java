@@ -5,11 +5,15 @@ package test.download.TRMM3B42RT;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -30,6 +34,8 @@ public class TRMM3B42RTListDatesFilesTest {
 
     //    private static DataDate date;
     private static DownloadMetaData data;
+    private static File outputFile;
+    private static FileWriter writer;
 
     /**
      * @throws java.lang.Exception
@@ -38,6 +44,10 @@ public class TRMM3B42RTListDatesFilesTest {
     public static void setUpBeforeClass() throws Exception {
         // date = new DataDate(LocalDate.now().minusDays(1));
         //        date = new DataDate(22, 3, 2015);
+        outputFile = new File("TRMM3B42RTListDatesFilesTest_output.txt");
+        outputFile.delete();
+        outputFile.createNewFile();
+        writer = new FileWriter(outputFile);
 
         String mode = "FTP";// the protocol type: ftp or http
         FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
@@ -49,7 +59,7 @@ public class TRMM3B42RTListDatesFilesTest {
         String datePatternStr = "\\d{4}";
         String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
         LocalDate ld = LocalDate.parse("Wed Mar 01 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
-        System.out.println(ld.toString());
+        writer.write("OriginDate: " + ld.toString() + "\n");
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
     }
 
@@ -70,17 +80,26 @@ public class TRMM3B42RTListDatesFilesTest {
     public final void testListDatesFilesFTP() throws IOException {
         TRMM3B42RTListDatesFiles testy = new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data);
 
-        Map<DataDate, ArrayList<String>> datesFiles = testy.getListDatesFiles();
+        Map<DataDate, ArrayList<String>> tempDatesFiles = testy.getListDatesFiles();
+        Map<Integer, Map.Entry<DataDate, ArrayList<String>>> datesFilesSorted = new TreeMap<Integer, Map.Entry<DataDate, ArrayList<String>>>();
 
-        System.out.println(datesFiles.size());
+        writer.write(tempDatesFiles.size() + "\n");
 
-        for (Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
+        for (Map.Entry<DataDate, ArrayList<String>> entry : tempDatesFiles.entrySet())
         {
-            System.out.println(entry.getKey() + " : /" + entry.getValue().get(0));
+            datesFilesSorted.put((((entry.getKey().getYear() - data.originDate.getYear()) + 1) * 365) + entry.getKey().getDayOfYear(), entry);
         }
 
-        fail("Results not validated yet"); // TODO
-        assertTrue("files is '" + datesFiles.toString() + "'", datesFiles.toString().equals(""));
+        for (Map.Entry<Integer, Map.Entry<DataDate, ArrayList<String>>> entry : datesFilesSorted.entrySet())
+        {
+            writer.write(entry.getValue().getKey() + " : /" + entry.getValue().getValue().get(0) + "\n");
+        }
+        writer.flush();
+
+        System.out.println("Check output in file " + outputFile.getCanonicalPath());
+
+        //        fail("Results not validated yet"); // TODO
+        //        assertTrue("files is '" + datesFiles.toString() + "'", datesFiles.toString().equals(""));
     }
 
 }
