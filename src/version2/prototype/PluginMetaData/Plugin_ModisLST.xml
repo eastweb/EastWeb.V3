@@ -10,7 +10,7 @@
 	</Download>
 	<Processes>
 		<ClassName>ModisLSTFilter</ClassName>
-		<ClassName>Mosaic</ClassName>
+		<ClassName>ModisLSTMosaic</ClassName>
 		<ClassName>Reproject</ClassName>
 		<ClassName>Mask</ClassName>
 	</Processes>
@@ -26,6 +26,6 @@
 		<Level>HIGHEST</Level>
 		<Level>MODERATE</Level>
 		<Level>LOW</Level>
-		<Level>NONE</Level>
+		<Level>NOSCREENING</Level>
 	</QualityControl>
 </PluginMetadata>
