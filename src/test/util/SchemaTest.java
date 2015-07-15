@@ -44,6 +44,7 @@ public class SchemaTest {
     /**
      * Defined for executable jar file to be used in setting up EASTWeb database for testing purposes. The config.xml file is needed for the database connection information but nothing else is used from
      * in it. The summary calculation fields created are "Count", "Sum", "Mean", and "StdDev". The "extra download file" fields created are just "QC" which effects global Download table and the caches.
+     * Tables are created so that foreign key fields are not referencing their counterparts and foreign key rules are not required to be respected when using them.
      *
      * @param args  - 1. Global schema name, 2. Project name, 3. Plugin name (Two schemas are created: 1. The global schema and 2. A schema named by combining project name and plugin name separated
      * by an '_')
@@ -62,7 +63,7 @@ public class SchemaTest {
         System.out.println("Project name to use: " + args[1]);
         System.out.println("Plugin name to use: " + args[2]);
         System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null, false);
         System.out.println("DONE");
     }
 
@@ -135,7 +136,7 @@ public class SchemaTest {
 
         // Run method under test - defined for MODIS plugin
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3,
-                summaries);
+                summaries, true);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +

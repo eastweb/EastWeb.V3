@@ -31,13 +31,15 @@ public class Schemas {
      * @param daysPerInputFile  - relevant to plugin entry creation and calculating the number of expected results to be found in ZonalStat
      * @param numOfIndices  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param summaries  - relevant to calculating the number of expected results to be found in ZonalStat
+     * @param createTablesWithForeignKeyReferences  - TRUE if tables should be created so that their foreign keys are referencing their corresponding primary keys, FALSE if tables shouldn't be created
+     * to enforce foreign key rules
      * @throws ConfigReadException
      * @throws SQLException
      * @throws ClassNotFoundException
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
-            ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries) throws ConfigReadException, SQLException,
-            ClassNotFoundException
+            ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries,
+            boolean createTablesWithForeignKeyReferences) throws ConfigReadException, SQLException, ClassNotFoundException
     {
         final Connection conn = postgreSQLConnection;
         final Statement stmt = conn.createStatement();
@@ -55,22 +57,22 @@ public class Schemas {
         createDateGroupTable(globalEASTWebSchema, stmt);
 
         // Create Project table
-        createProjectTableIfNotExists(globalEASTWebSchema, stmt);
+        createProjectTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
         // Create Plugin table
         createPluginTableIfNotExists(globalEASTWebSchema, stmt);
 
         // Create ExpectedResults table to keep track of how many results are expected for each plugin for each project
-        createExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt);
+        createExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
         // Create GlobalDownloader table
         createGlobalDownloaderTableIfNotExists(globalEASTWebSchema, stmt);
 
         // Create GDExpectedResults table
-        createGlobalDownloaderExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt);
+        createGlobalDownloaderExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
         // Create Download table
-        createDownloadTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt);
+        createDownloadTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, createTablesWithForeignKeyReferences);
 
         // Create Environmental Index table
         createIndexTableIfNotExists(globalEASTWebSchema, stmt);
@@ -79,16 +81,16 @@ public class Schemas {
         createRegionTableIfNotExists(globalEASTWebSchema, stmt);
 
         // Create the Zone table
-        createZoneTableIfNotExists(globalEASTWebSchema, stmt);
+        createZoneTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
         // Create the Zone_Var table
-        createZoneVarTableIfNotExists(globalEASTWebSchema, stmt);
+        createZoneVarTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
         // Create the ZoneFields table
         createZoneFieldTableIfNotExists(stmt, mSchemaName);
 
         // Create the Zone_Var table
-        createZoneVarTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName);
+        createZoneVarTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
         // Create the ZonalStats table
         //        query = String.format(
@@ -107,14 +109,14 @@ public class Schemas {
         //                        ")",
         //                        mSchemaName
         //                );
-        createZonalStatTableIfNotExists(globalEASTWebSchema, summaryNames, stmt, mSchemaName);
+        createZonalStatTableIfNotExists(globalEASTWebSchema, summaryNames, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
         // Create cache tables for each framework
-        createDownloadCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName);
+        createDownloadCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-        createProcessorCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName);
+        createProcessorCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-        createIndicesCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName);
+        createIndicesCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
         // Get DateGroupID
         int dateGroupID = getDateGroupID(globalEASTWebSchema, startDate, stmt);
@@ -250,7 +252,8 @@ public class Schemas {
         return dateGroupID;
     }
 
-    private static void createIndicesCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName) throws SQLException {
+    private static void createIndicesCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName,
+            boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null || extraDownloadFiles == null) {
             return;
         }
@@ -271,7 +274,8 @@ public class Schemas {
         query_.append(
                 String.format(
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
+                                "  \"DataGroupID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -280,7 +284,8 @@ public class Schemas {
         stmt.executeUpdate(query_.toString());
     }
 
-    private static void createProcessorCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName) throws SQLException {
+    private static void createProcessorCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName,
+            boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null || extraDownloadFiles == null) {
             return;
         }
@@ -301,7 +306,8 @@ public class Schemas {
         query_.append(
                 String.format(
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
+                                "  \"DataGroupID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -310,7 +316,8 @@ public class Schemas {
         stmt.executeUpdate(query_.toString());
     }
 
-    private static void createDownloadCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName) throws SQLException {
+    private static void createDownloadCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName,
+            boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null || extraDownloadFiles == null) {
             return;
         }
@@ -331,7 +338,8 @@ public class Schemas {
         query_.append(
                 String.format(
                         "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
+                                "  \"DataGroupID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -340,7 +348,8 @@ public class Schemas {
         stmt.executeUpdate(query_.toString());
     }
 
-    private static void createZonalStatTableIfNotExists(String globalEASTWebSchema, ArrayList<String> summaryNames, final Statement stmt, final String mSchemaName) throws SQLException {
+    private static void createZonalStatTableIfNotExists(String globalEASTWebSchema, ArrayList<String> summaryNames, final Statement stmt, final String mSchemaName,
+            boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null || summaryNames == null) {
             return;
         }
@@ -352,13 +361,17 @@ public class Schemas {
                         "CREATE TABLE \"%1$s\".\"ZonalStat\"\n" +
                                 "(\n" +
                                 "  \"ZonalStatID\" serial PRIMARY KEY,\n" +
-                                "  \"DateGroupID\" integer REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +
-                                "  \"IndexID\" integer REFERENCES \"%2$s\".\"Index\" (\"IndexID\") NOT NULL,\n" +
-                                "  \"ZoneMappingID\" integer REFERENCES \"%1$s\".\"ZoneMapping\" (\"ZoneMappingID\") NOT NULL,\n" +
-                                "  \"ExpectedResultsID\" integer REFERENCES \"%2$s\".\"ExpectedResults\" (\"ExpectedResultsID\") NOT NULL,\n" +
-                                "  \"TemporalSummaryCompositionStrategyClass\" varchar(255) NOT NULL\n",
-                                mSchemaName,
-                                globalEASTWebSchema
+                                "  \"DateGroupID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
+                                "  \"ZoneMappingID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ZoneMapping\" (\"ZoneMappingID\") " : "") + "NOT NULL,\n" +
+                                "  \"ExpectedResultsID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"ExpectedResults\" (\"ExpectedResultsID\") NOT NULL,\n" +
+                                        "  \"TemporalSummaryCompositionStrategyClass\" varchar(255) " : "") + "NOT NULL\n",
+                                        mSchemaName,
+                                        globalEASTWebSchema
                         ));
         for(String summary : summaryNames)
         {
@@ -370,7 +383,7 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createZoneVarTableIfNotExists(String globalEASTWebSchema, final Statement stmt, final String mSchemaName) throws SQLException {
+    private static void createZoneVarTableIfNotExists(String globalEASTWebSchema, final Statement stmt, final String mSchemaName, boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null) {
             return;
         }
@@ -380,8 +393,10 @@ public class Schemas {
                 "CREATE TABLE \"%1$s\".\"ZoneMapping\"\n" +
                         "(\n" +
                         "  \"ZoneMappingID\" serial PRIMARY KEY,\n" +
-                        "  \"ZoneID\" integer REFERENCES \"%2$s\".\"Zone\" (\"ZoneID\") NOT NULL,\n" +
-                        "  \"ZoneFieldID\" integer REFERENCES \"%1$s\".\"ZoneField\" (\"ZoneFieldID\") NOT NULL\n" +
+                        "  \"ZoneID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Zone\" (\"ZoneID\") " : "") + "NOT NULL,\n" +
+                        "  \"ZoneFieldID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ZoneField\" (\"ZoneFieldID\") " : "") + "NOT NULL\n" +
                         ")",
                         mSchemaName,
                         globalEASTWebSchema
@@ -407,7 +422,7 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createZoneVarTableIfNotExists(String globalEASTWebSchema, final Statement stmt) throws SQLException {
+    private static void createZoneVarTableIfNotExists(String globalEASTWebSchema, final Statement stmt, boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null) {
             return;
         }
@@ -417,7 +432,8 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ZoneVar\"\n" +
                         "(\n" +
                         "  \"ZoneVarID\" serial PRIMARY KEY,\n" +
-                        "  \"ZoneID\" integer REFERENCES \"%1$s\".\"Zone\" (\"ZoneID\") NOT NULL,\n" +
+                        "  \"ZoneID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Zone\" (\"ZoneID\") " : "") + "NOT NULL,\n" +
                         "  \"Name\" varchar(255) UNIQUE NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
@@ -425,7 +441,7 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createZoneTableIfNotExists(String globalEASTWebSchema, final Statement stmt) throws SQLException {
+    private static void createZoneTableIfNotExists(String globalEASTWebSchema, final Statement stmt, boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null) {
             return;
         }
@@ -436,7 +452,8 @@ public class Schemas {
                         "(\n" +
                         "  \"ZoneID\" serial PRIMARY KEY,\n" +
                         "  \"Name\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"RegionID\" integer REFERENCES \"%1$s\".\"Region\" (\"RegionID\") NOT NULL\n" +
+                        "  \"RegionID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Region\" (\"RegionID\") " : "") + "NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );
@@ -477,7 +494,8 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createDownloadTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt) throws SQLException {
+    private static void createDownloadTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, boolean createTablesWithForeignKeyReferences)
+            throws SQLException {
         if(globalEASTWebSchema == null || extraDownloadFiles == null) {
             return;
         }
@@ -487,7 +505,8 @@ public class Schemas {
                         "CREATE TABLE IF NOT EXISTS \"%1$s\".\"Download\"\n" +
                                 "(\n" +
                                 "  \"DownloadID\" serial PRIMARY KEY,\n" +
-                                "  \"GlobalDownloaderID\" integer REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") NOT NULL,\n" +
+                                "  \"GlobalDownloaderID\" integer "
+                                +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
                                 "  \"DataFileFullPath\" varchar(255) UNIQUE NOT NULL,\n",
                                 globalEASTWebSchema
                         ));
@@ -496,14 +515,15 @@ public class Schemas {
             query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
         }
         query_.append(
-                String.format("  \"DateGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL\n" +
+                String.format("  \"DateGroupID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                         ));
         stmt.executeUpdate(query_.toString());
     }
 
-    private static void createGlobalDownloaderExpectedResultsTableIfNotExists(String globalEASTWebSchema, final Statement stmt) throws SQLException {
+    private static void createGlobalDownloaderExpectedResultsTableIfNotExists(String globalEASTWebSchema, final Statement stmt, boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null) {
             return;
         }
@@ -513,8 +533,10 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"GDExpectedResults\"\n" +
                         "(\n" +
                         "  \"GDExpectedResultsID\" serial PRIMARY KEY,\n" +
-                        "  \"GlobalDownloaderID\" integer REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") NOT NULL,\n" +
-                        "  \"ExpectedResultsID\" integer REFERENCES \"%1$s\".\"ExpectedResults\" (\"ExpectedResultsID\") NOT NULL\n" +
+                        "  \"GlobalDownloaderID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
+                        "  \"ExpectedResultsID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ExpectedResults\" (\"ExpectedResultsID\") " : "") + "NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );
@@ -539,7 +561,7 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createExpectedResultsTableIfNotExists(String globalEASTWebSchema, final Statement stmt) throws SQLException {
+    private static void createExpectedResultsTableIfNotExists(String globalEASTWebSchema, final Statement stmt, boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null) {
             return;
         }
@@ -549,8 +571,10 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ExpectedResults\"\n" +
                         "(\n" +
                         "  \"ExpectedResultsID\" serial PRIMARY KEY,\n" +
-                        "  \"ProjectID\" integer REFERENCES \"%1$s\".\"Project\" (\"ProjectID\") NOT NULL,\n" +
-                        "  \"PluginID\" integer REFERENCES \"%1$s\".\"Plugin\" (\"PluginID\") NOT NULL,\n" +
+                        "  \"ProjectID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Project\" (\"ProjectID\") " : "") + "NOT NULL,\n" +
+                        "  \"PluginID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Plugin\" (\"PluginID\") " : "") + "NOT NULL,\n" +
                         "  \"ExpectedTotalResults\" integer NOT NULL,\n" +
                         "  \"TemporalSummaryCompositionStrategyClass\" varchar(255) NOT NULL\n" +
                         ")",
@@ -577,7 +601,7 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createProjectTableIfNotExists(String globalEASTWebSchema, final Statement stmt) throws SQLException {
+    private static void createProjectTableIfNotExists(String globalEASTWebSchema, final Statement stmt, boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null) {
             return;
         }
@@ -588,7 +612,8 @@ public class Schemas {
                         "(\n" +
                         "  \"ProjectID\" serial PRIMARY KEY,\n" +
                         "  \"Name\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"StartDate_DateGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL,\n" +   // Represents the project's start date
+                        "  \"StartDate_DateGroupID\" integer "
+                        +   (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +   // Represents the project's start date
                         "  \"IndicesCount\" integer NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
