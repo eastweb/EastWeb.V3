@@ -25,18 +25,18 @@ public class Schemas {
      * @param globalEASTWebSchema  - the global schema name (can be gotten from Config.getInstance().getGlobalSchema()
      * @param projectName  - name of project to create schema for
      * @param pluginName  - name of plugin to create schema for
-     * @param startDate  - the LocalDate starting date to set project start date and calculate number of expected results to be found in ZonalStat
+     * @param summaryNames  - used to define ZonalStat table
+     * @param extraDownloadFiles  - used to define cache tables and global Download table
+     * @param startDate  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param daysPerInputFile  - relevant to plugin entry creation and calculating the number of expected results to be found in ZonalStat
      * @param numOfIndices  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param summaries  - relevant to calculating the number of expected results to be found in ZonalStat
-     * @param summaryNames  - used to define ZonalStat table
-     * @param extraDownloadFiles  - used to define cache tables
      * @throws ConfigReadException
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, Integer daysPerInputFile,
-            Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries, ArrayList<String> summaryNames, ArrayList<String> extraDownloadFiles) throws ConfigReadException, SQLException,
+    public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
+            ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries) throws ConfigReadException, SQLException,
             ClassNotFoundException
     {
         final Connection conn = postgreSQLConnection;
@@ -493,7 +493,7 @@ public class Schemas {
                         ));
         for(String fileName : extraDownloadFiles)
         {
-            query_.append("  \"" + fileName + "FullPath\" varchar(255) UNIQUE NOT NULL,\n");
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
         }
         query_.append(
                 String.format("  \"DateGroupID\" integer REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") NOT NULL\n" +
