@@ -10,51 +10,59 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-import version2.prototype.util.LazyCachedReference;
+//import version2.prototype.util.LazyCachedReference;
 
-
+/**
+ *
+ * @author michael.devos
+ *
+ */
 public class Config {
     private static final String CONFIG_FILENAME = ".//config.xml";
+    // Download section
+    private static final String DOWNLOAD_DIR_KEY = "DownloadDir";
+    // Database section
+    private static final String DATA_BASE_KEY = "DataBase";
     private static final String GLOBAL_SCHEMA_KEY = "globalSchema";
     private static final String HOST_NAME_KEY = "hostName";
-    private static final String DATA_BASE_KEY = "DataBase";
     private static final String DATABASE_USERNAME_KEY = "userName";
     private static final String DATABASE_PASSWORD_KEY = "passWord";
-    private static final LazyCachedReference<Config, ConfigReadException> instance =
-            new LazyCachedReference<Config, ConfigReadException>() {
-        @Override
-        protected Config makeInstance() throws ConfigReadException {
-            try {
-                return new Config();
-            } catch (ConfigReadException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new ConfigReadException(e);
-            }
-        }
-    };
+    // Output section
+    private static final String OUTPUT_KEY = "Output";
+    // Instance
+    private static Config instance = null;
+    //    private static final LazyCachedReference<Config, ConfigReadException> instance =
+    //            new LazyCachedReference<Config, ConfigReadException>() {
+    //        @Override
+    //        protected Config makeInstance() throws ConfigReadException {
+    //            try {
+    //                return new Config();
+    //            } catch (ConfigReadException e) {
+    //                throw e;
+    //            } catch (Exception e) {
+    //                throw new ConfigReadException(e);
+    //            }
+    //        }
+    //    };
 
-    private String globalSchema;
-    private String databaseHost;
-    private String databaseUsername;
-    private String databasePassword;
-    private ArrayList<String> SummaryCalculations;
+    private final String downloadDir;
+    private final String globalSchema;
+    private final String databaseHost;
+    private final String databaseUsername;
+    private final String databasePassword;
+    private final ArrayList<String> summaryCalculations;
 
-    private Config() throws Exception {
-        loadSettings();
-    }
-
-    public static Config getInstance() throws ConfigReadException {
-        return instance.get();
-    }
-
-    private void loadSettings() throws ConfigReadException, IOException, SAXException, ParserConfigurationException {
-        File fXmlFile = new File(CONFIG_FILENAME);
+    private Config(String xmlPath) throws ParserConfigurationException, SAXException, IOException {
+        File fXmlFile = new File(xmlPath);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(fXmlFile);
         doc.getDocumentElement().normalize();
 
+        // Node: Download
+        downloadDir = ((Element) doc.getElementsByTagName(DOWNLOAD_DIR_KEY).item(0)).getTextContent();
+
+        // Node: Database
         Element database = (Element) doc.getElementsByTagName(DATA_BASE_KEY).item(0);
         globalSchema = database.getElementsByTagName(GLOBAL_SCHEMA_KEY).item(0).getTextContent();
         databaseHost = "jdbc:postgresql://"+database.getElementsByTagName(HOST_NAME_KEY).item(0).getTextContent();
@@ -62,14 +70,69 @@ public class Config {
         databasePassword = database.getElementsByTagName(DATABASE_PASSWORD_KEY).item(0).getTextContent();
 
         // Node: Output
-        Node outputNode = doc.getElementsByTagName("Output").item(0);
-
+        Node outputNode = doc.getElementsByTagName(OUTPUT_KEY).item(0);
         // Node(s): SummaryCalculation
-        SummaryCalculations = new ArrayList<String>(1);
+        summaryCalculations = new ArrayList<String>(1);
         NodeList summaryList = ((Element) outputNode).getElementsByTagName("SummaryCalculation");
         for(int i=0; i < summaryList.getLength(); i++) {
-            SummaryCalculations.add(summaryList.item(i).getTextContent());
+            summaryCalculations.add(summaryList.item(i).getTextContent());
         }
+    }
+
+    private Config(String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword, ArrayList<String> summaryCalculations) {
+        this.downloadDir = downloadDir;
+        this.globalSchema = globalSchema;
+        this.databaseHost = databaseHost;
+        this.databaseUsername = databaseUsername;
+        this.databasePassword = databasePassword;
+        this.summaryCalculations = summaryCalculations;
+    }
+
+    /**
+     * Gets the singleton instance of Config reading and parsing the Config.xml file found in EASTWeb's working directory.
+     *
+     * @return the Config instance
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static Config getInstance() throws ParserConfigurationException, SAXException, IOException {
+        if(instance == null) {
+            instance = new Config(CONFIG_FILENAME);
+        }
+        return instance;
+    }
+
+    /**
+     * Returns a Config object created from parsing the xml file found at the given path. Works the same as calling getInstance() but allows specifying of which file to use. Doesn't store or reuse
+     * the created instance. Meant for testing purposes.
+     *
+     * @param xmlPath  - file path to the xml to read and parse
+     * @return a new Config object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static Config getAnInstance(String xmlPath) throws ParserConfigurationException, SAXException, IOException {
+        return new Config(xmlPath);
+    }
+
+    /**
+     * Creates a custom Config object with the given parameters. Doesn't store or reuse the created instance. Meant for testing purposes.
+     * @param downloadDir
+     * @param globalSchema
+     * @param databaseHost
+     * @param databaseUsername
+     * @param databasePassword
+     * @param summaryCalculations
+     * @return a new Config object
+     */
+    public static Config getAnInstance(String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword, ArrayList<String> summaryCalculations) {
+        return new Config(downloadDir, globalSchema, databaseHost, databaseUsername, databasePassword, summaryCalculations);
+    }
+
+    public String getDownloadDir() {
+        return downloadDir;
     }
 
     public String getGlobalSchema() {
@@ -88,7 +151,7 @@ public class Config {
         return databasePassword;
     }
 
-    public ArrayList<String> SummaryCalculations() {
-        return SummaryCalculations;
+    public ArrayList<String> getSummaryCalculations() {
+        return summaryCalculations;
     }
 }

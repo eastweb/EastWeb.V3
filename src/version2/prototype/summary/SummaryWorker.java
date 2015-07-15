@@ -82,7 +82,7 @@ public class SummaryWorker extends ProcessWorker {
                         new File(summary.GetZonalSummary().GetShapeFile()),  // inShapeFile
                         outputFile,   // outTableFile
                         summary.GetZonalSummary().GetField(),    // zoneField
-                        new SummariesCollection(Config.getInstance().SummaryCalculations())); // summariesCollection
+                        new SummariesCollection(Config.getInstance().getSummaryCalculations())); // summariesCollection
                 zonalSummaryCal.calculate();
                 outputFiles.add(DatabaseCache.Parse(outputFile.getCanonicalPath()));
             }

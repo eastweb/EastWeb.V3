@@ -34,7 +34,7 @@ public class EASTWebResults {
         }
 
         // Build query
-        ArrayList<String> summaries = Config.getInstance().SummaryCalculations();
+        ArrayList<String> summaries = Config.getInstance().getSummaryCalculations();
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
         StringBuilder query = new StringBuilder("SELECT F.\"Field\", F.\"ShapeFile\", Z.\"ZoneName\", C.\"Year\", C.\"Day\", I.\"IndexName\", T.\"ExpectedTotalResults\", " +
                 "A.\"TemporalSummaryCompositionStrategyClass\", A." + summaries.get(0));
@@ -101,7 +101,7 @@ public class EASTWebResults {
             {
                 valid = true;
                 summaryCalculations = new ArrayList<Double>(0);
-                for(String summary : Config.getInstance().SummaryCalculations())
+                for(String summary : Config.getInstance().getSummaryCalculations())
                 {
                     foundColumn = false;
                     for(int i=0; i < rs.getMetaData().getColumnCount(); i++)
@@ -119,7 +119,7 @@ public class EASTWebResults {
                 }
                 if(valid) {
                     results.add(new EASTWebResult(rs.getString("IndexName"), rs.getInt("Year"), rs.getInt("Day"), rs.getString("Field"), rs.getString("ZoneName"), rs.getString("ShapeFile"),
-                            rs.getInt("ExpectedTotalResults"), rs.getString("TemporalSummaryCompositionStrategyClass"), Config.getInstance().SummaryCalculations(), summaryCalculations));
+                            rs.getInt("ExpectedTotalResults"), rs.getString("TemporalSummaryCompositionStrategyClass"), Config.getInstance().getSummaryCalculations(), summaryCalculations));
                 }
             }
         }

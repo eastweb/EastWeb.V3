@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 /**
  * Holds projection information.
- * 
+ *
+ * @author Michael DeVos
  * @author Isaiah Snell-Feikema
  */
 public class Projection implements Serializable {
@@ -48,17 +49,9 @@ public class Projection implements Serializable {
     private double falseNorthing;
     private double latitudeOfOrigin;
 
-
     /**
-     * Empty constructor.
-     */
-    public Projection() {
-    }
-
-
-    /**
-     * 
-     * 
+     *
+     *
      * @param projectionType
      * @param resamplingType
      * @param datum

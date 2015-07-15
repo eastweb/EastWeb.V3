@@ -3,6 +3,8 @@ package version2.prototype.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import version2.prototype.Config;
+import version2.prototype.ConfigReadException;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.ProcessName;
 
@@ -89,7 +91,7 @@ public final class FileSystem {
      */
     public static String GetProjectDirectoryPath(String workingDir, String projectName)
     {
-        return CheckWorkingDir(workingDir) + "Projects/" + StandardizeName(projectName) + "/";
+        return CheckDirPath(CheckDirPath(workingDir) + "Projects/" + StandardizeName(projectName) + "/");
     }
 
     /**
@@ -103,7 +105,7 @@ public final class FileSystem {
      */
     public static String GetProcessDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "/" + GetProcessDirectoryName(processName) + "/";
+        return CheckDirPath(GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "/" + GetProcessDirectoryName(processName) + "/");
     }
 
     /**
@@ -117,7 +119,7 @@ public final class FileSystem {
      */
     public static String GetProcessOutputDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output/";
+        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output/");
     }
 
     /**
@@ -131,19 +133,19 @@ public final class FileSystem {
      */
     public static String GetProcessWorkerTempDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp/";
+        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp/");
     }
 
     /**
-     * Gets the download directory path for the given type of data downloaded.
+     * Gets the global download directory path for the given type of data downloaded.
      *
-     * @param workingDir  - path of the working directory for EASTWeb data gotten from ProjectInfoFile
      * @param pluginName  - name of the data type as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
      * @return path to the download directory for the data
+     * @throws ConfigReadException
      */
-    public static String GetDownloadDirectory(String workingDir, String pluginName)
+    public static String GetGlobalDownloadDirectory(Config configInstance, String pluginName) throws ConfigReadException
     {
-        return CheckWorkingDir(workingDir) + "Downloads/" + StandardizeName(pluginName) + "/";
+        return CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "/");
     }
 
     private static String GetProcessDirectoryName(ProcessName name)
@@ -168,11 +170,11 @@ public final class FileSystem {
         return dirName;
     }
 
-    private static String CheckWorkingDir(String workingDir)
+    private static String CheckDirPath(String dirPath)
     {
-        if(!workingDir.endsWith("/") && workingDir.endsWith("\\")) {
-            workingDir += "/";
+        if(!dirPath.endsWith("/") && !dirPath.endsWith("\\")) {
+            dirPath += "/";
         }
-        return workingDir;
+        return dirPath;
     }
 }

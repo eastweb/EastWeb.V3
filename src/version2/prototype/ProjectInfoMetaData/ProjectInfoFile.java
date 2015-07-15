@@ -42,11 +42,11 @@ public class ProjectInfoFile {
     private final String projectName;
     private final String workingDir;
     private final String maskingFile;
-    private final int maskingResolution;
+    private final Integer maskingResolution;
     private final String masterShapeFile;
     private final String timeZone;
-    private final boolean clipping;
-    private final int totModisTiles;
+    private final Boolean clipping;
+    private final Integer totModisTiles;
     private final ArrayList<String> modisTiles;
     private final Projection projection;
     private final LocalDate freezingDate;
@@ -99,6 +99,46 @@ public class ProjectInfoFile {
         freezingDate = ReadFreezing();
         heatingDate = ReadHeating();
         summaries = ReadSummaries();
+    }
+
+    /**
+     * Creates a fully custom ProjectInfoFile object from the given parameters. Meant for testing purposes.
+     *
+     * @param plugins
+     * @param startDate
+     * @param projectName
+     * @param workingDir
+     * @param maskingFile
+     * @param maskingResolution
+     * @param masterShapeFile
+     * @param timeZone
+     * @param clipping
+     * @param totModisTiles
+     * @param modisTiles
+     * @param projection
+     * @param freezingDate
+     * @param heatingDate
+     * @param summaries
+     */
+    public ProjectInfoFile(ArrayList<ProjectInfoPlugin> plugins, LocalDate startDate, String projectName, String workingDir, String maskingFile, Integer maskingResolution, String masterShapeFile,
+            String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, LocalDate heatingDate,
+            ArrayList<ProjectInfoSummary> summaries) {
+
+        this.plugins = plugins;
+        this.startDate = startDate;
+        this.projectName = projectName;
+        this.workingDir = workingDir;
+        this.maskingFile = maskingFile;
+        this.maskingResolution = maskingResolution;
+        this.masterShapeFile = masterShapeFile;
+        this.timeZone = timeZone;
+        this.clipping = clipping;
+        this.totModisTiles = totModisTiles;
+        this.modisTiles = modisTiles;
+        this.projection = projection;
+        this.freezingDate = freezingDate;
+        this.heatingDate = heatingDate;
+        this.summaries = summaries;
     }
 
     /**

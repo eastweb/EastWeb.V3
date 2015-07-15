@@ -97,7 +97,7 @@ public class Scheduler {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
                 // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
                 Schemas.CreateProjectPluginSchema("EASTWeb", projectInfoFile.GetProjectName(), item.GetName(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData,
-                        item.GetIndicies().size(), projectInfoFile.GetSummaries(), Config.getInstance().SummaryCalculations(), pluginMetaData.ExtraDownloadFiles);
+                        item.GetIndicies().size(), projectInfoFile.GetSummaries(), Config.getInstance().getSummaryCalculations(), pluginMetaData.ExtraDownloadFiles);
                 SetupProcesses(item);
             }
             catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
