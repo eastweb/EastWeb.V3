@@ -154,7 +154,7 @@ public class ModisLSTFilter extends Filter{
 
 
     private static int filterQCValue(int array, String QCLevel) {
-        String []level={"HIGHEST","MODERATE","LOW","NONE"};
+        String []level={"HIGHEST","MODERATE","LOW","NOSCREENING"};
         int indexQCLevel=-1;
         int indexqclevel=-1;
         for(int i=0;i<4;i++)
@@ -226,7 +226,7 @@ public class ModisLSTFilter extends Filter{
         }
         if((convertValue[6]=='0' && convertValue[7]=='1' && convertValue[0]=='1' && convertValue[1]=='1')||l==true)
         {
-            qclevel="NONE";// no screening
+            qclevel="NOSCREENING";// no screening
             return qclevel;
         }
         return qclevel;

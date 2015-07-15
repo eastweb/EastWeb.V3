@@ -16,10 +16,10 @@ public class testHDFfinal {
         // TODO Auto-generated method stub
         // String filename= "/Users/fish/Desktop/MOD11A2.A2000073.h10v08.005.2007176154547.hdf";// x.filter is the filterd tif file
         File filename=new File("/Users/fish/Desktop/MOD11A2.A2000073.h10v08.005.2007176154547.hdf");
-        String dayOutput="/Users/fish/Desktop/dayH.tif";
-        String nightOutput="/Users/fish/Desktop/nightH.tif";
+        String dayOutput="/Users/fish/Desktop/dayN.tif";
+        String nightOutput="/Users/fish/Desktop/nightN.tif";
 
-        String qcLevel="High";
+        String qcLevel="NOSCREENING";
         gdal.AllRegister();
         //get subDataset from the HDF file
 
@@ -133,7 +133,7 @@ public class testHDFfinal {
 
 
     private static int filterQCValue(int array, String QCLevel) {
-        String []level={"HIGHEST","MODERATE","LOW","NONE"};
+        String []level={"HIGHEST","MODERATE","LOW","NOScreening"};
         int indexQCLevel=-1;
         int indexqclevel=-1;
         for(int i=0;i<4;i++)
@@ -205,7 +205,7 @@ public class testHDFfinal {
         }
         if((convertValue[6]=='0' && convertValue[7]=='1' && convertValue[0]=='1' && convertValue[1]=='1')||l==true)
         {
-            qclevel="NONE";// no screening
+            qclevel="NOSCREENING";// no screening
             return qclevel;
         }
         return qclevel;
