@@ -1,5 +1,6 @@
 package version2.prototype.download;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,8 +14,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import version2.prototype.ConfigReadException;
-import version2.prototype.DataDate;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
@@ -109,13 +113,15 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @param year  - year of the downloaded file
      * @param day  - day of the downloaded file
      * @param filePath  - path to the downloaded file
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      * @throws SQLException
      * @throws ParseException
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    protected void AddDownloadFile(String dataName, int year, int day, String filePath) throws SQLException,
-    ParseException, ConfigReadException, ClassNotFoundException
+    protected void AddDownloadFile(String dataName, int year, int day, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         String tableName = "Download";
         Connection conn = PostgreSQLConnection.getConnection();

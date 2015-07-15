@@ -35,7 +35,9 @@ public class EASTWebManager implements Runnable{
     private static List<SchedulerData> newSchedulerRequests;
     private static List<Integer> stopSchedulerRequests;
     private static List<Integer> deleteSchedulerRequests;
+    private static List<String> deleteSchedulerRequestsNames;
     private static List<Integer> startExistingSchedulerRequests;
+    private static List<String> startExistingSchedulerRequestsNames;
     private static List<GlobalDownloader> newGlobalDownloaderRequests;
     private static List<Integer> stopGlobalDownloaderRequests;
     private static List<Integer> startExistingGlobalDownloaderRequests;
@@ -148,6 +150,27 @@ public class EASTWebManager implements Runnable{
                         }
                     }
                 }
+                if(deleteSchedulerRequestsNames.size() > 0)
+                {
+                    synchronized (deleteSchedulerRequestsNames) {
+                        int schedulerId = -1;
+                        for(String projectName : deleteSchedulerRequestsNames)
+                        {
+                            for(Scheduler scheduler : schedulers)
+                            {
+                                if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                {
+                                    schedulerId = scheduler.GetID();
+                                    break;
+                                }
+                            }
+                            if(schedulerId != -1) {
+                                deleteSchedulerRequestsNames.remove(projectName);
+                                handleDeleteSchedulerRequests(schedulerId);
+                            }
+                        }
+                    }
+                }
 
                 // Handle start back up existing Scheduler requests
                 if(startExistingSchedulerRequests.size() > 0)
@@ -156,6 +179,28 @@ public class EASTWebManager implements Runnable{
                         while(startExistingSchedulerRequests.size() > 0)
                         {
                             handleStartExistingSchedulerRequests(startExistingSchedulerRequests.remove(0));
+                        }
+                    }
+                }
+                if(startExistingSchedulerRequestsNames.size() > 0)
+                {
+                    synchronized (startExistingSchedulerRequestsNames) {
+                        int schedulerId = -1;
+                        for(String projectName : startExistingSchedulerRequestsNames)
+                        {
+                            for(Scheduler scheduler : schedulers)
+                            {
+                                if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                {
+                                    schedulerId = scheduler.GetID();
+                                    break;
+                                }
+                            }
+                            if(schedulerId != -1) {
+                                startExistingSchedulerRequestsNames.remove(projectName);
+                                handleStartExistingSchedulerRequests(schedulerId);
+                            }
+                            schedulerId = -1;
                         }
                     }
                 }
@@ -354,6 +399,22 @@ public class EASTWebManager implements Runnable{
     }
 
     /**
+     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified project name to be deleted from the EASTWebManager's list
+     * and stopped. This does what {@link StopScheduler StopScheduler(int)} does with the added effect of removing it all references to the Scheduler
+     * from this manager. This may or may not remove any GlobalDownloaders currently existing. A
+     * {@link version2.download#GlobalDownloader GlobalDownloader} is only removed when it no longer has any projects currently using it
+     * (GlobalDownloader objects are shared amongst Schedulers).
+     *
+     * @param projectName  - targeted Scheduler's project name
+     */
+    public static void DeleteScheduler(String projectName)
+    {
+        synchronized (deleteSchedulerRequestsNames) {
+            deleteSchedulerRequestsNames.add(projectName);
+        }
+    }
+
+    /**
      * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to have its
      * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
      * cache information in the database.
@@ -371,20 +432,16 @@ public class EASTWebManager implements Runnable{
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to have its
+     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified specified project name to have its
      * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
      * cache information in the database.
      *
-     * @param schedulerID  - targeted Scheduler's ID
+     * @param projectName  - targeted Scheduler's project name
      */
     public static void StartExistingScheduler(String projectName)
     {
-
-        if(schedulerIDs.get(schedulerID))
-        {
-            synchronized (startExistingSchedulerRequests) {
-                startExistingSchedulerRequests.add(schedulerID);
-            }
+        synchronized (startExistingSchedulerRequestsNames) {
+            startExistingSchedulerRequestsNames.add(projectName);
         }
     }
 

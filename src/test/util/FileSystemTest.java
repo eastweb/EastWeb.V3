@@ -29,7 +29,6 @@ public class FileSystemTest {
     private static String testProjectName;
     private static ArrayList<ProcessName> testProcessNames;
 
-
     @BeforeClass
     public static void setUpBeforeClass() {
         testConfigInstance = Config.getAnInstance("C:/EASTWeb/Downloads", null, null, null, null, null);

@@ -26,9 +26,17 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
     public void run() {
         Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.getListDatesFiles();
 
+        // Step 1: get all downloads from ListDatesFiles
+
+        // Step 2: Pull all cached downloads
+        GetAllDownloadedFiles();
+
+        // Step 3: Remove already downloaded files from ListDatesFiles
+
+        // Step 4: Create downloader and run downloader for all that's left
         for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
         {
-            TRMM3B42RTDownloader downloader = new TRMM3B42RTDownloader(date, outFolder, data);
+            TRMM3B42RTDownloader downloader = new TRMM3B42RTDownloader(outFolder, metaData);
         }
 
     }

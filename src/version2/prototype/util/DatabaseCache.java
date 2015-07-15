@@ -1,5 +1,6 @@
 package version2.prototype.util;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,10 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
 import version2.prototype.Scheduler.ProcessName;
@@ -59,12 +64,14 @@ public class DatabaseCache extends Observable{
      * Retrieves a list of files from the desired table that have yet to be retrieved by a ProcessWorker.
      *
      * @return a list of available files to process
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      * @throws SQLException
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws
-    SQLException, ConfigReadException, ClassNotFoundException
+    public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
         ArrayList<DataFileMetaData> files = new ArrayList<DataFileMetaData>();

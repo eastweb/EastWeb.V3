@@ -1,8 +1,13 @@
 package version2.prototype.util;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
@@ -19,11 +24,14 @@ public class PostgreSQLConnection {
      * Creates a valid Connection object if a connection could be established with the PostgreSQL database using information from config.xml.
      *
      * @return valid Connection object if successfully connected, otherwise null
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      * @throws ClassNotFoundException
      * @throws SQLException
      * @throws ConfigReadException
      */
-    public static Connection getConnection() throws ClassNotFoundException, SQLException, ConfigReadException {
+    public static Connection getConnection() throws SQLException, ParserConfigurationException, SAXException, IOException, ClassNotFoundException {
         // Driver Connection Check
         try {
             Class.forName("org.postgresql.Driver");

@@ -20,8 +20,10 @@ public class ProjectInfoSummary {
 
     /**
      * Create an instance of ProjectInfoSummary to contain all information from ProjectInfoFile relevant for the Summary framework.
-     * @param zonalSummary
-     * @param temporalStrategy
+     *
+     * @param zonalSummary  - ZonalSummary object representing zonal data from a project metadata xml
+     * @param fileStore  - TemporalSummaryRasterFileStore object representing temporal data gotten from a project metadata xml
+     * @param temporalSummaryCompositionStrategyClassName  - class name of the used TemporalSummaryCompositionStrategy in making the filestore parameter
      */
     public ProjectInfoSummary(ZonalSummary zonalSummary, TemporalSummaryRasterFileStore fileStore, String temporalSummaryCompositionStrategyClassName)
     {

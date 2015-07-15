@@ -2,6 +2,7 @@ package test.util;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,22 +10,82 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
+import version2.prototype.ZonalSummary;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
+import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
+import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
 public class SchemaTest {
-    private String testGlobalSchema = "Test_EASTWeb";
+    private static Connection con;
+    private static String testProjectName;
+    private static String testPluginName;
+    private static String testGlobalSchema;
+    private static String testSchemaName;
+    private static String shapeFile;
+    private static ArrayList<String> summaryNames;
+    private static String areaValueField;
+    private static String areaNameField;
+    private static TemporalSummaryCompositionStrategy compStrategy;
+    private static String compStrategyClassName;
+    private static ArrayList<ProjectInfoSummary> summaries;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws SQLException, ParserConfigurationException, SAXException, IOException, ClassNotFoundException {
+        con = PostgreSQLConnection.getConnection();
+        testProjectName = "Test_Project";
+        testPluginName = "Test_Plugin";
+        testGlobalSchema = "Test_EASTWeb";
+        testSchemaName = testProjectName + "_" + testPluginName;
+        shapeFile = "C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp";
+        areaValueField = "COUNTYNS10";
+        areaNameField = "NAME10";
+        compStrategy = new GregorianWeeklyStrategy();
+
+        summaryNames = new ArrayList<String>();
+        summaryNames.add("Count");
+        summaryNames.add("Sum");
+        summaryNames.add("Mean");
+        summaryNames.add("StdDev");
+
+        summaries = new ArrayList<ProjectInfoSummary>(0);
+        summaries.add(new ProjectInfoSummary(new ZonalSummary(shapeFile, areaValueField, areaNameField), new TemporalSummaryRasterFileStore(compStrategy), compStrategy.getClass().getCanonicalName()));
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws SQLException {
+        //        Statement stmt = con.createStatement();
+        //        stmt.execute(String.format(
+        //                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+        //                testGlobalSchema
+        //                ));
+        //        stmt.execute(String.format(
+        //                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+        //                testSchemaName
+        //                ));
+        //        stmt.close();
+        //        con.close();
+    }
 
     @Test
     public final void testGetSchemaName() {
-        String schemaName = Schemas.getSchemaName("Test_Project", "Test_Plugin");
+        String schemaName = Schemas.getSchemaName(testProjectName, testPluginName);
         assertTrue("Schema name is " + schemaName, schemaName.equals("test_project_test_plugin"));
 
-        schemaName = Schemas.getSchemaName("1Test_Project", "Test_Plugin");
+        schemaName = Schemas.getSchemaName("1Test_Project", testPluginName);
         assertTrue("Schema name is " + schemaName, schemaName.equals("_test_project_test_plugin"));
 
         schemaName = Schemas.getSchemaName(" ", " ");
@@ -32,16 +93,9 @@ public class SchemaTest {
     }
 
     @Test
-    public final void testCreateProjectPluginSchema() throws ConfigReadException, ClassNotFoundException, SQLException {
-        Connection con = PostgreSQLConnection.getConnection();
+    public final void testCreateProjectPluginSchema() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
         Statement stmt = con.createStatement();
         ResultSet rs = null;
-        ArrayList<String> summaryNames = new ArrayList<String>();
-        summaryNames.add("Count");
-        summaryNames.add("Sum");
-        summaryNames.add("Mean");
-        summaryNames.add("StdDev");
-        String testSchemaName = Schemas.getSchemaName("Test_Project", "Test_Plugin");
 
         // Remove test schemas if they exist
         stmt.execute(String.format(
@@ -54,7 +108,10 @@ public class SchemaTest {
                 ));
 
         // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(testGlobalSchema, "Test_Project", "Test_Plugin", LocalDate.now(), 8, 3, summaryNames);
+        ArrayList<String> extraDownloadFiles = new ArrayList<String>();
+
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, LocalDate.now().minusDays(8), 8, 3, summaries, summaryNames,
+                extraDownloadFiles);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
@@ -66,7 +123,7 @@ public class SchemaTest {
         if(rs != null)
         {
             rs.next();
-            assertTrue("Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 2);
+            assertTrue("Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 1);
         } else {
             fail("ResultSet is null from querying schemas");
         }
@@ -134,15 +191,6 @@ public class SchemaTest {
             fail("ResultSet is null from querying test schema tables");
         }
 
-        // Cleanup
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-                testGlobalSchema
-                ));
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-                testSchemaName
-                ));
         stmt.close();
         rs.close();
     }
