@@ -1,6 +1,8 @@
 package version2.prototype;
 
+import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -12,11 +14,18 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
+import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.ListDatesFiles;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -38,7 +47,7 @@ public class EASTWebManager implements Runnable{
     private static List<String> deleteSchedulerRequestsNames;
     private static List<Integer> startExistingSchedulerRequests;
     private static List<String> startExistingSchedulerRequestsNames;
-    private static List<GlobalDownloader> newGlobalDownloaderRequests;
+    private static List<NewGlobalDownloaderRequestsParams> newGlobalDownloaderRequests;
     private static List<Integer> stopGlobalDownloaderRequests;
     private static List<Integer> startExistingGlobalDownloaderRequests;
     private static List<ProcessWorker> newProcessWorkerRequests;
@@ -111,216 +120,222 @@ public class EASTWebManager implements Runnable{
             try
             {
                 Thread.sleep(msBeetweenUpdates);
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
-            // Handle new Scheduler requests
-            if(newSchedulerRequests.size() > 0)
-            {
-                synchronized (newSchedulerRequests) {
-                    while(newSchedulerRequests.size() > 0)
+                // Tell Schedulers to attempt updating their projects
+                for(Scheduler scheduler : schedulers)
+                {
+                    scheduler.AttemptUpdate();
+                }
+
+                // Handle new Scheduler requests
+                if(newSchedulerRequests.size() > 0)
+                {
+                    synchronized (newSchedulerRequests) {
+                        while(newSchedulerRequests.size() > 0)
+                        {
+                            handleNewSchedulerRequests(newSchedulerRequests.remove(0));
+                        }
+                    }
+                }
+
+                if(!justCreateNewSchedulers)
+                {
+                    // Handle stop scheduler requests
+                    if(stopSchedulerRequests.size() > 0)
                     {
-                        handleNewSchedulerRequests(newSchedulerRequests.remove(0));
-                    }
-                }
-            }
-
-            if(!justCreateNewSchedulers)
-            {
-                // Handle stop scheduler requests
-                if(stopSchedulerRequests.size() > 0)
-                {
-                    synchronized (stopSchedulerRequests) {
-                        while(stopSchedulerRequests.size() > 0)
-                        {
-                            handleStopSchedulerRequests(stopSchedulerRequests.remove(0));
-                        }
-                    }
-                }
-
-                // Handle delete scheduler requests
-                if(deleteSchedulerRequests.size() > 0)
-                {
-                    synchronized (deleteSchedulerRequests) {
-                        while(deleteSchedulerRequests.size() > 0)
-                        {
-                            handleDeleteSchedulerRequests(deleteSchedulerRequests.remove(0));
-                        }
-                    }
-                }
-                if(deleteSchedulerRequestsNames.size() > 0)
-                {
-                    synchronized (deleteSchedulerRequestsNames) {
-                        int schedulerId = -1;
-                        for(String projectName : deleteSchedulerRequestsNames)
-                        {
-                            for(Scheduler scheduler : schedulers)
+                        synchronized (stopSchedulerRequests) {
+                            while(stopSchedulerRequests.size() > 0)
                             {
-                                if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                {
-                                    schedulerId = scheduler.GetID();
-                                    break;
-                                }
-                            }
-                            if(schedulerId != -1) {
-                                deleteSchedulerRequestsNames.remove(projectName);
-                                handleDeleteSchedulerRequests(schedulerId);
+                                handleStopSchedulerRequests(stopSchedulerRequests.remove(0));
                             }
                         }
                     }
-                }
 
-                // Handle start back up existing Scheduler requests
-                if(startExistingSchedulerRequests.size() > 0)
-                {
-                    synchronized (startExistingSchedulerRequests) {
-                        while(startExistingSchedulerRequests.size() > 0)
-                        {
-                            handleStartExistingSchedulerRequests(startExistingSchedulerRequests.remove(0));
-                        }
-                    }
-                }
-                if(startExistingSchedulerRequestsNames.size() > 0)
-                {
-                    synchronized (startExistingSchedulerRequestsNames) {
-                        int schedulerId = -1;
-                        for(String projectName : startExistingSchedulerRequestsNames)
-                        {
-                            for(Scheduler scheduler : schedulers)
-                            {
-                                if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                {
-                                    schedulerId = scheduler.GetID();
-                                    break;
-                                }
-                            }
-                            if(schedulerId != -1) {
-                                startExistingSchedulerRequestsNames.remove(projectName);
-                                handleStartExistingSchedulerRequests(schedulerId);
-                            }
-                            schedulerId = -1;
-                        }
-                    }
-                }
-
-                // Handle starting up new GlobalDownload requests requests
-                if(newGlobalDownloaderRequests.size() > 0)
-                {
-                    synchronized (newGlobalDownloaderRequests) {
-                        while(newGlobalDownloaderRequests.size() > 0)
-                        {
-                            handleNewGlobalDownloaderRequests(newGlobalDownloaderRequests.remove(0));
-                        }
-                    }
-                }
-
-                // Handle starting existing GlobalDownloader requests
-                if(startExistingGlobalDownloaderRequests.size() > 0)
-                {
-                    synchronized (startExistingGlobalDownloaderRequests) {
-                        while(startExistingGlobalDownloaderRequests.size() > 0)
-                        {
-                            handleStartExistingGlobalDownloaderRequests(startExistingGlobalDownloaderRequests.remove(0));
-                        }
-                    }
-                }
-
-                // Handle stopping GlobalDownloader requests
-                if(stopGlobalDownloaderRequests.size() > 0)
-                {
-                    synchronized (stopGlobalDownloaderRequests) {
-                        while(stopGlobalDownloaderRequests.size() > 0)
-                        {
-                            handleStopGlobalDownloaderRequests(stopGlobalDownloaderRequests.remove(0));
-                        }
-                    }
-                }
-
-                // Handle make new ProcessWorker requests
-                if(newProcessWorkerRequests.size() > 0)
-                {
-                    synchronized (newProcessWorkerRequests) {
-                        while(newProcessWorkerRequests.size() > 0)
-                        {
-                            handleNewProcessWorkerRequests(newProcessWorkerRequests.remove(0));
-                        }
-                    }
-                }
-
-                // Handle stopping GlobalDownloaders whose using projects are all stopped.
-                // Handle deleting GlobalDownloaders that don't have any currently existing projects using them.
-                if(globalDLs.size() > 0)
-                {
-                    synchronized (globalDLs)
+                    // Handle delete scheduler requests
+                    if(deleteSchedulerRequests.size() > 0)
                     {
-                        boolean allStopped;
-                        boolean noneExisting;
-
-                        if(schedulers.size() > 0)
-                        {
-                            synchronized (schedulers)
+                        synchronized (deleteSchedulerRequests) {
+                            while(deleteSchedulerRequests.size() > 0)
                             {
-                                for(GlobalDownloader gdl : globalDLs)
+                                handleDeleteSchedulerRequests(deleteSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(deleteSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (deleteSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : deleteSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
                                 {
-                                    allStopped = true;
-                                    noneExisting = true;
-
-                                    for(Scheduler scheduler : schedulers)
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
                                     {
-                                        for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    deleteSchedulerRequestsNames.remove(projectName);
+                                    handleDeleteSchedulerRequests(schedulerId);
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle start back up existing Scheduler requests
+                    if(startExistingSchedulerRequests.size() > 0)
+                    {
+                        synchronized (startExistingSchedulerRequests) {
+                            while(startExistingSchedulerRequests.size() > 0)
+                            {
+                                handleStartExistingSchedulerRequests(startExistingSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(startExistingSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (startExistingSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : startExistingSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
+                                {
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    {
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    startExistingSchedulerRequestsNames.remove(projectName);
+                                    handleStartExistingSchedulerRequests(schedulerId);
+                                }
+                                schedulerId = -1;
+                            }
+                        }
+                    }
+
+                    // Handle starting up new GlobalDownload requests requests
+                    if(newGlobalDownloaderRequests.size() > 0)
+                    {
+                        synchronized (newGlobalDownloaderRequests) {
+                            while(newGlobalDownloaderRequests.size() > 0)
+                            {
+                                handleNewGlobalDownloaderRequests(newGlobalDownloaderRequests.remove(0));
+                            }
+                        }
+                    }
+
+                    // Handle starting existing GlobalDownloader requests
+                    if(startExistingGlobalDownloaderRequests.size() > 0)
+                    {
+                        synchronized (startExistingGlobalDownloaderRequests) {
+                            while(startExistingGlobalDownloaderRequests.size() > 0)
+                            {
+                                handleStartExistingGlobalDownloaderRequests(startExistingGlobalDownloaderRequests.remove(0));
+                            }
+                        }
+                    }
+
+                    // Handle stopping GlobalDownloader requests
+                    if(stopGlobalDownloaderRequests.size() > 0)
+                    {
+                        synchronized (stopGlobalDownloaderRequests) {
+                            while(stopGlobalDownloaderRequests.size() > 0)
+                            {
+                                handleStopGlobalDownloaderRequests(stopGlobalDownloaderRequests.remove(0));
+                            }
+                        }
+                    }
+
+                    // Handle make new ProcessWorker requests
+                    if(newProcessWorkerRequests.size() > 0)
+                    {
+                        synchronized (newProcessWorkerRequests) {
+                            while(newProcessWorkerRequests.size() > 0)
+                            {
+                                handleNewProcessWorkerRequests(newProcessWorkerRequests.remove(0));
+                            }
+                        }
+                    }
+
+                    // Handle stopping GlobalDownloaders whose using projects are all stopped.
+                    // Handle deleting GlobalDownloaders that don't have any currently existing projects using them.
+                    if(globalDLs.size() > 0)
+                    {
+                        synchronized (globalDLs)
+                        {
+                            boolean allStopped;
+                            boolean noneExisting;
+
+                            if(schedulers.size() > 0)
+                            {
+                                synchronized (schedulers)
+                                {
+                                    for(GlobalDownloader gdl : globalDLs)
+                                    {
+                                        allStopped = true;
+                                        noneExisting = true;
+
+                                        for(Scheduler scheduler : schedulers)
                                         {
-                                            if(pluginInfo.GetName().equals(gdl.GetPluginName()))
+                                            for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
                                             {
-                                                noneExisting = false;
-                                                if(scheduler.GetState() == TaskState.RUNNING) {
-                                                    allStopped = false;
+                                                if(pluginInfo.GetName().equals(gdl.GetPluginName()))
+                                                {
+                                                    noneExisting = false;
+                                                    if(scheduler.GetState() == TaskState.RUNNING) {
+                                                        allStopped = false;
+                                                    }
+                                                    break;
                                                 }
+                                            }
+
+                                            if(!noneExisting && !allStopped) {
                                                 break;
                                             }
                                         }
 
-                                        if(!noneExisting && !allStopped) {
-                                            break;
+                                        if(noneExisting)
+                                        {
+                                            gdl.Stop();
+                                            globalDLs.remove(gdl.GetID());
+                                            releaseGlobalDLID(gdl.GetID());
+                                            globalDLFutures.get(gdl.GetID()).cancel(false);
                                         }
-                                    }
-
-                                    if(noneExisting)
-                                    {
-                                        gdl.Stop();
-                                        globalDLs.remove(gdl.GetID());
-                                        releaseGlobalDLID(gdl.GetID());
-                                        globalDLFutures.get(gdl.GetID()).cancel(false);
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            for(GlobalDownloader gdl : globalDLs)
+                            else
                             {
-                                gdl.Stop();
-                                globalDLs.remove(gdl.GetID());
-                                releaseGlobalDLID(gdl.GetID());
-                                globalDLFutures.get(gdl.GetID()).cancel(false);
+                                for(GlobalDownloader gdl : globalDLs)
+                                {
+                                    gdl.Stop();
+                                    globalDLs.remove(gdl.GetID());
+                                    releaseGlobalDLID(gdl.GetID());
+                                    globalDLFutures.get(gdl.GetID()).cancel(false);
+                                }
+                            }
+
+                            synchronized (numOfCreatedGDLs) {
+                                numOfCreatedGDLs = globalDLs.size();
                             }
                         }
+                    }
 
-                        synchronized (numOfCreatedGDLs) {
-                            numOfCreatedGDLs = globalDLs.size();
+                    if(schedulerStatesChanged)
+                    {
+                        synchronized (schedulerStatesChanged)
+                        {
+                            runGUIUpdateHandlers();
+                            schedulerStatesChanged = false;
                         }
                     }
                 }
-
-                if(schedulerStatesChanged)
-                {
-                    synchronized (schedulerStatesChanged)
-                    {
-                        runGUIUpdateHandlers();
-                        schedulerStatesChanged = false;
-                    }
-                }
+            }
+            catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                e.printStackTrace();
             }
         }while((msBeetweenUpdates > 0) && !manualUpdate);
         manualUpdate = false;
@@ -452,10 +467,10 @@ public class EASTWebManager implements Runnable{
      *
      * @param gdl  - {@link version2.download#GlobalDownloader GlobalDownloader} object to manage and run
      */
-    public static void StartGlobalDownloader(GlobalDownloader gdl)
+    public static void StartGlobalDownloader(DownloadFactory dlFactory, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
     {
         synchronized (newGlobalDownloaderRequests) {
-            newGlobalDownloaderRequests.add(gdl);
+            newGlobalDownloaderRequests.add(new EASTWebManager().new NewGlobalDownloaderRequestsParams(dlFactory, pluginName, metaData, listDatesFiles));
         }
     }
 
@@ -655,6 +670,43 @@ public class EASTWebManager implements Runnable{
         }
     }
 
+    /**
+     * Empty instance just to allow usage of private classes.
+     */
+    private EASTWebManager()
+    {
+        manualUpdate = false;
+        justCreateNewSchedulers = false;
+        msBeetweenUpdates = Integer.MAX_VALUE;
+        schedulerStatesChanged = false;
+
+        newSchedulerRequests = null;
+        stopSchedulerRequests = null;
+        deleteSchedulerRequests = null;
+        startExistingSchedulerRequests = null;
+        newGlobalDownloaderRequests = null;
+        stopGlobalDownloaderRequests = null;
+        startExistingGlobalDownloaderRequests = null;
+        newProcessWorkerRequests = null;
+        guiHandlers = null;
+
+        // Setup for handling executing GlobalDownloaders
+        globalDLs = null;
+        globalDLExecutor = null;
+        numOfCreatedGDLs = -1;
+        globalDLIDs = null;
+        globalDLFutures = null;
+
+        // Setup for handling executing Schedulers
+        schedulers = null;
+        schedulerStatuses = null;
+        numOfCreatedSchedulers = -10;
+        schedulerIDs = null;
+
+        // Setup for handling executing ProcessWorkers
+        processWorkerExecutor = null;
+    }
+
     private EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
     {
         manualUpdate = false;
@@ -696,7 +748,7 @@ public class EASTWebManager implements Runnable{
         stopSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
         deleteSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
         startExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        newGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<GlobalDownloader>(1));
+        newGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<NewGlobalDownloaderRequestsParams>(1));
         stopGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
         startExistingGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
         newProcessWorkerRequests = Collections.synchronizedList(new ArrayList<ProcessWorker>(10));
@@ -719,7 +771,7 @@ public class EASTWebManager implements Runnable{
         processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, pwFactory);
     }
 
-    private void handleNewSchedulerRequests(SchedulerData data)
+    private void handleNewSchedulerRequests(SchedulerData data) throws ParserConfigurationException, SAXException, IOException
     {
         synchronized (schedulers)
         {
@@ -779,7 +831,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleNewGlobalDownloaderRequests(GlobalDownloader gdl)
+    private void handleNewGlobalDownloaderRequests(NewGlobalDownloaderRequestsParams gdlParams)
     {
         synchronized (globalDLs)
         {
@@ -789,7 +841,7 @@ public class EASTWebManager implements Runnable{
                 int idx = -1;
                 for(int i=0; i < globalDLs.size(); i++)
                 {
-                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
+                    if(globalDLs.get(i).GetPluginName().equals(gdlParams.pluginName))
                     {
                         idx = i;
                         break;
@@ -798,6 +850,7 @@ public class EASTWebManager implements Runnable{
 
                 if(idx >= 0)
                 {
+                    GlobalDownloader gdl = gdlParams.dlFactory.CreateGlobalDownloader(id, gdlParams.pluginName, gdlParams.metaData, gdlParams.listDatesFiles);
                     globalDLs.set(id, gdl);
                     globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
                 }
@@ -811,7 +864,7 @@ public class EASTWebManager implements Runnable{
             }
             else
             {
-                newGlobalDownloaderRequests.add(gdl);
+                newGlobalDownloaderRequests.add(gdlParams);
             }
         }
     }
@@ -924,6 +977,21 @@ public class EASTWebManager implements Runnable{
             return true;
         } else {
             return false;
+        }
+    }
+
+    private class NewGlobalDownloaderRequestsParams {
+        public final DownloadFactory dlFactory;
+        public final String pluginName;
+        public final DownloadMetaData metaData;
+        public final ListDatesFiles listDatesFiles;
+
+        public NewGlobalDownloaderRequestsParams(DownloadFactory dlFactory, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
+        {
+            this.dlFactory = dlFactory;
+            this.pluginName = pluginName;
+            this.metaData = metaData;
+            this.listDatesFiles = listDatesFiles;
         }
     }
 }

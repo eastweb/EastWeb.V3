@@ -10,6 +10,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import version2.prototype.util.FileSystem;
+
 //import version2.prototype.util.LazyCachedReference;
 
 /**
@@ -132,11 +134,11 @@ public class Config {
     }
 
     public String getDownloadDir() {
-        return downloadDir;
+        return FileSystem.CheckDirPath(downloadDir);
     }
 
     public String getGlobalSchema() {
-        return globalSchema;
+        return FileSystem.StandardizeName(globalSchema);
     }
 
     public String getDatabaseHost() {
