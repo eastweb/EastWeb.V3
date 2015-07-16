@@ -120,15 +120,15 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.extraDownloads);
     }
 
-    public final ArrayList<DataFileMetaData> CheckForUpdate(int key)
-    {
-
-    }
-
-    public final DataFileMetaData GetSpecificDownload(LocalDate ld)
-    {
-
-    }
+    //    public final ArrayList<DataFileMetaData> CheckForUpdate(int key)
+    //    {
+    //
+    //    }
+    //
+    //    public final DataFileMetaData GetSpecificDownload(LocalDate ld)
+    //    {
+    //
+    //    }
 
     /**
      * Add the given file and associated information to the appropriate global downloads table.

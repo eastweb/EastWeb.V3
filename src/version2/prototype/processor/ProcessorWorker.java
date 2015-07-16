@@ -70,8 +70,11 @@ public class ProcessorWorker extends ProcessWorker {
         // get each plugin's PrepareProcessTask
         Class <?> classPrepareTask =
                 Class.forName("version2.prototype.processor." + pluginName + "PrepareProcessTask" );
+
         Constructor<?> cnstPrepareTask =
-                classPrepareTask.getConstructor(projectInfoFile, pluginInfo, projectInfoFile.GetStartDate());
+                classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, DataDate.class);
+
+        PrepareProcessTask prepareTask = (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, projectInfoFile.GetStartDate());
 
         for (Entry<Integer, String> step : processStep.entrySet())
         {
@@ -81,7 +84,6 @@ public class ProcessorWorker extends ProcessWorker {
                     + pluginName + step.getValue());
 
             Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
-            Object prepareTask = cnstProcess.newInstance(initargs);
 
             Object process =  cnstProcess.newInstance(new Object[] {new ProcessData(
                     prepareTask.getInputFolders(key),
@@ -95,7 +97,6 @@ public class ProcessorWorker extends ProcessWorker {
             Method methodProcess = process.getClass().getMethod("run");
             methodProcess.invoke(process);
         }
-
 
         return new ProcessWorkerReturn(outputFiles);
     }

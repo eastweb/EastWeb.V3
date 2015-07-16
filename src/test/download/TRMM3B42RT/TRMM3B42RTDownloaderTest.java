@@ -51,7 +51,7 @@ public class TRMM3B42RTDownloaderTest {
      */
     @Test
     public final void testDownload() throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "balh", "sdfajlk ", "TRMM3B42RT", LocalDate.now().minusDays(10), 1, null, null, null, null);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "balh", "sdfajlk ", "TRMM3B42RT", null, null, LocalDate.now().minusDays(10), 1, null, null, false);
         fail("Not yet implemented"); // TODO
     }
 

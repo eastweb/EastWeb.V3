@@ -32,8 +32,8 @@ import version2.prototype.util.FileSystem;
  */
 public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
-    protected TRMM3B42RTGlobalDownloader(int myID, String pluginName, TaskState initialState, DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
-        super(myID, pluginName, initialState, metaData, listDatesFiles);
+    protected TRMM3B42RTGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
+        super(myID, pluginName, metaData, listDatesFiles);
     }
 
     @Override
@@ -43,30 +43,38 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
         Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.getListDatesFiles();
 
         // Step 2: Pull all cached downloads
-        ArrayList<DataFileMetaData> cachedD = GetAllDownloadedFiles();
+        ArrayList<DataFileMetaData> cachedD;
+        try {
+            cachedD = GetAllDownloadedFiles();
 
-        // Step 3: Remove already downloaded files from ListDatesFiles
-        for (DataFileMetaData d: cachedD)
-        {
-            DownloadFileMetaData downloaded =  d.ReadMetaDataForProcessor();
-            // get the year and dayOfyear from each downloaded file
-            DataDate thisDate = new DataDate(downloaded.year, downloaded.day);
 
-            // get the files associated with the date in the ListDatesFiles
-            ArrayList <String> files = datesFiles.get(thisDate);
-            for ( String f :files)
+            // Step 3: Remove already downloaded files from ListDatesFiles
+            for (DataFileMetaData d: cachedD)
             {
-                String strPath = downloaded.dataFilePath;
-                strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
+                DownloadFileMetaData downloaded =  d.ReadMetaDataForProcessor();
+                // get the year and dayOfyear from each downloaded file
+                DataDate thisDate = new DataDate(downloaded.year, downloaded.day);
 
-                // if the file is found in the downloade list, remove it
-                if (f.equalsIgnoreCase(strPath))
+                // get the files associated with the date in the ListDatesFiles
+                ArrayList <String> files = datesFiles.get(thisDate);
+                for ( String f :files)
                 {
-                    files.remove(f);
-                }
-            }
+                    String strPath = downloaded.dataFilePath;
+                    strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
 
-            datesFiles.put(thisDate, files);
+                    // if the file is found in the downloade list, remove it
+                    if (f.equalsIgnoreCase(strPath))
+                    {
+                        files.remove(f);
+                    }
+                }
+
+                datesFiles.put(thisDate, files);
+            }
+        } catch (ClassNotFoundException | SQLException
+                | ParserConfigurationException | SAXException | IOException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
         }
 
         // Step 4: Create downloader and run downloader for all that's left

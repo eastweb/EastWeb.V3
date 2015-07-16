@@ -32,8 +32,8 @@ public class TRMM3B42RTFactory implements DownloadFactory {
     }
 
     @Override
-    public GlobalDownloader CreateGlobalDownloader(int myID, String pluginName, TaskState initialState, DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
-        return new TRMM3B42RTGlobalDownloader(myID, "TRMM3B42RT", initialState, metaData, listDatesFiles);
+    public GlobalDownloader CreateGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
+        return new TRMM3B42RTGlobalDownloader(myID, "TRMM3B42RT",  metaData, listDatesFiles);
     }
 
     @Override
