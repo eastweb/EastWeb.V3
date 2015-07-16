@@ -7,14 +7,14 @@ package version2.prototype.util;
  *
  */
 public class DataFileMetaData {
-    public final int rowID;
-    public final String dataFilePath;
-    public final String qcFilePath;
-    public final String dateDirectoryPath;
-    public final int dataGroupID;
-    public final int year;
-    public final int day;
-    public final String indexNm;
+    private final int rowID;
+    private final String dataFilePath;
+    private final String qcFilePath;
+    private final String dateDirectoryPath;
+    private final int dataGroupID;
+    private final int year;
+    private final int day;
+    private final String indexNm;
 
     /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the environmental index to null.
