@@ -28,14 +28,18 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
     private String mMode;
     private String mHost;
     private String mRoot;
+    private String mFileToDownload;
     private DownloadMetaData mData;
+    private String outFilePath;
 
-    public TRMM3B42RTDownloader(DataDate date, String outFolder, DownloadMetaData data)
+    public TRMM3B42RTDownloader(DataDate date, String outFolder, DownloadMetaData data, String fileToDownload)
     {
         mDate = date;
         mOutputFolder = outFolder;
         mData = data;
+        mFileToDownload = fileToDownload;
         setFTPValues(mData);
+        outFilePath = null;
     }
 
     // get the values from DownloadMetaData
@@ -65,7 +69,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
                             + yearDirectory);
                 }
 
-                int year = mDate.getYear();
+                /* int year = mDate.getYear();
                 int month = mDate.getMonth();
                 int day = mDate.getDay();
 
@@ -73,17 +77,21 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
                         String.format("3B42RT_daily.%04d.%02d.%02d.bin",
                                 year, month, day);
 
+
                 // Save it to the sub-folder with Day_of_year
                 LocalDate ld = LocalDate.of(year, month, day);
                 int day_of_year = ld.getDayOfYear();
+                 */
 
-                String dir = String.format("%s\\%04d\\%03d",mOutputFolder,year,day_of_year);
+                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",mOutputFolder, mDate.getDay(), mDate.getDayOfYear());
 
                 FileUtils.forceMkdir(new File(dir));
 
-                File outputFile = new File(String.format("%s\\%s",dir,fileToDownload));
+                outFilePath = String.format("%s\\%s",dir, mFileToDownload);
 
-                DownloadUtils.download(ftpC, fileToDownload, outputFile);
+                File outputFile  = new File(outFilePath);
+
+                DownloadUtils.download(ftpC, mFileToDownload, outputFile);
                 ftpC.disconnect();
 
             } catch (IOException e)
@@ -96,4 +104,10 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
             }
         } ;
     }
+
+    public String getOutputFilePath()
+    {
+        return outFilePath;
+    }
+
 }

@@ -32,66 +32,80 @@ import version2.prototype.util.FileSystem;
  */
 public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
-    protected TRMM3B42RTGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
+    public TRMM3B42RTGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
         super(myID, pluginName, metaData, listDatesFiles);
     }
 
     @Override
+    //get the files to in the TRMM3B42RTListDatesFiles, remove from the list the files downloaded already by checking the cached files in the database
+    //Download the files in the list by calling the download() method in TRMM3B42RTDownloader
+
     public void run()
     {
         // Step 1: get all downloads from ListDatesFiles
         Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.getListDatesFiles();
 
         // Step 2: Pull all cached downloads
-        ArrayList<DataFileMetaData> cachedD;
-        try {
-            cachedD = GetAllDownloadedFiles();
+        ArrayList<DataFileMetaData> cachedD = new ArrayList<DataFileMetaData>();
+        //try {
+
+        //WRITEBACK
+        //cachedD = GetAllDownloadedFiles();
+        DataFileMetaData d1 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\0001\\182\\3B42RT_daily.2015.07.01.bin", null, null, 0, 2015, 182);
+        DataFileMetaData d2 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\0001\\183\\3B42RT_daily.2015.07.02.bin", null, null, 0, 2015, 183);
+        cachedD.add(d1);
+        cachedD.add(d2);
 
 
-            // Step 3: Remove already downloaded files from ListDatesFiles
-            for (DataFileMetaData d: cachedD)
+        // Step 3: Remove already downloaded files from ListDatesFiles
+        for (DataFileMetaData d: cachedD)
+        {
+            DownloadFileMetaData downloaded =  d.ReadMetaDataForProcessor();
+            // get the year and dayOfyear from each downloaded file
+            System.out.println(downloaded.day);
+            DataDate thisDate = new DataDate( downloaded.day, downloaded.year);
+
+            // get the files associated with the date in the ListDatesFiles
+            ArrayList <String> files = datesFiles.get(thisDate);
+            for ( String f :files)
             {
-                DownloadFileMetaData downloaded =  d.ReadMetaDataForProcessor();
-                // get the year and dayOfyear from each downloaded file
-                DataDate thisDate = new DataDate(downloaded.year, downloaded.day);
+                String strPath = downloaded.dataFilePath;
+                strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
 
-                // get the files associated with the date in the ListDatesFiles
-                ArrayList <String> files = datesFiles.get(thisDate);
-                for ( String f :files)
+                // if the file is found in the downloade list, set it to null
+                if (f.equalsIgnoreCase(strPath))
                 {
-                    String strPath = downloaded.dataFilePath;
-                    strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
-
-                    // if the file is found in the downloade list, remove it
-                    if (f.equalsIgnoreCase(strPath))
-                    {
-                        files.remove(f);
-                    }
+                    f = null;
                 }
-
-                datesFiles.put(thisDate, files);
             }
-        } catch (ClassNotFoundException | SQLException
-                | ParserConfigurationException | SAXException | IOException e2) {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
+
+            datesFiles.put(thisDate, files);
         }
+
+        //}catch (ClassNotFoundException | SQLException
+        //                | ParserConfigurationException | SAXException | IOException e2) {
+        //            // TODO Auto-generated catch block
+        //            e2.printStackTrace();
+        //        }
 
         // Step 4: Create downloader and run downloader for all that's left
         for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
         {
             String outFolder;
 
-            try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+            //outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+            outFolder = "D:\\project\\download\\TRMM3B42RT";
 
-                DataDate dd = entry.getKey();
+            DataDate dd = entry.getKey();
 
-                for (String f : entry.getValue())
+            for (String f : entry.getValue())
+            {
+
+                if (f != null)
                 {
-                    TRMM3B42RTDownloader downloader = new TRMM3B42RTDownloader(dd, outFolder, metaData);
+                    TRMM3B42RTDownloader downloader = new TRMM3B42RTDownloader(dd, outFolder, metaData, f);
 
-                    try {
+                    try{
                         downloader.download();
                     } catch (DownloadFailedException e1) {
                         // TODO Auto-generated catch block
@@ -100,31 +114,17 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
-
-                    String filePath = outFolder + File.separator + f;
-                    try {
-                        AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), filePath);
-                    } catch (ClassNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (SQLException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
                 }
 
-            } catch (ConfigReadException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (ParserConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                //                    try {
+                //                        AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                //                    } catch (ClassNotFoundException e) {
+                //                        // TODO Auto-generated catch block
+                //                        e.printStackTrace();
+                //                    } catch (SQLException e) {
+                //                        // TODO Auto-generated catch block
+                //                        e.printStackTrace();
+                //                    }
             }
 
         }
