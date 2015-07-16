@@ -27,7 +27,7 @@ import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeekly
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
-public class SchemaTest {
+public class SchemasTest {
     private static Connection con;
     private static String testProjectName;
     private static String testPluginName;
@@ -86,7 +86,7 @@ public class SchemaTest {
         summaryNames.add("StdDev");
 
         summaries = new ArrayList<ProjectInfoSummary>(0);
-        summaries.add(new ProjectInfoSummary(new ZonalSummary(shapeFile, areaValueField, areaNameField), new TemporalSummaryRasterFileStore(compStrategy), compStrategy.getClass().getCanonicalName()));
+        summaries.add(new ProjectInfoSummary(new ZonalSummary(shapeFile, areaValueField, areaNameField), new TemporalSummaryRasterFileStore(compStrategy), compStrategy.getClass().getCanonicalName(), 1));
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");

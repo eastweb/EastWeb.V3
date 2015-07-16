@@ -170,7 +170,7 @@ public final class FileSystem {
         return dirName;
     }
 
-    private static String CheckDirPath(String dirPath)
+    public static String CheckDirPath(String dirPath)
     {
         if(!dirPath.endsWith("/") && !dirPath.endsWith("\\")) {
             dirPath += "/";

@@ -14,9 +14,10 @@ public class ProjectInfoSummary {
     public static final String SHAPE_FILE_TAG = "Shape File Path";
     public static final String AREA_VALUE_FIELD_TAG = "AreaValueField";
     public static final String TEMPORAL_SUMMARY_TAG = "Temporal Summary";
-    private ZonalSummary zonalSummary;
-    private TemporalSummaryRasterFileStore fileStore;
-    private String temporalSummaryCompositionStrategyClassName;
+    private final ZonalSummary zonalSummary;
+    private final TemporalSummaryRasterFileStore fileStore;
+    private final String temporalSummaryCompositionStrategyClassName;
+    private final int ID;
 
     /**
      * Create an instance of ProjectInfoSummary to contain all information from ProjectInfoFile relevant for the Summary framework.
@@ -25,11 +26,12 @@ public class ProjectInfoSummary {
      * @param fileStore  - TemporalSummaryRasterFileStore object representing temporal data gotten from a project metadata xml
      * @param temporalSummaryCompositionStrategyClassName  - class name of the used TemporalSummaryCompositionStrategy in making the filestore parameter
      */
-    public ProjectInfoSummary(ZonalSummary zonalSummary, TemporalSummaryRasterFileStore fileStore, String temporalSummaryCompositionStrategyClassName)
+    public ProjectInfoSummary(ZonalSummary zonalSummary, TemporalSummaryRasterFileStore fileStore, String temporalSummaryCompositionStrategyClassName, int ID)
     {
         this.zonalSummary = zonalSummary;
         this.fileStore = fileStore;
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
+        this.ID = ID;
     }
 
     /**
@@ -52,6 +54,13 @@ public class ProjectInfoSummary {
      * @return the class name of the TemporalSummaryCompositionStrategy gotten from the project meta data for this summary element
      */
     public String GetTemporalSummaryCompositionStrategyClassName() { return temporalSummaryCompositionStrategyClassName; }
+
+    /**
+     * Gets the ID attribute value assigned to this Summary element in the project metadata xml.
+     *
+     * @return int ID attributed
+     */
+    public int GetID() { return ID; }
 
     @Override
     public String toString() {

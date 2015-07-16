@@ -19,6 +19,7 @@ import version2.prototype.Projection.ProjectionType;
 import version2.prototype.Projection.ResamplingType;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
+import version2.prototype.util.FileSystem;
 import version2.prototype.ZonalSummary;
 
 /**
@@ -160,14 +161,14 @@ public class ProjectInfoFile {
      *
      * @return project name gotten from the xml's data.
      */
-    public String GetProjectName() { return projectName; }
+    public String GetProjectName() { return FileSystem.StandardizeName(projectName); }
 
     /**
      * Gets the working directory gotten from the once parsed xml file.
      *
      * @return working directory string gotten from the xml's data.
      */
-    public String GetWorkingDir() { return workingDir; }
+    public String GetWorkingDir() { return FileSystem.CheckDirPath(workingDir); }
 
     /**
      * Gets the path to masking file gotten from the once parsed xml file.
@@ -597,6 +598,7 @@ public class ProjectInfoFile {
         NodeList summaryList = GetUpperLevelNodeList("Summary", "Missing zonal summaries.", "Summaries");
         ArrayList<String> summaryStrings = GetNodeListValues(summaryList, "Missing zonal summaries.");
         if(summaryStrings.size() > 0) {
+            int ID;
             String shapefile;
             String areaValueField;
             String areaNameField;
@@ -605,10 +607,14 @@ public class ProjectInfoFile {
             Class<?> strategyClass;
             Constructor<?> ctorStrategy;
 
-            for(String summary : summaryStrings)
+            String summary;
+            for(int i=0; i < summaryStrings.size(); i++)
             {
+                summary = summaryStrings.get(i);
+                ID = Integer.parseInt(((Element)summaryList.item(i)).getAttribute("ID"));
                 // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; Field: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy
                 // Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; COUNTYNS10
+
                 areaNameField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_NAME_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_NAME_FIELD_TAG + ": ").length(),
                         summary.indexOf(";"));
                 shapefile = summary.substring(summary.indexOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ") + String.valueOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ").length(), summary.indexOf(";",
@@ -635,7 +641,7 @@ public class ProjectInfoFile {
                     ctorStrategy = strategyClass.getConstructor();
                     fileStore = new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance());
                 }
-                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, areaValueField, areaNameField), fileStore, temporalSummaryCompositionStrategyClassName));
+                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, areaValueField, areaNameField), fileStore, temporalSummaryCompositionStrategyClassName, ID));
             }
             return summaries;
         }

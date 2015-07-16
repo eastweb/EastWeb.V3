@@ -9,20 +9,22 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
+import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.Schemas;
 
 
 /**
@@ -39,23 +41,36 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     private static BitSet keys;
     private Map<Integer, Boolean> udpateStates;
 
-
-    protected GlobalDownloader(int myID, String pluginName, TaskState initialState, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
+    /**
+     * Sets this GlobalDownloader super to have an initial state (TaskState) of STOPPED.
+     *
+     * @param myID  - unique identifier ID of this GlobalDownloader (this is addressed by EASTWebManager and has nothing to do with the internal database IDs)
+     * @param pluginName
+     * @param metaData
+     * @param listDatesFiles
+     */
+    protected GlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
     {
-        state = initialState;
+        state = TaskState.STOPPED;
         ID = myID;
         this.pluginName = pluginName;
         this.metaData = metaData;
         keys = new BitSet(1000);
-        udpateStates = new HashMap<Integer, Boolean>(0);
+        udpateStates = new TreeMap<Integer, Boolean>();
         this.listDatesFiles = listDatesFiles;
     }
 
+    /**
+     * Sets this GlobalDownloader instance running state to STOPPED.
+     */
     public final void Stop()
     {
         state = TaskState.STOPPED;
     }
 
+    /**
+     * Sets this GlobalDownloader instance running state to RUNNING.
+     */
     public final void Start()
     {
         state = TaskState.RUNNING;
@@ -90,9 +105,19 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         }
     }
 
-    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles()
+    /**
+     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all projects.
+     *
+     * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-
+        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.extraDownloads);
     }
 
     public final ArrayList<DataFileMetaData> CheckForUpdate(int key)

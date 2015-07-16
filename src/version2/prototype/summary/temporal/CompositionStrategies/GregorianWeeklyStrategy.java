@@ -42,14 +42,12 @@ public class GregorianWeeklyStrategy implements TemporalSummaryCompositionStrate
     public int
     getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
         // TODO Auto-generated method stub
-        return 0;
     }
 
     @Override
     public int getNumberOfCompleteCompositesInRange(LocalDate startDate,
             LocalDate endDate, int daysPerInputData) {
         // TODO Auto-generated method stub
-        return 0;
     }
 
 }
