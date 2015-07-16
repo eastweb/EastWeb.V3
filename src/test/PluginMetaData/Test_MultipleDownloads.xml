@@ -6,7 +6,8 @@
 		<Name>QC</Name>
 	</ExtraDownloadFiles>
 	<Download Name="Data">
-		<DownloadFactoryClass>TRMM3B42RTFactory</DownloadFactoryClass>
+		<ListDatesFilesClass>ListDatesFilesClass1</ListDatesFilesClass>
+		<DownloaderClass>DownloaderClass1</DownloaderClass>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
@@ -21,7 +22,8 @@
 		<OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate>
 	</Download>
 	<Download Name="QC">
-		<DownloadFactoryClass>NldasDownloadTask</DownloadFactoryClass>
+		<ListDatesFilesClass>ListDatesFilesClass2</ListDatesFilesClass>
+		<DownloaderClass>DownloaderClass2</DownloaderClass>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>other.sci.gsfc.nasa.gov</HostName>

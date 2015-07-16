@@ -4,7 +4,8 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<DownloadFactoryClass>TRMM3B42RTFactory</DownloadFactoryClass>
+		<ListDatesFilesClass>ListDatesFilesClass1</ListDatesFilesClass>
+		<DownloaderClass>DownloaderClass1</DownloaderClass>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
@@ -16,7 +17,7 @@
 		<FilesPerDay>1</FilesPerDay>
 		<DatePattern>\\d{4}</DatePattern>
 		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
-		<OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate>
+		<OriginDate>Tue Jun 02 23:17:37 CDT 2015</OriginDate>
 	</Download>
 	<Processor>
 		<ProcessStep>NldasProjection</ProcessStep>
@@ -39,4 +40,5 @@
 		<Level>Level 2</Level>
 		<Level>Level 3</Level>
 	</QualityControl>
+</PluginMetadata>ityControl>
 </PluginMetadata>
