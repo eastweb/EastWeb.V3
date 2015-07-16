@@ -1,4 +1,4 @@
-package version2.prototype.projection.TRMM3B42RT;
+package version2.prototype.processor.TRMM3B42RT;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -8,8 +8,8 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
-import version2.prototype.projection.Convert;
-import version2.prototype.projection.ProcessData;
+import version2.prototype.processor.Convert;
+import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
 
 public class TRMM3B42RTConvert extends Convert {

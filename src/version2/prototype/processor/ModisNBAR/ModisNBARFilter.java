@@ -1,4 +1,4 @@
-package version2.prototype.projection.ModisNBAR;
+package version2.prototype.processor.ModisNBAR;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 
-import version2.prototype.projection.Filter;
-import version2.prototype.projection.ModisTileData;
-import version2.prototype.projection.ProcessData;
+import version2.prototype.processor.Filter;
+import version2.prototype.processor.ModisTileData;
+import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
 
 public class ModisNBARFilter extends Filter {

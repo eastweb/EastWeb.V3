@@ -1,7 +1,7 @@
-package version2.prototype.projection.TRMM3B42RT;
+package version2.prototype.processor.TRMM3B42RT;
 
-import version2.prototype.projection.Mask;
-import version2.prototype.projection.ProcessData;
+import version2.prototype.processor.Mask;
+import version2.prototype.processor.ProcessData;
 
 // For reflection
 public class TRMM3B42RTMask extends Mask {

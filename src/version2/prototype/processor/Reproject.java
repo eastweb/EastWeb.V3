@@ -1,4 +1,4 @@
-package version2.prototype.projection;
+package version2.prototype.processor;
 
 import java.io.File;
 import java.io.IOException;

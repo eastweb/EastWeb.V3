@@ -1,11 +1,11 @@
-package version2.prototype.projection.ModisNBAR;
+package version2.prototype.processor.ModisNBAR;
 
 import java.util.ArrayList;
 
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.projection.PrepareProcessTask;
+import version2.prototype.processor.PrepareProcessTask;
 
 public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
 

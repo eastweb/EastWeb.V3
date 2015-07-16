@@ -1,4 +1,4 @@
-package version2.prototype.projection;
+package version2.prototype.processor;
 
 import version2.prototype.Projection;
 

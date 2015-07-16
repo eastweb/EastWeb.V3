@@ -1,4 +1,4 @@
-package version2.prototype.projection.ModisLST;
+package version2.prototype.processor.ModisLST;
 
 import java.io.File;
 
@@ -8,8 +8,8 @@ import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconstConstants;
 
-import version2.prototype.projection.Filter;
-import version2.prototype.projection.ProcessData;
+import version2.prototype.processor.Filter;
+import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
 
 public class ModisLSTFilter extends Filter{

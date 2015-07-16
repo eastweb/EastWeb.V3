@@ -1,4 +1,4 @@
-package version2.prototype.projection.ModisLST;
+package version2.prototype.processor.ModisLST;
 import java.io.File;
 
 import org.gdal.gdal.Band;

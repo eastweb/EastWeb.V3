@@ -1,9 +1,9 @@
-package version2.prototype.projection.TRMM3B42RT;
+package version2.prototype.processor.TRMM3B42RT;
 
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.projection.PrepareProcessTask;
+import version2.prototype.processor.PrepareProcessTask;
 import version2.prototype.util.GeneralListener;
 
 public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
@@ -12,7 +12,7 @@ public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
     private String outputFolder;
 
     public TRMM3B42RTPrepareProcessTask(ProjectInfoFile mProject,
-            ProjectInfoPlugin mPlugin, DataDate mDate, GeneralListener l) {
+            ProjectInfoPlugin mPlugin, DataDate mDate) {
         super(mProject, mPlugin, mDate);
     }
 

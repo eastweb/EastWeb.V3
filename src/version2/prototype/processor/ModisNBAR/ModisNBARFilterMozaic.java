@@ -1,4 +1,4 @@
-package version2.prototype.projection.ModisNBAR;
+package version2.prototype.processor.ModisNBAR;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +14,10 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
-import version2.prototype.projection.ImageArray;
-import version2.prototype.projection.ModisTileData;
-import version2.prototype.projection.Mozaic;
-import version2.prototype.projection.ProcessData;
+import version2.prototype.processor.ImageArray;
+import version2.prototype.processor.ModisTileData;
+import version2.prototype.processor.Mozaic;
+import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
 
 public class ModisNBARFilterMozaic extends Mozaic {

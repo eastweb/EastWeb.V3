@@ -1,7 +1,7 @@
-package version2.prototype.projection.TRMM3B42RT;
+package version2.prototype.processor.TRMM3B42RT;
 
-import version2.prototype.projection.ProcessData;
-import version2.prototype.projection.Reproject;
+import version2.prototype.processor.ProcessData;
+import version2.prototype.processor.Reproject;
 
 // For reflection
 public class TRMM3B42RTReproject extends Reproject{

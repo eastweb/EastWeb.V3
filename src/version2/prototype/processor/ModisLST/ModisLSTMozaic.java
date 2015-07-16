@@ -1,7 +1,7 @@
-package version2.prototype.projection.ModisLST;
+package version2.prototype.processor.ModisLST;
 
-import version2.prototype.projection.Mozaic;
-import version2.prototype.projection.ProcessData;
+import version2.prototype.processor.Mozaic;
+import version2.prototype.processor.ProcessData;
 
 public class ModisLSTMozaic extends Mozaic{
 
