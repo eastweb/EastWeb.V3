@@ -48,7 +48,7 @@ public class Schemas {
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
             ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries,
             boolean createTablesWithForeignKeyReferences) throws ConfigReadException, SQLException, ClassNotFoundException
-    {
+            {
         final Connection conn = postgreSQLConnection;
         final Statement stmt = conn.createStatement();
         final String mSchemaName = getSchemaName(projectName, pluginName);
@@ -117,7 +117,7 @@ public class Schemas {
 
         // Add entry to EASTWeb global ExpectedResults table
         addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn, stmt);
-    }
+            }
 
     public static ArrayList<DataFileMetaData> getAllDownloadedFiles(String globalEASTWebSchema, String pluginName, int instanceID, ArrayList<DownloadMetaData> extraDownloadFiles)
             throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
@@ -172,7 +172,7 @@ public class Schemas {
         return results;
     }
 
-    private static int getGlobalDownloadID(String globalEASTWebSchema, String pluginName, int instanceID)
+    private static int getGlobalDownloadID(String globalEASTWebSchema, String pluginName, int instanceID) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
         int ID = -1;
         final Connection conn = PostgreSQLConnection.getConnection();

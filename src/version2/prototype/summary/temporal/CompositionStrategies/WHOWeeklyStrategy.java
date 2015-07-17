@@ -40,12 +40,14 @@ public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
     @Override
     public int
     getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
+        return 0;
         // TODO Auto-generated method stub
     }
 
     @Override
     public int getNumberOfCompleteCompositesInRange(LocalDate startDate,
             LocalDate endDate, int daysPerInputData) {
+        return daysPerInputData;
         // TODO Auto-generated method stub
     }
 

@@ -41,6 +41,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import version2.prototype.EASTWebManager;
+import version2.prototype.TaskState;
 import version2.prototype.EastWebUI.ProgressUI.ProjectProgress;
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
 import version2.prototype.EastWebUI.QueryUI.QueryUI;
@@ -48,10 +50,10 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
+import version2.prototype.Scheduler.SchedulerStatus;
 
 public class MainWindow {
 
-    private ArrayList<Scheduler> ListOfProjectSchedule;
     private JFrame frame;
     private JMenuItem mntmCreateNewProject;
     private JMenu mnHelp;
@@ -85,7 +87,6 @@ public class MainWindow {
      * Create the application.
      */
     public MainWindow() {
-        ListOfProjectSchedule = new ArrayList<Scheduler>();
         initialize();
     }
 
@@ -389,11 +390,8 @@ public class MainWindow {
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
                     SchedulerData data = new SchedulerData(project);
-                    Scheduler current = new Scheduler(data, null);
-                    Thread t = new Thread(current);
-                    t.start();
+                    EASTWebManager.StartNewScheduler(data, false);
 
-                    ListOfProjectSchedule.add(current);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -529,16 +527,9 @@ public class MainWindow {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                for(Scheduler item : ListOfProjectSchedule)
-                {
-                    String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
-                    String projectName = label.toString();
-
-                    if(currentProjectName.equals(projectName)) {
-                        new ProjectProgress(item);
-                    }
-                }
+                new ProjectProgress(label.toString());
             }
+
             isPushed = false;
             return new String(label);
         }
@@ -576,21 +567,14 @@ public class MainWindow {
                 setForeground(table.getForeground());
                 setBackground(UIManager.getColor("Button.background"));
             }
-            for(Scheduler item : ListOfProjectSchedule)
-            {
-                String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
-                String projectName = value.toString();
 
-                if(currentProjectName.equals(projectName)) {
+            String projectName = value.toString();
 
-                    if(item.isRunning) {
-                        setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            if(EASTWebManager.GetSchedulerStatus(projectName).GetState() == TaskState.RUNNING) {
+                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
 
-                    } else {
-                        setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
-                    }
-
-                }
+            } else {
+                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
             }
             return this;
         }
@@ -631,24 +615,14 @@ public class MainWindow {
             }
             label = (value == null) ? "" : value.toString();
 
-            for(Scheduler item : ListOfProjectSchedule)
-            {
-                String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
-                String projectName = label.toString();
+            String projectName = label.toString();
 
-                if(currentProjectName.equals(projectName)) {
-
-                    if(item.isRunning) {
-                        button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
-
-
-                    } else {
-                        button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
-
-                    }
-
-                }
+            if(EASTWebManager.GetSchedulerStatus(projectName).GetState() == TaskState.RUNNING) {
+                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            } else {
+                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
             }
+
             isPushed = true;
             return button;
         }
@@ -656,25 +630,18 @@ public class MainWindow {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                for(Scheduler item : ListOfProjectSchedule)
-                {
-                    String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
-                    String projectName = label.toString();
+                String projectName = label.toString();
 
-                    if(currentProjectName.equals(projectName)) {
+                if(EASTWebManager.GetSchedulerStatus(projectName).GetState() == TaskState.RUNNING) {
+                    EASTWebManager.StartExistingScheduler(projectName);
+                    button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 
-                        if(item.isRunning) {
-                            item.Stop();
-                            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
-
-                        } else {
-                            item.Start();
-                            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
-                        }
-
-                    }
+                } else {
+                    EASTWebManager.StopExistingScheduler(projectName);
+                    button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
                 }
             }
+
             isPushed = false;
             return new String(label);
         }
@@ -760,18 +727,21 @@ public class MainWindow {
         public Object getCellEditorValue() {
             if (isPushed) {
                 int removeProject = -1;
-                for(Scheduler item : ListOfProjectSchedule)
+
+                String projectName = label.toString();
+                ArrayList<SchedulerStatus> schedulersStatus = EASTWebManager.GetSchedulerStatuses();
+
+
+                for(SchedulerStatus item : schedulersStatus)
                 {
-                    String currentProjectName = item.data.projectInfoFile.GetProjectName().toString();
-                    String projectName = label.toString();
+                    String currentProjectName = item.projectName;
 
                     if(currentProjectName.equals(projectName)) {
-                        removeProject = ListOfProjectSchedule.indexOf(item);
+                        removeProject = schedulersStatus.indexOf(item);
                     }
                 }
                 if(removeProject != -1) {
-
-                    ListOfProjectSchedule.remove(removeProject);
+                    EASTWebManager.StopExistingScheduler(projectName);
                     defaultTableModel.removeRow(removeProject);
                 }
             }

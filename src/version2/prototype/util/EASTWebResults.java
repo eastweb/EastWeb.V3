@@ -3,10 +3,15 @@
  */
 package version2.prototype.util;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
@@ -24,9 +29,11 @@ public class EASTWebResults {
      * @param pluginName  - the plugin name to be queried
      * @param indices  - the environmental indices to get summary information for
      * @return The EASTWebQuery object that contains the query that can retrieve results from zonal summary associated with the given parameters.
-     * @throws ConfigReadException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, String... indices) throws ConfigReadException
+    public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, String... indices) throws ParserConfigurationException, SAXException, IOException
     {
         // Check parameters given
         if(projectName == null || pluginName == null) {
@@ -67,9 +74,11 @@ public class EASTWebResults {
      * @param projectName  - the project name to be queried
      * @param pluginName  - the plugin name to be queried
      * @return The EASTWebQuery object that contains the query that can retrieve results from zonal summary associated with the given parameters.
-     * @throws ConfigReadException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName) throws ConfigReadException
+    public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName) throws ParserConfigurationException, SAXException, IOException
     {
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
         return GetEASTWebQuery(globalSchema, projectName, pluginName, new String[0]);
@@ -82,9 +91,11 @@ public class EASTWebResults {
      * @return the list of resulting summary row data composition objects
      * @throws SQLException
      * @throws ClassNotFoundException
-     * @throws ConfigReadException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public static ArrayList<EASTWebResult> GetEASTWebResults(EASTWebQuery query) throws SQLException, ClassNotFoundException, ConfigReadException
+    public static ArrayList<EASTWebResult> GetEASTWebResults(EASTWebQuery query) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
         Statement stmt = PostgreSQLConnection.getConnection().createStatement();
         ResultSet rs;

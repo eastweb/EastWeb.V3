@@ -275,6 +275,12 @@ public class ProjectInformationPage {
         falseNothing.setEditable(false);
         falseNothing.setText("");
 
+        freezingDateChooser.setEnabled(false);
+        freezingDateChooser.setDate(null);
+
+        heatingDateChooser.setEnabled(false);
+        heatingDateChooser.setDate(null);
+
         summaryListModel.clear();
 
         // }}
@@ -377,6 +383,9 @@ public class ProjectInformationPage {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }

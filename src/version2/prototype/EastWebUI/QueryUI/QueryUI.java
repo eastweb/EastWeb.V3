@@ -22,6 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JTextPane;
 import javax.swing.JScrollPane;
@@ -86,6 +88,11 @@ public class QueryUI {
     public QueryUI(JComboBox<String> projectList) {
 
         initialize();
+        frame.setVisible(true);
+
+        // And From your main() method or any other method
+        Timer timer = new Timer();
+        timer.schedule(new UpdateQuery(), 0, 100);
         frame.setVisible(true);
     }
 
@@ -381,6 +388,16 @@ public class QueryUI {
             return "";
         } else {
             return f.getName().substring(f.getName().length() - 3, f.getName().length());
+        }
+    }
+
+    class UpdateQuery extends TimerTask {
+        int count = 0;
+        @Override
+        public void run() {
+            count += 1;
+            sqlViewTextPanel.setText(String.valueOf(count));
+
         }
     }
 }

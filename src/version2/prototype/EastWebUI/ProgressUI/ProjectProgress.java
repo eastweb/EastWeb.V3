@@ -10,10 +10,14 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JList;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import version2.prototype.EASTWebManager;
+import version2.prototype.GUIUpdateHandler;
 import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.Scheduler.SchedulerStatus;
 
 public class ProjectProgress {
 
@@ -23,7 +27,6 @@ public class ProjectProgress {
     private JProgressBar processProgressBar;
     private JProgressBar indiciesProgressBar;
     private JProgressBar summaryProgressBar;
-    private Scheduler scheduler;
 
     private DefaultListModel<String> itemLog;
 
@@ -48,14 +51,10 @@ public class ProjectProgress {
     /**
      * Create the application.
      */
-    public ProjectProgress(Scheduler scheduler) {
+    public ProjectProgress(String  projectName) {
         initialize();
-        this.scheduler = scheduler;
 
-        // And From your main() method or any other method
-        Timer timer = new Timer();
-        timer.schedule(new UpdateUI(), 0, 1000);
-        frame.setVisible(true);
+        EASTWebManager.RegisterGUIUpdateHandler(new GUIUpdateHandlerImplementation(projectName));
     }
 
     /**
@@ -121,19 +120,39 @@ public class ProjectProgress {
         panel_1.add(logList);
     }
 
-    class UpdateUI extends TimerTask {
+    class GUIUpdateHandlerImplementation implements GUIUpdateHandler{
+
+        private String projectName;
+
+        public GUIUpdateHandlerImplementation(String projectName){
+            this.projectName = projectName;
+        }
+
         @Override
         public void run() {
-            downloadProgressBar.setValue(scheduler.DownloadProgress);
-            processProgressBar.setValue(scheduler.ProcessProgress);
-            indiciesProgressBar.setValue(scheduler.IndiciesProgress);
-            summaryProgressBar.setValue(scheduler.SummaryProgress);
+            SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
 
-            for(String log : scheduler.Log)
+            downloadProgressBar.setValue(GetAverage(status.GetDownloadProgress()));
+            processProgressBar.setValue(GetAverage(status.GetProcessorProgress()));
+            indiciesProgressBar.setValue(GetAverage(status.GetIndicesProgress()));
+            summaryProgressBar.setValue(GetAverage(status.GetSummaryProgress()));
+
+            for(String log : status.GetAndClearLog())
             {
                 itemLog.addElement(log);
             }
-            scheduler.Log.clear();
         }
+
+        private int GetAverage(List<Integer> TotalProgress){
+
+            int total = 0;
+
+            for(int each: TotalProgress){
+                total += each;
+            }
+
+            return total / TotalProgress.size();
+        }
+
     }
 }

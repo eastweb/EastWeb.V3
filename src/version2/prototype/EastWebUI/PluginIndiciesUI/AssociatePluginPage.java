@@ -55,11 +55,9 @@ public class AssociatePluginPage {
 
     /**
      * Create the application.
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
+     * @throws Exception
      */
-    public AssociatePluginPage(IndiciesListener l) throws ParserConfigurationException, SAXException, IOException {
+    public AssociatePluginPage(IndiciesListener l) throws Exception {
         indiciesEvent = new IndiciesEvent();
         indiciesEvent.addListener(l);
         initialize();
@@ -68,11 +66,9 @@ public class AssociatePluginPage {
 
     /**
      * Initialize the contents of the frame.
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
+     * @throws Exception
      */
-    private void initialize() throws ParserConfigurationException, SAXException, IOException {
+    private void initialize() throws Exception {
         frame = new JFrame();
         frame.setBounds(100, 100, 400, 300);
         frame.setResizable(false);
