@@ -83,18 +83,6 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
                 }
             }
 
-            //            for ( String f :files)
-            //            {
-            //                String strPath = downloaded.dataFilePath;
-            //                strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
-            //
-            //                // if the file is found in the downloaded list, set it to null
-            //                if (f.equalsIgnoreCase(strPath))
-            //                {
-            //                    files.remove(files.indexOf(f));
-            //                }
-            //            }
-
             datesFiles.put(thisDate, files);
         }
 
