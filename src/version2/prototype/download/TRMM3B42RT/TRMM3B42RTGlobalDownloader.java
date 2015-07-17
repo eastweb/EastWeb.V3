@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -51,8 +52,8 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
         //WRITEBACK
         //cachedD = GetAllDownloadedFiles();
-        DataFileMetaData d1 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\0001\\182\\3B42RT_daily.2015.07.01.bin", null, null, 0, 2015, 182);
-        DataFileMetaData d2 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\0001\\183\\3B42RT_daily.2015.07.02.bin", null, null, 0, 2015, 183);
+        DataFileMetaData d1 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\2015\\182\\3B42RT_daily.2015.07.01.bin", null, null, 0, 2015, 182);
+        DataFileMetaData d2 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\2015\\183\\3B42RT_daily.2015.07.02.bin", null, null, 0, 2015, 183);
         cachedD.add(d1);
         cachedD.add(d2);
 
@@ -62,25 +63,45 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
         {
             DownloadFileMetaData downloaded =  d.ReadMetaDataForProcessor();
             // get the year and dayOfyear from each downloaded file
-            System.out.println(downloaded.day);
+
+
             DataDate thisDate = new DataDate( downloaded.day, downloaded.year);
 
             // get the files associated with the date in the ListDatesFiles
             ArrayList <String> files = datesFiles.get(thisDate);
-            for ( String f :files)
+
+            Iterator<String> fIter = files.iterator();
+
+            while (fIter.hasNext())
             {
                 String strPath = downloaded.dataFilePath;
                 strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
-
-                // if the file is found in the downloade list, set it to null
-                if (f.equalsIgnoreCase(strPath))
+                // remove the file if it is found in the downloaded list
+                if (fIter.next().equalsIgnoreCase(strPath))
                 {
-                    f = null;
+                    fIter.remove();
                 }
             }
 
+            //            for ( String f :files)
+            //            {
+            //                String strPath = downloaded.dataFilePath;
+            //                strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
+            //
+            //                // if the file is found in the downloaded list, set it to null
+            //                if (f.equalsIgnoreCase(strPath))
+            //                {
+            //                    files.remove(files.indexOf(f));
+            //                }
+            //            }
+
             datesFiles.put(thisDate, files);
         }
+
+        //        for (Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
+        //        {
+        //            System.out.println("dateFile: " + entry.getKey() + " : /" + entry.getValue() + "\n");
+        //        }
 
         //}catch (ClassNotFoundException | SQLException
         //                | ParserConfigurationException | SAXException | IOException e2) {
@@ -128,6 +149,7 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
             }
 
         }
+
 
     }
 

@@ -1,5 +1,5 @@
 OriginDate: 2000-03-01
-5613
+5616
 {year: 2000, month: 3, day: 1, dayOfYear: 61} : /3B42RT_daily.2000.03.01.bin
 {year: 2000, month: 3, day: 2, dayOfYear: 62} : /3B42RT_daily.2000.03.02.bin
 {year: 2000, month: 3, day: 3, dayOfYear: 63} : /3B42RT_daily.2000.03.03.bin
@@ -5609,3 +5609,6 @@ OriginDate: 2000-03-01
 {year: 2015, month: 7, day: 11, dayOfYear: 192} : /3B42RT_daily.2015.07.11.bin
 {year: 2015, month: 7, day: 12, dayOfYear: 193} : /3B42RT_daily.2015.07.12.bin
 {year: 2015, month: 7, day: 13, dayOfYear: 194} : /3B42RT_daily.2015.07.13.bin
+{year: 2015, month: 7, day: 14, dayOfYear: 195} : /3B42RT_daily.2015.07.14.bin
+{year: 2015, month: 7, day: 15, dayOfYear: 196} : /3B42RT_daily.2015.07.15.bin
+{year: 2015, month: 7, day: 16, dayOfYear: 197} : /3B42RT_daily.2015.07.16.bin

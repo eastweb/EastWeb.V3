@@ -59,10 +59,12 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
         {
             final FTPClient ftpC =
                     (FTPClient) ConnectionContext.getConnection(mData);
+
             try {
                 final String yearDirectory =
                         String.format("%s%d", mRoot, mDate.getYear());
                 System.out.println(yearDirectory);
+
                 if (!ftpC.changeWorkingDirectory(yearDirectory))
                 {
                     throw new IOException("Couldn't navigate to directory: "
@@ -92,7 +94,6 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
                 File outputFile  = new File(outFilePath);
 
                 DownloadUtils.download(ftpC, mFileToDownload, outputFile);
-                ftpC.disconnect();
 
             } catch (IOException e)
             {
