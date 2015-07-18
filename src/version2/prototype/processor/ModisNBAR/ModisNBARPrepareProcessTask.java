@@ -23,16 +23,16 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download -> Mozaic
-            folders.add("C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("Download\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
-            folders.add("C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("QCDownload\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            folders.add(project.GetWorkingDir() + String.format("Download\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            folders.add(project.GetWorkingDir() + String.format("QCDownload\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
             // Mozaic -> Reproject
-            folders.add("C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("1\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            folders.add(project.GetWorkingDir() + String.format("Mosaic\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Reproject -> Mask
-            folders.add("C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("2\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            folders.add(project.GetWorkingDir() + String.format("Reproject\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
             break;
         default:
             folders = null;
@@ -50,15 +50,15 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download/QCDownload -> Mozaic
-            outputFolder = "C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("1\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            outputFolder = project.GetWorkingDir() + String.format("Mosaic\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // Mozaic -> Reproject
-            outputFolder = "C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("2\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            outputFolder = project.GetWorkingDir() + String.format("Reproject\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
             break;
         case 3:
             // Reproject -> Mask
-            outputFolder = "C:\\Users\\Chris Plucker\\Desktop\\MODIS_NBAR\\Version2\\" + String.format("3\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            outputFolder = project.GetWorkingDir() + String.format("Output\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
             break;
         default:
             outputFolder = null;
