@@ -40,7 +40,6 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
     @Override
     //get the files to in the TRMM3B42RTListDatesFiles, remove from the list the files downloaded already by checking the cached files in the database
     //Download the files in the list by calling the download() method in TRMM3B42RTDownloader
-
     public void run()
     {
         // Step 1: get all downloads from ListDatesFiles

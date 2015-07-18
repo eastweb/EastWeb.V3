@@ -57,7 +57,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
     {
         if (mMode.equalsIgnoreCase("FTP"))
         {
-            final FTPClient ftpC =
+            FTPClient ftpC =
                     (FTPClient) ConnectionContext.getConnection(mData);
 
             try {
@@ -85,8 +85,9 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
                 int day_of_year = ld.getDayOfYear();
                  */
 
-                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",mOutputFolder, mDate.getDay(), mDate.getDayOfYear());
+                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
 
+                System.out.println("directory: " + dir);
                 FileUtils.forceMkdir(new File(dir));
 
                 outFilePath = String.format("%s\\%s",dir, mFileToDownload);
@@ -95,6 +96,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
 
                 DownloadUtils.download(ftpC, mFileToDownload, outputFile);
 
+
             } catch (IOException e)
             {
                 throw e;
@@ -102,6 +104,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
             finally
             {
                 FTPClientPool.returnFtpClient(mHost, ftpC);
+                //ftpC.disconnect();
             }
         } ;
     }
