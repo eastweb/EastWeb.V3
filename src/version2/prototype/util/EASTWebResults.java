@@ -3,7 +3,6 @@
  */
 package version2.prototype.util;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;

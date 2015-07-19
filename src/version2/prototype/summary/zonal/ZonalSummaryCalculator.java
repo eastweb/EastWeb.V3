@@ -328,8 +328,7 @@ public class ZonalSummaryCalculator {
 
     private void uploadResultsToDb(String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String field,
             Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException,
-            ClassNotFoundException, ParserConfigurationException, SAXException
-            {
+            ClassNotFoundException, ParserConfigurationException, SAXException {
         final Connection conn = PostgreSQLConnection.getConnection();
         final boolean previousAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
@@ -515,7 +514,7 @@ public class ZonalSummaryCalculator {
         } finally {
             conn.setAutoCommit(previousAutoCommit);
         }
-            }
+    }
 
     /**
      * Looks up the zoneFieldID for the specified (shapefile, field) pair. Returns null if there is no matching record.
