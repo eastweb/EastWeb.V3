@@ -3,6 +3,8 @@
  */
 package version2.prototype.util;
 
+
+import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,13 +16,94 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.ConfigReadException;
 
 /**
  * @author michael.devos
  *
  */
 public class EASTWebResults {
+    public enum Sign{
+        LESS_THAN,
+        GREATER_THAN,
+        EQUAL_TO,
+        NOT_EQUAL_TO,
+        LESS_THAN_OR_EQUAL_TO,
+        GREATER_THAN_OR_EQUAL_TO;
+
+        @Override
+        public String toString() {
+            String name = null;
+
+            switch(name())
+            {
+            case "LESS_THAN":
+                name = "<";
+                break;
+            case "GREATER_THAN":
+                name = ">";
+                break;
+            case "EQUAL_TO":
+                name = "=";
+                break;
+            case "NOT_EQUAL_TO":
+                name = "<>";
+                break;
+            case "LESS_THAN_OR_EQUAL_TO":
+                name = "<=";
+                break;
+            case "GREATER_THAN_OR_EQUAL_TO":
+                name = ">=";
+                break;
+            }
+            return name;
+        }
+    };
+
+    public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectSum, boolean selectMean,
+            boolean selectStdDev, Sign zoneSign, int zoneVal, Sign yearSign, int yearVal, Sign daySign, int dayVal, ArrayList<String> includedIndices,
+            int totalNumOfProjectIndices, int daysPerInputFile, String zoneNameField, String shapefile)
+    {
+        final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
+        globalSchema = FileSystem.StandardizeName(globalSchema);
+
+        StringBuilder query = new StringBuilder("SELECT A.\"FilePath\"");
+
+        if(selectCount) {
+            query.append(", A.\"Count\"");
+        }
+        if(selectSum) {
+            query.append(", A.\"Sum\"");
+        }
+        if(selectMean) {
+            query.append(", A.\"Mean\"");
+        }
+        if(selectStdDev) {
+            query.append(", A.\"StdDev\"");
+        }
+
+        query.append(String.format(
+                " FROM \"%1$s\".\"ZonalStat\" A, \"%2$s\".\"DateGroup\" D, \"%2$s\".\"DateGroup\", \"%2$s\".\"Index\" I, \"%1$s\".\"ZoneMapping\" M , \"%2$s\".\"ZoneVar\" Z, \"%1$s\".\"ZoneField\" F " +
+                        "WHERE (A.\"DateGroupID\" = D.\"DateGroupID\" AND D.\"Year\"" + yearSign + yearVal + " AND D.\"Day\"" + daySign + dayVal + ") " +
+                        mSchemaName,
+                        globalSchema)
+                );
+
+        if(includedIndices.size() > 0)
+        {
+            query.append("(A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"=" + includedIndices.get(0));
+            for(int i=1; i < includedIndices.size(); i++)
+            {
+                query.append(" OR I.\"Name\"=" + includedIndices.get(i));
+            }
+            query.append(")) ");
+        }
+
+        query.append("(Z.\"Name\"=" + zoneNameField + " AND F.\"ShapeFile\"='" + shapefile + "' AND F.\"Field\"='" + zoneNameField + "') ");
+        query.append("(A.\"ZoneMappingID\"=M.\"ZoneMappingID\" AND M.\"ZoneEWID\"=Z.\"ZoneEWID\" AND M.\"ZoneFieldID\"=F.\"ZoneFieldID\");");
+
+        return new EASTWebQuery(query.toString());
+    }
+
     /**
      * Get the EASTWebQuery object that represents the SQL query to handle getting EASTWeb zonal summary results associated with the given project and plugin names and for the given list of indices.
      *
@@ -64,7 +147,7 @@ public class EASTWebResults {
                 "M.\"ZoneFieldID\" = F.\"ZoneFieldID\";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
-        return new EASTWebQuery(schemaName, query.toString());
+        return new EASTWebQuery(query.toString());
     }
 
     /**
@@ -136,5 +219,24 @@ public class EASTWebResults {
         }
 
         return results;
+    }
+
+    public static ArrayList<File> GetResultCSVFiles(EASTWebQuery query) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    {
+        Statement stmt = PostgreSQLConnection.getConnection().createStatement();
+        ResultSet rs;
+        ArrayList<File> resultFiles = new ArrayList<File>(1);
+
+        // Run EASTWebQuery
+        rs = stmt.executeQuery(query.GetSQL());
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                resultFiles.add(new File(rs.getString("FilePath")));
+            }
+        }
+
+        return resultFiles;
     }
 }

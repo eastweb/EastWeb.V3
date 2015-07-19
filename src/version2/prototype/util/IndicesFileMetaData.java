@@ -1,5 +1,7 @@
 package version2.prototype.util;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author michael.devos
@@ -7,13 +9,14 @@ package version2.prototype.util;
  */
 public class IndicesFileMetaData {
     public final int rowID;
+    public final String dataName;
     public final String dataFilePath;
-    public final String qcFilePath;
     public final String dateDirectoryPath;
     public final int dataGroupID;
     public final int year;
     public final int day;
     public final String indexNm;
+    public final ArrayList<DataFileMetaData> extraDownloads;
 
     /**
      * Creates a IndicesFileMetaData object initialized to the given values.
@@ -27,14 +30,15 @@ public class IndicesFileMetaData {
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param indexNm  - the environmental index associated to the data file
      */
-    public IndicesFileMetaData(int rowID, String dataFilePath, String qcFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm) {
+    public IndicesFileMetaData(int rowID, String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads) {
         this.rowID = rowID;
+        this.dataName = dataName;
         this.dataFilePath = dataFilePath;
-        this.qcFilePath = qcFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
         this.dataGroupID = dataGroupID;
         this.year = year;
         this.day = day;
         this.indexNm = indexNm;
+        this.extraDownloads = extraDownloads;
     }
 }

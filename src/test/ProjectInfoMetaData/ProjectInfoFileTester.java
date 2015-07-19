@@ -22,9 +22,15 @@ public class ProjectInfoFileTester {
     InvocationTargetException, ParserConfigurationException, SAXException, IOException {
         ProjectInfoFile projectInfo = new ProjectInfoFile(System.getProperty("user.dir") + "\\src\\test\\ProjectInfoMetaData\\Test_Project.xml");
 
+        assertTrue("Plugins loaded: " + projectInfo.GetPlugins().size(), projectInfo.GetPlugins().size() == 1);
+        assertTrue("Plugin 1 name is " + projectInfo.GetPlugins().get(0).GetName(), projectInfo.GetPlugins().get(0).GetName().equals("Test Plugin"));
+        assertTrue("Plugin 1 QC Level is " + projectInfo.GetPlugins().get(0).GetQC(), projectInfo.GetPlugins().get(0).GetQC().equals("Level 1"));
+        assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndicies().get(0), projectInfo.GetPlugins().get(0).GetIndicies().get(0).equals("GdalModisLST_DAYCalculator"));
+        assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndicies().get(1), projectInfo.GetPlugins().get(0).GetIndicies().get(1).equals("GdalModisLST_MEANCalculator"));
+        assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndicies().get(2), projectInfo.GetPlugins().get(0).GetIndicies().get(2).equals("GdalModisLST_NIGHTCalculator"));
         assertTrue("StartDate is " + projectInfo.GetStartDate().toString(), projectInfo.GetStartDate().toString().equals("2015-06-02"));
         assertTrue("ProjectName is " + projectInfo.GetProjectName(), projectInfo.GetProjectName().equals("sufi_Project"));
-        assertTrue("WorkingDir is " + projectInfo.GetWorkingDir(), projectInfo.GetWorkingDir().equals("C:\\Users\\sufi"));
+        assertTrue("WorkingDir is " + projectInfo.GetWorkingDir(), projectInfo.GetWorkingDir().equals("C:\\Users\\sufi/"));
         assertTrue("Masking File is " + projectInfo.GetMaskingFile(), projectInfo.GetMaskingFile().equals("C:\\Users\\Public\\Desktop\\3D Vision Photo Viewer.lnk"));
         assertTrue("Masking Resolution is " + projectInfo.GetMaskingResolution(), projectInfo.GetMaskingResolution() == 1000);
         assertTrue("MasterShapeFile is " + projectInfo.GetMasterShapeFile(), projectInfo.GetMasterShapeFile().equals("C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp"));

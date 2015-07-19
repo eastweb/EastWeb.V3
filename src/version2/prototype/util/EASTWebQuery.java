@@ -6,7 +6,6 @@ package version2.prototype.util;
  *
  */
 public final class EASTWebQuery {
-    public final String schemaName;
     private final String sql;
 
     /**
@@ -15,9 +14,8 @@ public final class EASTWebQuery {
      *
      * @param query  - an sql command
      */
-    protected EASTWebQuery(String schemaName, String sql)
+    protected EASTWebQuery(String sql)
     {
-        this.schemaName = schemaName;
         this.sql = sql;
     }
 
