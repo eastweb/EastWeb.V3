@@ -98,7 +98,7 @@ public abstract class IndicesFramework implements IndexCalculator {
 
             outputDS.delete();
         }
-        event.fire(String.format("%s is Complete", className()), 100);
+        event.fire(String.format("%s is Complete", className()), 100, className());
     }
 
     private void process(Dataset[] inputs, Dataset output) throws Exception {

@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.border.TitledBorder;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
@@ -50,9 +49,12 @@ public class QueryUI {
     private JCheckBox chckbxStdev;
 
     String[] operationList = {"<", ">", "=", "<>", "<=", ">="};
-    private JComboBox zoneComboBox;
-    private JComboBox yearComboBox;
-    private  JComboBox dayComboBox;
+    private JCheckBox chckbxZone;
+    private JCheckBox chckbxYear;
+    private JCheckBox chckbxDay;
+    private JComboBox<Object> zoneComboBox;
+    private JComboBox<Object> yearComboBox;
+    private  JComboBox<Object> dayComboBox;
     private JTextField zoneTextField;
     private JTextField yearTextField;
     private JTextField dayTextField;
@@ -202,7 +204,7 @@ public class QueryUI {
         frame.getContentPane().add(clausePanel);
         clausePanel.setLayout(null);
 
-        final JCheckBox chckbxZone = new JCheckBox("Zone");
+        chckbxZone = new JCheckBox("Zone");
         chckbxZone.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -212,7 +214,7 @@ public class QueryUI {
         });
         chckbxZone.setBounds(6, 20, 70, 23);
         clausePanel.add(chckbxZone);
-        zoneComboBox = new JComboBox(operationList);
+        zoneComboBox = new JComboBox<Object>(operationList);
         zoneComboBox.setBounds(82, 21, 97, 20);
         clausePanel.add(zoneComboBox);
         zoneTextField = new JTextField();
@@ -220,7 +222,7 @@ public class QueryUI {
         clausePanel.add(zoneTextField);
         zoneTextField.setColumns(10);
 
-        final JCheckBox chckbxYear = new JCheckBox("Year");
+        chckbxYear = new JCheckBox("Year");
         chckbxYear.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -230,7 +232,7 @@ public class QueryUI {
         });
         chckbxYear.setBounds(6, 46, 70, 23);
         clausePanel.add(chckbxYear);
-        yearComboBox = new JComboBox(operationList);
+        yearComboBox = new JComboBox<Object>(operationList);
         yearComboBox.setBounds(82, 47, 97, 20);
         clausePanel.add(yearComboBox);
         yearTextField = new JTextField();
@@ -238,7 +240,7 @@ public class QueryUI {
         yearTextField.setBounds(189, 46, 97, 22);
         clausePanel.add(yearTextField);
 
-        final JCheckBox chckbxDay = new JCheckBox("Day");
+        chckbxDay = new JCheckBox("Day");
         chckbxDay.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -248,7 +250,7 @@ public class QueryUI {
         });
         chckbxDay.setBounds(6, 74, 70, 23);
         clausePanel.add(chckbxDay);
-        dayComboBox = new JComboBox(operationList);
+        dayComboBox = new JComboBox<Object>(operationList);
         dayComboBox.setBounds(82, 75, 97, 20);
         clausePanel.add(dayComboBox);
         dayTextField = new JTextField();
@@ -345,7 +347,7 @@ public class QueryUI {
         chckbxMean.setBounds(136, 21, 63, 23);
         fieldsPanel.add(chckbxMean);
 
-        JCheckBox chckbxStdev = new JCheckBox("stdev");
+        chckbxStdev = new JCheckBox("stdev");
         chckbxStdev.setBounds(201, 21, 97, 23);
         fieldsPanel.add(chckbxStdev);
     }
@@ -396,8 +398,64 @@ public class QueryUI {
         @Override
         public void run() {
             count += 1;
-            sqlViewTextPanel.setText(String.valueOf(count));
+            sqlViewTextPanel.setText(String.format("%s\n %s\n %s",
+                    SelectStatement(),
+                    FromStatement(),
+                    WhereStatement()
+                    ));
 
         }
+
+        private String FromStatement() {
+            String query = String.format("FROM \n \"%s\"\n", String.valueOf(projectListComboBox.getSelectedItem()));
+            return query;
+
+        }
+
+        private String SelectStatement() {
+            String query = String.format("SELECT  \n \t name,\n \t year,\n \t day,\n \t index,\n");
+
+            if(chckbxCount.isSelected()) {
+                query += "\tcount,\n";
+            }
+            if(chckbxSum.isSelected()) {
+                query += "\tsum,\n";
+            }
+            if(chckbxMean.isSelected()) {
+                query += "\tmean,\n";
+            }
+            if(chckbxStdev.isSelected()) {
+                query += "\tstdev,\n";
+            }
+
+            return query;
+        }
+
+        public Object WhereStatement() {
+
+            String query = "";
+
+            if(chckbxZone.isSelected() || chckbxYear.isSelected() || chckbxDay.isSelected())
+            {
+                query = String.format("WHERE\n");
+
+                if(chckbxYear.isSelected())
+                {
+                    query += String.format("year%s%s\n", String.valueOf(yearComboBox.getSelectedItem()), yearTextField.getText());
+                }
+                if(chckbxDay.isSelected())
+                {
+                    query += String.format("day%s%s\n", String.valueOf(dayComboBox.getSelectedItem()), dayTextField.getText());
+                }
+                if(chckbxZone.isSelected())
+                {
+                    query += String.format("day%s%s\n", String.valueOf(zoneComboBox.getSelectedItem()), zoneTextField.getText());
+                }
+            }
+
+            return query;
+        }
     }
+
+
 }

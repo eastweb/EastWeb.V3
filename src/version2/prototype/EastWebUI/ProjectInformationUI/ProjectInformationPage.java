@@ -16,7 +16,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -159,42 +161,19 @@ public class ProjectInformationPage {
             projectCollectionComboBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
+
                     try {
                         PopulateProjectInfo();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (ParserConfigurationException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (SAXException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (NoSuchMethodException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (SecurityException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (InstantiationException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (IllegalArgumentException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        // TODO Auto-generated catch block
+                    } catch (ClassNotFoundException | NoSuchMethodException
+                            | SecurityException | InstantiationException
+                            | IllegalAccessException
+                            | IllegalArgumentException
+                            | InvocationTargetException | IOException
+                            | ParserConfigurationException | SAXException
+                            | ParseException e) {
                         e.printStackTrace();
                     }
+
                 }
             });
             frame.getContentPane().add(projectCollectionComboBox);
@@ -299,13 +278,15 @@ public class ProjectInformationPage {
         }
 
         // set basic project info
-        startDate.setDate(project.GetStartDate());
+        startDate.setDate(Date.from(project.GetStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         projectName.setText(project.GetProjectName());
         workingDirectory.setText(project.GetWorkingDir());
         maskFile.setText(project.GetMaskingFile());
         masterShapeTextField.setText(project.GetMasterShapeFile());
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
+        freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         // set modis info
         for(String modis: project.GetModisTiles()){
@@ -327,7 +308,7 @@ public class ProjectInformationPage {
 
         // set summary info
         for(ProjectInfoSummary summary: project.GetSummaries()){
-            summaryListModel.addElement(String.format("Shape File Path: %s; %s", summary.GetZonalSummary().GetShapeFile(), summary.GetZonalSummary().GetField()));
+            summaryListModel.addElement(summary.toString());
         }
     }
 
@@ -376,17 +357,7 @@ public class ProjectInformationPage {
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     new AssociatePluginPage(new indiciesListenerImplementation());
-                } catch (ParserConfigurationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -422,7 +393,6 @@ public class ProjectInformationPage {
         ProjectInformation();
         SummaryInformation();
     }
-
 
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();

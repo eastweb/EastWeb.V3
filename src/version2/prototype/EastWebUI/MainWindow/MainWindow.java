@@ -741,7 +741,7 @@ public class MainWindow {
                     }
                 }
                 if(removeProject != -1) {
-                    EASTWebManager.StopExistingScheduler(projectName);
+                    EASTWebManager.DeleteScheduler(projectName);
                     defaultTableModel.removeRow(removeProject);
                 }
             }

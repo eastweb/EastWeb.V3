@@ -81,6 +81,9 @@ public class AssociateSummaryPage {
         final JComboBox<String> temporalComboBox = new JComboBox<String>();
         temporalComboBox.setBounds(172, 86, 150, 20);
         temporalComboBox.addItem("Gregorian Weekly");
+        temporalComboBox.addItem("Gregorian Monthly");
+        temporalComboBox.addItem("CDC Weekly");
+        temporalComboBox.addItem("WHO Weekly");
         myPanel.add(temporalComboBox);
 
         // combo box populated by the selected shapefile
@@ -148,7 +151,7 @@ public class AssociateSummaryPage {
                 String summary = "";
                 String temporal = String.valueOf(temporalComboBox.getSelectedItem());
 
-                summary = String.format("Shape File Path: %s; Field: %s", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
+                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaValueField: %s;", "AreaNameField", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
 
                 if(temporal != null & !temporal.isEmpty() ) {
                     summary = String.format("%s; Temporal Summary: %s",summary, String.valueOf(temporalComboBox.getSelectedItem()));
