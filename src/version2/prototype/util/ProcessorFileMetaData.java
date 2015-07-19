@@ -1,5 +1,7 @@
 package version2.prototype.util;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author michael.devos
@@ -7,12 +9,14 @@ package version2.prototype.util;
  */
 public class ProcessorFileMetaData {
     public final int rowID;
+    public final String dataName;
     public final String dataFilePath;
     public final String qcFilePath;
     public final String dateDirectoryPath;
     public final int dataGroupID;
     public final int year;
     public final int day;
+    public final ArrayList<DataFileMetaData> extraDownloads;
 
     /**
      * Creates a ProcessorFileMetaData object initialized to the given values.
@@ -25,13 +29,15 @@ public class ProcessorFileMetaData {
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public ProcessorFileMetaData(int rowID, String dataFilePath, String qcFilePath, String dateDirectoryPath, int dataGroupID, int year, int day) {
+    public ProcessorFileMetaData(int rowID, String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads) {
         this.rowID = rowID;
+        this.dataName = dataName;
         this.dataFilePath = dataFilePath;
-        this.qcFilePath = qcFilePath;
+        qcFilePath = qcFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
         this.dataGroupID = dataGroupID;
         this.year = year;
         this.day = day;
+        this.extraDownloads = extraDownloads;
     }
 }

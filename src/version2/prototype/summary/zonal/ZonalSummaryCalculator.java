@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Transformer;
@@ -23,6 +25,7 @@ import org.gdal.ogr.Feature;
 import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
+import org.xml.sax.SAXException;
 
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
@@ -325,7 +328,7 @@ public class ZonalSummaryCalculator {
 
     private void uploadResultsToDb(String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String field,
             Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException,
-            ClassNotFoundException
+            ClassNotFoundException, ParserConfigurationException, SAXException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final boolean previousAutoCommit = conn.getAutoCommit();
