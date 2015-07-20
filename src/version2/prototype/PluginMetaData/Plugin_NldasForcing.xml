@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<PluginMetadata>
+	<title>NldasForcing</title>
+	<Download>
+		<className>NldasForcingDownloadTask</className>
+		<mode>ftp</mode>
+		<FTP>
+			<hostName>hydro1.sci.gsfc.nasa.gov</hostName>
+			<rootDir>/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/</rootDir>
+			<userName>anonymous</userName>
+			<passWord>anonymous</passWord>
+		</FTP>
+	</Download>	
+	<Processes>
+		<className>NldasForcingComposite</className>
+		<className>Reproject</className>
+		<className>Mask</className>
+	</Processes>
+	<Indices>
+		<ClassName></ClassName>
+	</Indices>
+	<Summary>
+		<ClassName></ClassName>
+	</Summary>
+	<QualityControl>
+		<ClassName></ClassName>
+	</QualityControl>
+</PluginMetadata>

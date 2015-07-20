@@ -14,13 +14,13 @@ import org.apache.commons.io.FileUtils;
 public abstract class Composite {
 
     //locations for the input files. for this step, will only use inputFolders[0]
-    private String [] inputFolders;
+    protected String [] inputFolders;
     //location for the output file
-    private String outputFolder;
+    protected String outputFolder;
 
-    private File inputFolder;
+    protected File inputFolder;
     // the files in the input folder for composition
-    private File [] inputFiles;
+    protected File [] inputFiles;
 
     public Composite(ProcessData data) {
         inputFolders = data.getInputFolders();

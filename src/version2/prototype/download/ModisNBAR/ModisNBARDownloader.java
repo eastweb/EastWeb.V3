@@ -149,11 +149,14 @@ public final class ModisNBARDownloader extends DownloaderFramework {
     public final void download() throws IOException, ConfigReadException,
     DownloadFailedException, SAXException, Exception
     {
-        if(!(new File(mOutDataFolder).exists())) {
-            FileUtils.forceMkdir(new File(mOutDataFolder));
+        File dataDestination = new File(String.format("%s\\%04d\\%03d", mOutDataFolder, mDate.getYear(), mDate.getDayOfYear()));
+        File qcDestination = new File(String.format("%s\\%04d\\%03d", mOutQCFolder, mDate.getYear(), mDate.getDayOfYear()));
+
+        if(!dataDestination.exists()) {
+            FileUtils.forceMkdir(dataDestination);
         }
-        if(!(new File(mOutQCFolder).exists())) {
-            FileUtils.forceMkdir(new File(mOutQCFolder));
+        if(!qcDestination.exists()) {
+            FileUtils.forceMkdir(qcDestination);
         }
 
         if (mMode.equals("http"))
@@ -169,23 +172,17 @@ public final class ModisNBARDownloader extends DownloaderFramework {
                 {
 
                     DownloadUtils.downloadToFile(fileURL,
-                            new File(mOutDataFolder + "\\" + urlString.substring(urlString.lastIndexOf("MCD43B4"))));
+                            new File(dataDestination.getAbsolutePath() + "\\" + urlString.substring(urlString.lastIndexOf("MCD43B4"))));
                 }
 
                 if(qcFileURL != null)
                 {
                     DownloadUtils.downloadToFile(qcFileURL,
-                            new File(mOutQCFolder + "\\" + qcUrlString.substring(qcUrlString.lastIndexOf("MCD43B2"))));
+                            new File(qcDestination.getAbsolutePath() + "\\" + qcUrlString.substring(qcUrlString.lastIndexOf("MCD43B2"))));
                 }
             }
-            catch (MalformedURLException e)
-            {
+            catch (IOException e){
                 e.printStackTrace();
-                return;
-            }
-            catch (IOException eIO)
-            {
-                eIO.printStackTrace();
                 return;
             }
         }

@@ -1,4 +1,4 @@
-package version2.prototype.processor.ModisNBAR;
+package version2.prototype.processor.NldasForcing;
 
 import java.util.ArrayList;
 
@@ -7,28 +7,30 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.processor.PrepareProcessTask;
 
-public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
+public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
 
-    public ModisNBARPrepareProcessTask(ProjectInfoFile mProject,
+    public NldasForcingPrepareProcessTask(ProjectInfoFile mProject,
             ProjectInfoPlugin mPlugin, DataDate mDate) {
         super(mProject, mPlugin, mDate);
     }
 
     @Override
-    public String[] getInputFolders(int stepId) {
+    public String[] getInputFolders(int stepId)
+    {
         ArrayList<String> folders = new ArrayList<String>();
 
         // Format: Input (of this step) -> Output (of this step)
         switch(stepId)
         {
         case 1:
-            // Download -> Mozaic
+            // Download -> NldasForcingComposite
+            //try { FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), "NldasForcing"); }
+            //catch (ParserConfigurationException | SAXException | IOException e) { e.printStackTrace(); }
             folders.add(project.GetWorkingDir() + String.format("Download\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
-            folders.add(project.GetWorkingDir() + String.format("QCDownload\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
-            // Mozaic -> Reproject
-            folders.add(project.GetWorkingDir() + String.format("Mosaic\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            // NldasForcingComposite -> Reproject
+            folders.add(project.GetWorkingDir() + String.format("NldasForcingComposite\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Reproject -> Mask
@@ -50,7 +52,7 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download/QCDownload -> Mozaic
-            outputFolder = project.GetWorkingDir() + String.format("Mosaic\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            outputFolder = project.GetWorkingDir() + String.format("NldasForcingComposite\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // Mozaic -> Reproject
@@ -70,16 +72,22 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
 
     @Override
     public int[] getDataBands() {
-        return new int[] {1, 2, 3, 4, 5, 6, 7};
+        return new int[]
+                {1, // U wind component (m/s) at 10 meters above the surface
+                2,  // V wind component (m/s) at 10 meters above the surface
+                3,  // air temperature (K) at 2 meters above the surface
+                4,  // specific humidity (kg/kg) at 2 meters above the surface
+                5,  // surface pressure (Pa)
+                6,  // surface downward longwave radiation (W/m^2)
+                7,  // surface downward shortwave radiation (W/m^2) -- bias-corrected
+                8,  // precipitation hourly total (kg/m^2)
+                9,  // fraction of total precipitation that is convective (no units): from NARR
+                10, // CAPE: Convective Available Potential Energy (J/kg): from NARR
+                11};// potential evaporation (kg/m^2): from NARR
     }
 
     @Override
     public int[] getQCBands() {
-        // 1) BRDF_Albedo_Quality
-        // 2) Snow_BRDF_Albedo
-        // 3) BRDF_Albedo_Ancillary
-        // 4) BRDF_Albedo_Band_Quality*
-        // * only one we care about
-        return new int[] {1, 2, 3, 4};
+        return null;
     }
 }
