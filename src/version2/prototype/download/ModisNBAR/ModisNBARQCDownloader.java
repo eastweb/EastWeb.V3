@@ -4,9 +4,9 @@ import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.ModisDownloadUtils.ModisDownloader;
 
-public class ModisNBARDownloader extends ModisDownloader
+public class ModisNBARQCDownloader extends ModisDownloader
 {
-    public ModisNBARDownloader(DataDate date, String outFolder,
+    public ModisNBARQCDownloader(DataDate date, String outFolder,
             DownloadMetaData data, String fileToDownload)
     {
         super(date, outFolder, data, fileToDownload);

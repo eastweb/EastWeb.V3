@@ -54,19 +54,17 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
         //REMOVE
         //for testing.  remove the following afterGetAllDownloadedFiles() is implemented
-        DataFileMetaData d1 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\2015\\182\\3B42RT_daily.2015.07.01.bin", null, null, 0, 2015, 182);
-        DataFileMetaData d2 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\2015\\183\\3B42RT_daily.2015.07.02.bin", null, null, 0, 2015, 183);
+        DataFileMetaData d1 = new DataFileMetaData(1, "data","D:\\project\\download\\TRMM3B42RT\\2015\\182\\3B42RT_daily.2015.07.01.bin",  null, 0, 2015, 182);
+        DataFileMetaData d2 = new DataFileMetaData(1, "data", "D:\\project\\download\\TRMM3B42RT\\2015\\183\\3B42RT_daily.2015.07.02.bin", null, 0, 2015, 183);
         cachedD.add(d1);
         cachedD.add(d2);
-
 
         // Step 3: Remove already downloaded files from ListDatesFiles
         for (DataFileMetaData d: cachedD)
         {
             DownloadFileMetaData downloaded =  d.ReadMetaDataForProcessor();
+
             // get the year and dayOfyear from each downloaded file
-
-
             DataDate thisDate = new DataDate( downloaded.day, downloaded.year);
 
             // get the files associated with the date in the ListDatesFiles
@@ -77,9 +75,10 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
             while (fIter.hasNext())
             {
                 String strPath = downloaded.dataFilePath;
-                strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
+                System.out.println(strPath);
+                strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.lastIndexOf("."));
                 // remove the file if it is found in the downloaded list
-                if (fIter.next().equalsIgnoreCase(strPath))
+                if ((fIter.next().toLowerCase()).contains((strPath.toLowerCase())))
                 {
                     fIter.remove();
                 }

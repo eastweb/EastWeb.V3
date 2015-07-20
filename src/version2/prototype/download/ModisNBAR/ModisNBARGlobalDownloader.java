@@ -1,4 +1,4 @@
-package version2.prototype.download.ModisLST;
+package version2.prototype.download.ModisNBAR;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,14 +10,14 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.ModisNBAR.ModisNBARDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 
 //@Author: Yi Liu
-public class ModisLSTGlobalDownloader extends GlobalDownloader
+public class ModisNBARGlobalDownloader extends GlobalDownloader
 {
-
-    public ModisLSTGlobalDownloader(int myID, String pluginName,
+    public ModisNBARGlobalDownloader(int myID, String pluginName,
             DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
         super(myID, pluginName, metaData, listDatesFiles);
         // TODO Auto-generated constructor stub
@@ -44,8 +44,8 @@ public class ModisLSTGlobalDownloader extends GlobalDownloader
 
         //REMOVE
         //for testing.  remove the following afterGetAllDownloadedFiles() is implemented
-        DataFileMetaData d1 = new DataFileMetaData(1, "data", "D:\\project\\download\\ModisLST\\2015\\161\\h19v03.hdf", null,  0, 2015, 161);
-        DataFileMetaData d2 = new DataFileMetaData(1, "data", "D:\\project\\download\\ModisLST\\2015\\169\\h19v03.hdf", null,  0, 2015, 169);
+        DataFileMetaData d1 = new DataFileMetaData(1, "data", "D:\\project\\download\\ModisNBAR\\2015\\161\\h19v03.hdf", null,  0, 2015, 161);
+        DataFileMetaData d2 = new DataFileMetaData(1, "data", "D:\\project\\download\\ModisNBAR\\2015\\169\\h19v03.hdf", null,  0, 2015, 169);
         cachedD.add(d1);
         cachedD.add(d2);
 
@@ -99,7 +99,7 @@ public class ModisLSTGlobalDownloader extends GlobalDownloader
             //outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
 
             //REMOVE the following statement, for testing only
-            outFolder = "D:\\project\\download\\ModisLST";
+            outFolder = "D:\\project\\download\\ModisNBAR";
 
             DataDate dd = entry.getKey();
 
@@ -108,7 +108,7 @@ public class ModisLSTGlobalDownloader extends GlobalDownloader
 
                 if (f != null)
                 {
-                    ModisLSTDownloader downloader = new ModisLSTDownloader(dd, outFolder, metaData, f);
+                    ModisNBARDownloader downloader = new ModisNBARDownloader(dd, outFolder, metaData, f);
 
                     try{
                         downloader.download();
