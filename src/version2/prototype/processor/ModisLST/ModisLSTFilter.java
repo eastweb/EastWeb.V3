@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
-import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconstConstants;
 
@@ -66,10 +65,13 @@ public class ModisLSTFilter extends Filter{
                 hDataset[2]=gdal.Open(nightPath,gdalconstConstants.GA_ReadOnly);
                 hDataset[3]=gdal.Open(qcnightPath,gdalconstConstants.GA_ReadOnly);
 
+                String dayOutput=outputFolder+"/day.tif";
+                String nightOutput=outputFolder+"/night.tif";
+
                 //create copy of day databand tif file
-                Dataset dayDataset=gdal.GetDriverByName("GTiff").CreateCopy(outputFolder, hDataset[0]);
+                Dataset dayDataset=gdal.GetDriverByName("GTiff").CreateCopy(dayOutput, hDataset[0]);
                 //create copy of night databand tif file
-                Dataset nightDataset=gdal.GetDriverByName("GTiff").CreateCopy(outputFolder, hDataset[2]);
+                Dataset nightDataset=gdal.GetDriverByName("GTiff").CreateCopy(nightOutput, hDataset[2]);
 
                 //in this hdf file subdataset, those four bands have same xsize and ysize
                 int XSize=hDataset[1].getRasterXSize();

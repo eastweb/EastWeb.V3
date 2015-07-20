@@ -16,10 +16,11 @@ public class testHDFfinal {
         // TODO Auto-generated method stub
         // String filename= "/Users/fish/Desktop/MOD11A2.A2000073.h10v08.005.2007176154547.hdf";// x.filter is the filterd tif file
         File filename=new File("/Users/fish/Desktop/MOD11A2.A2000073.h10v08.005.2007176154547.hdf");
-        String dayOutput="/Users/fish/Desktop/dayN.tif";
-        String nightOutput="/Users/fish/Desktop/nightN.tif";
+        String output="/Users/fish/Desktop/LSTFilter";
+        String dayOutput=output+"/day.tif";
+        String nightOutput=output+"/night.tif";
 
-        String qcLevel="NOSCREENING";
+        String qcLevel="low";
         gdal.AllRegister();
         //get subDataset from the HDF file
 
@@ -51,6 +52,7 @@ public class testHDFfinal {
         //create copy of day databand tif file
         Dataset dayDataset=gdal.GetDriverByName("GTiff").CreateCopy(dayOutput, hDataset[0]);
         Dataset nightDataset=gdal.GetDriverByName("GTiff").CreateCopy(nightOutput, hDataset[2]);
+        //Dataset nightDataset=gdal.GetDriverByName("GTiff").
 
         //in this hdf file subdataset, those four bands have same xsize and ysize
         int XSize=hDataset[1].getRasterXSize();
@@ -123,9 +125,9 @@ public class testHDFfinal {
 
         hDataset[0].delete();
         hDataset[1].delete();
+        dayDataset.delete();
         hDataset[2].delete();
         hDataset[3].delete();
-        dayDataset.delete();
         nightDataset.delete();
         gdal.GDALDestroyDriverManager();
         System.out.println("good job!!!");
