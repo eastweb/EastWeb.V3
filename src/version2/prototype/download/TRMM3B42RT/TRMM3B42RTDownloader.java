@@ -38,15 +38,14 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
         mOutputFolder = outFolder;
         mData = data;
         mFileToDownload = fileToDownload;
-        setFTPValues(mData);
-        outFilePath = null;
+        setFTPValues();
     }
 
     // get the values from DownloadMetaData
-    private void setFTPValues(DownloadMetaData data)
+    private void setFTPValues()
     {
-        mMode = data.mode;
-        FTP f = data.myFtp;
+        mMode = mData.mode;
+        FTP f = mData.myFtp;
         mHost = f.hostName;
         mRoot = f.rootDir;
     }
@@ -71,26 +70,16 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
                             + yearDirectory);
                 }
 
-                /* int year = mDate.getYear();
-                int month = mDate.getMonth();
-                int day = mDate.getDay();
+                // set the directory to store the download file
+                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",
+                        mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
 
-                String fileToDownload =
-                        String.format("3B42RT_daily.%04d.%02d.%02d.bin",
-                                year, month, day);
+                if(!(new File(dir).exists()))
+                {
+                    FileUtils.forceMkdir(new File(dir));
+                }
 
-
-                // Save it to the sub-folder with Day_of_year
-                LocalDate ld = LocalDate.of(year, month, day);
-                int day_of_year = ld.getDayOfYear();
-                 */
-
-                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
-
-                System.out.println("directory: " + dir);
-                FileUtils.forceMkdir(new File(dir));
-
-                outFilePath = String.format("%s\\%s",dir, mFileToDownload);
+                outFilePath = String.format("%s"+File.separator+"%s",dir, mFileToDownload);
 
                 File outputFile  = new File(outFilePath);
 

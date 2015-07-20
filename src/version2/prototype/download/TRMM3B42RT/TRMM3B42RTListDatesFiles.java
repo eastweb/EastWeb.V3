@@ -15,6 +15,10 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.ListDatesFiles;
 
+/*
+ * @Author: Yi Liu
+ */
+
 public class TRMM3B42RTListDatesFiles extends ListDatesFiles
 {
 
@@ -33,7 +37,6 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
     {
-        System.out.println(sDate);
         final Pattern yearDirPattern = Pattern.compile("\\d{4}");
 
         FTPClient ftpC = null;

@@ -51,6 +51,9 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
         //WRITEBACK
         //cachedD = GetAllDownloadedFiles();
+
+        //REMOVE
+        //for testing.  remove the following afterGetAllDownloadedFiles() is implemented
         DataFileMetaData d1 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\2015\\182\\3B42RT_daily.2015.07.01.bin", null, null, 0, 2015, 182);
         DataFileMetaData d2 = new DataFileMetaData(1, "D:\\project\\download\\TRMM3B42RT\\2015\\183\\3B42RT_daily.2015.07.02.bin", null, null, 0, 2015, 183);
         cachedD.add(d1);
