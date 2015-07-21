@@ -58,9 +58,29 @@ public class EASTWebResults {
         }
     };
 
+    /**
+     *
+     * @param globalSchema
+     * @param projectName
+     * @param pluginName
+     * @param selectCount
+     * @param selectSum
+     * @param selectMean
+     * @param selectStdDev
+     * @param zoneSign
+     * @param zoneVal
+     * @param yearSign
+     * @param yearVal
+     * @param daySign
+     * @param dayVal
+     * @param includedIndices
+     * @param zoneNameField
+     * @param shapefile
+     * @return
+     */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectSum, boolean selectMean,
-            boolean selectStdDev, Sign zoneSign, int zoneVal, Sign yearSign, int yearVal, Sign daySign, int dayVal, ArrayList<String> includedIndices,
-            int totalNumOfProjectIndices, int daysPerInputFile, String zoneNameField, String shapefile)
+            boolean selectStdDev, String zoneSign, int zoneVal, String yearSign, int yearVal, String daySign, int dayVal, ArrayList<String> includedIndices,
+            String zoneNameField, String shapefile)
     {
         final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         globalSchema = FileSystem.StandardizeName(globalSchema);
