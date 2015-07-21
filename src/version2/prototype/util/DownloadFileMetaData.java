@@ -8,7 +8,6 @@ import java.util.ArrayList;
  *
  */
 public class DownloadFileMetaData {
-    public final int rowID;
     public final String dataName;
     public final String dataFilePath;
     public final String dateDirectoryPath;
@@ -20,7 +19,6 @@ public class DownloadFileMetaData {
     /**
      * Creates a DownloadFileMetaData object initialized to the given values.
      *
-     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
      * @param qcFilePath  - full path to the QC file associated to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")
@@ -28,8 +26,7 @@ public class DownloadFileMetaData {
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public DownloadFileMetaData(int rowID, String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads) {
-        this.rowID = rowID;
+    public DownloadFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads) {
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
         this.dateDirectoryPath = dateDirectoryPath;

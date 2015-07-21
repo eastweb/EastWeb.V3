@@ -46,8 +46,8 @@ public class SchemasTest {
      * in it. The summary calculation fields created are "Count", "Sum", "Mean", and "StdDev". The "extra download file" fields created are just "QC" which effects global Download table and the caches.
      * Tables are created so that foreign key fields are not referencing their counterparts and foreign key rules are not required to be respected when using them.
      *
-     * @param args  - 1. Global schema name, 2. Project name, 3. Plugin name (Two schemas are created: 1. The global schema and 2. A schema named by combining project name and plugin name separated
-     * by an '_')
+     * @param args  - 1. Global schema name, 2. Project name, 3. Plugin name, 4. True/False if foreign keys should reference their associated tables. Two schemas are created: 1. The global schema and 2. A schema named by combining project name
+     * and plugin name separated by an '_'.
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -58,12 +58,16 @@ public class SchemasTest {
     public static void main(String[] args) throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         setUpBeforeClass();
+        boolean createTablesWithForeignKeyReferences = false;
+        if(args.length > 3) {
+            createTablesWithForeignKeyReferences = Boolean.parseBoolean(args[3]);
+        }
         System.out.println("Setting up PostgreSQL Schema...");
         System.out.println("Global schema to use or create: " + args[0]);
         System.out.println("Project name to use: " + args[1]);
         System.out.println("Plugin name to use: " + args[2]);
         System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null, false);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null, createTablesWithForeignKeyReferences);
         System.out.println("DONE");
     }
 
@@ -171,8 +175,7 @@ public class SchemasTest {
                 {
                 case "DateGroup": break;
                 case "Index": break;
-                case "Region": break;
-                case "Zone": break;
+                case "ZoneEW": break;
                 case "ZoneVar": break;
                 case "ExpectedResults": break;
                 case "Project": break;
@@ -180,6 +183,7 @@ public class SchemasTest {
                 case "GDExpectedResults": break;
                 case "GlobalDownloader": break;
                 case "Download": break;
+                case "ExtraDownload": break;
                 default: fail("Unknown table in test global schema: " + rs.getString("Name"));
                 }
             } while(rs.next());
@@ -190,8 +194,8 @@ public class SchemasTest {
         // Check the existence of the test schema tables
         query = "SELECT c.relname as \"Name\", count(*) over() as \"RowCount\" " +
                 "FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace " +
-                "WHERE c.relkind = 'r' AND n.nspname = '" + testSchemaName + "' " +
-                "AND pg_catalog.pg_get_userbyid(c.relowner) = '" + Config.getInstance().getDatabaseUsername() + "' " +
+                "WHERE c.relkind = 'r' AND n.nspname = '" + testSchemaName.toLowerCase() + "' " +
+                "AND pg_catalog.pg_get_userbyid(c.relowner) = '" + Config.getAnInstance("Config.xml").getDatabaseUsername() + "' " +
                 "ORDER BY \"RowCount\" desc;";
         rs = stmt.executeQuery(query);
         if(rs != null)

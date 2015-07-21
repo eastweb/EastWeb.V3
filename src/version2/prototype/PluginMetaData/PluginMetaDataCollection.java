@@ -109,7 +109,7 @@ public class PluginMetaDataCollection {
             throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
+        return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
     }
 
     /**
@@ -133,7 +133,8 @@ public class PluginMetaDataCollection {
             String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, extraDownloads, originDate);
+        return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
+                extraDownloads, originDate);
     }
 
     /**
@@ -156,7 +157,8 @@ public class PluginMetaDataCollection {
             String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(name, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
+        return collection.new DownloadMetaData(null, null, null, null, name, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
+                originDate);
     }
 
     /**
@@ -204,7 +206,7 @@ public class PluginMetaDataCollection {
     public static ProcessorMetaData CreateProcessorMetaData(Map<Integer, String> processSteps) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new ProcessorMetaData(processSteps);
+        return collection.new ProcessorMetaData(null, null, null, null, processSteps);
     }
 
     /**
@@ -220,7 +222,7 @@ public class PluginMetaDataCollection {
     public static SummaryMetaData CreateSummaryMetaData(String mergeStrategyClass, String interpolateStrategyClass) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new SummaryMetaData(mergeStrategyClass, interpolateStrategyClass);
+        return collection.new SummaryMetaData(null, null, null, null, mergeStrategyClass, interpolateStrategyClass);
     }
 
     private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, Exception{
@@ -235,25 +237,15 @@ public class PluginMetaDataCollection {
     private Map<String, PluginMetaData> createMap(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, Exception{
         Map<String,PluginMetaData> myMap=new HashMap<String,PluginMetaData>();
         for(File fXmlFile: xmlFiles){
-
+            // Setup Document
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
-
             doc.getDocumentElement().normalize();
+
+            // Get top level non-process specific elements
             String Title = doc.getElementsByTagName("title").item(0).getTextContent();
             int DaysPerInputData = Integer.parseInt(doc.getElementsByTagName("DaysPerInputData").item(0).getTextContent());
-            DownloadMetaData Download = new DownloadMetaData(doc.getElementsByTagName("Download"));
-            ProcessorMetaData Processor = new ProcessorMetaData(doc.getElementsByTagName("Processor"));
-
-            ArrayList<String> IndicesMetaData = new ArrayList<String>();
-            NodeList tempIndices = doc.getElementsByTagName("Indices");
-            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("Class").getLength();
-            for(int i = 0; i < nodesIndices; i++) {
-                IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("Class").item(i).getTextContent());
-            }
-
-            SummaryMetaData Summary = new SummaryMetaData(doc.getElementsByTagName("Summary"));
 
             ArrayList<String> QualityControlMetaData = new ArrayList<String>();
             NodeList tempQC = doc.getElementsByTagName("QualityControl");
@@ -270,9 +262,23 @@ public class PluginMetaDataCollection {
                 ExtraDownloadFiles.add( ((Element) extraDownloadFilesNodeList.item(0)).getElementsByTagName("Name").item(i).getTextContent());
             }
 
+            // Get process specific metadata
+            DownloadMetaData Download = new DownloadMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Download"));
+            ProcessorMetaData Processor = new ProcessorMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Processor"));
+            ArrayList<String> IndicesMetaData = new ArrayList<String>();
+            NodeList tempIndices = doc.getElementsByTagName("Indices");
+            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("Class").getLength();
+            for(int i = 0; i < nodesIndices; i++) {
+                IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("Class").item(i).getTextContent());
+            }
+            IndexMetaData Indices = new IndexMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, tempIndices);
+            SummaryMetaData Summary = new SummaryMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Summary"));
+
+            // Setup map
             String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
             pluginList.add(pluginName);
-            myMap.put(pluginName, new PluginMetaData(Download, Processor, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles));
+            myMap.put(pluginName, new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData,
+                    ExtraDownloadFiles));
 
         }
         return myMap;
@@ -301,18 +307,20 @@ public class PluginMetaDataCollection {
     public class PluginMetaData {
         public final DownloadMetaData Download;
         public final ProcessorMetaData Processor;
+        public final IndexMetaData Indices;
         public final SummaryMetaData Summary;
-        public final ArrayList<String> IndicesMetaData;
+        public final ArrayList<String> IndicesMetaData; // Deprecated. Eventually IndicesMetaData will be a type and replace IndexMetaData. Property replaced by 'Indices'.
         public final ArrayList<String> QualityControlMetaData;
         public final String Title;
         public final int DaysPerInputData;
         public final ArrayList<String> ExtraDownloadFiles;
 
-        public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, SummaryMetaData Summary, ArrayList<String> IndicesMetaData, ArrayList<String> QualityControlMetaData, String Title,
-                int DaysPerInputData, ArrayList<String> ExtraDownloadFiles)
+        public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndexMetaData Indices, SummaryMetaData Summary, ArrayList<String> IndicesMetaData,
+                ArrayList<String> QualityControlMetaData, String Title, int DaysPerInputData, ArrayList<String> ExtraDownloadFiles)
         {
             this.Download = Download;
             this.Processor = Processor;
+            this.Indices = Indices;
             this.Summary = Summary;
             this.IndicesMetaData = IndicesMetaData;
             this.QualityControlMetaData = QualityControlMetaData;
@@ -322,7 +330,22 @@ public class PluginMetaDataCollection {
         }
     }
 
-    public class DownloadMetaData{
+    public abstract class ProcessMetaData {
+        public final ArrayList<String> QualityControlMetaData;
+        public final String Title;
+        public final Integer DaysPerInputData;
+        public final ArrayList<String> ExtraDownloadFiles;
+
+        protected ProcessMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles)
+        {
+            this.QualityControlMetaData = QualityControlMetaData;
+            this.Title = Title;
+            this.DaysPerInputData = DaysPerInputData;
+            this.ExtraDownloadFiles = ExtraDownloadFiles;
+        }
+    }
+
+    public class DownloadMetaData extends ProcessMetaData{
         private NodeList nList;
 
         public final String name;   // Attribute defined
@@ -337,7 +360,9 @@ public class PluginMetaDataCollection {
         public final ArrayList<DownloadMetaData> extraDownloads;
         public final LocalDate originDate;
 
-        public DownloadMetaData(NodeList n) throws Exception{
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n)
+                throws Exception{
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempName = null;
             String tempMode = null;
             FTP tempFtp = null;
@@ -422,7 +447,7 @@ public class PluginMetaDataCollection {
                 {
                     if(i != dataNodeIdx)
                     {
-                        extraDownloads.add(new DownloadMetaData(nList.item(i), timeZone, filesPerDay));
+                        extraDownloads.add(new DownloadMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, nList.item(i), timeZone, filesPerDay));
                     }
                 }
             } else {
@@ -433,9 +458,11 @@ public class PluginMetaDataCollection {
             originDate = LocalDate.parse(((Element) dataNode).getElementsByTagName("OriginDate").item(0).getTextContent(), datesFormatter);
         }
 
-        public DownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode,
+                FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
                 LocalDate originDate)
         {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             name = "Data";
             this.mode = mode;
             this.myFtp = myFtp;
@@ -449,9 +476,11 @@ public class PluginMetaDataCollection {
             this.originDate = originDate;
         }
 
-        public DownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode,
+                FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
                 ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate)
         {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             name = "Data";
             this.mode = mode;
             this.myFtp = myFtp;
@@ -465,9 +494,11 @@ public class PluginMetaDataCollection {
             this.originDate = originDate;
         }
 
-        public DownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String name,
+                String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
                 LocalDate originDate)
         {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             this.name = name;
             this.mode = mode;
             this.myFtp = myFtp;
@@ -481,8 +512,10 @@ public class PluginMetaDataCollection {
             this.originDate = originDate;
         }
 
-        private DownloadMetaData(Node extraDownloadNode, String defaultTimeZone, int defaultFilesPerDay) throws Exception
+        private DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles,
+                Node extraDownloadNode, String defaultTimeZone, int defaultFilesPerDay) throws Exception
         {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempMode = null;
             FTP tempFtp = null;
             HTTP tempHttp = null;
@@ -572,13 +605,14 @@ public class PluginMetaDataCollection {
         }
     }
 
-    public class ProcessorMetaData {
+    public class ProcessorMetaData extends ProcessMetaData {
 
         private NodeList nList;
 
         public final Map<Integer, String> processStep;
 
-        public ProcessorMetaData(NodeList n){
+        public ProcessorMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n){
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             nList = n;
             processStep = new HashMap<Integer, String>();
             Node processorNode = nList.item(0);
@@ -591,19 +625,39 @@ public class PluginMetaDataCollection {
             }
         }
 
-        public ProcessorMetaData(Map<Integer, String> processSteps)
+        public ProcessorMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles,
+                Map<Integer, String> processSteps)
         {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             processStep = processSteps;
         }
     }
 
-    public class SummaryMetaData{
+    public class IndexMetaData extends ProcessMetaData {
+        public final ArrayList<String> indicesNames;
+
+        private NodeList nList;
+
+        public IndexMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
+            nList = n;
+
+            indicesNames = new ArrayList<String>();
+            int nodesIndices = ((Element) nList.item(0)).getElementsByTagName("Class").getLength();
+            for(int i = 0; i < nodesIndices; i++) {
+                indicesNames.add( ((Element) nList.item(0)).getElementsByTagName("Class").item(i).getTextContent());
+            }
+        }
+    }
+
+    public class SummaryMetaData extends ProcessMetaData {
         public final String mergeStrategyClass;
         public final String interpolateStrategyClass;
 
         private NodeList nList;
 
-        public SummaryMetaData(NodeList n){
+        public SummaryMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n){
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             nList = n;
             Node summaryNode = nList.item(0);
 
@@ -624,8 +678,10 @@ public class PluginMetaDataCollection {
             interpolateStrategyClass = (((Element) temporalNode).getElementsByTagName("InterpolateStrategyClass").item(0).getTextContent());
         }
 
-        public SummaryMetaData(String mergeStrategyClass, String interpolateStrategyClass)
+        public SummaryMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles,
+                String mergeStrategyClass, String interpolateStrategyClass)
         {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             this.mergeStrategyClass = mergeStrategyClass;
             this.interpolateStrategyClass = interpolateStrategyClass;
         }
