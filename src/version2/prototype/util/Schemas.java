@@ -551,7 +551,6 @@ public class Schemas {
         //                        mSchemaName
         //                );
 
-        String query;
         StringBuilder query_;
         query_ = new StringBuilder(
                 String.format(
@@ -562,8 +561,8 @@ public class Schemas {
                                 "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
                                 "  \"ZoneMappingID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ZoneMapping\" (\"ZoneMappingID\") " : "") + "NOT NULL,\n" +
                                 "  \"ExpectedResultsID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"ExpectedResults\" (\"ExpectedResultsID\") " : "") + " NOT NULL,\n" +
-                                "  \"TemporalSummaryCompositionStrategyClass\" varchar(255) NOT NULL,\n",
-                                "  \"FilePath\" varchar(255) NOT NULL\n",
+                                "  \"TemporalSummaryCompositionStrategyClass\" varchar(255) NOT NULL,\n" +
+                                "  \"FilePath\" varchar(255) NOT NULL",
                                 mSchemaName,
                                 globalEASTWebSchema
                         ));
@@ -571,10 +570,8 @@ public class Schemas {
         {
             query_.append(",\n  \"" + summary + "\" double precision NOT NULL");
         }
-        query_.append(
-                "\n)");
-        query = query_.toString();
-        stmt.executeUpdate(query);
+        query_.append("\n)");
+        stmt.executeUpdate(query_.toString());
     }
 
     private static void createZoneMappingTableIfNotExists(String globalEASTWebSchema, final Statement stmt, final String mSchemaName, boolean createTablesWithForeignKeyReferences) throws SQLException {
@@ -677,9 +674,10 @@ public class Schemas {
                         "(\n" +
                         "  \"ExtraDownloadID\" serial PRIMARY KEY,\n" +
                         "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
-                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL\n" +
+                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                         "  \"DataName\" varchar(255) NOT NULL,\n" +
-                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n",
+                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n" +
+                        ")",
                         globalEASTWebSchema
                 );
         stmt.executeUpdate(query);
@@ -697,8 +695,9 @@ public class Schemas {
                                 "(\n" +
                                 "  \"DownloadID\" serial PRIMARY KEY,\n" +
                                 "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
-                                "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL\n" +
-                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n",
+                                "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n" +
+                                ")",
                                 globalEASTWebSchema
                         ));
         stmt.executeUpdate(query_.toString());

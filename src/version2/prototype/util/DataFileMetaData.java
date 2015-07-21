@@ -9,7 +9,6 @@ import java.util.ArrayList;
  *
  */
 public class DataFileMetaData {
-    private final int rowID;
     private final String dataName;
     private final String dataFilePath;
     private final String dateDirectoryPath;
@@ -22,18 +21,15 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the environmental index to null.
      *
-     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
-     * @param qcFilePath  - full path to the QC file associated to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")
      * @param dataGroupID  - unique ID associated with the combination of the year and day
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param extraDownloads  - the files
      */
-    public DataFileMetaData(int rowID, String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads)
+    public DataFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads)
     {
-        this.rowID = rowID;
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
@@ -47,18 +43,15 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object initialized with the given metadata.
      *
-     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
-     * @param qcFilePath  - full path to the QC file associated to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")
      * @param dataGroupID  - unique ID associated with the combination of the year and day
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param indexNm  - the environmental index associated to the data file
      */
-    public DataFileMetaData(int rowID, String dataName, String dataFilePath, String qcFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads)
+    public DataFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads)
     {
-        this.rowID = rowID;
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
@@ -72,7 +65,6 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the QC file path to null.
      *
-     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")
      * @param dataGroupID  - unique ID associated with the combination of the year and day
@@ -80,9 +72,8 @@ public class DataFileMetaData {
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param indexNm  - the environmental index associated to the data file
      */
-    public DataFileMetaData(int rowID, String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm)
+    public DataFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm)
     {
-        this.rowID = rowID;
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
@@ -103,9 +94,8 @@ public class DataFileMetaData {
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public DataFileMetaData(int rowID, String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day)
+    public DataFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day)
     {
-        this.rowID = rowID;
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
         this.dateDirectoryPath = dateDirectoryPath;
@@ -118,16 +108,16 @@ public class DataFileMetaData {
 
     public DownloadFileMetaData ReadMetaDataForProcessor()
     {
-        return new DownloadFileMetaData(rowID, dataName, dataFilePath, dateDirectoryPath, dataGroupID, year, day, extraDownloads);
+        return new DownloadFileMetaData(dataName, dataFilePath, dateDirectoryPath, dataGroupID, year, day, extraDownloads);
     }
 
     public ProcessorFileMetaData ReadMetaDataForIndices()
     {
-        return new ProcessorFileMetaData(rowID, dataName, dataFilePath, dateDirectoryPath, dataGroupID, year, day, extraDownloads);
+        return new ProcessorFileMetaData(dataName, dataFilePath, dateDirectoryPath, dataGroupID, year, day, extraDownloads);
     }
 
     public IndicesFileMetaData ReadMetaDataForSummary()
     {
-        return new IndicesFileMetaData(rowID, dataName, dataFilePath, dateDirectoryPath, dataGroupID, year, day, indexNm, extraDownloads);
+        return new IndicesFileMetaData(dataName, dataFilePath, dateDirectoryPath, dataGroupID, year, day, indexNm, extraDownloads);
     }
 }

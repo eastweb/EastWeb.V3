@@ -117,18 +117,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.extraDownloads);
+        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.extraDownloads,
+                metaData.DaysPerInputData);
     }
-
-    //    public final ArrayList<DataFileMetaData> CheckForUpdate(int key)
-    //    {
-    //
-    //    }
-    //
-    //    public final DataFileMetaData GetSpecificDownload(LocalDate ld)
-    //    {
-    //
-    //    }
 
     /**
      * Add the given file and associated information to the appropriate global downloads table.
