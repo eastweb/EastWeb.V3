@@ -399,7 +399,7 @@ public class EASTWebManager implements Runnable{
      * {@link version2#TaskState TaskState} value for that Scheduler to STOPPED effectively stopping all associated Process objects. Causes a graceful
      * shutdown of a project since it only keeps Processes from spawning more ProcessWorkers.
      *
-     * @param schedulerID  - targeted Scheduler's ID
+     * @param projectName  - targeted Scheduler's project name
      */
     public static void StopExistingScheduler(String projectName)
     {

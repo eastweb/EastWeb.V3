@@ -15,6 +15,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.ZonalSummary;
 
 /**
  * @author michael.devos
@@ -80,7 +81,7 @@ public class EASTWebResults {
      */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectSum, boolean selectMean,
             boolean selectStdDev, String zoneSign, int zoneVal, String yearSign, int yearVal, String daySign, int dayVal, ArrayList<String> includedIndices,
-            String zoneNameField, String shapefile)
+            ZonalSummary zonalSummary)
     {
         final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         globalSchema = FileSystem.StandardizeName(globalSchema);
@@ -117,7 +118,7 @@ public class EASTWebResults {
             query.append(")) ");
         }
 
-        query.append("(Z.\"Name\"=" + zoneNameField + " AND F.\"ShapeFile\"='" + shapefile + "' AND F.\"Field\"='" + zoneNameField + "') ");
+        query.append("(Z.\"Name\"=" + zonalSummary.GetAreaNameField() + " AND F.\"ShapeFile\"='" + zonalSummary.GetShapeFile() + "' AND F.\"Field\"='" + zonalSummary.GetAreaValueField() + "') ");
         query.append("(A.\"ZoneMappingID\"=M.\"ZoneMappingID\" AND M.\"ZoneEWID\"=Z.\"ZoneEWID\" AND M.\"ZoneFieldID\"=F.\"ZoneFieldID\");");
 
         return new EASTWebQuery(query.toString());
