@@ -100,7 +100,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
 
                     // List 24 hours in this day
                     String dayDirectory =
-                            String.format("%s/%s/%s", mRoot, yearDirectory, dayFile.getName());
+                            String.format("%s/%s", yearDirectory, dayFile.getName());
 
                     if (!ftpC.changeWorkingDirectory(dayDirectory))
                     {
@@ -108,17 +108,22 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                                 "Couldn't navigate to directory: " + dayDirectory);
                     }
 
+                    ArrayList<String> fileNames = new ArrayList<String>();
+
                     for (FTPFile file : ftpC.listFiles())
                     {
                         if (file.isFile() &&
                                 mData.fileNamePattern.matcher(file.getName()).matches())
                         {
-                            ArrayList<String> fileNames = new ArrayList<String>();
+                            /* pattern of NLDASNOAH
+                             * {productname}.A%y4%m2%d2.%h4.002.grb
+                             */
+
                             fileNames.add(file.getName());
 
                             String[] strings = file.getName().split("[.]");
-                            final int month = Integer.parseInt(strings[2]);
-                            final int day = Integer.parseInt(strings[3]);
+                            final int month = Integer.parseInt(strings[1].substring(5, 7));
+                            final int day = Integer.parseInt(strings[1].substring(7, 9));
                             final int hour = Integer.parseInt(strings[2]);
                             DataDate dataDate = new DataDate(hour, day, month, year);
                             if (dataDate.compareTo(sDate) >= 0)
@@ -132,6 +137,8 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
             }
 
             ftpC.disconnect();
+            ftpC = null;
+            System.out.println("connection is closed " + ftpC);
             return mapDatesFiles;
         }
         catch (Exception e)

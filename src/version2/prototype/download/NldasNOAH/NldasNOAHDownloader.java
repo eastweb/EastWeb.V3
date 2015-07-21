@@ -2,7 +2,6 @@ package version2.prototype.download.NldasNOAH;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
@@ -24,21 +23,24 @@ public class NldasNOAHDownloader extends DownloaderFramework{
     private String mMode;
     private String mHost;
     private String mRoot;
+    private String mFileToDownload;
     private DownloadMetaData mData;
+    private String outFilePath;
 
-    public NldasNOAHDownloader(DataDate date, String outFolder, DownloadMetaData data)
+    public NldasNOAHDownloader(DataDate date, String outFolder, DownloadMetaData data, String fileToDownload)
     {
         mDate = date;
         mOutputFolder = outFolder;
         mData = data;
-        setFTPValues(mData);
+        mFileToDownload = fileToDownload;
+        setFTPValues();
     }
 
     // get the values from DownloadMetaData
-    private void setFTPValues(DownloadMetaData data)
+    private void setFTPValues()
     {
-        mMode = data.mode;
-        FTP f = data.myFtp;
+        mMode = mData.mode;
+        FTP f = mData.myFtp;
         mHost = f.hostName;
         mRoot = f.rootDir;
     }
@@ -53,34 +55,35 @@ public class NldasNOAHDownloader extends DownloaderFramework{
                     (FTPClient) ConnectionContext.getConnection(mData);
             try {
                 final String yearDirectory =
-                        String.format("%s%d", mRoot, mDate.getYear());
-                System.out.println(yearDirectory);
+                        String.format("%s/%d", mRoot, mDate.getYear());
                 if (!ftpC.changeWorkingDirectory(yearDirectory))
                 {
                     throw new IOException("Couldn't navigate to directory: "
                             + yearDirectory);
                 }
 
-                int year = mDate.getYear();
-                int month = mDate.getMonth();
-                int day = mDate.getDay();
+                final String dayDirectory = String.format("%s/%d", yearDirectory, mDate.getDayOfYear());
 
-                String fileToDownload =
-                        String.format("Nldas_NOAH0125_H.A%04d.%02d.%02d.%04d.002.grb",
-                                year, month, day);
+                if (!ftpC.changeWorkingDirectory(dayDirectory))
+                {
+                    throw new IOException("Couldn't navigate to directory: "
+                            + dayDirectory);
+                }
 
-                // Save it to the sub-folder with Day_of_year
-                LocalDate ld = LocalDate.of(year, month, day);
-                int day_of_year = ld.getDayOfYear();
+                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",
+                        mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
 
-                String dir = String.format("%s\\%04d\\%03d",mOutputFolder,year,day_of_year);
+                if(!(new File(dir).exists()))
+                {
+                    FileUtils.forceMkdir(new File(dir));
+                }
 
-                FileUtils.forceMkdir(new File(dir));
+                outFilePath = String.format("%s"+File.separator+"%s",dir, mFileToDownload);
 
-                File outputFile = new File(String.format("%s\\%s",dir,fileToDownload));
+                File outputFile = new File(outFilePath);
 
-                DownloadUtils.download(ftpC, fileToDownload, outputFile);
-                ftpC.disconnect();
+                DownloadUtils.download(ftpC, mFileToDownload, outputFile);
+                //ftpC.disconnect();
 
             } catch (IOException e)
             {
@@ -93,4 +96,8 @@ public class NldasNOAHDownloader extends DownloaderFramework{
         } ;
     }
 
+    public String getOutputFilePath()
+    {
+        return outFilePath;
+    }
 }
