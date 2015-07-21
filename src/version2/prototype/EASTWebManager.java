@@ -384,7 +384,24 @@ public class EASTWebManager implements Runnable{
      *
      * @param schedulerID  - targeted Scheduler's ID
      */
-    public static void StopScheduler(int schedulerID)
+    public static void StopExistingScheduler(int schedulerID)
+    {
+        if(schedulerIDs.get(schedulerID))
+        {
+            synchronized (stopSchedulerRequests) {
+                stopSchedulerRequests.add(schedulerID);
+            }
+        }
+    }
+
+    /**
+     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be stopped. Sets the
+     * {@link version2#TaskState TaskState} value for that Scheduler to STOPPED effectively stopping all associated Process objects. Causes a graceful
+     * shutdown of a project since it only keeps Processes from spawning more ProcessWorkers.
+     *
+     * @param schedulerID  - targeted Scheduler's ID
+     */
+    public static void StopExistingScheduler(String projectName)
     {
         if(schedulerIDs.get(schedulerID))
         {
