@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class ProcessorFileMetaData {
     public final String dataName;
     public final String dataFilePath;
-    public final String dateDirectoryPath;
     public final int dataGroupID;
     public final int year;
     public final int day;
@@ -25,10 +24,9 @@ public class ProcessorFileMetaData {
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public ProcessorFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads) {
+    public ProcessorFileMetaData(String dataName, String dataFilePath, int dataGroupID, int year, int day, ArrayList<DataFileMetaData> extraDownloads) {
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
-        this.dateDirectoryPath = dateDirectoryPath;
         this.dataGroupID = dataGroupID;
         this.year = year;
         this.day = day;

@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -126,20 +128,38 @@ public class Schemas {
             ArrayList<DownloadMetaData> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
             IOException {
         ArrayList<DataFileMetaData> downloads = new ArrayList<DataFileMetaData>();
+        Map<Integer, DataFileMetaData> downloadsList = new HashMap<Integer, DataFileMetaData>();
 
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName, daysPerInputFile, instanceID);
 
         ResultSet rs;
-        rs = stmt.executeQuery(String.format("SELECT * FROM  \"%1$s\".\"Download\" WHERE \"GlobalDownloaderID\"=" + gdlID + ";",
+        rs = stmt.executeQuery(String.format(
+                "SELECT A.*, B.* FROM  \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND D.\"DateGroupID\"=A.\"DateGroupID\";",
                 globalEASTWebSchema
                 ));
         if(rs != null)
         {
             while(rs.next())
             {
+                downloadsList.put(rs.getInt("A.DateGroupID"), new DataFileMetaData("Data", rs.getString("A.DataFilePath"), rs.getInt("A.DateGroupID"), rs.getInt("B.Year"), rs.getInt("B.Day")));
+            }
+        }
+        rs.close();
 
+        rs = stmt.executeQuery(String.format(
+                "SELECT * FROM  \"%1$s\".\"ExtraDownload\" WHERE A.\"GlobalDownloaderID\"=" + gdlID + ";",
+                globalEASTWebSchema
+                ));
+        if(rs != null)
+        {
+            DownloadFileMetaData temp;
+            while(rs.next())
+            {
+                temp = downloadsList.get(rs.getInt("DateGroupID")).ReadMetaDataForProcessor();
+                downloadsList.put(temp.dataGroupID, new DataFileMetaData("Data", temp.dataFilePath, temp.dataGroupID, temp.year, temp.day, temp.extraDownloads.add(
+                        new DataFileMetaData(dataName, dataFilePath, dataGroupID, year, day))));
             }
         }
         rs.close();

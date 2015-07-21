@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class IndicesFileMetaData {
     public final String dataName;
     public final String dataFilePath;
-    public final String dateDirectoryPath;
     public final int dataGroupID;
     public final int year;
     public final int day;
@@ -29,10 +28,9 @@ public class IndicesFileMetaData {
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param indexNm  - the environmental index associated to the data file
      */
-    public IndicesFileMetaData(String dataName, String dataFilePath, String dateDirectoryPath, int dataGroupID, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads) {
+    public IndicesFileMetaData(String dataName, String dataFilePath, int dataGroupID, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads) {
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
-        this.dateDirectoryPath = dateDirectoryPath;
         this.dataGroupID = dataGroupID;
         this.year = year;
         this.day = day;
