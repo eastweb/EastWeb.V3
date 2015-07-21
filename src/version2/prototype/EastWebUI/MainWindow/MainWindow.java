@@ -731,7 +731,6 @@ public class MainWindow {
                 String projectName = label.toString();
                 ArrayList<SchedulerStatus> schedulersStatus = EASTWebManager.GetSchedulerStatuses();
 
-
                 for(SchedulerStatus item : schedulersStatus)
                 {
                     String currentProjectName = item.projectName;

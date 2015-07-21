@@ -73,7 +73,7 @@ public class AssociateSummaryPage {
         myPanel.add(filePathText);
         filePathText.setColumns(10);
 
-        final JLabel shapeFileLabel = new JLabel("Shape Type");
+        final JLabel shapeFileLabel = new JLabel("Field Name");
         shapeFileLabel.setBounds(10, 58, 152, 14);
         myPanel.add(shapeFileLabel);
 
@@ -151,7 +151,7 @@ public class AssociateSummaryPage {
                 String summary = "";
                 String temporal = String.valueOf(temporalComboBox.getSelectedItem());
 
-                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaValueField: %s;", "AreaNameField", filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
+                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaValueField: %s;", String.valueOf(shapeFileComboBox.getSelectedItem()), filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
 
                 if(temporal != null & !temporal.isEmpty() ) {
                     summary = String.format("%s; Temporal Summary: %s",summary, String.valueOf(temporalComboBox.getSelectedItem()));

@@ -57,6 +57,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -926,6 +927,7 @@ public class ProjectInformationPage {
 
             for(Object item:summaryListModel.toArray()){
                 Element summary = doc.createElement("Summary");
+
                 summary.appendChild(doc.createTextNode(item.toString()));
                 summaries.appendChild(summary);
             }

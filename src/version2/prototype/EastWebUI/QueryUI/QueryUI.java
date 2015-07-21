@@ -31,9 +31,12 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
+import version2.prototype.util.EASTWebResults;
 
 public class QueryUI {
 
@@ -175,7 +178,23 @@ public class QueryUI {
         btnQuery.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                // call query run method
+                ProjectInfoFile project = new ProjectInfoCollection().GetProject(String.valueOf(projectListComboBox.getSelectedItem()));
+
+                for(ProjectInfoPlugin s : project.GetPlugins()) {
+                    for(ProjectInfoSummary summary : project.GetSummaries()) {
+                        EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
+                                chckbxCount.isSelected(), chckbxSum.isSelected(), chckbxMean.isSelected(), chckbxStdev.isSelected(),
+                                String.valueOf(zoneComboBox.getSelectedItem()), zoneTextField.getText(),
+                                String.valueOf(yearComboBox.getSelectedItem()), yearTextField.getText(),
+                                String.valueOf(dayComboBox.getSelectedItem()), dayTextField.getText(),
+                                includeListModel,
+                                summary.GetZonalSummary());
+                    }
+                }
+
+
+
+
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
         });
@@ -428,6 +447,12 @@ public class QueryUI {
                 query += "\tstdev,\n";
             }
 
+            for(int i = 0; i < includeListModel.size(); i ++){
+                query += String.format("\t%s,\n", includeListModel.elementAt(i));
+            }
+
+
+
             return query;
         }
 
@@ -449,7 +474,7 @@ public class QueryUI {
                 }
                 if(chckbxZone.isSelected())
                 {
-                    query += String.format("day%s%s\n", String.valueOf(zoneComboBox.getSelectedItem()), zoneTextField.getText());
+                    query += String.format("zone%s%s\n", String.valueOf(zoneComboBox.getSelectedItem()), zoneTextField.getText());
                 }
             }
 
