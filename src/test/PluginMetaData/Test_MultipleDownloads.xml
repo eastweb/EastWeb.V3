@@ -19,7 +19,12 @@
 		<FilesPerDay>1</FilesPerDay>
 		<DatePattern>\\d{4}</DatePattern>
 		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
-		<OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate>
+		<!-- <OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate> -->
+		<OriginDate>
+			<Day>01</Day>
+			<Month>March</Month>
+			<Year>2000</Year>
+		</OriginDate>
 	</Download>
 	<Download Name="QC">
 		<ListDatesFilesClass>ListDatesFilesClass2</ListDatesFilesClass>
