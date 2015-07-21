@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <PluginMetadata>
 	<title>NldasNOAH</title>
+	<DaysPerInputData>1</DaysPerInputData>
+	<ExtraDownloadFiles/>
 	<Download>
 		<className>NldasNOAHDownloadTask</className>
 		<mode>ftp</mode>
@@ -10,17 +12,21 @@
 			<userName>anonymous</userName>
 			<passWord>anonymous</passWord>
 		</FTP>
+		<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+		<FilesPerDay>24</FilesPerDay>
+		<datePattern>\\d{4}</datePattern>
+		<fileNamePattern>NLDAS_NOAH0125_H\\.A(\\d{4})(\\d{2})(\\d{2})\\.(\\d{4})\\.002\\.grb</fileNamePattern>
+		<OriginDate>
+			<Day>01</Day>
+			<Month>03</Month>
+			<Year>2000</Year>
+		</OriginDate>
 	</Download>	
 	<Processes>
-		<Process processStep="1">
-			<className>NldasNOAHComposite</className>
-		</Process>
-		<Process processStep="2">
-			<className>Reproject</className>
-		</Process>
-		<Process processStep="3">
-			<className>Mask</className>
-		</Process>
+		<className>NldasNOAHComposite</className>
+		<className>NldasNOAHReproject</className>
+		<className>NldasNOAHClip</className>
+		<className>NldasNOAHMask</className>
 	</Processes>
 	<Indices>
 		<ClassName>NldasNOAHMeanDailySnowDepthCalculator</ClassName>
@@ -35,7 +41,10 @@
 		<ClassName>NldasNOAHMeanDailySoilTemp100_200Calculator</ClassName>
 	</Indices>
 	<Summary>
-		<ClassName></ClassName></Summary>
-	<QualityControl>
-		<ClassName></ClassName></QualityControl>
+		<Temporal>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass/>
+		</Temporal>
+	</Summary>
+	<QualityControl/>
 </PluginMetadata>

@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <PluginMetadata>
 	<title>TRMM3B42RT</title>
+	<DaysPerInputData>1</DaysPerInputData>
+	<ExtraDownloadFiles/>
 	<Download>
 		<className>TRMM3B42RTDownloader</className>
 		<mode>ftp</mode>
@@ -12,9 +14,15 @@
 			<userName>anonymous</userName>
 			<passWord>anonymous</passWord>
 		</FTP>
-		<datePattern>\\d{4}</datePattern>
+		<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+		<FilesPerDay>1</FilesPerDay>
+		<DatePattern>\\d{4}</datePattern>
 		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>
-		<filesPerDay>1<filesPerDay>
+		<OriginDate>
+			<Day>01</Day>
+			<Month>03</Month>
+			<Year>2000</Year>
+		</OriginDate>
 	</Download>	
 	<Process>
 		<className>TRMM3B42RTConvert</className>
@@ -27,8 +35,10 @@
 	</Indices>
 	<Summary>
 		<Temporal>
-			<DaysPerInputData>1</DaysPerInputData>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass/>
 		</Temporal>
 	</Summary>
+	<QualityControl/>
 </PluginMetadata>
 

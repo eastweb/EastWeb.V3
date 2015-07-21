@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <PluginMetadata>
 	<title>NldasForcing</title>
+	<DaysPerInputData>1</DaysPerInputData>
+	<ExtraDownloadFiles/>
 	<Download>
 		<className>NldasForcingDownloadTask</className>
 		<mode>ftp</mode>
@@ -10,19 +12,30 @@
 			<userName>anonymous</userName>
 			<passWord>anonymous</passWord>
 		</FTP>
+		<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+		<FilesPerDay>24</FilesPerDay>
+		<datePattern>\\d{4}</datePattern>
+		<fileNamePattern>NLDAS_FORA0125_H\\.A(\\d{4})(\\d{4})(\\d{4}).(\\d{4})00\\.002\\.grb</fileNamePattern>
+		<OriginDate>
+			<Day>01</Day>
+			<Month>03</Month>
+			<Year>2000</Year>
+		</OriginDate>
 	</Download>	
 	<Processes>
 		<className>NldasForcingComposite</className>
-		<className>Reproject</className>
-		<className>Mask</className>
+		<className>NldasForcingReproject</className>
+		<className>NldasForcingClip</className>
+		<className>NldasForcingMask</className>
 	</Processes>
 	<Indices>
 		<ClassName></ClassName>
 	</Indices>
 	<Summary>
-		<ClassName></ClassName>
+		<Temporal>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass/>
+		</Temporal>
 	</Summary>
-	<QualityControl>
-		<ClassName></ClassName>
-	</QualityControl>
+	<QualityControl/>
 </PluginMetadata>
