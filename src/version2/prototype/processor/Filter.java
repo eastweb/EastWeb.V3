@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.util.GdalUtils;
 
@@ -92,7 +93,9 @@ public abstract class Filter {
                 Dataset inputDS = gdal.Open(mInput.getPath());
                 assert(inputDS.GetRasterCount() == 1);
 
-                Dataset outputDS = createOutput(inputDS);
+                // name the output file as the same as the input's
+                Dataset outputDS =
+                        gdal.GetDriverByName("GTiff").CreateCopy(outputFolder + mInput.getName(), inputDS);
 
                 int xSize = outputDS.GetRasterXSize();
                 int ySize = outputDS.GetRasterYSize();
@@ -101,9 +104,8 @@ public abstract class Filter {
                 // maybe in an abstract class?
                 double[] array = new double[xSize * ySize];
 
-                // use GDT_Float32 (6) for the buffer
                 // read the whole raster out into the array
-                int readReturn = outputDS.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, 6, array);
+                int readReturn = outputDS.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, array);
                 if (readReturn != 0) {
                     throw new Exception("Cant read the Raster band : " + mInput.getPath());
                 }
@@ -117,18 +119,13 @@ public abstract class Filter {
                 }
 
                 synchronized (GdalUtils.lockObject) {
-                    outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 6, array);
-
+                    outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, array);
                 }
 
                 inputDS.delete();
                 outputDS.delete();
             }
         }
-    }
-
-    protected Dataset createOutput(Dataset inputDS) {
-        return gdal.GetDriverByName("GTiff").CreateCopy(outputFolder, inputDS);
     }
 
     /*Override this:
