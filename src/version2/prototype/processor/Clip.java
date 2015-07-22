@@ -2,6 +2,7 @@ package version2.prototype.processor;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Transformer;
@@ -10,119 +11,140 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
+
 import version2.prototype.util.GdalUtils;
 
 public class Clip
 {
-    private final File mRaster;
-    private final File mFeature;
-    private final File mOutput;
-    //private final String mFormat;
+    //locations for the input files. for this step, will only use inputFolders[0]
+    protected String[] inputFolders;
+    //location for the output file
+    protected String outputFolder;
+    protected File inputFolder;
+    // the files in the input folder for composition
+    protected File [] inputFiles;
+    // mask file
+    protected File shapeFile;
 
-    /**
-     * The feature extent must be a subset of the raster extent.
-     *
-     * @param raster Filename of GDAL supported raster with one band.
-     * @param feature Filename of GDAL supported feature.
-     * @param output Filename for GeoTiff output raster.
-     * @param format GDAL format string with copy creation support. @see [GDAL format str html]
-     */
-    public Clip (File raster, File feature, File output, String format) {
-        mRaster = raster;
-        mFeature = feature;
-        mOutput = output;
-        //mFormat = format;
+    public Clip(ProcessData data)
+    {
+        inputFolders = data.getInputFolders();
+        outputFolder = data.getOutputFolder();
+
+        //check if there are more than one input file in the given folder
+        inputFolder = new File(inputFolders[0]);
+        File[] listOfFiles = inputFolder.listFiles();
+        assert (listOfFiles.length >= 1);
+
+        //set the input files
+        //We assume that each file is a GDAL supported raster file with one band
+        inputFiles = listOfFiles;
+
+        shapeFile = new File(data.getShapefile());
     }
 
+
+    // clip all the files in the input folder
     public void clipFiles() throws Exception {
+
         GdalUtils.register();
 
-        synchronized (GdalUtils.lockObject) {
-            Dataset rasterDS = gdal.Open(mRaster.getPath());
-            DataSource featureDS = ogr.Open(mFeature.getPath());
-            Layer featureLyr = featureDS.GetLayer(0);
+        synchronized (GdalUtils.lockObject)
+        {
+            for (File mInput : inputFiles)
+            {
+                String filename = mInput.getName();
+                File mOutput = new File(outputFolder,filename);
 
-            final int pixelSize = (int) Math.abs(rasterDS.GetGeoTransform()[1]); // FIXME: getting pixel size won't work for some datasets
-            System.out.println("PIXEL SIZE: " + pixelSize);
+                Dataset rasterDS = gdal.Open(mInput.getPath());
+                DataSource featureDS = ogr.Open(shapeFile.getPath());
+                Layer featureLyr = featureDS.GetLayer(0);
 
-            double[] featureExtent = featureLyr.GetExtent();
-            System.out.println(Arrays.toString(featureExtent));
+                final int pixelSize = (int) Math.abs(rasterDS.GetGeoTransform()[1]); // FIXME: getting pixel size won't work for some datasets
+                //System.out.println("PIXEL SIZE: " + pixelSize);
 
-            Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
-                    mOutput.getPath(),
-                    (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
-                    (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
-                    1,
-                    gdalconst.GDT_Int16
-                    );
+                double[] featureExtent = featureLyr.GetExtent();
+                //System.out.println(Arrays.toString(featureExtent));
 
-            outputDS.SetProjection(featureLyr.GetSpatialRef().ExportToWkt());
-            outputDS.SetGeoTransform(new double[] {
-                    featureExtent[0], pixelSize, 0,
-                    featureExtent[2] + outputDS.GetRasterYSize()*pixelSize, 0, -pixelSize
-            });
+                Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
+                        mOutput.getPath(),
+                        (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
+                        (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
+                        1,
+                        gdalconst.GDT_Int16
+                        );
 
-            System.out.println(Arrays.toString(outputDS.GetGeoTransform()));
+                outputDS.SetProjection(featureLyr.GetSpatialRef().ExportToWkt());
+                outputDS.SetGeoTransform(new double[] {
+                        featureExtent[0], pixelSize, 0,
+                        featureExtent[2] + outputDS.GetRasterYSize()*pixelSize, 0, -pixelSize
+                });
 
-            // Get pixel coordinate in output raster of corner of zone raster
-            Transformer transformer = new Transformer(outputDS, rasterDS, null);
+                //System.out.println(Arrays.toString(outputDS.GetGeoTransform()));
 
-            double[] point = new double[] {-0.5, -0.5, 0}; // Location of corner of first zone raster pixel
+                // Get pixel coordinate in output raster of corner of zone raster
+                Transformer transformer = new Transformer(outputDS, rasterDS, null);
 
-            transformer.TransformPoint(0, point);
-            //int xOffset = (int) Math.round(point[0]);
-            //int yOffset = (int) Math.round(point[1]);
+                double[] point = new double[] {-0.5, -0.5, 0}; // Location of corner of first zone raster pixel
 
-            Dataset maskDS = gdal.GetDriverByName("MEM").Create(
-                    "",
-                    (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
-                    (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
-                    1,
-                    gdalconst.GDT_Int16);
+                transformer.TransformPoint(0, point);
+                //int xOffset = (int) Math.round(point[0]);
+                //int yOffset = (int) Math.round(point[1]);
 
-            maskDS.SetProjection(featureLyr.GetSpatialRef().ExportToWkt());
-            //zoneDS.SetProjection(rasterDS.GetProjection());
-            maskDS.SetGeoTransform(new double[] {
-                    featureExtent[0], pixelSize, 0,
-                    featureExtent[2] + outputDS.GetRasterYSize()*pixelSize, 0, -pixelSize
-            });
+                Dataset maskDS = gdal.GetDriverByName("MEM").Create(
+                        "",
+                        (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
+                        (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
+                        1,
+                        gdalconst.GDT_Int16);
 
-            maskDS.GetRasterBand(1).Fill(0); // FIXME: necessary?
+                maskDS.SetProjection(featureLyr.GetSpatialRef().ExportToWkt());
+                //zoneDS.SetProjection(rasterDS.GetProjection());
+                maskDS.SetGeoTransform(new double[] {
+                        featureExtent[0], pixelSize, 0,
+                        featureExtent[2] + outputDS.GetRasterYSize()*pixelSize, 0, -pixelSize
+                });
 
-            gdal.RasterizeLayer(maskDS, new int[] {1}, featureLyr);
+                maskDS.GetRasterBand(1).Fill(0); // FIXME: necessary?
 
-            int[] maskArray = new int[maskDS.GetRasterXSize()];
-            int[] rasterArray = new int[maskDS.GetRasterXSize()];
-            for (int y=0; y<maskDS.GetRasterYSize(); y++) {
-                maskDS.GetRasterBand(1).ReadRaster(0, y, maskDS.GetRasterXSize(), 1, maskArray);
-                /* removed offsets from the parameters in the following statement
-                 *  rasterDS.GetRasterBand(1).ReadRaster(xOffset, yOffset + y, maskDS.GetRasterXSize(), 1, rasterArray);
-                 *  8/28/13 by J. Hu
-                 */
+                gdal.RasterizeLayer(maskDS, new int[] {1}, featureLyr);
 
-                rasterDS.GetRasterBand(1).ReadRaster(0, y, maskDS.GetRasterXSize(), 1, rasterArray);
-                for (int i=0; i<maskArray.length; i++) {
-                    if (maskArray[i] == 0) { // FIXME
-                        rasterArray[i] = 32767; // FIXME
+                int[] maskArray = new int[maskDS.GetRasterXSize()];
+                int[] rasterArray = new int[maskDS.GetRasterXSize()];
+
+                // FIXME: optimize it!
+                for (int y=0; y<maskDS.GetRasterYSize(); y++) {
+                    maskDS.GetRasterBand(1).ReadRaster(0, y, maskDS.GetRasterXSize(), 1, maskArray);
+                    /* removed offsets from the parameters in the following statement
+                     *  rasterDS.GetRasterBand(1).ReadRaster(xOffset, yOffset + y, maskDS.GetRasterXSize(), 1, rasterArray);
+                     *  8/28/13 by J. Hu
+                     */
+
+                    rasterDS.GetRasterBand(1).ReadRaster(0, y, maskDS.GetRasterXSize(), 1, rasterArray);
+                    for (int i=0; i<maskArray.length; i++) {
+                        if (maskArray[i] == 0)
+                        {
+                            rasterArray[i] = GdalUtils.NoValue;
+                        }
                     }
+
+                    outputDS.GetRasterBand(1).WriteRaster(0, y, maskDS.GetRasterXSize(), 1, rasterArray);
                 }
 
-                outputDS.GetRasterBand(1).WriteRaster(0, y, maskDS.GetRasterXSize(), 1, rasterArray);
+                // Calculate statistics
+                for (int i=1; i<=outputDS.GetRasterCount(); i++) {
+                    Band band = outputDS.GetRasterBand(i);
+
+                    band.SetNoDataValue(GdalUtils.NoValue); // FIXME
+                    band.ComputeStatistics(false);
+                }
+
+                maskDS.GetRasterBand(1).ComputeStatistics(false);
+
+                maskDS.delete();
+                rasterDS.delete();
+                outputDS.delete();
             }
-
-            // Calculate statistics
-            for (int i=1; i<=outputDS.GetRasterCount(); i++) {
-                Band band = outputDS.GetRasterBand(i);
-
-                band.SetNoDataValue(32767); // FIXME
-                band.ComputeStatistics(false);
-            }
-
-            maskDS.GetRasterBand(1).ComputeStatistics(false);
-
-            maskDS.delete();
-            rasterDS.delete();
-            outputDS.delete();
         }
     }
 

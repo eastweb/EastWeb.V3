@@ -90,6 +90,8 @@ public class Mask {
                     double[] output = new double[intersectWidth];
                     double[] mask = new double[intersectWidth];
 
+
+                    // FIXME:  optimize it
                     for (int y=0; y<intersectHeight; y++) {
                         mInputDS.GetRasterBand(1).ReadRaster(intersectX, intersectY + y, intersectWidth, 1, output);
                         mMaskDS.GetRasterBand(1).ReadRaster(intersectX - maskX, intersectY - maskY + y, intersectWidth, 1, mask);
