@@ -42,9 +42,10 @@ public class EASTWebManager implements Runnable{
 
     // Logged requests from other threads
     private static List<SchedulerData> newSchedulerRequests;
-    private static List<Integer> stopSchedulerRequests;
-    private static List<Integer> deleteSchedulerRequests;
-    private static List<String> deleteSchedulerRequestsNames;
+    private static List<Integer> stopExistingSchedulerRequests;
+    private static List<String> stopExistingSchedulerRequestsNames;
+    private static List<Integer> deleteExistingSchedulerRequests;
+    private static List<String> deleteExistingSchedulerRequestsNames;
     private static List<Integer> startExistingSchedulerRequests;
     private static List<String> startExistingSchedulerRequestsNames;
     private static List<NewGlobalDownloaderRequestsParams> newGlobalDownloaderRequests;
@@ -141,31 +142,20 @@ public class EASTWebManager implements Runnable{
                 if(!justCreateNewSchedulers)
                 {
                     // Handle stop scheduler requests
-                    if(stopSchedulerRequests.size() > 0)
+                    if(stopExistingSchedulerRequests.size() > 0)
                     {
-                        synchronized (stopSchedulerRequests) {
-                            while(stopSchedulerRequests.size() > 0)
+                        synchronized (stopExistingSchedulerRequests) {
+                            while(stopExistingSchedulerRequests.size() > 0)
                             {
-                                handleStopSchedulerRequests(stopSchedulerRequests.remove(0));
+                                handleStopSchedulerRequests(stopExistingSchedulerRequests.remove(0));
                             }
                         }
                     }
-
-                    // Handle delete scheduler requests
-                    if(deleteSchedulerRequests.size() > 0)
+                    if(stopExistingSchedulerRequestsNames.size() > 0)
                     {
-                        synchronized (deleteSchedulerRequests) {
-                            while(deleteSchedulerRequests.size() > 0)
-                            {
-                                handleDeleteSchedulerRequests(deleteSchedulerRequests.remove(0));
-                            }
-                        }
-                    }
-                    if(deleteSchedulerRequestsNames.size() > 0)
-                    {
-                        synchronized (deleteSchedulerRequestsNames) {
+                        synchronized (stopExistingSchedulerRequestsNames) {
                             int schedulerId = -1;
-                            for(String projectName : deleteSchedulerRequestsNames)
+                            for(String projectName : stopExistingSchedulerRequestsNames)
                             {
                                 for(Scheduler scheduler : schedulers)
                                 {
@@ -176,7 +166,39 @@ public class EASTWebManager implements Runnable{
                                     }
                                 }
                                 if(schedulerId != -1) {
-                                    deleteSchedulerRequestsNames.remove(projectName);
+                                    stopExistingSchedulerRequestsNames.remove(projectName);
+                                    handleStopSchedulerRequests(schedulerId);
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle delete scheduler requests
+                    if(deleteExistingSchedulerRequests.size() > 0)
+                    {
+                        synchronized (deleteExistingSchedulerRequests) {
+                            while(deleteExistingSchedulerRequests.size() > 0)
+                            {
+                                handleDeleteSchedulerRequests(deleteExistingSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(deleteExistingSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (deleteExistingSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : deleteExistingSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
+                                {
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    {
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    deleteExistingSchedulerRequestsNames.remove(projectName);
                                     handleDeleteSchedulerRequests(schedulerId);
                                 }
                             }
@@ -388,8 +410,8 @@ public class EASTWebManager implements Runnable{
     {
         if(schedulerIDs.get(schedulerID))
         {
-            synchronized (stopSchedulerRequests) {
-                stopSchedulerRequests.add(schedulerID);
+            synchronized (stopExistingSchedulerRequests) {
+                stopExistingSchedulerRequests.add(schedulerID);
             }
         }
     }
@@ -403,11 +425,8 @@ public class EASTWebManager implements Runnable{
      */
     public static void StopExistingScheduler(String projectName)
     {
-        if(schedulerIDs.get(schedulerID))
-        {
-            synchronized (stopSchedulerRequests) {
-                stopSchedulerRequests.add(schedulerID);
-            }
+        synchronized (stopExistingSchedulerRequestsNames) {
+            stopExistingSchedulerRequestsNames.add(projectName);
         }
     }
 
@@ -424,8 +443,8 @@ public class EASTWebManager implements Runnable{
     {
         if(schedulerIDs.get(schedulerID))
         {
-            synchronized (deleteSchedulerRequests) {
-                deleteSchedulerRequests.add(schedulerID);
+            synchronized (deleteExistingSchedulerRequests) {
+                deleteExistingSchedulerRequests.add(schedulerID);
             }
         }
     }
@@ -441,8 +460,8 @@ public class EASTWebManager implements Runnable{
      */
     public static void DeleteScheduler(String projectName)
     {
-        synchronized (deleteSchedulerRequestsNames) {
-            deleteSchedulerRequestsNames.add(projectName);
+        synchronized (deleteExistingSchedulerRequestsNames) {
+            deleteExistingSchedulerRequestsNames.add(projectName);
         }
     }
 
@@ -698,9 +717,12 @@ public class EASTWebManager implements Runnable{
         schedulerStatesChanged = false;
 
         newSchedulerRequests = null;
-        stopSchedulerRequests = null;
-        deleteSchedulerRequests = null;
+        stopExistingSchedulerRequests = null;
+        stopExistingSchedulerRequestsNames = null;
+        deleteExistingSchedulerRequests = null;
+        deleteExistingSchedulerRequestsNames = null;
         startExistingSchedulerRequests = null;
+        startExistingSchedulerRequestsNames = null;
         newGlobalDownloaderRequests = null;
         stopGlobalDownloaderRequests = null;
         startExistingGlobalDownloaderRequests = null;
@@ -762,9 +784,12 @@ public class EASTWebManager implements Runnable{
 
         // Setup request lists
         newSchedulerRequests = Collections.synchronizedList(new ArrayList<SchedulerData>(1));
-        stopSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        deleteSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        stopExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        stopExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
+        deleteExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        deleteExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
         startExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        startExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
         newGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<NewGlobalDownloaderRequestsParams>(1));
         stopGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
         startExistingGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<Integer>(0));

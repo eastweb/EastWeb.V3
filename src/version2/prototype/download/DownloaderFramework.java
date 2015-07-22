@@ -6,7 +6,7 @@ import org.xml.sax.SAXException;
 public abstract class DownloaderFramework {
 
     //process of downloading one file
-    public abstract void download() throws IOException, DownloadFailedException, Exception, SAXException;
+    public abstract void download() throws IOException, DownloadFailedException, SAXException, Exception;
 
     // return the path of the downloaded file
     public abstract String getOutputFilePath();

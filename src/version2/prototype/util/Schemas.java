@@ -124,9 +124,50 @@ public class Schemas {
         addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn, stmt);
     }
 
-    public static ArrayList<DataFileMetaData> getAllDownloadedFiles(String globalEASTWebSchema, String pluginName, int instanceID,
-            ArrayList<DownloadMetaData> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-            IOException {
+    public static int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, int instanceID, LocalDate startDate,
+            ArrayList<DownloadMetaData> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName, daysPerInputFile, instanceID);
+        final String mSchemaName = getSchemaName(projectName, pluginName);
+
+        StringBuilder query = new StringBuilder(String.format(
+                "INSERT INTO \"%1$s\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", ",
+                globalEASTWebSchema
+                ));
+        for(DownloadMetaData dmd : extraDownloadFiles)
+        {
+            query.append("\"" + dmd.name + "FilePath\", ");
+        }
+        query.append("\"DateGroupID\") "
+                + "SELECT D.\"DownloadID\", D.\"DataFilePath\", ");
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(Character.toChars('E' + i)[0] + ".\"FilePath\", ");
+        }
+        query.append(String.format("D.\"DateGroupID\" "
+                + "FROM \"%1$s\".\"Download\" D ",
+                globalEASTWebSchema
+                ));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(String.format(
+                    "INNER JOIN \"%1$s\".\"ExtraDownload\" " + Character.toChars('E' + i)[0] + " ON D.\"DownloadID\"=" + Character.toChars('E' + i)[0] + ".\"DownloadID\" ",
+                    globalEASTWebSchema));
+        }
+        query.append(String.format("LEFT JOIN \"%1$s\".\"DownloadCache\" L ON D.\"DownloadID\"=L.\"DownloadID\" "
+                + "WHERE L.\"DownloadID\" IS NULL",
+                mSchemaName));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(" AND " + Character.toChars('E' + i)[0] + ".\"DataName\"='" + extraDownloadFiles.get(i).name + "';");
+        }
+        return stmt.executeUpdate(query.toString());
+    }
+
+    public static ArrayList<DataFileMetaData> getAllDownloadedFiles(String globalEASTWebSchema, String pluginName, int instanceID, ArrayList<DownloadMetaData> extraDownloadFiles, int daysPerInputFile)
+            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         ArrayList<DataFileMetaData> downloads = new ArrayList<DataFileMetaData>();
         Map<Integer, DataFileMetaData> downloadsList = new HashMap<Integer, DataFileMetaData>();
 
@@ -136,7 +177,7 @@ public class Schemas {
 
         ResultSet rs;
         rs = stmt.executeQuery(String.format(
-                "SELECT A.*, B.* FROM  \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND D.\"DateGroupID\"=A.\"DateGroupID\";",
+                "SELECT A.*, B.* FROM  \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND B.\"DateGroupID\"=A.\"DateGroupID\";",
                 globalEASTWebSchema
                 ));
         if(rs != null)
@@ -149,7 +190,7 @@ public class Schemas {
         rs.close();
 
         rs = stmt.executeQuery(String.format(
-                "SELECT * FROM  \"%1$s\".\"ExtraDownload\" WHERE A.\"GlobalDownloaderID\"=" + gdlID + ";",
+                "SELECT A.*, B.* FROM  \"%1$s\".\"ExtraDownload\" A, \"%1$s\".\"DateGroup\" B WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND A.\"DateGroupID\"=B.\"DateGroupID\";",
                 globalEASTWebSchema
                 ));
         if(rs != null)
@@ -158,8 +199,8 @@ public class Schemas {
             while(rs.next())
             {
                 temp = downloadsList.get(rs.getInt("DateGroupID")).ReadMetaDataForProcessor();
-                downloadsList.put(temp.dataGroupID, new DataFileMetaData("Data", temp.dataFilePath, temp.dataGroupID, temp.year, temp.day, temp.extraDownloads.add(
-                        new DataFileMetaData(dataName, dataFilePath, dataGroupID, year, day))));
+                temp.extraDownloads.add(new DataFileMetaData(rs.getString("A.DataName"), rs.getString("A.DataFilePath"), rs.getInt("A.DateGroupID"), rs.getInt("B.Year"), rs.getInt("B.Day")));
+                downloadsList.put(temp.dataGroupID, new DataFileMetaData("Data", temp.dataFilePath, temp.dataGroupID, temp.year, temp.day, temp.extraDownloads));
             }
         }
         rs.close();
@@ -217,13 +258,38 @@ public class Schemas {
 
         int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName, daysPerInputFile, globalDownloaderInstanceID);
         int dateGroupID = getDateGroupID(globalEASTWebSchema, date, stmt);
+        int downloadID = getDownloadID(globalEASTWebSchema, gdlID, dateGroupID);
 
         String query = String.format(
-                "INSERT INTO TABLE \"%1$s\".\"ExtraDownload\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"DataFilePath\") VALUES\n" +
-                        "(" + gdlID + ", " + dateGroupID + ", " + dataName + ", " + dataFilePath + ");",
+                "INSERT INTO TABLE \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"DataFilePath\") VALUES\n" +
+                        "(" + downloadID + ", " + dataName + ", " + dataFilePath + ");",
                         globalEASTWebSchema
                 );
         stmt.executeUpdate(query);
+    }
+
+    private static int getDownloadID(String globalEASTWebSchema, Integer globalDownloaderID, Integer dateGroupID) throws ClassNotFoundException, SQLException,
+    ParserConfigurationException, SAXException, IOException {
+        if(globalEASTWebSchema == null || globalDownloaderID == null || dateGroupID == null) {
+            return -1;
+        }
+
+        int ID = -1;
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+
+        ResultSet rs;
+        rs = stmt.executeQuery(String.format(
+                "SELECT \"DownloadID\" FROM \"%1$s\".\"Download\" WHERE \n" +
+                        "\"GlobalDownloaderID\" = " + globalDownloaderID + " AND \"DateGroupID\" = " + dateGroupID + ";",
+                        globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            ID = rs.getInt("DownloadID");
+        }
+        rs.close();
+        return ID;
     }
 
     private static int getGlobalDownloaderID(String globalEASTWebSchema, String pluginName, int daysPerInputFile, int instanceID) throws SQLException,
@@ -475,8 +541,7 @@ public class Schemas {
         }
         query_.append(
                 String.format(
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
@@ -507,8 +572,7 @@ public class Schemas {
         }
         query_.append(
                 String.format(
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -538,8 +602,8 @@ public class Schemas {
         }
         query_.append(
                 String.format(
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                        "  \"DownloadID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Download\" (\"DownloadID\") " : "") + "NOT NULL,\n" +
+                                "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -693,10 +757,11 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ExtraDownload\"\n" +
                         "(\n" +
                         "  \"ExtraDownloadID\" serial PRIMARY KEY,\n" +
-                        "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
-                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                        "  \"DownloadID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Download\" (\"DownloadID\") " : "") + "NOT NULL,\n" +
+                        //                        "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
+                        //                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                         "  \"DataName\" varchar(255) NOT NULL,\n" +
-                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n" +
+                        "  \"FilePath\" varchar(255) UNIQUE NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );

@@ -57,8 +57,7 @@ public class ModisDownloader extends DownloaderFramework
     }
 
     @Override
-    public void download() throws IOException, DownloadFailedException,
-    Exception, SAXException
+    public void download() throws IOException, DownloadFailedException, SAXException, Exception
     {
         /*set the directory to store the file to be downloaded
          *all the tiles on the same day will be placed in a folder

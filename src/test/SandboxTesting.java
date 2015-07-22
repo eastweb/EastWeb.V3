@@ -12,8 +12,18 @@ public class SandboxTesting {
     public static void main(String[] args) {
         //        testPersistance();
         //        Test3();
-        test4();
+        //        test4();
+        test5();
     }
+
+    private static void test5()
+    {
+        for(int i=0; i < 4; i++)
+        {
+            System.out.println(Character.toChars('E' + i)[0] +  ".\"FilePath\"");
+        }
+    }
+
     private static void test4()
     {
         BitSet bits = new BitSet(1);

@@ -120,8 +120,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.extraDownloads,
-                metaData.DaysPerInputData);
+        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.extraDownloads, metaData.DaysPerInputData);
     }
 
     /**
@@ -146,12 +145,10 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         Connection conn = PostgreSQLConnection.getConnection();
         String query = String.format(
                 "INSERT INTO \"%1$s\" (\n" +
-                        "\"FullPath\",\n" +
-                        "\"DateDirectory\",\n" +
+                        "\"DataFilePath\",\n" +
                         "\"DataGroupID\"\n" +
                         ") VALUES (\n" +
                         "\"%2$s\",\n" +
-                        "?,\n" +
                         "?\n" +
                         ")",
                         tableName,

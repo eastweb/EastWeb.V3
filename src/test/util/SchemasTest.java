@@ -94,6 +94,17 @@ public class SchemasTest {
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
+
+        // Remove test schemas if they exist
+        Statement stmt = con.createStatement();
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testGlobalSchema
+                ));
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testSchemaName
+                ));
     }
 
     @AfterClass
@@ -127,16 +138,6 @@ public class SchemasTest {
     public final void testCreateProjectPluginSchema() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
         Statement stmt = con.createStatement();
         ResultSet rs = null;
-
-        // Remove test schemas if they exist
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-                testGlobalSchema
-                ));
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-                testSchemaName
-                ));
 
         // Run method under test - defined for MODIS plugin
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3,

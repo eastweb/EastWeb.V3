@@ -43,7 +43,7 @@ public class NldasForcingDownloader extends DownloaderFramework
     }
 
     @Override
-    public void download() throws IOException, DownloadFailedException, Exception, SAXException
+    public void download() throws IOException, DownloadFailedException, Exception, SAXException, Exception
     {
         String outDesStr = String.format("%s\\%04d\\%03d", mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
         File outputDestination = new File(outDesStr);
