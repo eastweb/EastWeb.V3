@@ -11,6 +11,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
@@ -18,15 +19,13 @@ import version2.prototype.util.DatabaseCache;
  */
 public class GenericLocalDownloader extends LocalDownloader {
 
-    public GenericLocalDownloader(int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache) {
+    public GenericLocalDownloader(int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache) {
         super(globalDLID, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
     }
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        // TODO Auto-generated method stub
-
+        Schemas.loadUnprocessedDownloadsToLocalDownloader(globalEASTWebSchema, projectName, pluginName, instanceID, startDate, extraDownloadFiles, daysPerInputFile);
     }
 
 }

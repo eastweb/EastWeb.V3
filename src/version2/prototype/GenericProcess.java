@@ -32,10 +32,7 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param state  - TaskState to initialize this object to
      * @param processName  - name of this threaded process
-     * @param inputProcessName  - name of process to use the output of for its input
-     * @param executor  - executor service to use to spawn worker threads
      * @throws ClassNotFoundException
      */
     public GenericProcess(ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,

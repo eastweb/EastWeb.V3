@@ -80,7 +80,6 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object, defaults the QC file path and environmental index to null and others to that given.
      *
-     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
      * @param dataGroupID  - unique ID associated with the combination of the year and day
      * @param year  - the Gregorian year the data file is relevant to

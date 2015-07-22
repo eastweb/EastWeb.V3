@@ -22,42 +22,6 @@ import version2.prototype.ZonalSummary;
  *
  */
 public class EASTWebResults {
-    public enum Sign{
-        LESS_THAN,
-        GREATER_THAN,
-        EQUAL_TO,
-        NOT_EQUAL_TO,
-        LESS_THAN_OR_EQUAL_TO,
-        GREATER_THAN_OR_EQUAL_TO;
-
-        @Override
-        public String toString() {
-            String name = null;
-
-            switch(name())
-            {
-            case "LESS_THAN":
-                name = "<";
-                break;
-            case "GREATER_THAN":
-                name = ">";
-                break;
-            case "EQUAL_TO":
-                name = "=";
-                break;
-            case "NOT_EQUAL_TO":
-                name = "<>";
-                break;
-            case "LESS_THAN_OR_EQUAL_TO":
-                name = "<=";
-                break;
-            case "GREATER_THAN_OR_EQUAL_TO":
-                name = ">=";
-                break;
-            }
-            return name;
-        }
-    };
 
     /**
      *
@@ -80,8 +44,7 @@ public class EASTWebResults {
      * @return
      */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectSum, boolean selectMean,
-            boolean selectStdDev, String zoneSign, int zoneVal, String yearSign, int yearVal, String daySign, int dayVal, ArrayList<String> includedIndices,
-            ZonalSummary zonalSummary)
+            boolean selectStdDev, String zoneSign, int zoneVal, String yearSign, int yearVal, String daySign, int dayVal, ArrayList<String> includedIndices, ZonalSummary zonalSummary)
     {
         final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         globalSchema = FileSystem.StandardizeName(globalSchema);

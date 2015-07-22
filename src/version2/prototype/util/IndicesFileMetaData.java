@@ -19,7 +19,6 @@ public class IndicesFileMetaData {
     /**
      * Creates a IndicesFileMetaData object initialized to the given values.
      *
-     * @param rowID  - the row ID for this table row
      * @param dataFilePath  - full path to the data file
      * @param qcFilePath  - full path to the QC file associated to the data file
      * @param dateDirectoryPath  - path to the data file's date directory (e.g. ".../2015/001/")

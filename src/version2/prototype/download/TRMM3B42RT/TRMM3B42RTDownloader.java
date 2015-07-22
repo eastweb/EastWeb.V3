@@ -51,8 +51,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
     }
 
     @Override
-    public void download() throws IOException, DownloadFailedException,
-    Exception, SAXException
+    public void download() throws IOException, DownloadFailedException, SAXException, Exception
     {
         if (mMode.equalsIgnoreCase("FTP"))
         {
