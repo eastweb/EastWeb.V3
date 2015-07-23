@@ -27,7 +27,7 @@ import version2.prototype.util.Schemas;
  */
 public abstract class LocalDownloader extends Process {
     private boolean updateAvailable;
-    private final int globalDLID;
+    protected final int globalDLID;
 
     protected LocalDownloader(int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache) {
         super(ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);

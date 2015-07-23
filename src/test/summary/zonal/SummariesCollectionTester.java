@@ -37,26 +37,6 @@ public class SummariesCollectionTester {
         col2 = null;
     }
 
-    @Test
-    public final void testLookup() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testPut() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testRegister() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    @Test
-    public final void testGetResults() {
-        fail("Not yet implemented"); // TODO
-    }
-
     private void testData1(SummariesCollection col) {
         col.put(0, 1.0);
         col.put(1, 2.0);

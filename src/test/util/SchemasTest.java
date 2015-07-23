@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,6 +25,8 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
+import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -40,6 +43,9 @@ public class SchemasTest {
     private static TemporalSummaryCompositionStrategy compStrategy;
     private static ArrayList<ProjectInfoSummary> summaries;
     private static ArrayList<String> extraDownloadFiles;
+    private static LocalDate startDate;
+    private static int daysPerInputFile;
+    private static int numOfIndices;
 
     /**
      * Defined for executable jar file to be used in setting up EASTWeb database for testing purposes. The config.xml file is needed for the database connection information but nothing else is used from
@@ -82,6 +88,9 @@ public class SchemasTest {
         areaValueField = "COUNTYNS10";
         areaNameField = "NAME10";
         compStrategy = new GregorianWeeklyStrategy();
+        startDate = LocalDate.now().minusDays(8);
+        daysPerInputFile = 8;
+        numOfIndices = 3;
 
         summaryNames = new ArrayList<String>();
         summaryNames.add("Count");
@@ -107,19 +116,23 @@ public class SchemasTest {
                 ));
     }
 
+    @After
+    public void tearDownAfterTests() throws SQLException {
+        Statement stmt = con.createStatement();
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testGlobalSchema
+                ));
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testSchemaName
+                ));
+        stmt.close();
+    }
+
     @AfterClass
     public static void tearDownAfterClass() throws SQLException {
-        //        Statement stmt = con.createStatement();
-        //        stmt.execute(String.format(
-        //                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-        //                testGlobalSchema
-        //                ));
-        //        stmt.execute(String.format(
-        //                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-        //                testSchemaName
-        //                ));
-        //        stmt.close();
-        //        con.close();
+        con.close();
     }
 
     @Test
@@ -140,8 +153,8 @@ public class SchemasTest {
         ResultSet rs = null;
 
         // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3,
-                summaries, true);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
+                numOfIndices, summaries, true);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
@@ -224,4 +237,235 @@ public class SchemasTest {
         stmt.close();
         rs.close();
     }
+
+    @Test
+    public final void testLoadUnprocessedDownloadsToLocalDownloader() throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        Statement stmt = con.createStatement();
+        ResultSet rs = null;
+        String schemaName = Schemas.getSchemaName(testProjectName, testPluginName);
+        String dateFilePath1 = "path to data file1";
+        String dateFilePath2 = "path to data file2";
+        String qcFilePath1 = "path to qc file1";
+        String qcFilePath2 = "path to qc file2";
+        String query;
+
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
+                numOfIndices, summaries, true);
+
+        query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES (" + LocalDate.now().getDayOfYear() + ", " + LocalDate.now().getYear() + ")",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\", \"UniqueInstanceNum\") VALUES (1, 1);",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        query = String.format("INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES (1, 1, '" + dateFilePath1 + "'), (1, 2, '" + dateFilePath2 +
+                "');",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        query = String.format("INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES (1, 'QC', '" + qcFilePath1 + "'), (2, 'QC', '" + qcFilePath2 + "');",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        //        query = "INSERT INTO \"" + schemaName + "\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", \"QCFilePath\", \"DateGroupID\")" +
+        //                "SELECT D.\"DownloadID\", D.\"DataFilePath\", E.\"FilePath\", D.\"DateGroupID\"" +
+        //                "FROM \"" + testGlobalSchema + "\".\"Download\" D INNER JOIN \"" + testGlobalSchema + "\".\"ExtraDownload\" E ON D.\"DownloadID\" = E.\"DownloadID\" LEFT JOIN \"" + schemaName +
+        //                "\".\"DownloadCache\" L ON D.\"DownloadID\" = L.\"DownloadID\"" +
+        //                "WHERE L.\"DownloadID\" IS NULL AND E.\"DataName\" = 'QC';";
+
+        Schemas.loadUnprocessedDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, 1, startDate, extraDownloadFiles, daysPerInputFile);
+
+        query = "SELECT * FROM \"" + schemaName + "\".\"DownloadCache\"";
+        rs = stmt.executeQuery(query);
+        if(rs != null)
+        {
+            if(rs.next())
+            {
+                assertTrue(schemaName + ".DownloadCache Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheID") + ", " + rs.getString("DataFilePath") + ", " + rs.getString("QCFilePath") + ", " +
+                        rs.getInt("DownloadID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
+                        rs.getInt("DownloadCacheID") == rs.getRow() &&
+                        rs.getString("DataFilePath").equals(dateFilePath1) &&
+                        rs.getString("QCFilePath").equals(qcFilePath1) &&
+                        rs.getInt("DownloadID") == 1 &&
+                        rs.getInt("DateGroupID") == 1 &&
+                        rs.getBoolean("Retrieved") == false &&
+                        rs.getBoolean("Processed") == false);
+            }
+            if(rs.next())
+            {
+                assertTrue(schemaName + ".DownloadCache Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheID") + ", " + rs.getString("DataFilePath") + ", " + rs.getString("QCFilePath") + ", " +
+                        rs.getInt("DownloadID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
+                        rs.getInt("DownloadCacheID") == rs.getRow() &&
+                        rs.getString("DataFilePath").equals(dateFilePath2) &&
+                        rs.getString("QCFilePath").equals(qcFilePath2) &&
+                        rs.getInt("DownloadID") == 2 &&
+                        rs.getInt("DateGroupID") == 2 &&
+                        rs.getBoolean("Retrieved") == false &&
+                        rs.getBoolean("Processed") == false);
+            }
+        }
+    }
+
+    @Test
+    public final void testGetAllDownloadedFiles() throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        Statement stmt = con.createStatement();
+        ResultSet rs = null;
+        String schemaName = Schemas.getSchemaName(testProjectName, testPluginName);
+        String dateFilePath1 = "path to data file1";
+        String dateFilePath2 = "path to data file2";
+        String qcFilePath1 = "path to qc file1";
+        String qcFilePath2 = "path to qc file2";
+        String query;
+
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
+                numOfIndices, summaries, true);
+
+        query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES (" + LocalDate.now().getDayOfYear() + ", " + LocalDate.now().getYear() + ")",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\", \"UniqueInstanceNum\") VALUES (1, 1);",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        query = String.format("INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES (1, 1, '" + dateFilePath1 + "'), (1, 2, '" + dateFilePath2 +
+                "');",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        query = String.format("INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES (1, 'QC', '" + qcFilePath1 + "'), (2, 'QC', '" + qcFilePath2 + "');",
+                testGlobalSchema);
+        stmt.execute(query);
+
+        ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName, 1, daysPerInputFile);
+
+        assertTrue("Test Results contains " + testResults.size() + " rows.", testResults.size() == 2);
+
+        DownloadFileMetaData data;
+        for(int i=0; i < testResults.size(); i++)
+        {
+            if(i == 0)
+            {
+                data = testResults.get(i).ReadMetaDataForProcessor();
+                assertTrue("Data " + i + " dataName is " + data.dataName, data.dataName.equals("Data"));
+                assertTrue("Data " + i + " dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(dateFilePath1));
+                assertTrue("Data " + i + " dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
+                assertTrue("Data " + i + " day is " + data.day, data.day == startDate.getDayOfYear());
+                assertTrue("Data " + i + " year is " + data.year, data.year == startDate.getYear());
+                assertTrue("Data " + i + ".ExtraDownloads size is " + data.extraDownloads.size(), data.extraDownloads.size() == 1);
+                data = data.extraDownloads.get(0).ReadMetaDataForProcessor();
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataName is " + data.dataName, data.dataName.equals("QC"));
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(qcFilePath1));
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
+                assertTrue("Data " + i + ".ExtraDownloads[0].day is " + data.day + " not " + startDate.getDayOfYear(), data.day == startDate.getDayOfYear());
+                assertTrue("Data " + i + ".ExtraDownloads[0].year is " + data.year + " not " + startDate.getYear(), data.year == startDate.getYear());
+            }
+            else if(i == 1)
+            {
+                data = testResults.get(i).ReadMetaDataForProcessor();
+                assertTrue("Data " + i + " dataName is " + data.dataName, data.dataName.equals("Data"));
+                assertTrue("Data " + i + " dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(dateFilePath2));
+                assertTrue("Data " + i + " dataGroupID is " + data.dataGroupID, data.dataGroupID == 2);
+                assertTrue("Data " + i + " day is " + data.day, data.day == LocalDate.now().getDayOfYear());
+                assertTrue("Data " + i + " year is " + data.year, data.year == LocalDate.now().getYear());
+                assertTrue("Data " + i + ".ExtraDownloads size is " + data.extraDownloads.size(), data.extraDownloads.size() == 1);
+                data = data.extraDownloads.get(0).ReadMetaDataForProcessor();
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataName is " + data.dataName, data.dataName.equals("QC"));
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(qcFilePath2));
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 2);
+                assertTrue("Data " + i + ".ExtraDownloads[0].day is " + data.day + " not " + LocalDate.now().getDayOfYear(), data.day == LocalDate.now().getDayOfYear());
+                assertTrue("Data " + i + ".ExtraDownloads[0].year is " + data.year + " not " + LocalDate.now().getYear(), data.year == LocalDate.now().getYear());
+            }
+            else{
+                fail("TestResults size is " + testResults.size());
+            }
+        }
+    }
+
+    @Test
+    public final void testRegisterGlobalDownloader() throws SQLException, ConfigReadException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException {
+        Statement stmt = con.createStatement();
+        ResultSet rs = null;
+        final int globalDownloaderInstanceID = 10;
+
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
+                numOfIndices, summaries, true);
+
+        String query = String.format(
+                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \n" +
+                        "\"UniqueInstanceNum\" = " + globalDownloaderInstanceID + " ORDER BY \"GlobalDownloaderID\" DESC;",
+                        testGlobalSchema
+                );
+
+        // Verify no GlobalDownloaders are registered with instance ID 10
+        rs = stmt.executeQuery(query);
+        assertTrue("Multiple GlobalDownloaders registered with instance ID " + globalDownloaderInstanceID, rs.next() == false);
+
+        // Register new GlobalDownloader ID
+        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName, daysPerInputFile, globalDownloaderInstanceID);
+        rs = stmt.executeQuery(query);
+        if(rs != null)
+        {
+            rs.next();
+            assertTrue("More than one GlobalDownloader with Instance ID " + globalDownloaderInstanceID, rs.next() == false);
+        } else {
+            fail("Failed to register GlobalDownloader");
+        }
+
+        // Register GlobalDownloader again for Instance ID 10 (mimic behavior of stopping and restarting GlobalDownloader)
+        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName, daysPerInputFile, globalDownloaderInstanceID);
+        rs = stmt.executeQuery(query);
+        if(rs != null)
+        {
+            rs.next();
+            rs.next();
+            assertTrue("More than two GlobalDownloader records with Instance ID " + globalDownloaderInstanceID, rs.next() == false);
+        } else {
+            fail("Failed to register GlobalDownloader");
+        }
+    }
+
+    @Test
+    public final void testInsertIntoExtraDownloadTable() throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        Statement stmt = con.createStatement();
+        ResultSet rs = null;
+        final int globalDownloaderInstanceID = 10;
+        String dateFilePath1 = "path to data file1";
+        String qcFilePath1 = "path to qc file1";
+
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
+                numOfIndices, summaries, true);
+
+        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName, daysPerInputFile, globalDownloaderInstanceID);
+        Schemas.insertIntoDownloadTable(testGlobalSchema, testPluginName, globalDownloaderInstanceID, startDate, dateFilePath1, daysPerInputFile);
+        Schemas.insertIntoExtraDownloadTable(testGlobalSchema, testPluginName, globalDownloaderInstanceID, startDate, "QC", qcFilePath1, daysPerInputFile);
+
+        ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName, globalDownloaderInstanceID, daysPerInputFile);
+        assertTrue("TestResults size is " + testResults.size(), testResults.size() == 1);
+        DownloadFileMetaData data = testResults.get(0).ReadMetaDataForProcessor();
+        assertTrue("TestResults[0].dataName is " + data.dataName, data.dataName.equals("Data"));
+        assertTrue("TestResults[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(dateFilePath1));
+        assertTrue("TestResults[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
+        assertTrue("TestResults[0].day is " + data.day, data.day == startDate.getDayOfYear());
+        assertTrue("TestResults[0].year is " + data.year, data.year == startDate.getYear());
+        assertTrue("TestResults[0].ExtraDownloads size is " + data.extraDownloads.size(), data.extraDownloads.size() == 1);
+        data = data.extraDownloads.get(0).ReadMetaDataForProcessor();
+        assertTrue("TestResults[0].ExtraDownloads[0].dataName is " + data.dataName, data.dataName.equals("QC"));
+        assertTrue("TestResults[0].ExtraDownloads[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(qcFilePath1));
+        assertTrue("TestResults[0].ExtraDownloads[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
+        assertTrue("TestResults[0].ExtraDownloads[0].day is " + data.day + " not " + startDate.getDayOfYear(), data.day == startDate.getDayOfYear());
+        assertTrue("TestResults[0].ExtraDownloads[0].year is " + data.year + " not " + startDate.getYear(), data.year == startDate.getYear());
+    }
+
+    //    @Test
+    //    public final void testUdpateExpectedResults() throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    //        Statement stmt = con.createStatement();
+    //        ResultSet rs = null;
+    //
+    //        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
+    //                numOfIndices, summaries, true);
+    //
+    //    }
 }
