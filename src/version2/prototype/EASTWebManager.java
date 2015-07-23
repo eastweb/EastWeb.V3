@@ -25,6 +25,7 @@ import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.GlobalDownloaderFactory;
 import version2.prototype.download.ListDatesFiles;
 
 /**
@@ -503,7 +504,7 @@ public class EASTWebManager implements Runnable{
      *
      * @param gdl  - {@link version2.download#GlobalDownloader GlobalDownloader} object to manage and run
      */
-    public static void StartGlobalDownloader(DownloadFactory dlFactory, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
+    public static void StartGlobalDownloader(GlobalDownloaderFactory dlFactory)
     {
         synchronized (newGlobalDownloaderRequests) {
             newGlobalDownloaderRequests.add(new EASTWebManager().new NewGlobalDownloaderRequestsParams(dlFactory, pluginName, metaData, listDatesFiles));

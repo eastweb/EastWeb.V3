@@ -28,6 +28,8 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
+import version2.prototype.download.GenericGlobalDownloader;
+import version2.prototype.download.GenericGlobalDownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
@@ -292,14 +294,27 @@ public class Scheduler {
     private LocalDownloader SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache) throws ClassNotFoundException, NoSuchMethodException,
     SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, IOException
     {
-        Class<?> dlFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + pluginMetaData.Download.downloadFactoryClassName);
-        Constructor<?> dlFactoryCtor = dlFactoryClass.getConstructor();
-        Object dlFactory = dlFactoryCtor.newInstance();
-        Method createGlobalDownloader = dlFactoryClass.getMethod("CreateGlobalDownloader", int.class, String.class, DownloadMetaData.class, ListDatesFiles.class);
-        Method createListDatesFiles = dlFactoryClass.getMethod("CreateListDatesFiles", DataDate.class, DownloadMetaData.class);
-        EASTWebManager.StartGlobalDownloader((DownloadFactory) dlFactory, pluginInfo.GetName(), pluginMetaData.Download,
-                ((DownloadFactory) dlFactory).CreateListDatesFiles(new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download));
-        return ((DownloadFactory) dlFactory).CreateLocalDownloader(globalDLID, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache);
+        // Create data ListDatesFiles instance
+        Class<?> listDatesFilesClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + pluginMetaData.Download.listDatesFilesClassName);
+        Constructor<?> listDatesFilesCtor = listDatesFilesClass.getConstructor(DataDate.class, DownloadMetaData.class);
+        ListDatesFiles listDatesFiles = (ListDatesFiles) listDatesFilesCtor.newInstance(new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download);
+
+        // Create data GenericGlobalDownloader
+        EASTWebManager.StartGlobalDownloader(new GenericGlobalDownloaderFactory(pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, pluginMetaData.Download.downloaderClassName));
+
+        for(DownloadMetaData dlMetaData : pluginMetaData.Download.extraDownloads)
+        {
+            // Create data ListDatesFiles instance
+            listDatesFilesClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + pluginMetaData.Download.listDatesFilesClassName);
+            listDatesFilesCtor = listDatesFilesClass.getConstructor(DataDate.class, DownloadMetaData.class);
+            listDatesFiles = (ListDatesFiles) listDatesFilesCtor.newInstance(new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download);
+
+            // Create data GenericGlobalDownloader
+            EASTWebManager.StartGlobalDownloader(new GenericGlobalDownloaderFactory(pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, dlMetaData.downloaderClassName));
+        }
+
+
+
     }
 
     /**

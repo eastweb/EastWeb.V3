@@ -18,9 +18,9 @@
 		<DatePattern>\\d{4}</DatePattern>
 		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
 		<OriginDate>
-			<Day>01</Day>
-			<Month>03</Month>
-			<Year>2000</Year>
+			<DayOfMonth>02</DayOfMonth>
+			<Month>June</Month>
+			<Year>2015</Year>
 		</OriginDate>
 	</Download>
 	<Processor>

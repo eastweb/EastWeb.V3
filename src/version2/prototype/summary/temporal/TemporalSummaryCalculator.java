@@ -39,8 +39,7 @@ public class TemporalSummaryCalculator {
      * @param fileStore  - common storage object to hold files waiting to be merged together into a single composite
      */
     public TemporalSummaryCalculator(String workingDir, String projectName, String pluginName, File inRasterFile, DataDate inDataDate,
-            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy,
-            MergeStrategy mergeStrategy) {
+            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) {
         this.workingDir = workingDir;
         this.projectName = projectName;
         this.pluginName = pluginName;

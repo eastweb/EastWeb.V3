@@ -33,7 +33,7 @@ public class ConfigTest {
     public final void testGetInstance() throws ParserConfigurationException, SAXException, IOException {
         Config config = Config.getAnInstance("config.xml");     // Works no different than Config.getInstance()
 
-        assertTrue("Config downloadDir is " + config.getDownloadDir(), config.getDownloadDir().equals("C:/EASTWeb/Downloads"));
+        assertTrue("Config downloadDir is " + config.getDownloadDir(), config.getDownloadDir().equals("C:/EASTWeb/Downloads/"));
 
         assertTrue("Config DataBase hostName is " + config.getDatabaseHost(), config.getDatabaseHost().equals("jdbc:postgresql://" + "localhost:5432"));
         assertTrue("Config DataBase userName is " + config.getDatabaseUsername(), config.getDatabaseUsername().equals("postgres"));

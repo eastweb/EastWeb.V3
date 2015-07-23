@@ -21,7 +21,7 @@
 		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
 		<!-- <OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate> -->
 		<OriginDate>
-			<Day>01</Day>
+			<DayOfMonth>01</DayOfMonth>
 			<Month>March</Month>
 			<Year>2000</Year>
 		</OriginDate>

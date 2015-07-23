@@ -45,8 +45,7 @@ public class CDCWeeklyStrategy implements TemporalSummaryCompositionStrategy {
     }
 
     @Override
-    public int getNumberOfCompleteCompositesInRange(LocalDate startDate,
-            LocalDate endDate, int daysPerInputData) {
+    public int getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
         return daysPerInputData;
         // TODO Auto-generated method stub
     }

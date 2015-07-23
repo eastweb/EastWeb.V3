@@ -12,8 +12,7 @@ import test.summary.zonal.SummariesCollectionTester;
 import test.util.SchemasTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({ PluginMetaDataCollectionTester.class, ProjectInfoFileTester.class, ConfigTest.class, SummariesCollectionTester.class, TemporalSummaryCompositionStrategyTester.class,
-    SchemasTest.class, TRMM3B42RTListDatesFilesTest.class })
+@SuiteClasses({ PluginMetaDataCollectionTester.class, ProjectInfoFileTester.class, ConfigTest.class, SummariesCollectionTester.class, SchemasTest.class, TRMM3B42RTListDatesFilesTest.class })
 public class AllTests {
 
 }

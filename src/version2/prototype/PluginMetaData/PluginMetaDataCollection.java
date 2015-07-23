@@ -3,6 +3,7 @@ package version2.prototype.PluginMetaData;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,7 +96,8 @@ public class PluginMetaDataCollection {
      * @param mode
      * @param myFtp
      * @param myHttp
-     * @param className
+     * @param listDatesFilesClassName
+     * @param downloaderClassName
      * @param timeZone
      * @param filesPerDay
      * @param datePatternStr
@@ -105,11 +107,12 @@ public class PluginMetaDataCollection {
      * @throws SAXException
      * @throws IOException
      */
-    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
-            throws ParserConfigurationException, SAXException, IOException
+    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String listDatesFilesClassName, String downloaderClassName, String timeZone, int filesPerDay,
+            String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
+        return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, listDatesFilesClassName, downloaderClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
+                originDate);
     }
 
     /**
@@ -119,7 +122,8 @@ public class PluginMetaDataCollection {
      * @param mode
      * @param myFtp
      * @param myHttp
-     * @param className
+     * @param listDatesFilesClassName
+     * @param downloaderClassName
      * @param timeZone
      * @param filesPerDay
      * @param datePatternStr
@@ -129,11 +133,11 @@ public class PluginMetaDataCollection {
      * @throws SAXException
      * @throws IOException
      */
-    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr,
-            String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
+    public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String listDatesFilesClassName, String downloaderClassName, String timeZone, int filesPerDay,
+            String datePatternStr, String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
+        return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, listDatesFilesClassName, downloaderClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
                 extraDownloads, originDate);
     }
 
@@ -143,7 +147,8 @@ public class PluginMetaDataCollection {
      * @param mode
      * @param myFtp
      * @param myHttp
-     * @param className
+     * @param listDatesFilesClassName
+     * @param downloaderClassName
      * @param timeZone
      * @param filesPerDay
      * @param datePatternStr
@@ -153,11 +158,11 @@ public class PluginMetaDataCollection {
      * @throws SAXException
      * @throws IOException
      */
-    public static DownloadMetaData CreateDownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String className, String timeZone, int filesPerDay, String datePatternStr,
-            String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
+    public static DownloadMetaData CreateDownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String listDatesFilesClassName, String downloaderClassName, String timeZone, int filesPerDay,
+            String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new DownloadMetaData(null, null, null, null, name, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
+        return collection.new DownloadMetaData(null, null, null, null, name, mode, myFtp, myHttp, listDatesFilesClassName, downloaderClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
                 originDate);
     }
 
@@ -277,8 +282,7 @@ public class PluginMetaDataCollection {
             // Setup map
             String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
             pluginList.add(pluginName);
-            myMap.put(pluginName, new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData,
-                    ExtraDownloadFiles));
+            myMap.put(pluginName, new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles));
 
         }
         return myMap;
@@ -352,7 +356,8 @@ public class PluginMetaDataCollection {
         public final String mode;   // the protocol type: ftp or http
         public final FTP myFtp;
         public final HTTP myHttp;
-        public final String downloadFactoryClassName;
+        public final String listDatesFilesClassName;
+        public final String downloaderClassName;
         public final String timeZone;
         public final int filesPerDay;
         public final Pattern datePattern;
@@ -360,14 +365,14 @@ public class PluginMetaDataCollection {
         public final ArrayList<DownloadMetaData> extraDownloads;
         public final LocalDate originDate;
 
-        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n)
-                throws Exception{
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) throws Exception{
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempName = null;
             String tempMode = null;
             FTP tempFtp = null;
             HTTP tempHttp = null;
-            String tempDownloadFactoryClassName = null;
+            String tempListDatesFilesClassName = null;
+            String tempDownloaderClassName = null;
             String tempTimeZone = null;
             int tempFilesPerDay = -1;
             Pattern tempDatePattern = null;
@@ -378,18 +383,20 @@ public class PluginMetaDataCollection {
             nList = n;
 
             // If there are multiple Download elements then find the Download element with attribute Name="Data"
+            Element temp;
             if(nList.getLength() > 1)
             {
                 for(int i=0; i < nList.getLength(); i++)
                 {
-                    if(((Element) nList.item(i)).hasAttribute("Name") && ((Element) nList.item(i)).getAttribute("Name").equals("Data"))
+                    temp = (Element) nList.item(i);
+                    if(temp.getNodeName().equals("Download") && temp.hasAttribute("Name") && temp.getAttribute("Name").equals("Data"))
                     {
                         dataNode = nList.item(i);
                         dataNodeIdx = i;
                         tempName = "Data";
                         break;
                     }
-                    else if(!((Element) nList.item(i)).hasAttribute("Name"))
+                    else if(!temp.hasAttribute("Name"))
                     {
                         throw new Exception("A Download element is missing the attribute \"Name\"");
                     }
@@ -405,8 +412,8 @@ public class PluginMetaDataCollection {
             else
             {
                 dataNode = nList.item(0);
-                if((((Element) dataNode).hasAttribute("Name") && ((Element) dataNode).getAttribute("Name").equals("Data"))
-                        || !((Element) dataNode).hasAttribute("Name"))
+                temp = (Element) dataNode;
+                if((temp.hasAttribute("Name") && temp.getAttribute("Name").equals("Data")) || !temp.hasAttribute("Name"))
                 {
                     name = "Data";
                 } else {
@@ -415,26 +422,29 @@ public class PluginMetaDataCollection {
             }
 
             // Set properties
-            tempTimeZone = ((Element) dataNode).getElementsByTagName("TimeZone").item(0).getTextContent();
+            Element dataElement = (Element) dataNode;
+            tempTimeZone = dataElement.getElementsByTagName("TimeZone").item(0).getTextContent();
             tempTimeZone = tempTimeZone.substring(tempTimeZone.indexOf(") ") + 2);
-            tempDownloadFactoryClassName = ((Element) dataNode).getElementsByTagName("DownloadFactoryClass").item(0).getTextContent();
-            tempMode = ((Element) dataNode).getElementsByTagName("Mode").item(0).getTextContent();
+            tempListDatesFilesClassName = dataElement.getElementsByTagName("ListDatesFilesClass").item(0).getTextContent();
+            tempDownloaderClassName = dataElement.getElementsByTagName("DownloaderClass").item(0).getTextContent();
+            tempMode = dataElement.getElementsByTagName("Mode").item(0).getTextContent();
             tempMode = tempMode.toUpperCase();
 
             if(tempMode.equalsIgnoreCase("FTP")) {
-                tempFtp = new FTP(((Element)dataNode).getElementsByTagName(tempMode).item(0));
+                tempFtp = new FTP(dataElement.getElementsByTagName(tempMode).item(0));
             } else {
-                tempHttp = new HTTP(((Element)dataNode).getElementsByTagName(tempMode).item(0));
+                tempHttp = new HTTP(dataElement.getElementsByTagName(tempMode).item(0));
             }
 
-            tempFilesPerDay = Integer.parseInt(((Element) dataNode).getElementsByTagName("FilesPerDay").item(0).getTextContent());
-            tempDatePattern = Pattern.compile(((Element) dataNode).getElementsByTagName("DatePattern").item(0).getTextContent());
-            tempFileNamePattern = Pattern.compile(((Element) dataNode).getElementsByTagName("FileNamePattern").item(0).getTextContent());
+            tempFilesPerDay = Integer.parseInt(dataElement.getElementsByTagName("FilesPerDay").item(0).getTextContent());
+            tempDatePattern = Pattern.compile(dataElement.getElementsByTagName("DatePattern").item(0).getTextContent());
+            tempFileNamePattern = Pattern.compile(dataElement.getElementsByTagName("FileNamePattern").item(0).getTextContent());
 
             mode = tempMode;
             myFtp = tempFtp;
             myHttp = tempHttp;
-            downloadFactoryClassName = tempDownloadFactoryClassName;
+            listDatesFilesClassName = tempListDatesFilesClassName;
+            downloaderClassName = tempDownloaderClassName;
             timeZone = tempTimeZone;
             filesPerDay = tempFilesPerDay;
             datePattern = tempDatePattern;
@@ -454,20 +464,23 @@ public class PluginMetaDataCollection {
                 extraDownloads = null;
             }
 
-            DateTimeFormatter datesFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu");
-            originDate = LocalDate.parse(((Element) dataNode).getElementsByTagName("OriginDate").item(0).getTextContent(), datesFormatter);
+            Element originDateElement = (Element) dataElement.getElementsByTagName("OriginDate").item(0);
+            int dayOfMonth = Integer.parseInt(originDateElement.getElementsByTagName("DayOfMonth").item(0).getTextContent());
+            String month = originDateElement.getElementsByTagName("Month").item(0).getTextContent();
+            int year = Integer.parseInt(originDateElement.getElementsByTagName("Year").item(0).getTextContent());
+            originDate = LocalDate.of(year, Month.valueOf(month.toUpperCase()), dayOfMonth);
         }
 
-        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode,
-                FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
-                LocalDate originDate)
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode, FTP myFtp, HTTP myHttp,
+                String listDatesFilesClassName, String downloaderClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             name = "Data";
             this.mode = mode;
             this.myFtp = myFtp;
             this.myHttp = myHttp;
-            this.downloadFactoryClassName = downloadFactoryClassName;
+            this.listDatesFilesClassName = listDatesFilesClassName;
+            this.downloaderClassName = downloaderClassName;
             this.timeZone = timeZone;
             this.filesPerDay = filesPerDay;
             datePattern = Pattern.compile(datePatternStr);
@@ -476,8 +489,8 @@ public class PluginMetaDataCollection {
             this.originDate = originDate;
         }
 
-        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode,
-                FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode, FTP myFtp, HTTP myHttp,
+                String listDatesFilesClassName, String downloaderClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
                 ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate)
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
@@ -485,7 +498,8 @@ public class PluginMetaDataCollection {
             this.mode = mode;
             this.myFtp = myFtp;
             this.myHttp = myHttp;
-            this.downloadFactoryClassName = downloadFactoryClassName;
+            this.listDatesFilesClassName = listDatesFilesClassName;
+            this.downloaderClassName = downloaderClassName;
             this.timeZone = timeZone;
             this.filesPerDay = filesPerDay;
             datePattern = Pattern.compile(datePatternStr);
@@ -494,16 +508,16 @@ public class PluginMetaDataCollection {
             this.originDate = originDate;
         }
 
-        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String name,
-                String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
-                LocalDate originDate)
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String name, String mode, FTP myFtp,
+                HTTP myHttp, String listDatesFilesClassName, String downloaderClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             this.name = name;
             this.mode = mode;
             this.myFtp = myFtp;
             this.myHttp = myHttp;
-            this.downloadFactoryClassName = downloadFactoryClassName;
+            this.listDatesFilesClassName = listDatesFilesClassName;
+            this.downloaderClassName = downloaderClassName;
             this.timeZone = timeZone;
             this.filesPerDay = filesPerDay;
             datePattern = Pattern.compile(datePatternStr);
@@ -512,14 +526,15 @@ public class PluginMetaDataCollection {
             this.originDate = originDate;
         }
 
-        private DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles,
-                Node extraDownloadNode, String defaultTimeZone, int defaultFilesPerDay) throws Exception
+        private DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, Node extraDownloadNode, String defaultTimeZone,
+                int defaultFilesPerDay) throws Exception
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempMode = null;
             FTP tempFtp = null;
             HTTP tempHttp = null;
-            String tempDownloadFactoryClassName = null;
+            String tempListDatesFilesClassName = null;
+            String tempDownloaderClassName = null;
             String tempTimeZone = null;
             int tempFilesPerDay = -1;
             Pattern tempDatePattern = null;
@@ -540,7 +555,8 @@ public class PluginMetaDataCollection {
             } else {
                 tempTimeZone = defaultTimeZone;
             }
-            tempDownloadFactoryClassName = ((Element) extraDownloadNode).getElementsByTagName("DownloadFactoryClass").item(0).getTextContent();
+            tempListDatesFilesClassName = ((Element) extraDownloadNode).getElementsByTagName("ListDatesFilesClass").item(0).getTextContent();
+            tempDownloaderClassName = ((Element) extraDownloadNode).getElementsByTagName("DownloaderClass").item(0).getTextContent();
             tempMode = ((Element) extraDownloadNode).getElementsByTagName("Mode").item(0).getTextContent();
             tempMode = tempMode.toUpperCase();
 
@@ -561,7 +577,8 @@ public class PluginMetaDataCollection {
             mode = tempMode;
             myFtp = tempFtp;
             myHttp = tempHttp;
-            downloadFactoryClassName = tempDownloadFactoryClassName;
+            listDatesFilesClassName = tempListDatesFilesClassName;
+            downloaderClassName = tempDownloaderClassName;
             timeZone = tempTimeZone;
             filesPerDay = tempFilesPerDay;
             datePattern = tempDatePattern;

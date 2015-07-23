@@ -36,7 +36,7 @@ public class SummariesCollection {
         summaries = new ArrayList<SummaryCalculation>();
         registry = new ArrayList<SummaryNameInstancePair>();
         SummaryCalculation temp = null;
-        String canonicalPath = this.getClass().getCanonicalName().substring(0, this.getClass().getCanonicalName().lastIndexOf(".") + 1);
+        String canonicalPath = this.getClass().getCanonicalName().substring(0, this.getClass().getCanonicalName().lastIndexOf(".") + 1) + "summaries.";
         boolean alreadyRegistered = false;
 
         if(summaryNames.size() > 0){
