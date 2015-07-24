@@ -190,7 +190,7 @@ public class DatabaseCache extends Observable{
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public void CacheFile(ArrayList<DataFileMetaData> cacheFiles) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public void CacheFile(DataFileMetaData... cacheFiles) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
         String dateDirectory;
 
