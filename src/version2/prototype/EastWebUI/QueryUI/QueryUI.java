@@ -6,6 +6,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JComboBox;
@@ -18,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,23 +180,48 @@ public class QueryUI {
         btnQuery.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                ProjectInfoFile project = new ProjectInfoCollection().GetProject(String.valueOf(projectListComboBox.getSelectedItem()));
+                ProjectInfoFile project = null;
+                try {
+                    project = new ProjectInfoCollection().GetProject(String.valueOf(projectListComboBox.getSelectedItem()));
+                } catch (ClassNotFoundException | NoSuchMethodException
+                        | SecurityException | InstantiationException
+                        | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException | IOException
+                        | ParserConfigurationException | SAXException
+                        | ParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                ArrayList<File> listFile = null;
 
                 for(ProjectInfoPlugin s : project.GetPlugins()) {
                     for(ProjectInfoSummary summary : project.GetSummaries()) {
-                        EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
-                                chckbxCount.isSelected(), chckbxSum.isSelected(), chckbxMean.isSelected(), chckbxStdev.isSelected(),
-                                String.valueOf(zoneComboBox.getSelectedItem()), zoneTextField.getText(),
-                                String.valueOf(yearComboBox.getSelectedItem()), yearTextField.getText(),
-                                String.valueOf(dayComboBox.getSelectedItem()), dayTextField.getText(),
-                                includeListModel,
-                                summary.GetZonalSummary());
+                        try {
+                            listFile =  EASTWebResults.GetResultCSVFiles( EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
+                                    chckbxCount.isSelected(), chckbxSum.isSelected(), chckbxMean.isSelected(), chckbxStdev.isSelected(),
+                                    String.valueOf(zoneComboBox.getSelectedItem()), Integer.parseInt(zoneTextField.getText()),
+                                    String.valueOf(yearComboBox.getSelectedItem()), Integer.parseInt(yearTextField.getText()),
+                                    String.valueOf(dayComboBox.getSelectedItem()), Integer.parseInt(dayTextField.getText()),
+                                    null,
+                                    summary.GetZonalSummary()));
+                        } catch (NumberFormatException
+                                | ClassNotFoundException | SQLException
+                                | ParserConfigurationException
+                                | SAXException | IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+
                     }
                 }
 
-
-
-
+                if(listFile != null){
+                    new QueryResultWindow(listFile);
+                }
+                else{
+                    JOptionPane.showMessageDialog(frame, "No results generated");
+                }
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
         });
