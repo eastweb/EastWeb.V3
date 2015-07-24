@@ -424,7 +424,6 @@ public class PluginMetaDataCollection {
             // Set properties
             Element dataElement = (Element) dataNode;
             tempTimeZone = dataElement.getElementsByTagName("TimeZone").item(0).getTextContent();
-            tempTimeZone = tempTimeZone.substring(tempTimeZone.indexOf(") ") + 2);
             tempListDatesFilesClassName = dataElement.getElementsByTagName("ListDatesFilesClass").item(0).getTextContent();
             tempDownloaderClassName = dataElement.getElementsByTagName("DownloaderClass").item(0).getTextContent();
             tempMode = dataElement.getElementsByTagName("Mode").item(0).getTextContent();
@@ -551,7 +550,6 @@ public class PluginMetaDataCollection {
 
             if(((Element) extraDownloadNode).getElementsByTagName("TimeZone").getLength() > 0) {
                 tempTimeZone = ((Element) extraDownloadNode).getElementsByTagName("TimeZone").item(0).getTextContent();
-                tempTimeZone = tempTimeZone.substring(tempTimeZone.indexOf(") ") + 2);
             } else {
                 tempTimeZone = defaultTimeZone;
             }
