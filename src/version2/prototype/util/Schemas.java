@@ -214,7 +214,7 @@ public class Schemas {
             while(rs.next())
             {
                 downloadIDs.add(rs.getInt("DownloadID"));
-                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
             }
         }
         rs.close();
@@ -238,11 +238,17 @@ public class Schemas {
         if(rs != null)
         {
             DownloadFileMetaData temp;
+            ArrayList<DataFileMetaData> extraDownloads;
             while(rs.next())
             {
                 temp = downloadsList.get(rs.getInt("DownloadID")).ReadMetaDataForProcessor();
-                temp.extraDownloads.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
-                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", temp.dataFilePath, temp.dataGroupID, temp.year, temp.day, temp.extraDownloads));
+                extraDownloads = new ArrayList<DataFileMetaData>();
+                for(DownloadFileMetaData dData : temp.extraDownloads)
+                {
+                    extraDownloads.add(new DataFileMetaData(dData));
+                }
+                extraDownloads.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", temp.dataFilePath, temp.year, temp.day, extraDownloads));
             }
         }
         rs.close();

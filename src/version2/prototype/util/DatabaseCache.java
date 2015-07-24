@@ -182,15 +182,13 @@ public class DatabaseCache extends Observable{
      * Add file(s) to the cache table this DatabaseCache object is mapped to. Notifies observers that files are available for further processing.
      * All files will be submitted as a single transaction and associated to the given year and day.
      *
-     * @param year  - 4 digit Gregorian year the data file(s) are for
-     * @param day  - day of the year the data file(s) are for
-     * @param filePaths  - file paths to add to the cache table
+     * @param filesForASingleDay
      * @throws SQLException
      * @throws ParseException
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public void CacheFile(DataFileMetaData... cacheFiles) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public void CacheFile(ArrayList<DataFileMetaData> filesForASingleDay) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
         String dateDirectory;
 
