@@ -1,9 +1,15 @@
 package version2.prototype.download.ModisNBAR;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -40,15 +46,24 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
         //try {
 
         //WRITEBACK
-        //cachedD = GetAllDownloadedFiles();
-
-        //REMOVE
-        //for testing.  remove the following afterGetAllDownloadedFiles() is implemented
-        DataFileMetaData d1 = new DataFileMetaData(1, "data", "D:\\project\\download\\ModisNBAR\\2015\\161\\h19v03.hdf", null,  0, 2015, 161);
-        DataFileMetaData d2 = new DataFileMetaData(1, "data", "D:\\project\\download\\ModisNBAR\\2015\\169\\h19v03.hdf", null,  0, 2015, 169);
-        cachedD.add(d1);
-        cachedD.add(d2);
-
+        try {
+            cachedD = GetAllDownloadedFiles();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SAXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // Step 3: Remove already downloaded files from ListDatesFiles
         for (DataFileMetaData d: cachedD)

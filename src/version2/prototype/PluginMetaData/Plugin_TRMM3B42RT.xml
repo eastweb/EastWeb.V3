@@ -14,7 +14,7 @@
 			<userName>anonymous</userName>
 			<passWord>anonymous</passWord>
 		</FTP>
-		<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>1</FilesPerDay>
 		<DatePattern>\\d{4}</datePattern>
 		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>

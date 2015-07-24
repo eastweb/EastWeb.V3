@@ -7,12 +7,12 @@ import version2.prototype.util.GeneralListener;
  * EVI = G * (NIR - RED)/(NIR + C1*RED - C2*BLUE + L) where L=1, C1=6, C2=7.5,
  * and G=2.5
  *
- * @author Isaiah Snell-Feikema
+ *@author Isaiah Snell-Feikema
  */
 
-public class GdalEVICalculator extends IndicesFramework {
+public class ModisNBAREVICalculator extends IndicesFramework {
 
-    public GdalEVICalculator(GeneralListener l) {
+    public ModisNBAREVICalculator(GeneralListener l) {
         super(l);
         // TODO Auto-generated constructor stub
     }
