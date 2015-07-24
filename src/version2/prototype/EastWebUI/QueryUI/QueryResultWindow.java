@@ -112,18 +112,16 @@ public class QueryResultWindow {
                     try {
                         for(String v:list.getSelectedValuesList()) {
                             File source = new File(v);
-                            FileUtils.copyFile(source, dest);
+                            FileUtils.copyFileToDirectory(source, dest);
                         }
                     } catch (IOException e) {
                         JOptionPane.showMessageDialog(frame, "Folder not found");
                         e.printStackTrace();
                     }
-
                 }
             }
         });
         btnSaveFilesTo.setBounds(214, 261, 149, 23);
         frame.getContentPane().add(btnSaveFilesTo);
     }
-
 }
