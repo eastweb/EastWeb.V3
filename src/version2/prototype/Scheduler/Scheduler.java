@@ -30,6 +30,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.GenericGlobalDownloader;
 import version2.prototype.download.GenericGlobalDownloaderFactory;
+import version2.prototype.download.GenericLocalDownloader;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
@@ -48,6 +49,7 @@ public class Scheduler {
     public final PluginMetaDataCollection pluginMetaDataCollection;
 
     private final int ID;
+    private final EASTWebManager manager;
     private SchedulerStatus status;
     private TaskState mState;
     private ArrayList<LocalDownloader> localDownloaders;
@@ -68,9 +70,9 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebManager manager) throws ParserConfigurationException, SAXException, IOException
     {
-        this(data, myID, TaskState.STOPPED);
+        this(data, myID, TaskState.STOPPED, manager);
     }
 
     /**
@@ -84,7 +86,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, TaskState initState) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManager manager) throws ParserConfigurationException, SAXException, IOException
     {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
@@ -101,6 +103,7 @@ public class Scheduler {
         indicesCaches = new ArrayList<DatabaseCache>(1);
 
         ID = myID;
+        this.manager = manager;
         PluginMetaData pluginMetaData;
         for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
@@ -294,27 +297,26 @@ public class Scheduler {
     private LocalDownloader SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache) throws ClassNotFoundException, NoSuchMethodException,
     SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, IOException
     {
-        // Create data ListDatesFiles instance
+        // Create "data" ListDatesFiles instance
         Class<?> listDatesFilesClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + pluginMetaData.Download.listDatesFilesClassName);
         Constructor<?> listDatesFilesCtor = listDatesFilesClass.getConstructor(DataDate.class, DownloadMetaData.class);
         ListDatesFiles listDatesFiles = (ListDatesFiles) listDatesFilesCtor.newInstance(new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download);
 
-        // Create data GenericGlobalDownloader
+        // Create "data" GenericGlobalDownloader
         EASTWebManager.StartGlobalDownloader(new GenericGlobalDownloaderFactory(pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, pluginMetaData.Download.downloaderClassName));
 
         for(DownloadMetaData dlMetaData : pluginMetaData.Download.extraDownloads)
         {
-            // Create data ListDatesFiles instance
+            // Create extra ListDatesFiles instance
             listDatesFilesClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + pluginMetaData.Download.listDatesFilesClassName);
             listDatesFilesCtor = listDatesFilesClass.getConstructor(DataDate.class, DownloadMetaData.class);
             listDatesFiles = (ListDatesFiles) listDatesFilesCtor.newInstance(new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download);
 
-            // Create data GenericGlobalDownloader
+            // Create extra GenericGlobalDownloader
             EASTWebManager.StartGlobalDownloader(new GenericGlobalDownloaderFactory(pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, dlMetaData.downloaderClassName));
         }
 
-
-
+        return manager.getLocalDownloader(projectInfoFile, pluginInfo, pluginMetaData, this, outputCache);
     }
 
     /**
@@ -396,7 +398,7 @@ public class Scheduler {
         // uses reflection
         Class<?> clazzDownloader = Class.forName("version2.prototype.download."
                 + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
-                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download.downloadFactoryClassName);
+                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download.downloaderClassName);
         Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class, GeneralListener.class);
         Object downloader =  ctorDownloader.newInstance(new Object[] {
                 data.projectInfoFile.GetStartDate(),

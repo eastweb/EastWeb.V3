@@ -19,14 +19,19 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
 import version2.prototype.download.DownloadFactory;
+import version2.prototype.download.GenericLocalDownloader;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.GlobalDownloaderFactory;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.LocalDownloader;
+import version2.prototype.util.DatabaseCache;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -507,7 +512,7 @@ public class EASTWebManager implements Runnable{
     public static void StartGlobalDownloader(GlobalDownloaderFactory dlFactory)
     {
         synchronized (newGlobalDownloaderRequests) {
-            newGlobalDownloaderRequests.add(new EASTWebManager().new NewGlobalDownloaderRequestsParams(dlFactory, pluginName, metaData, listDatesFiles));
+            newGlobalDownloaderRequests.add(new EASTWebManager().new NewGlobalDownloaderRequestsParams(dlFactory));
         }
     }
 
@@ -708,6 +713,35 @@ public class EASTWebManager implements Runnable{
     }
 
     /**
+     * Creates a LocalDownloader for requesting Scheduler to use. LocalDownloaders are only needed for GlobalDownloaders created to download the main "Data" files not the extra downloads.
+     *
+     * @param projectInfoFile  - parsed project information to initialize LocalDownloader with
+     * @param pluginInfo  - ProjectInfoPlugin object describing the plugin to use listed from within the project metadata file
+     * @param pluginMetaData  - the PluginMetaData object parsed from the plugin metadata file associated with the given ProjectInfoPlugin object
+     * @param scheduler  - the requesting Scheduler instance
+     * @param outputCache  - the cache the LocalDownloader is to use for its output
+     * @return A concrete LocalDownloader object
+     */
+    public LocalDownloader getLocalDownloader(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache)
+    {
+        LocalDownloader localDl = null;
+
+        synchronized (globalDLs)
+        {
+            for(int i=0; i < globalDLs.size(); i++)
+            {
+                if(globalDLs.get(i).GetPluginName().equals(pluginInfo.GetName()))
+                {
+                    localDl = new GenericLocalDownloader(globalDLs.get(i).GetID(), projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+                    globalDLs.get(i).addObserver(localDl);
+                    break;
+                }
+            }
+        }
+        return localDl;
+    }
+
+    /**
      * Empty instance just to allow usage of private classes.
      */
     private EASTWebManager()
@@ -821,7 +855,7 @@ public class EASTWebManager implements Runnable{
             int id = getLowestAvailableSchedulerID();
             if(IsIDValid(id, schedulerIDs))
             {
-                Scheduler scheduler = new Scheduler(data, id);
+                Scheduler scheduler = new Scheduler(data, id, this);
                 schedulers.set(id, scheduler);
                 scheduler.Start();
 
@@ -881,24 +915,24 @@ public class EASTWebManager implements Runnable{
             int id = getLowestAvailableGlobalDLID();
             if(IsIDValid(id, globalDLIDs))
             {
-                int idx = -1;
+                GlobalDownloader gdl = gdlParams.dlFactory.createGlobalDownloader(id);
+                int currentGDLIdx = -1;
                 for(int i=0; i < globalDLs.size(); i++)
                 {
-                    if(globalDLs.get(i).GetPluginName().equals(gdlParams.pluginName))
+                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
                     {
-                        idx = i;
+                        currentGDLIdx = i;
                         break;
                     }
                 }
 
-                if(idx >= 0)
+                if(currentGDLIdx >= 0)
                 {
-                    GlobalDownloader gdl = gdlParams.dlFactory.CreateGlobalDownloader(id, gdlParams.pluginName, gdlParams.metaData, gdlParams.listDatesFiles);
-                    globalDLs.set(id, gdl);
-                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                    releaseGlobalDLID(id);
                 }
                 else {
-                    releaseGlobalDLID(id);
+                    globalDLs.set(id, gdl);
+                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
                 }
 
                 synchronized (numOfCreatedGDLs) {
@@ -1024,17 +1058,11 @@ public class EASTWebManager implements Runnable{
     }
 
     private class NewGlobalDownloaderRequestsParams {
-        public final DownloadFactory dlFactory;
-        public final String pluginName;
-        public final DownloadMetaData metaData;
-        public final ListDatesFiles listDatesFiles;
+        public final GlobalDownloaderFactory dlFactory;
 
-        public NewGlobalDownloaderRequestsParams(DownloadFactory dlFactory, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
+        public NewGlobalDownloaderRequestsParams(GlobalDownloaderFactory dlFactory)
         {
             this.dlFactory = dlFactory;
-            this.pluginName = pluginName;
-            this.metaData = metaData;
-            this.listDatesFiles = listDatesFiles;
         }
     }
 }
