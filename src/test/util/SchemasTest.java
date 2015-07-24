@@ -52,8 +52,8 @@ public class SchemasTest {
      * in it. The summary calculation fields created are "Count", "Sum", "Mean", and "StdDev". The "extra download file" fields created are just "QC" which effects global Download table and the caches.
      * Tables are created so that foreign key fields are not referencing their counterparts and foreign key rules are not required to be respected when using them.
      *
-     * @param args  - 1. Global schema name, 2. Project name, 3. Plugin name, 4. True/False if foreign keys should reference their associated tables. Two schemas are created: 1. The global schema and 2. A schema named by combining project name
-     * and plugin name separated by an '_'.
+     * @param args  - 1. Global schema name, 2. Project name, 3. Plugin name, 4. True/False if foreign keys should reference their associated tables. Two schemas are created:
+     * 1. The global schema and 2. A schema named by combining project name and plugin name separated by an '_'.
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -73,7 +73,8 @@ public class SchemasTest {
         System.out.println("Project name to use: " + args[1]);
         System.out.println("Plugin name to use: " + args[2]);
         System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null, createTablesWithForeignKeyReferences);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null,
+                createTablesWithForeignKeyReferences);
         System.out.println("DONE");
     }
 
@@ -268,12 +269,6 @@ public class SchemasTest {
         query = String.format("INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES (1, 'QC', '" + qcFilePath1 + "'), (2, 'QC', '" + qcFilePath2 + "');",
                 testGlobalSchema);
         stmt.execute(query);
-
-        //        query = "INSERT INTO \"" + schemaName + "\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", \"QCFilePath\", \"DateGroupID\")" +
-        //                "SELECT D.\"DownloadID\", D.\"DataFilePath\", E.\"FilePath\", D.\"DateGroupID\"" +
-        //                "FROM \"" + testGlobalSchema + "\".\"Download\" D INNER JOIN \"" + testGlobalSchema + "\".\"ExtraDownload\" E ON D.\"DownloadID\" = E.\"DownloadID\" LEFT JOIN \"" + schemaName +
-        //                "\".\"DownloadCache\" L ON D.\"DownloadID\" = L.\"DownloadID\"" +
-        //                "WHERE L.\"DownloadID\" IS NULL AND E.\"DataName\" = 'QC';";
 
         Schemas.loadUnprocessedDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, 1, startDate, extraDownloadFiles, daysPerInputFile);
 

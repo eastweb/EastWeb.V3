@@ -135,6 +135,23 @@ public class Schemas {
         return stmt.execute(query);
     }
 
+    /**
+     * Loads unprocessed downloads from the associated GlobalDownloader, identified from the given parameters, to the table for the identified LocalDownloader table.
+     *
+     * @param globalEASTWebSchema
+     * @param projectName
+     * @param pluginName
+     * @param globalDownloaderInstanceID
+     * @param startDate
+     * @param extraDownloadFiles
+     * @param daysPerInputFile
+     * @return number of records effected
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
     public static int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, int globalDownloaderInstanceID, LocalDate startDate,
             ArrayList<String> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
@@ -578,12 +595,13 @@ public class Schemas {
                         ));
         for(String fileName : extraDownloadFiles)
         {
-            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE DEFAULT NULL,\n");
         }
         query_.append(
                 String.format(
                         "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
-                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "DEFAULT NULL,\n" +
+                                "  \"Complete\" boolean DEFAULT FALSE,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -609,11 +627,13 @@ public class Schemas {
                         ));
         for(String fileName : extraDownloadFiles)
         {
-            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE DEFAULT NULL,\n");
         }
         query_.append(
                 String.format(
                         "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "DEFAULT NULL,\n" +
+                                "  \"Complete\" boolean DEFAULT FALSE,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -639,12 +659,14 @@ public class Schemas {
                         ));
         for(String fileName : extraDownloadFiles)
         {
-            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE DEFAULT NULL,\n");
         }
         query_.append(
                 String.format(
                         "  \"DownloadID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Download\" (\"DownloadID\") " : "") + "NOT NULL,\n" +
                                 "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "DEFAULT NULL,\n" +
+                                "  \"Complete\" boolean DEFAULT FALSE,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -822,7 +844,8 @@ public class Schemas {
                                 "  \"DownloadID\" serial PRIMARY KEY,\n" +
                                 "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
                                 "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
-                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                                "  \"Complete\" boolean DEFAULT FALSE\n" +
                                 ")",
                                 globalEASTWebSchema
                         ));

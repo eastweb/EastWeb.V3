@@ -5,7 +5,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.regex.Matcher;
@@ -15,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.Scheduler.ProcessName;
 
@@ -33,7 +36,8 @@ public class DatabaseCache extends Observable{
     private final String pluginName;
     private final String tableName;
     private final ProcessName process;
-    private boolean filesAvailable;
+    private final ArrayList<String> extraDownloadFiles;
+    private Boolean filesAvailable;
 
     /**
      * Creates a DatabaseCache object set to cache files to and get file listings from the table identified by the given information.
@@ -43,11 +47,12 @@ public class DatabaseCache extends Observable{
      * @param dataComingFrom  - name of process to check output of for available files to process
      * @throws ParseException
      */
-    public DatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom) throws ParseException
+    public DatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException
     {
         this.projectName = projectName;
         this.pluginName = pluginName;
         process = dataComingFrom;
+        this.extraDownloadFiles = extraDownloadFiles;
         filesAvailable = false;
 
         switch(process)
@@ -56,7 +61,7 @@ public class DatabaseCache extends Observable{
         case INDICES: tableName = "IndicesCache"; break;
         case PROCESSOR: tableName = "ProcessCache"; break;
         case SUMMARY: tableName = "SummaryCache"; break;
-        default: throw new ParseException("Filepath doesn't contain an expected framework identifier.", 0);
+        default: throw new ParseException("ProcessName 'dataComingFrom' doesn't contain an expected framework identifier.", 0);
         }
     }
 
@@ -77,58 +82,100 @@ public class DatabaseCache extends Observable{
         ArrayList<DataFileMetaData> files = new ArrayList<DataFileMetaData>();
         Connection conn = PostgreSQLConnection.getConnection();
         conn.createStatement().execute("BEGIN");
-        String query = String.format(
-                "SELECT \"A\".\"%1$sID\", \"A\".\"DataFilePath\", \"A\".\"QCFilePath\",  \"A\".\"DateDirectory\", \"A\".\"DataGroupID\", \"B\".\"Year\", " +
-                        "\"B\".\"Day\"\n" +
-                        "FROM \"%2$s\".\"%1$s\" \"A\" INNER JOIN \"%2$s\".\"DateGroup\" \"B\" ON (\"A\".\"DataGroupID\" = \"B\".\"DataGroupID\")\n" +
-                        "WHERE \"Retrieved\" != TRUE\n" +
-                        "FOR UPDATE",
-                        tableName,
-                        schemaName
-                );
-        final PreparedStatement ps = conn.prepareStatement(query);
-        final ResultSet rs = ps.executeQuery();
-        ArrayList<Integer> rows = new ArrayList<Integer>();
-        try {
-            while(rs.next()) {
-                files.add(new DataFileMetaData(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getInt(5), rs.getInt(56),
-                        rs.getInt(7)));
-                rows.add(rs.getInt(1));
-            }
 
-            for(int row : rows)
-            {
-                conn.createStatement().execute(String.format(
-                        "UPDATE \"%1$s\".\"%2$s\"\n" +
-                                "SET \"Retrieved\" = TRUE\n" +
-                                "WHERE \"%2$sID\" = %3$d",
-                                tableName,
-                                schemaName,
-                                row
-                        ));
-            }
-            conn.createStatement().execute("COMMIT");
-            synchronized(this)
-            {
+        StringBuilder query = new StringBuilder(String.format(
+                "SELECT A.\"%1$sID\", A.\"DataFilePath\", ",
+                tableName
+                ));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append("A.\"" + extraDownloadFiles.get(i) + "FilePath\", ");
+        }
+        query.append(String.format("I.\"Name\", A.\"DataGroupID\", D.\"Year\", D.\"DayOfYear\" \n" +
+                "FROM \"%1$s\".\"%2$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DataGroupID\" = D.\"DataGroupID\") INNER JOIN \"%3$s\".\"Index\" D ON (A.\"IndexID\" = I.\"IndexID\")\n" +
+                "WHERE \"Complete\" = TRUE AND \"Retrieved\" != TRUE FOR UPDATE;",
+                schemaName,
+                tableName,
+                Config.getInstance().getGlobalSchema()
+                ));
+        final Statement stmt = conn.createStatement();
+
+        synchronized(filesAvailable)
+        {
+            final ResultSet rs = stmt.executeQuery(query.toString());
+            ArrayList<Integer> rows = new ArrayList<Integer>();
+            try {
+                int tempDateGroupID, tempDayOfYear, tempYear;
+                ArrayList<DataFileMetaData> tempExtraDownloads = new ArrayList<DataFileMetaData>();
+                while(rs.next()) {
+                    tempDateGroupID = rs.getInt("DataGroupID");
+                    tempDayOfYear = rs.getInt("DayOfYear");
+                    tempYear = rs.getInt("Year");
+
+                    for(String dataName : extraDownloadFiles)
+                    {
+                        tempExtraDownloads.add(new DataFileMetaData(dataName, rs.getString(dataName + "FilePath"), tempDateGroupID, tempYear, tempDayOfYear));
+                    }
+
+                    files.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), tempDateGroupID, tempYear, tempDayOfYear, tempExtraDownloads));
+                    rows.add(rs.getInt(tableName + "ID"));
+                }
+
+                for(int row : rows)
+                {
+                    conn.createStatement().execute(String.format(
+                            "UPDATE \"%1$s\".\"%2$s\"\n" +
+                                    "SET \"Retrieved\" = TRUE\n" +
+                                    "WHERE \"%2$sID\" = %3$d",
+                                    schemaName,
+                                    tableName,
+                                    row
+                            ));
+                }
+                conn.createStatement().execute("COMMIT");
+
                 filesAvailable = false;
+            } catch(Exception e) {
+                conn.createStatement().execute("ROLLBACK");
+            } finally {
+                rs.close();
             }
-        } catch(Exception e) {
-            conn.createStatement().execute("ROLLBACK");
-        } finally {
-            rs.close();
         }
 
         return files;
     }
 
     /**
-     * Gets a list of rows from the desired GlobalDownload table which have yet to be written to the LocalDownload cache.
+     * Used by LocalDownloaders to load new downloads from GlobalDownloader objects and update this cache for observers.
      *
-     * @return list of row data to copy from GlobalDownload table for the plugin data this DatabaseCache is tied to.
+     * @param globalEASTWebSchema
+     * @param projectName
+     * @param pluginName
+     * @param globalDownloaderInstanceID
+     * @param startDate
+     * @param extraDownloadFiles
+     * @param daysPerInputFile
+     * @return number of records effected
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
      */
-    public ArrayList<DataFileMetaData> GetUnprocessedGlobalDownloadFiles()
-    {
-        // TODO: unifinished method.
+    public int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, int globalDownloaderInstanceID, LocalDate startDate,
+            ArrayList<String> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        int changes = -1;
+
+        changes = Schemas.loadUnprocessedDownloadsToLocalDownloader(globalEASTWebSchema, projectName, pluginName, globalDownloaderInstanceID, startDate, extraDownloadFiles, daysPerInputFile);
+
+        synchronized(this)
+        {
+            filesAvailable = true;
+        }
+        setChanged();
+        notifyObservers();
+
+        return changes;
     }
 
     /**
@@ -143,7 +190,7 @@ public class DatabaseCache extends Observable{
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public void CacheFile(int year, int day, String... filePaths) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public void CacheFile(ArrayList<DataFileMetaData> cacheFiles) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
     {
         String dateDirectory;
 
@@ -178,7 +225,7 @@ public class DatabaseCache extends Observable{
         query = String.format(
                 "SELECT DataGroupdID FROM \"%1$s\".\"%2$s\"\n" +
                         "WHERE \"Year\" = ? AND \n" +
-                        "\"Day\" = ?",
+                        "\"DayOfYear\" = ?",
                         schemaName,
                         tableName
                 );
@@ -195,7 +242,7 @@ public class DatabaseCache extends Observable{
                 query = String.format(
                         "INSERT INTO \"%1$s\".\"%2$s\" (\n" +
                                 "\"Year\",\n" +
-                                "\"Day\")\n" +
+                                "\"DayOfYear\")\n" +
                                 "VALUES (" +
                                 "%3$d,\n" +
                                 "%4$d)",
@@ -240,9 +287,11 @@ public class DatabaseCache extends Observable{
      * @throws SQLException
      * @throws ParseException
      * @throws ClassNotFoundException
-     * @throws ConfigReadException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException, ConfigReadException
+    public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
         String projectName, pluginName, tableName, dateDirectory;
         int dataGroupID = -1, year, day;
@@ -276,7 +325,7 @@ public class DatabaseCache extends Observable{
         String query = String.format(
                 "SELECT DataGroupdID FROM \"%1$s\".\"%2$s\"\n" +
                         "WHERE \"Year\" = ? AND \n" +
-                        "\"Day\" = ?",
+                        "\"DayOfYear\" = ?",
                         schemaName,
                         tableName
                 );
@@ -293,7 +342,7 @@ public class DatabaseCache extends Observable{
                 query = String.format(
                         "INSERT INTO \"%1$s\".\"%2$s\" (\n" +
                                 "\"Year\",\n" +
-                                "\"Day\")\n" +
+                                "\"DayOfYear\")\n" +
                                 "VALUES (" +
                                 "%3$d,\n" +
                                 "%4$d)",

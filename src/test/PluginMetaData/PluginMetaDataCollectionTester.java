@@ -66,9 +66,9 @@ public class PluginMetaDataCollectionTester {
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
-        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("CST6CDT"));
         ZoneId zid = ZoneId.of(downloadData.timeZone);
-        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
         assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
@@ -145,9 +145,9 @@ public class PluginMetaDataCollectionTester {
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
-        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("CST6CDT"));
         zid = ZoneId.of(downloadData.timeZone);
-        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2000-03-01"));
 
@@ -160,9 +160,9 @@ public class PluginMetaDataCollectionTester {
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/qc/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
-        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("CST6CDT"));
         zid = ZoneId.of(downloadData.timeZone);
-        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
         assertNull("OriginDate is not null", downloadData.originDate);

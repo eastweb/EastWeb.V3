@@ -262,9 +262,9 @@ public class Scheduler {
     InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException, IOException
     {
         PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
-        DatabaseCache downloadCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.DOWNLOAD);
-        DatabaseCache processorCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.PROCESSOR);
-        DatabaseCache indicesCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.INDICES);
+        DatabaseCache downloadCache = new DatabaseCache(data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.DOWNLOAD, plMeta.ExtraDownloadFiles);
+        DatabaseCache processorCache = new DatabaseCache(data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, plMeta.ExtraDownloadFiles);
+        DatabaseCache indicesCache = new DatabaseCache(data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, plMeta.ExtraDownloadFiles);
 
         localDownloaders.add(SetupDownloadProcess(pluginInfo, plMeta, downloadCache));
         processorProcesses.add(SetupProcessorProcess(pluginInfo, plMeta, downloadCache, processorCache));

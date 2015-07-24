@@ -18,14 +18,25 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
-import version2.prototype.util.Schemas;
 
 /**
+ * GenericLocalDownloader used for getting files from a locally used GlobalDownloader for the DatabaseCache this LocalDownloader uses as its output cache.
+ *
  * @author michael.devos
  *
  */
 public class GenericLocalDownloader extends LocalDownloader {
 
+    /**
+     * Creates a GenericLocalDownloader that expects to finds the GlobalDownloader download records in a locally and globally accessible table in the database.
+     *
+     * @param globalDLID
+     * @param projectInfoFile
+     * @param pluginInfo
+     * @param pluginMetaData
+     * @param scheduler
+     * @param outputCache
+     */
     public GenericLocalDownloader(int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache) {
         super(globalDLID, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
     }
@@ -33,7 +44,7 @@ public class GenericLocalDownloader extends LocalDownloader {
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
         try {
-            Schemas.loadUnprocessedDownloadsToLocalDownloader(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), globalDLID, projectInfoFile.GetStartDate(),
+            outputCache.loadUnprocessedDownloadsToLocalDownloader(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), globalDLID, projectInfoFile.GetStartDate(),
                     pluginMetaData.ExtraDownloadFiles, pluginMetaData.DaysPerInputData);
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
