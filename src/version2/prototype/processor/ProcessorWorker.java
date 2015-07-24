@@ -51,6 +51,7 @@ public class ProcessorWorker extends ProcessWorker {
     {
         super("ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
         // TODO Auto-generated constructor stub
+
     }
 
     /* (non-Javadoc)
@@ -60,7 +61,7 @@ public class ProcessorWorker extends ProcessWorker {
     public ProcessWorkerReturn call() throws Exception
     {
         String pluginName = pluginMetaData.Title;
-        String outputFiles  =
+        String outputFolder  =
                 FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(),
                         projectInfoFile.GetProjectName(), pluginName, ProcessName.PROCESSOR) ;
 
@@ -78,6 +79,9 @@ public class ProcessorWorker extends ProcessWorker {
 
         for (Entry<Integer, String> step : processStep.entrySet())
         {
+            // TODO: extract cachedFiles for download folder
+            //copy them to the input folders
+
             Integer key = step.getKey();
 
             Class<?> classProcess = Class.forName("version2.prototype.projection."
@@ -98,7 +102,13 @@ public class ProcessorWorker extends ProcessWorker {
             methodProcess.invoke(process);
         }
 
-        return new ProcessWorkerReturn(outputFiles);
+
+        /* TODO:  cache files by day
+         write to database
+          outputCache.CacheFiles(ArrayList<DataFileMetaData> completeListOfFilesForADay);
+         */
+
+        return null;
     }
 
 }
