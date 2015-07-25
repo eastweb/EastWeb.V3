@@ -67,14 +67,12 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
 
                 for (String f : entry.getValue())
                 {
-                    NldasForcingDownloader downloader = new NldasForcingDownloader(dd, outFolder, metaData);
+                    NldasForcingDownloader downloader = new NldasForcingDownloader(dd, outFolder, metaData, f);
 
                     try { downloader.download(); }
                     catch (Exception e1) { e1.printStackTrace(); }
 
-                    String filePath = outFolder + File.separator + f;
-
-                    try { AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), filePath); }
+                    try { AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath()); }
                     catch (ClassNotFoundException | SQLException e) { e.printStackTrace(); }
                 }
 

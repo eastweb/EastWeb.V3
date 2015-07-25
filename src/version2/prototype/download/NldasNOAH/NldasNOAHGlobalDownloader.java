@@ -41,12 +41,6 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
         try {
             cachedD = GetAllDownloadedFiles();
 
-            //Testing Only
-            //DataFileMetaData d1 = new DataFileMetaData(1, "data","C:\\project\\download\\NLDAS_NOAH0125_H.002\\2015\\196\\NLDAS_NOAH0125_H.A20150715.0000.002.grb",  null, 0, 2015, 196);
-            //DataFileMetaData d2 = new DataFileMetaData(1, "data", "C:\\project\\download\\NLDAS_NOAH0125_H.002\\2015\\196\\NLDAS_NOAH0125_H.A20150715.0100.002.grb", null, 0, 2015, 196);
-            //cachedD.add(d1);
-            //cachedD.add(d2);
-
             // Step 3: Remove already downloaded files from ListDatesFiles
             for (DataFileMetaData d: cachedD)
             {
@@ -72,18 +66,6 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
                 }
 
                 datesFiles.put(thisDate, files);
-                //                for ( String f :files)
-                //                {
-                //                    String strPath = downloaded.dataFilePath;
-                //                    strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.length());
-                //
-                //                    // if the file is found in the downloade list, remove it
-                //                    if (f.equalsIgnoreCase(strPath))
-                //                    {
-                //                        files.remove(f);
-                //                    }
-                //                }
-
             }
 
         } catch (ClassNotFoundException | SQLException
@@ -97,29 +79,34 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
         {
             String outFolder;
 
-            //outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
-            outFolder = "D:\\project\\download\\NLDASNOAH";
+            try {
+                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
 
-            DataDate dd = entry.getKey();
+                DataDate dd = entry.getKey();
 
-            for (String f : entry.getValue())
-            {
-                if(f != null)
+                for (String f : entry.getValue())
                 {
-                    NldasNOAHDownloader downloader = new NldasNOAHDownloader(dd, outFolder, metaData, f);
+                    if(f != null)
+                    {
+                        NldasNOAHDownloader downloader = new NldasNOAHDownloader(dd, outFolder, metaData, f);
 
-                    try {
-                        downloader.download();
-                    } catch (DownloadFailedException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    } catch (Exception e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                        try {
+                            downloader.download();
+                        } catch (DownloadFailedException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (Exception e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
                     }
-                }
 
+                }
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+
         }
 
     }

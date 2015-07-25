@@ -11,6 +11,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
+import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
@@ -19,6 +21,7 @@ import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.ModisNBAR.ModisNBARDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
+import version2.prototype.util.FileSystem;
 
 //@Author: Yi Liu
 public class ModisNBARGlobalDownloader extends GlobalDownloader
@@ -43,9 +46,7 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
 
         // Step 2: Pull all cached downloads
         ArrayList<DataFileMetaData> cachedD = new ArrayList<DataFileMetaData>();
-        //try {
 
-        //WRITEBACK
         try {
             cachedD = GetAllDownloadedFiles();
         } catch (ClassNotFoundException e) {
@@ -93,59 +94,67 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
             datesFiles.put(thisDate, files);
         }
 
-        //        for (Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
-        //        {
-        //            System.out.println("dateFile: " + entry.getKey() + " : /" + entry.getValue().size() + "\n");
-        //        }
-
-        //WRITEBACK after GetAllDownloadedFiles() is implemented
-        //}catch (ClassNotFoundException | SQLException
-        //                | ParserConfigurationException | SAXException | IOException e2) {
-        //            // TODO Auto-generated catch block
-        //            e2.printStackTrace();
-        //        }
 
         // Step 4
         for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
         {
             String outFolder;
 
-            //WRITEBACK after config is integrated
-            //outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+            try {
+                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
 
-            //REMOVE the following statement, for testing only
-            outFolder = "D:\\project\\download\\ModisNBAR";
+                DataDate dd = entry.getKey();
 
-            DataDate dd = entry.getKey();
-
-            for (String f : entry.getValue())
-            {
-
-                if (f != null)
+                for (String f : entry.getValue())
                 {
-                    ModisNBARDownloader downloader = new ModisNBARDownloader(dd, outFolder, metaData, f);
 
-                    try{
-                        downloader.download();
-                    } catch (DownloadFailedException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    } catch (Exception e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                    if (f != null)
+                    {
+                        ModisNBARDownloader downloader = new ModisNBARDownloader(dd, outFolder, metaData, f);
+
+                        try{
+                            downloader.download();
+                        } catch (DownloadFailedException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (Exception e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
+
+                        try {
+                            AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                        } catch (ClassNotFoundException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (SQLException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (ParserConfigurationException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (SAXException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                // WRITEBACK after AddDownloadFile is implemented
-                //                    try {
-                //                        AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
-                //                    } catch (ClassNotFoundException e) {
-                //                        // TODO Auto-generated catch block
-                //                        e.printStackTrace();
-                //                    } catch (SQLException e) {
-                //                        // TODO Auto-generated catch block
-                //                        e.printStackTrace();
-                //                    }
+                }
+            } catch (ConfigReadException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ParserConfigurationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SAXException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
 
         }
@@ -153,3 +162,5 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
     }
 
 }
+
+

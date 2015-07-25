@@ -58,16 +58,14 @@ public class NldasNOAHDownloader extends DownloaderFramework{
                         String.format("%s/%d", mRoot, mDate.getYear());
                 if (!ftpC.changeWorkingDirectory(yearDirectory))
                 {
-                    throw new IOException("Couldn't navigate to directory: "
-                            + yearDirectory);
+                    throw new IOException("Couldn't navigate to directory: " + yearDirectory);
                 }
 
                 final String dayDirectory = String.format("%s/%d", yearDirectory, mDate.getDayOfYear());
 
                 if (!ftpC.changeWorkingDirectory(dayDirectory))
                 {
-                    throw new IOException("Couldn't navigate to directory: "
-                            + dayDirectory);
+                    throw new IOException("Couldn't navigate to directory: " + dayDirectory);
                 }
 
                 String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",
@@ -96,6 +94,7 @@ public class NldasNOAHDownloader extends DownloaderFramework{
         } ;
     }
 
+    @Override
     public String getOutputFilePath()
     {
         return outFilePath;

@@ -24,13 +24,17 @@ public class NldasForcingDownloader extends DownloaderFramework
     private String mUsername;
     private String mPassword;
     private String mRootDir;
+    private String mFileToDownload;
+    private String outFilePath;
 
-    public NldasForcingDownloader(DataDate date, String outFolder, DownloadMetaData metaData)
+    public NldasForcingDownloader(DataDate date, String outFolder, DownloadMetaData metaData, String fileToDownload)
     {
         mDate = date;
         mOutputFolder = outFolder;
         mData = metaData;
         mMode = metaData.mode;
+        mFileToDownload = fileToDownload;
+        outFilePath = null;
 
         mHostName = metaData.myFtp.hostName;
         mUsername = metaData.myFtp.userName;
@@ -41,7 +45,8 @@ public class NldasForcingDownloader extends DownloaderFramework
     @Override
     public void download() throws IOException, DownloadFailedException, Exception, SAXException
     {
-        File outputDestination = new File(String.format("%s\\%04d\\%03d", mOutputFolder, mDate.getYear(), mDate.getDayOfYear()));
+        String outDesStr = String.format("%s\\%04d\\%03d", mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
+        File outputDestination = new File(outDesStr);
 
         if(mMode.equalsIgnoreCase("FTP"))
         {
@@ -52,13 +57,16 @@ public class NldasForcingDownloader extends DownloaderFramework
                     throw new IOException("Couldn't navigate to " + mData.myFtp.rootDir + String.format("/%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()));
                 }
 
-                String desiredFile = String.format("NLDAS_FORA0125_H.A%04d%02d%02d.%02d00.002.grb", mDate.getYear(), mDate.getMonth(), mDate.getDay(), mDate.getHour());
-
                 if(!outputDestination.exists()) {
                     FileUtils.forceMkdir(outputDestination);
                 }
 
-                DownloadUtils.download(ftpClient, desiredFile, new File(outputDestination.getAbsolutePath() + "\\" + desiredFile));
+                outFilePath = String.format("%s"+File.separator+"%s", outDesStr, mFileToDownload);
+
+                DownloadUtils.download(ftpClient, mFileToDownload, new File(outFilePath));
+
+                //FIXME:  close FTP connection
+
             }
             catch (IOException e) { throw e; }
             finally { FTPClientPool.returnFtpClient(mHostName, ftpClient); }
@@ -98,5 +106,12 @@ public class NldasForcingDownloader extends DownloaderFramework
             }*/
         }
     }
+
+    @Override
+    public String getOutputFilePath() {
+        return outFilePath;
+    }
+
+
 }
 

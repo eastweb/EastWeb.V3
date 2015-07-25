@@ -60,6 +60,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         this.listDatesFiles = listDatesFiles;
     }
 
+
     /**
      * Sets this GlobalDownloader instance running state to STOPPED.
      */
@@ -75,6 +76,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     {
         state = TaskState.RUNNING;
     }
+
+
 
     public final LocalDate GetOriginDate() { return metaData.originDate; }
 

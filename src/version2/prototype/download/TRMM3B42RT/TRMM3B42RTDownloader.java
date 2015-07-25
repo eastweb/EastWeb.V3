@@ -93,6 +93,7 @@ public class TRMM3B42RTDownloader extends DownloaderFramework
             finally
             {
                 FTPClientPool.returnFtpClient(mHost, ftpC);
+                //FIXME:  need to disconnect the connection !
                 //ftpC.disconnect();
             }
         } ;
