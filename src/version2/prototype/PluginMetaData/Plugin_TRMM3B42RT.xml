@@ -4,7 +4,8 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<className>TRMM3B42RTDownloader</className>
+		<ListDatesFilesClass>TRMM3B42ListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>TRMM3B42RTDownloader</DownloaderClass>
 		<mode>ftp</mode>
 		<FTP>
 			<hostName>disc2.nascom.nasa.gov</hostName>
@@ -16,7 +17,7 @@
 		</FTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>1</FilesPerDay>
-		<DatePattern>\\d{4}</datePattern>
+		<DatePattern>\\d{4}</DatePattern>
 		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>
 		<OriginDate>
 			<Day>01</Day>

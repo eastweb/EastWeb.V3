@@ -1,27 +1,63 @@
 <?xml version="1.0"?>
 <PluginMetadata>
 	<title>ModisNBAR</title>
-	<Download>
-		<ClassName>ModisNBARDownloadTask</ClassName>
+	<DaysPerInputData>8</DaysPerInputData>
+	<ExtraDownloadFiles>
+		<Name>QC</Name>
+	</ExtraDownloadFiles>
+	<Download Name="Data">
+		<ListDatesFilesClass>ModisNBARListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>ModisNBARDownloader</DownloaderClass>
 		<mode>http</mode>
 		<HTTP>
-			<url>http://e4ftl01.cr.usgs.gov/MOTA/</url>
+			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/</url>
 		</HTTP>
+		<TimeZone>CST6CDT</TimeZone>
+		<FilesPerDay>322</FilesPerDay>
+		<DatePattern>\\d{4}</DatePattern>
+		<FileNamePattern>MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf</FileNamePattern>
+		<OriginDate>
+			<Day>18</Day>
+			<Month>02</Month>
+			<Year>2000</Year>
+		</OriginDate>
+	</Download>
+	<Download Name="QC">
+		<ListDatesFilesClass>ModisNBARQCListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>ModisNBARQCDownloader</DownloaderClass>
+		<mode>http</mode>
+		<HTTP>
+			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B2.005/</url>
+		</HTTP>
+		<TimeZone>CST6CDT</TimeZone>
+		<FilesPerDay>322</FilesPerDay>
+		<DatePattern>\\d{4}</DatePattern>
+		<FileNamePattern>MCD43B2.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf</FileNamePattern>
+		<OriginDate>
+			<Day>18</Day>
+			<Month>02</Month>
+			<Year>2000</Year>
+		</OriginDate>
 	</Download>
 	<Processes>
-		<ClassName>ModisNBARFilterMozaic</ClassName>
-		<ClassName>Reproject</ClassName>
-		<ClassName>Mask</ClassName>
+		<ClassName>ModisNBARFilter</ClassName>
+		<className>ModisNBARMozaic</className>
+		<ClassName>ModisNBARReproject</ClassName>
+		<ClassName>ModisNBARMask</ClassName>
+		<ClassName>ModisNBARClip</ClassName>
 	</Processes>
 	<Indices>
-		<ClassName>GdalNDVICalculator</ClassName>
-		<ClassName>GdalEVICalculator</ClassName>
-		<ClassName>GdalNDWI5Calculator</ClassName>
-		<ClassName>GdalNDWI6Calculator</ClassName>
-		<ClassName>GdalSAVICalculator</ClassName>
+		<ClassName>ModisNBARNDVICalculator</ClassName>
+		<ClassName>ModisNBAREVICalculator</ClassName>
+		<ClassName>ModisNBARNDWI5Calculator</ClassName>
+		<ClassName>ModisNBARNDWI6Calculator</ClassName>
+		<ClassName>ModisNBARSAVICalculator</ClassName>
 	</Indices>
 	<Summary>
-		<ClassName></ClassName>
+		<Temporal>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass></InterpolateStrategyClass>
+		</Temporal>
 	</Summary>
 	<QualityControl>
 		<Level>Highest</Level>

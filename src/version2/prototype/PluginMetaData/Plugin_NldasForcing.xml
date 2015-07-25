@@ -4,7 +4,8 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<className>NldasForcingDownloadTask</className>
+		<ListDatesFilesClass>NldasForcingListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>NldasForcingDownloader</DownloaderClass>
 		<mode>ftp</mode>
 		<FTP>
 			<hostName>hydro1.sci.gsfc.nasa.gov</hostName>
@@ -12,14 +13,16 @@
 			<userName>anonymous</userName>
 			<passWord>anonymous</passWord>
 		</FTP>
-		<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>24</FilesPerDay>
-		<datePattern>\\d{4}</datePattern>
+		<DatePattern>\\d{4}</DatePattern>
 		<fileNamePattern>NLDAS_FORA0125_H\\.A(\\d{4})(\\d{4})(\\d{4}).(\\d{4})00\\.002\\.grb</fileNamePattern>
+		<DatePattern>\\d{4}</DatePattern>
+		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>
 		<OriginDate>
 			<Day>01</Day>
-			<Month>03</Month>
-			<Year>2000</Year>
+			<Month>01</Month>
+			<Year>1979</Year>
 		</OriginDate>
 	</Download>	
 	<Processes>
