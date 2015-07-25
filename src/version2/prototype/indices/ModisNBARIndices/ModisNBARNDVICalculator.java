@@ -3,11 +3,11 @@ package version2.prototype.indices.ModisNBARIndices;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GeneralListener;
 
-public class GdalNDVICalculator extends IndicesFramework {
+public class ModisNBARNDVICalculator extends IndicesFramework {
     private static final int RED = 0;
     private static final int NIR = 1;
 
-    public GdalNDVICalculator(GeneralListener l) {
+    public ModisNBARNDVICalculator(GeneralListener l) {
         super(l);
         // TODO Auto-generated constructor stub
     }

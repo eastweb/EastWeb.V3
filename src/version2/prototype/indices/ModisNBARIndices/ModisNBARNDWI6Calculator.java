@@ -9,11 +9,11 @@ import version2.prototype.util.GeneralListener;
  * @author Isaiah Snell-Feikema
  */
 
-public class GdalNDWI6Calculator extends IndicesFramework {
+public class ModisNBARNDWI6Calculator extends IndicesFramework {
     private static final int NIR = 0;
     private static final int SWIR = 1;
 
-    public GdalNDWI6Calculator(GeneralListener l) {
+    public ModisNBARNDWI6Calculator(GeneralListener l) {
         super(l);
         // TODO Auto-generated constructor stub
     }
@@ -33,3 +33,4 @@ public class GdalNDWI6Calculator extends IndicesFramework {
     }
 
 }
+

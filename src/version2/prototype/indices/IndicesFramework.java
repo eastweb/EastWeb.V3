@@ -47,9 +47,9 @@ public abstract class IndicesFramework implements IndexCalculator {
 
     // creates the output file
     private Dataset createOutput(Dataset[] inputs) throws IOException {
-        System.out.println("inputs 0 is  "+inputs[0]);
-        System.out.println(inputs[0].GetRasterXSize());
-        System.out.println(inputs[0].GetRasterYSize());
+        //        System.out.println("inputs 0 is  "+inputs[0]);
+        //        System.out.println(inputs[0].GetRasterXSize());
+        //        System.out.println(inputs[0].GetRasterYSize());
 
         FileUtils.forceMkdir(mOutputFile.getParentFile());
         Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
@@ -59,7 +59,7 @@ public abstract class IndicesFramework implements IndexCalculator {
                 1,
                 gdalconst.GDT_Float32);
 
-        System.out.println("output is  "+outputDS);
+        //        System.out.println("output is  "+outputDS);
         outputDS.SetGeoTransform(inputs[0].GetGeoTransform());
         outputDS.SetProjection(inputs[0].GetProjection());
         outputDS.SetMetadata(inputs[0].GetMetadata_Dict());

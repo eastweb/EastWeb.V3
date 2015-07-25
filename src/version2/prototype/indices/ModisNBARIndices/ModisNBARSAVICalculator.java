@@ -3,12 +3,12 @@ package version2.prototype.indices.ModisNBARIndices;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GeneralListener;
 
-public class GdalSAVICalculator extends IndicesFramework {
+public class ModisNBARSAVICalculator extends IndicesFramework {
     private final static double L = 0.5;
     private final static int RED = 0;
     private final static int NIR = 1;
 
-    public GdalSAVICalculator(GeneralListener l) {
+    public ModisNBARSAVICalculator(GeneralListener l) {
         super(l);
         // TODO Auto-generated constructor stub
     }
@@ -29,3 +29,4 @@ public class GdalSAVICalculator extends IndicesFramework {
     }
 
 }
+

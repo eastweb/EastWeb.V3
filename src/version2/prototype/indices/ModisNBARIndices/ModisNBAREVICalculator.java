@@ -10,11 +10,11 @@ import version2.prototype.util.GeneralListener;
  *@author Isaiah Snell-Feikema
  */
 
-public class ModisNBAREVICalculator extends IndicesFramework {
+public class ModisNBAREVICalculator extends IndicesFramework
+{
 
     public ModisNBAREVICalculator(GeneralListener l) {
         super(l);
-        // TODO Auto-generated constructor stub
     }
 
     private static final double L = 1;
