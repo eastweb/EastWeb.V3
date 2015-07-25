@@ -27,9 +27,12 @@ import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
+import version2.prototype.util.ProcessorFileMetaData;
+import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
+@SuppressWarnings("javadoc")
 public class SchemasTest {
     private static Connection con;
     private static String testProjectName;
@@ -338,40 +341,38 @@ public class SchemasTest {
 
         assertTrue("Test Results contains " + testResults.size() + " rows.", testResults.size() == 2);
 
-        DownloadFileMetaData data;
+        DownloadFileMetaData dData;
+        ProcessorFileMetaData pData;
+        IndicesFileMetaData iData;
         for(int i=0; i < testResults.size(); i++)
         {
             if(i == 0)
             {
-                data = testResults.get(i).ReadMetaDataForProcessor();
-                assertTrue("Data " + i + " dataName is " + data.dataName, data.dataName.equals("Data"));
-                assertTrue("Data " + i + " dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(dateFilePath1));
-                assertTrue("Data " + i + " dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
-                assertTrue("Data " + i + " day is " + data.day, data.day == startDate.getDayOfYear());
-                assertTrue("Data " + i + " year is " + data.year, data.year == startDate.getYear());
-                assertTrue("Data " + i + ".ExtraDownloads size is " + data.extraDownloads.size(), data.extraDownloads.size() == 1);
-                data = data.extraDownloads.get(0).ReadMetaDataForProcessor();
-                assertTrue("Data " + i + ".ExtraDownloads[0].dataName is " + data.dataName, data.dataName.equals("QC"));
-                assertTrue("Data " + i + ".ExtraDownloads[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(qcFilePath1));
-                assertTrue("Data " + i + ".ExtraDownloads[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
-                assertTrue("Data " + i + ".ExtraDownloads[0].day is " + data.day + " not " + startDate.getDayOfYear(), data.day == startDate.getDayOfYear());
-                assertTrue("Data " + i + ".ExtraDownloads[0].year is " + data.year + " not " + startDate.getYear(), data.year == startDate.getYear());
+                dData = testResults.get(i).ReadMetaDataForProcessor();
+                assertTrue("Data " + i + " dataName is " + dData.dataName, dData.dataName.equals("Data"));
+                assertTrue("Data " + i + " dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(dateFilePath1));
+                assertTrue("Data " + i + " day is " + dData.day, dData.day == startDate.getDayOfYear());
+                assertTrue("Data " + i + " year is " + dData.year, dData.year == startDate.getYear());
+                assertTrue("Data " + i + ".ExtraDownloads size is " + dData.extraDownloads.size(), dData.extraDownloads.size() == 1);
+                dData = dData.extraDownloads.get(0);
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataName is " + dData.dataName, dData.dataName.equals("QC"));
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath1));
+                assertTrue("Data " + i + ".ExtraDownloads[0].day is " + dData.day + " not " + startDate.getDayOfYear(), dData.day == startDate.getDayOfYear());
+                assertTrue("Data " + i + ".ExtraDownloads[0].year is " + dData.year + " not " + startDate.getYear(), dData.year == startDate.getYear());
             }
             else if(i == 1)
             {
-                data = testResults.get(i).ReadMetaDataForProcessor();
-                assertTrue("Data " + i + " dataName is " + data.dataName, data.dataName.equals("Data"));
-                assertTrue("Data " + i + " dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(dateFilePath2));
-                assertTrue("Data " + i + " dataGroupID is " + data.dataGroupID, data.dataGroupID == 2);
-                assertTrue("Data " + i + " day is " + data.day, data.day == LocalDate.now().getDayOfYear());
-                assertTrue("Data " + i + " year is " + data.year, data.year == LocalDate.now().getYear());
-                assertTrue("Data " + i + ".ExtraDownloads size is " + data.extraDownloads.size(), data.extraDownloads.size() == 1);
-                data = data.extraDownloads.get(0).ReadMetaDataForProcessor();
-                assertTrue("Data " + i + ".ExtraDownloads[0].dataName is " + data.dataName, data.dataName.equals("QC"));
-                assertTrue("Data " + i + ".ExtraDownloads[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(qcFilePath2));
-                assertTrue("Data " + i + ".ExtraDownloads[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 2);
-                assertTrue("Data " + i + ".ExtraDownloads[0].day is " + data.day + " not " + LocalDate.now().getDayOfYear(), data.day == LocalDate.now().getDayOfYear());
-                assertTrue("Data " + i + ".ExtraDownloads[0].year is " + data.year + " not " + LocalDate.now().getYear(), data.year == LocalDate.now().getYear());
+                dData = testResults.get(i).ReadMetaDataForProcessor();
+                assertTrue("Data " + i + " dataName is " + dData.dataName, dData.dataName.equals("Data"));
+                assertTrue("Data " + i + " dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(dateFilePath2));
+                assertTrue("Data " + i + " day is " + dData.day, dData.day == LocalDate.now().getDayOfYear());
+                assertTrue("Data " + i + " year is " + dData.year, dData.year == LocalDate.now().getYear());
+                assertTrue("Data " + i + ".ExtraDownloads size is " + dData.extraDownloads.size(), dData.extraDownloads.size() == 1);
+                dData = dData.extraDownloads.get(0);
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataName is " + dData.dataName, dData.dataName.equals("QC"));
+                assertTrue("Data " + i + ".ExtraDownloads[0].dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath2));
+                assertTrue("Data " + i + ".ExtraDownloads[0].day is " + dData.day + " not " + LocalDate.now().getDayOfYear(), dData.day == LocalDate.now().getDayOfYear());
+                assertTrue("Data " + i + ".ExtraDownloads[0].year is " + dData.year + " not " + LocalDate.now().getYear(), dData.year == LocalDate.now().getYear());
             }
             else{
                 fail("TestResults size is " + testResults.size());
@@ -439,19 +440,17 @@ public class SchemasTest {
 
         ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName, globalDownloaderInstanceID, daysPerInputFile);
         assertTrue("TestResults size is " + testResults.size(), testResults.size() == 1);
-        DownloadFileMetaData data = testResults.get(0).ReadMetaDataForProcessor();
-        assertTrue("TestResults[0].dataName is " + data.dataName, data.dataName.equals("Data"));
-        assertTrue("TestResults[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(dateFilePath1));
-        assertTrue("TestResults[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
-        assertTrue("TestResults[0].day is " + data.day, data.day == startDate.getDayOfYear());
-        assertTrue("TestResults[0].year is " + data.year, data.year == startDate.getYear());
-        assertTrue("TestResults[0].ExtraDownloads size is " + data.extraDownloads.size(), data.extraDownloads.size() == 1);
-        data = data.extraDownloads.get(0).ReadMetaDataForProcessor();
-        assertTrue("TestResults[0].ExtraDownloads[0].dataName is " + data.dataName, data.dataName.equals("QC"));
-        assertTrue("TestResults[0].ExtraDownloads[0].dataFilePath is " + data.dataFilePath, data.dataFilePath.equals(qcFilePath1));
-        assertTrue("TestResults[0].ExtraDownloads[0].dataGroupID is " + data.dataGroupID, data.dataGroupID == 1);
-        assertTrue("TestResults[0].ExtraDownloads[0].day is " + data.day + " not " + startDate.getDayOfYear(), data.day == startDate.getDayOfYear());
-        assertTrue("TestResults[0].ExtraDownloads[0].year is " + data.year + " not " + startDate.getYear(), data.year == startDate.getYear());
+        DownloadFileMetaData dData = testResults.get(0).ReadMetaDataForProcessor();
+        assertTrue("TestResults[0].dataName is " + dData.dataName, dData.dataName.equals("Data"));
+        assertTrue("TestResults[0].dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(dateFilePath1));
+        assertTrue("TestResults[0].day is " + dData.day, dData.day == startDate.getDayOfYear());
+        assertTrue("TestResults[0].year is " + dData.year, dData.year == startDate.getYear());
+        assertTrue("TestResults[0].ExtraDownloads size is " + dData.extraDownloads.size(), dData.extraDownloads.size() == 1);
+        dData = dData.extraDownloads.get(0);
+        assertTrue("TestResults[0].ExtraDownloads[0].dataName is " + dData.dataName, dData.dataName.equals("QC"));
+        assertTrue("TestResults[0].ExtraDownloads[0].dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath1));
+        assertTrue("TestResults[0].ExtraDownloads[0].day is " + dData.day + " not " + startDate.getDayOfYear(), dData.day == startDate.getDayOfYear());
+        assertTrue("TestResults[0].ExtraDownloads[0].year is " + dData.year + " not " + startDate.getYear(), dData.year == startDate.getYear());
     }
 
     //    @Test

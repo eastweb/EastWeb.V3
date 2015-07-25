@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
-import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a minimum summary based on indexed double values.
@@ -28,10 +27,10 @@ public class Min extends SummaryCalculation {
      */
     @Override
     public void put(int index, double value) {
-        if(map.get(index) == null) {
-            map.put(index, value);
-        } else if(map.get(index) > value) {
-            map.put(index, value);
+        if(resultMap.get(index) == null) {
+            resultMap.put(index, value);
+        } else if(resultMap.get(index) > value) {
+            resultMap.put(index, value);
         }
     }
 
@@ -40,7 +39,7 @@ public class Min extends SummaryCalculation {
      */
     @Override
     public Map<Integer, Double> getResult() {
-        return map;
+        return resultMap;
     }
 
     /* (non-Javadoc)

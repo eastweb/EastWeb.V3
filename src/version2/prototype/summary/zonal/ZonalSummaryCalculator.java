@@ -271,7 +271,7 @@ public class ZonalSummaryCalculator {
                 int zone = zoneArray[i];
                 double value = rasterArray[i];
                 if (zone != 0 && value != NO_DATA) { // Neither are no data values
-                    summariesCollection.put(zone, value);
+                    summariesCollection.add(zone, value);
                 }
             }
         }
