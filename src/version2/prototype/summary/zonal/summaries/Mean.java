@@ -5,7 +5,6 @@ import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.SummaryNameInstancePair;
-import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a mean summary based on indexed double values.
@@ -30,9 +29,9 @@ public class Mean extends SummaryCalculation {
      * @see version2.prototype.summary.summaries.SummaryCalculation#put(int, double)
      */
     @Override
-    public void put(int index, double value) {
-        sum.put(index, value);
-        count.put(index, value);
+    protected void put(int index, double value) {
+        //        sum.add(index, value);
+        //        count.add(index, value);
     }
 
     /* (non-Javadoc)
@@ -40,15 +39,15 @@ public class Mean extends SummaryCalculation {
      */
     @Override
     public Map<Integer, Double> getResult() {
-        if(map.size() == 0 || map.size() < count.getResult().size()){
+        if(resultMap.size() == 0 || resultMap.size() < count.getResult().size()){
             Map<Integer, Double> sumRs = sum.getResult();
             Map<Integer, Double> countRs = count.getResult();
 
             for(int i=0; i < countRs.size(); i++){
-                map.put(i, sumRs.get(i)/countRs.get(i));
+                resultMap.put(i, sumRs.get(i)/countRs.get(i));
             }
         }
-        return map;
+        return resultMap;
     }
 
     /* (non-Javadoc)
@@ -67,6 +66,7 @@ public class Mean extends SummaryCalculation {
      */
     @Override
     protected void registerDependencies() {
+        SummariesCollection col = getCollection();
         sum = new Sum(col);
         sum = col.register(new SummaryNameInstancePair(sum.getCanonicalName(), sum));
 

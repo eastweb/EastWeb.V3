@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
-import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a counting summary based on the count of indexed double values.
@@ -28,10 +27,10 @@ public class Count extends SummaryCalculation {
      */
     @Override
     public void put(int index, double value) {
-        if(map.get(index) == null) {
-            map.put(index, 1.0);
+        if(resultMap.get(index) == null) {
+            resultMap.put(index, 1.0);
         } else {
-            map.put(index, map.get(index) + 1);
+            resultMap.put(index, resultMap.get(index) + 1);
         }
     }
 
@@ -40,7 +39,7 @@ public class Count extends SummaryCalculation {
      */
     @Override
     public Map<Integer, Double> getResult() {
-        return map;
+        return resultMap;
     }
 
     /* (non-Javadoc)

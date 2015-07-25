@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
+@SuppressWarnings("javadoc")
 public class ProjectInfoFileTester {
 
     @Test

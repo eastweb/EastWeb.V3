@@ -1,5 +1,7 @@
 package version2.prototype.summary.zonal;
 
+import version2.prototype.summary.zonal.summaries.SummaryCalculation;
+
 
 /**
  * Container object holding the pairing of a summary with a name and an instance.

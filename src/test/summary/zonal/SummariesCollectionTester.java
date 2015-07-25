@@ -5,12 +5,15 @@ import static org.junit.Assert.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.SummaryNameResultPair;
 
+@SuppressWarnings("javadoc")
 public class SummariesCollectionTester {
 
     @Test
@@ -18,70 +21,160 @@ public class SummariesCollectionTester {
     IllegalArgumentException, InvocationTargetException {
         SummariesCollection col1 = new SummariesCollection(new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev")));
         SummariesCollection col2 = new SummariesCollection(new ArrayList<String>(Arrays.asList("Count", "Sum", "Mean", "StdDev")));
+        Map<Integer, Double> countResults1 = new HashMap<Integer, Double>();
+        Map<Integer, Double> sumResults1 = new HashMap<Integer, Double>();
+        Map<Integer, Double> meanResults1 = new HashMap<Integer, Double>();
+        Map<Integer, Double> stdDevResults1 = new HashMap<Integer, Double>();
+        Map<Integer, Double> countResults2 = new HashMap<Integer, Double>();
+        Map<Integer, Double> sumResults2 = new HashMap<Integer, Double>();
+        Map<Integer, Double> meanResults2 = new HashMap<Integer, Double>();
+        Map<Integer, Double> stdDevResults2 = new HashMap<Integer, Double>();
+
+        // Setup results maps
+        double m1 = 1;
+        double m2 = 2;
+        double m3 = 3;
+        double m4 = 4;
+        double m5 = 5;
+        double m6 = 6;
+        double ansStdDev1_1 = Math.sqrt((Math.pow(1 - m1, 2) + Math.pow(1 - m1, 2) + Math.pow(1 - m1, 2)) / 3);
+        double ansStdDev1_2 = Math.sqrt((Math.pow(2 - m2, 2) + Math.pow(2 - m2, 2) + Math.pow(2 - m2, 2)) / 3);
+        double ansStdDev1_3 = Math.sqrt((Math.pow(3 - m3, 2) + Math.pow(3 - m3, 2) + Math.pow(3 - m3, 2)) / 3);
+        double ansStdDev1_4 = Math.sqrt((Math.pow(4 - m4, 2) + Math.pow(4 - m4, 2) + Math.pow(4 - m4, 2)) / 3);
+        double ansStdDev1_5 = Math.sqrt((Math.pow(5 - m5, 2) + Math.pow(5 - m5, 2) + Math.pow(5 - m5, 2)) / 3);
+        double ansStdDev1_6 = Math.sqrt((Math.pow(6 - m6, 2) + Math.pow(6 - m6, 2) + Math.pow(6 - m6, 2)) / 3);
+        stdDevResults1.put(0, ansStdDev1_1);
+        stdDevResults1.put(1, ansStdDev1_2);
+        stdDevResults1.put(2, ansStdDev1_3);
+        stdDevResults1.put(3, ansStdDev1_4);
+        stdDevResults1.put(4, ansStdDev1_5);
+        stdDevResults1.put(5, ansStdDev1_6);
+
+        m1 = 2.5;
+        m2 = 2.0;
+        double ansStdDev2_1 = Math.sqrt((Math.pow(1 - m1, 2) + Math.pow(2 - m1, 2) + Math.pow(3 - m1, 2) + Math.pow(4 - m1, 2)) / 4);
+        double ansStdDev2_2 = Math.sqrt((Math.pow(1 - m2, 2) + Math.pow(2 - m2, 2) + Math.pow(3 - m2, 2)) / 3);
+        //        double ansStdDev2_1 = new BigDecimal(Math.sqrt((Math.pow(1 - m1, 2) + Math.pow(2 - m1, 2) + Math.pow(3 - m1, 2) + Math.pow(4 - m1, 2)) / 4)).setScale(14, BigDecimal.ROUND_DOWN).doubleValue();
+        //        double ansStdDev2_2 = new BigDecimal(Math.sqrt((Math.pow(1 - m2, 2) + Math.pow(2 - m2, 2) + Math.pow(3 - m2, 2)) / 3)).setScale(14, BigDecimal.ROUND_DOWN).doubleValue();
+
+        for(int i=0; i < 6; i++)
+        {
+            // Collection 1 results
+            countResults1.put(i, 3.0);
+            sumResults1.put(i, 3.0 * (i + 1));
+            meanResults1.put(i, new Double(i+1));
+
+            // Collection 2 results
+            if(i == 0)
+            {
+                countResults2.put(i, 4.0);
+                sumResults2.put(i, 10.0);
+                meanResults2.put(i, new Double(2.5));
+                stdDevResults2.put(i, ansStdDev2_1);
+            }
+            else
+            {
+                countResults2.put(i, 3.0);
+                sumResults2.put(i, 6.0);
+                meanResults2.put(i, new Double(2));
+                stdDevResults2.put(i, ansStdDev2_2);
+            }
+        }
+
+        // Initialize collections
         testData1(col1);
         testData2(col2);
 
-        ArrayList<SummaryNameResultPair> results = col1.getResults();
-        for(SummaryNameResultPair pair : results){
-            System.out.println(pair.getSimpleName() + ": " + pair.getResult().toString());
+        // Verification
+        ArrayList<SummaryNameResultPair> results;
+        results = col1.getResults();
+        for(SummaryNameResultPair pair : results)
+        {
+            switch(pair.getSimpleName())
+            {
+            case "Count":
+                assertEquals("Count1 results not as expected.", countResults1, pair.getResult());
+                break;
+            case "Sum":
+                assertEquals("Sum1 results not as expected.", sumResults1, pair.getResult());
+                break;
+            case "Mean":
+                assertEquals("Mean1 results not as expected.", meanResults1, pair.getResult());
+                break;
+            case "StdDev":
+                assertEquals("StdDev1 results not as expected.", stdDevResults1, pair.getResult());
+                break;
+            }
         }
-        System.out.println();
-
         results = col2.getResults();
-        for(SummaryNameResultPair pair : results){
-            System.out.println(pair.getSimpleName() + ": " + pair.getResult().toString());
+        for(SummaryNameResultPair pair : results)
+        {
+            switch(pair.getSimpleName())
+            {
+            case "Count":
+                assertEquals("Count2 results not as expected.", countResults2, pair.getResult());
+                break;
+            case "Sum":
+                assertEquals("Sum2 results not as expected.", sumResults2, pair.getResult());
+                break;
+            case "Mean":
+                assertEquals("Mean2 results not as expected.", meanResults2, pair.getResult());
+                break;
+            case "StdDev":
+                assertEquals("StdDev2 results not as expected.", stdDevResults2, pair.getResult());
+                break;
+            }
         }
-        System.out.println();
 
         col1 = null;
         col2 = null;
     }
 
     private void testData1(SummariesCollection col) {
-        col.put(0, 1.0);
-        col.put(1, 2.0);
-        col.put(2, 3.0);
-        col.put(3, 4.0);
-        col.put(4, 5.0);
-        col.put(5, 6.0);
+        col.add(0, 1.0);
+        col.add(1, 2.0);
+        col.add(2, 3.0);
+        col.add(3, 4.0);
+        col.add(4, 5.0);
+        col.add(5, 6.0);
 
-        col.put(0, 1.0);
-        col.put(1, 2.0);
-        col.put(2, 3.0);
-        col.put(3, 4.0);
-        col.put(4, 5.0);
-        col.put(5, 6.0);
+        col.add(0, 1.0);
+        col.add(1, 2.0);
+        col.add(2, 3.0);
+        col.add(3, 4.0);
+        col.add(4, 5.0);
+        col.add(5, 6.0);
 
-        col.put(0, 1.0);
-        col.put(1, 2.0);
-        col.put(2, 3.0);
-        col.put(3, 4.0);
-        col.put(4, 5.0);
-        col.put(5, 6.0);
+        col.add(0, 1.0);
+        col.add(1, 2.0);
+        col.add(2, 3.0);
+        col.add(3, 4.0);
+        col.add(4, 5.0);
+        col.add(5, 6.0);
     }
 
     private static void testData2(SummariesCollection col) {
-        col.put(0, 1.0);
-        col.put(1, 1.0);
-        col.put(2, 1.0);
-        col.put(3, 1.0);
-        col.put(4, 1.0);
-        col.put(5, 1.0);
+        col.add(0, 1.0);
+        col.add(1, 1.0);
+        col.add(2, 1.0);
+        col.add(3, 1.0);
+        col.add(4, 1.0);
+        col.add(5, 1.0);
 
-        col.put(0, 2.0);
-        col.put(1, 2.0);
-        col.put(2, 2.0);
-        col.put(3, 2.0);
-        col.put(4, 2.0);
-        col.put(5, 2.0);
+        col.add(0, 2.0);
+        col.add(1, 2.0);
+        col.add(2, 2.0);
+        col.add(3, 2.0);
+        col.add(4, 2.0);
+        col.add(5, 2.0);
 
-        col.put(0, 3.0);
-        col.put(1, 3.0);
-        col.put(2, 3.0);
-        col.put(3, 3.0);
-        col.put(4, 3.0);
-        col.put(5, 3.0);
+        col.add(0, 3.0);
+        col.add(1, 3.0);
+        col.add(2, 3.0);
+        col.add(3, 3.0);
+        col.add(4, 3.0);
+        col.add(5, 3.0);
 
-        col.put(0, 4.0);
+        col.add(0, 4.0);
     }
 }
