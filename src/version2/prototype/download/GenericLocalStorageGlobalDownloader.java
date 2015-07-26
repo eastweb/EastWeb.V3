@@ -106,6 +106,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
                         DownloaderFramework downloader = (DownloaderFramework) downloadCtr.newInstance(dd, outFolder, metaData, f);
                         try {
                             downloader.download();
+                            AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
