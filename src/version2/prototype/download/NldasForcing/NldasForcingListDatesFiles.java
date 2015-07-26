@@ -32,91 +32,6 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
     {
-        Map<DataDate, ArrayList<String>>  mapDatesToFiles = new HashMap<DataDate, ArrayList<String>>();
-
-        FTPClient ftpClient = new FTPClient();
-        try
-        {
-            ftpClient.connect(mHostName);
-            if(!ftpClient.login(mUsername, mPassword)){
-                throw new IOException("Wasn't able to login to remote host with provided credentials.");
-            }
-
-            ftpClient.enterLocalPassiveMode();
-
-            if(!ftpClient.changeWorkingDirectory(mRootDir)) {
-                throw new IOException("Couldn't navigate to " + mRootDir);
-            }
-
-            // List out all of the year directories.
-            FTPFile[] yearDirs = ftpClient.listDirectories();
-
-            for(FTPFile yearDir : yearDirs)
-            {
-                // There is another file named "doc" in the host's file system
-                if(yearDir.getName() == "doc" || !yearDir.isDirectory()) {
-                    continue;
-                }
-
-                if(Integer.parseInt(yearDir.getName()) >= sDate.getYear())
-                {
-                    for(FTPFile dayOfYearDir : ftpClient.listDirectories(mRootDir + yearDir.getName() + "/"))
-                    {
-                        // Continue if the day of year is less than the start date
-                        if(Integer.parseInt(yearDir.getName()) ==  sDate.getYear() &&
-                                Integer.parseInt(dayOfYearDir.getName()) < sDate.getDayOfYear()) {
-                            continue;
-                        }
-
-                        ArrayList<String> files = new ArrayList<String>();
-                        for(FTPFile hourlyFile : ftpClient.listFiles(mRootDir + yearDir.getName() + "/" + dayOfYearDir.getName() + "/"))
-                        {
-                            // Continue if the file is the .xml companion file
-                            if(!hourlyFile.getName().endsWith(".grb")) {
-                                continue;
-                            }
-
-                            if(Integer.parseInt(yearDir.getName()) == sDate.getYear() &&
-                                    Integer.parseInt(dayOfYearDir.getName()) == sDate.getDayOfYear())
-                            {
-                                int startIndex = hourlyFile.getName().indexOf(".002.grb") - 4;
-                                if(Integer.parseInt(hourlyFile.getName().substring(startIndex, (startIndex+2))) >= sDate.getHour()) {
-                                    files.add(hourlyFile.getName());
-                                }
-                            }
-                            else {
-                                files.add(hourlyFile.getName());
-                            }
-                        }
-                        mapDatesToFiles.put(new DataDate(Integer.parseInt(dayOfYearDir.getName()), Integer.parseInt(yearDir.getName())), files);
-                    }
-                }
-            }
-        }
-        catch (Exception e) { e.printStackTrace(); }
-        finally
-        {
-            try
-            {
-                if(ftpClient != null && ftpClient.isConnected())
-                {
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-                }
-            }
-            catch (IOException e) { e.printStackTrace(); }
-        }
-
-        return mapDatesToFiles;
-    }
-
-    @Override
-    protected Map<DataDate, ArrayList<String>> ListDatesFilesHTTP() {
-        return null;
-    }
-
-    protected Map<DataDate, ArrayList<String>> TheoreticalListDatesFiles()
-    {
         String fileFormat = "NLDAS_FORA0125_H.A%04d%02d%02d.%02d00.002.grb";
         Map<DataDate, ArrayList<String>>  mapDatesToFiles = new HashMap<DataDate, ArrayList<String>>();
         DataDate today = new DataDate(LocalDate.now());
@@ -213,6 +128,98 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
                     catch(DateTimeException e) { }
                 }
             }
+        }
+
+        return mapDatesToFiles;
+    }
+
+    @Override
+    protected Map<DataDate, ArrayList<String>> ListDatesFilesHTTP() {
+        return null;
+    }
+
+    /*
+     * This is the original method to find the files available from the ftp server.
+     * I implemented a theoretical determination if the files which is being used in place of this logic
+     * (this method takes approximately 3 minutes compared to 250 milliseconds for theoretical)
+     * This method can be either removed or left if there is a desire to have it regardless.
+     * - Chris Plucker 7/26/2015
+     */
+    protected Map<DataDate, ArrayList<String>> Actual_ListDatesFilesFTP()
+    {
+        Map<DataDate, ArrayList<String>>  mapDatesToFiles = new HashMap<DataDate, ArrayList<String>>();
+
+        FTPClient ftpClient = new FTPClient();
+        try
+        {
+            ftpClient.connect(mHostName);
+            if(!ftpClient.login(mUsername, mPassword)){
+                throw new IOException("Wasn't able to login to remote host with provided credentials.");
+            }
+
+            ftpClient.enterLocalPassiveMode();
+
+            if(!ftpClient.changeWorkingDirectory(mRootDir)) {
+                throw new IOException("Couldn't navigate to " + mRootDir);
+            }
+
+            // List out all of the year directories.
+            FTPFile[] yearDirs = ftpClient.listDirectories();
+
+            for(FTPFile yearDir : yearDirs)
+            {
+                // There is another file named "doc" in the host's file system
+                if(yearDir.getName() == "doc" || !yearDir.isDirectory()) {
+                    continue;
+                }
+
+                if(Integer.parseInt(yearDir.getName()) >= sDate.getYear())
+                {
+                    for(FTPFile dayOfYearDir : ftpClient.listDirectories(mRootDir + yearDir.getName() + "/"))
+                    {
+                        // Continue if the day of year is less than the start date
+                        if(Integer.parseInt(yearDir.getName()) ==  sDate.getYear() &&
+                                Integer.parseInt(dayOfYearDir.getName()) < sDate.getDayOfYear()) {
+                            continue;
+                        }
+
+                        ArrayList<String> files = new ArrayList<String>();
+                        for(FTPFile hourlyFile : ftpClient.listFiles(mRootDir + yearDir.getName() + "/" + dayOfYearDir.getName() + "/"))
+                        {
+                            // Continue if the file is the .xml companion file
+                            if(!hourlyFile.getName().endsWith(".grb")) {
+                                continue;
+                            }
+
+                            if(Integer.parseInt(yearDir.getName()) == sDate.getYear() &&
+                                    Integer.parseInt(dayOfYearDir.getName()) == sDate.getDayOfYear())
+                            {
+                                int startIndex = hourlyFile.getName().indexOf(".002.grb") - 4;
+                                if(Integer.parseInt(hourlyFile.getName().substring(startIndex, (startIndex+2))) >= sDate.getHour()) {
+                                    files.add(hourlyFile.getName());
+                                }
+                            }
+                            else {
+                                files.add(hourlyFile.getName());
+                            }
+                        }
+                        mapDatesToFiles.put(new DataDate(Integer.parseInt(dayOfYearDir.getName()), Integer.parseInt(yearDir.getName())), files);
+                    }
+                }
+            }
+        }
+        catch (Exception e) { e.printStackTrace(); }
+        finally
+        {
+            try
+            {
+                if(ftpClient != null && ftpClient.isConnected())
+                {
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+                }
+            }
+            catch (IOException e) { e.printStackTrace(); }
         }
 
         return mapDatesToFiles;

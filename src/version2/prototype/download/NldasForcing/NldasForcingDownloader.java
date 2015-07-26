@@ -64,12 +64,18 @@ public class NldasForcingDownloader extends DownloaderFramework
                 outFilePath = String.format("%s"+File.separator+"%s", outDesStr, mFileToDownload);
 
                 DownloadUtils.download(ftpClient, mFileToDownload, new File(outFilePath));
-
-                //FIXME:  close FTP connection
-
             }
             catch (IOException e) { throw e; }
-            finally { FTPClientPool.returnFtpClient(mHostName, ftpClient); }
+            finally
+            {
+                if(ftpClient.isConnected())
+                {
+                    // Close the FTP session.
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+                }
+                FTPClientPool.returnFtpClient(mHostName, ftpClient);
+            }
 
             // Alternative code in case I shouldn't be using the FTPCLientPool class
             /*File outputDestination = new File(String.format("%s\\%04d\\%03d", mOutputFolder, mDate.getYear(), mDate.getDayOfYear()));
@@ -87,13 +93,13 @@ public class NldasForcingDownloader extends DownloaderFramework
                     throw new IOException("Couldn't navigate to " + mData.myFtp.rootDir + String.format("/%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()));
                 }
 
-                String desiredFile = String.format("NLDAS_FORA0125_H.A%04d%02d%02d.%02d00.002.grb", mDate.getYear(), mDate.getMonth(), mDate.getDay(), mDate.getHour());
-
                 if(!new File(mOutputFolder).exists()) {
                     FileUtils.forceMkdir(new File(mOutputFolder));
                 }
 
-                DownloadUtils.download(ftpClient, desiredFile, new File(outputDestination.getAbsolutePath() + "\\" + desiredFile));
+                outFilePath = String.format("%s"+File.separator+"%s", outDesStr, mFileToDownload);
+
+                DownloadUtils.download(ftpClient, mFileToDownload, new File(outFilePath));
             }
             catch (Exception e) { throw e; }
             finally

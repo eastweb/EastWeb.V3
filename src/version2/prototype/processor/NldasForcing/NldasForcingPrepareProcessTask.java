@@ -73,17 +73,17 @@ public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
     @Override
     public int[] getDataBands() {
         return new int[]
-                {1, // U wind component (m/s) at 10 meters above the surface
-                2,  // V wind component (m/s) at 10 meters above the surface
-                3,  // air temperature (K) at 2 meters above the surface
-                4,  // specific humidity (kg/kg) at 2 meters above the surface
-                5,  // surface pressure (Pa)
+                {1, // air temperature (K) at 2 meters above the surface
+                2,  // specific humidity (kg/kg) at 2 meters above the surface
+                3,  // surface pressure (Pa)
+                4,  // U wind component (m/s) at 10 meters above the surface
+                5,  // V wind component (m/s) at 10 meters above the surface
                 6,  // surface downward longwave radiation (W/m^2)
-                7,  // surface downward shortwave radiation (W/m^2) -- bias-corrected
-                8,  // precipitation hourly total (kg/m^2)
-                9,  // fraction of total precipitation that is convective (no units): from NARR
-                10, // CAPE: Convective Available Potential Energy (J/kg): from NARR
-                11};// potential evaporation (kg/m^2): from NARR
+                7,  // fraction of total precipitation that is convective (no units): from NARR
+                8,  // CAPE: Convective Available Potential Energy (J/kg): from NARR
+                9,  // potential evaporation (kg/m^2): from NARR
+                10, // precipitation hourly total (kg/m^2)
+                11};// surface downward shortwave radiation (W/m^2) -- bias-corrected
     }
 
     @Override
