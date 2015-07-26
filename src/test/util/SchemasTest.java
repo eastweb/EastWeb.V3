@@ -49,6 +49,7 @@ public class SchemasTest {
     private static LocalDate startDate;
     private static int daysPerInputFile;
     private static int numOfIndices;
+    private static int filesPerDay;
 
     /**
      * Defined for executable jar file to be used in setting up EASTWeb database for testing purposes. The config.xml file is needed for the database connection information but nothing else is used from
@@ -76,7 +77,7 @@ public class SchemasTest {
         System.out.println("Project name to use: " + args[1]);
         System.out.println("Plugin name to use: " + args[2]);
         System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, null,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, 1, null,
                 createTablesWithForeignKeyReferences);
         System.out.println("DONE");
     }
@@ -95,6 +96,7 @@ public class SchemasTest {
         startDate = LocalDate.now().minusDays(8);
         daysPerInputFile = 8;
         numOfIndices = 3;
+        filesPerDay = 1;
 
         summaryNames = new ArrayList<String>();
         summaryNames.add("Count");
@@ -158,7 +160,7 @@ public class SchemasTest {
 
         // Run method under test - defined for MODIS plugin
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
-                numOfIndices, summaries, true);
+                numOfIndices, filesPerDay, summaries, true);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
@@ -254,18 +256,20 @@ public class SchemasTest {
         String query;
 
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
-                numOfIndices, summaries, true);
+                numOfIndices, filesPerDay, summaries, true);
 
         query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES (" + LocalDate.now().getDayOfYear() + ", " + LocalDate.now().getYear() + ")",
                 testGlobalSchema);
         stmt.execute(query);
 
-        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\", \"UniqueInstanceNum\") VALUES (1, 1);",
+        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\") VALUES (1);",
                 testGlobalSchema);
         stmt.execute(query);
 
-        query = String.format("INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES (1, 1, '" + dateFilePath1 + "'), (1, 2, '" + dateFilePath2 +
-                "');",
+        query = String.format("INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\", \"Complete\") VALUES " +
+                "(1, 1, '" + dateFilePath1 + "', TRUE), " +
+                "(1, 2, '" + dateFilePath2 + "', TRUE), " +
+                "(1, 2, 'blah', FALSE);",
                 testGlobalSchema);
         stmt.execute(query);
 
@@ -273,7 +277,7 @@ public class SchemasTest {
                 testGlobalSchema);
         stmt.execute(query);
 
-        Schemas.loadUnprocessedDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, 1, startDate, extraDownloadFiles, daysPerInputFile);
+        Schemas.loadUnprocessedDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, startDate, extraDownloadFiles);
 
         query = "SELECT * FROM \"" + schemaName + "\".\"DownloadCache\"";
         rs = stmt.executeQuery(query);
@@ -303,6 +307,10 @@ public class SchemasTest {
                         rs.getBoolean("Retrieved") == false &&
                         rs.getBoolean("Processed") == false);
             }
+            if(rs.next())
+            {
+                fail("More than 2 files loaded into DownloadCache.");
+            }
         }
     }
 
@@ -318,13 +326,13 @@ public class SchemasTest {
         String query;
 
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
-                numOfIndices, summaries, true);
+                numOfIndices, filesPerDay, summaries, true);
 
         query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES (" + LocalDate.now().getDayOfYear() + ", " + LocalDate.now().getYear() + ")",
                 testGlobalSchema);
         stmt.execute(query);
 
-        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\", \"UniqueInstanceNum\") VALUES (1, 1);",
+        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\") VALUES (1);",
                 testGlobalSchema);
         stmt.execute(query);
 
@@ -337,7 +345,7 @@ public class SchemasTest {
                 testGlobalSchema);
         stmt.execute(query);
 
-        ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName, 1, daysPerInputFile);
+        ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName);
 
         assertTrue("Test Results contains " + testResults.size() + " rows.", testResults.size() == 2);
 
@@ -387,37 +395,35 @@ public class SchemasTest {
         final int globalDownloaderInstanceID = 10;
 
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
-                numOfIndices, summaries, true);
+                numOfIndices, filesPerDay, summaries, true);
 
         String query = String.format(
-                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \n" +
-                        "\"UniqueInstanceNum\" = " + globalDownloaderInstanceID + " ORDER BY \"GlobalDownloaderID\" DESC;",
-                        testGlobalSchema
+                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\";",
+                testGlobalSchema
                 );
 
         // Verify no GlobalDownloaders are registered with instance ID 10
         rs = stmt.executeQuery(query);
-        assertTrue("Multiple GlobalDownloaders registered with instance ID " + globalDownloaderInstanceID, rs.next() == false);
+        assertTrue("GlobalDownloaders registered already.", rs.next() == false);
 
         // Register new GlobalDownloader ID
-        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName, daysPerInputFile, globalDownloaderInstanceID);
+        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName);
         rs = stmt.executeQuery(query);
         if(rs != null)
         {
             rs.next();
-            assertTrue("More than one GlobalDownloader with Instance ID " + globalDownloaderInstanceID, rs.next() == false);
+            assertTrue("More than one GlobalDownloader with the same plugin '" + testPluginName + "'", rs.next() == false);
         } else {
             fail("Failed to register GlobalDownloader");
         }
 
         // Register GlobalDownloader again for Instance ID 10 (mimic behavior of stopping and restarting GlobalDownloader)
-        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName, daysPerInputFile, globalDownloaderInstanceID);
+        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName);
         rs = stmt.executeQuery(query);
         if(rs != null)
         {
             rs.next();
-            rs.next();
-            assertTrue("More than two GlobalDownloader records with Instance ID " + globalDownloaderInstanceID, rs.next() == false);
+            assertTrue("More than one GlobalDownloader with the same plugin '" + testPluginName + "'", rs.next() == false);
         } else {
             fail("Failed to register GlobalDownloader");
         }
@@ -432,13 +438,13 @@ public class SchemasTest {
         String qcFilePath1 = "path to qc file1";
 
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
-                numOfIndices, summaries, true);
+                numOfIndices, filesPerDay, summaries, true);
 
-        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName, daysPerInputFile, globalDownloaderInstanceID);
-        Schemas.insertIntoDownloadTable(testGlobalSchema, testPluginName, globalDownloaderInstanceID, startDate, dateFilePath1, daysPerInputFile);
-        Schemas.insertIntoExtraDownloadTable(testGlobalSchema, testPluginName, globalDownloaderInstanceID, startDate, "QC", qcFilePath1, daysPerInputFile);
+        Schemas.registerGlobalDownloader(testGlobalSchema, testPluginName);
+        Schemas.insertIntoDownloadTable(testGlobalSchema, testPluginName, startDate, dateFilePath1);
+        Schemas.insertIntoExtraDownloadTable(testGlobalSchema, testPluginName, startDate, "QC", qcFilePath1);
 
-        ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName, globalDownloaderInstanceID, daysPerInputFile);
+        ArrayList<DataFileMetaData> testResults = Schemas.getAllDownloadedFiles(testGlobalSchema, testPluginName);
         assertTrue("TestResults size is " + testResults.size(), testResults.size() == 1);
         DownloadFileMetaData dData = testResults.get(0).ReadMetaDataForProcessor();
         assertTrue("TestResults[0].dataName is " + dData.dataName, dData.dataName.equals("Data"));

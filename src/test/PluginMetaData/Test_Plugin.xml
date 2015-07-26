@@ -4,8 +4,7 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<ListDatesFilesClass>ListDatesFilesClass1</ListDatesFilesClass>
-		<DownloaderClass>DownloaderClass1</DownloaderClass>
+		<DownloadFactoryClassName>DownloadFactory1</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>

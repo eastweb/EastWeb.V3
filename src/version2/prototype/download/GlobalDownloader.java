@@ -117,104 +117,24 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName, ID, metaData.DaysPerInputData);
+        return Schemas.getAllDownloadedFiles(Config.getInstance().getGlobalSchema(), pluginName);
     }
 
-    /**
-     * Add the given file and associated information to the appropriate global downloads table.
-     *
-     * @param projectName  - project schema to look under
-     * @param dataName  - name of the downloaded file's data type
-     * @param year  - year of the downloaded file
-     * @param day  - day of the downloaded file
-     * @param filePath  - path to the downloaded file
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ParseException
-     * @throws ConfigReadException
-     * @throws ClassNotFoundException
-     */
-    protected void AddDownloadFile(String dataName, int year, int day, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
-    {
-        String tableName = "Download";
-        Connection conn = PostgreSQLConnection.getConnection();
-        String query = String.format(
-                "INSERT INTO \"%1$s\" (\n" +
-                        "\"DataFilePath\",\n" +
-                        "\"DataGroupID\"\n" +
-                        ") VALUES (\n" +
-                        "\"%2$s\",\n" +
-                        "?\n" +
-                        ")",
-                        tableName,
-                        filePath
-                );
-        PreparedStatement psInsertFile = conn.prepareStatement(query);
-
-        // Get data group ID
-        query = String.format(
-                "SELECT DataGroupdID FROM \"%1$s\"\n" +
-                        "WHERE \"Year\" = ? AND \n" +
-                        "\"Day\" = ?",
-                        tableName
-                );
-        PreparedStatement psDG = conn.prepareStatement(query);
-        psDG.setString(1, String.valueOf(year));
-        psDG.setString(2, String.valueOf(day));
-        ResultSet rs = psDG.executeQuery();
-        try {
-            if(rs.next()) {
-                psInsertFile.setString(2, rs.getString(1));
-            }
-            else
-            {
-                query = String.format(
-                        "INSERT INTO \"%1$s\" (\n" +
-                                "\"Year\",\n" +
-                                "\"Day\")\n" +
-                                "VALUES (" +
-                                "%2$d,\n" +
-                                "%3$d)",
-                                tableName,
-                                year,
-                                day
-                        );
-                psDG = conn.prepareStatement(query);
-                rs = psDG.executeQuery();
-                query = String.format(
-                        "SELECT currval(\"%1$s\")",
-                        tableName + "_" + tableName + "ID_seq"
-                        );
-                rs = conn.prepareStatement(query).executeQuery();
-
-                if (rs.next()) {
-                    psInsertFile.setString(2, rs.getString(1));
-                } else {
-                    throw new SQLException("Couldn't get ID of inserted DataGroup row.");
-                }
-            }
-            rs = psInsertFile.executeQuery();
-
-            // Update states
-            Iterator<Integer> it = udpateStates.keySet().iterator();
-            while(it.hasNext())
-            {
-                keys.set(it.next());
-            }
-        } finally {
-            rs.close();
+    protected final void AddDownloadFile(int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        if(metaData.name.toLowerCase().equals("data"))
+        {
+            Schemas.insertIntoDownloadTable(Config.getInstance().getGlobalSchema(), GetPluginName(), LocalDate.ofYearDay(year, dayOfYear), filePath);
         }
-    }
+        else
+        {
+            Schemas.insertIntoExtraDownloadTable(Config.getInstance().getGlobalSchema(), GetPluginName(), LocalDate.ofYearDay(year, dayOfYear), metaData.name, filePath);
+        }
 
-    @Override
-    public final void notifyObservers(Object arg0) {
-        super.notifyObservers(arg0);
-    }
-
-    @Override
-    public final void notifyObservers() {
-        super.notifyObservers();
+        // Update States
+        Iterator<Integer> it = udpateStates.keySet().iterator();
+        while(it.hasNext())
+        {
+            keys.set(it.next());
+        }
     }
 }

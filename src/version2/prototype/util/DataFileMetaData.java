@@ -75,9 +75,9 @@ public class DataFileMetaData {
     }
 
     /**
-     * Creates a DataFileMetaData object, defaults the QC file path and environmental index to null and others to that given.
+     * Creates a DataFileMetaData object. Defaults the environmental index to null, extraDownloads list to an empty list, and others to that given.
      *
-     * @param dataName  - name of the data this file represents (data name = plugin name)
+     * @param dataName  - name of the data this file represents (name is that of what's found for the 'Name' attribute of the 'Download' node in the plugin metadata this file is for)
      * @param filePath  - full path to the data file
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to

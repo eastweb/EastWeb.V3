@@ -31,6 +31,7 @@ public abstract class Process implements Observer {
     public final PluginMetaData pluginMetaData;
     protected Scheduler scheduler;
     protected DatabaseCache outputCache;
+    protected EASTWebManager manager;
 
     /**
      * Creates a Process object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName, and acquiring its
@@ -44,9 +45,10 @@ public abstract class Process implements Observer {
      * @param processName  - name of this threaded process
      * @param outputCache  - DatabaseCache object to use when storing output of this process to notify next process of files available for processing
      */
-    protected Process(ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    protected Process(EASTWebManager manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache)
     {
+        this.manager = manager;
         this.processName = processName;
         this.scheduler = scheduler;
         this.pluginInfo = pluginInfo;
