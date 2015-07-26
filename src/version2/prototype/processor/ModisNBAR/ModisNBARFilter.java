@@ -68,7 +68,7 @@ public class ModisNBARFilter extends Filter {
 
                     // Read the entire raster
                     int[] array = new int[xSize * ySize];
-                    b.ReadRaster(0, 0, xSize, ySize, 5, array);
+                    b.ReadRaster(0, 0, xSize, ySize, array);
 
                     ModisTileData tileData = null;
                     try {
@@ -160,7 +160,7 @@ public class ModisNBARFilter extends Filter {
         // it will have all flags allowed (which is why only break at last case)
         switch(qcLevel)
         {
-        case "None":
+        case "NoScreening":
             allowedFlags.add("0100");
         case "Low":
             allowedFlags.add("0011");

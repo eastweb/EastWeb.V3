@@ -63,6 +63,6 @@
 		<Level>Highest</Level>
 		<Level>Moderate</Level>
 		<Level>Low</Level>
-		<Level>None</Level>
+		<Level>NoScreening</Level>
 	</QualityControl>
 </PluginMetadata>

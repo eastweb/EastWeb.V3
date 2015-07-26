@@ -7,6 +7,5 @@ public class ModisLSTMozaic extends Mozaic{
 
     public ModisLSTMozaic(ProcessData data) throws InterruptedException {
         super(data);
-        // TODO Auto-generated constructor stub
     }
 }
