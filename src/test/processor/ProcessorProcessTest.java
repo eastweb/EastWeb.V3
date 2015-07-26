@@ -74,7 +74,7 @@ public class ProcessorProcessTest {
             Process process = new GenericProcess<ProcessorWorker>(ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, scheduler, inputCache, outputCache);
 
             DataFileMetaData newData = new DataFileMetaData("Data", "filepath", dataGroupID, year, day);
-            inputCache.CacheFile(newData);
+            inputCache.CacheFiles(newData);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -8,17 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.apache.commons.io.FileUtils;
 
 import version2.prototype.DataDate;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
-import version2.prototype.Projection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -50,9 +45,9 @@ public class ProcessorWorker extends ProcessWorker {
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      */
     protected ProcessorWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
+            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
-        super("ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
+        super("ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         // TODO Auto-generated constructor stub
 
     }
@@ -149,7 +144,7 @@ public class ProcessorWorker extends ProcessWorker {
                     {
                         // assume QC is the first element in the extraDownloads
                         FileUtils.copyFileToDirectory(
-                                new File(dFile.extraDownloads.get(0).ReadMetaDataForProcessor().dataFilePath),
+                                new File(dFile.extraDownloads.get(0).dataFilePath),
                                 qcInputFolder);
                     }
                 }
@@ -192,7 +187,7 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             // cache to the database
-            DatabaseCache.CacheFile(toCache);
+            outputCache.CacheFiles(toCache);
         }
 
         return null;

@@ -9,6 +9,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 
 
 /**
@@ -30,9 +31,9 @@ public class IndicesWorker extends ProcessWorker{
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      */
     public IndicesWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
+            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
-        super("IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
+        super("IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         // TODO Auto-generated constructor stub
     }
 

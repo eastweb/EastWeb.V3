@@ -7,13 +7,13 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 
 /**
  * Abstract framework worker class. Frameworks are to use a concrete class that extends this class to handle doing their required processing work.
  *
  * @author michael.devos
  *
- * @param <V>  - return type of the Callable
  */
 public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
     public String processWorkerName;
@@ -22,6 +22,7 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
     protected ProjectInfoPlugin pluginInfo;
     protected PluginMetaData pluginMetaData;
     protected ArrayList<DataFileMetaData> cachedFiles;
+    protected DatabaseCache outputCache;
 
     /**
      * Creates a ProcessWorker object labeled by the given processWorkerName, owned by the given process, and set to work on the given cachedFiles.
@@ -34,7 +35,7 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
      * @param cachedFiles  - the files to process
      */
     protected ProcessWorker(String processWorkerName, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
+            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
         this.processWorkerName = processWorkerName;
         this.process = process;
@@ -42,5 +43,6 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
         this.pluginInfo = pluginInfo;
         this.pluginMetaData = pluginMetaData;
         this.cachedFiles = cachedFiles;
+        this.outputCache = outputCache;
     }
 }
