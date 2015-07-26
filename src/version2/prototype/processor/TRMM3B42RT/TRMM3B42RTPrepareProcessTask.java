@@ -1,9 +1,13 @@
 package version2.prototype.processor.TRMM3B42RT;
 
+import java.io.File;
+
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.PrepareProcessTask;
+import version2.prototype.util.FileSystem;
 import version2.prototype.util.GeneralListener;
 
 public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
@@ -66,14 +70,15 @@ public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
                     + date.getYear() + "/" + date.getMonth() + "/" + date.getDay();
             break;
         case 4:
-            outputFolder = project.GetWorkingDir() + "/mask/"
-                    + date.getYear() + "/" + date.getMonth() + "/" + date.getDay();
+            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    date.getYear(), date.getDayOfYear());
+            ;
             break;
         default:
-            outputFolder = project.GetWorkingDir() + "/output/"
-                    + date.getYear() + "/" + date.getMonth() + "/" + date.getDay();
-            break;
-
+            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    date.getYear(), date.getDayOfYear());
         }
 
         return outputFolder;

@@ -24,7 +24,6 @@ public class TRMM3B42RTConvert extends Convert {
         GdalUtils.register();
         synchronized (GdalUtils.lockObject) {
 
-
             int xSize = 1440;
             // size for 3B42RT
             int ySize = 480;

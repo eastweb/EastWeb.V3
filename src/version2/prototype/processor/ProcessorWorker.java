@@ -1,5 +1,6 @@
 package version2.prototype.processor;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map.Entry;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.apache.commons.io.FileUtils;
 
 import version2.prototype.DataDate;
 import version2.prototype.Process;
@@ -22,8 +24,8 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaD
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
-import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
 
 
@@ -75,38 +77,110 @@ public class ProcessorWorker extends ProcessWorker {
         Constructor<?> cnstPrepareTask =
                 classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, DataDate.class);
 
-        PrepareProcessTask prepareTask = (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, projectInfoFile.GetStartDate());
+        // Use a map to group CachedFiles based on the dates
+        HashMap<DataDate, ArrayList<DownloadFileMetaData>> map =
+                new HashMap<DataDate, ArrayList<DownloadFileMetaData>>();
 
-        for (Entry<Integer, String> step : processStep.entrySet())
+        // extract cachedFiles for download folder
+        for (DataFileMetaData dmd : cachedFiles)
         {
-            // TODO: extract cachedFiles for download folder
-            //copy them to the input folders
+            // read each cachedFile
+            DownloadFileMetaData downloaded = dmd.ReadMetaDataForProcessor();
 
-            Integer key = step.getKey();
+            // get the date of the downloaded file
+            DataDate thisDate = new DataDate(downloaded.day, downloaded.year);
 
-            Class<?> classProcess = Class.forName("version2.prototype.projection."
-                    + pluginName + step.getValue());
-
-            Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
-
-            Object process =  cnstProcess.newInstance(new Object[] {new ProcessData(
-                    prepareTask.getInputFolders(key),
-                    prepareTask.getOutputFolder(key),
-                    prepareTask.getQC(),
-                    prepareTask.getShapeFile(),
-                    prepareTask.getMaskFile(),
-                    prepareTask.getDataBands(),
-                    prepareTask.getQCBands(),
-                    prepareTask.getProjection())});
-            Method methodProcess = process.getClass().getMethod("run");
-            methodProcess.invoke(process);
+            // add the downloaded file into the downloaded ArrayList
+            ArrayList<DownloadFileMetaData> files = map.get(thisDate);
+            if (files != null)
+            {
+                // add the downloaded file into the arraylist associated with this date
+                files.add(downloaded);
+                // modify the map
+                map.put(thisDate, files);
+            }
         }
 
+        // for each date, process the steps associated with the plugin
+        for (Map.Entry<DataDate, ArrayList<DownloadFileMetaData>> entry : map.entrySet())
+        {
+            DataDate thisDay = entry.getKey();
 
-        /* TODO:  cache files by day
-         write to database
-          outputCache.CacheFiles(ArrayList<DataFileMetaData> completeListOfFilesForADay);
-         */
+            //create necessary folders for the date
+            PrepareProcessTask prepareTask =
+                    (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, thisDay);
+
+            String laststepOutputFolder = null;
+
+            // process the files for that date
+            for (Entry<Integer, String> step : processStep.entrySet())
+            {
+                Integer key = step.getKey();
+
+                Class<?> classProcess = Class.forName("version2.prototype.processor." + pluginName + step.getValue());
+
+                Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
+
+                Object process =  cnstProcess.newInstance(new Object[] {new ProcessData(
+                        prepareTask.getInputFolders(key),
+                        prepareTask.getOutputFolder(key),
+                        prepareTask.getQC(),
+                        prepareTask.getShapeFile(),
+                        prepareTask.getMaskFile(),
+                        prepareTask.getDataBands(),
+                        prepareTask.getQCBands(),
+                        prepareTask.getProjection())});
+
+                //copy the downloaded files to the input folders
+                String [] inputFolders = prepareTask.getInputFolders(key);
+
+                File dataInputFolder = new File(inputFolders[0]);
+                File qcInputFolder = null;
+                if (inputFolders.length > 1)    // it has a qc folder
+                {
+                    qcInputFolder =  new File(inputFolders[1]);
+                }
+
+                for (DownloadFileMetaData dFile : entry.getValue())
+                {
+                    FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
+                    if (qcInputFolder != null)
+                    {
+                        // assume QC is the first element in the extraDownloads
+                        FileUtils.copyFileToDirectory(
+                                new File(dFile.extraDownloads.get(0).ReadMetaDataForProcessor().dataFilePath),
+                                qcInputFolder);
+                    }
+                }
+
+                laststepOutputFolder = prepareTask.getOutputFolder(key);
+
+                Method methodProcess = process.getClass().getMethod("run");
+                methodProcess.invoke(process);
+            }
+
+            // check if the laststepOutputFolder is the  final outputFolder for the processor
+            String outputPath = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+                    outputFolder, thisDay.getYear(), thisDay.getDayOfYear());
+
+            // if not match, copy the files from the last step to the final outputfolder for  processor
+            if (!outputPath.equals(laststepOutputFolder))
+            {
+                if(!(new File(outputPath).exists()))
+                {
+                    FileUtils.forceMkdir(new File(outputPath));
+                }
+
+                // copy the output files to the system output directory
+                if (laststepOutputFolder != null)
+                {
+                    FileUtils.copyDirectoryToDirectory(new File(laststepOutputFolder), new File(outputPath));
+                }
+            }
+
+            //TODO:  cache files by day, write to database
+            //outputCache.CacheFiles(ArrayList<DataFileMetaData> completeListOfFilesForADay);
+        }
 
         return null;
     }

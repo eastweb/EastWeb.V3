@@ -69,12 +69,10 @@ public class TRMM3B42Downloader extends DownloaderFramework
                 // set the directory to store the download file
                 String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",
                         mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
-                System.out.println(dir);
 
                 if(!(new File(dir).exists()))
                 {
                     FileUtils.forceMkdir(new File(dir));
-                    System.out.println("created");
                 }
 
                 outFilePath = String.format("%s"+File.separator+"%s",dir, mFileToDownload);
