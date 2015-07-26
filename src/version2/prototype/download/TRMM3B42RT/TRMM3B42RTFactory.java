@@ -6,40 +6,36 @@ package version2.prototype.download.TRMM3B42RT;
 import java.io.IOException;
 
 import version2.prototype.DataDate;
-import version2.prototype.TaskState;
+import version2.prototype.EASTWebManager;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.download.DownloadFactory;
-import version2.prototype.download.GenericLocalDownloader;
-import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.download.LocalDownloader;
+import version2.prototype.download.LocalStorageDownloadFactory;
 import version2.prototype.util.DatabaseCache;
 
 /**
  * @author michael.devos
  *
  */
-public class TRMM3B42RTFactory implements DownloadFactory {
+public class TRMM3B42RTFactory extends DownloadFactory {
 
-    @Override
-    public LocalDownloader CreateLocalDownloader(int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache) {
-        return new GenericLocalDownloader(globalDLID, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+    protected TRMM3B42RTFactory(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache outputCache, DataDate startDate, DownloadMetaData dData) {
+        super(manager, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
     }
 
     @Override
-    public GlobalDownloader CreateGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
-        return new TRMM3B42RTGlobalDownloader(myID, "TRMM3B42RT",  metaData, listDatesFiles);
+    public DownloaderFactory CreateDownloadFactory(ListDatesFiles listDatesFiles) {
+        return new LocalStorageDownloadFactory(manager, "TRMM3B42RTDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
     @Override
-    public ListDatesFiles CreateListDatesFiles(DataDate startDate, DownloadMetaData data) throws IOException {
-        return new TRMM3B42RTListDatesFiles(startDate, data);
+    public ListDatesFiles CreateListDatesFiles() throws IOException {
+        return new TRMM3B42RTListDatesFiles(startDate, dData);
     }
-
-
 }

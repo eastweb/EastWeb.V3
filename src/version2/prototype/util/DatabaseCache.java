@@ -34,7 +34,8 @@ public class DatabaseCache extends Observable{
 
     private final String projectName;
     private final String pluginName;
-    private final String tableName;
+    private final String inputTableName;
+    private final String myTableName;
     private final ProcessName process;
     private final ArrayList<String> extraDownloadFiles;
     private Boolean filesAvailable;
@@ -45,6 +46,7 @@ public class DatabaseCache extends Observable{
      * @param projectName  - project schema to look under
      * @param pluginName  - plugin schema to look under
      * @param dataComingFrom  - name of process to check output of for available files to process
+     * @param extraDownloadFiles  - the data names of the extra download files associated with the related plugin metadata
      * @throws ParseException
      */
     public DatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException
@@ -57,16 +59,17 @@ public class DatabaseCache extends Observable{
 
         switch(process)
         {
-        case DOWNLOAD: tableName = "DownloadCache"; break;
-        case INDICES: tableName = "IndicesCache"; break;
-        case PROCESSOR: tableName = "ProcessCache"; break;
-        case SUMMARY: tableName = "SummaryCache"; break;
+        case DOWNLOAD: inputTableName = "DownloadCache"; myTableName = "ProcessorCache"; break;
+        case PROCESSOR: inputTableName = "ProcessorCache"; myTableName = "IndicesCache"; break;
+        case INDICES: inputTableName = "IndicesCache"; myTableName = null; break;
+        case SUMMARY: inputTableName = null; myTableName = null; break;
         default: throw new ParseException("ProcessName 'dataComingFrom' doesn't contain an expected framework identifier.", 0);
         }
     }
 
     /**
-     * Retrieves a list of files from the desired table that have yet to be retrieved by a ProcessWorker.
+     * Retrieves a set of files from the desired table that have yet to be retrieved by a ProcessWorker. This set will be at minimum the resulting files from computations done on all data files for
+     * a single day or however large the download composite size is in days.
      *
      * @return a list of available files to process
      * @throws IOException
@@ -85,7 +88,7 @@ public class DatabaseCache extends Observable{
 
         StringBuilder query = new StringBuilder(String.format(
                 "SELECT A.\"%1$sID\", A.\"DataFilePath\", ",
-                tableName
+                inputTableName
                 ));
         for(int i=0; i < extraDownloadFiles.size(); i++)
         {
@@ -93,9 +96,9 @@ public class DatabaseCache extends Observable{
         }
         query.append(String.format("I.\"Name\", A.\"DataGroupID\", D.\"Year\", D.\"DayOfYear\" \n" +
                 "FROM \"%1$s\".\"%2$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DataGroupID\" = D.\"DataGroupID\") INNER JOIN \"%3$s\".\"Index\" D ON (A.\"IndexID\" = I.\"IndexID\")\n" +
-                "WHERE \"Complete\" = TRUE AND \"Retrieved\" != TRUE FOR UPDATE;",
+                "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
                 schemaName,
-                tableName,
+                inputTableName,
                 Config.getInstance().getGlobalSchema()
                 ));
         final Statement stmt = conn.createStatement();
@@ -114,11 +117,11 @@ public class DatabaseCache extends Observable{
 
                     for(String dataName : extraDownloadFiles)
                     {
-                        tempExtraDownloads.add(new DataFileMetaData(dataName, rs.getString(dataName + "FilePath"), tempDateGroupID, tempYear, tempDayOfYear));
+                        tempExtraDownloads.add(new DataFileMetaData(dataName, rs.getString(dataName + "FilePath"), tempYear, tempDayOfYear));
                     }
 
-                    files.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), tempDateGroupID, tempYear, tempDayOfYear, tempExtraDownloads));
-                    rows.add(rs.getInt(tableName + "ID"));
+                    files.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear, tempExtraDownloads));
+                    rows.add(rs.getInt(inputTableName + "ID"));
                 }
 
                 for(int row : rows)
@@ -128,7 +131,7 @@ public class DatabaseCache extends Observable{
                                     "SET \"Retrieved\" = TRUE\n" +
                                     "WHERE \"%2$sID\" = %3$d",
                                     schemaName,
-                                    tableName,
+                                    inputTableName,
                                     row
                             ));
                 }
@@ -146,7 +149,7 @@ public class DatabaseCache extends Observable{
     }
 
     /**
-     * Used by LocalDownloaders to load new downloads from GlobalDownloader objects and update this cache for observers.
+     * Used by LocalDownloaders to load newly completed sets of downloads from GlobalDownloader objects and update this cache for observers.
      *
      * @param globalEASTWebSchema
      * @param projectName
@@ -166,7 +169,7 @@ public class DatabaseCache extends Observable{
             ArrayList<String> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = -1;
 
-        changes = Schemas.loadUnprocessedDownloadsToLocalDownloader(globalEASTWebSchema, projectName, pluginName, globalDownloaderInstanceID, startDate, extraDownloadFiles, daysPerInputFile);
+        changes = Schemas.loadUnprocessedDownloadsToLocalDownloader(globalEASTWebSchema, projectName, pluginName, startDate, extraDownloadFiles);
 
         synchronized(this)
         {
@@ -180,105 +183,57 @@ public class DatabaseCache extends Observable{
 
     /**
      * Add file(s) to the cache table this DatabaseCache object is mapped to. Notifies observers that files are available for further processing.
-     * All files will be submitted as a single transaction and associated to the given year and day.
+     * All files will be submitted as a single transaction and associated to the given year and day (or the number of days in the download composite size if larger than a day).
      *
-     * @param filesForASingleDay
+     * @param filesForASingleComposite  - A list of all files to be inserted and handled as a single download/data composite. The extraDownloads field will not be used.
+     * Each file needs its own DataFileMetaData instance. DataFileMetaData instances with data name of "Data" will be inserted into the 'Download' table and others will be
+     * added to the 'ExtraDownload' table.
      * @throws SQLException
      * @throws ParseException
-     * @throws ConfigReadException
      * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public void CacheFile(ArrayList<DataFileMetaData> filesForASingleDay) throws SQLException, ParseException, ConfigReadException, ClassNotFoundException
+    public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
-        String dateDirectory;
-
-        // Parse out date directory
-        Matcher matcher = filePathPattern.matcher(filePath);
-        if(matcher.find()) {
-            dateDirectory = filePath.substring(0, matcher.end());
-        } else {
-            throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day.", 0);
+        if(filesForASingleComposite.size() == 0) {
+            return;
         }
-
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
         Connection conn = PostgreSQLConnection.getConnection();
-        String query = String.format(
-                "INSERT INTO \"%1$s\".\"%2$s\" (\n" +
-                        "\"FullPath\",\n" +
-                        "\"DateDirectory\",\n" +
-                        "\"DataGroupID\"\n" +
-                        ") VALUES (\n" +
-                        "\"%3$s\",\n" +
-                        "\"%4$s\",\n" +
-                        "?\n" +
-                        ")",
-                        schemaName,
-                        tableName,
-                        filePath,
-                        dateDirectory
-                );
-        PreparedStatement psInsertFile = conn.prepareStatement(query);
+        Statement stmt = conn.createStatement();
 
-        // Get data group ID
-        query = String.format(
-                "SELECT DataGroupdID FROM \"%1$s\".\"%2$s\"\n" +
-                        "WHERE \"Year\" = ? AND \n" +
-                        "\"DayOfYear\" = ?",
+        IndicesFileMetaData temp = filesForASingleComposite.get(0).ReadMetaDataForSummary();
+        Integer dateGroupID = Schemas.getDateGroupID(Config.getInstance().getGlobalSchema(), LocalDate.ofYearDay(temp.year, temp.day), stmt);
+        Integer indexID = Schemas.getIndexID(Config.getInstance().getGlobalSchema(), temp.indexNm, stmt);
+        StringBuilder query = new StringBuilder(String.format(
+                "INSERT INTO \"%1$s\".\"%2$s\" \n" +
+                        "(\"DataFilePath\", \"DataGroupID\", \"IndexID\") VALUES \n" +
+                        "('" + temp.dataFilePath + "', " + dateGroupID + ", " + indexID + ")",
                         schemaName,
-                        tableName
-                );
-        PreparedStatement psDG = conn.prepareStatement(query);
-        psDG.setString(1, String.valueOf(year));
-        psDG.setString(2, String.valueOf(day));
-        ResultSet rs = psDG.executeQuery();
-        try {
-            if(rs.next()) {
-                psInsertFile.setInt(1, rs.getInt(1));
-            }
-            else
-            {
-                query = String.format(
-                        "INSERT INTO \"%1$s\".\"%2$s\" (\n" +
-                                "\"Year\",\n" +
-                                "\"DayOfYear\")\n" +
-                                "VALUES (" +
-                                "%3$d,\n" +
-                                "%4$d)",
-                                schemaName,
-                                tableName,
-                                year,
-                                day
-                        );
-                psDG = conn.prepareStatement(query);
-                rs = psDG.executeQuery();
-                query = String.format(
-                        "SELECT currval(\"%1$s\".\"%2$s\")",
-                        schemaName,
-                        tableName + "_" + tableName + "ID_seq"
-                        );
-                rs = conn.prepareStatement(query).executeQuery();
-
-                if (rs.next()) {
-                    psInsertFile.setInt(1, rs.getInt(1));
-                } else {
-                    throw new SQLException("Couldn't get ID of inserted DataGroup row.");
-                }
-            }
-            rs = psInsertFile.executeQuery();
-
-            synchronized(this)
-            {
-                filesAvailable = true;
-            }
-            setChanged();
-            notifyObservers();
-        } finally {
-            rs.close();
+                        myTableName
+                ));
+        for(int i=1; i < filesForASingleComposite.size(); i++)
+        {
+            temp = filesForASingleComposite.get(i).ReadMetaDataForSummary();
+            dateGroupID = Schemas.getDateGroupID(Config.getInstance().getGlobalSchema(), LocalDate.ofYearDay(temp.year, temp.day), stmt);
+            indexID = Schemas.getIndexID(Config.getInstance().getGlobalSchema(), temp.indexNm, stmt);
+            query.append(",\n('" + temp.dataFilePath + "', " + dateGroupID + ", " + indexID + ")");
         }
+        query.append(";");
+        stmt.execute(query.toString());
+
+        synchronized(this)
+        {
+            filesAvailable = true;
+        }
+        setChanged();
+        notifyObservers();
     }
 
     /**
-     * Can be used to get a DataFileMetaData object created from parsing the given file path.
+     * Can be used to get a DataFileMetaData object created from parsing the given file path. Assumes data name of the file is "Data".
      *
      * @param fullPath  - path to the data file
      * @return returns the DataFileMetaData equivalent to the information that could be parsed from the path string passed in
@@ -291,84 +246,18 @@ public class DatabaseCache extends Observable{
      */
     public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
-        String projectName, pluginName, tableName, dateDirectory;
-        int dataGroupID = -1, year, day;
+        int year, day;
 
         // Parse out date directory
         Matcher matcher = filePathPattern.matcher(fullPath);
         if(matcher.find()) {
-            projectName = matcher.group(1);
-            dateDirectory = fullPath.substring(0, matcher.end());
-
-            switch(matcher.group(2))
-            {
-            case "download": tableName = "DownloadCache"; break;
-            case "indices": tableName = "IndicesCache"; break;
-            case "process": tableName = "ProcessCache"; break;
-            case "summary": tableName = "SummaryCache"; break;
-            default: throw new ParseException("Filepath doesn't contain an expected framework identifier.", 0);
-            }
-
-            pluginName = matcher.group(3);
             year = Integer.parseInt(matcher.group(4));
             day = Integer.parseInt(matcher.group(5));
         } else {
             throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day.", 0);
         }
 
-        String schemaName = Schemas.getSchemaName(projectName, pluginName);
-        Connection conn = PostgreSQLConnection.getConnection();
-
-        // Get data group ID
-        String query = String.format(
-                "SELECT DataGroupdID FROM \"%1$s\".\"%2$s\"\n" +
-                        "WHERE \"Year\" = ? AND \n" +
-                        "\"DayOfYear\" = ?",
-                        schemaName,
-                        tableName
-                );
-        PreparedStatement psDG = conn.prepareStatement(query);
-        psDG.setString(1, String.valueOf(year));
-        psDG.setString(2, String.valueOf(day));
-        ResultSet rs = psDG.executeQuery();
-        try {
-            if(rs.next()) {
-                dataGroupID = rs.getInt(1);
-            }
-            else
-            {
-                query = String.format(
-                        "INSERT INTO \"%1$s\".\"%2$s\" (\n" +
-                                "\"Year\",\n" +
-                                "\"DayOfYear\")\n" +
-                                "VALUES (" +
-                                "%3$d,\n" +
-                                "%4$d)",
-                                schemaName,
-                                tableName,
-                                year,
-                                day
-                        );
-                psDG = conn.prepareStatement(query);
-                rs = psDG.executeQuery();
-                query = String.format(
-                        "SELECT currval(\"%1$s\".\"%2$s\")",
-                        schemaName,
-                        tableName + "_" + tableName + "ID_seq"
-                        );
-                rs = conn.prepareStatement(query).executeQuery();
-
-                if (rs.next()) {
-                    dataGroupID = rs.getInt(1);
-                } else {
-                    throw new SQLException("Couldn't get ID of inserted DataGroup row.");
-                }
-            }
-        } finally {
-            rs.close();
-        }
-
-        return new DataFileMetaData(fullPath, dateDirectory, dataGroupID, year, day);
+        return new DataFileMetaData("Data", fullPath, year, day);
     }
 
     public void NotifyObserversToCheckForPastUpdates()

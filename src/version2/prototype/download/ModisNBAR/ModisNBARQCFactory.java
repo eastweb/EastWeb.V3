@@ -1,4 +1,7 @@
-package version2.prototype.download.NldasForcing;
+/**
+ *
+ */
+package version2.prototype.download.ModisNBAR;
 
 import java.io.IOException;
 
@@ -19,20 +22,27 @@ import version2.prototype.util.DatabaseCache;
  * @author michael.devos
  *
  */
-public final class NldasForcingFactory extends DownloadFactory {
+public class ModisNBARQCFactory extends DownloadFactory {
 
-    protected NldasForcingFactory(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    protected ModisNBARQCFactory(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache outputCache, DataDate startDate, DownloadMetaData dData) {
-        super(manager, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache,  startDate, dData);
+        super(manager, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.download.DownloadFactory#CreateDownloadFactory()
+     */
     @Override
     public DownloaderFactory CreateDownloadFactory(ListDatesFiles listDatesFiles) {
-        return new LocalStorageDownloadFactory(manager, "NldasForcingDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
+        return new LocalStorageDownloadFactory(manager, "ModisNBARQCDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.download.DownloadFactory#CreateListDatesFiles(version2.prototype.DataDate, version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData)
+     */
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new NldasForcingListDatesFiles(startDate, dData);
+        return new ModisNBARQCListDatesFiles(startDate, dData);
     }
+
 }

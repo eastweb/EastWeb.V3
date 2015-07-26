@@ -32,15 +32,15 @@ public class Summary extends Process {
      * @param inputProcessName  - name of process to use the output of for its input
      * @param executor  - executor service to use to spawn worker threads
      */
-    public Summary(ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
+    public Summary(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
     {
-        super(ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, null);
+        super(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, null);
         inputCache.addObserver(this);
     }
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        EASTWebManager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles));
+        manager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles));
     }
 
 }
