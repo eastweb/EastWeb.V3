@@ -179,18 +179,19 @@ public class ProcessorWorker extends ProcessWorker {
                 }
             }
 
-            //TODO:  cache files by day, write to database
             // compile the output files in the outputPath to an arraylist of DataFileMetaData and save to the database
             ArrayList<DataFileMetaData> toCache = new ArrayList<DataFileMetaData>();
 
-            //
+            // get the list of files in the output folder
             File dir = new File(outputPath);
             File[] dirList = dir.listFiles();
 
+            // add each file into DataFileMetaData
             for (File oFile : dirList) {
                 toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), thisDay.getYear(), thisDay.getDayOfYear()));
             }
 
+            // cache to the database
             DatabaseCache.CacheFile(toCache);
         }
 
