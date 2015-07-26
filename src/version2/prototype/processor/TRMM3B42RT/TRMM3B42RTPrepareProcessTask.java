@@ -58,8 +58,11 @@ public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
 
         switch (stepId){
         case 1:
-            outputFolder = project.GetWorkingDir() + "/convert/"
-                    + date.getYear() + "/" + date.getMonth() + "/" + date.getDay();
+            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, processName)
+
+                    GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    date.getYear(), date.getDayOfYear());
             break;
         case 2:
             outputFolder = project.GetWorkingDir() + "/reproject/"

@@ -25,6 +25,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
 
@@ -179,7 +180,18 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             //TODO:  cache files by day, write to database
-            //outputCache.CacheFiles(ArrayList<DataFileMetaData> completeListOfFilesForADay);
+            // compile the output files in the outputPath to an arraylist of DataFileMetaData and save to the database
+            ArrayList<DataFileMetaData> toCache = new ArrayList<DataFileMetaData>();
+
+            //
+            File dir = new File(outputPath);
+            File[] dirList = dir.listFiles();
+
+            for (File oFile : dirList) {
+                toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), thisDay.getYear(), thisDay.getDayOfYear()));
+            }
+
+            DatabaseCache.CacheFile(toCache);
         }
 
         return null;
