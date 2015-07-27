@@ -4,8 +4,7 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<ListDatesFilesClass>TRMM3B42ListDatesFiles</ListDatesFilesClass>
-		<DownloaderClass>TRMM3B42RTDownloader</DownloaderClass>
+		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<mode>ftp</mode>
 		<FTP>
 			<hostName>disc2.nascom.nasa.gov</hostName>

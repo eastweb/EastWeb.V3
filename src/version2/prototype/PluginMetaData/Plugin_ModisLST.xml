@@ -4,8 +4,7 @@
 	<DaysPerInputData>8</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<ListDatesFilesClass>ModisNBARListDatesFiles</ListDatesFilesClass>
-		<DownloaderClass>ModisNBARDownloader</DownloaderClass>
+		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<mode>http</mode>
 		<HTTP>
 			<url>http://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.005/</url>
