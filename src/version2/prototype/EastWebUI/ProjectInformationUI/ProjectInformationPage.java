@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JTextField;
 import javax.swing.JList;
 import javax.swing.JComboBox;
@@ -35,6 +36,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.ModisTile;
 import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
 import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
 import version2.prototype.EastWebUI.PluginIndiciesUI.AssociatePluginPage;
@@ -57,7 +59,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -461,6 +462,8 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 JFileChooser chooser = new JFileChooser();
+                FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("tiff files", "tiff", "tif");
+                chooser.setFileFilter(xmlfilter);
                 chooser.setCurrentDirectory(new java.io.File("."));
                 chooser.setDialogTitle("Browse the folder to process");
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -567,6 +570,21 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tiles", null);
+
+                if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V') {
+                    JOptionPane.showMessageDialog(null, "Modis format: hddvdd  d=> digit");
+                    return;
+                } else{
+                    int horizontal = Integer.parseInt(String.format("%s%s", tile.toUpperCase().charAt(1), tile.toUpperCase().charAt(2)));
+                    int vertical = Integer.parseInt(String.format("%c%c", tile.toUpperCase().charAt(4), tile.toUpperCase().charAt(5)));
+
+                    if(horizontal < ModisTile.HORZ_MIN || horizontal > ModisTile.HORZ_MAX || vertical < ModisTile.VERT_MIN || vertical > ModisTile.VERT_MAX){
+                        JOptionPane.showMessageDialog(null, String.format("Horizontal has be to within %d-%d and Vertical has to be within %d-%d",
+                                ModisTile.HORZ_MIN , ModisTile.HORZ_MAX , ModisTile.VERT_MIN, ModisTile.VERT_MAX ));
+                        return;
+                    }
+
+                }
                 modisListModel.addElement(tile);
             }
         });
