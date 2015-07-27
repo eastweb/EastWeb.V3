@@ -44,7 +44,7 @@ public class ProcessorWorker extends ProcessWorker {
      * @param pluginMetaData  - information relevant to this ProcessWorker about the plugin being used gotten from the plugin's info xml.
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      */
-    protected ProcessorWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    public ProcessorWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
         super("ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
