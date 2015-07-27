@@ -2,6 +2,7 @@ package version2.prototype.download;
 
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Observable;
 import java.util.TreeMap;
@@ -20,6 +21,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
 /**
@@ -51,8 +53,10 @@ public abstract class LocalDownloader extends Process {
         TreeMap<Integer, Integer> newFiles = new TreeMap<Integer, Integer>();
         if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
         {
+            final Connection conn = PostgreSQLConnection.getConnection();
             newFiles = Schemas.udpateExpectedResults(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData,
-                    pluginInfo.GetIndicies().size(), projectInfoFile.GetSummaries());
+                    pluginInfo.GetIndicies().size(), projectInfoFile.GetSummaries(), conn);
+            conn.close();
             updateAvailable = true;
         } else {
             updateAvailable = false;

@@ -21,7 +21,8 @@ import version2.prototype.util.FileSystem;
 
 public class NldasForcingGlobalDownloader extends GlobalDownloader {
 
-    public NldasForcingGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
+    public NldasForcingGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    IOException, SQLException {
         super(myID, pluginName, metaData, listDatesFiles);
     }
 
@@ -72,7 +73,7 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
                     try { downloader.download(); }
                     catch (Exception e1) { e1.printStackTrace(); }
 
-                    try { AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath()); }
+                    try { AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath()); }
                     catch (ClassNotFoundException | SQLException e) { e.printStackTrace(); }
                 }
 

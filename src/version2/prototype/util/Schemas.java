@@ -122,166 +122,7 @@ public class Schemas {
         int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
 
         // Add entry to EASTWeb global ExpectedResults table
-        addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn, stmt);
-    }
-
-    /**
-     * Registers a GlobalDownlaoder's instance ID within to allow it to be associated with downloads in the future.
-     *
-     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
-     * @param pluginName  - plugin name the GlobalDownloader is associated with
-     * @return TRUE if successful, FALSE otherwise
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    public static boolean registerGlobalDownloader(String globalEASTWebSchema, String pluginName) throws ClassNotFoundException, SQLException,
-    ParserConfigurationException, SAXException, IOException
-    {
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-        final int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
-
-        ResultSet rs;
-        rs = stmt.executeQuery("SELECT \"GlobalDownloaderID\" FROM \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" WHERE \"PluginID\" = " + pluginID + ";");
-        if(rs != null && rs.next()) {
-            return true;
-        }
-
-        return stmt.execute("INSERT INTO \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" (\"PluginID\") VALUES (" + pluginID + ");");
-    }
-
-    /**
-     * Loads unprocessed downloads from the associated GlobalDownloader, identified from the given parameters, to the table for the identified LocalDownloader table.
-     *
-     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
-     * @param projectName  - name of the project to load downloads to
-     * @param pluginName  - name of the plugin to load downloads to
-     * @param startDate  - the start date to load downloads beginning from this time or later
-     * @param extraDownloadFiles  - names of extra download files listed within the plugin metadata
-     * @return number of records effected
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    public static int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
-            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
-    {
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-        final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
-        final String mSchemaName = getSchemaName(projectName, pluginName);
-
-        StringBuilder query = new StringBuilder(String.format(
-                "INSERT INTO \"%1$s\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", ",
-                mSchemaName
-                ));
-        for(String dataName : extraDownloadFiles)
-        {
-            query.append("\"" + dataName + "FilePath\", ");
-        }
-        query.append("\"DateGroupID\") "
-                + "SELECT D.\"DownloadID\", D.\"DataFilePath\", ");
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append(Character.toChars('E' + i)[0] + ".\"FilePath\", ");
-        }
-        query.append(String.format("D.\"DateGroupID\" "
-                + "FROM \"%1$s\".\"Download\" D ",
-                globalEASTWebSchema
-                ));
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append(String.format(
-                    "INNER JOIN \"%1$s\".\"ExtraDownload\" " + Character.toChars('E' + i)[0] + " ON D.\"DownloadID\"=" + Character.toChars('E' + i)[0] + ".\"DownloadID\" ",
-                    globalEASTWebSchema));
-        }
-        query.append(String.format("LEFT JOIN \"%1$s\".\"DownloadCache\" L ON D.\"DownloadID\"=L.\"DownloadID\" "
-                + "WHERE D.\"GlobalDownloaderID\" = " + gdlID + " AND D.\"Complete\" = TRUE AND L.\"DownloadID\" IS NULL",
-                mSchemaName));
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append(" AND " + Character.toChars('E' + i)[0] + ".\"DataName\"='" + extraDownloadFiles.get(i) + "';");
-        }
-        return stmt.executeUpdate(query.toString());
-    }
-
-    /**
-     * Retrieves all downloaded files which were downloaded for the specified plugin.
-     *
-     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
-     * @param pluginName  - name of the plugin to get downloaded files for
-     * @return a list of all downloaded files as DataFileMetaData objects
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    public static ArrayList<DataFileMetaData> getAllDownloadedFiles(String globalEASTWebSchema, String pluginName) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-    IOException {
-        Map<Integer, DataFileMetaData> downloadsList = new HashMap<Integer, DataFileMetaData>();
-        ArrayList<Integer> downloadIDs = new ArrayList<Integer>(0);
-
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-        final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
-
-        ResultSet rs;
-        rs = stmt.executeQuery(String.format(
-                "SELECT A.\"DownloadID\", A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" FROM \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B " +
-                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND B.\"DateGroupID\"=A.\"DateGroupID\";",
-                        globalEASTWebSchema
-                ));
-        if(rs != null)
-        {
-            while(rs.next())
-            {
-                downloadIDs.add(rs.getInt("DownloadID"));
-                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
-            }
-        }
-        rs.close();
-
-        StringBuilder query = new StringBuilder(String.format(
-                "SELECT A.\"DownloadID\", A.\"DataName\", A.\"FilePath\", B.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
-                        "FROM \"%1$s\".\"ExtraDownload\" A INNER JOIN \"%1$s\".\"Download\" D ON A.\"DownloadID\"=D.\"DownloadID\" " +
-                        "INNER JOIN \"%1$s\".\"DateGroup\" B ON D.\"DateGroupID\"=B.\"DateGroupID\" WHERE ",
-                        globalEASTWebSchema));
-
-        if(downloadIDs.size() > 0)
-        {
-            query.append("A.\"DownloadID\"=" + downloadIDs.get(0));
-            for(int i=1; i < downloadIDs.size(); i++)
-            {
-                query.append(" OR A.\"DownloadID\"=" + downloadIDs.get(i));
-            }
-        }
-
-        rs = stmt.executeQuery(query.toString());
-        if(rs != null)
-        {
-            DownloadFileMetaData temp;
-            ArrayList<DataFileMetaData> extraDownloads;
-            while(rs.next())
-            {
-                temp = downloadsList.get(rs.getInt("DownloadID")).ReadMetaDataForProcessor();
-                extraDownloads = new ArrayList<DataFileMetaData>();
-                for(DownloadFileMetaData dData : temp.extraDownloads)
-                {
-                    extraDownloads.add(new DataFileMetaData(dData));
-                }
-                extraDownloads.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
-                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", temp.dataFilePath, temp.year, temp.day, extraDownloads));
-            }
-        }
-        rs.close();
-
-        return new ArrayList<DataFileMetaData>(downloadsList.values());
+        addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn);
     }
 
     /**
@@ -301,14 +142,13 @@ public class Schemas {
      * @throws SAXException
      * @throws IOException
      */
-    public static TreeMap<Integer, Integer> udpateExpectedResults(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices,
-            ArrayList<ProjectInfoSummary> summaries) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException {
+    public static TreeMap<Integer, Integer> udpateExpectedResults(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, Integer daysPerInputFile,
+            Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries, Connection conn) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException {
         TreeMap<Integer, Integer> results = new TreeMap<Integer, Integer>();
-        if(globalEASTWebSchema == null || startDate == null || daysPerInputFile == null || numOfIndices == null || summaries == null || projectName == null || pluginName == null) {
+        if(globalEASTWebSchema == null || startDate == null || daysPerInputFile == null || numOfIndices == null || summaries == null || projectName == null || pluginName == null || conn == null) {
             return results;
         }
 
-        final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
         //        final String mSchemaName = getSchemaName(projectName, pluginName);
 
@@ -341,125 +181,15 @@ public class Schemas {
         return results;
     }
 
-    /**
-     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
-     * @param pluginName  - the plugin name to associated the newly inserted extra download file to
-     * @param dataDate  - the date of which the new extra download file is for
-     * @param dataName  - the name of the data the new extra download file contains
-     * @param dataFilePath  - the file path of the new extra download file
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    public static void insertIntoExtraDownloadTable(String globalEASTWebSchema, String pluginName, LocalDate dataDate, String dataName, String dataFilePath)
-            throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
-    {
-        if(globalEASTWebSchema == null || pluginName == null || dataDate == null || dataName == null || dataFilePath == null) {
-            return;
-        }
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-        int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
-        int dateGroupID = getDateGroupID(globalEASTWebSchema, dataDate, stmt);
-        int downloadID = getDownloadID(globalEASTWebSchema, gdlID, dateGroupID);
-
-        String query = String.format(
-                "INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES\n" +
-                        "(" + downloadID + ", '" + dataName + "', '" + dataFilePath + "');",
-                        globalEASTWebSchema
-                );
-        stmt.executeUpdate(query);
-    }
-
-    /**
-     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
-     * @param pluginName  - the plugin name to associated the newly inserted download file to
-     * @param dataDate  - the date of which the new download file is for
-     * @param dataFilePath  - the file path of the new download file
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    public static void insertIntoDownloadTable(String globalEASTWebSchema, String pluginName, LocalDate dataDate, String dataFilePath)
-            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-        int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
-        int filesPerDay = getFilesPerDayValue(globalEASTWebSchema, pluginName);
-        int dateGroupID = getDateGroupID(globalEASTWebSchema, dataDate, stmt);
-
-        // Insert new download
-        String query = String.format(
-                "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
-                        "(" + gdlID + ", " + dateGroupID + ", '" + dataFilePath + "');",
-                        globalEASTWebSchema
-                );
-        stmt.executeUpdate(query);
-
-        // Check if all files downloaded for any additional days
-        Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
-        ResultSet rs;
-        rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalEASTWebSchema + "\".\"Download\" " +
-                "WHERE \"GlobalDownloaderID\" = " + gdlID + " AND \"Complete\" = FALSE " +
-                "GROUP BY \"DateGroupID\";");
-        if(rs != null)
-        {
-            while(rs.next())
-            {
-                countOfDates.put(rs.getInt("DateGroupID"), rs.getInt("DateGroupIDCount"));
-            }
-        }
-        rs.close();
-        rs = stmt.executeQuery("SELECT B.\"DateGroupID\", COUNT(B.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalEASTWebSchema + "\".\"ExtraDownload\" A " +
-                "INNER JOIN \"" + globalEASTWebSchema + "\".\"Download\" B ON A.\"DownloadID\" = B.\"DownloadID\" " +
-                "WHERE B.\"GlobalDownloaderID\" = " + gdlID + " AND B.\"Complete\" = FALSE " +
-                "GROUP BY \"DateGroupID\";");
-        if(rs != null)
-        {
-            while(rs.next())
-            {
-                countOfDates.put(rs.getInt("DateGroupID"), countOfDates.get(rs.getInt("DateGroupID")) + rs.getInt("DateGroupIDCount"));
-            }
-        }
-        rs.close();
-
-        Iterator<Integer> iterator = countOfDates.keySet().iterator();
-        ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
-        int idx;
-        while(iterator.hasNext())
-        {
-            idx = iterator.next();
-            if(countOfDates.get(idx) == filesPerDay)
-            {
-                datesCompleted.add(idx);
-            }
-        }
-
-        if(datesCompleted.size() > 0)
-        {
-            StringBuilder update = new StringBuilder("UPDATE \"" + globalEASTWebSchema + "\" SET \"Completed\" = TRUE WHERE \"DateGroupID\" = " + datesCompleted.get(0));
-            for(int i=1; i < datesCompleted.size(); i++)
-            {
-                update.append(" OR \"DateGroupID\" = " + datesCompleted.get(i));
-            }
-            update.append(";");
-            stmt.executeUpdate(update.toString());
-        }
-    }
-
-    public static int getDateGroupID(final String globalEASTWebSchema, final LocalDate date, final Statement stmt) throws SQLException {
-        if(globalEASTWebSchema == null || date == null) {
+    public static int getDateGroupID(final String globalEASTWebSchema, final LocalDate lDate, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null || lDate == null) {
             return -1;
         }
 
         ResultSet rs;
         int dateGroupID = -1;
         rs = stmt.executeQuery(String.format("SELECT \"DateGroupID\" FROM \"%1$s\".\"DateGroup\" " +
-                "WHERE \"Year\"=" + date.getYear() + " AND \"DayOfYear\"=" + date.getDayOfYear() + ";",
+                "WHERE \"Year\"=" + lDate.getYear() + " AND \"DayOfYear\"=" + lDate.getDayOfYear() + ";",
                 globalEASTWebSchema
                 ));
         if(rs != null && rs.next())
@@ -468,11 +198,11 @@ public class Schemas {
         }
         else{
             stmt.executeUpdate(String.format(
-                    "INSERT INTO \"%1$s\".\"DateGroup\" (\"Year\", \"DayOfYear\") VALUES (" + date.getYear() + "," + date.getDayOfYear() + ");",
+                    "INSERT INTO \"%1$s\".\"DateGroup\" (\"Year\", \"DayOfYear\") VALUES (" + lDate.getYear() + "," + lDate.getDayOfYear() + ");",
                     globalEASTWebSchema
                     ));
             rs = stmt.executeQuery(String.format("SELECT \"DateGroupID\" FROM \"%1$s\".\"DateGroup\" " +
-                    "WHERE \"Year\"=" + date.getYear() + " AND \"DayOfYear\"=" + date.getDayOfYear() + ";",
+                    "WHERE \"Year\"=" + lDate.getYear() + " AND \"DayOfYear\"=" + lDate.getDayOfYear() + ";",
                     globalEASTWebSchema
                     ));
             if(rs != null && rs.next())
@@ -517,9 +247,69 @@ public class Schemas {
         return indexID;
     }
 
-    private static int getFilesPerDayValue(String globalEASTWebSchema, String pluginName) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
+    public static int getGlobalDownloaderID(String globalEASTWebSchema, String pluginName, final Statement stmt) throws SQLException,
+    ClassNotFoundException, ParserConfigurationException, SAXException, IOException
+    {
+        int ID = -1;
+
+        int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
+
+        ResultSet rs;
+        rs = stmt.executeQuery(String.format(
+                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \n" +
+                        "\"PluginID\"=" + pluginID + " ORDER BY \"GlobalDownloaderID\" DESC;",
+                        globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            ID = rs.getInt("GlobalDownloaderID");
+        }
+        rs.close();
+        return ID;
+    }
+
+    public static int getPluginID(String globalEASTWebSchema, String pluginName, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null || pluginName == null) {
+            return -1;
+        }
+
+        ResultSet rs;
+        int pluginID = -1;
+        rs = stmt.executeQuery(String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
+                "WHERE \"Name\"='" + pluginName + "';",
+                globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            pluginID = rs.getInt("PluginID");
+        }
+        rs.close();
+        return pluginID;
+    }
+
+    public static int getDownloadID(String globalEASTWebSchema, Integer globalDownloaderID, Integer dateGroupID, final Statement stmt) throws ClassNotFoundException, SQLException,
+    ParserConfigurationException, SAXException, IOException {
+        if(globalEASTWebSchema == null || globalDownloaderID == null || dateGroupID == null) {
+            return -1;
+        }
+
+        int ID = -1;
+
+        ResultSet rs;
+        rs = stmt.executeQuery(String.format(
+                "SELECT \"DownloadID\" FROM \"%1$s\".\"Download\" WHERE \n" +
+                        "\"GlobalDownloaderID\" = " + globalDownloaderID + " AND \"DateGroupID\" = " + dateGroupID + ";",
+                        globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            ID = rs.getInt("DownloadID");
+        }
+        rs.close();
+        return ID;
+    }
+
+    public static int getFilesPerDayValue(String globalEASTWebSchema, String pluginName, final Statement stmt) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int filesPerDay = -1;
 
         ResultSet rs;
@@ -537,51 +327,35 @@ public class Schemas {
         return filesPerDay;
     }
 
-    private static int getDownloadID(String globalEASTWebSchema, Integer globalDownloaderID, Integer dateGroupID) throws ClassNotFoundException, SQLException,
-    ParserConfigurationException, SAXException, IOException {
-        if(globalEASTWebSchema == null || globalDownloaderID == null || dateGroupID == null) {
-            return -1;
+    /**
+     * Gets the name of the specified project's database schema. The returned name does not need to be quoted to use in SQL.
+     *
+     * @param projectName  - project name the schema is for
+     * @param pluginName  - plugin name the schema is for
+     * @return name of schema within database formatted as seen in database
+     */
+    public static String getSchemaName(String projectName, String pluginName) {
+        String name = projectName + "_" + pluginName;
+        StringBuilder builder = new StringBuilder();
+        int codePointOut, codePointIn;
+
+        for (int index = 0; index < name.length(); index += Character.charCount(codePointIn)) {
+            codePointIn = name.codePointAt(index);
+
+            if (codePointIn >= 'A' && codePointIn <= 'Z') {
+                // Convert upper-case letters to lower-case
+                codePointOut = codePointIn - 'A' + 'a';
+            } else if ((codePointIn >= 'a' && codePointIn <= 'z') ||
+                    (codePointIn >= '0' && codePointIn <= '9')) {
+                // Preserve lower-case letters and digits
+                codePointOut = codePointIn;
+            } else {
+                // Make anything else an underscore
+                codePointOut = '_';
+            }
+            builder.appendCodePoint(codePointOut);
         }
-
-        int ID = -1;
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-
-        ResultSet rs;
-        rs = stmt.executeQuery(String.format(
-                "SELECT \"DownloadID\" FROM \"%1$s\".\"Download\" WHERE \n" +
-                        "\"GlobalDownloaderID\" = " + globalDownloaderID + " AND \"DateGroupID\" = " + dateGroupID + ";",
-                        globalEASTWebSchema
-                ));
-        if(rs != null && rs.next())
-        {
-            ID = rs.getInt("DownloadID");
-        }
-        rs.close();
-        return ID;
-    }
-
-    private static int getGlobalDownloaderID(String globalEASTWebSchema, String pluginName) throws SQLException,
-    ClassNotFoundException, ParserConfigurationException, SAXException, IOException
-    {
-        int ID = -1;
-        final Connection conn = PostgreSQLConnection.getConnection();
-        final Statement stmt = conn.createStatement();
-
-        int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
-
-        ResultSet rs;
-        rs = stmt.executeQuery(String.format(
-                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \n" +
-                        "\"PluginID\"=" + pluginID + " ORDER BY \"GlobalDownloaderID\" DESC;",
-                        globalEASTWebSchema
-                ));
-        if(rs != null && rs.next())
-        {
-            ID = rs.getInt("GlobalDownloaderID");
-        }
-        rs.close();
-        return ID;
+        return FileSystem.StandardizeName(builder.toString());
     }
 
     private static int getTemporalSummaryCompositionStrategyID(String globalEASTWebSchema, String temporalSummaryCompositionStrategyClassName, Statement stmt) throws SQLException {
@@ -623,25 +397,6 @@ public class Schemas {
         return expectedResultsID;
     }
 
-    private static int getPluginID(String globalEASTWebSchema, String pluginName, final Statement stmt) throws SQLException {
-        if(globalEASTWebSchema == null || pluginName == null) {
-            return -1;
-        }
-
-        ResultSet rs;
-        int pluginID = -1;
-        rs = stmt.executeQuery(String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
-                "WHERE \"Name\"='" + pluginName + "';",
-                globalEASTWebSchema
-                ));
-        if(rs != null && rs.next())
-        {
-            pluginID = rs.getInt("PluginID");
-        }
-        rs.close();
-        return pluginID;
-    }
-
     private static int getProjectID(String globalEASTWebSchema, String projectName, final Statement stmt) throws SQLException
     {
         if(globalEASTWebSchema == null) {
@@ -664,7 +419,7 @@ public class Schemas {
     }
 
     private static int[] addExpectedResults(String globalEASTWebSchema, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries, Integer projectID,
-            Integer pluginID, final Connection conn, final Statement stmt) throws SQLException{
+            Integer pluginID, final Connection conn) throws SQLException{
         if(globalEASTWebSchema == null || startDate == null || daysPerInputFile == null || numOfIndices == null || summaries == null || projectID == null || pluginID == null) {
             return new int[0];
         }
@@ -1151,36 +906,5 @@ public class Schemas {
                 mSchemaName
                 );
         stmt.executeUpdate(query);
-    }
-
-    /**
-     * Gets the name of the specified project's database schema. The returned name does not need to be quoted to use in SQL.
-     *
-     * @param projectName  - project name the schema is for
-     * @param pluginName  - plugin name the schema is for
-     * @return name of schema within database formatted as seen in database
-     */
-    public static String getSchemaName(String projectName, String pluginName) {
-        String name = projectName + "_" + pluginName;
-        StringBuilder builder = new StringBuilder();
-        int codePointOut, codePointIn;
-
-        for (int index = 0; index < name.length(); index += Character.charCount(codePointIn)) {
-            codePointIn = name.codePointAt(index);
-
-            if (codePointIn >= 'A' && codePointIn <= 'Z') {
-                // Convert upper-case letters to lower-case
-                codePointOut = codePointIn - 'A' + 'a';
-            } else if ((codePointIn >= 'a' && codePointIn <= 'z') ||
-                    (codePointIn >= '0' && codePointIn <= '9')) {
-                // Preserve lower-case letters and digits
-                codePointOut = codePointIn;
-            } else {
-                // Make anything else an underscore
-                codePointOut = '_';
-            }
-            builder.appendCodePoint(codePointOut);
-        }
-        return FileSystem.StandardizeName(builder.toString());
     }
 }

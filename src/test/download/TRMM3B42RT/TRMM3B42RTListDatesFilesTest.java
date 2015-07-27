@@ -54,15 +54,14 @@ public class TRMM3B42RTListDatesFilesTest {
                 "/data/TRMM/Gridded/Derived_Products/3B42RT/Daily/", "anonymous", "anonymous");
         HTTP myHttp = null;
         String className = null;
-        String listDatesFilesClassName = null;
-        String downloaderClassName = null;
+        String downloadFactoryClassName = null;
         String timeZone = null;
         int filesPerDay = -1;
         String datePatternStr = "\\d{4}";
         String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
         LocalDate ld = LocalDate.parse("Wed Mar 01 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
         writer.write("OriginDate: " + ld.toString() + "\n");
-        data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, listDatesFilesClassName, downloaderClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
     }
 
     /**

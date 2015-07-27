@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -23,7 +22,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
-import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
@@ -41,9 +39,13 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      * @throws ClassNotFoundException
      * @throws NoSuchMethodException
      * @throws SecurityException
+     * @throws SQLException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     public GenericLocalStorageGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, String downloaderClassName)
-            throws ClassNotFoundException, NoSuchMethodException, SecurityException
+            throws ClassNotFoundException, NoSuchMethodException, SecurityException, ParserConfigurationException, SAXException, IOException, SQLException
     {
         super(myID, pluginName, metaData, listDatesFiles);
         Class<?> downloaderClass = Class.forName(downloaderClassName);

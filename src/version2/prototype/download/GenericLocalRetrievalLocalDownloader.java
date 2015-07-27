@@ -47,8 +47,8 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
         try {
-            outputCache.loadUnprocessedDownloadsToLocalDownloader(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), globalDLID, projectInfoFile.GetStartDate(),
-                    pluginMetaData.ExtraDownloadFiles, pluginMetaData.DaysPerInputData);
+            outputCache.loadUnprocessedDownloadsToLocalDownloader(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
+                    pluginMetaData.ExtraDownloadFiles);
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }

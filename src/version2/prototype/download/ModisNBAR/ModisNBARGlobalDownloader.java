@@ -26,8 +26,8 @@ import version2.prototype.util.FileSystem;
 //@Author: Yi Liu
 public class ModisNBARGlobalDownloader extends GlobalDownloader
 {
-    public ModisNBARGlobalDownloader(int myID, String pluginName,
-            DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
+    public ModisNBARGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    IOException, SQLException {
         super(myID, pluginName, metaData, listDatesFiles);
         // TODO Auto-generated constructor stub
     }
@@ -123,7 +123,7 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
                         }
 
                         try {
-                            AddDownloadFile("data", dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                            AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (ClassNotFoundException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();

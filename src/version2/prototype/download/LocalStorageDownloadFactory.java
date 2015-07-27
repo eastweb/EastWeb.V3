@@ -3,6 +3,13 @@
  */
 package version2.prototype.download;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import version2.prototype.EASTWebManager;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -63,7 +70,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
         GlobalDownloader downloader = null;
         try {
             downloader = new GenericLocalStorageGlobalDownloader(myID, pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, downloaderClassName);
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | ParserConfigurationException | SAXException | IOException | SQLException e) {
             e.printStackTrace();
         }
         return downloader;

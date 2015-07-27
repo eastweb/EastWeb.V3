@@ -3,6 +3,7 @@ package test.download.TRMM3B42RT;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class TestTRMM3B42RTGlobalDownloader {
     }
 
     @Test
-    public void testRun() throws IOException {
+    public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         ListDatesFiles ldf= new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data);
 
         TRMM3B42RTGlobalDownloader ttd = new TRMM3B42RTGlobalDownloader(1,"TRMM3B42RT",  data,  ldf);

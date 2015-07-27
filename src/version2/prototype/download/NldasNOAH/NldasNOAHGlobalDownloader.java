@@ -24,7 +24,8 @@ import version2.prototype.util.FileSystem;
 
 public class NldasNOAHGlobalDownloader extends GlobalDownloader{
 
-    public NldasNOAHGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) {
+    public NldasNOAHGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    IOException, SQLException {
         super(myID, pluginName, metaData, listDatesFiles);
     }
 

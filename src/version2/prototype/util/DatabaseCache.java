@@ -151,13 +151,11 @@ public class DatabaseCache extends Observable{
     /**
      * Used by LocalDownloaders to load newly completed sets of downloads from GlobalDownloader objects and update this cache for observers.
      *
-     * @param globalEASTWebSchema
-     * @param projectName
-     * @param pluginName
-     * @param globalDownloaderInstanceID
-     * @param startDate
-     * @param extraDownloadFiles
-     * @param daysPerInputFile
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param projectName  - name of the project to load downloads to
+     * @param pluginName  - name of the plugin to load downloads to
+     * @param startDate  - the start date to load downloads beginning from this time or later
+     * @param extraDownloadFiles  - names of extra download files listed within the plugin metadata
      * @return number of records effected
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -165,12 +163,53 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws IOException
      */
-    public int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, int globalDownloaderInstanceID, LocalDate startDate,
-            ArrayList<String> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    public int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
+            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = -1;
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, stmt);
+        final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
 
-        changes = Schemas.loadUnprocessedDownloadsToLocalDownloader(globalEASTWebSchema, projectName, pluginName, startDate, extraDownloadFiles);
+        // Set up query
+        StringBuilder query = new StringBuilder(String.format(
+                "INSERT INTO \"%1$s\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", ",
+                mSchemaName
+                ));
+        for(String dataName : extraDownloadFiles)
+        {
+            query.append("\"" + dataName + "FilePath\", ");
+        }
+        query.append("\"DateGroupID\") "
+                + "SELECT D.\"DownloadID\", D.\"DataFilePath\", ");
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(Character.toChars('E' + i)[0] + ".\"FilePath\", ");
+        }
+        query.append(String.format("D.\"DateGroupID\" "
+                + "FROM \"%1$s\".\"Download\" D ",
+                globalEASTWebSchema
+                ));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(String.format(
+                    "INNER JOIN \"%1$s\".\"ExtraDownload\" " + Character.toChars('E' + i)[0] + " ON D.\"DownloadID\"=" + Character.toChars('E' + i)[0] + ".\"DownloadID\" ",
+                    globalEASTWebSchema));
+        }
+        query.append(String.format("LEFT JOIN \"%1$s\".\"DownloadCache\" L ON D.\"DownloadID\"=L.\"DownloadID\" "
+                + "WHERE D.\"GlobalDownloaderID\" = " + gdlID + " AND D.\"Complete\" = TRUE AND L.\"DownloadID\" IS NULL",
+                mSchemaName));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(" AND " + Character.toChars('E' + i)[0] + ".\"DataName\"='" + extraDownloadFiles.get(i) + "';");
+        }
 
+        // Execute and get number of rows effected
+        changes = stmt.executeUpdate(query.toString());
+        stmt.close();
+        conn.close();
+
+        // Notify observers
         synchronized(this)
         {
             filesAvailable = true;
@@ -223,6 +262,8 @@ public class DatabaseCache extends Observable{
         }
         query.append(";");
         stmt.execute(query.toString());
+        stmt.close();
+        conn.close();
 
         synchronized(this)
         {
