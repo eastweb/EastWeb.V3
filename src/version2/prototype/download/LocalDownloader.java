@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.EASTWebManager;
 import version2.prototype.Process;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -27,11 +28,10 @@ import version2.prototype.util.Schemas;
  */
 public abstract class LocalDownloader extends Process {
     private boolean updateAvailable;
-    private final int globalDLID;
+    protected final int globalDLID;
 
-    protected LocalDownloader(int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache) {
-        super(ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+    protected LocalDownloader(EASTWebManager manager, int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache) {
+        super(manager, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         updateAvailable = false;
         this.globalDLID = globalDLID;
     }

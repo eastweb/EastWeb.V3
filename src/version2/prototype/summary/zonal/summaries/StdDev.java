@@ -1,11 +1,11 @@
 package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.SummaryNameInstancePair;
-import version2.prototype.summary.zonal.SummaryCalculation;
 
 /**
  * Represents a standard deviation summary based on indexed double values.
@@ -14,7 +14,7 @@ import version2.prototype.summary.zonal.SummaryCalculation;
  *
  */
 public class StdDev extends SummaryCalculation {
-    private SummaryCalculation sqrSum;
+    //    private SummaryCalculation sqrSum;
     private SummaryCalculation count;
     private SummaryCalculation mean;
 
@@ -31,10 +31,9 @@ public class StdDev extends SummaryCalculation {
      * @see version2.prototype.summary.summaries.SummaryCalculation#put(int, double)
      */
     @Override
-    public void put(int index, double value) {
-        sqrSum.put(index, value);
-        count.put(index, value);
-        mean.put(index, value);
+    protected void put(int index, double value) {
+        //        count.add(index, value);
+        //        mean.add(index, value);
     }
 
     /* (non-Javadoc)
@@ -42,16 +41,33 @@ public class StdDev extends SummaryCalculation {
      */
     @Override
     public Map<Integer, Double> getResult() {
-        if(map.size() == 0 || map.size() < count.getResult().size()){
-            Map<Integer, Double> sqrSumRs = sqrSum.getResult();
+        if(resultMap.size() == 0 || resultMap.size() < count.getResult().size()){
+            Map<Integer, LinkedList<Double>> valuesMap = count.getValuesMap();
+            //            Map<Integer, Double> sqrSumRs = sqrSum.getResult();
             Map<Integer, Double> countRs = count.getResult();
             Map<Integer, Double> meanRs = mean.getResult();
+            double tempSum;
+            double tempResult;
 
             for(int i=0; i < countRs.size(); i++){
-                map.put(i, Math.sqrt((sqrSumRs.get(i)/countRs.get(i)) - (meanRs.get(i) * meanRs.get(i))));
+                //                tempResult = Math.sqrt((sqrSumRs.get(i)/countRs.get(i)) - (meanRs.get(i) * meanRs.get(i)));       // Approximation, accurate up to 14 decimal positions.
+                tempSum = 0;
+                for(int x_i=0; x_i < valuesMap.get(i).size(); x_i++)
+                {
+                    // Summation of the squared differences from the mean
+                    tempSum += Math.pow(valuesMap.get(i).get(x_i) - meanRs.get(i), 2);
+                }
+                // Calculate variance and std dev
+                tempResult = Math.sqrt(tempSum / valuesMap.get(i).size());
+                if(new Double(tempResult).equals(Double.NaN)) {
+                    resultMap.put(i, 0.0);
+                }
+                else{
+                    resultMap.put(i, tempResult);
+                }
             }
         }
-        return map;
+        return resultMap;
     }
 
     /* (non-Javadoc)
@@ -61,7 +77,7 @@ public class StdDev extends SummaryCalculation {
     public ArrayList<SummaryCalculation> getDistinctLeaflets() {
         ArrayList<SummaryCalculation> temp = new ArrayList<SummaryCalculation>(3);
         temp.add(count);
-        temp.add(sqrSum);
+        //        temp.add(sqrSum);
         ArrayList<SummaryCalculation> fromMean = mean.getDistinctLeaflets();
         if(fromMean.get(0).getClass().getSimpleName().equalsIgnoreCase("sum")) {
             temp.add(fromMean.get(0));
@@ -76,8 +92,9 @@ public class StdDev extends SummaryCalculation {
      */
     @Override
     protected void registerDependencies() {
-        sqrSum = new SqrSum(col);
-        sqrSum = col.register(new SummaryNameInstancePair(sqrSum.getCanonicalName(), sqrSum));
+        SummariesCollection col = getCollection();
+        //        sqrSum = new SqrSum(col);
+        //        sqrSum = col.register(new SummaryNameInstancePair(sqrSum.getCanonicalName(), sqrSum));
 
         count = new Count(col);
         count = col.register(new SummaryNameInstancePair(count.getCanonicalName(), count));

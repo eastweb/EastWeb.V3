@@ -39,8 +39,7 @@ public class TemporalSummaryCalculator {
      * @param fileStore  - common storage object to hold files waiting to be merged together into a single composite
      */
     public TemporalSummaryCalculator(String workingDir, String projectName, String pluginName, File inRasterFile, DataDate inDataDate,
-            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy,
-            MergeStrategy mergeStrategy) {
+            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) {
         this.workingDir = workingDir;
         this.projectName = projectName;
         this.pluginName = pluginName;
@@ -66,16 +65,20 @@ public class TemporalSummaryCalculator {
         // Check if interpolation is needed
         if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getCalendar()) % daysPerInputData == 0) {
             inputFileSet.add(inRasterFile);
-        } else {
-            // If the given interpolation strategy is be able to complete the required composites..
-            if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getCalendar()) % intStrategy.GetResultingNumOfFiles() == 0) {
-                inputFileSet = intStrategy.Interpolate(inRasterFile, daysPerInputData);
-            }
-            // Else, if it isn't then the default daily interpolation strategy.
-            else {
-
-            }
         }
+
+        /* Interpolation is not supported currently. */
+
+        //        else {
+        //            // If the given interpolation strategy is able to complete the required composites..
+        //            if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getCalendar()) % intStrategy.GetResultingNumOfFiles() == 0) {
+        //                inputFileSet = intStrategy.Interpolate(inRasterFile, daysPerInputData);
+        //            }
+        //            // Else, if it isn't then the default daily interpolation strategy.
+        //            else {
+        //
+        //            }
+        //        }
 
         TemporalSummaryComposition tempComp;
         for(File inRaster : inputFileSet)

@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -17,7 +18,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
 /**
@@ -39,6 +39,7 @@ public class Schemas {
      * @param extraDownloadFiles  - used to define cache tables and global Download table
      * @param startDate  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param daysPerInputFile  - relevant to plugin entry creation and calculating the number of expected results to be found in ZonalStat
+     * @param filesPerDay  - relevant to plugin entry creation and calculating when downloads are ready to be loaded by the LocalDownloader
      * @param numOfIndices  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param summaries  - relevant to calculating the number of expected results to be found in ZonalStat
      * @param createTablesWithForeignKeyReferences  - TRUE if tables should be created so that their foreign keys are referencing their corresponding primary keys, FALSE if tables shouldn't be created
@@ -48,8 +49,8 @@ public class Schemas {
      * @throws ClassNotFoundException
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
-            ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries,
-            boolean createTablesWithForeignKeyReferences) throws ConfigReadException, SQLException, ClassNotFoundException
+            ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices,
+            ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences) throws ConfigReadException, SQLException, ClassNotFoundException
     {
         final Connection conn = postgreSQLConnection;
         final Statement stmt = conn.createStatement();
@@ -118,55 +119,188 @@ public class Schemas {
         int projectID = addProject(globalEASTWebSchema, projectName, numOfIndices, stmt, dateGroupID);
 
         // Add entry to Plugin table if not already existing
-        int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, stmt);
+        int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
 
         // Add entry to EASTWeb global ExpectedResults table
         addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn, stmt);
     }
 
-    public static ArrayList<DataFileMetaData> getAllDownloadedFiles(String globalEASTWebSchema, String pluginName, int instanceID,
-            ArrayList<DownloadMetaData> extraDownloadFiles, int daysPerInputFile) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-            IOException {
-        ArrayList<DataFileMetaData> downloads = new ArrayList<DataFileMetaData>();
+    /**
+     * Registers a GlobalDownlaoder's instance ID within to allow it to be associated with downloads in the future.
+     *
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param pluginName  - plugin name the GlobalDownloader is associated with
+     * @return TRUE if successful, FALSE otherwise
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static boolean registerGlobalDownloader(String globalEASTWebSchema, String pluginName) throws ClassNotFoundException, SQLException,
+    ParserConfigurationException, SAXException, IOException
+    {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        final int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
+
+        ResultSet rs;
+        rs = stmt.executeQuery("SELECT \"GlobalDownloaderID\" FROM \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" WHERE \"PluginID\" = " + pluginID + ";");
+        if(rs != null && rs.next()) {
+            return true;
+        }
+
+        return stmt.execute("INSERT INTO \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" (\"PluginID\") VALUES (" + pluginID + ");");
+    }
+
+    /**
+     * Loads unprocessed downloads from the associated GlobalDownloader, identified from the given parameters, to the table for the identified LocalDownloader table.
+     *
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param projectName  - name of the project to load downloads to
+     * @param pluginName  - name of the plugin to load downloads to
+     * @param startDate  - the start date to load downloads beginning from this time or later
+     * @param extraDownloadFiles  - names of extra download files listed within the plugin metadata
+     * @return number of records effected
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
+            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
+        final String mSchemaName = getSchemaName(projectName, pluginName);
+
+        StringBuilder query = new StringBuilder(String.format(
+                "INSERT INTO \"%1$s\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", ",
+                mSchemaName
+                ));
+        for(String dataName : extraDownloadFiles)
+        {
+            query.append("\"" + dataName + "FilePath\", ");
+        }
+        query.append("\"DateGroupID\") "
+                + "SELECT D.\"DownloadID\", D.\"DataFilePath\", ");
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(Character.toChars('E' + i)[0] + ".\"FilePath\", ");
+        }
+        query.append(String.format("D.\"DateGroupID\" "
+                + "FROM \"%1$s\".\"Download\" D ",
+                globalEASTWebSchema
+                ));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(String.format(
+                    "INNER JOIN \"%1$s\".\"ExtraDownload\" " + Character.toChars('E' + i)[0] + " ON D.\"DownloadID\"=" + Character.toChars('E' + i)[0] + ".\"DownloadID\" ",
+                    globalEASTWebSchema));
+        }
+        query.append(String.format("LEFT JOIN \"%1$s\".\"DownloadCache\" L ON D.\"DownloadID\"=L.\"DownloadID\" "
+                + "WHERE D.\"GlobalDownloaderID\" = " + gdlID + " AND D.\"Complete\" = TRUE AND L.\"DownloadID\" IS NULL",
+                mSchemaName));
+        for(int i=0; i < extraDownloadFiles.size(); i++)
+        {
+            query.append(" AND " + Character.toChars('E' + i)[0] + ".\"DataName\"='" + extraDownloadFiles.get(i) + "';");
+        }
+        return stmt.executeUpdate(query.toString());
+    }
+
+    /**
+     * Retrieves all downloaded files which were downloaded for the specified plugin.
+     *
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param pluginName  - name of the plugin to get downloaded files for
+     * @return a list of all downloaded files as DataFileMetaData objects
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static ArrayList<DataFileMetaData> getAllDownloadedFiles(String globalEASTWebSchema, String pluginName) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
+    IOException {
         Map<Integer, DataFileMetaData> downloadsList = new HashMap<Integer, DataFileMetaData>();
+        ArrayList<Integer> downloadIDs = new ArrayList<Integer>(0);
 
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
-        final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName, daysPerInputFile, instanceID);
+        final int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
 
         ResultSet rs;
         rs = stmt.executeQuery(String.format(
-                "SELECT A.*, B.* FROM  \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND D.\"DateGroupID\"=A.\"DateGroupID\";",
-                globalEASTWebSchema
+                "SELECT A.\"DownloadID\", A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" FROM \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B " +
+                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND B.\"DateGroupID\"=A.\"DateGroupID\";",
+                        globalEASTWebSchema
                 ));
         if(rs != null)
         {
             while(rs.next())
             {
-                downloadsList.put(rs.getInt("A.DateGroupID"), new DataFileMetaData("Data", rs.getString("A.DataFilePath"), rs.getInt("A.DateGroupID"), rs.getInt("B.Year"), rs.getInt("B.Day")));
+                downloadIDs.add(rs.getInt("DownloadID"));
+                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
             }
         }
         rs.close();
 
-        rs = stmt.executeQuery(String.format(
-                "SELECT * FROM  \"%1$s\".\"ExtraDownload\" WHERE A.\"GlobalDownloaderID\"=" + gdlID + ";",
-                globalEASTWebSchema
-                ));
+        StringBuilder query = new StringBuilder(String.format(
+                "SELECT A.\"DownloadID\", A.\"DataName\", A.\"FilePath\", B.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
+                        "FROM \"%1$s\".\"ExtraDownload\" A INNER JOIN \"%1$s\".\"Download\" D ON A.\"DownloadID\"=D.\"DownloadID\" " +
+                        "INNER JOIN \"%1$s\".\"DateGroup\" B ON D.\"DateGroupID\"=B.\"DateGroupID\" WHERE ",
+                        globalEASTWebSchema));
+
+        if(downloadIDs.size() > 0)
+        {
+            query.append("A.\"DownloadID\"=" + downloadIDs.get(0));
+            for(int i=1; i < downloadIDs.size(); i++)
+            {
+                query.append(" OR A.\"DownloadID\"=" + downloadIDs.get(i));
+            }
+        }
+
+        rs = stmt.executeQuery(query.toString());
         if(rs != null)
         {
             DownloadFileMetaData temp;
+            ArrayList<DataFileMetaData> extraDownloads;
             while(rs.next())
             {
-                temp = downloadsList.get(rs.getInt("DateGroupID")).ReadMetaDataForProcessor();
-                downloadsList.put(temp.dataGroupID, new DataFileMetaData("Data", temp.dataFilePath, temp.dataGroupID, temp.year, temp.day, temp.extraDownloads.add(
-                        new DataFileMetaData(dataName, dataFilePath, dataGroupID, year, day))));
+                temp = downloadsList.get(rs.getInt("DownloadID")).ReadMetaDataForProcessor();
+                extraDownloads = new ArrayList<DataFileMetaData>();
+                for(DownloadFileMetaData dData : temp.extraDownloads)
+                {
+                    extraDownloads.add(new DataFileMetaData(dData));
+                }
+                extraDownloads.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                downloadsList.put(rs.getInt("DownloadID"), new DataFileMetaData("Data", temp.dataFilePath, temp.year, temp.day, extraDownloads));
             }
         }
         rs.close();
 
-        return downloads;
+        return new ArrayList<DataFileMetaData>(downloadsList.values());
     }
 
+    /**
+     * Updates the ExpectedResults table calculations starting from the given start date up to, but not including, tomorrow.
+     *
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param projectName  - name of project to update ExpectedResults for
+     * @param pluginName  - name of plugin to update ExpectedResults for
+     * @param startDate  - date to start calculations from
+     * @param daysPerInputFile  - the number of days expected per input file specified in the plugin metadata
+     * @param numOfIndices  - the number of indices specified in the project metadata
+     * @param summaries  - the summaries specified in the project metadata
+     * @return the number of updates done for each summary specified in the project metadata indexed by the value for their 'ID' attribute
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
     public static TreeMap<Integer, Integer> udpateExpectedResults(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices,
             ArrayList<ProjectInfoSummary> summaries) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException {
         TreeMap<Integer, Integer> results = new TreeMap<Integer, Integer>();
@@ -178,9 +312,8 @@ public class Schemas {
         final Statement stmt = conn.createStatement();
         //        final String mSchemaName = getSchemaName(projectName, pluginName);
 
-        int dateGroupID = getDateGroupID(globalEASTWebSchema, startDate, stmt);
-        int projectID = getProjectID(globalEASTWebSchema, projectName, numOfIndices, stmt, dateGroupID);
-        int pluginID = getPluginID(globalEASTWebSchema, pluginName, daysPerInputFile, stmt);
+        int projectID = getProjectID(globalEASTWebSchema, projectName, stmt);
+        int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
 
         PreparedStatement preparedStmt = conn.prepareStatement(String.format(
                 "UPDATE \"%1$s\".\"ExpectedResults\" SET \"ExpectedTotalResults\" = ? WHERE \"ExpectedResultsID\" = ?;",
@@ -208,37 +341,239 @@ public class Schemas {
         return results;
     }
 
-    public static void insertIntoExtraDownloadTable(String globalEASTWebSchema, final Statement stmt, String pluginName, Integer globalDownloaderInstanceID, LocalDate date,
-            String dataName, String dataFilePath, int daysPerInputFile) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
+    /**
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param pluginName  - the plugin name to associated the newly inserted extra download file to
+     * @param dataDate  - the date of which the new extra download file is for
+     * @param dataName  - the name of the data the new extra download file contains
+     * @param dataFilePath  - the file path of the new extra download file
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static void insertIntoExtraDownloadTable(String globalEASTWebSchema, String pluginName, LocalDate dataDate, String dataName, String dataFilePath)
+            throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
-        if(globalEASTWebSchema == null || pluginName == null || globalDownloaderInstanceID == null || date == null || dataName == null || dataFilePath == null) {
+        if(globalEASTWebSchema == null || pluginName == null || dataDate == null || dataName == null || dataFilePath == null) {
             return;
         }
-
-        int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName, daysPerInputFile, globalDownloaderInstanceID);
-        int dateGroupID = getDateGroupID(globalEASTWebSchema, date, stmt);
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
+        int dateGroupID = getDateGroupID(globalEASTWebSchema, dataDate, stmt);
+        int downloadID = getDownloadID(globalEASTWebSchema, gdlID, dateGroupID);
 
         String query = String.format(
-                "INSERT INTO TABLE \"%1$s\".\"ExtraDownload\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"DataFilePath\") VALUES\n" +
-                        "(" + gdlID + ", " + dateGroupID + ", " + dataName + ", " + dataFilePath + ");",
+                "INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES\n" +
+                        "(" + downloadID + ", '" + dataName + "', '" + dataFilePath + "');",
                         globalEASTWebSchema
                 );
         stmt.executeUpdate(query);
     }
 
-    private static int getGlobalDownloaderID(String globalEASTWebSchema, String pluginName, int daysPerInputFile, int instanceID) throws SQLException,
+    /**
+     * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
+     * @param pluginName  - the plugin name to associated the newly inserted download file to
+     * @param dataDate  - the date of which the new download file is for
+     * @param dataFilePath  - the file path of the new download file
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static void insertIntoDownloadTable(String globalEASTWebSchema, String pluginName, LocalDate dataDate, String dataFilePath)
+            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        int gdlID = getGlobalDownloaderID(globalEASTWebSchema, pluginName);
+        int filesPerDay = getFilesPerDayValue(globalEASTWebSchema, pluginName);
+        int dateGroupID = getDateGroupID(globalEASTWebSchema, dataDate, stmt);
+
+        // Insert new download
+        String query = String.format(
+                "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
+                        "(" + gdlID + ", " + dateGroupID + ", '" + dataFilePath + "');",
+                        globalEASTWebSchema
+                );
+        stmt.executeUpdate(query);
+
+        // Check if all files downloaded for any additional days
+        Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
+        ResultSet rs;
+        rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalEASTWebSchema + "\".\"Download\" " +
+                "WHERE \"GlobalDownloaderID\" = " + gdlID + " AND \"Complete\" = FALSE " +
+                "GROUP BY \"DateGroupID\";");
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                countOfDates.put(rs.getInt("DateGroupID"), rs.getInt("DateGroupIDCount"));
+            }
+        }
+        rs.close();
+        rs = stmt.executeQuery("SELECT B.\"DateGroupID\", COUNT(B.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalEASTWebSchema + "\".\"ExtraDownload\" A " +
+                "INNER JOIN \"" + globalEASTWebSchema + "\".\"Download\" B ON A.\"DownloadID\" = B.\"DownloadID\" " +
+                "WHERE B.\"GlobalDownloaderID\" = " + gdlID + " AND B.\"Complete\" = FALSE " +
+                "GROUP BY \"DateGroupID\";");
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                countOfDates.put(rs.getInt("DateGroupID"), countOfDates.get(rs.getInt("DateGroupID")) + rs.getInt("DateGroupIDCount"));
+            }
+        }
+        rs.close();
+
+        Iterator<Integer> iterator = countOfDates.keySet().iterator();
+        ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
+        int idx;
+        while(iterator.hasNext())
+        {
+            idx = iterator.next();
+            if(countOfDates.get(idx) == filesPerDay)
+            {
+                datesCompleted.add(idx);
+            }
+        }
+
+        if(datesCompleted.size() > 0)
+        {
+            StringBuilder update = new StringBuilder("UPDATE \"" + globalEASTWebSchema + "\" SET \"Completed\" = TRUE WHERE \"DateGroupID\" = " + datesCompleted.get(0));
+            for(int i=1; i < datesCompleted.size(); i++)
+            {
+                update.append(" OR \"DateGroupID\" = " + datesCompleted.get(i));
+            }
+            update.append(";");
+            stmt.executeUpdate(update.toString());
+        }
+    }
+
+    public static int getDateGroupID(final String globalEASTWebSchema, final LocalDate date, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null || date == null) {
+            return -1;
+        }
+
+        ResultSet rs;
+        int dateGroupID = -1;
+        rs = stmt.executeQuery(String.format("SELECT \"DateGroupID\" FROM \"%1$s\".\"DateGroup\" " +
+                "WHERE \"Year\"=" + date.getYear() + " AND \"DayOfYear\"=" + date.getDayOfYear() + ";",
+                globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            dateGroupID = rs.getInt("DateGroupID");
+        }
+        else{
+            stmt.executeUpdate(String.format(
+                    "INSERT INTO \"%1$s\".\"DateGroup\" (\"Year\", \"DayOfYear\") VALUES (" + date.getYear() + "," + date.getDayOfYear() + ");",
+                    globalEASTWebSchema
+                    ));
+            rs = stmt.executeQuery(String.format("SELECT \"DateGroupID\" FROM \"%1$s\".\"DateGroup\" " +
+                    "WHERE \"Year\"=" + date.getYear() + " AND \"DayOfYear\"=" + date.getDayOfYear() + ";",
+                    globalEASTWebSchema
+                    ));
+            if(rs != null && rs.next())
+            {
+                dateGroupID = rs.getInt("DateGroupID");
+            }
+        }
+        rs.close();
+        return dateGroupID;
+    }
+
+    public static Integer getIndexID(final String globalEASTWebSchema, final String indexNm, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null || indexNm == null) {
+            return null;
+        }
+
+        ResultSet rs;
+        int indexID = -1;
+        rs = stmt.executeQuery(String.format("SELECT \"IndexID\" FROM \"%1$s\".\"Index\" " +
+                "WHERE \"Name\"='" + indexNm + "';",
+                globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            indexID = rs.getInt("IndexID");
+        }
+        else{
+            stmt.executeUpdate(String.format(
+                    "INSERT INTO \"%1$s\".\"Index\" (\"Name\") VALUES ('" + indexNm + "');",
+                    globalEASTWebSchema
+                    ));
+            rs = stmt.executeQuery(String.format("SELECT \"IndexID\" FROM \"%1$s\".\"Index\" " +
+                    "WHERE \"Name\"='" + indexNm + "';",
+                    globalEASTWebSchema
+                    ));
+            if(rs != null && rs.next())
+            {
+                indexID = rs.getInt("IndexID");
+            }
+        }
+        rs.close();
+        return indexID;
+    }
+
+    private static int getFilesPerDayValue(String globalEASTWebSchema, String pluginName) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        int filesPerDay = -1;
+
+        ResultSet rs;
+        rs = stmt.executeQuery(String.format(
+                "SELECT \"FilesPerDay\" FROM \"%1$s\".\"Plugin\" WHERE \n" +
+                        "\"Name\" = '" + pluginName + "';",
+                        globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            filesPerDay = rs.getInt("FilesPerDay");
+        }
+        rs.close();
+
+        return filesPerDay;
+    }
+
+    private static int getDownloadID(String globalEASTWebSchema, Integer globalDownloaderID, Integer dateGroupID) throws ClassNotFoundException, SQLException,
+    ParserConfigurationException, SAXException, IOException {
+        if(globalEASTWebSchema == null || globalDownloaderID == null || dateGroupID == null) {
+            return -1;
+        }
+
+        int ID = -1;
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+
+        ResultSet rs;
+        rs = stmt.executeQuery(String.format(
+                "SELECT \"DownloadID\" FROM \"%1$s\".\"Download\" WHERE \n" +
+                        "\"GlobalDownloaderID\" = " + globalDownloaderID + " AND \"DateGroupID\" = " + dateGroupID + ";",
+                        globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            ID = rs.getInt("DownloadID");
+        }
+        rs.close();
+        return ID;
+    }
+
+    private static int getGlobalDownloaderID(String globalEASTWebSchema, String pluginName) throws SQLException,
     ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
         int ID = -1;
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
 
-        int pluginID = getPluginID(globalEASTWebSchema, pluginName, daysPerInputFile, stmt);
+        int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
 
         ResultSet rs;
         rs = stmt.executeQuery(String.format(
-                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GloablDownloader\" WHERE \n" +
-                        "\"PluginID\" = " + pluginID + " AND \"UniqueInstanceNum\" = " + instanceID + ";",
+                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \n" +
+                        "\"PluginID\"=" + pluginID + " ORDER BY \"GlobalDownloaderID\" DESC;",
                         globalEASTWebSchema
                 ));
         if(rs != null && rs.next())
@@ -288,15 +623,15 @@ public class Schemas {
         return expectedResultsID;
     }
 
-    private static int getPluginID(String globalEASTWebSchema, String pluginName, Integer daysPerInputFile, final Statement stmt) throws SQLException {
-        if(globalEASTWebSchema == null || pluginName == null || daysPerInputFile == null) {
+    private static int getPluginID(String globalEASTWebSchema, String pluginName, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null || pluginName == null) {
             return -1;
         }
 
         ResultSet rs;
         int pluginID = -1;
         rs = stmt.executeQuery(String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
-                "WHERE \"Name\"='" + pluginName + "' AND \"DaysPerInputFile\"=" + daysPerInputFile + ";",
+                "WHERE \"Name\"='" + pluginName + "';",
                 globalEASTWebSchema
                 ));
         if(rs != null && rs.next())
@@ -307,16 +642,16 @@ public class Schemas {
         return pluginID;
     }
 
-    private static int getProjectID(String globalEASTWebSchema, String projectName, Integer numOfIndices, final Statement stmt, Integer dateGroupID) throws SQLException
+    private static int getProjectID(String globalEASTWebSchema, String projectName, final Statement stmt) throws SQLException
     {
-        if(globalEASTWebSchema == null || numOfIndices == null || dateGroupID == null) {
+        if(globalEASTWebSchema == null) {
             return -1;
         }
 
         ResultSet rs;
         int projectID = -1;
         rs = stmt.executeQuery(String.format("SELECT \"ProjectID\" FROM \"%1$s\".\"Project\" " +
-                "WHERE \"Name\"='" + projectName + "' AND \"StartDate_DateGroupID\"=" + dateGroupID + " AND \"IndicesCount\"=" + numOfIndices + ";",
+                "WHERE \"Name\"='" + projectName + "';",
                 globalEASTWebSchema
                 ));
         if(rs != null && rs.next())
@@ -354,7 +689,8 @@ public class Schemas {
         return preparedStmt.executeBatch();
     }
 
-    private static int addPlugin(String globalEASTWebSchema, String pluginName, Integer daysPerInputFile, final Statement stmt) throws SQLException {
+    private static int addPlugin(final String globalEASTWebSchema, final String pluginName, final Integer daysPerInputFile, final Integer filesPerDay,
+            final Statement stmt) throws SQLException {
         if(globalEASTWebSchema == null || pluginName == null || daysPerInputFile == null) {
             return -1;
         }
@@ -362,7 +698,7 @@ public class Schemas {
         ResultSet rs;
         int pluginID = -1;
         rs = stmt.executeQuery(String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
-                "WHERE \"Name\"='" + pluginName + "' AND \"DaysPerInputFile\"=" + daysPerInputFile + ";",
+                "WHERE \"Name\"='" + pluginName + "';",
                 globalEASTWebSchema
                 ));
         if(rs != null && rs.next())
@@ -371,11 +707,12 @@ public class Schemas {
         }
         else{
             stmt.executeUpdate(String.format(
-                    "INSERT INTO \"%1$s\".\"Plugin\" (\"Name\", \"DaysPerInputFile\") VALUES ('" + pluginName + "'," + daysPerInputFile + ");",
-                    globalEASTWebSchema
+                    "INSERT INTO \"%1$s\".\"Plugin\" (\"Name\", \"DaysPerInputFile\", \"FilesPerDay\") VALUES " +
+                            "('" + pluginName + "', " + daysPerInputFile + ", " + filesPerDay + ");",
+                            globalEASTWebSchema
                     ));
             rs = stmt.executeQuery(String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
-                    "WHERE \"Name\"='" + pluginName + "' AND \"DaysPerInputFile\"=" + daysPerInputFile + ";",
+                    "WHERE \"Name\"='" + pluginName + "';",
                     globalEASTWebSchema
                     ));
             if(rs != null && rs.next())
@@ -421,39 +758,6 @@ public class Schemas {
         return projectID;
     }
 
-    private static int getDateGroupID(String globalEASTWebSchema, LocalDate date, final Statement stmt) throws SQLException {
-        if(globalEASTWebSchema == null || date == null) {
-            return -1;
-        }
-
-        ResultSet rs;
-        int dateGroupID = -1;
-        rs = stmt.executeQuery(String.format("SELECT \"DateGroupID\" FROM \"%1$s\".\"DateGroup\" " +
-                "WHERE \"Year\"=" + date.getYear() + " AND \"Day\"=" + date.getDayOfYear() + ";",
-                globalEASTWebSchema
-                ));
-        if(rs != null && rs.next())
-        {
-            dateGroupID = rs.getInt("DateGroupID");
-        }
-        else{
-            stmt.executeUpdate(String.format(
-                    "INSERT INTO \"%1$s\".\"DateGroup\" (\"Year\", \"Day\") VALUES (" + date.getYear() + "," + date.getDayOfYear() + ");",
-                    globalEASTWebSchema
-                    ));
-            rs = stmt.executeQuery(String.format("SELECT \"DateGroupID\" FROM \"%1$s\".\"DateGroup\" " +
-                    "WHERE \"Year\"=" + date.getYear() + " AND \"Day\"=" + date.getDayOfYear() + ";",
-                    globalEASTWebSchema
-                    ));
-            if(rs != null && rs.next())
-            {
-                dateGroupID = rs.getInt("DateGroupID");
-            }
-        }
-        rs.close();
-        return dateGroupID;
-    }
-
     private static void createIndicesCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName,
             boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null || extraDownloadFiles == null) {
@@ -466,21 +770,13 @@ public class Schemas {
                         "CREATE TABLE \"%1$s\".\"IndicesCache\"\n" +
                                 "(\n" +
                                 "  \"IndicesCacheID\" serial PRIMARY KEY,\n" +
-                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n",
-                                mSchemaName
-                        ));
-        for(String fileName : extraDownloadFiles)
-        {
-            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
-        }
-        query_.append(
-                String.format(
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
-                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                                "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Index\" (\"IndexID\") " : "") + "DEFAULT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
+                                mSchemaName,
                                 globalEASTWebSchema
                         ));
         stmt.executeUpdate(query_.toString());
@@ -498,20 +794,13 @@ public class Schemas {
                         "CREATE TABLE \"%1$s\".\"ProcessorCache\"\n" +
                                 "(\n" +
                                 "  \"ProcessorCacheID\" serial PRIMARY KEY,\n" +
-                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n",
-                                mSchemaName
-                        ));
-        for(String fileName : extraDownloadFiles)
-        {
-            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
-        }
-        query_.append(
-                String.format(
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                                "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Index\" (\"IndexID\") " : "") + "DEFAULT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
+                                mSchemaName,
                                 globalEASTWebSchema
                         ));
         stmt.executeUpdate(query_.toString());
@@ -534,12 +823,13 @@ public class Schemas {
                         ));
         for(String fileName : extraDownloadFiles)
         {
-            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE NOT NULL,\n");
+            query_.append("  \"" + fileName + "FilePath\" varchar(255) UNIQUE DEFAULT NULL,\n");
         }
         query_.append(
                 String.format(
-                        "  \"DateDirectory\" varchar(255) NOT NULL,\n" +
-                                "  \"DataGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                        "  \"DownloadID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Download\" (\"DownloadID\") " : "") + "NOT NULL,\n" +
+                                "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                                "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Index\" (\"IndexID\") " : "") + "DEFAULT NULL,\n" +
                                 "  \"Retrieved\" boolean DEFAULT FALSE,\n" +
                                 "  \"Processed\" boolean DEFAULT FALSE\n" +
                                 ")",
@@ -693,10 +983,11 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ExtraDownload\"\n" +
                         "(\n" +
                         "  \"ExtraDownloadID\" serial PRIMARY KEY,\n" +
-                        "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
-                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
+                        "  \"DownloadID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Download\" (\"DownloadID\") " : "") + "NOT NULL,\n" +
+                        //                        "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
+                        //                        "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                         "  \"DataName\" varchar(255) NOT NULL,\n" +
-                        "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n" +
+                        "  \"FilePath\" varchar(255) UNIQUE NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );
@@ -716,7 +1007,8 @@ public class Schemas {
                                 "  \"DownloadID\" serial PRIMARY KEY,\n" +
                                 "  \"GlobalDownloaderID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"GlobalDownloader\" (\"GlobalDownloaderID\") " : "") + "NOT NULL,\n" +
                                 "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
-                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL\n" +
+                                "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
+                                "  \"Complete\" boolean DEFAULT FALSE\n" +
                                 ")",
                                 globalEASTWebSchema
                         ));
@@ -751,8 +1043,7 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"GlobalDownloader\"\n" +
                         "(\n" +
                         "  \"GlobalDownloaderID\" serial PRIMARY KEY,\n" +
-                        "  \"PluginID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Plugin\" (\"PluginID\") " : "") + "NOT NULL,\n" +
-                        "  \"UniqueInstanceNum\" integer UNIQUE NOT NULL\n" +
+                        "  \"PluginID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Plugin\" (\"PluginID\") " : "") + "NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );
@@ -790,7 +1081,8 @@ public class Schemas {
                         "(\n" +
                         "  \"PluginID\" serial PRIMARY KEY,\n" +
                         "  \"Name\" varchar(255) UNIQUE NOT NULL,\n" +
-                        "  \"DaysPerInputFile\" integer NOT NULL\n" +
+                        "  \"DaysPerInputFile\" integer NOT NULL,\n" +
+                        "  \"FilesPerDay\" integer NOT NULL" +
                         ")",
                         globalEASTWebSchema
                 );
@@ -828,7 +1120,7 @@ public class Schemas {
                         "(\n" +
                         "  \"DateGroupID\" serial PRIMARY KEY,\n" +
                         "  \"Year\" integer NOT NULL,\n" +
-                        "  \"Day\" integer NOT NULL\n" +
+                        "  \"DayOfYear\" integer NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );

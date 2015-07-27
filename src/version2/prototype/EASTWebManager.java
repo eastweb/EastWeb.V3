@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
@@ -19,13 +20,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
 import version2.prototype.download.DownloadFactory;
+import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.LocalDownloader;
+import version2.prototype.util.DatabaseCache;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -42,15 +48,12 @@ public class EASTWebManager implements Runnable{
 
     // Logged requests from other threads
     private static List<SchedulerData> newSchedulerRequests;
-    private static List<Integer> stopSchedulerRequests;
-    private static List<Integer> deleteSchedulerRequests;
-    private static List<String> deleteSchedulerRequestsNames;
+    private static List<Integer> stopExistingSchedulerRequests;
+    private static List<String> stopExistingSchedulerRequestsNames;
+    private static List<Integer> deleteExistingSchedulerRequests;
+    private static List<String> deleteExistingSchedulerRequestsNames;
     private static List<Integer> startExistingSchedulerRequests;
     private static List<String> startExistingSchedulerRequestsNames;
-    private static List<NewGlobalDownloaderRequestsParams> newGlobalDownloaderRequests;
-    private static List<Integer> stopGlobalDownloaderRequests;
-    private static List<Integer> startExistingGlobalDownloaderRequests;
-    private static List<ProcessWorker> newProcessWorkerRequests;
     private static List<GUIUpdateHandler> guiHandlers;
 
     // EASTWebManager state
@@ -141,31 +144,20 @@ public class EASTWebManager implements Runnable{
                 if(!justCreateNewSchedulers)
                 {
                     // Handle stop scheduler requests
-                    if(stopSchedulerRequests.size() > 0)
+                    if(stopExistingSchedulerRequests.size() > 0)
                     {
-                        synchronized (stopSchedulerRequests) {
-                            while(stopSchedulerRequests.size() > 0)
+                        synchronized (stopExistingSchedulerRequests) {
+                            while(stopExistingSchedulerRequests.size() > 0)
                             {
-                                handleStopSchedulerRequests(stopSchedulerRequests.remove(0));
+                                handleStopSchedulerRequests(stopExistingSchedulerRequests.remove(0));
                             }
                         }
                     }
-
-                    // Handle delete scheduler requests
-                    if(deleteSchedulerRequests.size() > 0)
+                    if(stopExistingSchedulerRequestsNames.size() > 0)
                     {
-                        synchronized (deleteSchedulerRequests) {
-                            while(deleteSchedulerRequests.size() > 0)
-                            {
-                                handleDeleteSchedulerRequests(deleteSchedulerRequests.remove(0));
-                            }
-                        }
-                    }
-                    if(deleteSchedulerRequestsNames.size() > 0)
-                    {
-                        synchronized (deleteSchedulerRequestsNames) {
+                        synchronized (stopExistingSchedulerRequestsNames) {
                             int schedulerId = -1;
-                            for(String projectName : deleteSchedulerRequestsNames)
+                            for(String projectName : stopExistingSchedulerRequestsNames)
                             {
                                 for(Scheduler scheduler : schedulers)
                                 {
@@ -176,7 +168,39 @@ public class EASTWebManager implements Runnable{
                                     }
                                 }
                                 if(schedulerId != -1) {
-                                    deleteSchedulerRequestsNames.remove(projectName);
+                                    stopExistingSchedulerRequestsNames.remove(projectName);
+                                    handleStopSchedulerRequests(schedulerId);
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle delete scheduler requests
+                    if(deleteExistingSchedulerRequests.size() > 0)
+                    {
+                        synchronized (deleteExistingSchedulerRequests) {
+                            while(deleteExistingSchedulerRequests.size() > 0)
+                            {
+                                handleDeleteSchedulerRequests(deleteExistingSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(deleteExistingSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (deleteExistingSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : deleteExistingSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
+                                {
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    {
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    deleteExistingSchedulerRequestsNames.remove(projectName);
                                     handleDeleteSchedulerRequests(schedulerId);
                                 }
                             }
@@ -212,50 +236,6 @@ public class EASTWebManager implements Runnable{
                                     handleStartExistingSchedulerRequests(schedulerId);
                                 }
                                 schedulerId = -1;
-                            }
-                        }
-                    }
-
-                    // Handle starting up new GlobalDownload requests requests
-                    if(newGlobalDownloaderRequests.size() > 0)
-                    {
-                        synchronized (newGlobalDownloaderRequests) {
-                            while(newGlobalDownloaderRequests.size() > 0)
-                            {
-                                handleNewGlobalDownloaderRequests(newGlobalDownloaderRequests.remove(0));
-                            }
-                        }
-                    }
-
-                    // Handle starting existing GlobalDownloader requests
-                    if(startExistingGlobalDownloaderRequests.size() > 0)
-                    {
-                        synchronized (startExistingGlobalDownloaderRequests) {
-                            while(startExistingGlobalDownloaderRequests.size() > 0)
-                            {
-                                handleStartExistingGlobalDownloaderRequests(startExistingGlobalDownloaderRequests.remove(0));
-                            }
-                        }
-                    }
-
-                    // Handle stopping GlobalDownloader requests
-                    if(stopGlobalDownloaderRequests.size() > 0)
-                    {
-                        synchronized (stopGlobalDownloaderRequests) {
-                            while(stopGlobalDownloaderRequests.size() > 0)
-                            {
-                                handleStopGlobalDownloaderRequests(stopGlobalDownloaderRequests.remove(0));
-                            }
-                        }
-                    }
-
-                    // Handle make new ProcessWorker requests
-                    if(newProcessWorkerRequests.size() > 0)
-                    {
-                        synchronized (newProcessWorkerRequests) {
-                            while(newProcessWorkerRequests.size() > 0)
-                            {
-                                handleNewProcessWorkerRequests(newProcessWorkerRequests.remove(0));
                             }
                         }
                     }
@@ -388,8 +368,8 @@ public class EASTWebManager implements Runnable{
     {
         if(schedulerIDs.get(schedulerID))
         {
-            synchronized (stopSchedulerRequests) {
-                stopSchedulerRequests.add(schedulerID);
+            synchronized (stopExistingSchedulerRequests) {
+                stopExistingSchedulerRequests.add(schedulerID);
             }
         }
     }
@@ -403,11 +383,8 @@ public class EASTWebManager implements Runnable{
      */
     public static void StopExistingScheduler(String projectName)
     {
-        if(schedulerIDs.get(schedulerID))
-        {
-            synchronized (stopSchedulerRequests) {
-                stopSchedulerRequests.add(schedulerID);
-            }
+        synchronized (stopExistingSchedulerRequestsNames) {
+            stopExistingSchedulerRequestsNames.add(projectName);
         }
     }
 
@@ -424,8 +401,8 @@ public class EASTWebManager implements Runnable{
     {
         if(schedulerIDs.get(schedulerID))
         {
-            synchronized (deleteSchedulerRequests) {
-                deleteSchedulerRequests.add(schedulerID);
+            synchronized (deleteExistingSchedulerRequests) {
+                deleteExistingSchedulerRequests.add(schedulerID);
             }
         }
     }
@@ -441,8 +418,8 @@ public class EASTWebManager implements Runnable{
      */
     public static void DeleteScheduler(String projectName)
     {
-        synchronized (deleteSchedulerRequestsNames) {
-            deleteSchedulerRequestsNames.add(projectName);
+        synchronized (deleteExistingSchedulerRequestsNames) {
+            deleteExistingSchedulerRequestsNames.add(projectName);
         }
     }
 
@@ -474,65 +451,6 @@ public class EASTWebManager implements Runnable{
     {
         synchronized (startExistingSchedulerRequestsNames) {
             startExistingSchedulerRequestsNames.add(projectName);
-        }
-    }
-
-    /**
-     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} of the given type to be started up. GlobalDownloader objects are
-     * singletons and are shared amongst Schedulers. If the GlobalDownloader associated pluginName is not currently associated with an existing
-     * GlobalDownloader then the given one is stored and added to the running list of them.
-     *
-     * @param gdl  - {@link version2.download#GlobalDownloader GlobalDownloader} object to manage and run
-     */
-    public static void StartGlobalDownloader(DownloadFactory dlFactory, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
-    {
-        synchronized (newGlobalDownloaderRequests) {
-            newGlobalDownloaderRequests.add(new EASTWebManager().new NewGlobalDownloaderRequestsParams(dlFactory, pluginName, metaData, listDatesFiles));
-        }
-    }
-
-    /**
-     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
-     * {@link version2#TaskState TaskState} set to STOPPED and to cease execution. If other GlobalDownloaders are waiting to execute then the next
-     * oldest one is started up.
-     *
-     * @param gdlID  - targeted GlobalDownloader's ID
-     */
-    public static void StopGlobalDownloader(int gdlID)
-    {
-        if(globalDLIDs.get(gdlID))
-        {
-            synchronized (stopGlobalDownloaderRequests) {
-                stopGlobalDownloaderRequests.add(gdlID);
-            }
-        }
-    }
-
-    /**
-     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
-     * {@link version2#TaskState TaskState} set to RUNNING and to continue downloading new data files when its given a turn to run again.
-     *
-     * @param gdlID  - targeted GlobalDownloader's ID
-     */
-    public static void StartExistingGlobalDownloader(int gdlID)
-    {
-        if(globalDLIDs.get(gdlID))
-        {
-            synchronized (startExistingGlobalDownloaderRequests) {
-                startExistingGlobalDownloaderRequests.add(gdlID);
-            }
-        }
-    }
-
-    /**
-     * Requests that the given {@link version2#ProcesWorker ProcesWorker} be managed and executed.
-     *
-     * @param worker  - {@link version2#ProcesWorker ProcesWorker} to execute on a separate available thread
-     */
-    public static void StartNewProcessWorker(ProcessWorker worker)
-    {
-        synchronized (newProcessWorkerRequests) {
-            newProcessWorkerRequests.add(worker);
         }
     }
 
@@ -667,7 +585,7 @@ public class EASTWebManager implements Runnable{
      *
      * @param updatedScheduler  - reference to the Scheduler instance for whom the stored SchedulerStatus object is now out of date
      */
-    public static void NotifyUI(Scheduler updatedScheduler)
+    public void NotifyUI(Scheduler updatedScheduler)
     {
         synchronized (schedulerStatesChanged)
         {
@@ -688,6 +606,111 @@ public class EASTWebManager implements Runnable{
     }
 
     /**
+     * Creates a {@link version2.download#GlobalDownloader GlobalDownloader} using the given factory and schedules it to run daily starting now.
+     * GlobalDownloader objects are singletons and are shared amongst Schedulers. If the GlobalDownloader associated pluginName is not currently
+     * associated with an existing GlobalDownloader then the given one is stored and added to the running list of them.
+     *
+     * @param dlFactory  - factory to use to create the GlobalDownloader
+     * @param createLocalDownloader  - True if the factory should be used to create a LocalDownloader, set it to observe on the created GlobalDownloader, and return it.
+     * @return LocalDownloader if specified to create one, otherwise NULL
+     * @throws IOException
+     */
+    public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory, boolean createLocalDownloader) throws IOException
+    {
+        synchronized (globalDLs)
+        {
+            int id = getLowestAvailableGlobalDLID();
+            if(IsIDValid(id, globalDLIDs))
+            {
+                DownloaderFactory factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
+                GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
+                int currentGDLIdx = -1;
+                for(int i=0; i < globalDLs.size(); i++)
+                {
+                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
+                    {
+                        currentGDLIdx = i;
+                        break;
+                    }
+                }
+
+                if(currentGDLIdx >= 0)
+                {
+                    releaseGlobalDLID(id);
+                }
+                else {
+                    globalDLs.set(id, gdl);
+                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                }
+
+                synchronized (numOfCreatedGDLs) {
+                    numOfCreatedGDLs = globalDLs.size();
+                }
+
+                if(createLocalDownloader)
+                {
+                    LocalDownloader localDl = factory.CreateLocalDownloader(id);
+                    gdl.addObserver(localDl);
+                    return localDl;
+                }
+                else {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
+     * {@link version2#TaskState TaskState} set to STOPPED and to cease execution. If other GlobalDownloaders are waiting to execute then the next
+     * oldest one is started up.
+     *
+     * @param gdlID  - targeted GlobalDownloader's ID
+     */
+    public void StopGlobalDownloader(int gdlID)
+    {
+        synchronized (globalDLs)
+        {
+            if(globalDLs.size() > gdlID)
+            {
+                globalDLs.get(gdlID).Stop();
+            }
+        }
+    }
+
+    /**
+     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
+     * {@link version2#TaskState TaskState} set to RUNNING and to continue downloading new data files when its given a turn to run again.
+     *
+     * @param gdlID  - targeted GlobalDownloader's ID
+     */
+    public void StartExistingGlobalDownloader(int gdlID)
+    {
+        synchronized (globalDLs)
+        {
+            if(globalDLs.size() > gdlID)
+            {
+                globalDLs.get(gdlID).Start();
+            }
+        }
+    }
+
+    /**
+     * Requests that the given {@link version2#ProcesWorker ProcesWorker} be managed and executed.
+     *
+     * @param worker  - {@link version2#ProcesWorker ProcesWorker} to execute on a separate available thread
+     * @return Future object representing the return object of the submitted ProcessWorker which is of type ProcessWorkerReturn
+     */
+    public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker)
+    {
+        return processWorkerExecutor.submit(worker);
+    }
+
+    /**
      * Empty instance just to allow usage of private classes.
      */
     private EASTWebManager()
@@ -698,13 +721,12 @@ public class EASTWebManager implements Runnable{
         schedulerStatesChanged = false;
 
         newSchedulerRequests = null;
-        stopSchedulerRequests = null;
-        deleteSchedulerRequests = null;
+        stopExistingSchedulerRequests = null;
+        stopExistingSchedulerRequestsNames = null;
+        deleteExistingSchedulerRequests = null;
+        deleteExistingSchedulerRequestsNames = null;
         startExistingSchedulerRequests = null;
-        newGlobalDownloaderRequests = null;
-        stopGlobalDownloaderRequests = null;
-        startExistingGlobalDownloaderRequests = null;
-        newProcessWorkerRequests = null;
+        startExistingSchedulerRequestsNames = null;
         guiHandlers = null;
 
         // Setup for handling executing GlobalDownloaders
@@ -762,13 +784,12 @@ public class EASTWebManager implements Runnable{
 
         // Setup request lists
         newSchedulerRequests = Collections.synchronizedList(new ArrayList<SchedulerData>(1));
-        stopSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        deleteSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        stopExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        stopExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
+        deleteExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        deleteExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
         startExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        newGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<NewGlobalDownloaderRequestsParams>(1));
-        stopGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        startExistingGlobalDownloaderRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        newProcessWorkerRequests = Collections.synchronizedList(new ArrayList<ProcessWorker>(10));
+        startExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
         guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
 
         // Setup for handling executing GlobalDownloaders
@@ -795,7 +816,7 @@ public class EASTWebManager implements Runnable{
             int id = getLowestAvailableSchedulerID();
             if(IsIDValid(id, schedulerIDs))
             {
-                Scheduler scheduler = new Scheduler(data, id);
+                Scheduler scheduler = new Scheduler(data, id, this);
                 schedulers.set(id, scheduler);
                 scheduler.Start();
 
@@ -846,71 +867,6 @@ public class EASTWebManager implements Runnable{
                 schedulers.get(schedulerID).Start();
             }
         }
-    }
-
-    private void handleNewGlobalDownloaderRequests(NewGlobalDownloaderRequestsParams gdlParams)
-    {
-        synchronized (globalDLs)
-        {
-            int id = getLowestAvailableGlobalDLID();
-            if(IsIDValid(id, globalDLIDs))
-            {
-                int idx = -1;
-                for(int i=0; i < globalDLs.size(); i++)
-                {
-                    if(globalDLs.get(i).GetPluginName().equals(gdlParams.pluginName))
-                    {
-                        idx = i;
-                        break;
-                    }
-                }
-
-                if(idx >= 0)
-                {
-                    GlobalDownloader gdl = gdlParams.dlFactory.CreateGlobalDownloader(id, gdlParams.pluginName, gdlParams.metaData, gdlParams.listDatesFiles);
-                    globalDLs.set(id, gdl);
-                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
-                }
-                else {
-                    releaseGlobalDLID(id);
-                }
-
-                synchronized (numOfCreatedGDLs) {
-                    numOfCreatedGDLs = globalDLs.size();
-                }
-            }
-            else
-            {
-                newGlobalDownloaderRequests.add(gdlParams);
-            }
-        }
-    }
-
-    private void handleStopGlobalDownloaderRequests(int gdlID)
-    {
-        synchronized (globalDLs)
-        {
-            if(globalDLs.size() > gdlID)
-            {
-                globalDLs.get(gdlID).Stop();
-            }
-        }
-    }
-
-    private void handleStartExistingGlobalDownloaderRequests(int gdlID)
-    {
-        synchronized (globalDLs)
-        {
-            if(globalDLs.size() > gdlID)
-            {
-                globalDLs.get(gdlID).Start();
-            }
-        }
-    }
-
-    private void handleNewProcessWorkerRequests(ProcessWorker worker)
-    {
-        processWorkerExecutor.submit(worker);
     }
 
     private void runGUIUpdateHandlers()
@@ -994,21 +950,6 @@ public class EASTWebManager implements Runnable{
             return true;
         } else {
             return false;
-        }
-    }
-
-    private class NewGlobalDownloaderRequestsParams {
-        public final DownloadFactory dlFactory;
-        public final String pluginName;
-        public final DownloadMetaData metaData;
-        public final ListDatesFiles listDatesFiles;
-
-        public NewGlobalDownloaderRequestsParams(DownloadFactory dlFactory, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles)
-        {
-            this.dlFactory = dlFactory;
-            this.pluginName = pluginName;
-            this.metaData = metaData;
-            this.listDatesFiles = listDatesFiles;
         }
     }
 }

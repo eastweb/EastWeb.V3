@@ -21,12 +21,16 @@ import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.IndicesFileMetaData;
 
+/**
+ * @author michael.devos
+ *
+ */
 public class SummaryWorker extends ProcessWorker {
 
     protected SummaryWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
     {
-        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
+        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
     }
 
     /* (non-Javadoc)

@@ -59,18 +59,18 @@ public class PluginMetaDataCollectionTester {
         // Test getting DownloadMetaData
         DownloadMetaData downloadData = pluginMetaData.Download;
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("Data"));
-        assertTrue("Class is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("TRMM3B42RTFactory"));
+        assertTrue("downloaderClassName is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("DownloadFactory1"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("hydro1.sci.gsfc.nasa.gov"));
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
-        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("CST6CDT"));
         ZoneId zid = ZoneId.of(downloadData.timeZone);
-        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
-        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2000-03-01"));
+        assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
 
         Matcher matcher;
         // TODO: Test downloadData.datePattern.
@@ -137,29 +137,29 @@ public class PluginMetaDataCollectionTester {
         assertTrue("ExtraDownloads list is null", downloadData.extraDownloads != null);
         assertTrue("ExtraDownloads list is " + downloadData.extraDownloads.toString(), downloadData.extraDownloads.size() == 1);
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("Data"));
-        assertTrue("Class is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("TRMM3B42RTFactory"));
+        assertTrue("downloaderClassName is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("DownloadFactory1"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("hydro1.sci.gsfc.nasa.gov"));
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/data/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
-        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("CST6CDT"));
         zid = ZoneId.of(downloadData.timeZone);
-        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2000-03-01"));
 
         downloadData = downloadData.extraDownloads.get(0);
         assertTrue("Name is " + downloadData.name, downloadData.name.equals("QC"));
-        assertTrue("Class is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("NldasDownloadTask"));
+        assertTrue("downloaderClassName is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("DownloadFactory2"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("other.sci.gsfc.nasa.gov"));
         assertTrue("FTP root directory is " + downloadData.myFtp.rootDir, downloadData.myFtp.rootDir.equals("/qc/s4pa/NLDAS/NLDAS_FORA0125_H.002"));
         assertTrue("FTP username is " + downloadData.myFtp.userName, downloadData.myFtp.userName.equals("anonymous"));
         assertTrue("FTP password is " + downloadData.myFtp.password, downloadData.myFtp.password.equals("anonymous"));
-        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("Africa/Bangui"));
+        assertTrue("TimeZone is " + downloadData.timeZone, downloadData.timeZone.equals("CST6CDT"));
         zid = ZoneId.of(downloadData.timeZone);
-        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
+        assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
         assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
         assertNull("OriginDate is not null", downloadData.originDate);

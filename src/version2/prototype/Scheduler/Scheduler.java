@@ -28,8 +28,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
-import version2.prototype.download.GlobalDownloader;
-import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
@@ -40,12 +38,17 @@ import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
+/**
+ * @author michael.devos
+ *
+ */
 public class Scheduler {
     public final SchedulerData data;
     public final ProjectInfoFile projectInfoFile;
     public final PluginMetaDataCollection pluginMetaDataCollection;
 
     private final int ID;
+    private final EASTWebManager manager;
     private SchedulerStatus status;
     private TaskState mState;
     private ArrayList<LocalDownloader> localDownloaders;
@@ -62,13 +65,14 @@ public class Scheduler {
      *
      * @param data  - SchedulerData describing the project to setup for
      * @param myID  - a unique ID for this Scheduler instance
+     * @param manager  - reference to the EASTWebManager creating this Scheduler
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebManager manager) throws ParserConfigurationException, SAXException, IOException
     {
-        this(data, myID, TaskState.STOPPED);
+        this(data, myID, TaskState.STOPPED, manager);
     }
 
     /**
@@ -77,12 +81,13 @@ public class Scheduler {
      *
      * @param data  - SchedulerData describing the project to setup for
      * @param myID  - a unique ID for this Scheduler instance
-     * @param initState  - Initial TaskState to set this Scheduler to. Process ob
+     * @param initState  - Initial TaskState to set this Scheduler to.
+     * @param manager  - reference to the EASTWebManager creating this Scheduler
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, TaskState initState) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManager manager) throws ParserConfigurationException, SAXException, IOException
     {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
@@ -99,6 +104,7 @@ public class Scheduler {
         indicesCaches = new ArrayList<DatabaseCache>(1);
 
         ID = myID;
+        this.manager = manager;
         PluginMetaData pluginMetaData;
         for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
@@ -107,7 +113,7 @@ public class Scheduler {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
                 // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
                 Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(), Config.getInstance().getSummaryCalculations(),
-                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, item.GetIndicies().size(), projectInfoFile.GetSummaries(), true);
+                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndicies().size(), projectInfoFile.GetSummaries(), true);
                 SetupProcesses(item);
             }
             catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
@@ -213,7 +219,7 @@ public class Scheduler {
             status.AddToLog(e.getStatus());
         }
 
-        EASTWebManager.NotifyUI(this);
+        manager.NotifyUI(this);
     }
 
     /**
@@ -257,9 +263,9 @@ public class Scheduler {
     InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException, IOException
     {
         PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
-        DatabaseCache downloadCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.DOWNLOAD);
-        DatabaseCache processorCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.PROCESSOR);
-        DatabaseCache indicesCache = new DatabaseCache(data.projectInfoFile.GetProjectName(),  pluginInfo.GetName(), ProcessName.INDICES);
+        DatabaseCache downloadCache = new DatabaseCache(data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.DOWNLOAD, plMeta.ExtraDownloadFiles);
+        DatabaseCache processorCache = new DatabaseCache(data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, plMeta.ExtraDownloadFiles);
+        DatabaseCache indicesCache = new DatabaseCache(data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, plMeta.ExtraDownloadFiles);
 
         localDownloaders.add(SetupDownloadProcess(pluginInfo, plMeta, downloadCache));
         processorProcesses.add(SetupProcessorProcess(pluginInfo, plMeta, downloadCache, processorCache));
@@ -292,14 +298,30 @@ public class Scheduler {
     private LocalDownloader SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache) throws ClassNotFoundException, NoSuchMethodException,
     SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, IOException
     {
-        Class<?> dlFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + pluginMetaData.Download.downloadFactoryClassName);
-        Constructor<?> dlFactoryCtor = dlFactoryClass.getConstructor();
-        Object dlFactory = dlFactoryCtor.newInstance();
-        Method createGlobalDownloader = dlFactoryClass.getMethod("CreateGlobalDownloader", int.class, String.class, DownloadMetaData.class, ListDatesFiles.class);
-        Method createListDatesFiles = dlFactoryClass.getMethod("CreateListDatesFiles", DataDate.class, DownloadMetaData.class);
-        EASTWebManager.StartGlobalDownloader((DownloadFactory) dlFactory, pluginInfo.GetName(), pluginMetaData.Download,
-                ((DownloadFactory) dlFactory).CreateListDatesFiles(new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download));
-        return ((DownloadFactory) dlFactory).CreateLocalDownloader(globalDLID, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache);
+        // Create "data" DownloadFactory
+        Class<?> downloadFactoryClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + pluginMetaData.Download.downloadFactoryClassName);
+        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
+                DatabaseCache.class, DataDate.class, DownloadMetaData.class);
+        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
+                new DataDate(pluginMetaData.Download.originDate), pluginMetaData.Download);
+
+        // Create "data" GenericGlobalDownloader
+        LocalDownloader lDownloder = manager.StartGlobalDownloader(downloadFactory, true);
+
+        for(DownloadMetaData dlMetaData : pluginMetaData.Download.extraDownloads)
+        {
+            // Create extra ListDatesFiles instance
+            downloadFactoryClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + dlMetaData.downloadFactoryClassName);
+            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
+                    DatabaseCache.class, DataDate.class);
+            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
+                    new DataDate(pluginMetaData.Download.originDate), dlMetaData);
+
+            // Create extra GenericGlobalDownloader
+            manager.StartGlobalDownloader(downloadFactory, false);
+        }
+
+        return lDownloder;
     }
 
     /**
@@ -317,7 +339,7 @@ public class Scheduler {
     private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<ProcessorWorker>(ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
         //        inputCache.addObserver(process);
         return process;
     }
@@ -337,7 +359,7 @@ public class Scheduler {
     private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
             DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<IndicesWorker>(ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
         //        inputCache.addObserver(process);
         return process;
     }
@@ -354,7 +376,7 @@ public class Scheduler {
      */
     private Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
     {
-        Summary process = new Summary(projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
+        Summary process = new Summary(manager, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
         //        inputCache.addObserver(process);
         return process;
     }

@@ -32,16 +32,13 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param state  - TaskState to initialize this object to
      * @param processName  - name of this threaded process
-     * @param inputProcessName  - name of process to use the output of for its input
-     * @param executor  - executor service to use to spawn worker threads
      * @throws ClassNotFoundException
      */
-    public GenericProcess(ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public GenericProcess(EASTWebManager manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache inputCache, DatabaseCache outputCache, String... classNames) throws ClassNotFoundException
     {
-        super(processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        super(manager, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
 
         if(inputCache != null) {
             inputCache.addObserver(this);
@@ -71,7 +68,7 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
             for(Class<?> cl : processWorkerClasses)
             {
                 cstr = cl.getConstructor(Process.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, ArrayList.class);
-                EASTWebManager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
+                manager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             e.printStackTrace();

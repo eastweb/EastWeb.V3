@@ -11,6 +11,7 @@ import version2.prototype.summary.zonal.summaries.Min;
 import version2.prototype.summary.zonal.summaries.SqrSum;
 import version2.prototype.summary.zonal.summaries.StdDev;
 import version2.prototype.summary.zonal.summaries.Sum;
+import version2.prototype.summary.zonal.summaries.SummaryCalculation;
 
 /**
  * Represents a collection of registered summaries as SummaryCalculations facilitating interaction between summaries to share computations.
@@ -36,7 +37,7 @@ public class SummariesCollection {
         summaries = new ArrayList<SummaryCalculation>();
         registry = new ArrayList<SummaryNameInstancePair>();
         SummaryCalculation temp = null;
-        String canonicalPath = this.getClass().getCanonicalName().substring(0, this.getClass().getCanonicalName().lastIndexOf(".") + 1);
+        String canonicalPath = this.getClass().getCanonicalName().substring(0, this.getClass().getCanonicalName().lastIndexOf(".") + 1) + "summaries.";
         boolean alreadyRegistered = false;
 
         if(summaryNames.size() > 0){
@@ -98,12 +99,12 @@ public class SummariesCollection {
     }
 
     /**
-     * Inserts a new value into the collection by inserting the value into all distinct leaflet SummaryCalculation objects registered to the collection.
+     * Adds a new value into the collection by adding the value, at the specified index, into all distinct leaflet SummaryCalculation objects registered to the collection.
      *
      * @param index  - index of given value
      * @param value  - double value to insert
      */
-    public void put(int index, double value){
+    public void add(int index, double value){
         ArrayList<SummaryCalculation> leavesFromSummaries = new ArrayList<SummaryCalculation>();
         ArrayList<SummaryCalculation> temp = null;
         for(SummaryCalculation summary : summaries){
@@ -118,7 +119,7 @@ public class SummariesCollection {
         }
 
         for(SummaryCalculation summary : leavesFromSummaries){
-            summary.put(index, value);
+            summary.add(index, value);
         }
     }
 
