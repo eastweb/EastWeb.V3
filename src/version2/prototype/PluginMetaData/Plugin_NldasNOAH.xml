@@ -4,8 +4,7 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<ListDatesFilesClass>NldasNOAHListDatesFiles</ListDatesFilesClass>
-		<DownloaderClass>NldasNOAHDownloader</DownloaderClass>
+		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<mode>ftp</mode>
 		<FTP>
 			<hostName>hydro1.sci.gsfc.nasa.gov</hostName>
