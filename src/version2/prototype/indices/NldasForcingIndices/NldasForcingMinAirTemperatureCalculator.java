@@ -7,8 +7,7 @@ import version2.prototype.util.GeneralListener;
 
 public class NldasForcingMinAirTemperatureCalculator extends IndicesFramework {
 
-    public NldasForcingMinAirTemperatureCalculator(GeneralListener l) {
-        super(l);
+    public NldasForcingMinAirTemperatureCalculator() {
     }
 
     @Override

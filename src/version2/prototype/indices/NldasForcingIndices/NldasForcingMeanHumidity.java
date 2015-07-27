@@ -7,8 +7,7 @@ import version2.prototype.util.GeneralListener;
 
 public class NldasForcingMeanHumidity extends IndicesFramework {
 
-    public NldasForcingMeanHumidity(GeneralListener l) {
-        super(l);
+    public NldasForcingMeanHumidity() {
     }
 
     @Override
@@ -60,8 +59,7 @@ public class NldasForcingMeanHumidity extends IndicesFramework {
 
     @Override
     protected String className() {
-        // TODO Auto-generated method stub
-        return null;
+        return getClass().getName();
     }
 
 }

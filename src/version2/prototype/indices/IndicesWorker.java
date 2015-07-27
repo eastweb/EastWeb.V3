@@ -1,21 +1,35 @@
 package version2.prototype.indices;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
+import version2.prototype.DataDate;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.IndexMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.FileSystem;
+import version2.prototype.util.ProcessorFileMetaData;
 
 
 /**
  * An implementation of a ProcessWorker to handle the work for the Indices framework and to be used by a Process extending class.
  *
  * @author michael.devos
+ * @author Yi Liu
  *
  */
 public class IndicesWorker extends ProcessWorker{
@@ -34,7 +48,6 @@ public class IndicesWorker extends ProcessWorker{
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
         super("IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
-        // TODO Auto-generated constructor stub
     }
 
     /* (non-Javadoc)
@@ -42,7 +55,90 @@ public class IndicesWorker extends ProcessWorker{
      */
     @Override
     public ProcessWorkerReturn call() throws Exception {
-        // TODO Auto-generated method stub
+        String pluginName = pluginMetaData.Title;
+        String outputFolder  =
+                FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(),
+                        projectInfoFile.GetProjectName(), pluginName, ProcessName.INDICES) ;
+
+        // Use a map to group CachedFiles based on the dates
+        HashMap<DataDate, ArrayList<ProcessorFileMetaData>> map =
+                new HashMap<DataDate, ArrayList<ProcessorFileMetaData>>();
+
+        // extract cachedFiles for indices inputs
+        for (DataFileMetaData dmd : cachedFiles)
+        {
+            // read each cachedFile
+            ProcessorFileMetaData input = dmd.ReadMetaDataForIndices();
+
+            // get the date of the downloaded file
+            DataDate thisDate = new DataDate(input.day, input.year);
+
+            // add the cachedInput file into the file ArrayList
+            ArrayList<ProcessorFileMetaData> files = map.get(thisDate);
+            if (files == null)
+            {
+                files = new ArrayList<ProcessorFileMetaData>();
+            }
+            // add the cachedInput file into the arraylist associated with this date
+            files.add(input);
+            // modify the map
+            map.put(thisDate, files);
+        }
+
+        IndexMetaData iMetaData = pluginMetaData.Indices;
+        ArrayList<String> indicesNames  = iMetaData.indicesNames;
+
+        for (Map.Entry<DataDate, ArrayList<ProcessorFileMetaData>> entry : map.entrySet())
+        {
+            DataDate thisDay = entry.getKey();
+
+            File [] inputFiles =  new File [entry.getValue().size()];
+
+            int i = 0;
+            // feed the inputs
+            for (ProcessorFileMetaData dFile : entry.getValue())
+            {
+                inputFiles[i++]= new File(dFile.dataFilePath);
+            }
+
+            // output file path
+            String outputPath = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+                    outputFolder, thisDay.getYear(), thisDay.getDayOfYear());
+
+            if(!(new File(outputPath).exists()))
+            {
+                FileUtils.forceMkdir(new File(outputPath));
+            }
+
+            for(String indices: indicesNames)
+            {
+                Class<?> clazzIndicies;
+                try
+                {
+                    clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", pluginName, indices));
+                    Constructor<?> ctorIndicies = clazzIndicies.getConstructor();
+                    Object indexCalculator =  ctorIndicies.newInstance();
+
+                    // set input files
+                    Method method = indexCalculator.getClass().getMethod("setInputFile", File[].class);
+                    method.invoke(indexCalculator, inputFiles);
+
+                    // set output file
+                    String outFile = outputPath + indices + ".tiff";
+                    method = indexCalculator.getClass().getMethod("setOutputFile", File.class);
+                    method.invoke(indexCalculator, new File(outFile));
+
+                    method = indexCalculator.getClass().getMethod("calculate");
+                    method.invoke(indexCalculator);
+
+                }catch(Exception e)
+                {
+                    throw new EmptyStackException(); // class not found
+                }
+            }
+
+        }
+
         return null;
     }
 }

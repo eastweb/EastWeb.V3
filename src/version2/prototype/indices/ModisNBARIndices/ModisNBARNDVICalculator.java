@@ -7,10 +7,7 @@ public class ModisNBARNDVICalculator extends IndicesFramework {
     private static final int RED = 0;
     private static final int NIR = 1;
 
-    public ModisNBARNDVICalculator(GeneralListener l) {
-        super(l);
-        // TODO Auto-generated constructor stub
-    }
+    public ModisNBARNDVICalculator(){}
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {

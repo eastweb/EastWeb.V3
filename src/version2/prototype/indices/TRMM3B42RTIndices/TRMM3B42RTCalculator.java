@@ -1,15 +1,12 @@
 package version2.prototype.indices.TRMM3B42RTIndices;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GeneralListener;
 
 public class TRMM3B42RTCalculator extends IndicesFramework
 {
     private final int INPUT = 0;
 
-    public TRMM3B42RTCalculator(GeneralListener l) {
-        super(l);
-    }
+    public TRMM3B42RTCalculator() {}
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {

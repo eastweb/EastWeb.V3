@@ -7,9 +7,7 @@ import version2.prototype.util.GeneralListener;
 
 public class NldasForcingTotalPrecipitation extends IndicesFramework {
 
-    public NldasForcingTotalPrecipitation(GeneralListener l) {
-        super(l);
-    }
+    public NldasForcingTotalPrecipitation() {}
 
     @Override
     protected void process(Dataset[] inputs, Dataset output) throws Exception

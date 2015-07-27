@@ -9,9 +9,7 @@ public class ModisLSTMeanCalculator extends IndicesFramework{
     double mMin;
     double mMax;
 
-    public ModisLSTMeanCalculator(GeneralListener l){
-        super (l);
-    }
+    public ModisLSTMeanCalculator(){}
 
     @Override
     protected double calculatePixelValue(double[] values) {

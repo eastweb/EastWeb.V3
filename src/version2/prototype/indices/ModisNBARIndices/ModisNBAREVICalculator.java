@@ -13,9 +13,7 @@ import version2.prototype.util.GeneralListener;
 public class ModisNBAREVICalculator extends IndicesFramework
 {
 
-    public ModisNBAREVICalculator(GeneralListener l) {
-        super(l);
-    }
+    public ModisNBAREVICalculator(){}
 
     private static final double L = 1;
     private static final double C1 = 6;

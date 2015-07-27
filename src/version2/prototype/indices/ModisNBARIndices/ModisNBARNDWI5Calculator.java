@@ -14,10 +14,7 @@ public class ModisNBARNDWI5Calculator extends IndicesFramework {
     private static final int NIR = 0;
     private static final int SWIR = 1;
 
-    public ModisNBARNDWI5Calculator(GeneralListener l) {
-        super(l);
-        // TODO Auto-generated constructor stub
-    }
+    public ModisNBARNDWI5Calculator(){}
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {

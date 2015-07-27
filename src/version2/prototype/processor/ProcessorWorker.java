@@ -88,13 +88,14 @@ public class ProcessorWorker extends ProcessWorker {
 
             // add the downloaded file into the downloaded ArrayList
             ArrayList<DownloadFileMetaData> files = map.get(thisDate);
-            if (files != null)
+            if (files == null)
             {
-                // add the downloaded file into the arraylist associated with this date
-                files.add(downloaded);
-                // modify the map
-                map.put(thisDate, files);
+                files = new ArrayList<DownloadFileMetaData>();
             }
+            // add the downloaded file into the arraylist associated with this date
+            files.add(downloaded);
+            // modify the map
+            map.put(thisDate, files);
         }
 
         // for each date, process the steps associated with the plugin
@@ -117,7 +118,7 @@ public class ProcessorWorker extends ProcessWorker {
 
                 Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
 
-                Object process =  cnstProcess.newInstance(new Object[] {new ProcessData(
+                Object process =  cnstProcess.newInstance(new ProcessData(
                         prepareTask.getInputFolders(key),
                         prepareTask.getOutputFolder(key),
                         prepareTask.getQC(),
@@ -125,7 +126,7 @@ public class ProcessorWorker extends ProcessWorker {
                         prepareTask.getMaskFile(),
                         prepareTask.getDataBands(),
                         prepareTask.getQCBands(),
-                        prepareTask.getProjection())});
+                        prepareTask.getProjection()));
 
                 //copy the downloaded files to the input folders
                 String [] inputFolders = prepareTask.getInputFolders(key);

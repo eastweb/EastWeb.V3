@@ -8,9 +8,7 @@ public class ModisLSTNightCalculator extends IndicesFramework {
     double mMin;
     double mMax;
 
-    public ModisLSTNightCalculator(GeneralListener l){
-        super(l);
-    }
+    public ModisLSTNightCalculator(){}
 
     @Override
     protected double calculatePixelValue(double[] values) {

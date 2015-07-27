@@ -23,19 +23,16 @@ public abstract class IndicesFramework implements IndexCalculator {
     private static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
     private GeneralUIEvent event;
-    private File[] mInputFiles;
+    private static File[] mInputFiles;
     private File mOutputFile;
 
     // constructor which takes the listener to talk back to the UI
     // listener will come from the scheduler
-    public IndicesFramework(GeneralListener l)
-    {
-        event = new GeneralUIEvent();
-        event.addListener(l);
-    }
+    public IndicesFramework()
+    { }
 
     // set input file property
-    protected void setInputFiles(File[] inputFiles) {
+    protected static void setInputFiles(File[] inputFiles) {
         assert (inputFiles.length > 0);
         mInputFiles = inputFiles;
     }
@@ -50,6 +47,7 @@ public abstract class IndicesFramework implements IndexCalculator {
         //        System.out.println("inputs 0 is  "+inputs[0]);
         //        System.out.println(inputs[0].GetRasterXSize());
         //        System.out.println(inputs[0].GetRasterYSize());
+
 
         FileUtils.forceMkdir(mOutputFile.getParentFile());
         Dataset outputDS = gdal.GetDriverByName("GTiff").Create(

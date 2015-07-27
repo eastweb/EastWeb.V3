@@ -10,9 +10,7 @@ public class NldasForcingFreezingDegreeDays extends IndicesFramework {
     DataDate mStart;
     double threshold;
 
-    public NldasForcingFreezingDegreeDays(GeneralListener l, DataDate startDate, double thresholdCelsius) {
-        super(l);
-
+    public NldasForcingFreezingDegreeDays( DataDate startDate, double thresholdCelsius) {
         mStart = startDate;
         threshold = thresholdCelsius;
     }

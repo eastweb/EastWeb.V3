@@ -9,9 +9,8 @@ public class ModisLSTDayCalculator extends IndicesFramework{
     double mMin;
     double mMax;
 
-    public ModisLSTDayCalculator(GeneralListener l){
-        super(l);
-    }
+    public ModisLSTDayCalculator(){}
+
 
     @Override
     protected double calculatePixelValue(double[] values) {

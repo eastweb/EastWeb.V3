@@ -7,8 +7,7 @@ import version2.prototype.util.GeneralListener;
 
 public class NldasForcingMeanAirTemperatureCalculator extends IndicesFramework {
 
-    public NldasForcingMeanAirTemperatureCalculator(GeneralListener l) {
-        super(l);
+    public NldasForcingMeanAirTemperatureCalculator() {
     }
 
     @Override
