@@ -68,8 +68,15 @@ public class NldasForcingComposite extends Composite
                 for (Dataset inputDS : inputDSs) {
                     inputDS.GetRasterBand(band).ReadRaster(0, 0, inputDS.GetRasterXSize(), inputDS.GetRasterYSize(), inputArray);
                     for (int i=0; i<inputArray.length; i++) {
-                        // Add each piece of data proportional to the total.
-                        outputArray[i] += (inputArray[i] / inputDSs.size());
+
+                        if(band != 10){
+                            // Add each piece of data proportional to the total.
+                            outputArray[i] += (inputArray[i] / inputDSs.size());
+                        }
+                        else {
+                            // band 10 == precipitation hourly total, so we don't want the average but rather the total
+                            outputArray[i] += inputArray[i];
+                        }
                     }
                 }
 

@@ -101,7 +101,7 @@ public abstract class IndicesFramework implements IndexCalculator {
         event.fire(String.format("%s is Complete", className()), 100, className());
     }
 
-    private void process(Dataset[] inputs, Dataset output) throws Exception {
+    protected void process(Dataset[] inputs, Dataset output) throws Exception {
         int xSize = inputs[0].GetRasterXSize();
         int ySize = inputs[0].GetRasterYSize();
         double[][] inputsArray = new double[inputs.length][xSize];
