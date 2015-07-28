@@ -92,12 +92,6 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                         continue;
                     }
 
-                    int dayNum = Integer.parseInt(dayFile.getName());
-                    if (dayNum < sDate.getDayOfYear())
-                    {
-                        continue;
-                    }
-
                     // List 24 hours in this day
                     String dayDirectory =
                             String.format("%s/%s", yearDirectory, dayFile.getName());
