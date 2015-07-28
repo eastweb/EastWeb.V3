@@ -1,35 +1,33 @@
 <?xml version="1.0" ?>
 <PluginMetadata>
-	<title>TRMM3B42</title>
+	<Title>TRMM3B42</Title>
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
-			<hostName>disc2.nascom.nasa.gov</hostName>
-			<rootDir>
-			  /ftp/data/s4pa/TRMM_L3/TRMM_3B42_daily/
-			</rootDir>
-			<userName>anonymous</userName>
-			<passWord>anonymous</passWord>
+			<HostName>disc2.nascom.nasa.gov</HostName>
+			<RootDir>/ftp/data/s4pa/TRMM_L3/TRMM_3B42_daily/</RootDir>
+			<UserName>anonymous</UserName>
+			<PassWord>anonymous</PassWord>
 		</FTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>1</FilesPerDay>
 		<DatePattern>\\d{4}</DatePattern>
-		<fileNamePattern>3B42_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.7\\.bin</fileNamePattern>
+		<FileNamePattern>3B42_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.7\\.bin</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>31</DayOfMonth>
 			<Month>12</Month>
 			<Year>1997</Year>
 		</OriginDate>
 	</Download>	
-	<Process>
-		<className>TRMM3B42Convert</className>
-		<className>TRMM3B42Reproject</className>
-		<className>TRMM3B42Clip</className>
-		<className>TRMM3B42Mask</className>
-	</Process>
+	<Processor>
+		<ProcessStep>TRMM3B42Convert</ProcessStep>
+		<ProcessStep>TRMM3B42Reproject</ProcessStep>
+		<ProcessStep>TRMM3B42Clip</ProcessStep>
+		<ProcessStep>TRMM3B42Mask</ProcessStep>
+	</Processor>
 	<Indices>
 		<ClassName>TRMM3B42Calculator</ClassName>
 	</Indices>

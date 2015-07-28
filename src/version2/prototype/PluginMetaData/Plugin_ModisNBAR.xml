@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <PluginMetadata>
-	<title>ModisNBAR</title>
+	<Title>ModisNBAR</Title>
 	<DaysPerInputData>8</DaysPerInputData>
 	<ExtraDownloadFiles>
 		<Name>QC</Name>
@@ -9,7 +9,7 @@
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<Mode>http</Mode>
 		<HTTP>
-			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/</url>
+			<URL>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/</URL>
 		</HTTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>322</FilesPerDay>
@@ -25,7 +25,7 @@
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<Mode>http</Mode>
 		<HTTP>
-			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B2.005/</url>
+			<URL>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B2.005/</URL>
 		</HTTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>322</FilesPerDay>
@@ -37,12 +37,12 @@
 			<Year>2000</Year>
 		</OriginDate>
 	</Download>
-	<Processes>
-		<ClassName>ModisNBARFilterMozaic</ClassName>
-		<ClassName>ModisNBARReproject</ClassName>
-		<ClassName>ModisNBARMask</ClassName>
-		<ClassName>ModisNBARClip</ClassName>
-	</Processes>
+	<Processor>
+		<ProcessStep>ModisNBARFilterMozaic</ProcessStep>
+		<ProcessStep>ModisNBARReproject</ProcessStep>
+		<ProcessStep>ModisNBARMask</ProcessStep>
+		<ProcessStep>ModisNBARClip</ProcessStep>
+	</Processor>
 	<Indices>
 		<ClassName>ModisNBARNDVICalculator</ClassName>
 		<ClassName>ModisNBAREVICalculator</ClassName>

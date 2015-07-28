@@ -7,29 +7,27 @@
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
-			<hostName>hydro1.sci.gsfc.nasa.gov</hostName>
-			<rootDir>/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/</rootDir>
-			<userName>anonymous</userName>
-			<passWord>anonymous</passWord>
+			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
+			<RootDir>/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/</RootDir>
+			<UserName>anonymous</UserName>
+			<PassWord>anonymous</PassWord>
 		</FTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>24</FilesPerDay>
 		<DatePattern>\\d{4}</DatePattern>
-		<fileNamePattern>NLDAS_FORA0125_H\\.A(\\d{4})(\\d{4})(\\d{4}).(\\d{4})00\\.002\\.grb</fileNamePattern>
-		<DatePattern>\\d{4}</DatePattern>
-		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>
+		<FileNamePattern>NLDAS_FORA0125_H\\.A(\\d{4})(\\d{4})(\\d{4}).(\\d{4})00\\.002\\.grb</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>01</DayOfMonth>
 			<Month>01</Month>
 			<Year>1979</Year>
 		</OriginDate>
 	</Download>	
-	<Processes>
-		<ClassName>NldasForcingComposite</ClassName>
-		<ClassName>NldasForcingReproject</ClassName>
-		<ClassName>NldasForcingClip</ClassName>
-		<ClassName>NldasForcingMask</ClassName>
-	</Processes>
+	<Processor>
+		<ProcessStep>NldasForcingComposite</ProcessStep>
+		<ProcessStep>NldasForcingReproject</ProcessStep>
+		<ProcessStep>NldasForcingClip</ProcessStep>
+		<ProcessStep>NldasForcingMask</ProcessStep>
+	</Processor>
 	<Indices>
 		<ClassName>NldasForcingHeatingDegreeDays</ClassName>
 		<ClassName>NldasForcingFreezingDegreeDays</ClassName>

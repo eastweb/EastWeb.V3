@@ -244,7 +244,7 @@ public class PluginMetaDataCollection {
             doc.getDocumentElement().normalize();
 
             // Get top level non-process specific elements
-            String Title = doc.getElementsByTagName("title").item(0).getTextContent();
+            String Title = doc.getElementsByTagName("Title").item(0).getTextContent();
             int DaysPerInputData = Integer.parseInt(doc.getElementsByTagName("DaysPerInputData").item(0).getTextContent());
 
             ArrayList<String> QualityControlMetaData = new ArrayList<String>();

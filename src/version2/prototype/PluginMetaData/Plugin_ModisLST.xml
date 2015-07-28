@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <PluginMetadata>
-	<title>ModisLST</title>
+	<Title>ModisLST</Title>
 	<DaysPerInputData>8</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
 		<Mode>http</Mode>
 		<HTTP>
-			<url>http://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.005/</url>
+			<URL>http://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.005/</URL>
 		</HTTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>322</FilesPerDay>
@@ -19,13 +19,13 @@
 			<Year>2000</Year>
 		</OriginDate>
 	</Download>
-	<Processes>
-		<ClassName>ModisLSTFilter</ClassName>
-		<ClassName>ModisLSTMosaic</ClassName>
-		<ClassName>ModisLSTReproject</ClassName>
-		<ClassName>ModisLSTMask</ClassName>
-		<ClassName>ModiLSTClip</ClassName>
-	</Processes>
+	<Processor>
+		<ProcessStep>ModisLSTFilter</ProcessStep>
+		<ProcessStep>ModisLSTMosaic</ProcessStep>
+		<ProcessStep>ModisLSTReproject</ProcessStep>
+		<ProcessStep>ModisLSTMask</ProcessStep>
+		<ProcessStep>ModiLSTClip</ProcessStep>
+	</Processor>
 	<Indices>
 		<ClassName>ModisLSTDayCalculator</ClassName>
 		<ClassName>ModisLSTNightCalculator</ClassName>

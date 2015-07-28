@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <PluginMetadata>
-	<title>Test Multiple Downloads</title>
+	<Title>Test Multiple Downloads</Title>
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles>
 		<Name>QC</Name>
@@ -44,7 +44,7 @@
 		<ProcessStep>NldasFilter</ProcessStep>
 	</Processor>
 	<Indices>
-		<Class>GdalNldasCalculator</Class>
+		<ClassName>GdalNldasCalculator</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>
