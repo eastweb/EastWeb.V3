@@ -95,12 +95,28 @@ public class ProcessorWorkerTest {
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day, extraDownloads)));
 
 
-        DatabaseCache outputCache = new DatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, pluginMetaData.ExtraDownloadFiles);
+        DatabaseCache outputCache = new MyDatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, pluginMetaData.ExtraDownloadFiles);
         ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
         ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
         fail("Not yet implemented"); // TODO
+    }
+
+    protected class MyDatabaseCache extends DatabaseCache
+    {
+        public MyDatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
+            super(projectName, pluginName, dataComingFrom, extraDownloadFiles);
+        }
+
+        @Override
+        public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
+        ParserConfigurationException, SAXException, IOException {
+            for(DataFileMetaData data : filesForASingleComposite)
+            {
+                System.out.println(data.ReadMetaDataForIndices().dataFilePath);
+            }
+        }
     }
 
 }
