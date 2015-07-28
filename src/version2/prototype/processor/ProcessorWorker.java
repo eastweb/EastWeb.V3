@@ -130,7 +130,9 @@ public class ProcessorWorker extends ProcessWorker {
                         prepareTask.getMaskResolution(),
                         prepareTask.getClipOrNot(),
                         prepareTask.getFreezingDate(),
-                        prepareTask.getHeatingDate()
+                        prepareTask.getHeatingDate(),
+                        prepareTask.getFreezingDegree(),
+                        prepareTask.getHeatingDegree()
                         )
                         );
 
