@@ -1,7 +1,6 @@
 package version2.prototype.indices.ModisNBARIndices;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GeneralListener;
 
 public class ModisNBARSAVICalculator extends IndicesFramework {
     private final static double L = 0.5;

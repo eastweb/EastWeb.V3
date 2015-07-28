@@ -108,10 +108,10 @@ public class PluginMetaDataCollection {
      */
     public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay,
             String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
-    {
+            {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
         return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
-    }
+            }
 
     /**
      * Provides a means to create a custom DownloadMetaData object mainly for testing purposes. Used if extra downloads are specified. Will need to create those extras using a different method (to be
@@ -132,11 +132,11 @@ public class PluginMetaDataCollection {
      */
     public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay,
             String datePatternStr, String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
-    {
+            {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
         return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
                 extraDownloads, originDate);
-    }
+            }
 
     /**
      * Provides a means to create a custom DownloadMetaData object mainly for testing purposes. Creates a DownloadMetaData object to represent one of the extra downloads.
@@ -156,10 +156,10 @@ public class PluginMetaDataCollection {
      */
     public static DownloadMetaData CreateDownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay,
             String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
-    {
+            {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
         return collection.new DownloadMetaData(null, null, null, null, name, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
-    }
+            }
 
     /**
      * Provides a means to create a custom FTP object mainly for testing purposes.
@@ -515,7 +515,7 @@ public class PluginMetaDataCollection {
 
         private DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, Node extraDownloadNode, String defaultTimeZone,
                 int defaultFilesPerDay) throws Exception
-        {
+                {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempMode = null;
             FTP tempFtp = null;
@@ -567,7 +567,7 @@ public class PluginMetaDataCollection {
             datePattern = tempDatePattern;
             fileNamePattern = tempFileNamePattern;
             originDate = null;
-        }
+                }
     }
 
     public class FTP {

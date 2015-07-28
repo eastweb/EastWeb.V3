@@ -48,7 +48,6 @@ import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
 import version2.prototype.EastWebUI.QueryUI.QueryUI;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
-import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
 

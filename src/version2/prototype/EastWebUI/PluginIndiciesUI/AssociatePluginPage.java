@@ -11,17 +11,12 @@ import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JButton;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-
 import javax.swing.ImageIcon;
 
 public class AssociatePluginPage {

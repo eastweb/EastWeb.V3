@@ -1,7 +1,6 @@
 package version2.prototype.indices.ModisLSTIndices;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GeneralListener;
 
 public class ModisLSTDayCalculator extends IndicesFramework{
 

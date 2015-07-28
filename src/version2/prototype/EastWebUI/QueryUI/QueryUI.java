@@ -80,6 +80,7 @@ public class QueryUI {
             @Override
             public void run() {
                 try {
+                    @SuppressWarnings("unused")
                     QueryUI window = new QueryUI(new JComboBox<String>());
 
                 } catch (Exception e) {

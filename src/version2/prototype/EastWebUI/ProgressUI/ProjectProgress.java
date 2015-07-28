@@ -11,12 +11,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.JList;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import version2.prototype.EASTWebManager;
 import version2.prototype.GUIUpdateHandler;
-import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerStatus;
 
 public class ProjectProgress {

@@ -10,7 +10,6 @@ import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.util.GdalUtils;
-import version2.prototype.util.GeneralListener;
 import version2.prototype.util.GeneralUIEvent;
 
 /**
