@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <PluginMetadata>
-	<title>NldasForcing</title>
+	<Title>NldasForcing</Title>
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
