@@ -8,7 +8,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.PrepareProcessTask;
 import version2.prototype.util.FileSystem;
-import version2.prototype.util.GeneralListener;
 
 public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
 

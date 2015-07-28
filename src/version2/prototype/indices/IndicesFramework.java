@@ -10,7 +10,6 @@ import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.util.GdalUtils;
-import version2.prototype.util.GeneralUIEvent;
 
 /**
  * Indicies Framework;
@@ -21,7 +20,6 @@ import version2.prototype.util.GeneralUIEvent;
 public abstract class IndicesFramework implements IndexCalculator {
     private static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
-    private GeneralUIEvent event;
     private static File[] mInputFiles;
     private File mOutputFile;
 
@@ -95,7 +93,7 @@ public abstract class IndicesFramework implements IndexCalculator {
 
             outputDS.delete();
         }
-        event.fire(String.format("%s is Complete", className()), 100, className());
+        //event.fire(String.format("%s is Complete", className()), 100, className());
     }
 
     protected void process(Dataset[] inputs, Dataset output) throws Exception {
