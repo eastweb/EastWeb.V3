@@ -1,11 +1,14 @@
 package version2.prototype.processor.NldasNOAH;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.PrepareProcessTask;
+import version2.prototype.util.FileSystem;
 
 public class NldasNOAHPrepareProcessTask extends PrepareProcessTask {
 
@@ -23,18 +26,30 @@ public class NldasNOAHPrepareProcessTask extends PrepareProcessTask {
         /*
         Step1: Composite: Download->Composite
         Step2: Reproject: Composite->Reproject
-        Step3: Mask: Reproject->Mask
+        Step3: Clip: Reproject->Clip
+        Step4: Mask: Clip->Mask
          */
         switch(stepId)
         {
         case 1:
-            inputFolders.add(project.GetWorkingDir() + String.format("NldasNOAH\\Download\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            inputFolders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Download", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
-            inputFolders.add(project.GetWorkingDir() + String.format("NldasNOAH\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            inputFolders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Composite", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
-            inputFolders.add(project.GetWorkingDir() + String.format("NldasNOAH\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            inputFolders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Reproject", date.getYear(), date.getDayOfYear()));
+            break;
+        case 4:
+            inputFolders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Clip", date.getYear(), date.getDayOfYear()));
             break;
         default:
             inputFolders = null;
@@ -51,22 +66,36 @@ public class NldasNOAHPrepareProcessTask extends PrepareProcessTask {
         /*
         Step1: Composite: Download->Composite
         Step2: Reproject: Composite->Reproject
-        Step3: Mask: Reproject->Mask
+        Step3: Clip: Reproject->Clip
+        Step4: Mask: Clip->Mask
          */
 
         switch(stepId)
         {
         case 1:
-            outputFolder = project.GetWorkingDir() + String.format("NldasNOAH\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Composite", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            outputFolder = project.GetWorkingDir() + String.format("NldasNOAH\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Reproject", date.getYear(), date.getDayOfYear());
             break;
         case 3:
-            outputFolder = project.GetWorkingDir() + String.format("NldasNOAH\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Clip", date.getYear(), date.getDayOfYear());
+            break;
+        case 4:
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Mask", date.getYear(), date.getDayOfYear());
             break;
         default:
-            outputFolder = null;
+            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    date.getYear(), date.getDayOfYear());
             break;
         }
 
