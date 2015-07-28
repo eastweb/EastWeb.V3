@@ -60,7 +60,9 @@ public class ProjectInfoFileTester {
         assertTrue("FalseNorthing is " + projectInfo.GetProjection().getFalseNorthing(), projectInfo.GetProjection().getFalseNorthing() == 33);
         assertTrue("LatitudeOfOrigin is " + projectInfo.GetProjection().getLatitudeOfOrigin(), projectInfo.GetProjection().getLatitudeOfOrigin() == 111);
         assertTrue("Freezing is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("2015-06-02"));
+        assertTrue("CoolingDegree is " + projectInfo.GetCoolingDegree(), projectInfo.GetCoolingDegree() == 0);
         assertTrue("Heating is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("2015-06-02"));
+        assertTrue("HeatingDegree is " + projectInfo.GetHeatingDegree(), projectInfo.GetHeatingDegree() == 100);
         assertTrue("Summary 1 is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
                 .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary 2 is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()

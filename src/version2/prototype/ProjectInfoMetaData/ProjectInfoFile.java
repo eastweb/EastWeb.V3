@@ -50,8 +50,10 @@ public class ProjectInfoFile {
     private final Integer totModisTiles;
     private final ArrayList<String> modisTiles;
     private final Projection projection;
-    private final LocalDate freezingDate;
     private final LocalDate heatingDate;
+    private final Double heatingDegree;
+    private final LocalDate freezingDate;
+    private final Double coolingDegree;
     private final ArrayList<ProjectInfoSummary> summaries;
 
     /**
@@ -97,8 +99,10 @@ public class ProjectInfoFile {
         projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
                 ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
                 ReadLatitudeOfOrigin());
-        freezingDate = ReadFreezing();
-        heatingDate = ReadHeating();
+        freezingDate = ReadFreezingDate();
+        coolingDegree = ReadCoolingDegree();
+        heatingDate = ReadHeatingDate();
+        heatingDegree = ReadHeatingDegree();
         summaries = ReadSummaries();
     }
 
@@ -118,12 +122,14 @@ public class ProjectInfoFile {
      * @param modisTiles
      * @param projection
      * @param freezingDate
+     * @param coolingDegree
      * @param heatingDate
+     * @param heatingDegree
      * @param summaries
      */
     public ProjectInfoFile(ArrayList<ProjectInfoPlugin> plugins, LocalDate startDate, String projectName, String workingDir, String maskingFile, Integer maskingResolution, String masterShapeFile,
-            String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, LocalDate heatingDate,
-            ArrayList<ProjectInfoSummary> summaries) {
+            String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate,
+            Double heatingDegree, ArrayList<ProjectInfoSummary> summaries) {
 
         this.plugins = plugins;
         this.startDate = startDate;
@@ -138,7 +144,9 @@ public class ProjectInfoFile {
         this.modisTiles = modisTiles;
         this.projection = projection;
         this.freezingDate = freezingDate;
+        this.coolingDegree = coolingDegree;
         this.heatingDate = heatingDate;
+        this.heatingDegree = heatingDegree;
         this.summaries = summaries;
     }
 
@@ -241,11 +249,25 @@ public class ProjectInfoFile {
     public LocalDate GetFreezingDate() { return freezingDate; }
 
     /**
+     * Gets the cooling degree gotten from the once parsed xml file.
+     *
+     * @return Double - the cooling degree read from the xml's data.
+     */
+    public Double GetCoolingDegree() { return coolingDegree; }
+
+    /**
      * Gets the heating date gotten from the once parsed xml file.
      *
      * @return Date - the heating date read from the xml's data.
      */
     public LocalDate GetHeatingDate() { return heatingDate; }
+
+    /**
+     * Gets the heating degree gotten from the once parsed xml file.
+     *
+     * @return Double - the heating degree read from the xml's data.
+     */
+    public Double GetHeatingDegree() { return heatingDegree; }
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
@@ -552,7 +574,7 @@ public class ProjectInfoFile {
         return 0;
     }
 
-    private LocalDate ReadFreezing() throws DateTimeParseException
+    private LocalDate ReadFreezingDate() throws DateTimeParseException
     {
         NodeList nodes = GetUpperLevelNodeList("Freezing", "Missing heating date.");
         //        try {
@@ -571,7 +593,17 @@ public class ProjectInfoFile {
         //        }
     }
 
-    private LocalDate ReadHeating() throws DateTimeParseException
+    private Double ReadCoolingDegree()
+    {
+        NodeList nodes = GetUpperLevelNodeList("CoolingDegree", "Missing cooling degree.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing cooling degree.");
+        if(values.size() > 0) {
+            return Double.parseDouble(values.get(0));
+        }
+        return 0.0;
+    }
+
+    private LocalDate ReadHeatingDate() throws DateTimeParseException
     {
         NodeList nodes = GetUpperLevelNodeList("Heating", "Missing freezing date.");
         //        try {
@@ -588,6 +620,16 @@ public class ProjectInfoFile {
         //            errorMsg.add(e.getMessage());
         //            return null;
         //        }
+    }
+
+    private Double ReadHeatingDegree()
+    {
+        NodeList nodes = GetUpperLevelNodeList("HeatingDegree", "Missing heating degree.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing heating degree.");
+        if(values.size() > 0) {
+            return Double.parseDouble(values.get(0));
+        }
+        return 0.0;
     }
 
     private ArrayList<ProjectInfoSummary> ReadSummaries() throws ClassNotFoundException, NoSuchMethodException, SecurityException,
