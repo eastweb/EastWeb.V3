@@ -2,7 +2,6 @@ package version2.prototype.util;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -108,10 +107,9 @@ public class DatabaseCache extends Observable{
             final ResultSet rs = stmt.executeQuery(query.toString());
             ArrayList<Integer> rows = new ArrayList<Integer>();
             try {
-                int tempDateGroupID, tempDayOfYear, tempYear;
+                int tempDayOfYear, tempYear;
                 ArrayList<DataFileMetaData> tempExtraDownloads = new ArrayList<DataFileMetaData>();
                 while(rs.next()) {
-                    tempDateGroupID = rs.getInt("DataGroupID");
                     tempDayOfYear = rs.getInt("DayOfYear");
                     tempYear = rs.getInt("Year");
 
@@ -163,7 +161,7 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws IOException
      */
-    public int loadUnprocessedDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
+    public int LoadUnprocessedGloablDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
             throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = -1;
         final Connection conn = PostgreSQLConnection.getConnection();
@@ -301,6 +299,9 @@ public class DatabaseCache extends Observable{
         return new DataFileMetaData("Data", fullPath, year, day);
     }
 
+    /**
+     * Forces the state of this DatabaseCache to that of "changed" and notifies any and all observers to act and check for available updates.
+     */
     public void NotifyObserversToCheckForPastUpdates()
     {
         setChanged();

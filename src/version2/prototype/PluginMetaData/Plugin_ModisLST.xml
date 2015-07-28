@@ -5,7 +5,7 @@
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
-		<mode>http</mode>
+		<Mode>http</Mode>
 		<HTTP>
 			<url>http://e4ftl01.cr.usgs.gov/MOLT/MOD11A2.005/</url>
 		</HTTP>
@@ -14,7 +14,7 @@
 		<DatePattern>\\d{4}</DatePattern>
 		<FileNamePattern>MOD11A2.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf</FileNamePattern>
 		<OriginDate>
-			<Day>05</Day>
+			<DayOfMonth>05</DayOfMonth>
 			<Month>03</Month>
 			<Year>2000</Year>
 		</OriginDate>

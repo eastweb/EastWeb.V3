@@ -3,12 +3,16 @@ package test.download.ModisLST;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -48,7 +52,7 @@ public class TestModisLSTGlobalDownloader {
     }
 
     @Test
-    public void testRun() throws IOException
+    public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException
     {
         ListDatesFiles ldf= new ModisLSTListDatesFiles(new DataDate(data.originDate), data);
 

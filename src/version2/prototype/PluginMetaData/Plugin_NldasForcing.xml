@@ -4,9 +4,8 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<ListDatesFilesClass>NldasForcingListDatesFiles</ListDatesFilesClass>
-		<DownloaderClass>NldasForcingDownloader</DownloaderClass>
-		<mode>ftp</mode>
+		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<Mode>ftp</Mode>
 		<FTP>
 			<hostName>hydro1.sci.gsfc.nasa.gov</hostName>
 			<rootDir>/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/</rootDir>
@@ -20,7 +19,7 @@
 		<DatePattern>\\d{4}</DatePattern>
 		<fileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</fileNamePattern>
 		<OriginDate>
-			<Day>01</Day>
+			<DayOfMonth>01</DayOfMonth>
 			<Month>01</Month>
 			<Year>1979</Year>
 		</OriginDate>

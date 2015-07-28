@@ -27,29 +27,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
         return new DataDate(hour,dayOfMonth,month,year);
     }
 
-    /**
-     * Returns a GregorianCalendar initialized with today's date.
-     */
-    private static LocalDate getTodayCalendar() {
-        LocalDate date = LocalDate.now();
-        //        final GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"), Locale.ROOT);
-        //        cal.setLenient(false);
-        return date;
-    }
-
-    /**
-     * Returns a cleared GregorianCalendar.
-     */
-    //    private static LocalDate getClearedCalendar() {
-    //        final GregorianCalendar cal = getTodayCalendar();
-    //        cal.clear();
-    //        return cal;
-    //    }
-
-    /**
-     * Returns a GregorianCalendar initialized with this instance's date.
-     */
-    public LocalDate getCalendar() {
+    public LocalDate getLocalDate() {
         //        final GregorianCalendar cal = getClearedCalendar();
         //        cal.set(year, month - 1, day); // Subtract 1 to convert from 1-based months to 0-based months
         LocalDate date = LocalDate.of(year, month, dayOfMonth);
@@ -115,7 +93,7 @@ public final class DataDate implements Comparable<DataDate>, Serializable {
      * Gets a new DataDate representing today's date.
      */
     public static DataDate today() {
-        return new DataDate(getTodayCalendar());
+        return new DataDate(LocalDate.now());
     }
 
     /**

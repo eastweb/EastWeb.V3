@@ -29,7 +29,7 @@ public class TemporalSummaryComposition {
         this.strategy = strategy;
         files = new ArrayList<FileDatePair>(1);
         files.add(FDPair);
-        startDate = strategy.getStartDate(FDPair.date.getCalendar());
+        startDate = strategy.getStartDate(FDPair.date.getLocalDate());
     }
 
     /**
@@ -41,7 +41,7 @@ public class TemporalSummaryComposition {
     public boolean addFilePair(FileDatePair FDPair)
     {
         boolean success = true;
-        if((strategy.getDaysInThisComposite(startDate) > files.size()) && (FDPair.date.getCalendar().compareTo(startDate) >= 0))
+        if((strategy.getDaysInThisComposite(startDate) > files.size()) && (FDPair.date.getLocalDate().compareTo(startDate) >= 0))
         {
             files.add(FDPair);
             Collections.sort(files, new AscComp());

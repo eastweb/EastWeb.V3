@@ -6,9 +6,8 @@
 		<Name>QC</Name>
 	</ExtraDownloadFiles>
 	<Download Name="Data">
-		<ListDatesFilesClass>ModisNBARListDatesFiles</ListDatesFilesClass>
-		<DownloaderClass>ModisNBARDownloader</DownloaderClass>
-		<mode>http</mode>
+		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<Mode>http</Mode>
 		<HTTP>
 			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/</url>
 		</HTTP>
@@ -17,15 +16,14 @@
 		<DatePattern>\\d{4}</DatePattern>
 		<FileNamePattern>MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf</FileNamePattern>
 		<OriginDate>
-			<Day>18</Day>
+			<DayOfMonth>18</DayOfMonth>
 			<Month>02</Month>
 			<Year>2000</Year>
 		</OriginDate>
 	</Download>
 	<Download Name="QC">
-		<ListDatesFilesClass>ModisNBARQCListDatesFiles</ListDatesFilesClass>
-		<DownloaderClass>ModisNBARQCDownloader</DownloaderClass>
-		<mode>http</mode>
+		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<Mode>http</Mode>
 		<HTTP>
 			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B2.005/</url>
 		</HTTP>

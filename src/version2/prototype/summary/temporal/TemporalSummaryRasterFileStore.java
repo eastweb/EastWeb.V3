@@ -39,7 +39,7 @@ public class TemporalSummaryRasterFileStore {
     public TemporalSummaryComposition addFile(File f, DataDate d, int daysPerInputData) throws Exception
     {
         TemporalSummaryComposition modifiedComp = null;
-        LocalDate lDate = compStrategy.getStartDate(d.getCalendar());
+        LocalDate lDate = compStrategy.getStartDate(d.getLocalDate());
         int i;
         boolean matched = false;
         for(i=0; i < compositions.size(); i++) {
@@ -60,7 +60,7 @@ public class TemporalSummaryRasterFileStore {
         else
         {
             TemporalSummaryComposition tempComp = new TemporalSummaryComposition(compStrategy, new FileDatePair(f, d));
-            if(compStrategy.getDaysInThisComposite(d.getCalendar()) == 1) {
+            if(compStrategy.getDaysInThisComposite(d.getLocalDate()) == 1) {
                 modifiedComp = tempComp;
             } else {
                 compositions.add(tempComp);

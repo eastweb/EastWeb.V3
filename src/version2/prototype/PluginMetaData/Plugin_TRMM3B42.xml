@@ -5,7 +5,7 @@
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
-		<mode>ftp</mode>
+		<Mode>ftp</Mode>
 		<FTP>
 			<hostName>disc2.nascom.nasa.gov</hostName>
 			<rootDir>
@@ -19,7 +19,7 @@
 		<DatePattern>\\d{4}</DatePattern>
 		<fileNamePattern>3B42_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.7\\.bin</fileNamePattern>
 		<OriginDate>
-			<Day>31</Day>
+			<DayOfMonth>31</DayOfMonth>
 			<Month>12</Month>
 			<Year>1997</Year>
 		</OriginDate>
