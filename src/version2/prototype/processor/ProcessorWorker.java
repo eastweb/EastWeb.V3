@@ -126,7 +126,13 @@ public class ProcessorWorker extends ProcessWorker {
                         prepareTask.getMaskFile(),
                         prepareTask.getDataBands(),
                         prepareTask.getQCBands(),
-                        prepareTask.getProjection()));
+                        prepareTask.getProjection(),
+                        prepareTask.getMaskResolution(),
+                        prepareTask.getClipOrNot(),
+                        prepareTask.getFreezingDate(),
+                        prepareTask.getHeatingDate()
+                        )
+                        );
 
                 //copy the downloaded files to the input folders
                 String [] inputFolders = prepareTask.getInputFolders(key);

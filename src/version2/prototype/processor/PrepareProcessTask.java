@@ -1,6 +1,8 @@
 package version2.prototype.processor;
 
 
+import java.time.LocalDate;
+
 import version2.prototype.DataDate;
 import version2.prototype.Projection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -61,5 +63,19 @@ public abstract class PrepareProcessTask {
         return plugin.GetQC();
     }
 
+    // post-condition: return the mask resolution for the maskfile in the project
+    public Integer getMaskResolution()
+    {   return project.GetMaskingResolution();  }
 
+    // post-condition: return true if clipping is needed; otherwise, false
+    public Boolean getClipOrNot()
+    {   return project.GetClipping();   }
+
+    // post-condition: return freezing date use set in the project
+    public LocalDate getFreezingDate()
+    {   return project.GetFreezingDate();   }
+
+    // post-condition: return heating date use set in the project
+    public LocalDate getHeatingDate()
+    {   return project.GetHeatingDate();    }
 }
