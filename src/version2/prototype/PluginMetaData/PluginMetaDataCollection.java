@@ -440,6 +440,12 @@ public class PluginMetaDataCollection {
             datePattern = tempDatePattern;
             fileNamePattern = tempFileNamePattern;
 
+            Element originDateElement = (Element) dataElement.getElementsByTagName("OriginDate").item(0);
+            int dayOfMonth = Integer.parseInt(originDateElement.getElementsByTagName("DayOfMonth").item(0).getTextContent());
+            String month = originDateElement.getElementsByTagName("Month").item(0).getTextContent();
+            int year = Integer.parseInt(originDateElement.getElementsByTagName("Year").item(0).getTextContent());
+            originDate = LocalDate.of(year, Month.valueOf(month.toUpperCase()), dayOfMonth);
+
             if(nList.getLength() > 1)
             {
                 extraDownloads = new ArrayList<DownloadMetaData>();
@@ -447,18 +453,12 @@ public class PluginMetaDataCollection {
                 {
                     if(i != dataNodeIdx)
                     {
-                        extraDownloads.add(new DownloadMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, nList.item(i), timeZone, filesPerDay));
+                        extraDownloads.add(new DownloadMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, nList.item(i), timeZone, filesPerDay, originDate));
                     }
                 }
             } else {
                 extraDownloads = null;
             }
-
-            Element originDateElement = (Element) dataElement.getElementsByTagName("OriginDate").item(0);
-            int dayOfMonth = Integer.parseInt(originDateElement.getElementsByTagName("DayOfMonth").item(0).getTextContent());
-            String month = originDateElement.getElementsByTagName("Month").item(0).getTextContent();
-            int year = Integer.parseInt(originDateElement.getElementsByTagName("Year").item(0).getTextContent());
-            originDate = LocalDate.of(year, Month.valueOf(month.toUpperCase()), dayOfMonth);
         }
 
         public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode, FTP myFtp, HTTP myHttp,
@@ -514,7 +514,7 @@ public class PluginMetaDataCollection {
         }
 
         private DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, Node extraDownloadNode, String defaultTimeZone,
-                int defaultFilesPerDay) throws Exception
+                int defaultFilesPerDay, LocalDate dataOriginDate) throws Exception
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempMode = null;
@@ -566,7 +566,7 @@ public class PluginMetaDataCollection {
             filesPerDay = tempFilesPerDay;
             datePattern = tempDatePattern;
             fileNamePattern = tempFileNamePattern;
-            originDate = null;
+            originDate = dataOriginDate;
         }
     }
 

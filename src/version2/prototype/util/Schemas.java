@@ -8,9 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -307,24 +304,6 @@ public class Schemas {
         }
         rs.close();
         return ID;
-    }
-
-    public static int getFilesPerDayValue(String globalEASTWebSchema, String pluginName, final Statement stmt) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        int filesPerDay = -1;
-
-        ResultSet rs;
-        rs = stmt.executeQuery(String.format(
-                "SELECT \"FilesPerDay\" FROM \"%1$s\".\"Plugin\" WHERE \n" +
-                        "\"Name\" = '" + pluginName + "';",
-                        globalEASTWebSchema
-                ));
-        if(rs != null && rs.next())
-        {
-            filesPerDay = rs.getInt("FilesPerDay");
-        }
-        rs.close();
-
-        return filesPerDay;
     }
 
     /**

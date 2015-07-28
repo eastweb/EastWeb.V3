@@ -1,26 +1,19 @@
 /**
  *
  */
-package test.processor;
+package test.summary;
 
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -28,9 +21,12 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.ProcessorWorker;
+import version2.prototype.summary.SummaryWorker;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
+import version2.prototype.util.EASTWebResult;
+import version2.prototype.util.EASTWebResults;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -38,7 +34,7 @@ import version2.prototype.util.Schemas;
  * @author michael.devos
  *
  */
-public class ProcessorWorkerTest {
+public class SummaryWorkerTest {
 
     /**
      * @throws java.lang.Exception
@@ -69,16 +65,12 @@ public class ProcessorWorkerTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.processor.ProcessorWorker#call()}.
-     * @throws ParseException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ClassNotFoundException
+     * Test method for {@link version2.prototype.summary.SummaryWorker#call()}.
      */
     @Test
-    public final void testCall() throws ParseException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    public final void testCall() {
+        // Set up parameters
+        String globalSchema = "";
         Process process = null;
         ProjectInfoFile projectInfoFile = new ProjectInfoFile(xmlLocation);
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
@@ -89,17 +81,16 @@ public class ProcessorWorkerTest {
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
+        ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
         extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
-        ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day, extraDownloads)));
 
-
-        DatabaseCache outputCache = new DatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, pluginMetaData.ExtraDownloadFiles);
-        ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        DatabaseCache outputCache = new DatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
+        SummaryWorker worker = new SummaryWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
 
         // Verify results
-        ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
+        ArrayList<EASTWebResult> results = EASTWebResults.GetEASTWebResults(EASTWebResults.GetEASTWebQuery(globalSchema, projectInfoFile.GetProjectName(), pluginInfo.GetName()));
         fail("Not yet implemented"); // TODO
     }
 

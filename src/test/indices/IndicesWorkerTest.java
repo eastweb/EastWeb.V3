@@ -1,26 +1,19 @@
 /**
  *
  */
-package test.processor;
+package test.indices;
 
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -38,7 +31,7 @@ import version2.prototype.util.Schemas;
  * @author michael.devos
  *
  */
-public class ProcessorWorkerTest {
+public class IndicesWorkerTest {
 
     /**
      * @throws java.lang.Exception
@@ -69,16 +62,11 @@ public class ProcessorWorkerTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.processor.ProcessorWorker#call()}.
-     * @throws ParseException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ClassNotFoundException
+     * Test method for {@link version2.prototype.indices.IndicesWorker#call()}.
      */
     @Test
-    public final void testCall() throws ParseException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    public final void testCall() {
+        // Set up parameters
         Process process = null;
         ProjectInfoFile projectInfoFile = new ProjectInfoFile(xmlLocation);
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
@@ -94,8 +82,7 @@ public class ProcessorWorkerTest {
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day, extraDownloads)));
 
-
-        DatabaseCache outputCache = new DatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, pluginMetaData.ExtraDownloadFiles);
+        DatabaseCache outputCache = new DatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
         ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results

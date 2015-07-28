@@ -63,7 +63,7 @@ public class TemporalSummaryCalculator {
         ArrayList<File> inputFileSet = new ArrayList<File>();
 
         // Check if interpolation is needed
-        if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getCalendar()) % daysPerInputData == 0) {
+        if(fileStore.compStrategy.getDaysInThisComposite(inDataDate.getLocalDate()) % daysPerInputData == 0) {
             inputFileSet.add(inRasterFile);
         }
 
