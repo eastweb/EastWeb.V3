@@ -6,13 +6,19 @@ package test.summary;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -86,7 +92,7 @@ public class SummaryWorkerTest {
         extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day, extraDownloads)));
 
-        DatabaseCache outputCache = new DatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
+        DatabaseCache outputCache = new MyDatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
         SummaryWorker worker = new SummaryWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles);
 
         // Verify results
@@ -94,4 +100,19 @@ public class SummaryWorkerTest {
         fail("Not yet implemented"); // TODO
     }
 
+    protected class MyDatabaseCache extends DatabaseCache
+    {
+        public MyDatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
+            super(projectName, pluginName, dataComingFrom, extraDownloadFiles);
+        }
+
+        @Override
+        public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
+        ParserConfigurationException, SAXException, IOException {
+            for(DataFileMetaData data : filesForASingleComposite)
+            {
+                System.out.println(data.ReadMetaDataForSummary().dataFilePath);
+            }
+        }
+    }
 }
