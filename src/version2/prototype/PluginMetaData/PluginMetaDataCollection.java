@@ -596,7 +596,7 @@ public class PluginMetaDataCollection {
         public final String url;
 
         public HTTP(Node e){
-            url=((Element)e).getElementsByTagName("url").item(0).getTextContent();
+            url=((Element)e).getElementsByTagName("URL").item(0).getTextContent();
         }
 
         public HTTP(String url)
