@@ -291,9 +291,9 @@ public class ProjectInformationPage {
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
         freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        //coolingTextField.setText(project.GetMasterShapeFile());
+        coolingTextField.setText(project.GetCoolingDegree().toString());
         heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        //heatingTextField.setText(project.GetMasterShapeFile());
+        heatingTextField.setText(project.GetHeatingDegree().toString());
 
         // set modis info
         for(String modis: project.GetModisTiles()){
