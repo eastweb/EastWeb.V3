@@ -267,9 +267,9 @@ public class PluginMetaDataCollection {
             ProcessorMetaData Processor = new ProcessorMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Processor"));
             ArrayList<String> IndicesMetaData = new ArrayList<String>();
             NodeList tempIndices = doc.getElementsByTagName("Indices");
-            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("Class").getLength();
+            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
             for(int i = 0; i < nodesIndices; i++) {
-                IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("Class").item(i).getTextContent());
+                IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
             }
             IndexMetaData Indices = new IndexMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, tempIndices);
             SummaryMetaData Summary = new SummaryMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Summary"));
@@ -643,9 +643,9 @@ public class PluginMetaDataCollection {
             nList = n;
 
             indicesNames = new ArrayList<String>();
-            int nodesIndices = ((Element) nList.item(0)).getElementsByTagName("Class").getLength();
+            int nodesIndices = ((Element) nList.item(0)).getElementsByTagName("ClassName").getLength();
             for(int i = 0; i < nodesIndices; i++) {
-                indicesNames.add( ((Element) nList.item(0)).getElementsByTagName("Class").item(i).getTextContent());
+                indicesNames.add( ((Element) nList.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
             }
         }
     }
