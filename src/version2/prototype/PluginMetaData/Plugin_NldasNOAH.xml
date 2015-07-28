@@ -23,7 +23,7 @@
 		</OriginDate>
 	</Download>	
 	<Processor>
-		<ClassNProcessStepame>NldasNOAHComposite</ProcessStep>
+		<ProcessStep>NldasNOAHComposite</ProcessStep>
 		<ProcessStep>NldasNOAHReproject</ProcessStep>
 		<ProcessStep>NldasNOAHClip</ProcessStep>
 		<ProcessStep>NldasNOAHMask</ProcessStep>
