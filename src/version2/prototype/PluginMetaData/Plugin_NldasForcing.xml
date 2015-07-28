@@ -4,7 +4,8 @@
 	<DaysPerInputData>1</DaysPerInputData>
 	<ExtraDownloadFiles/>
 	<Download>
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<ListDatesFilesClass>NldasForcingListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>NldasForcingDownloader</DownloaderClass>
 		<mode>ftp</mode>
 		<FTP>
 			<hostName>hydro1.sci.gsfc.nasa.gov</hostName>
@@ -25,13 +26,19 @@
 		</OriginDate>
 	</Download>	
 	<Processes>
-		<className>NldasForcingComposite</className>
-		<className>NldasForcingReproject</className>
-		<className>NldasForcingClip</className>
-		<className>NldasForcingMask</className>
+		<ClassName>NldasForcingComposite</ClassName>
+		<ClassName>NldasForcingReproject</ClassName>
+		<ClassName>NldasForcingClip</ClassName>
+		<ClassName>NldasForcingMask</ClassName>
 	</Processes>
 	<Indices>
-		<ClassName></ClassName>
+		<ClassName>NldasForcingHeatingDegreeDays</ClassName>
+		<ClassName>NldasForcingFreezingDegreeDays</ClassName>
+		<ClassName>NldasForcingMinAirTemperatureCalculator</ClassName>
+		<ClassName>NldasForcingMeanAirTemperatureCalculator</ClassName>
+		<ClassName>NldasForcingMaxAirTemperatureCalculator</ClassName>
+		<ClassName>NldasForcingMeanHumidity</ClassName>
+		<ClassName>NldasForcingTotalPrecipitation</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>

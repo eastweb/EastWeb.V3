@@ -1,16 +1,18 @@
 package version2.prototype.processor.NldasForcing;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.PrepareProcessTask;
+import version2.prototype.util.FileSystem;
 
 public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
 
-    public NldasForcingPrepareProcessTask(ProjectInfoFile mProject,
-            ProjectInfoPlugin mPlugin, DataDate mDate) {
+    public NldasForcingPrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate) {
         super(mProject, mPlugin, mDate);
     }
 
@@ -23,18 +25,28 @@ public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
         switch(stepId)
         {
         case 1:
-            // Download -> NldasForcingComposite
-            //try { FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), "NldasForcing"); }
-            //catch (ParserConfigurationException | SAXException | IOException e) { e.printStackTrace(); }
-            folders.add(project.GetWorkingDir() + String.format("Download\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            // Download -> Composite
+            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Download", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
-            // NldasForcingComposite -> Reproject
-            folders.add(project.GetWorkingDir() + String.format("NldasForcingComposite\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            // Composite -> Reproject
+            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Composite", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Reproject -> Mask
-            folders.add(project.GetWorkingDir() + String.format("Reproject\\%4d\\%03d\\", date.getYear(), date.getDayOfYear()));
+            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Reproject", date.getYear(), date.getDayOfYear()));
+            break;
+        case 4:
+            // Mask -> Clip
+            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Mask", date.getYear(), date.getDayOfYear()));
             break;
         default:
             folders = null;
@@ -51,16 +63,28 @@ public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
         switch(stepId)
         {
         case 1:
-            // Download/QCDownload -> Mozaic
-            outputFolder = project.GetWorkingDir() + String.format("NldasForcingComposite\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            // Download -> Composite
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Composite", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            // Mozaic -> Reproject
-            outputFolder = project.GetWorkingDir() + String.format("Reproject\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            // Composite -> Reproject
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Reproject", date.getYear(), date.getDayOfYear());
             break;
         case 3:
             // Reproject -> Mask
-            outputFolder = project.GetWorkingDir() + String.format("Output\\%4d\\%03d\\", date.getYear(), date.getDayOfYear());
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Mask", date.getYear(), date.getDayOfYear());
+            break;
+        case 4:
+            // Mask -> Clip
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), plugin.GetName(), ProcessName.PROCESSOR),
+                    "Output", date.getYear(), date.getDayOfYear());
             break;
         default:
             outputFolder = null;
@@ -73,17 +97,17 @@ public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
     @Override
     public int[] getDataBands() {
         return new int[]
-                {1, // air temperature (K) at 2 meters above the surface
-                2,  // specific humidity (kg/kg) at 2 meters above the surface
-                3,  // surface pressure (Pa)
-                4,  // U wind component (m/s) at 10 meters above the surface
-                5,  // V wind component (m/s) at 10 meters above the surface
-                6,  // surface downward longwave radiation (W/m^2)
-                7,  // fraction of total precipitation that is convective (no units): from NARR
-                8,  // CAPE: Convective Available Potential Energy (J/kg): from NARR
-                9,  // potential evaporation (kg/m^2): from NARR
-                10, // precipitation hourly total (kg/m^2)
-                11};// surface downward shortwave radiation (W/m^2) -- bias-corrected
+                {1,// air temperature (K) at 2 meters above the surface
+                2, // specific humidity (kg/kg) at 2 meters above the surface
+                //    surface pressure (Pa)
+                //    U wind component (m/s) at 10 meters above the surface
+                //    V wind component (m/s) at 10 meters above the surface
+                //    surface downward longwave radiation (W/m^2)
+                //    fraction of total precipitation that is convective (no units): from NARR
+                //    CAPE: Convective Available Potential Energy (J/kg): from NARR
+                //    potential evaporation (kg/m^2): from NARR
+                10,// precipitation hourly total (kg/m^2)
+                };//  surface downward shortwave radiation (W/m^2) -- bias-corrected
     }
 
     @Override

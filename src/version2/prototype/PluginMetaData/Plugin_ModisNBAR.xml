@@ -6,7 +6,8 @@
 		<Name>QC</Name>
 	</ExtraDownloadFiles>
 	<Download Name="Data">
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<ListDatesFilesClass>ModisNBARListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>ModisNBARDownloader</DownloaderClass>
 		<mode>http</mode>
 		<HTTP>
 			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/</url>
@@ -22,7 +23,8 @@
 		</OriginDate>
 	</Download>
 	<Download Name="QC">
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<ListDatesFilesClass>ModisNBARQCListDatesFiles</ListDatesFilesClass>
+		<DownloaderClass>ModisNBARQCDownloader</DownloaderClass>
 		<mode>http</mode>
 		<HTTP>
 			<url>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B2.005/</url>
@@ -38,8 +40,7 @@
 		</OriginDate>
 	</Download>
 	<Processes>
-		<ClassName>ModisNBARFilter</ClassName>
-		<className>ModisNBARMozaic</className>
+		<ClassName>ModisNBARFilterMozaic</ClassName>
 		<ClassName>ModisNBARReproject</ClassName>
 		<ClassName>ModisNBARMask</ClassName>
 		<ClassName>ModisNBARClip</ClassName>
