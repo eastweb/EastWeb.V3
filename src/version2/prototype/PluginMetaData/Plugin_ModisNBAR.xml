@@ -17,7 +17,7 @@
 		<FileNamePattern>MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>18</DayOfMonth>
-			<Month>02</Month>
+			<Month>February</Month>
 			<Year>2000</Year>
 		</OriginDate>
 	</Download>

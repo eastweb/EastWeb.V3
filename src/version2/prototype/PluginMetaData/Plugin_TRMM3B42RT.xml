@@ -18,7 +18,7 @@
 		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>01</DayOfMonth>
-			<Month>03</Month>
+			<Month>March</Month>
 			<Year>2000</Year>
 		</OriginDate>
 	</Download>	

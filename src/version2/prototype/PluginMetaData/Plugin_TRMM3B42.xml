@@ -18,7 +18,7 @@
 		<FileNamePattern>3B42_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.7\\.bin</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>31</DayOfMonth>
-			<Month>12</Month>
+			<Month>December</Month>
 			<Year>1997</Year>
 		</OriginDate>
 	</Download>	
