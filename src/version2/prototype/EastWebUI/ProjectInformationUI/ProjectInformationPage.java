@@ -89,7 +89,9 @@ public class ProjectInformationPage {
     private JButton deleteSelectedModisButton;
     private  JCheckBox isClippingCheckBox;
     private JDateChooser freezingDateChooser;
+    private JTextField coolingTextField;
     private JDateChooser heatingDateChooser;
+    private JTextField heatingTextField;
 
     private boolean isEditable;
 
@@ -231,6 +233,15 @@ public class ProjectInformationPage {
 
         timeZoneComboBox.setEnabled(false);
         isClippingCheckBox.setEnabled(false);
+        coolingTextField.setEnabled(false);
+        heatingTextField.setEnabled(false);
+
+        freezingDateChooser.setEnabled(false);
+        freezingDateChooser.setDate(null);
+
+        heatingDateChooser.setEnabled(false);
+        heatingDateChooser.setDate(null);
+
         coordinateSystemComboBox.setEnabled(false);
         reSamplingComboBox.setEnabled(false);
         datumComboBox.setEnabled(false);
@@ -256,15 +267,7 @@ public class ProjectInformationPage {
         falseNothing.setEditable(false);
         falseNothing.setText("");
 
-        freezingDateChooser.setEnabled(false);
-        freezingDateChooser.setDate(null);
-
-        heatingDateChooser.setEnabled(false);
-        heatingDateChooser.setDate(null);
-
         summaryListModel.clear();
-
-        // }}
 
         if(project == null) {
             return;
@@ -288,7 +291,9 @@ public class ProjectInformationPage {
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
         freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        //coolingTextField.setText(project.GetMasterShapeFile());
         heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        //heatingTextField.setText(project.GetMasterShapeFile());
 
         // set modis info
         for(String modis: project.GetModisTiles()){
@@ -546,11 +551,29 @@ public class ProjectInformationPage {
         panel.add(freezingDateChooser);
 
         JLabel lblHeatingStartDate = new JLabel("Heating Start Date:");
-        lblHeatingStartDate.setBounds(6, 254, 132, 14);
+        lblHeatingStartDate.setBounds(6, 282, 132, 14);
         panel.add(lblHeatingStartDate);
         heatingDateChooser = new JDateChooser();
-        heatingDateChooser.setBounds(148, 254, 200, 20);
+        heatingDateChooser.setBounds(148, 276, 200, 20);
         panel.add(heatingDateChooser);
+
+        JLabel lblCoolingDegreeThreshold = new JLabel("Cooling degree threshold:");
+        lblCoolingDegreeThreshold.setBounds(6, 254, 132, 14);
+        panel.add(lblCoolingDegreeThreshold);
+
+        coolingTextField = new JTextField();
+        coolingTextField.setBounds(148, 251, 200, 20);
+        panel.add(coolingTextField);
+        coolingTextField.setColumns(10);
+
+        JLabel lblHeatingDegreeThreshold = new JLabel("Heating degree threshold:");
+        lblHeatingDegreeThreshold.setBounds(6, 307, 132, 14);
+        panel.add(lblHeatingDegreeThreshold);
+
+        heatingTextField = new JTextField();
+        heatingTextField.setBounds(148, 304, 200, 20);
+        panel.add(heatingTextField);
+        heatingTextField.setColumns(10);
     }
 
     @SuppressWarnings("rawtypes")
@@ -592,7 +615,7 @@ public class ProjectInformationPage {
         modisInformationPanel.add(addNewModisButton);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(15, 70, 245, 178);
+        scrollPane.setBounds(15, 25, 245, 263);
         modisInformationPanel.add(scrollPane);
 
         final JList<String> modisList = new JList<String>(modisListModel);
@@ -733,7 +756,7 @@ public class ProjectInformationPage {
         summaryPanel.add(editSummaryButton);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(15, 70, 245, 178);
+        scrollPane.setBounds(15, 25, 245, 263);
         summaryPanel.add(scrollPane);
         final JList summaryList = new JList(summaryListModel);
         scrollPane.setViewportView(summaryList);
@@ -872,10 +895,20 @@ public class ProjectInformationPage {
             startDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
             projectInfo.appendChild(freezingstartDate);
 
-            // Freezing start Date
+            // Cooling degree value
+            Element coolingDegree = doc.createElement("CoolingDegree");
+            coolingDegree.appendChild(doc.createTextNode(coolingTextField.getText()));
+            projectInfo.appendChild(coolingDegree);
+
+            // Heating start Date
             Element heatingstartDate = doc.createElement("Heating");
             startDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
             projectInfo.appendChild(heatingstartDate);
+
+            // heating degree value
+            Element heatingDegree = doc.createElement("HeatingDegree");
+            heatingDegree.appendChild(doc.createTextNode(heatingTextField.getText()));
+            projectInfo.appendChild(heatingDegree);
 
             //list of modis tiles
             Element modisTiles = doc.createElement("ModisTiles");
