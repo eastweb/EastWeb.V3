@@ -100,6 +100,7 @@ public class ProjectInformationPage {
     private DefaultListModel<String> listOfAddedPluginModel;
     private DefaultListModel<String> summaryListModel;
     private DefaultListModel<String> modisListModel;
+    private JTextField scalingTextField;
 
     /**
      * Launch the application.
@@ -563,7 +564,7 @@ public class ProjectInformationPage {
         panel.add(lblCoolingDegreeThreshold);
 
         coolingTextField = new JTextField();
-        coolingTextField.setBounds(148, 251, 200, 20);
+        coolingTextField.setBounds(148, 251, 100, 20);
         panel.add(coolingTextField);
         coolingTextField.setColumns(10);
 
@@ -572,9 +573,17 @@ public class ProjectInformationPage {
         panel.add(lblHeatingDegreeThreshold);
 
         heatingTextField = new JTextField();
-        heatingTextField.setBounds(148, 304, 200, 20);
+        heatingTextField.setBounds(148, 304, 100, 20);
         panel.add(heatingTextField);
         heatingTextField.setColumns(10);
+
+        JLabel lblCelcius = new JLabel("Celcius");
+        lblCelcius.setBounds(258, 254, 46, 14);
+        panel.add(lblCelcius);
+
+        JLabel label = new JLabel("Celcius");
+        label.setBounds(258, 307, 46, 14);
+        panel.add(label);
     }
 
     @SuppressWarnings("rawtypes")
@@ -732,6 +741,15 @@ public class ProjectInformationPage {
         falseNothing.setColumns(10);
         falseNothing.setBounds(146, 240, 140, 16);
         panel_2.add(falseNothing);
+
+        JLabel lblScaling = new JLabel("Scaling ");
+        lblScaling.setBounds(6, 266, 134, 14);
+        panel_2.add(lblScaling);
+
+        scalingTextField = new JTextField();
+        scalingTextField.setBounds(146, 267, 140, 20);
+        panel_2.add(scalingTextField);
+        scalingTextField.setColumns(10);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

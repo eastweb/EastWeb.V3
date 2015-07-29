@@ -1,14 +1,11 @@
 package version2.prototype.Scheduler;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,7 +30,6 @@ import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.summary.Summary;
 import version2.prototype.util.DatabaseCache;
-import version2.prototype.util.GeneralListener;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
@@ -336,8 +332,7 @@ public class Scheduler {
      * @return general concrete Process object for managing ProcessWorkers
      * @throws ClassNotFoundException
      */
-    private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
-            DatabaseCache outputCache) throws ClassNotFoundException {
+    private Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
         Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
         //        inputCache.addObserver(process);
@@ -356,8 +351,7 @@ public class Scheduler {
      * @return general concrete Process object for managing ProcessWorkers
      * @throws ClassNotFoundException
      */
-    private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache,
-            DatabaseCache outputCache) throws ClassNotFoundException {
+    private Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
         Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
         //        inputCache.addObserver(process);
@@ -380,136 +374,4 @@ public class Scheduler {
         //        inputCache.addObserver(process);
         return process;
     }
-
-    /**
-     * @deprecated
-     *
-     * @param plugin
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @Deprecated
-    public void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
-    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
-    {
-        // uses reflection
-        Class<?> clazzDownloader = Class.forName("version2.prototype.download."
-                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
-                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download.downloadFactoryClassName);
-        Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class, GeneralListener.class);
-        Object downloader =  ctorDownloader.newInstance(new Object[] {
-                data.projectInfoFile.GetStartDate(),
-                pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download});
-        Method methodDownloader = downloader.getClass().getMethod("run");
-        methodDownloader.invoke(downloader);
-
-        //        DownloadProgress = 100;
-        //        log.add("Download Finish");
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param plugin
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @Deprecated
-    public void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
-    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
-    {
-        //        ProcessorMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
-        // TODO: revise the "date"
-        //        PrepareProcessTask prepareProcessTask;
-        // TODO: initiate it with each plugin's implementation
-        //prepareProcessTask= new PrepareProcessTask(projectInfoFile, plugin.GetName(), projectInfoFile.startDate, new processListener());
-
-        /* will move to the Projection framework
-        for (int i = 1; i <= temp.processStep.size(); i++) {
-            if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
-            {
-                Class<?> clazzProcess = Class.forName("version2.prototype.projection."
-                        + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
-                        + temp.processStep.get(i));
-                Constructor<?> ctorProcess = clazzProcess.getConstructor(ProcessData.class);
-                Object process =  ctorProcess.newInstance(new Object[] {new ProcessData(
-                        prepareProcessTask.getInputFolders(i),
-                        prepareProcessTask.getOutputFolder(i),
-                        prepareProcessTask.getQC(),
-                        prepareProcessTask.getShapeFile(),
-                        prepareProcessTask.getMaskFile(),
-                        prepareProcessTask.getDataBands(),
-                        prepareProcessTask.getQCBands(),
-                        prepareProcessTask.getProjection(),
-                        prepareProcessTask.getListener())});
-                Method methodProcess = process.getClass().getMethod("run");
-                methodProcess.invoke(process);
-            }
-        }
-         */
-        //        ProcessorProgress = 100;
-        //        log.add("Process Finish");
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param plugin
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @Deprecated
-    public void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
-    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
-    {
-        for(String indicie: plugin.GetIndicies())
-        {
-            Class<?> clazzIndicies;
-            try{
-                clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", plugin.GetName(), indicie));
-            }catch(Exception e){
-                try{
-                    clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S", indicie));
-                }catch(Exception ex){
-                    throw new EmptyStackException(); // class not found
-                }
-            }
-            Constructor<?> ctorIndicies = clazzIndicies.getConstructor(String.class, DataDate.class, String.class, String.class, GeneralListener.class);
-            Object indexCalculator =  ctorIndicies.newInstance(
-                    new Object[] {
-                            plugin.GetName(),
-                            data.projectInfoFile.GetStartDate(),
-                            new File(indicie).getName().split("\\.")[0],
-                            indicie});
-            Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
-            methodIndicies.invoke(indexCalculator);
-        }
-        //        IndiciesProgress = 100;
-        //        log.add("Indicies Finish");
-    }
 }
-
