@@ -2,6 +2,7 @@
 <PluginMetadata>
 	<Title>Test Plugin</Title>
 	<DaysPerInputData>1</DaysPerInputData>
+	<Resolution>1000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
@@ -29,7 +30,7 @@
 		<ProcessStep>NldasFilter</ProcessStep>
 	</Processor>
 	<Indices>
-		<Class>GdalNldasCalculator</Class>
+		<ClassName>GdalNldasCalculator</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>

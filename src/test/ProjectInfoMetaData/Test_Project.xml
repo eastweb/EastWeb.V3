@@ -33,10 +33,16 @@
 	<FalseEasting>151</FalseEasting>
 	<FalseNorthing>33</FalseNorthing>
 	<LatitudeOfOrigin>111</LatitudeOfOrigin>
-	<Freezing>Tue Jun 02 23:17:37 CDT 2015</Freezing>
+	<FreezingDate>
+		<Day>02</Day>
+		<Month>June</Month>
+	</FreezingDate>
 	<CoolingDegree>0</CoolingDegree>
-	<Heating>Tue Jun 02 23:17:37 CDT 2015</Heating>
-	<HeatingDegree>100.0</HeatingDegree>
+	<HeatingDate>
+		<Day>02</Day>
+		<Month>June</Month>
+	</HeatingDate>
+	<HeatingDegree>100.1</HeatingDegree>
 	<Summaries>
         <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
         <Summary ID="2">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>

@@ -2,6 +2,7 @@
 <PluginMetadata>
 	<Title>ModisLST</Title>
 	<DaysPerInputData>8</DaysPerInputData>
+	<Resolution>1000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>

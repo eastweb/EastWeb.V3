@@ -246,6 +246,7 @@ public class PluginMetaDataCollection {
             // Get top level non-process specific elements
             String Title = doc.getElementsByTagName("Title").item(0).getTextContent();
             int DaysPerInputData = Integer.parseInt(doc.getElementsByTagName("DaysPerInputData").item(0).getTextContent());
+            int resolution = Integer.parseInt(doc.getElementsByTagName("Resolution").item(0).getTextContent());
 
             ArrayList<String> QualityControlMetaData = new ArrayList<String>();
             NodeList tempQC = doc.getElementsByTagName("QualityControl");
@@ -277,7 +278,7 @@ public class PluginMetaDataCollection {
             // Setup map
             String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
             pluginList.add(pluginName);
-            myMap.put(pluginName, new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles));
+            myMap.put(pluginName, new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, resolution, ExtraDownloadFiles));
 
         }
         return myMap;
@@ -312,10 +313,11 @@ public class PluginMetaDataCollection {
         public final ArrayList<String> QualityControlMetaData;
         public final String Title;
         public final int DaysPerInputData;
+        public final int Resolution;
         public final ArrayList<String> ExtraDownloadFiles;
 
         public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndexMetaData Indices, SummaryMetaData Summary, ArrayList<String> IndicesMetaData,
-                ArrayList<String> QualityControlMetaData, String Title, int DaysPerInputData, ArrayList<String> ExtraDownloadFiles)
+                ArrayList<String> QualityControlMetaData, String Title, int DaysPerInputData, int Resolution, ArrayList<String> ExtraDownloadFiles)
         {
             this.Download = Download;
             this.Processor = Processor;
@@ -325,6 +327,7 @@ public class PluginMetaDataCollection {
             this.QualityControlMetaData = QualityControlMetaData;
             this.Title = Title;
             this.DaysPerInputData = DaysPerInputData;
+            this.Resolution = Resolution;
             this.ExtraDownloadFiles = ExtraDownloadFiles;
         }
     }

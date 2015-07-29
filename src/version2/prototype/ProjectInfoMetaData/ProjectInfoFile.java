@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -50,9 +52,9 @@ public class ProjectInfoFile {
     private final Integer totModisTiles;
     private final ArrayList<String> modisTiles;
     private final Projection projection;
-    private final LocalDate heatingDate;
+    private final MonthDay heatingDate;
     private final Double heatingDegree;
-    private final LocalDate freezingDate;
+    private final MonthDay freezingDate;
     private final Double coolingDegree;
     private final ArrayList<ProjectInfoSummary> summaries;
 
@@ -128,7 +130,7 @@ public class ProjectInfoFile {
      * @param summaries
      */
     public ProjectInfoFile(ArrayList<ProjectInfoPlugin> plugins, LocalDate startDate, String projectName, String workingDir, String maskingFile, Integer maskingResolution, String masterShapeFile,
-            String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate,
+            String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, MonthDay freezingDate, Double coolingDegree, MonthDay heatingDate,
             Double heatingDegree, ArrayList<ProjectInfoSummary> summaries) {
 
         this.plugins = plugins;
@@ -246,7 +248,7 @@ public class ProjectInfoFile {
      *
      * @return Date - the freezing date read from the xml's data.
      */
-    public LocalDate GetFreezingDate() { return freezingDate; }
+    public MonthDay GetFreezingDate() { return freezingDate; }
 
     /**
      * Gets the cooling degree gotten from the once parsed xml file.
@@ -260,7 +262,7 @@ public class ProjectInfoFile {
      *
      * @return Date - the heating date read from the xml's data.
      */
-    public LocalDate GetHeatingDate() { return heatingDate; }
+    public MonthDay GetHeatingDate() { return heatingDate; }
 
     /**
      * Gets the heating degree gotten from the once parsed xml file.
@@ -574,23 +576,25 @@ public class ProjectInfoFile {
         return 0;
     }
 
-    private LocalDate ReadFreezingDate() throws DateTimeParseException
+    private MonthDay ReadFreezingDate() throws DateTimeParseException
     {
-        NodeList nodes = GetUpperLevelNodeList("Freezing", "Missing heating date.");
-        //        try {
-        // e.g. "Wed May 20 21:21:36 CDT 2015"
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
+        Integer dayOfMonth;
+        Month month;
+        NodeList dayNodes = GetUpperLevelNodeList("Day", "Missing freezing date.", "FreezingDate");
+        NodeList monthNodes = GetUpperLevelNodeList("Month", "Missing freezing date.", "FreezingDate");
+
+        ArrayList<String> values = GetNodeListValues(dayNodes, "Missing FreezingDate day.");
         if(values.size() > 0) {
-            return LocalDate.parse(values.get(0), datesFormatter);
-            //            ZonedDateTime.parse(values.get(0));
-            //                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
+            dayOfMonth = Integer.parseInt(values.get(0));
+
+            values = GetNodeListValues(monthNodes, "Missing FreezingDate month.");
+            if(values.size() > 0) {
+                month = Month.valueOf(values.get(0).toUpperCase());
+
+                return MonthDay.of(month, dayOfMonth);
+            }
         }
         return null;
-        //        } catch (DateTimeParseException e) {
-        //            error = true;
-        //            errorMsg.add(e.getMessage());
-        //            return null;
-        //        }
     }
 
     private Double ReadCoolingDegree()
@@ -603,23 +607,25 @@ public class ProjectInfoFile {
         return 0.0;
     }
 
-    private LocalDate ReadHeatingDate() throws DateTimeParseException
+    private MonthDay ReadHeatingDate() throws DateTimeParseException
     {
-        NodeList nodes = GetUpperLevelNodeList("Heating", "Missing freezing date.");
-        //        try {
-        // e.g. "Wed May 20 21:21:36 CDT 2015"
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
+        Integer dayOfMonth;
+        Month month;
+        NodeList dayNodes = GetUpperLevelNodeList("Day", "Missing heating date.", "HeatingDate");
+        NodeList monthNodes = GetUpperLevelNodeList("Month", "Missing heating date.", "HeatingDate");
+
+        ArrayList<String> values = GetNodeListValues(dayNodes, "Missing HeatingDate day.");
         if(values.size() > 0) {
-            return LocalDate.parse(values.get(0), datesFormatter);
-            //            ZonedDateTime.parse(values.get(0));
-            //                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
+            dayOfMonth = Integer.parseInt(values.get(0));
+
+            values = GetNodeListValues(monthNodes, "Missing HeatingDate month.");
+            if(values.size() > 0) {
+                month = Month.valueOf(values.get(0).toUpperCase());
+
+                return MonthDay.of(month, dayOfMonth);
+            }
         }
         return null;
-        //        } catch (DateTimeParseException e) {
-        //            error = true;
-        //            errorMsg.add(e.getMessage());
-        //            return null;
-        //        }
     }
 
     private Double ReadHeatingDegree()
