@@ -59,9 +59,11 @@ public class ProjectInfoFileTester {
         assertTrue("FalseEasting is " + projectInfo.GetProjection().getFalseEasting(), projectInfo.GetProjection().getFalseEasting() == 151);
         assertTrue("FalseNorthing is " + projectInfo.GetProjection().getFalseNorthing(), projectInfo.GetProjection().getFalseNorthing() == 33);
         assertTrue("LatitudeOfOrigin is " + projectInfo.GetProjection().getLatitudeOfOrigin(), projectInfo.GetProjection().getLatitudeOfOrigin() == 111);
-        assertTrue("FreezingDate is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("--06-02"));
+        assertTrue("FreezingDate is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("2015-06-02"));
+        //        assertTrue("FreezingDate is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("--06-02"));
         assertTrue("CoolingDegree is " + projectInfo.GetCoolingDegree(), projectInfo.GetCoolingDegree() == 0);
-        assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("--06-02"));
+        assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("2015-06-02"));
+        //        assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("--06-02"));
         assertTrue("HeatingDegree is " + projectInfo.GetHeatingDegree(), projectInfo.GetHeatingDegree() == 100.1);
         assertTrue("Summary 1 is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
                 .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
