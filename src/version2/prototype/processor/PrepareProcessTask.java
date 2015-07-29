@@ -67,6 +67,10 @@ public abstract class PrepareProcessTask {
     public Integer getMaskResolution()
     {   return project.GetMaskingResolution();  }
 
+    // post-condition: return the data resolution of the plugin product
+    public Integer getDataResolution()
+    {   return plugin.GetDataResolution();  }
+
     // post-condition: return true if clipping is needed; otherwise, false
     public Boolean getClipOrNot()
     {   return project.GetClipping();   }
@@ -83,6 +87,6 @@ public abstract class PrepareProcessTask {
     {   return project.GetHeatingDegree();  }
 
     public double getFreezingDegree()
-    {   return project.GetHeatingDegree();  }
+    {   return project.GetCoolingDegree();  }
 
 }

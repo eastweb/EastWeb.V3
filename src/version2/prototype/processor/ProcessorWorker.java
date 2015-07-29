@@ -128,6 +128,7 @@ public class ProcessorWorker extends ProcessWorker {
                         prepareTask.getQCBands(),
                         prepareTask.getProjection(),
                         prepareTask.getMaskResolution(),
+                        prepareTask.getDataResolution(),
                         prepareTask.getClipOrNot(),
                         prepareTask.getFreezingDate(),
                         prepareTask.getHeatingDate(),
