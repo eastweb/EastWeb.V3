@@ -35,7 +35,13 @@ public abstract class Composite {
     }
 
     // run method for scheduler
-    public void run() throws IOException{
+    public void run() throws Exception{
+
+        //create outputDirectory
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists())
+        {   FileUtils.forceMkdir(outputDir); }
+
         composeFiles();
 
         // remove the input folder
@@ -54,6 +60,6 @@ public abstract class Composite {
      *   (1) check if there are enough number of files in the inputFiles array.(e.g. 24 for hourly NLDAS)
      *   (2) compose the files into a result file and save the result file to outputFolder
      */
-    public abstract void composeFiles();
+    abstract protected void composeFiles();
 
 }

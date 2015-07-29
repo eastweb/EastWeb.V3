@@ -66,21 +66,24 @@ public abstract class Filter {
     }
 
     // run method for the scheduler
-    public void run() throws IOException{
+    public void run() throws Exception{
+
+        //create outputDirectory
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists())
+        {   FileUtils.forceMkdir(outputDir); }
+
         if (qcBands != null) {
             filterByQCFlag(qcLevel);
-        } else {
-            try {
-                filterByValue();
-            } catch (Exception e) {
-                // TODO :write into log
-                e.printStackTrace();
-            }
+        } else
+        {
+            filterByValue();
         }
 
         // remove the input folder
         FileUtils.deleteDirectory(inputFolder1);
-        FileUtils.deleteDirectory(inputFolder2);
+        if (inputFolder2.exists())
+        {   FileUtils.deleteDirectory(inputFolder2);    }
 
     }
 

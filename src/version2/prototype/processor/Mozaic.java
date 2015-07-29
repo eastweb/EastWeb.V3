@@ -72,18 +72,19 @@ public class Mozaic {
     }
 
     // run method for the scheduler
-    public void run(){
+    public void run() throws Exception{
         synchronized (GdalUtils.lockObject) {
-            sortTiles();
-            try {
-                linkTiles();
 
-                // remove the input folder
-                FileUtils.deleteDirectory(inputFolder);
-            } catch (IOException e) {
-                // TODO: Write to log
-                e.printStackTrace();
-            }
+            //create outputDirectory
+            if (!outputFolder.exists())
+            {   FileUtils.forceMkdir(outputFolder); }
+
+            sortTiles();
+            linkTiles();
+
+
+            // remove the input folder
+            FileUtils.deleteDirectory(inputFolder);
         }
     }
 
@@ -133,18 +134,18 @@ public class Mozaic {
         // loop for each band needed be reprojected
         for (int i = 0; i < bands.length; i++) {
             int currentBand = bands[i];
-            File temp = File.createTempFile("band" + currentBand, ".tif", outputFolder);
+            File outputFile = new File(outputFolder, "band" + currentBand + ".tif");
 
-            System.out.println("create temp: " + temp.toString());
-            temp.deleteOnExit();
+            outputFile.deleteOnExit();
 
             String[] option = { "INTERLEAVE=PIXEL" };
             Dataset output = gdal.GetDriverByName("GTiff").Create(
-                    temp.getAbsolutePath(),
+                    outputFile.getAbsolutePath(),
                     outputXSize,
                     outputYSize,
                     1, // band number
                     gdalconst.GDT_Float32, option);
+
             Dataset input = gdal.Open(tileList[0].sdsName[0]);
 
             output.SetGeoTransform(input.GetGeoTransform());
@@ -199,10 +200,6 @@ public class Mozaic {
             output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
             output.GetRasterBand(1).ComputeStatistics(true);
             output.delete();
-
-            // add this band mozaic product into outputFile arraylist
-            outputFiles.add(temp);
         }
-
     }
 }

@@ -36,6 +36,11 @@ public abstract class Convert {
 
     // run method for the scheduler
     public void run() throws Exception, IOException{
+        //create outputDirectory
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists())
+        {   FileUtils.forceMkdir(outputDir); }
+
         convertFiles();
 
         // remove the input folder

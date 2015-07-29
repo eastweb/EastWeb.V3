@@ -73,7 +73,7 @@ public class Mask {
         FileUtils.deleteDirectory(inputFolder);
     }
 
-    private void maskFiles() throws IOException
+    protected void maskFiles() throws IOException
     {
         synchronized (GdalUtils.lockObject) {
             for (File mInput : inputFiles){

@@ -69,7 +69,7 @@ public class Clip
 
 
     // clip all the files in the input folder
-    private void clipFiles() throws Exception
+    protected void clipFiles() throws Exception
     {
         GdalUtils.register();
 
