@@ -558,6 +558,7 @@ public class ProjectInformationPage {
         lblFreezingStartDate.setBounds(6, 259, 132, 14);
         panel.add(lblFreezingStartDate);
         freezingDateChooser = new JDateChooser();
+        freezingDateChooser.setDateFormatString("MMM d");
         freezingDateChooser.setBounds(148, 253, 200, 20);
         panel.add(freezingDateChooser);
 
@@ -565,6 +566,7 @@ public class ProjectInformationPage {
         lblHeatingStartDate.setBounds(6, 318, 132, 14);
         panel.add(lblHeatingStartDate);
         heatingDateChooser = new JDateChooser();
+        heatingDateChooser.setDateFormatString("MMM d");
         heatingDateChooser.setBounds(148, 312, 200, 20);
         panel.add(heatingDateChooser);
 
@@ -942,7 +944,7 @@ public class ProjectInformationPage {
             projectInfo.appendChild(isClipping);
 
             // Freezing start Date
-            Element freezingstartDate = doc.createElement("Freezing");
+            Element freezingstartDate = doc.createElement("FreezingDate");
             startDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
             projectInfo.appendChild(freezingstartDate);
 
@@ -952,7 +954,7 @@ public class ProjectInformationPage {
             projectInfo.appendChild(coolingDegree);
 
             // Heating start Date
-            Element heatingstartDate = doc.createElement("Heating");
+            Element heatingstartDate = doc.createElement("HeatingDate");
             startDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
             projectInfo.appendChild(heatingstartDate);
 
