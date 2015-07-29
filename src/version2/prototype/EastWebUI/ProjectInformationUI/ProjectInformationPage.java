@@ -64,6 +64,8 @@ import com.toedter.calendar.JDateChooser;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 
 public class ProjectInformationPage {
 
@@ -299,9 +301,9 @@ public class ProjectInformationPage {
         masterShapeTextField.setText(project.GetMasterShapeFile());
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
-        freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        //freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         coolingTextField.setText(project.GetCoolingDegree().toString());
-        heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        //heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         heatingTextField.setText(project.GetHeatingDegree().toString());
 
 
@@ -945,7 +947,7 @@ public class ProjectInformationPage {
 
             // Freezing start Date
             Element freezingstartDate = doc.createElement("FreezingDate");
-            startDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
+            freezingstartDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
             projectInfo.appendChild(freezingstartDate);
 
             // Cooling degree value
@@ -955,7 +957,7 @@ public class ProjectInformationPage {
 
             // Heating start Date
             Element heatingstartDate = doc.createElement("HeatingDate");
-            startDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
+            heatingstartDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
             projectInfo.appendChild(heatingstartDate);
 
             // heating degree value
