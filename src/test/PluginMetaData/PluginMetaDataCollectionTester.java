@@ -61,6 +61,7 @@ public class PluginMetaDataCollectionTester {
         PluginMetaData pluginMetaData = instance.pluginMetaDataMap.get(instance.pluginList.get(0));
         assertNotNull(pluginMetaData);
         assertTrue("Plugin DaysPerInputData is " + pluginMetaData.DaysPerInputData, pluginMetaData.DaysPerInputData == 1);
+        assertTrue("Plugin Resolution is " + pluginMetaData.Resolution, pluginMetaData.Resolution == 1000);
         assertTrue("ExtraDownloadFiles list is " + pluginMetaData.ExtraDownloadFiles.toString(), pluginMetaData.ExtraDownloadFiles.size() == 0);
 
         // Test getting DownloadMetaData
