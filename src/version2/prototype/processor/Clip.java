@@ -1,8 +1,6 @@
 package version2.prototype.processor;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
@@ -61,7 +59,9 @@ public class Clip
         }
         else    // skip clipping
         {   // copy the input files to the output folder
-            FileUtils.copyDirectoryToDirectory(inputFolder, outputDir);
+            for (File f: inputFiles) {
+                FileUtils.copyFileToDirectory(f, outputDir);
+            }
         }
         // remove the input folder
         FileUtils.deleteDirectory(inputFolder);

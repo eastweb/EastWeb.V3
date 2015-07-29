@@ -172,15 +172,18 @@ public class ProcessorWorker extends ProcessWorker {
             // if not match, copy the files from the last step to the final outputfolder for  processor
             if (!outputPath.equals(laststepOutputFolder))
             {
-                if(!(new File(outputPath).exists()))
+                File outputDir = new File(outputPath);
+                if(!(outputDir.exists()))
                 {
-                    FileUtils.forceMkdir(new File(outputPath));
+                    FileUtils.forceMkdir(outputDir);
                 }
 
                 // copy the output files to the system output directory
                 if (laststepOutputFolder != null)
                 {
-                    FileUtils.copyDirectoryToDirectory(new File(laststepOutputFolder), new File(outputPath));
+                    for (File f: new File(laststepOutputFolder).listFiles()) {
+                        FileUtils.copyFileToDirectory(f, outputDir);
+                    }
                 }
             }
 

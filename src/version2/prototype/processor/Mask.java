@@ -64,7 +64,9 @@ public class Mask {
         else  // skip masking
         {
             // copy files in the input folder to the output folder
-            FileUtils.copyDirectoryToDirectory(inputFolder, outputDir);
+            for (File f: inputFiles) {
+                FileUtils.copyFileToDirectory(f, outputDir);
+            }
         }
 
         // remove the input folder
