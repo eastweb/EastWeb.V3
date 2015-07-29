@@ -18,6 +18,9 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JScrollPane;
 
 public class AssociatePluginPage {
 
@@ -86,9 +89,12 @@ public class AssociatePluginPage {
 
         // list of indices to be added
         indiciesListModel = new DefaultListModel();
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(10, 89, 365, 132);
+        pluginPanel.add(scrollPane);
         final JList<DefaultListModel> listOfInndicies = new JList<DefaultListModel>(indiciesListModel);
-        listOfInndicies.setBounds(10, 89, 365, 132);
-        pluginPanel.add(listOfInndicies);
+        scrollPane.setViewportView(listOfInndicies);
 
         JLabel qcLabel = new JLabel("Quality Control");
         qcLabel.setBounds(10, 41, 80, 14);
@@ -106,21 +112,9 @@ public class AssociatePluginPage {
 
         populatePluginComboBox(pluginPanel);
 
-        // add indices button
-        final JButton btnAddIndices = new JButton("");
-        btnAddIndices.setToolTipText("add indices ");
-        btnAddIndices.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
-        btnAddIndices.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                indiciesListModel.addElement(String.valueOf(indiciesComboBox.getSelectedItem()));
-            }
-        });
-        btnAddIndices.setBounds(283, 62, 36, 23);
-        pluginPanel.add(btnAddIndices);
-
         // add plugin to list
-        JButton btnSave = new JButton("Save");
+        final JButton btnSave = new JButton("Save");
+        btnSave.setEnabled(!indiciesListModel.isEmpty());
         btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -146,6 +140,26 @@ public class AssociatePluginPage {
         btnCancel.setBounds(230, 227, 89, 23);
         pluginPanel.add(btnCancel);
 
+        // add indices button
+        final JButton btnAddIndices = new JButton("");
+        btnAddIndices.setToolTipText("add indices ");
+        btnAddIndices.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
+        btnAddIndices.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+
+                if(indiciesComboBox.getSelectedItem() == null) {
+                    return ;
+                }
+
+                indiciesListModel.addElement(String.valueOf(indiciesComboBox.getSelectedItem()));
+                indiciesComboBox.removeItem(indiciesComboBox.getSelectedItem());
+                btnSave.setEnabled(!indiciesListModel.isEmpty());
+            }
+        });
+        btnAddIndices.setBounds(283, 62, 36, 23);
+        pluginPanel.add(btnAddIndices);
+
         // delete selected indices
         JButton btnDeleteIndicies = new JButton("");
         btnDeleteIndicies.setToolTipText("delete selected indices");
@@ -153,11 +167,15 @@ public class AssociatePluginPage {
         btnDeleteIndicies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                indiciesComboBox.addItem(indiciesListModel.getElementAt(listOfInndicies.getSelectedIndex()).toString());
+
                 DefaultListModel<DefaultListModel> model = (DefaultListModel<DefaultListModel>) listOfInndicies.getModel();
+                model.getElementAt(listOfInndicies.getSelectedIndex());
                 int selectedIndex = listOfInndicies.getSelectedIndex();
                 if (selectedIndex != -1) {
                     model.remove(selectedIndex);
                 }
+                btnSave.setEnabled(!indiciesListModel.isEmpty());
             }
         });
         btnDeleteIndicies.setBounds(339, 62, 36, 23);
