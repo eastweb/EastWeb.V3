@@ -86,6 +86,8 @@ public class NldasNOAHComposite extends Composite{
 
                 outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, tempArray.get(i));
 
+                outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+
                 outputDS.delete();
             }
 
