@@ -60,7 +60,7 @@ public class NldasNOAHDownloader extends DownloaderFramework{
                     throw new IOException("Couldn't navigate to directory: " + yearDirectory);
                 }
 
-                final String dayDirectory = String.format("%s/%3d", yearDirectory, mDate.getDayOfYear());
+                final String dayDirectory = String.format("%s/%03d", yearDirectory, mDate.getDayOfYear());
 
                 if (!ftpC.changeWorkingDirectory(dayDirectory))
                 {
