@@ -78,4 +78,11 @@ public abstract class PrepareProcessTask {
     // post-condition: return heating date use set in the project
     public LocalDate getHeatingDate()
     {   return project.GetHeatingDate();    }
+
+    public double getHeatingDegree()
+    {   return project.GetHeatingDegree();  }
+
+    public double getFreezingDegree()
+    {   return project.GetHeatingDegree();  }
+
 }

@@ -20,12 +20,15 @@ public class ProcessData {
     private Boolean clipOrNot;
     private LocalDate freezingDate;
     private LocalDate heatingDate;
+    private double freezingDegree;
+    private double heatingDegree;
 
     public ProcessData() { }
 
     public ProcessData(String [] inputFolders, String outputFolder, String qcLevel, String shapefile,
             String maskfile, int dataBands[], int qcBands[], Projection projection,
-            Integer maskResolution, Boolean clipOrNot, LocalDate freezingDate, LocalDate heatingDate)
+            Integer maskResolution, Boolean clipOrNot, LocalDate freezingDate, LocalDate heatingDate,
+            double freezingDegree, double heatingDegree)
     {
         this.inputFolders = inputFolders;
         this.outputFolder = outputFolder;
@@ -39,6 +42,8 @@ public class ProcessData {
         this.clipOrNot = clipOrNot;
         this.freezingDate = freezingDate;
         this.heatingDate = heatingDate;
+        this.freezingDegree = freezingDegree;
+        this.heatingDegree = heatingDegree;
     }
 
     public String [] getInputFolders()
@@ -77,4 +82,10 @@ public class ProcessData {
 
     public LocalDate getHeatingDate()
     {   return heatingDate;     }
+
+    public double getFreezingDegree()
+    {   return freezingDegree;  }
+
+    public double getHeatingDegree()
+    {   return heatingDegree;   }
 }
