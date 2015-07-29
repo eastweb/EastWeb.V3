@@ -3,7 +3,6 @@ package version2.prototype.indices.NldasForcingIndices;
 import org.gdal.gdal.Dataset;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GeneralListener;
 
 public class NldasForcingMeanHumidity extends IndicesFramework {
 
@@ -20,8 +19,7 @@ public class NldasForcingMeanHumidity extends IndicesFramework {
 
         for (int y = 0; y < ySize; y++) {
             for (int i = 0; i < inputs.length; i++) {
-                // Raster band 2 == Specific Humidity (kg/kg)
-                inputs[i].GetRasterBand(2).ReadRaster(0, y, xSize, 1, inputsArray[i]);
+                inputs[i].GetRasterBand(1).ReadRaster(0, y, xSize, 1, inputsArray[i]);
             }
 
             for (int x = 0; x < xSize; x++) {

@@ -3,7 +3,6 @@ package version2.prototype.indices.NldasForcingIndices;
 import org.gdal.gdal.Dataset;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GeneralListener;
 
 public class NldasForcingTotalPrecipitation extends IndicesFramework {
 
@@ -19,8 +18,7 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
 
         for (int y = 0; y < ySize; y++) {
             for (int i = 0; i < inputs.length; i++) {
-                // Raster band 10 == Total Daily Precipitation (kg/m^2)
-                inputs[i].GetRasterBand(10).ReadRaster(0, y, xSize, 1, inputsArray[i]);
+                inputs[i].GetRasterBand(1).ReadRaster(0, y, xSize, 1, inputsArray[i]);
             }
 
             for (int x = 0; x < xSize; x++) {
