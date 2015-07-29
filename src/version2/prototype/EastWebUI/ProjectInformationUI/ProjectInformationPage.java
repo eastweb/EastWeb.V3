@@ -295,6 +295,7 @@ public class ProjectInformationPage {
         heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         heatingTextField.setText(project.GetHeatingDegree().toString());
 
+
         // set modis info
         for(String modis: project.GetModisTiles()){
             modisListModel.addElement(modis);
