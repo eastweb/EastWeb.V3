@@ -602,9 +602,9 @@ public class ProjectInformationPage {
         addNewModisButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tiles", null);
+                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tile", null);
 
-                if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V') {
+                if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V' || tile.length() > 6) {
                     JOptionPane.showMessageDialog(null, "Modis format: hddvdd  d=> digit");
                     return;
                 } else{
@@ -618,6 +618,14 @@ public class ProjectInformationPage {
                     }
 
                 }
+
+                for(Object item:modisListModel.toArray()){
+                    if(tile.contentEquals(item.toString())) {
+                        JOptionPane.showMessageDialog(null, "Modis tile already exist");
+                        return;
+                    }
+                }
+
                 modisListModel.addElement(tile);
             }
         });

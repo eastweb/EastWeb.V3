@@ -18,8 +18,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.JScrollPane;
 
 public class AssociatePluginPage {
