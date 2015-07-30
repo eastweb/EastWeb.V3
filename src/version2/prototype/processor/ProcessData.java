@@ -1,6 +1,7 @@
 package version2.prototype.processor;
 
 import java.time.LocalDate;
+import java.time.MonthDay;
 
 import version2.prototype.Projection;
 
@@ -19,8 +20,8 @@ public class ProcessData {
     private Integer maskResolution;
     private Integer dataResolution;
     private Boolean clipOrNot;
-    private LocalDate freezingDate;
-    private LocalDate heatingDate;
+    private MonthDay freezingDate;
+    private MonthDay heatingDate;
     private double freezingDegree;
     private double heatingDegree;
 
@@ -29,7 +30,7 @@ public class ProcessData {
     public ProcessData(String [] inputFolders, String outputFolder, String qcLevel, String shapefile,
             String maskfile, int dataBands[], int qcBands[], Projection projection,
             Integer maskResolution, Integer dataResolution, Boolean clipOrNot,
-            LocalDate freezingDate, LocalDate heatingDate, double freezingDegree, double heatingDegree)
+            MonthDay freezingDate, MonthDay heatingDate, double freezingDegree, double heatingDegree)
     {
         this.inputFolders = inputFolders;
         this.outputFolder = outputFolder;
@@ -82,10 +83,10 @@ public class ProcessData {
     public Boolean getClipOrNot()
     {   return clipOrNot;       }
 
-    public LocalDate getFreezingDate()
+    public MonthDay getFreezingDate()
     {   return freezingDate;    }
 
-    public LocalDate getHeatingDate()
+    public MonthDay getHeatingDate()
     {   return heatingDate;     }
 
     public double getFreezingDegree()

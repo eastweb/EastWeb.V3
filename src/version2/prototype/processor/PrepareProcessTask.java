@@ -1,10 +1,11 @@
 package version2.prototype.processor;
 
-
 import java.time.LocalDate;
+import java.time.MonthDay;
 
 import version2.prototype.DataDate;
 import version2.prototype.Projection;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 
@@ -14,12 +15,15 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 public abstract class PrepareProcessTask {
     protected ProjectInfoFile project;
     protected final DataDate date;
-    protected final ProjectInfoPlugin plugin;
+    protected final ProjectInfoPlugin pPlugin;
+    protected final PluginMetaData pluginInfo;
 
-    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin, DataDate mDate) {
+    public PrepareProcessTask(ProjectInfoFile mProject, ProjectInfoPlugin mPlugin,
+            PluginMetaData plugin, DataDate mDate) {
         project = mProject;
         date = mDate;
-        plugin = mPlugin;
+        pPlugin = mPlugin;
+        pluginInfo = plugin;
     }
 
     /* pre-condition: input the ID of the step specified in the plugin metadata
@@ -60,7 +64,7 @@ public abstract class PrepareProcessTask {
 
     // post-condition: return the set qcLevel for the plugin in the project
     public String getQC(){
-        return plugin.GetQC();
+        return pPlugin.GetQC();
     }
 
     // post-condition: return the mask resolution for the maskfile in the project
@@ -69,19 +73,25 @@ public abstract class PrepareProcessTask {
 
     // post-condition: return the data resolution of the plugin product
     public Integer getDataResolution()
-    {   return plugin.GetDataResolution();  }
+    {   return pluginInfo.Resolution ;  }
 
     // post-condition: return true if clipping is needed; otherwise, false
     public Boolean getClipOrNot()
     {   return project.GetClipping();   }
 
-    // post-condition: return freezing date use set in the project
-    public LocalDate getFreezingDate()
-    {   return project.GetFreezingDate();   }
+    // post-condition: return month/day of freezing date use set in the project
+    public MonthDay getFreezingDate()
+    {
+        LocalDate cDate = project.GetFreezingDate();
+        return MonthDay.of(cDate.getMonthValue(), cDate.getDayOfMonth());
+    }
 
-    // post-condition: return heating date use set in the project
-    public LocalDate getHeatingDate()
-    {   return project.GetHeatingDate();    }
+    // post-condition: return month/day of heating date use set in the project
+    public MonthDay getHeatingDate()
+    {
+        LocalDate hDate = project.GetHeatingDate();
+        return MonthDay.of(hDate.getMonthValue(), hDate.getDayOfMonth());
+    }
 
     public double getHeatingDegree()
     {   return project.GetHeatingDegree();  }
