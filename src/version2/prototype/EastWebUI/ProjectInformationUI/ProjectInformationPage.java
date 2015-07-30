@@ -287,7 +287,7 @@ public class ProjectInformationPage {
         for(ProjectInfoPlugin plugin: project.GetPlugins()){
             String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>Quality: %s;</span></html>",
                     String.valueOf(plugin.GetName()),
-                    getIndiciesFormat(plugin.GetIndicies()),
+                    getIndiciesFormat(plugin.GetIndices()),
                     String.valueOf(plugin.GetQC()));
             listOfAddedPluginModel.addElement(formatString);
         }
@@ -1035,8 +1035,13 @@ public class ProjectInformationPage {
             Element summaries = doc.createElement("Summaries");
             projectInfo.appendChild(summaries);
 
+            int counter = 1;
+
             for(Object item:summaryListModel.toArray()){
+
                 Element summary = doc.createElement("Summary");
+                summary.setAttribute("ID", String.valueOf(counter));
+                counter ++;
 
                 summary.appendChild(doc.createTextNode(item.toString()));
                 summaries.appendChild(summary);

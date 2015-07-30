@@ -28,11 +28,19 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * Creates a GenericFrameworkProcess object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName,
      * and acquiring its input from the specified process (inputProcessName).
      *
+     * @param manager  - EASTWebManager reference
+     * @param processName  - name of this threaded process
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param processName  - name of this threaded process
+     * @param inputCache  - DatabaseCache to listen on for available file to process
+     * @param outputCache  - DatabaseCache to use when caching output files from the process
+     * @param classNames  - worker class names to spawn for each new input file. Expects the class to exist within one of the following packages:
+     * 1. version2.prototype.download
+     * 2. version2.prototype.indices
+     * 3. version2.prototype.processor
+     * 4. version2.prototype.summary
      * @throws ClassNotFoundException
      */
     public GenericProcess(EASTWebManager manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
@@ -48,9 +56,9 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
         switch(processName)
         {
         case DOWNLOAD: packageOfWorker = "version2.prototype.download."; break;
-        case INDICES: packageOfWorker = "version2.prototype.indices.IndicesWorker"; break;
-        case PROCESSOR: packageOfWorker = "version2.prototype.processor.ProcessorWorker"; break;
-        case SUMMARY: packageOfWorker = "version2.prototype.summary.SummaryWorker"; break;
+        case INDICES: packageOfWorker = "version2.prototype.indices."; break;
+        case PROCESSOR: packageOfWorker = "version2.prototype.processor."; break;
+        case SUMMARY: packageOfWorker = "version2.prototype.summary."; break;
         }
 
         processWorkerClasses = new ArrayList<Class<?>>(1);

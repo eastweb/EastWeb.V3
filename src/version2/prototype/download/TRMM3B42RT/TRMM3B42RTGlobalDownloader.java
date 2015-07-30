@@ -6,6 +6,7 @@ package version2.prototype.download.TRMM3B42RT;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,7 +18,6 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
-import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
@@ -33,9 +33,9 @@ import version2.prototype.util.FileSystem;
  */
 public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
-    public TRMM3B42RTGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    public TRMM3B42RTGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
     IOException, SQLException {
-        super(myID, pluginName, metaData, listDatesFiles);
+        super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
 
                 DataDate dd = entry.getKey();
 
@@ -135,12 +135,6 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
                     }
                 }
             } catch (ConfigReadException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
-            } catch (ParserConfigurationException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
-            } catch (SAXException e2) {
                 // TODO Auto-generated catch block
                 e2.printStackTrace();
             } catch (IOException e2) {

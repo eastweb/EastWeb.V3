@@ -11,10 +11,10 @@ public interface DownloaderFactory {
     /**
      * Creates a LocalDownloader instance determined by subclasses.
      *
-     * @param globalDLID  - the GlobalDownloader unique ID number
+     * @param gdl  - the GlobalDownloader to associate the LocalDownloader with for when loading files for processing
      * @return a LocalDownloader instance
      */
-    public LocalDownloader CreateLocalDownloader(int globalDLID);
+    public LocalDownloader CreateLocalDownloader(GlobalDownloader gdl);
 
     /**
      * Creates a GlobaldDownloader instance determined by subclasses.

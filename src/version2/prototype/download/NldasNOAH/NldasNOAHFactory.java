@@ -1,7 +1,9 @@
 package version2.prototype.download.NldasNOAH;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.EASTWebManager;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -21,18 +23,19 @@ import version2.prototype.util.DatabaseCache;
  */
 public class NldasNOAHFactory extends DownloadFactory {
 
-    protected NldasNOAHFactory(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache, DataDate startDate, DownloadMetaData dData) {
-        super(manager, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
+    protected NldasNOAHFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
+        super(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
     }
 
     @Override
     public DownloaderFactory CreateDownloadFactory(ListDatesFiles listDatesFiles) {
-        return new LocalStorageDownloadFactory(manager, "NldasNOAHDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
+        return new LocalStorageDownloadFactory(manager, configInstance, "NldasNOAHDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles,
+                startDate);
     }
 
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new NldasNOAHListDatesFiles(startDate, dData);
+        return new NldasNOAHListDatesFiles(new DataDate(startDate), dData);
     }
 }

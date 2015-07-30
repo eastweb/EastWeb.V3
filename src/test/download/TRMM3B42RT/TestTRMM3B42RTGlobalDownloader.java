@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -54,7 +55,7 @@ public class TestTRMM3B42RTGlobalDownloader {
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         ListDatesFiles ldf= new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data);
 
-        TRMM3B42RTGlobalDownloader ttd = new TRMM3B42RTGlobalDownloader(1,"TRMM3B42RT",  data,  ldf);
+        TRMM3B42RTGlobalDownloader ttd = new TRMM3B42RTGlobalDownloader(1, Config.getAnInstance("src/test/config.xml"), "TRMM3B42RT",  data,  ldf, LocalDate.ofYearDay(2015, 1));
 
         ttd.run();
 

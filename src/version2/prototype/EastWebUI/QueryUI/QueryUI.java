@@ -136,7 +136,7 @@ public class QueryUI {
                     }
 
                     for(ProjectInfoPlugin plugin: project.GetPlugins()){
-                        for(String indice: plugin.GetIndicies()) {
+                        for(String indice: plugin.GetIndices()) {
                             excludeListModel.addElement(indice);
                         }
                     }
