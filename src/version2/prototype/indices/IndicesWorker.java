@@ -120,7 +120,7 @@ public class IndicesWorker extends ProcessWorker{
                     Object indexCalculator =  ctorIndicies.newInstance();
 
                     // set input files
-                    Method method = indexCalculator.getClass().getMethod("setInputFile", File[].class);
+                    Method method = indexCalculator.getClass().getMethod("setInputFiles", File[].class);
                     method.invoke(indexCalculator, inputFiles);
 
                     // set output file
