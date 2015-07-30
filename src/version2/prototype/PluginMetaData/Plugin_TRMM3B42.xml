@@ -2,7 +2,7 @@
 <PluginMetadata>
 	<Title>TRMM3B42</Title>
 	<DaysPerInputData>1</DaysPerInputData>
-	<Resolution>1000</Resolution>
+	<Resolution>25000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
