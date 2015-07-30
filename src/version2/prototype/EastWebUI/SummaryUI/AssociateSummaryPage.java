@@ -80,10 +80,11 @@ public class AssociateSummaryPage {
         // combo box for temporal
         final JComboBox<String> temporalComboBox = new JComboBox<String>();
         temporalComboBox.setBounds(172, 86, 150, 20);
-        temporalComboBox.addItem("Gregorian Weekly");
-        temporalComboBox.addItem("Gregorian Monthly");
-        temporalComboBox.addItem("CDC Weekly");
-        temporalComboBox.addItem("WHO Weekly");
+        //FIXME:
+        temporalComboBox.addItem("GregorianWeeklyStrategy");
+        temporalComboBox.addItem("GregorianMonthlyStrategy");
+        temporalComboBox.addItem("CDCWeeklyStrategy");
+        temporalComboBox.addItem("WHOWeeklyStrategy");
         myPanel.add(temporalComboBox);
 
         // combo box populated by the selected shapefile
