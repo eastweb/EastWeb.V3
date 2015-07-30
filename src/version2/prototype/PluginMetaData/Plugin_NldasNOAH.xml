@@ -2,7 +2,7 @@
 <PluginMetadata>
 	<Title>NldasNOAH</Title>
 	<DaysPerInputData>1</DaysPerInputData>
-	<Resolution>1000</Resolution>
+	<Resolution>12500</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
