@@ -3,6 +3,7 @@ package version2.prototype.download.NldasForcing;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -21,9 +22,9 @@ import version2.prototype.util.FileSystem;
 
 public class NldasForcingGlobalDownloader extends GlobalDownloader {
 
-    public NldasForcingGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    public NldasForcingGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
     IOException, SQLException {
-        super(myID, pluginName, metaData, listDatesFiles);
+        super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
 
                 DataDate dd = entry.getKey();
 

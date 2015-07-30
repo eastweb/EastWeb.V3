@@ -4,8 +4,9 @@
 package version2.prototype.download;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
-import version2.prototype.DataDate;
+import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -20,17 +21,19 @@ import version2.prototype.util.DatabaseCache;
  */
 public abstract class DownloadFactory {
     protected final EASTWebManager manager;
+    protected final Config configInstance;
     protected final ProjectInfoFile projectInfoFile;
     protected final ProjectInfoPlugin pluginInfo;
     protected final PluginMetaData pluginMetaData;
     protected final Scheduler scheduler;
     protected final DatabaseCache outputCache;
-    protected final DataDate startDate;
+    protected final LocalDate startDate;
     protected final DownloadMetaData dData;
 
-    protected DownloadFactory(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache, DataDate startDate, DownloadMetaData dData) {
+    protected DownloadFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
         this.manager = manager;
+        this.configInstance = configInstance;
         this.projectInfoFile = projectInfoFile;
         this.pluginInfo = pluginInfo;
         this.pluginMetaData = pluginMetaData;

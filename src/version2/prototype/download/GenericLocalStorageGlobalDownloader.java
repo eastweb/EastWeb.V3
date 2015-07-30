@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,10 +32,14 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
     private Constructor<?> downloadCtr;
 
     /**
-     * @param myID
+     * Creates a generic GlobalDownloader that expects to be writing downloaded files to a local storage and updating a local database.
+     *
+     * @param myID  - unique identifier ID of this GlobalDownloader
+     * @param globalSchema
      * @param pluginName
      * @param metaData
      * @param listDatesFiles
+     * @param startDate
      * @param downloaderClassName
      * @throws ClassNotFoundException
      * @throws NoSuchMethodException
@@ -44,11 +49,12 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public GenericLocalStorageGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, String downloaderClassName)
-            throws ClassNotFoundException, NoSuchMethodException, SecurityException, ParserConfigurationException, SAXException, IOException, SQLException
+    public GenericLocalStorageGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate,
+            String downloaderClassName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, ParserConfigurationException, SAXException,
+            IOException, SQLException
     {
-        super(myID, pluginName, metaData, listDatesFiles);
-        Class<?> downloaderClass = Class.forName(downloaderClassName);
+        super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
+        Class<?> downloaderClass = Class.forName("version2.prototype.download." + pluginName + "." + downloaderClassName);
         downloadCtr = downloaderClass.getConstructor(DataDate.class, String.class, DownloadMetaData.class, String.class);
     }
 
@@ -98,7 +104,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
             // Step 4: Create downloader and run downloader for all that's left
             for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
             {
-                String outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+                String outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
                 DataDate dd = entry.getKey();
 
                 for (String f : entry.getValue())

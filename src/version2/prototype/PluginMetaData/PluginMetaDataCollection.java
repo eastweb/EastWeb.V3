@@ -33,6 +33,11 @@ import version2.prototype.util.FileSystem;
  */
 public class PluginMetaDataCollection {
     private static PluginMetaDataCollection instance;
+    /**
+     * PluginMetaData objects are mapped based on the xml file name from which they were parsed from.
+     * The string used is that of the file name but with the prepended "Plugin_" stripped out.
+     * For the typical case, this would make the plugin's 'Title' element equal to this value.
+     */
     public Map<String,PluginMetaData> pluginMetaDataMap;
     public ArrayList<String> pluginList;
 
@@ -225,6 +230,14 @@ public class PluginMetaDataCollection {
         return collection.new SummaryMetaData(null, null, null, null, mergeStrategyClass, interpolateStrategyClass);
     }
 
+    public static PluginMetaData CreatePluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndexMetaData Indices, SummaryMetaData Summary, ArrayList<String> IndicesMetaData,
+            ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles) throws ParserConfigurationException, SAXException,
+            IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, Resolution, ExtraDownloadFiles);
+    }
+
     private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, Exception{
         pluginList = new ArrayList<String>();
         pluginMetaDataMap = createMap(xmlFiles);
@@ -312,12 +325,12 @@ public class PluginMetaDataCollection {
         public final ArrayList<String> IndicesMetaData; // Deprecated. Eventually IndicesMetaData will be a type and replace IndexMetaData. Property replaced by 'Indices'.
         public final ArrayList<String> QualityControlMetaData;
         public final String Title;
-        public final int DaysPerInputData;
-        public final int Resolution;
+        public final Integer DaysPerInputData;
+        public final Integer Resolution;
         public final ArrayList<String> ExtraDownloadFiles;
 
         public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndexMetaData Indices, SummaryMetaData Summary, ArrayList<String> IndicesMetaData,
-                ArrayList<String> QualityControlMetaData, String Title, int DaysPerInputData, int Resolution, ArrayList<String> ExtraDownloadFiles)
+                ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles)
         {
             this.Download = Download;
             this.Processor = Processor;

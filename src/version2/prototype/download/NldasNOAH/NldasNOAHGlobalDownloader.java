@@ -3,6 +3,7 @@ package version2.prototype.download.NldasNOAH;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -12,7 +13,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
@@ -24,9 +24,9 @@ import version2.prototype.util.FileSystem;
 
 public class NldasNOAHGlobalDownloader extends GlobalDownloader{
 
-    public NldasNOAHGlobalDownloader(int myID, String pluginName,  DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    public NldasNOAHGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
     IOException, SQLException {
-        super(myID, pluginName, metaData, listDatesFiles);
+        super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
 
                 DataDate dd = entry.getKey();
 
@@ -103,7 +103,7 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
                     }
 
                 }
-            } catch (ParserConfigurationException | SAXException | IOException e) {
+            } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }

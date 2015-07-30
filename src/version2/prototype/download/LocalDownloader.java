@@ -4,7 +4,6 @@ package version2.prototype.download;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Observable;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,13 +28,18 @@ import version2.prototype.util.Schemas;
  *
  */
 public abstract class LocalDownloader extends Process {
-    private boolean updateAvailable;
-    protected final int globalDLID;
+    protected final GlobalDownloader gdl;
+    protected final Config configInstance;
 
-    protected LocalDownloader(EASTWebManager manager, int globalDLID, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache) {
+    protected LocalDownloader(EASTWebManager manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+            Scheduler scheduler, DatabaseCache outputCache) {
         super(manager, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
-        updateAvailable = false;
-        this.globalDLID = globalDLID;
+        this.gdl = gdl;
+        this.configInstance = configInstance;
+
+        if(gdl != null) {
+            gdl.addObserver(this);
+        }
     }
 
     /**
@@ -54,28 +58,13 @@ public abstract class LocalDownloader extends Process {
         if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
         {
             final Connection conn = PostgreSQLConnection.getConnection();
-            newFiles = Schemas.udpateExpectedResults(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData,
-                    pluginInfo.GetIndicies().size(), projectInfoFile.GetSummaries(), conn);
+            newFiles = Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
+                    pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
             conn.close();
-            updateAvailable = true;
-        } else {
-            updateAvailable = false;
+
+            outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
+                    pluginMetaData.ExtraDownloadFiles);
         }
         return newFiles;
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        super.update(o, arg);
-
-        if(o instanceof GlobalDownloader)
-        {
-            updateAvailable = true;
-        }
-    }
-
-    protected void ValidateDownloadCache()
-    {
-
     }
 }

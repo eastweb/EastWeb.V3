@@ -4,7 +4,9 @@
 package version2.prototype.download.ModisLST;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.EASTWebManager;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -24,9 +26,9 @@ import version2.prototype.util.DatabaseCache;
  */
 public class ModisLSTFactory extends DownloadFactory {
 
-    protected ModisLSTFactory(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache, DataDate startDate, DownloadMetaData dData) {
-        super(manager, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
+    protected ModisLSTFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
+        super(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
     }
 
     /* (non-Javadoc)
@@ -34,7 +36,8 @@ public class ModisLSTFactory extends DownloadFactory {
      */
     @Override
     public DownloaderFactory CreateDownloadFactory(ListDatesFiles listDatesFiles) {
-        return new LocalStorageDownloadFactory(manager, "ModisLSTDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
+        return new LocalStorageDownloadFactory(manager, configInstance, "ModisLSTDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles,
+                startDate);
     }
 
     /* (non-Javadoc)
@@ -42,7 +45,7 @@ public class ModisLSTFactory extends DownloadFactory {
      */
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new ModisLSTListDatesFiles(startDate, dData);
+        return new ModisLSTListDatesFiles(new DataDate(startDate), dData);
     }
 
 }
