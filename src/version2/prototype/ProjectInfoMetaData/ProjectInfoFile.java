@@ -576,21 +576,31 @@ public class ProjectInfoFile {
 
     private LocalDate ReadFreezingDate() throws DateTimeParseException
     {
-        NodeList nodes = GetUpperLevelNodeList("Freezing", "Missing heating date.");
-        //        try {
+        NodeList nodes = GetUpperLevelNodeList("FreezingDate", "Missing freezing date.");
         // e.g. "Wed May 20 21:21:36 CDT 2015"
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
+        ArrayList<String> values = GetNodeListValues(nodes, "Missing freezing date.");
         if(values.size() > 0) {
             return LocalDate.parse(values.get(0), datesFormatter);
-            //            ZonedDateTime.parse(values.get(0));
-            //                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
         }
         return null;
-        //        } catch (DateTimeParseException e) {
-        //            error = true;
-        //            errorMsg.add(e.getMessage());
-        //            return null;
+
+        //        Integer dayOfMonth;
+        //        Month month;
+        //        NodeList dayNodes = GetUpperLevelNodeList("Day", "Missing heating date.", "HeatingDate");
+        //        NodeList monthNodes = GetUpperLevelNodeList("Month", "Missing heating date.", "HeatingDate");
+        //
+        //        ArrayList<String> values = GetNodeListValues(dayNodes, "Missing HeatingDate day.");
+        //        if(values.size() > 0) {
+        //            dayOfMonth = Integer.parseInt(values.get(0));
+        //
+        //            values = GetNodeListValues(monthNodes, "Missing HeatingDate month.");
+        //            if(values.size() > 0) {
+        //                month = Month.valueOf(values.get(0).toUpperCase());
+        //
+        //                return MonthDay.of(month, dayOfMonth);
+        //            }
         //        }
+        //        return null;
     }
 
     private Double ReadCoolingDegree()
@@ -605,21 +615,31 @@ public class ProjectInfoFile {
 
     private LocalDate ReadHeatingDate() throws DateTimeParseException
     {
-        NodeList nodes = GetUpperLevelNodeList("Heating", "Missing freezing date.");
-        //        try {
+        NodeList nodes = GetUpperLevelNodeList("HeatingDate", "Missing heating date.");
         // e.g. "Wed May 20 21:21:36 CDT 2015"
         ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
         if(values.size() > 0) {
             return LocalDate.parse(values.get(0), datesFormatter);
-            //            ZonedDateTime.parse(values.get(0));
-            //                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
         }
         return null;
-        //        } catch (DateTimeParseException e) {
-        //            error = true;
-        //            errorMsg.add(e.getMessage());
-        //            return null;
+
+        //        Integer dayOfMonth;
+        //        Month month;
+        //        NodeList dayNodes = GetUpperLevelNodeList("Day", "Missing heating date.", "HeatingDate");
+        //        NodeList monthNodes = GetUpperLevelNodeList("Month", "Missing heating date.", "HeatingDate");
+        //
+        //        ArrayList<String> values = GetNodeListValues(dayNodes, "Missing HeatingDate day.");
+        //        if(values.size() > 0) {
+        //            dayOfMonth = Integer.parseInt(values.get(0));
+        //
+        //            values = GetNodeListValues(monthNodes, "Missing HeatingDate month.");
+        //            if(values.size() > 0) {
+        //                month = Month.valueOf(values.get(0).toUpperCase());
+        //
+        //                return MonthDay.of(month, dayOfMonth);
+        //            }
         //        }
+        //        return null;
     }
 
     private Double ReadHeatingDegree()

@@ -1,8 +1,8 @@
 package version2.prototype.processor;
 
 import java.io.File;
-import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Transformer;
@@ -25,11 +25,13 @@ public class Clip
     protected File [] inputFiles;
     // mask file
     protected File shapeFile;
+    protected Boolean clipOrNot;
 
     public Clip(ProcessData data)
     {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
+        clipOrNot = data.getClipOrNot();
 
         //check if there are more than one input file in the given folder
         inputFolder = new File(inputFolders[0]);
@@ -43,10 +45,32 @@ public class Clip
         shapeFile = new File(data.getShapefile());
     }
 
+    // run method for the scheduler
+    public void run() throws Exception
+    {
+        //create outputDirectory
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists())
+        {   FileUtils.forceMkdir(outputDir);   }
+
+        if (clipOrNot)
+        {   // true for clipping
+            clipFiles();
+        }
+        else    // skip clipping
+        {   // copy the input files to the output folder
+            for (File f: inputFiles) {
+                FileUtils.copyFileToDirectory(f, outputDir);
+            }
+        }
+        // remove the input folder
+        FileUtils.deleteDirectory(inputFolder);
+    }
+
 
     // clip all the files in the input folder
-    public void clipFiles() throws Exception {
-
+    protected void clipFiles() throws Exception
+    {
         GdalUtils.register();
 
         synchronized (GdalUtils.lockObject)

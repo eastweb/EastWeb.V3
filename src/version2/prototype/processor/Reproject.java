@@ -1,7 +1,6 @@
 package version2.prototype.processor;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
@@ -39,25 +38,25 @@ public class Reproject {
     }
 
     // run method for the scheduler
-    public void run(){
+    public void run() throws Exception{
+
+        //create outputDirectory
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists())
+        {   FileUtils.forceMkdir(outputDir); }
+
         reprojectFiles();
 
         // remove the input folder
-        try {
-            FileUtils.deleteDirectory(inputFolder);
-        } catch (IOException e) {
-            // TODO : write into log
-            e.printStackTrace();
-        }
+        FileUtils.deleteDirectory(inputFolder);
+
     }
 
-    /* (1) reproject all the input Files and save them to the outputFolder
-     * (2) remove the inputFolder
-     */
+    // reproject all the input Files and save them to the outputFolder
     private void reprojectFiles()  {
         for (File f : inputFiles) {
             String fileName = f.getName();
-            File outputFile = new File (outputFolder + fileName);
+            File outputFile = new File (outputFolder, fileName);
             // reproject
             GdalUtils.project(f, shapefile, projection, outputFile);
         }

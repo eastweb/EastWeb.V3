@@ -64,6 +64,8 @@ import com.toedter.calendar.JDateChooser;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 
 public class ProjectInformationPage {
 
@@ -100,6 +102,8 @@ public class ProjectInformationPage {
     private DefaultListModel<String> listOfAddedPluginModel;
     private DefaultListModel<String> summaryListModel;
     private DefaultListModel<String> modisListModel;
+    private JTextField scalingTextField;
+    private JTextField resolutionTextField;
 
     /**
      * Launch the application.
@@ -142,7 +146,7 @@ public class ProjectInformationPage {
      */
     private void initialize() throws IOException, ParserConfigurationException, SAXException, ParseException {
         frame = new JFrame();
-        frame.setBounds(100, 100, 1207, 800);
+        frame.setBounds(100, 100, 1207, 850);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
@@ -224,6 +228,9 @@ public class ProjectInformationPage {
         maskFile.setEditable(false);
         maskFile.setText("");
 
+        resolutionTextField.setEditable(false);
+        resolutionTextField.setText("");
+
         masterShapeTextField.setEditable(false);
         masterShapeTextField.setText("");
 
@@ -267,6 +274,9 @@ public class ProjectInformationPage {
         falseNothing.setEditable(false);
         falseNothing.setText("");
 
+        scalingTextField.setEditable(false);
+        scalingTextField.setText("");
+
         summaryListModel.clear();
 
         if(project == null) {
@@ -287,13 +297,15 @@ public class ProjectInformationPage {
         projectName.setText(project.GetProjectName());
         workingDirectory.setText(project.GetWorkingDir());
         maskFile.setText(project.GetMaskingFile());
+        resolutionTextField.setText(project.GetMaskingResolution().toString());
         masterShapeTextField.setText(project.GetMasterShapeFile());
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
-        freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        //coolingTextField.setText(project.GetMasterShapeFile());
-        heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        //heatingTextField.setText(project.GetMasterShapeFile());
+        //freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        coolingTextField.setText(project.GetCoolingDegree().toString());
+        //heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        heatingTextField.setText(project.GetHeatingDegree().toString());
+
 
         // set modis info
         for(String modis: project.GetModisTiles()){
@@ -312,6 +324,7 @@ public class ProjectInformationPage {
         standardParallel2.setText(String.valueOf(project.GetProjection().getStandardParallel2()));
         latitudeOfOrigin.setText(String.valueOf(project.GetProjection().getLatitudeOfOrigin()));
         falseNothing.setText(String.valueOf(project.GetProjection().getFalseNorthing()));
+        scalingTextField.setText(String.valueOf(project.GetProjection().getScalingFactor()));
 
         // set summary info
         for(ProjectInfoSummary summary: project.GetSummaries()){
@@ -404,7 +417,7 @@ public class ProjectInformationPage {
     private void BasicProjectInformation() {
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Basic Project Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(10, 420, 358, 340);
+        panel.setBounds(10, 420, 358, 390);
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 
@@ -488,7 +501,7 @@ public class ProjectInformationPage {
         panel.add(maskFileBrowseButton);
 
         masterShapeTextField = new JTextField();
-        masterShapeTextField.setBounds(148, 145, 158, 20);
+        masterShapeTextField.setBounds(148, 176, 158, 20);
         panel.add(masterShapeTextField);
         masterShapeTextField.setColumns(10);
 
@@ -512,19 +525,19 @@ public class ProjectInformationPage {
                 }
             }
         });
-        masterShapeFileBrowseButton.setBounds(316, 146, 32, 20);
+        masterShapeFileBrowseButton.setBounds(316, 176, 32, 20);
         panel.add(masterShapeFileBrowseButton);
 
         final JLabel chmasterShapeFileLabel = new JLabel("Master shape file:");
-        chmasterShapeFileLabel.setBounds(6, 144, 136, 23);
+        chmasterShapeFileLabel.setBounds(6, 175, 136, 23);
         panel.add(chmasterShapeFileLabel);
 
         JLabel lblTimeZone = new JLabel("Time Zone:");
-        lblTimeZone.setBounds(6, 179, 132, 14);
+        lblTimeZone.setBounds(6, 209, 132, 14);
         panel.add(lblTimeZone);
 
         timeZoneComboBox = new JComboBox<String>();
-        timeZoneComboBox.setBounds(148, 176, 200, 20);
+        timeZoneComboBox.setBounds(148, 206, 200, 20);
         for (String id : TimeZone.getAvailableIDs()) {
             TimeZone zone = TimeZone.getTimeZone(id);
             int offset = zone.getRawOffset()/1000;
@@ -536,44 +549,65 @@ public class ProjectInformationPage {
         panel.add(timeZoneComboBox);
 
         isClippingCheckBox = new JCheckBox("");
-        isClippingCheckBox.setBounds(148, 203, 200, 15);
+        isClippingCheckBox.setBounds(148, 233, 200, 15);
         panel.add(isClippingCheckBox);
 
         JLabel lblClipping = new JLabel("Clipping:");
-        lblClipping.setBounds(6, 204, 132, 14);
+        lblClipping.setBounds(6, 234, 132, 14);
         panel.add(lblClipping);
 
         JLabel lblFreezingStartDate = new JLabel("Freezing Start Date: ");
-        lblFreezingStartDate.setBounds(6, 229, 132, 14);
+        lblFreezingStartDate.setBounds(6, 259, 132, 14);
         panel.add(lblFreezingStartDate);
         freezingDateChooser = new JDateChooser();
-        freezingDateChooser.setBounds(148, 223, 200, 20);
+        freezingDateChooser.setDateFormatString("MMM d");
+        freezingDateChooser.setBounds(148, 253, 200, 20);
         panel.add(freezingDateChooser);
 
         JLabel lblHeatingStartDate = new JLabel("Heating Start Date:");
-        lblHeatingStartDate.setBounds(6, 282, 132, 14);
+        lblHeatingStartDate.setBounds(6, 318, 132, 14);
         panel.add(lblHeatingStartDate);
         heatingDateChooser = new JDateChooser();
-        heatingDateChooser.setBounds(148, 276, 200, 20);
+        heatingDateChooser.setDateFormatString("MMM d");
+        heatingDateChooser.setBounds(148, 312, 200, 20);
         panel.add(heatingDateChooser);
 
-        JLabel lblCoolingDegreeThreshold = new JLabel("Cooling degree threshold:");
-        lblCoolingDegreeThreshold.setBounds(6, 254, 132, 14);
+        JLabel lblCoolingDegreeThreshold = new JLabel("Cooling degree:");
+        lblCoolingDegreeThreshold.setToolTipText("Cooling degree threshold");
+        lblCoolingDegreeThreshold.setBounds(6, 284, 132, 14);
         panel.add(lblCoolingDegreeThreshold);
 
         coolingTextField = new JTextField();
-        coolingTextField.setBounds(148, 251, 200, 20);
+        coolingTextField.setBounds(148, 281, 100, 20);
         panel.add(coolingTextField);
         coolingTextField.setColumns(10);
 
-        JLabel lblHeatingDegreeThreshold = new JLabel("Heating degree threshold:");
-        lblHeatingDegreeThreshold.setBounds(6, 307, 132, 14);
+        JLabel lblHeatingDegreeThreshold = new JLabel("Heating degree");
+        lblHeatingDegreeThreshold.setToolTipText("Heating degree threshold");
+        lblHeatingDegreeThreshold.setBounds(6, 343, 132, 14);
         panel.add(lblHeatingDegreeThreshold);
 
         heatingTextField = new JTextField();
-        heatingTextField.setBounds(148, 304, 200, 20);
+        heatingTextField.setBounds(148, 340, 100, 20);
         panel.add(heatingTextField);
         heatingTextField.setColumns(10);
+
+        JLabel lblCelcius = new JLabel("Celcius");
+        lblCelcius.setBounds(258, 284, 90, 14);
+        panel.add(lblCelcius);
+
+        JLabel label = new JLabel("Celcius");
+        label.setBounds(260, 343, 88, 14);
+        panel.add(label);
+
+        JLabel lblResolution = new JLabel("Resolution:");
+        lblResolution.setBounds(6, 150, 132, 14);
+        panel.add(lblResolution);
+
+        resolutionTextField = new JTextField();
+        resolutionTextField.setBounds(148, 146, 200, 20);
+        panel.add(resolutionTextField);
+        resolutionTextField.setColumns(10);
     }
 
     @SuppressWarnings("rawtypes")
@@ -581,7 +615,7 @@ public class ProjectInformationPage {
         JPanel modisInformationPanel = new JPanel();
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(359, 420, 275, 340);
+        modisInformationPanel.setBounds(359, 420, 275, 390);
         frame.getContentPane().add(modisInformationPanel);
 
         modisListModel = new DefaultListModel<String>();
@@ -592,9 +626,9 @@ public class ProjectInformationPage {
         addNewModisButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tiles", null);
+                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tile", null);
 
-                if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V') {
+                if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V' || tile.length() > 6) {
                     JOptionPane.showMessageDialog(null, "Modis format: hddvdd  d=> digit");
                     return;
                 } else{
@@ -608,14 +642,22 @@ public class ProjectInformationPage {
                     }
 
                 }
+
+                for(Object item:modisListModel.toArray()){
+                    if(tile.contentEquals(item.toString())) {
+                        JOptionPane.showMessageDialog(null, "Modis tile already exist");
+                        return;
+                    }
+                }
+
                 modisListModel.addElement(tile);
             }
         });
-        addNewModisButton.setBounds(15, 299, 75, 30);
+        addNewModisButton.setBounds(15, 349, 75, 30);
         modisInformationPanel.add(addNewModisButton);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(15, 25, 245, 263);
+        scrollPane.setBounds(15, 25, 245, 313);
         modisInformationPanel.add(scrollPane);
 
         final JList<String> modisList = new JList<String>(modisListModel);
@@ -634,7 +676,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deleteSelectedModisButton.setBounds(185, 299, 75, 30);
+        deleteSelectedModisButton.setBounds(185, 349, 75, 30);
         modisInformationPanel.add(deleteSelectedModisButton);
     }
 
@@ -642,7 +684,7 @@ public class ProjectInformationPage {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(631, 420, 297, 340);
+        panel_2.setBounds(631, 420, 297, 390);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -731,6 +773,15 @@ public class ProjectInformationPage {
         falseNothing.setColumns(10);
         falseNothing.setBounds(146, 240, 140, 16);
         panel_2.add(falseNothing);
+
+        JLabel lblScaling = new JLabel("Scaling Factor");
+        lblScaling.setBounds(6, 266, 134, 14);
+        panel_2.add(lblScaling);
+
+        scalingTextField = new JTextField();
+        scalingTextField.setBounds(146, 263, 140, 20);
+        panel_2.add(scalingTextField);
+        scalingTextField.setColumns(10);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -738,7 +789,7 @@ public class ProjectInformationPage {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
         summaryPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        summaryPanel.setBounds(920, 420, 281, 340);
+        summaryPanel.setBounds(920, 420, 281, 390);
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
@@ -752,11 +803,11 @@ public class ProjectInformationPage {
                 new AssociateSummaryPage(new summaryListenerImplementation());
             }
         });
-        editSummaryButton.setBounds(15, 299, 75, 30);
+        editSummaryButton.setBounds(15, 349, 75, 30);
         summaryPanel.add(editSummaryButton);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(15, 25, 245, 263);
+        scrollPane.setBounds(15, 25, 245, 313);
         summaryPanel.add(scrollPane);
         final JList summaryList = new JList(summaryListModel);
         scrollPane.setViewportView(summaryList);
@@ -775,7 +826,7 @@ public class ProjectInformationPage {
                 }
             }
         });
-        deleteSummaryButton.setBounds(185, 299, 75, 30);
+        deleteSummaryButton.setBounds(185, 349, 75, 30);
         summaryPanel.add(deleteSummaryButton);
     }
 
@@ -878,6 +929,10 @@ public class ProjectInformationPage {
             maskingFile.appendChild(doc.createTextNode(maskFile.getText()));
             projectInfo.appendChild(maskingFile);
 
+            Element resolution = doc.createElement("Resolution");
+            resolution.appendChild(doc.createTextNode(resolutionTextField.getText()));
+            projectInfo.appendChild(resolution);
+
             Element masterShapeFile = doc.createElement("MasterShapeFile");
             masterShapeFile.appendChild(doc.createTextNode(masterShapeTextField.getText()));
             projectInfo.appendChild(masterShapeFile);
@@ -891,8 +946,8 @@ public class ProjectInformationPage {
             projectInfo.appendChild(isClipping);
 
             // Freezing start Date
-            Element freezingstartDate = doc.createElement("Freezing");
-            startDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
+            Element freezingstartDate = doc.createElement("FreezingDate");
+            freezingstartDate.appendChild(doc.createTextNode(freezingDateChooser.getDate().toString()));
             projectInfo.appendChild(freezingstartDate);
 
             // Cooling degree value
@@ -901,8 +956,8 @@ public class ProjectInformationPage {
             projectInfo.appendChild(coolingDegree);
 
             // Heating start Date
-            Element heatingstartDate = doc.createElement("Heating");
-            startDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
+            Element heatingstartDate = doc.createElement("HeatingDate");
+            heatingstartDate.appendChild(doc.createTextNode(heatingDateChooser.getDate().toString()));
             projectInfo.appendChild(heatingstartDate);
 
             // heating degree value
@@ -971,6 +1026,10 @@ public class ProjectInformationPage {
             Element falseNothing = doc.createElement("FalseNothing");
             falseNothing.appendChild(doc.createTextNode(String.valueOf(this.falseNothing.getText())));
             projectInfo.appendChild(falseNothing);
+
+            Element scalingFactor = doc.createElement("ScalingFactor");
+            scalingFactor.appendChild(doc.createTextNode(String.valueOf(scalingTextField.getText())));
+            projectInfo.appendChild(scalingFactor);
 
             //list of summary tiles
             Element summaries = doc.createElement("Summaries");

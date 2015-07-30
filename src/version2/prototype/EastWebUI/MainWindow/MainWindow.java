@@ -227,7 +227,7 @@ public class MainWindow {
         mntmDeleteAllFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete all files ?", "Delete Intermidate File", JOptionPane.YES_NO_OPTION);
+                int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete all files ?", "Delete Intermediate File", JOptionPane.YES_NO_OPTION);
                 if (reply == JOptionPane.YES_OPTION) {
                     try {
                         FileUtils.cleanDirectory(new File(intermidateDumpPath.getText()));
@@ -264,7 +264,7 @@ public class MainWindow {
     {
         final File diskPartition = new File(System.getProperty("user.dir"));
 
-        final JLabel lblIntermidateDumpFolder = new JLabel("Intermidate dump folder");
+        final JLabel lblIntermidateDumpFolder = new JLabel("Intermediate dump folder");
         lblIntermidateDumpFolder.setEnabled(false);
         lblIntermidateDumpFolder.setBounds(10, 62, 138, 14);
         frame.getContentPane().add(lblIntermidateDumpFolder);
@@ -308,7 +308,7 @@ public class MainWindow {
         frame.getContentPane().add(btnBrowser);
 
         // check box to control intermediate files process (true => creates intermediate files)
-        chckbxIntermidiateFiles = new JCheckBox("Intermidiate Files");
+        chckbxIntermidiateFiles = new JCheckBox("Intermediate Files");
         chckbxIntermidiateFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {

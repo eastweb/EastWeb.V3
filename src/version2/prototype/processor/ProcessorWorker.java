@@ -71,7 +71,8 @@ public class ProcessorWorker extends ProcessWorker {
                 Class.forName("version2.prototype.processor." + pluginName + "PrepareProcessTask" );
 
         Constructor<?> cnstPrepareTask =
-                classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class, DataDate.class);
+                classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class,
+                        PluginMetaData.class, DataDate.class);
 
         // Use a map to group CachedFiles based on the dates
         HashMap<DataDate, ArrayList<DownloadFileMetaData>> map =
@@ -105,7 +106,7 @@ public class ProcessorWorker extends ProcessWorker {
 
             //create necessary folders for the date
             PrepareProcessTask prepareTask =
-                    (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, thisDay);
+                    (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, pluginMetaData, thisDay);
 
             String laststepOutputFolder = null;
 
@@ -128,6 +129,7 @@ public class ProcessorWorker extends ProcessWorker {
                         prepareTask.getQCBands(),
                         prepareTask.getProjection(),
                         prepareTask.getMaskResolution(),
+                        prepareTask.getDataResolution(),
                         prepareTask.getClipOrNot(),
                         prepareTask.getFreezingDate(),
                         prepareTask.getHeatingDate(),
@@ -171,15 +173,18 @@ public class ProcessorWorker extends ProcessWorker {
             // if not match, copy the files from the last step to the final outputfolder for  processor
             if (!outputPath.equals(laststepOutputFolder))
             {
-                if(!(new File(outputPath).exists()))
+                File outputDir = new File(outputPath);
+                if(!(outputDir.exists()))
                 {
-                    FileUtils.forceMkdir(new File(outputPath));
+                    FileUtils.forceMkdir(outputDir);
                 }
 
                 // copy the output files to the system output directory
                 if (laststepOutputFolder != null)
                 {
-                    FileUtils.copyDirectoryToDirectory(new File(laststepOutputFolder), new File(outputPath));
+                    for (File f: new File(laststepOutputFolder).listFiles()) {
+                        FileUtils.copyFileToDirectory(f, outputDir);
+                    }
                 }
             }
 

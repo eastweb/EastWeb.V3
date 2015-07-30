@@ -21,6 +21,10 @@ public class Mask {
     protected File [] inputFiles;
     // mask file
     protected File maskFile;
+    // mask file resolution
+    protected int maskRes;
+    // data file resolution;
+    protected int dataRes;
 
     public Mask(ProcessData data)
     {
@@ -34,18 +38,42 @@ public class Mask {
         //set the input files
         inputFiles = listOfFiles;
 
-        maskFile = new File(data.getMaskfile());
+        if (data.getMaskfile() != null) {
+            maskFile = new File(data.getMaskfile());
+        } else {
+            maskFile = null;
+        }
+        maskRes = data.getMaskResolution();
+        dataRes = data.getDataResolution();
     }
 
     // run method for the scheduler
-    public void run() throws IOException
+    public void run() throws Exception
     {
-        masking();
+        //create outputDirectory
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists())
+        {   FileUtils.forceMkdir(outputDir);   }
+
+        if ((maskFile != null) && (maskRes == dataRes))
+        {
+            // do masking only when a mask file exist
+            // and the mask resolution equals to the data resolution
+            maskFiles();
+        }
+        else  // skip masking
+        {
+            // copy files in the input folder to the output folder
+            for (File f: inputFiles) {
+                FileUtils.copyFileToDirectory(f, outputDir);
+            }
+        }
+
         // remove the input folder
         FileUtils.deleteDirectory(inputFolder);
     }
 
-    private void masking() throws IOException
+    protected void maskFiles() throws IOException
     {
         synchronized (GdalUtils.lockObject) {
             for (File mInput : inputFiles){
