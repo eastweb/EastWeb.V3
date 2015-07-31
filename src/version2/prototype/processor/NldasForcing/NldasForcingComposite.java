@@ -290,8 +290,7 @@ public class NldasForcingComposite extends Composite
         double[] cumulative = null;
         File yesterdayFile = null;
 
-        //TODO: Need something else than MonthDay object.
-        DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), Calendar.getInstance().get(Calendar.YEAR));
+        DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), Integer.parseInt(inputFolder.getParent()));
         if(!(inputFolder.getName().equalsIgnoreCase(String.format("%03d", date.getDayOfYear())) &&
                 inputFolder.getParent().equalsIgnoreCase(String.format("%04d", date.getYear()))))
         {
