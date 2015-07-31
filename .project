@@ -15,41 +15,4 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingFreezingDegreeDays.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingFreezingDegreeDays.java</locationURI>
-		</link>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingHeatingDegreeDays.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingHeatingDegreeDays.java</locationURI>
-		</link>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingMaxAirTemperatureCalculator.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingMaxAirTemperatureCalculator.java</locationURI>
-		</link>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingMeanAirTemperatureCalculator.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingMeanAirTemperatureCalculator.java</locationURI>
-		</link>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingMeanHumidity.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingMeanHumidity.java</locationURI>
-		</link>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingMinAirTemperatureCalculator.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingMinAirTemperatureCalculator.java</locationURI>
-		</link>
-		<link>
-			<name>src/version2/prototype/indices/NldasForcingIndices/NldasForcingTotalPrecipitation.java</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Desktop/NldasForcing/NldasForcingTotalPrecipitation.java</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>
