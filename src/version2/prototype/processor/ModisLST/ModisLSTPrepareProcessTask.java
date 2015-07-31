@@ -3,6 +3,7 @@ package version2.prototype.processor.ModisLST;
 import java.util.ArrayList;
 
 import version2.prototype.DataDate;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.processor.PrepareProcessTask;
@@ -10,9 +11,8 @@ import version2.prototype.processor.PrepareProcessTask;
 public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
 
     public ModisLSTPrepareProcessTask(ProjectInfoFile mProject,
-            ProjectInfoPlugin mPlugin, DataDate mDate) {
-        super(mProject, mPlugin, mDate);
-        // TODO Auto-generated constructor stub
+            ProjectInfoPlugin pPlugin, PluginMetaData plugin, DataDate mDate) {
+        super(mProject, pPlugin, plugin, mDate);
     }
 
     @Override

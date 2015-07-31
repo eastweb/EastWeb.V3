@@ -1,6 +1,7 @@
 package version2.prototype;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Observable;
@@ -15,9 +16,12 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.download.GlobalDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
+import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.Schemas;
 
 /**
  * Abstract framework thread management class. Frameworks are to use a concrete class that extends this class to handle creating their worker threads.
@@ -79,30 +83,47 @@ public abstract class Process implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        if((scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING) && (o instanceof DatabaseCache))
+        if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
         {
-            DatabaseCache inputCache = (DatabaseCache) o;
-            ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-            try {
-                cachedFiles = inputCache.GetUnprocessedCacheFiles();
-                if(cachedFiles.size() > 0) {
-                    process(cachedFiles);
-                }
+            if(o instanceof DatabaseCache)
+            {
+                DatabaseCache inputCache = (DatabaseCache) o;
+                ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
+                try {
+                    cachedFiles = inputCache.GetUnprocessedCacheFiles();
+                    if(cachedFiles.size() > 0) {
+                        process(cachedFiles);
+                    }
 
-                // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
-                //                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
+                    // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
+                    //                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
+                }
+                catch (ConfigReadException | ClassNotFoundException | SQLException e) {
+                    e.printStackTrace();
+                } catch (ParserConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
-            catch (ConfigReadException | ClassNotFoundException | SQLException e) {
-                e.printStackTrace();
-            } catch (ParserConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            else if(o instanceof GlobalDownloader)
+            {
+                try {
+                    final Connection conn = PostgreSQLConnection.getConnection();
+                    Schemas.updateExpectedResults(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
+                            pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
+                    conn.close();
+                    process(null);
+                }
+                catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException |
+                        IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

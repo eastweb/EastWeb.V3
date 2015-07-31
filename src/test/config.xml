@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <config>
-	<DownloadDir>C:/EASTWeb/Downloads</DownloadDir>
+	<DownloadDir>C:/Users/michael.devos/Desktop/EASTWeb/Downloads</DownloadDir>
 	<DataBase>
-		<globalSchema>EASTWeb</globalSchema>
+		<globalSchema>Test_EASTWeb</globalSchema>
 		<hostName>localhost:5432</hostName>
 		<userName>postgres</userName>
 		<passWord>eastweb</passWord>

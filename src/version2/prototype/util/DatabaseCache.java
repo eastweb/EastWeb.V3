@@ -16,7 +16,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.Scheduler.ProcessName;
 
@@ -31,38 +30,46 @@ public class DatabaseCache extends Observable{
     static final Pattern filePathPattern = Pattern.compile("(\\w+)\\\\(\\w+)\\\\(\\w+)\\\\(\\d{4})\\\\(\\d{3})\\\\");   // To save time
     static final Pattern dateStringPattern = Pattern.compile("(\\d{4})\\\\(\\d{3})\\\\");   // To save time
 
+    private final String globalSchema;
     private final String projectName;
     private final String pluginName;
-    private final String inputTableName;
-    private final String myTableName;
-    private final ProcessName process;
+    private final String getFromTableName;
+    private final String cacheToTableName;
+    private final ProcessName processCachingFor;
     private final ArrayList<String> extraDownloadFiles;
     private Boolean filesAvailable;
 
     /**
      * Creates a DatabaseCache object set to cache files to and get file listings from the table identified by the given information.
      *
+     * @param globalSchema
      * @param projectName  - project schema to look under
      * @param pluginName  - plugin schema to look under
-     * @param dataComingFrom  - name of process to check output of for available files to process
+     * @param processCachingFor  - name of process to cache output for
      * @param extraDownloadFiles  - the data names of the extra download files associated with the related plugin metadata
      * @throws ParseException
      */
-    public DatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException
+    public DatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName processCachingFor, ArrayList<String> extraDownloadFiles) throws ParseException
     {
+        this.globalSchema = globalSchema;
         this.projectName = projectName;
         this.pluginName = pluginName;
-        process = dataComingFrom;
-        this.extraDownloadFiles = extraDownloadFiles;
+        this.processCachingFor = processCachingFor;
+        if(extraDownloadFiles != null) {
+            this.extraDownloadFiles = extraDownloadFiles;
+        } else {
+            this.extraDownloadFiles = new ArrayList<String>();
+        }
         filesAvailable = false;
 
-        switch(process)
+        // Setup so that a single DatabaseCache object is intended to be used for output by one process and then used by another for input
+        switch(this.processCachingFor)
         {
-        case DOWNLOAD: inputTableName = "DownloadCache"; myTableName = "ProcessorCache"; break;
-        case PROCESSOR: inputTableName = "ProcessorCache"; myTableName = "IndicesCache"; break;
-        case INDICES: inputTableName = "IndicesCache"; myTableName = null; break;
-        case SUMMARY: inputTableName = null; myTableName = null; break;
-        default: throw new ParseException("ProcessName 'dataComingFrom' doesn't contain an expected framework identifier.", 0);
+        case DOWNLOAD: cacheToTableName = "DownloadCache"; getFromTableName = null; break;
+        case PROCESSOR: cacheToTableName = "ProcessorCache"; getFromTableName = "ProcessorCache"; break;
+        case INDICES: cacheToTableName = "IndicesCache"; getFromTableName = "IndicesCache"; break;
+        case SUMMARY: cacheToTableName = null; getFromTableName = null; break;
+        default: throw new ParseException("ProcessName 'processCachingFor' doesn't contain an expected framework identifier.", 0);
         }
     }
 
@@ -87,18 +94,18 @@ public class DatabaseCache extends Observable{
 
         StringBuilder query = new StringBuilder(String.format(
                 "SELECT A.\"%1$sID\", A.\"DataFilePath\", ",
-                inputTableName
+                getFromTableName
                 ));
         for(int i=0; i < extraDownloadFiles.size(); i++)
         {
             query.append("A.\"" + extraDownloadFiles.get(i) + "FilePath\", ");
         }
-        query.append(String.format("I.\"Name\", A.\"DataGroupID\", D.\"Year\", D.\"DayOfYear\" \n" +
-                "FROM \"%1$s\".\"%2$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DataGroupID\" = D.\"DataGroupID\") INNER JOIN \"%3$s\".\"Index\" D ON (A.\"IndexID\" = I.\"IndexID\")\n" +
+        query.append(String.format("I.\"Name\", A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\" \n" +
+                "FROM \"%1$s\".\"%2$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\") INNER JOIN \"%3$s\".\"Index\" I ON (A.\"IndexID\" = I.\"IndexID\")\n" +
                 "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
                 schemaName,
-                inputTableName,
-                Config.getInstance().getGlobalSchema()
+                getFromTableName,
+                globalSchema
                 ));
         final Statement stmt = conn.createStatement();
 
@@ -119,7 +126,7 @@ public class DatabaseCache extends Observable{
                     }
 
                     files.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear, tempExtraDownloads));
-                    rows.add(rs.getInt(inputTableName + "ID"));
+                    rows.add(rs.getInt(getFromTableName + "ID"));
                 }
 
                 for(int row : rows)
@@ -129,7 +136,7 @@ public class DatabaseCache extends Observable{
                                     "SET \"Retrieved\" = TRUE\n" +
                                     "WHERE \"%2$sID\" = %3$d",
                                     schemaName,
-                                    inputTableName,
+                                    getFromTableName,
                                     row
                             ));
                 }
@@ -161,7 +168,7 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws IOException
      */
-    public int LoadUnprocessedGloablDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
+    public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
             throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = -1;
         final Connection conn = PostgreSQLConnection.getConnection();
@@ -242,20 +249,20 @@ public class DatabaseCache extends Observable{
         Statement stmt = conn.createStatement();
 
         IndicesFileMetaData temp = filesForASingleComposite.get(0).ReadMetaDataForSummary();
-        Integer dateGroupID = Schemas.getDateGroupID(Config.getInstance().getGlobalSchema(), LocalDate.ofYearDay(temp.year, temp.day), stmt);
-        Integer indexID = Schemas.getIndexID(Config.getInstance().getGlobalSchema(), temp.indexNm, stmt);
+        Integer dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(temp.year, temp.day), stmt);
+        Integer indexID = Schemas.getIndexID(globalSchema, temp.indexNm, stmt);
         StringBuilder query = new StringBuilder(String.format(
                 "INSERT INTO \"%1$s\".\"%2$s\" \n" +
-                        "(\"DataFilePath\", \"DataGroupID\", \"IndexID\") VALUES \n" +
+                        "(\"DataFilePath\", \"DateGroupID\", \"IndexID\") VALUES \n" +
                         "('" + temp.dataFilePath + "', " + dateGroupID + ", " + indexID + ")",
                         schemaName,
-                        myTableName
+                        cacheToTableName
                 ));
         for(int i=1; i < filesForASingleComposite.size(); i++)
         {
             temp = filesForASingleComposite.get(i).ReadMetaDataForSummary();
-            dateGroupID = Schemas.getDateGroupID(Config.getInstance().getGlobalSchema(), LocalDate.ofYearDay(temp.year, temp.day), stmt);
-            indexID = Schemas.getIndexID(Config.getInstance().getGlobalSchema(), temp.indexNm, stmt);
+            dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(temp.year, temp.day), stmt);
+            indexID = Schemas.getIndexID(globalSchema, temp.indexNm, stmt);
             query.append(",\n('" + temp.dataFilePath + "', " + dateGroupID + ", " + indexID + ")");
         }
         query.append(";");
@@ -293,7 +300,8 @@ public class DatabaseCache extends Observable{
             year = Integer.parseInt(matcher.group(4));
             day = Integer.parseInt(matcher.group(5));
         } else {
-            throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day.", 0);
+            throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day. Expecting path to be of form \"" + filePathPattern.pattern() + "\"."
+                    + " Path \"" + fullPath + "\" doesn't match.", 0);
         }
 
         return new DataFileMetaData("Data", fullPath, year, day);

@@ -1,8 +1,8 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <PluginMetadata>
 	<Title>TRMM3B42RT</Title>
 	<DaysPerInputData>1</DaysPerInputData>
-	<Resolution>25000</Resolution>
+	<Resolution>1000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
 		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>

@@ -2,14 +2,11 @@ package version2.prototype.download;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,7 +18,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.ConfigReadException;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
@@ -37,17 +33,17 @@ import version2.prototype.util.Schemas;
 public abstract class GlobalDownloader extends Observable implements Runnable{
     protected TaskState state;
     protected final int ID;
+    protected final Config configInstance;
+    protected final String globalSchema;
     protected final String pluginName;
     protected final DownloadMetaData metaData;
     protected final ListDatesFiles listDatesFiles;
-
-    private static BitSet keys;
-    private Map<Integer, Boolean> udpateStates;
+    protected LocalDate currentStartDate;
 
     /**
      * Sets this GlobalDownloader super to have an initial state (TaskState) of STOPPED and registers the GlobalDownloader in the database.
      *
-     * @param myID  - unique identifier ID of this GlobalDownloader (this is addressed by EASTWebManager and has nothing to do with the internal database IDs)
+     * @param myID  - unique identifier ID of this GlobalDownloader
      * @param pluginName
      * @param metaData
      * @param listDatesFiles
@@ -57,16 +53,17 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws ParserConfigurationException
      * @throws ClassNotFoundException
      */
-    protected GlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    protected GlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
     IOException, SQLException
     {
         state = TaskState.STOPPED;
         ID = myID;
+        this.configInstance = configInstance;
+        globalSchema = configInstance.getGlobalSchema();
         this.pluginName = pluginName;
         this.metaData = metaData;
-        keys = new BitSet(1000);
-        udpateStates = new TreeMap<Integer, Boolean>();
         this.listDatesFiles = listDatesFiles;
+        currentStartDate = startDate;
         RegisterGlobalDownloader();
     }
 
@@ -87,36 +84,126 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         state = TaskState.RUNNING;
     }
 
-
-
-    public final LocalDate GetOriginDate() { return metaData.originDate; }
-
-    public final int GetID() { return ID; }
-
-    public final String GetPluginName() { return pluginName; }
-
-    public final int GetAnUpdateKey()
+    /**
+     * Gets this GlobalDownloader instance's running state.
+     *
+     * @return TaskState indicating current state of this GlobalDownloader's running status
+     */
+    public final TaskState GetRunningState()
     {
-        synchronized(keys)
-        {
-            int registerKey = keys.nextClearBit(0);
-            keys.set(registerKey);
-            udpateStates.put(registerKey, true);
-            return registerKey;
-        }
+        return state;
     }
 
-    public final void ReleaseUpdateKey(int key)
+    /**
+     * Checks for any new data that's ready to be loaded by a LocalDownlader, flags them, and then sends notifications of those updates, if any, to observing LocalDownloaders.
+     * This will all be done on the calling thread including the work that is done by the LocalDownloaders to perform these notified for updates.
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public final void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
+    IOException
     {
-        synchronized(keys)
+        final Connection conn = PostgreSQLConnection.getConnection();
+        final Statement stmt = conn.createStatement();
+        final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, stmt);
+        int filesPerDay = metaData.filesPerDay;
+        ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
+        Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
+        ResultSet rs;
+        StringBuilder update;
+
+        // Check if all files downloaded for any additional days
+        rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalSchema + "\".\"Download\" " +
+                "WHERE \"GlobalDownloaderID\" = " + gdlID + " AND \"Complete\" = FALSE " +
+                "GROUP BY \"DateGroupID\";");
+        if(rs != null)
         {
-            if((key >= 0) && (key < keys.size()))
+            while(rs.next())
             {
-                keys.clear(key);
-                udpateStates.remove(key);
+                countOfDates.put(rs.getInt("DateGroupID"), rs.getInt("DateGroupIDCount"));
             }
         }
+        rs.close();
+        rs = stmt.executeQuery("SELECT B.\"DateGroupID\", COUNT(B.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalSchema + "\".\"ExtraDownload\" A " +
+                "INNER JOIN \"" + globalSchema + "\".\"Download\" B ON A.\"DownloadID\" = B.\"DownloadID\" " +
+                "WHERE B.\"GlobalDownloaderID\" = " + gdlID + " AND B.\"Complete\" = FALSE " +
+                "GROUP BY \"DateGroupID\";");
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                countOfDates.put(rs.getInt("DateGroupID"), countOfDates.get(rs.getInt("DateGroupID")) + rs.getInt("DateGroupIDCount"));
+            }
+        }
+        rs.close();
+
+        Iterator<Integer> iterator = countOfDates.keySet().iterator();
+        int idx;
+        while(iterator.hasNext())
+        {
+            idx = iterator.next();
+            if(countOfDates.get(idx) == filesPerDay)
+            {
+                datesCompleted.add(idx);
+            }
+        }
+
+        if(datesCompleted.size() > 0)
+        {
+            update = new StringBuilder("UPDATE \"" + globalSchema + "\".\"Download\" SET \"Complete\" = TRUE WHERE \"DateGroupID\" = " + datesCompleted.get(0));
+            for(int i=1; i < datesCompleted.size(); i++)
+            {
+                update.append(" OR \"DateGroupID\" = " + datesCompleted.get(i));
+            }
+            update.append(";");
+            stmt.executeUpdate(update.toString());
+        }
+
+        if(datesCompleted.size() > 0)
+        {
+            setChanged();
+            notifyObservers();
+        }
     }
+
+    /**
+     * Gets the date this GlobalDownloader will/has started downloading from.
+     *
+     * @return start date for downloading
+     */
+    public final LocalDate GetStartDate() { return currentStartDate; }
+
+    /**
+     * Changes the start date for this GlobalDownloader and causes it to start downloading from the given date. Does not cause the GlobalDownloader to redownload anything already
+     * downloaded but if the date is earlier than the current start date than it will start downloading from that date onward with the next set of downloads until caught up, or if it's
+     * later than the current start date then it is simply ignored and the original start date is kept.
+     *
+     * @param newStartDate  - new date to state downloading from
+     */
+    public final void SetStartDate(LocalDate newStartDate)
+    {
+        if(currentStartDate.isAfter(newStartDate)) {
+            currentStartDate = newStartDate;
+        }
+    }
+
+    /**
+     * Gets this GlobalDownloader's assigned unique ID. Only expected to be unique when compared to other currently existing GlobalDownloaders.
+     *
+     * @return  integer representing unique identifier of this GlobalDownloader
+     */
+    public final int GetID() { return ID; }
+
+    /**
+     * Gets the plugin name of the associated plugin metadata this GlobalDownloader uses.
+     *
+     * @return String of plugin name gotten from plugin metadata
+     */
+    public final String GetPluginName() { return pluginName; }
 
     /**
      * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all projects.
@@ -128,21 +215,21 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    protected final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
-        final String globalEASTWebSchema = Config.getInstance().getGlobalSchema();
-        final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, stmt);
+        final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, stmt);
         Map<Integer, DataFileMetaData> downloadsList = new HashMap<Integer, DataFileMetaData>();
         ArrayList<Integer> downloadIDs = new ArrayList<Integer>(0);
         ResultSet rs;
 
-        rs = stmt.executeQuery(String.format(
+        String query_ = String.format(
                 "SELECT A.\"DownloadID\", A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" FROM \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B " +
                         "WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND B.\"DateGroupID\"=A.\"DateGroupID\";",
-                        globalEASTWebSchema
-                ));
+                        globalSchema
+                );
+        rs = stmt.executeQuery(query_);
         if(rs != null)
         {
             while(rs.next())
@@ -156,17 +243,18 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         StringBuilder query = new StringBuilder(String.format(
                 "SELECT A.\"DownloadID\", A.\"DataName\", A.\"FilePath\", B.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
                         "FROM \"%1$s\".\"ExtraDownload\" A INNER JOIN \"%1$s\".\"Download\" D ON A.\"DownloadID\"=D.\"DownloadID\" " +
-                        "INNER JOIN \"%1$s\".\"DateGroup\" B ON D.\"DateGroupID\"=B.\"DateGroupID\" WHERE ",
-                        globalEASTWebSchema));
+                        "INNER JOIN \"%1$s\".\"DateGroup\" B ON D.\"DateGroupID\"=B.\"DateGroupID\"",
+                        globalSchema));
 
         if(downloadIDs.size() > 0)
         {
-            query.append("A.\"DownloadID\"=" + downloadIDs.get(0));
+            query.append(" WHERE A.\"DownloadID\"=" + downloadIDs.get(0));
             for(int i=1; i < downloadIDs.size(); i++)
             {
                 query.append(" OR A.\"DownloadID\"=" + downloadIDs.get(i));
             }
         }
+        query.append(";");
 
         rs = stmt.executeQuery(query.toString());
         if(rs != null)
@@ -207,94 +295,34 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     protected final void AddDownloadFile(int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
-        final String globalEASTWebSchema = Config.getInstance().getGlobalSchema();
         final LocalDate lDate = LocalDate.ofYearDay(year, dayOfYear);
-
         // If inserting a "Data" labeled file then insert its record into the 'Download' table
         if(metaData.name.toLowerCase().equals("data"))
         {
-            int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, stmt);
-            int filesPerDay = Schemas.getFilesPerDayValue(globalEASTWebSchema, pluginName, stmt);
-            int dateGroupID = Schemas.getDateGroupID(globalEASTWebSchema, lDate, stmt);
+            int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, stmt);
+            int dateGroupID = Schemas.getDateGroupID(globalSchema, lDate, stmt);
 
             // Insert new download
             String query = String.format(
                     "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
                             "(" + gdlID + ", " + dateGroupID + ", '" + filePath + "');",
-                            globalEASTWebSchema
+                            globalSchema
                     );
             stmt.executeUpdate(query);
-
-            // Check if all files downloaded for any additional days
-            Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
-            ResultSet rs;
-            rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalEASTWebSchema + "\".\"Download\" " +
-                    "WHERE \"GlobalDownloaderID\" = " + gdlID + " AND \"Complete\" = FALSE " +
-                    "GROUP BY \"DateGroupID\";");
-            if(rs != null)
-            {
-                while(rs.next())
-                {
-                    countOfDates.put(rs.getInt("DateGroupID"), rs.getInt("DateGroupIDCount"));
-                }
-            }
-            rs.close();
-            rs = stmt.executeQuery("SELECT B.\"DateGroupID\", COUNT(B.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalEASTWebSchema + "\".\"ExtraDownload\" A " +
-                    "INNER JOIN \"" + globalEASTWebSchema + "\".\"Download\" B ON A.\"DownloadID\" = B.\"DownloadID\" " +
-                    "WHERE B.\"GlobalDownloaderID\" = " + gdlID + " AND B.\"Complete\" = FALSE " +
-                    "GROUP BY \"DateGroupID\";");
-            if(rs != null)
-            {
-                while(rs.next())
-                {
-                    countOfDates.put(rs.getInt("DateGroupID"), countOfDates.get(rs.getInt("DateGroupID")) + rs.getInt("DateGroupIDCount"));
-                }
-            }
-            rs.close();
-
-            Iterator<Integer> iterator = countOfDates.keySet().iterator();
-            ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
-            int idx;
-            while(iterator.hasNext())
-            {
-                idx = iterator.next();
-                if(countOfDates.get(idx) == filesPerDay)
-                {
-                    datesCompleted.add(idx);
-                }
-            }
-
-            if(datesCompleted.size() > 0)
-            {
-                StringBuilder update = new StringBuilder("UPDATE \"" + globalEASTWebSchema + "\" SET \"Completed\" = TRUE WHERE \"DateGroupID\" = " + datesCompleted.get(0));
-                for(int i=1; i < datesCompleted.size(); i++)
-                {
-                    update.append(" OR \"DateGroupID\" = " + datesCompleted.get(i));
-                }
-                update.append(";");
-                stmt.executeUpdate(update.toString());
-            }
         }
         // Else, insert the record into the 'ExtraDownload' table
         else
         {
-            int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, stmt);
-            int dateGroupID = Schemas.getDateGroupID(globalEASTWebSchema, lDate, stmt);
-            int downloadID = Schemas.getDownloadID(globalEASTWebSchema, gdlID, dateGroupID, stmt);
+            int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, stmt);
+            int dateGroupID = Schemas.getDateGroupID(globalSchema, lDate, stmt);
+            int downloadID = Schemas.getDownloadID(globalSchema, gdlID, dateGroupID, stmt);
 
             String query = String.format(
                     "INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES\n" +
                             "(" + downloadID + ", '" + metaData.name + "', '" + filePath + "');",
-                            globalEASTWebSchema
+                            globalSchema
                     );
             stmt.executeUpdate(query);
-        }
-
-        // Update States
-        Iterator<Integer> it = udpateStates.keySet().iterator();
-        while(it.hasNext())
-        {
-            keys.set(it.next());
         }
 
         stmt.close();
@@ -305,15 +333,14 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
-        final String globalEASTWebSchema = Config.getInstance().getGlobalSchema();
-        final int pluginID = Schemas.getPluginID(globalEASTWebSchema, pluginName, stmt);
+        final int pluginID = Schemas.getPluginID(globalSchema, pluginName, stmt);
 
         ResultSet rs;
-        rs = stmt.executeQuery("SELECT \"GlobalDownloaderID\" FROM \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" WHERE \"PluginID\" = " + pluginID + ";");
+        rs = stmt.executeQuery("SELECT \"GlobalDownloaderID\" FROM \"" + globalSchema + "\".\"GlobalDownloader\" WHERE \"PluginID\" = " + pluginID + ";");
         if(rs != null && rs.next()) {
             return true;
         }
 
-        return stmt.execute("INSERT INTO \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" (\"PluginID\") VALUES (" + pluginID + ");");
+        return stmt.execute("INSERT INTO \"" + globalSchema + "\".\"GlobalDownloader\" (\"PluginID\") VALUES (" + pluginID + ");");
     }
 }

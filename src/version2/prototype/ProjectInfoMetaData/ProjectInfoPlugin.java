@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public class ProjectInfoPlugin {
     private String Name;
-    private ArrayList<String> Inidicies;
+    private ArrayList<String> Indices;
     private String QC;
 
     /**
@@ -16,13 +16,13 @@ public class ProjectInfoPlugin {
      * in a "Plugin" node child of a "Plugins" node.
      *
      * @param name  - plugin name
-     * @param inidicies  - list of indices to calculate by their names
+     * @param indices  - list of indices to calculate by their names
      * @param qc  - QC level
      */
-    public ProjectInfoPlugin(String name, ArrayList<String> inidicies, String qc)
+    public ProjectInfoPlugin(String name, ArrayList<String> indices, String qc)
     {
         Name = name;
-        Inidicies = inidicies;
+        Indices = indices;
         QC = qc;
     }
 
@@ -31,9 +31,9 @@ public class ProjectInfoPlugin {
         return Name;
     }
 
-    public ArrayList<String> GetIndicies()
+    public ArrayList<String> GetIndices()
     {
-        return Inidicies;
+        return Indices;
     }
 
     public String GetQC()

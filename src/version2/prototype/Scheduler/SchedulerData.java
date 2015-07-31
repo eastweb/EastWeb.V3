@@ -33,7 +33,9 @@ public class SchedulerData {
      */
     public SchedulerData(ProjectInfoFile projectInfoFile, String pluginMetaDataFile) throws ConfigReadException, Exception
     {
-        this.projectInfoFile= projectInfoFile;
-        pluginMetaDataCollection = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile));
+        this.projectInfoFile = projectInfoFile;
+        if(pluginMetaDataFile != null) {
+            pluginMetaDataCollection = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile));
+        }
     }
 }

@@ -3,6 +3,7 @@ package version2.prototype.download.ModisNBAR;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -23,13 +24,16 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
 
-// @Author: Yi Liu
+/**
+ * @author Yi Liu
+ *
+ */
 public class ModisNBARQCGlobalDownloader extends GlobalDownloader
 {
 
-    public ModisNBARQCGlobalDownloader(int myID, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles) throws ClassNotFoundException, ParserConfigurationException, SAXException,
+    public ModisNBARQCGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
     IOException, SQLException {
-        super(myID, pluginName, metaData, listDatesFiles);
+        super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
         // TODO Auto-generated constructor stub
     }
 
@@ -101,7 +105,7 @@ public class ModisNBARQCGlobalDownloader extends GlobalDownloader
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(Config.getInstance(), pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
 
                 //REMOVE the following statement, for testing only
                 outFolder = "D:\\project\\download\\ModisNBAR";

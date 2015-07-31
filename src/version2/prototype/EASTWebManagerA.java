@@ -19,9 +19,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
@@ -29,50 +26,43 @@ import version2.prototype.Scheduler.SchedulerStatus;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
-import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
-import version2.prototype.util.DatabaseCache;
 
 /**
- * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
- * the number of currently processing threads for each resource group. This class throttles execution where necessary to allow fair processing time
- * to all threads and to manage memory usage across the system. All communication between the presentation layer (GUI) and EASTWeb processes and other
- * are handled by this class as well.
- *
  * @author michael.devos
  *
  */
-public class EASTWebManager implements Runnable{
-    private static EASTWebManager instance = null;
-    private static ExecutorService executor;
+public abstract class EASTWebManagerA  implements Runnable{
+    protected static EASTWebManagerA instance = null;
+    protected static ExecutorService executor;
 
     // Logged requests from other threads
-    private static List<SchedulerData> newSchedulerRequests;
-    private static List<Integer> stopExistingSchedulerRequests;
-    private static List<String> stopExistingSchedulerRequestsNames;
-    private static List<Integer> deleteExistingSchedulerRequests;
-    private static List<String> deleteExistingSchedulerRequestsNames;
-    private static List<Integer> startExistingSchedulerRequests;
-    private static List<String> startExistingSchedulerRequestsNames;
-    private static List<GUIUpdateHandler> guiHandlers;
+    protected static List<SchedulerData> newSchedulerRequests;
+    protected static List<Integer> stopExistingSchedulerRequests;
+    protected static List<String> stopExistingSchedulerRequestsNames;
+    protected static List<Integer> deleteExistingSchedulerRequests;
+    protected static List<String> deleteExistingSchedulerRequestsNames;
+    protected static List<Integer> startExistingSchedulerRequests;
+    protected static List<String> startExistingSchedulerRequestsNames;
+    protected static List<GUIUpdateHandler> guiHandlers;
 
     // EASTWebManager state
-    private static Integer numOfCreatedGDLs;
-    private static Integer numOfCreatedSchedulers;
-    private static List<SchedulerStatus> schedulerStatuses;
-    private static BitSet schedulerIDs;
-    private static BitSet globalDLIDs;
-    private static Boolean schedulerStatesChanged;
-    private boolean manualUpdate;
-    private boolean justCreateNewSchedulers;
-    private final int msBeetweenUpdates;
+    protected static Integer numOfCreatedGDLs;
+    protected static Integer numOfCreatedSchedulers;
+    protected static List<SchedulerStatus> schedulerStatuses;
+    protected static BitSet schedulerIDs;
+    protected static BitSet globalDLIDs;
+    protected static Boolean schedulerStatesChanged;
+    protected boolean manualUpdate;
+    protected boolean justCreateNewSchedulers;
+    protected final int msBeetweenUpdates;
 
     // Object references of EASTWeb components
-    private List<GlobalDownloader> globalDLs;
-    private List<Scheduler> schedulers;
-    private List<ScheduledFuture<?>> globalDLFutures;
-    private final ScheduledExecutorService globalDLExecutor;
-    private final ExecutorService processWorkerExecutor;
+    protected List<GlobalDownloader> globalDLs;
+    protected List<Scheduler> schedulers;
+    protected List<ScheduledFuture<?>> globalDLFutures;
+    protected final ScheduledExecutorService globalDLExecutor;
+    protected final ExecutorService processWorkerExecutor;
 
     /**
      *  If first time calling, starts up the EASTWebManager background processing thread to handle passively processing logged requests and updating
@@ -114,212 +104,6 @@ public class EASTWebManager implements Runnable{
                 executor.execute(instance);
             }
         }
-    }
-
-    @Override
-    public void run() {
-        do
-        {
-            try
-            {
-                Thread.sleep(msBeetweenUpdates);
-
-                // Tell Schedulers to attempt updating their projects
-                for(Scheduler scheduler : schedulers)
-                {
-                    scheduler.AttemptUpdate();
-                }
-
-                // Handle new Scheduler requests
-                if(newSchedulerRequests.size() > 0)
-                {
-                    synchronized (newSchedulerRequests) {
-                        while(newSchedulerRequests.size() > 0)
-                        {
-                            handleNewSchedulerRequests(newSchedulerRequests.remove(0));
-                        }
-                    }
-                }
-
-                if(!justCreateNewSchedulers)
-                {
-                    // Handle stop scheduler requests
-                    if(stopExistingSchedulerRequests.size() > 0)
-                    {
-                        synchronized (stopExistingSchedulerRequests) {
-                            while(stopExistingSchedulerRequests.size() > 0)
-                            {
-                                handleStopSchedulerRequests(stopExistingSchedulerRequests.remove(0));
-                            }
-                        }
-                    }
-                    if(stopExistingSchedulerRequestsNames.size() > 0)
-                    {
-                        synchronized (stopExistingSchedulerRequestsNames) {
-                            int schedulerId = -1;
-                            for(String projectName : stopExistingSchedulerRequestsNames)
-                            {
-                                for(Scheduler scheduler : schedulers)
-                                {
-                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                    {
-                                        schedulerId = scheduler.GetID();
-                                        break;
-                                    }
-                                }
-                                if(schedulerId != -1) {
-                                    stopExistingSchedulerRequestsNames.remove(projectName);
-                                    handleStopSchedulerRequests(schedulerId);
-                                }
-                            }
-                        }
-                    }
-
-                    // Handle delete scheduler requests
-                    if(deleteExistingSchedulerRequests.size() > 0)
-                    {
-                        synchronized (deleteExistingSchedulerRequests) {
-                            while(deleteExistingSchedulerRequests.size() > 0)
-                            {
-                                handleDeleteSchedulerRequests(deleteExistingSchedulerRequests.remove(0));
-                            }
-                        }
-                    }
-                    if(deleteExistingSchedulerRequestsNames.size() > 0)
-                    {
-                        synchronized (deleteExistingSchedulerRequestsNames) {
-                            int schedulerId = -1;
-                            for(String projectName : deleteExistingSchedulerRequestsNames)
-                            {
-                                for(Scheduler scheduler : schedulers)
-                                {
-                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                    {
-                                        schedulerId = scheduler.GetID();
-                                        break;
-                                    }
-                                }
-                                if(schedulerId != -1) {
-                                    deleteExistingSchedulerRequestsNames.remove(projectName);
-                                    handleDeleteSchedulerRequests(schedulerId);
-                                }
-                            }
-                        }
-                    }
-
-                    // Handle start back up existing Scheduler requests
-                    if(startExistingSchedulerRequests.size() > 0)
-                    {
-                        synchronized (startExistingSchedulerRequests) {
-                            while(startExistingSchedulerRequests.size() > 0)
-                            {
-                                handleStartExistingSchedulerRequests(startExistingSchedulerRequests.remove(0));
-                            }
-                        }
-                    }
-                    if(startExistingSchedulerRequestsNames.size() > 0)
-                    {
-                        synchronized (startExistingSchedulerRequestsNames) {
-                            int schedulerId = -1;
-                            for(String projectName : startExistingSchedulerRequestsNames)
-                            {
-                                for(Scheduler scheduler : schedulers)
-                                {
-                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                    {
-                                        schedulerId = scheduler.GetID();
-                                        break;
-                                    }
-                                }
-                                if(schedulerId != -1) {
-                                    startExistingSchedulerRequestsNames.remove(projectName);
-                                    handleStartExistingSchedulerRequests(schedulerId);
-                                }
-                                schedulerId = -1;
-                            }
-                        }
-                    }
-
-                    // Handle stopping GlobalDownloaders whose using projects are all stopped.
-                    // Handle deleting GlobalDownloaders that don't have any currently existing projects using them.
-                    if(globalDLs.size() > 0)
-                    {
-                        synchronized (globalDLs)
-                        {
-                            boolean allStopped;
-                            boolean noneExisting;
-
-                            if(schedulers.size() > 0)
-                            {
-                                synchronized (schedulers)
-                                {
-                                    for(GlobalDownloader gdl : globalDLs)
-                                    {
-                                        allStopped = true;
-                                        noneExisting = true;
-
-                                        for(Scheduler scheduler : schedulers)
-                                        {
-                                            for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
-                                            {
-                                                if(pluginInfo.GetName().equals(gdl.GetPluginName()))
-                                                {
-                                                    noneExisting = false;
-                                                    if(scheduler.GetState() == TaskState.RUNNING) {
-                                                        allStopped = false;
-                                                    }
-                                                    break;
-                                                }
-                                            }
-
-                                            if(!noneExisting && !allStopped) {
-                                                break;
-                                            }
-                                        }
-
-                                        if(noneExisting)
-                                        {
-                                            gdl.Stop();
-                                            globalDLs.remove(gdl.GetID());
-                                            releaseGlobalDLID(gdl.GetID());
-                                            globalDLFutures.get(gdl.GetID()).cancel(false);
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                for(GlobalDownloader gdl : globalDLs)
-                                {
-                                    gdl.Stop();
-                                    globalDLs.remove(gdl.GetID());
-                                    releaseGlobalDLID(gdl.GetID());
-                                    globalDLFutures.get(gdl.GetID()).cancel(false);
-                                }
-                            }
-
-                            synchronized (numOfCreatedGDLs) {
-                                numOfCreatedGDLs = globalDLs.size();
-                            }
-                        }
-                    }
-
-                    if(schedulerStatesChanged)
-                    {
-                        synchronized (schedulerStatesChanged)
-                        {
-                            runGUIUpdateHandlers();
-                            schedulerStatesChanged = false;
-                        }
-                    }
-                }
-            }
-            catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                e.printStackTrace();
-            }
-        }while((msBeetweenUpdates > 0) && !manualUpdate);
-        manualUpdate = false;
-        justCreateNewSchedulers = false;
     }
 
     /**
@@ -580,6 +364,275 @@ public class EASTWebManager implements Runnable{
         }
     }
 
+    @Override
+    public void run() {
+        do
+        {
+            try
+            {
+                Thread.sleep(msBeetweenUpdates);
+
+                // Tell Schedulers to attempt updating their projects
+                for(Scheduler scheduler : schedulers)
+                {
+                    scheduler.AttemptUpdate();
+                }
+
+                // Handle new Scheduler requests
+                if(newSchedulerRequests.size() > 0)
+                {
+                    synchronized (newSchedulerRequests) {
+                        while(newSchedulerRequests.size() > 0)
+                        {
+                            handleNewSchedulerRequests(newSchedulerRequests.remove(0));
+                        }
+                    }
+                }
+
+                if(!justCreateNewSchedulers)
+                {
+                    // Handle stop scheduler requests
+                    if(stopExistingSchedulerRequests.size() > 0)
+                    {
+                        synchronized (stopExistingSchedulerRequests) {
+                            while(stopExistingSchedulerRequests.size() > 0)
+                            {
+                                handleStopSchedulerRequests(stopExistingSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(stopExistingSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (stopExistingSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : stopExistingSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
+                                {
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    {
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    stopExistingSchedulerRequestsNames.remove(projectName);
+                                    handleStopSchedulerRequests(schedulerId);
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle delete scheduler requests
+                    if(deleteExistingSchedulerRequests.size() > 0)
+                    {
+                        synchronized (deleteExistingSchedulerRequests) {
+                            while(deleteExistingSchedulerRequests.size() > 0)
+                            {
+                                handleDeleteSchedulerRequests(deleteExistingSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(deleteExistingSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (deleteExistingSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : deleteExistingSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
+                                {
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    {
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    deleteExistingSchedulerRequestsNames.remove(projectName);
+                                    handleDeleteSchedulerRequests(schedulerId);
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle start back up existing Scheduler requests
+                    if(startExistingSchedulerRequests.size() > 0)
+                    {
+                        synchronized (startExistingSchedulerRequests) {
+                            while(startExistingSchedulerRequests.size() > 0)
+                            {
+                                handleStartExistingSchedulerRequests(startExistingSchedulerRequests.remove(0));
+                            }
+                        }
+                    }
+                    if(startExistingSchedulerRequestsNames.size() > 0)
+                    {
+                        synchronized (startExistingSchedulerRequestsNames) {
+                            int schedulerId = -1;
+                            for(String projectName : startExistingSchedulerRequestsNames)
+                            {
+                                for(Scheduler scheduler : schedulers)
+                                {
+                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    {
+                                        schedulerId = scheduler.GetID();
+                                        break;
+                                    }
+                                }
+                                if(schedulerId != -1) {
+                                    startExistingSchedulerRequestsNames.remove(projectName);
+                                    handleStartExistingSchedulerRequests(schedulerId);
+                                }
+                                schedulerId = -1;
+                            }
+                        }
+                    }
+
+                    // Handle stopping GlobalDownloaders whose using projects are all stopped.
+                    // Handle deleting GlobalDownloaders that don't have any currently existing projects using them.
+                    if(globalDLs.size() > 0)
+                    {
+                        synchronized (globalDLs)
+                        {
+                            boolean allStopped;
+                            boolean noneExisting;
+
+                            if(schedulers.size() > 0)
+                            {
+                                synchronized (schedulers)
+                                {
+                                    for(GlobalDownloader gdl : globalDLs)
+                                    {
+                                        allStopped = true;
+                                        noneExisting = true;
+
+                                        for(Scheduler scheduler : schedulers)
+                                        {
+                                            for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
+                                            {
+                                                if(pluginInfo.GetName().equals(gdl.GetPluginName()))
+                                                {
+                                                    noneExisting = false;
+                                                    if(scheduler.GetState() == TaskState.RUNNING) {
+                                                        allStopped = false;
+                                                    }
+                                                    break;
+                                                }
+                                            }
+
+                                            if(!noneExisting && !allStopped) {
+                                                break;
+                                            }
+                                        }
+
+                                        if(noneExisting)
+                                        {
+                                            gdl.Stop();
+                                            globalDLs.remove(gdl.GetID());
+                                            releaseGlobalDLID(gdl.GetID());
+                                            globalDLFutures.get(gdl.GetID()).cancel(false);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for(GlobalDownloader gdl : globalDLs)
+                                {
+                                    gdl.Stop();
+                                    globalDLs.remove(gdl.GetID());
+                                    releaseGlobalDLID(gdl.GetID());
+                                    globalDLFutures.get(gdl.GetID()).cancel(false);
+                                }
+                            }
+
+                            synchronized (numOfCreatedGDLs) {
+                                numOfCreatedGDLs = globalDLs.size();
+                            }
+                        }
+                    }
+
+                    if(schedulerStatesChanged)
+                    {
+                        synchronized (schedulerStatesChanged)
+                        {
+                            runGUIUpdateHandlers();
+                            schedulerStatesChanged = false;
+                        }
+                    }
+                }
+            }
+            catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                e.printStackTrace();
+            }
+        }while((msBeetweenUpdates > 0) && !manualUpdate);
+        manualUpdate = false;
+        justCreateNewSchedulers = false;
+    }
+
+    protected EASTWebManagerA(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
+    {
+        manualUpdate = false;
+        justCreateNewSchedulers = false;
+        this.msBeetweenUpdates = msBeetweenUpdates;
+        schedulerStatesChanged = false;
+
+        ThreadFactory gDLFactory = new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable target) {
+                final Thread thread = new Thread(target);
+                //                log.debug("Creating new worker thread");
+                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread t, Throwable e) {
+                        //                        log.error("Uncaught Exception", e);
+                    }
+                });
+                return thread;
+            }
+        };
+        ThreadFactory pwFactory = new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable target) {
+                final Thread thread = new Thread(target);
+                //                log.debug("Creating new worker thread");
+                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread t, Throwable e) {
+                        //                        log.error("Uncaught Exception", e);
+                    }
+                });
+                return thread;
+            }
+        };
+
+        // Setup request lists
+        newSchedulerRequests = Collections.synchronizedList(new ArrayList<SchedulerData>(1));
+        stopExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        stopExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
+        deleteExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        deleteExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
+        startExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
+        startExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
+        guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
+
+        // Setup for handling executing GlobalDownloaders
+        globalDLs = Collections.synchronizedList(new ArrayList<GlobalDownloader>(1));
+        globalDLExecutor = Executors.newScheduledThreadPool(numOfGlobalDLResourses, gDLFactory);
+        numOfCreatedGDLs = 0;
+        globalDLIDs = new BitSet(1000);
+        globalDLFutures = Collections.synchronizedList(new ArrayList<ScheduledFuture<?>>(1));
+
+        // Setup for handling executing Schedulers
+        schedulers = Collections.synchronizedList(new ArrayList<Scheduler>(1));
+        schedulerStatuses = new ArrayList<SchedulerStatus>(1);
+        numOfCreatedSchedulers = 0;
+        schedulerIDs = new BitSet(100000);
+
+        // Setup for handling executing ProcessWorkers
+        processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, pwFactory);
+    }
+
     /**
      * Updates the local SchedulerStatus listing and sets a boolean flag to signal that the UI needs to be updated.
      *
@@ -709,106 +762,7 @@ public class EASTWebManager implements Runnable{
         return processWorkerExecutor.submit(worker);
     }
 
-    /**
-     * Empty instance just to allow usage of private classes.
-     */
-    private EASTWebManager()
-    {
-        manualUpdate = false;
-        justCreateNewSchedulers = false;
-        msBeetweenUpdates = Integer.MAX_VALUE;
-        schedulerStatesChanged = false;
-
-        newSchedulerRequests = null;
-        stopExistingSchedulerRequests = null;
-        stopExistingSchedulerRequestsNames = null;
-        deleteExistingSchedulerRequests = null;
-        deleteExistingSchedulerRequestsNames = null;
-        startExistingSchedulerRequests = null;
-        startExistingSchedulerRequestsNames = null;
-        guiHandlers = null;
-
-        // Setup for handling executing GlobalDownloaders
-        globalDLs = null;
-        globalDLExecutor = null;
-        numOfCreatedGDLs = -1;
-        globalDLIDs = null;
-        globalDLFutures = null;
-
-        // Setup for handling executing Schedulers
-        schedulers = null;
-        schedulerStatuses = null;
-        numOfCreatedSchedulers = -10;
-        schedulerIDs = null;
-
-        // Setup for handling executing ProcessWorkers
-        processWorkerExecutor = null;
-    }
-
-    private EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
-    {
-        manualUpdate = false;
-        justCreateNewSchedulers = false;
-        this.msBeetweenUpdates = msBeetweenUpdates;
-        schedulerStatesChanged = false;
-
-        ThreadFactory gDLFactory = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable target) {
-                final Thread thread = new Thread(target);
-                //                log.debug("Creating new worker thread");
-                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                    @Override
-                    public void uncaughtException(Thread t, Throwable e) {
-                        //                        log.error("Uncaught Exception", e);
-                    }
-                });
-                return thread;
-            }
-        };
-        ThreadFactory pwFactory = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable target) {
-                final Thread thread = new Thread(target);
-                //                log.debug("Creating new worker thread");
-                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                    @Override
-                    public void uncaughtException(Thread t, Throwable e) {
-                        //                        log.error("Uncaught Exception", e);
-                    }
-                });
-                return thread;
-            }
-        };
-
-        // Setup request lists
-        newSchedulerRequests = Collections.synchronizedList(new ArrayList<SchedulerData>(1));
-        stopExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        stopExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
-        deleteExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        deleteExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
-        startExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
-        startExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
-        guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
-
-        // Setup for handling executing GlobalDownloaders
-        globalDLs = Collections.synchronizedList(new ArrayList<GlobalDownloader>(1));
-        globalDLExecutor = Executors.newScheduledThreadPool(numOfGlobalDLResourses, gDLFactory);
-        numOfCreatedGDLs = 0;
-        globalDLIDs = new BitSet(1000);
-        globalDLFutures = Collections.synchronizedList(new ArrayList<ScheduledFuture<?>>(1));
-
-        // Setup for handling executing Schedulers
-        schedulers = Collections.synchronizedList(new ArrayList<Scheduler>(1));
-        schedulerStatuses = new ArrayList<SchedulerStatus>(1);
-        numOfCreatedSchedulers = 0;
-        schedulerIDs = new BitSet(100000);
-
-        // Setup for handling executing ProcessWorkers
-        processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, pwFactory);
-    }
-
-    private void handleNewSchedulerRequests(SchedulerData data) throws ParserConfigurationException, SAXException, IOException
+    protected void handleNewSchedulerRequests(SchedulerData data) throws ParserConfigurationException, SAXException, IOException
     {
         synchronized (schedulers)
         {
@@ -830,7 +784,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleStopSchedulerRequests(int schedulerID)
+    protected void handleStopSchedulerRequests(int schedulerID)
     {
         synchronized (schedulers)
         {
@@ -841,7 +795,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleDeleteSchedulerRequests(int schedulerID)
+    protected void handleDeleteSchedulerRequests(int schedulerID)
     {
         synchronized (schedulers)
         {
@@ -857,7 +811,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleStartExistingSchedulerRequests(int schedulerID)
+    protected void handleStartExistingSchedulerRequests(int schedulerID)
     {
         synchronized (schedulers)
         {
@@ -868,7 +822,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void runGUIUpdateHandlers()
+    protected void runGUIUpdateHandlers()
     {
         synchronized (guiHandlers)
         {
@@ -879,7 +833,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private int getLowestAvailableSchedulerID()
+    protected int getLowestAvailableSchedulerID()
     {
         int id = -1;
 
@@ -900,7 +854,7 @@ public class EASTWebManager implements Runnable{
         return id;
     }
 
-    private void releaseSchedulerID(int id)
+    protected void releaseSchedulerID(int id)
     {
         synchronized (schedulerIDs)
         {
@@ -911,7 +865,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private int getLowestAvailableGlobalDLID()
+    protected int getLowestAvailableGlobalDLID()
     {
         int id = -1;
 
@@ -932,7 +886,7 @@ public class EASTWebManager implements Runnable{
         return id;
     }
 
-    private void releaseGlobalDLID(int id)
+    protected void releaseGlobalDLID(int id)
     {
         synchronized (globalDLIDs)
         {
@@ -943,7 +897,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private boolean IsIDValid(int id, BitSet set)
+    protected boolean IsIDValid(int id, BitSet set)
     {
         if((id >= 0) && (id < set.size())) {
             return true;

@@ -77,7 +77,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
             avgArray = null;
             avgRasterDs.delete();
 
-            mergedFile = DatabaseCache.Parse(newFilePath);
+            mergedFile = new DataFileMetaData("Data", newFilePath, firstDate.getYear(), firstDate.getDayOfYear());
         }
         return mergedFile;
     }
