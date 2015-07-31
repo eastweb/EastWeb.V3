@@ -176,8 +176,10 @@ public class GdalUtils {
                 switch (resample) {
                 case NEAREST_NEIGHBOR:
                     resampleAlg = gdalconst.GRA_NearestNeighbour;
+                    break;              // added by YL
                 case BILINEAR:
                     resampleAlg = gdalconst.GRA_Bilinear;
+                    break;              // added by YL
                 case CUBIC_CONVOLUTION:
                     resampleAlg = gdalconst.GRA_CubicSpline;
                 }

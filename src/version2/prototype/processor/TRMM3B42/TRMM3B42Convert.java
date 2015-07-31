@@ -50,6 +50,9 @@ public class TRMM3B42Convert extends Convert{
                     for (int col=0; col<xSize; col++)
                     {
                         array[col] = dis.readFloat();
+                        if ((row < 20) && (col < 20)) {
+                            System.out.println("TRMM4B32Convert : " + array[col] );
+                        }
                     }
                     outputDS.GetRasterBand(1).WriteRaster(0, row, xSize, 1, array);
                 }
