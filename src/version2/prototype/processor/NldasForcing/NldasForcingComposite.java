@@ -310,10 +310,13 @@ public class NldasForcingComposite extends Composite
                         + String.format("%04d", Integer.parseInt(inputFolder.getParent())-1) + File.pathSeparator + "365");
             }
 
-            for(File file : yesterdayFolder.listFiles())
+            if(yesterdayFolder != null && yesterdayFolder.exists())
             {
-                if(file.getName().contains(prefix)) {
-                    yesterdayFile = file;
+                for(File file : yesterdayFolder.listFiles())
+                {
+                    if(file.getName().contains(prefix)) {
+                        yesterdayFile = file;
+                    }
                 }
             }
         }
