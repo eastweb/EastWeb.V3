@@ -380,7 +380,7 @@ public class MainWindow {
                 defaultTableModel.addRow(new Object[] {
                         String.valueOf(projectList.getSelectedItem()),
                         "75 %",
-                        "Summary Quiries",
+                        "Summary Queries",
                         chckbxIntermidiateFiles.isSelected(),
                         String.valueOf(projectList.getSelectedItem()),
                         String.valueOf(projectList.getSelectedItem())});
@@ -389,7 +389,7 @@ public class MainWindow {
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
                     SchedulerData data = new SchedulerData(project);
-                    EASTWebManager.StartNewScheduler(data, false);
+                    EASTWebManager.StartNewScheduler(data, true);
 
                 } catch (IOException e) {
                     // TODO Auto-generated catch block

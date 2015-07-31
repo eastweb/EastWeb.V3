@@ -5,7 +5,7 @@
 	<Resolution>12500</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<DownloadFactoryClassName>NldasNOAHFactory</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
@@ -15,8 +15,8 @@
 		</FTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>24</FilesPerDay>
-		<DatePattern>\\d{4}</DatePattern>
-		<FileNamePattern>NLDAS_NOAH0125_H\\.A(\\d{4})(\\d{2})(\\d{2})\\.(\\d{4})\\.002\\.grb</FileNamePattern>
+		<DatePattern>\d{4}</DatePattern>
+		<FileNamePattern>NLDAS_NOAH0125_H\.A(\d{4})(\d{2})(\d{2})\.(\d{4})\.002\.grb</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>02</DayOfMonth>
 			<Month>January</Month>

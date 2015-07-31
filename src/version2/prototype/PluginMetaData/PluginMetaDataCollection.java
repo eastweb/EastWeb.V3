@@ -473,7 +473,7 @@ public class PluginMetaDataCollection {
                     }
                 }
             } else {
-                extraDownloads = null;
+                extraDownloads = new ArrayList<DownloadMetaData>();
             }
         }
 
@@ -525,7 +525,7 @@ public class PluginMetaDataCollection {
             this.filesPerDay = filesPerDay;
             datePattern = Pattern.compile(datePatternStr);
             fileNamePattern = Pattern.compile(fileNamePatternStr);
-            extraDownloads = null;
+            extraDownloads = new ArrayList<DownloadMetaData>();
             this.originDate = originDate;
         }
 
@@ -542,7 +542,7 @@ public class PluginMetaDataCollection {
             Pattern tempDatePattern = null;
             Pattern tempFileNamePattern = null;
             nList = null;
-            extraDownloads = null;
+            extraDownloads = new ArrayList<DownloadMetaData>();
 
             // Set properties
             if(((Element) extraDownloadNode).hasAttribute("Name")) {

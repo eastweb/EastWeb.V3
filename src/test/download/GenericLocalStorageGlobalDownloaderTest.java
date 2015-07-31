@@ -37,6 +37,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.GenericLocalStorageGlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
@@ -120,8 +121,31 @@ public class GenericLocalStorageGlobalDownloaderTest {
     public void tearDown() throws Exception {
     }
 
+    //    @Test
+    //    public final void testManual() throws Exception
+    //    {
+    //        String pluginName = "TRMM3B42RT";
+    //        FileUtils.deleteDirectory(new File(Config.getInstance().getDownloadDir() + pluginName));
+    //
+    //        // Setup
+    //        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("src/test/download/Test_" + pluginName + ".xml")).pluginMetaDataMap.get("Test_" + pluginName);
+    //        DownloadMetaData downloadData = pluginMetaData.Download;
+    //        ListDatesFiles listDatesFiles = new TRMM3B42RTListDatesFiles(new DataDate(downloadData.originDate), downloadData);
+    //        String downloaderClassName = pluginName + "Downloader";
+    //        GenericLocalStorageGlobalDownloader gdl = new GenericLocalStorageGlobalDownloader(1, Config.getInstance(), pluginName, downloadData, listDatesFiles, startDate, downloaderClassName);
+    //
+    //        // Run GenericLocalStorageGlobalDownloader
+    //        gdl.run();
+    //
+    //        // Test Run. results were written and stored
+    //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + 2015 + "/" + 182 + "/3B42RT_daily.2015.07.01.bin";
+    //        File temp = new File(testFilePath);
+    //        assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
+    //    }
+
     /**
-     * Test method for {@link version2.prototype.download.GenericLocalStorageGlobalDownloader#GenericLocalStorageGlobalDownloader(int, version2.prototype.Config, java.lang.String, version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData, version2.prototype.download.ListDatesFiles, java.time.LocalDate, java.lang.String)}.
+     * Test method for {@link version2.prototype.download.GenericLocalStorageGlobalDownloader#GenericLocalStorageGlobalDownloader(int, version2.prototype.Config, java.lang.String,
+     * version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData, version2.prototype.download.ListDatesFiles, java.time.LocalDate, java.lang.String)}.
      * @throws Exception
      */
     @Test

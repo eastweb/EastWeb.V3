@@ -185,7 +185,7 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertTrue("Test Global Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 11);
+            assertTrue("Test Global Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 12);
 
             // Check global schema table names
             do{
@@ -202,6 +202,7 @@ public class SchemasTest {
                 case "GlobalDownloader": break;
                 case "Download": break;
                 case "ExtraDownload": break;
+                case "TemporalSummaryCompositionStrategy": break;
                 default: fail("Unknown table in test global schema: " + rs.getString("Name"));
                 }
             } while(rs.next());

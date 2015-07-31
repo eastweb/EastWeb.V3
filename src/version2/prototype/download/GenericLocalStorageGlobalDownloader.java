@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -67,11 +69,31 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      */
     public void run() {
         try {
+            System.out.println("currentStartDate: " + currentStartDate);
+
             // Step 1: Get all downloads from ListDatesFiles
-            Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.getListDatesFiles();
+            Map<DataDate, ArrayList<String>> datesFiles = new TreeMap<DataDate, ArrayList<String>>(listDatesFiles.getListDatesFiles());
+
+            // Remove from downloads list any which are before the current start date
+            Set<DataDate> dateKeys = datesFiles.keySet();
+            ArrayList <String> files;
+            Iterator<String> fIter;
+            for(DataDate dd : dateKeys)
+            {
+                if(dd.getLocalDate().isBefore(currentStartDate))
+                {
+                    files = datesFiles.get(dd);
+                    fIter = files.iterator();
+                    while(fIter.hasNext())
+                    {
+                        fIter.next();
+                        fIter.remove();
+                    }
+                }
+            }
 
             // Step 2: Pull all cached downloads
-            ArrayList<DataFileMetaData> cachedD = GetAllDownloadedFiles();
+            ArrayList<DataFileMetaData> cachedD = GetAllDownloadedFiles(currentStartDate);
 
             // Step 3: Remove already downloaded files from ListDatesFiles
             for (DataFileMetaData d: cachedD)
@@ -82,17 +104,19 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
                 DataDate thisDate = new DataDate(downloaded.day, downloaded.year);
 
                 // get the files associated with the date in the ListDatesFiles
-                ArrayList <String> files = datesFiles.get(thisDate);
+                files = datesFiles.get(thisDate);
 
-                Iterator<String> fIter = files.iterator();
+                fIter = files.iterator();
 
+                String fileTemp;
                 while (fIter.hasNext())
                 {
                     String strPath = downloaded.dataFilePath;
                     System.out.println(strPath);
                     strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.lastIndexOf("."));
                     // remove the file if it is found in the downloaded list
-                    if ((fIter.next().toLowerCase()).contains((strPath.toLowerCase())))
+                    fileTemp = fIter.next();
+                    if ((fileTemp.toLowerCase()).contains((strPath.toLowerCase())))
                     {
                         fIter.remove();
                     }

@@ -45,6 +45,8 @@ import version2.prototype.util.DatabaseCache;
 public class EASTWebManager implements Runnable{
     private static EASTWebManager instance = null;
     private static ExecutorService executor;
+    private static int defaultNumOfSimultaneousGlobalDLs = 1;
+    private static int defaultMSBeetweenUpdates = 5000;
 
     // Logged requests from other threads
     private static List<SchedulerData> newSchedulerRequests;
@@ -54,15 +56,15 @@ public class EASTWebManager implements Runnable{
     private static List<String> deleteExistingSchedulerRequestsNames;
     private static List<Integer> startExistingSchedulerRequests;
     private static List<String> startExistingSchedulerRequestsNames;
-    private static List<GUIUpdateHandler> guiHandlers;
+    private static List<GUIUpdateHandler> guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
 
     // EASTWebManager state
-    private static Integer numOfCreatedGDLs;
-    private static Integer numOfCreatedSchedulers;
-    private static List<SchedulerStatus> schedulerStatuses;
-    private static BitSet schedulerIDs;
-    private static BitSet globalDLIDs;
-    private static Boolean schedulerStatesChanged;
+    private static Integer numOfCreatedGDLs = 0;
+    private static Integer numOfCreatedSchedulers = 0;
+    private static List<SchedulerStatus> schedulerStatuses = new ArrayList<SchedulerStatus>(1);
+    private static BitSet schedulerIDs = new BitSet(100000);
+    private static BitSet globalDLIDs = new BitSet(1000);
+    private static Boolean schedulerStatesChanged = false;
     private boolean manualUpdate;
     private boolean justCreateNewSchedulers;
     private final int msBeetweenUpdates;
@@ -345,6 +347,10 @@ public class EASTWebManager implements Runnable{
      */
     public static void StartNewScheduler(SchedulerData data, boolean manualUpdate)
     {
+        if(instance == null)
+        {
+            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+        }
         synchronized (newSchedulerRequests) {
             newSchedulerRequests.add(data);
         }
@@ -461,6 +467,10 @@ public class EASTWebManager implements Runnable{
      */
     public static int GetNumberOfGlobalDownloaders()
     {
+        if(instance == null)
+        {
+            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+        }
         int num;
         synchronized (numOfCreatedGDLs) {
             num = numOfCreatedGDLs;
@@ -475,6 +485,10 @@ public class EASTWebManager implements Runnable{
      */
     public static int GetNumberOfSchedulerResources()
     {
+        if(instance == null)
+        {
+            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+        }
         int num;
         synchronized (numOfCreatedSchedulers) {
             num = numOfCreatedSchedulers;
@@ -492,6 +506,10 @@ public class EASTWebManager implements Runnable{
      */
     public static ArrayList<SchedulerStatus> GetSchedulerStatuses()
     {
+        if(instance == null)
+        {
+            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+        }
         ArrayList<SchedulerStatus> output = new ArrayList<SchedulerStatus>(0);
         synchronized (schedulerStatuses)
         {
@@ -513,6 +531,10 @@ public class EASTWebManager implements Runnable{
     {
         SchedulerStatus status = null;
 
+        if(instance == null)
+        {
+            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+        }
         synchronized (schedulerStatuses)
         {
             for(SchedulerStatus aStatus : schedulerStatuses)
@@ -538,6 +560,10 @@ public class EASTWebManager implements Runnable{
     {
         SchedulerStatus status = null;
 
+        if(instance == null)
+        {
+            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+        }
         synchronized (schedulerStatuses)
         {
             for(SchedulerStatus aStatus : schedulerStatuses)
@@ -639,8 +665,24 @@ public class EASTWebManager implements Runnable{
                     releaseGlobalDLID(id);
                 }
                 else {
-                    globalDLs.set(id, gdl);
-                    globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                    if(globalDLs.size() == 0)
+                    {
+                        globalDLs.add(id, gdl);
+                        globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                    }
+                    else
+                    {
+                        GlobalDownloader temp = globalDLs.get(id);
+                        if(temp == null)
+                        {
+                            globalDLs.add(id, gdl);
+                            globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                        }
+                        else{
+                            globalDLs.set(id, gdl);
+                            globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                        }
+                    }
                 }
 
                 synchronized (numOfCreatedGDLs) {
@@ -717,7 +759,6 @@ public class EASTWebManager implements Runnable{
         manualUpdate = false;
         justCreateNewSchedulers = false;
         msBeetweenUpdates = Integer.MAX_VALUE;
-        schedulerStatesChanged = false;
 
         newSchedulerRequests = null;
         stopExistingSchedulerRequests = null;
@@ -726,20 +767,14 @@ public class EASTWebManager implements Runnable{
         deleteExistingSchedulerRequestsNames = null;
         startExistingSchedulerRequests = null;
         startExistingSchedulerRequestsNames = null;
-        guiHandlers = null;
 
         // Setup for handling executing GlobalDownloaders
         globalDLs = null;
         globalDLExecutor = null;
-        numOfCreatedGDLs = -1;
-        globalDLIDs = null;
         globalDLFutures = null;
 
         // Setup for handling executing Schedulers
         schedulers = null;
-        schedulerStatuses = null;
-        numOfCreatedSchedulers = -10;
-        schedulerIDs = null;
 
         // Setup for handling executing ProcessWorkers
         processWorkerExecutor = null;
@@ -750,7 +785,6 @@ public class EASTWebManager implements Runnable{
         manualUpdate = false;
         justCreateNewSchedulers = false;
         this.msBeetweenUpdates = msBeetweenUpdates;
-        schedulerStatesChanged = false;
 
         ThreadFactory gDLFactory = new ThreadFactory() {
             @Override
@@ -789,20 +823,14 @@ public class EASTWebManager implements Runnable{
         deleteExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
         startExistingSchedulerRequests = Collections.synchronizedList(new ArrayList<Integer>(0));
         startExistingSchedulerRequestsNames = Collections.synchronizedList(new ArrayList<String>(0));
-        guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
 
         // Setup for handling executing GlobalDownloaders
         globalDLs = Collections.synchronizedList(new ArrayList<GlobalDownloader>(1));
         globalDLExecutor = Executors.newScheduledThreadPool(numOfGlobalDLResourses, gDLFactory);
-        numOfCreatedGDLs = 0;
-        globalDLIDs = new BitSet(1000);
         globalDLFutures = Collections.synchronizedList(new ArrayList<ScheduledFuture<?>>(1));
 
         // Setup for handling executing Schedulers
         schedulers = Collections.synchronizedList(new ArrayList<Scheduler>(1));
-        schedulerStatuses = new ArrayList<SchedulerStatus>(1);
-        numOfCreatedSchedulers = 0;
-        schedulerIDs = new BitSet(100000);
 
         // Setup for handling executing ProcessWorkers
         processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, pwFactory);
@@ -815,8 +843,14 @@ public class EASTWebManager implements Runnable{
             int id = getLowestAvailableSchedulerID();
             if(IsIDValid(id, schedulerIDs))
             {
+                schedulerStatuses.add(new SchedulerStatus(id, data.projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), TaskState.STOPPED));
                 Scheduler scheduler = new Scheduler(data, id, this);
-                schedulers.set(id, scheduler);
+                if(schedulers.size() == 0 || schedulers.get(id) == null) {
+                    schedulers.add(id, scheduler);
+                }
+                else {
+                    schedulers.set(id, scheduler);
+                }
                 scheduler.Start();
 
                 synchronized (numOfCreatedSchedulers) {

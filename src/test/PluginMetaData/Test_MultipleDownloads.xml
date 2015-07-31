@@ -7,7 +7,7 @@
 		<Name>QC</Name>
 	</ExtraDownloadFiles>
 	<Download Name="Data">
-		<DownloadFactoryClassName>LocalStorageDownloadFactory1</DownloadFactoryClassName>
+		<DownloadFactoryClassName>DownloadFactory1</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
@@ -27,7 +27,7 @@
 		</OriginDate>
 	</Download>
 	<Download Name="QC">
-		<DownloadFactoryClassName>LocalStorageDownloadFactory2</DownloadFactoryClassName>
+		<DownloadFactoryClassName>DownloadFactory2</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>other.sci.gsfc.nasa.gov</HostName>

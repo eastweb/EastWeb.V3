@@ -163,8 +163,8 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         int pluginID = Schemas.getPluginID(testGlobalSchema, testPluginName, stmt);
         int temporalStrategyId = Schemas.getTemporalSummaryCompositionStrategyID(testGlobalSchema, temporalSummaryCompositionStrategyClass, stmt);
         int expectedResultsId = Schemas.getExpectedResultsID(testGlobalSchema, projectID, pluginID, temporalStrategyId, stmt);
-        String query = "SELECT * FROM \"" + testGlobalSchema + "\".\"ExpectedResults\" WHERE \"ExpectedResultsID\" = " + expectedResultsId + ";";
-        rs = stmt.executeQuery(query);
+        String selectResultsQuery = "SELECT * FROM \"" + testGlobalSchema + "\".\"ExpectedResults\" WHERE \"ExpectedResultsID\" = " + expectedResultsId + ";";
+        rs = stmt.executeQuery(selectResultsQuery);
         if(rs != null && rs.next())
         {
             assertEquals("TemporalSummaryCompositionStrategyClass is incorrect.", temporalSummaryCompositionStrategyClass, rs.getString("TemporalSummaryCompositionStrategyClass"));
@@ -175,6 +175,13 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         ldl.AttemptUpdate();
 
         // Test results
+        rs = stmt.executeQuery(selectResultsQuery);
+        if(rs != null && rs.next())
+        {
+            assertEquals("TemporalSummaryCompositionStrategyClass is incorrect.", temporalSummaryCompositionStrategyClass, rs.getString("TemporalSummaryCompositionStrategyClass"));
+            assertEquals("ExpectedTotalResults incorrect.", expectedTotalResults, rs.getInt("ExpectedTotalResults"));
+        }
+
 
     }
 

@@ -168,8 +168,8 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws IOException
      */
-    public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles)
-            throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles,
+            ArrayList<String> modisTileNames) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = -1;
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
@@ -202,8 +202,14 @@ public class DatabaseCache extends Observable{
                     globalEASTWebSchema));
         }
         query.append(String.format("LEFT JOIN \"%1$s\".\"DownloadCache\" L ON D.\"DownloadID\"=L.\"DownloadID\" "
-                + "WHERE D.\"GlobalDownloaderID\" = " + gdlID + " AND D.\"Complete\" = TRUE AND L.\"DownloadID\" IS NULL",
+                + "WHERE D.\"GlobalDownloaderID\" = " + gdlID +
+                " AND D.\"Complete\" = TRUE" +
+                " AND L.\"DownloadID\" IS NULL",
                 mSchemaName));
+        for(String tile : modisTileNames)
+        {
+            query.append(" AND D.\"DataFilePath\" LIKE '%" + tile + "%'");
+        }
         for(int i=0; i < extraDownloadFiles.size(); i++)
         {
             query.append(" AND " + Character.toChars('E' + i)[0] + ".\"DataName\"='" + extraDownloadFiles.get(i) + "';");

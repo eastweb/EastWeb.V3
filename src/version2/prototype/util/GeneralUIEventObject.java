@@ -4,7 +4,7 @@ import java.util.EventObject;
 
 @SuppressWarnings("serial")
 public class GeneralUIEventObject  extends EventObject{
-    private int progress;
+    private Integer progress;
     private String status;
     private String pluginName;
 
@@ -13,7 +13,7 @@ public class GeneralUIEventObject  extends EventObject{
      * @param source
      * @param plugin
      */
-    public GeneralUIEventObject(Object source, String status, int progress, String pluginName) {
+    public GeneralUIEventObject(Object source, String status, Integer progress, String pluginName) {
         super(source);
         this.status = status;
         this.progress = progress;

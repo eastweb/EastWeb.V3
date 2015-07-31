@@ -5,7 +5,7 @@
 	<Resolution>25000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<DownloadFactoryClassName>TRMM3B42Factory</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>disc2.nascom.nasa.gov</HostName>
@@ -15,8 +15,8 @@
 		</FTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>1</FilesPerDay>
-		<DatePattern>\\d{4}</DatePattern>
-		<FileNamePattern>3B42_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.7\\.bin</FileNamePattern>
+		<DatePattern>\d{4}</DatePattern>
+		<FileNamePattern>3B42_daily\.(\d{4})\.(\d{2})\.(\d{2})\.7\.bin</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>31</DayOfMonth>
 			<Month>December</Month>

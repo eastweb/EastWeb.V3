@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
@@ -120,10 +121,13 @@ public class Scheduler {
         downloadCaches = new ArrayList<DatabaseCache>(1);
         processorCaches = new ArrayList<DatabaseCache>(1);
         indicesCaches = new ArrayList<DatabaseCache>(1);
-
         ID = myID;
         this.configInstance = configInstance;
         this.manager = manager;
+
+        // Update status in EASTWebManager
+        NotifyUI(new GeneralUIEventObject(this, null, null, null));
+
         PluginMetaData pluginMetaData;
         for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
         {
@@ -217,27 +221,30 @@ public class Scheduler {
      */
     public void NotifyUI(GeneralUIEventObject e)
     {
-        Process process = (Process)e.getSource();
-
-        synchronized (status)
+        if(e.getSource() instanceof Process)
         {
-            switch(process.processName)
-            {
-            case DOWNLOAD:
-                status.UpdateDownloadProgress(e.getProgress(), e.getPluginName());
-                break;
-            case PROCESSOR:
-                status.UpdateProcessorProgress(e.getProgress(), e.getPluginName());
-                break;
-            case INDICES:
-                status.UpdateIndicesProgress(e.getProgress(), e.getPluginName());
-                break;
-            default:    // SUMMARY
-                status.UpdateSummaryProgress(e.getProgress(), e.getPluginName());
-                break;
-            }
+            Process process = (Process)e.getSource();
 
-            status.AddToLog(e.getStatus());
+            synchronized (status)
+            {
+                switch(process.processName)
+                {
+                case DOWNLOAD:
+                    status.UpdateDownloadProgress(e.getProgress(), e.getPluginName());
+                    break;
+                case PROCESSOR:
+                    status.UpdateProcessorProgress(e.getProgress(), e.getPluginName());
+                    break;
+                case INDICES:
+                    status.UpdateIndicesProgress(e.getProgress(), e.getPluginName());
+                    break;
+                default:    // SUMMARY
+                    status.UpdateSummaryProgress(e.getProgress(), e.getPluginName());
+                    break;
+                }
+
+                status.AddToLog(e.getStatus());
+            }
         }
 
         manager.NotifyUI(this);
@@ -333,10 +340,10 @@ public class Scheduler {
     SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, IOException
     {
         // Create "data" DownloadFactory
-        Class<?> downloadFactoryClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + pluginMetaData.Download.downloadFactoryClassName);
-        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
+        Class<?> downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + pluginMetaData.Download.downloadFactoryClassName);
+        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
                 DatabaseCache.class, LocalDate.class, DownloadMetaData.class);
-        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
+        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
                 projectInfoFile.GetStartDate(), pluginMetaData.Download);
 
         // Create "data" GenericGlobalDownloader
@@ -346,9 +353,9 @@ public class Scheduler {
         {
             // Create extra ListDatesFiles instance
             downloadFactoryClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + dlMetaData.downloadFactoryClassName);
-            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
-                    DatabaseCache.class, LocalDate.class);
-            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
+            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
+                    DatabaseCache.class, LocalDate.class, DownloadMetaData.class);
+            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
                     projectInfoFile.GetStartDate(), dlMetaData);
 
             // Create extra GenericGlobalDownloader
