@@ -34,6 +34,7 @@ public class NldasNOAHComposite extends Composite{
             // open file
             // read 10 bands and add to corresponding temp file
             // close file
+
             Dataset initialize = gdal.Open(inputFiles[0].getPath());
             int xSize = initialize.GetRasterXSize();
             int ySize = initialize.GetRasterYSize();
@@ -73,9 +74,9 @@ public class NldasNOAHComposite extends Composite{
                     tempArray.get(i)[j] /= inputFiles.length;
                 }
 
-                File outputFile = null;
+                File outputFile = new File(outputFolder + "\\Band" + dataBands[i] + ".tif");
                 try {
-                    outputFile = File.createTempFile(String.format("band%d", dataBands[i]), ".tif",new File(outputFolder));
+                    outputFile.createNewFile();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
