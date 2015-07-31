@@ -68,7 +68,7 @@ public class ProcessorWorker extends ProcessWorker {
 
         // get each plugin's PrepareProcessTask
         Class <?> classPrepareTask =
-                Class.forName("version2.prototype.processor." + pluginName + "PrepareProcessTask" );
+                Class.forName("version2.prototype.processor." + pluginName + "." + pluginName +"PrepareProcessTask" );
 
         Constructor<?> cnstPrepareTask =
                 classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class,
