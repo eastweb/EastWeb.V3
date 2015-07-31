@@ -11,6 +11,8 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 
 /* Overridden by each plugin's prepareProcessTask class
  * name convention:  Plugin_namePrepareProcessTask.class
+ *
+ * @Author:  Yi Liu
  */
 public abstract class PrepareProcessTask {
     protected ProjectInfoFile project;
@@ -44,6 +46,10 @@ public abstract class PrepareProcessTask {
      *          if no QC bands, return null
      */
     public abstract int [] getQCBands();
+
+    //post-condition: return the date of the file which is under processing
+    public DataDate getDataDate()
+    {   return date;       }
 
     /* post-condition: return the master shapefile given in the project */
     public String getShapeFile() {

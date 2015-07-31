@@ -122,6 +122,7 @@ public class ProcessorWorker extends ProcessWorker {
                 Object process =  cnstProcess.newInstance(new ProcessData(
                         prepareTask.getInputFolders(key),
                         prepareTask.getOutputFolder(key),
+                        prepareTask.getDataDate(),
                         prepareTask.getQC(),
                         prepareTask.getShapeFile(),
                         prepareTask.getMaskFile(),
@@ -187,6 +188,15 @@ public class ProcessorWorker extends ProcessWorker {
                     }
                 }
             }
+
+            // remove the entire temp folder
+            // find "temp" in the laststepOutputFolder
+            if (laststepOutputFolder != null)
+            {
+                String tempFolder = laststepOutputFolder.substring(0, laststepOutputFolder.lastIndexOf("Temp"))+"Temp";
+                FileUtils.deleteDirectory(new File(tempFolder));
+            }
+
 
             // compile the output files in the outputPath to an arraylist of DataFileMetaData and save to the database
             ArrayList<DataFileMetaData> toCache = new ArrayList<DataFileMetaData>();

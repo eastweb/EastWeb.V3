@@ -30,7 +30,6 @@ public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
             inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "download", date.getYear(), date.getDayOfYear());
-            // System.out.println(inputFolders[0]);
             break;
         case 2:
             inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",

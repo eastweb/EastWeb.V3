@@ -8,7 +8,6 @@ public class TRMM3B42RTReproject extends Reproject{
 
     public TRMM3B42RTReproject(ProcessData data) {
         super(data);
-        // TODO Auto-generated constructor stub
     }
 
 }

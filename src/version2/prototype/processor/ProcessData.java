@@ -3,6 +3,7 @@ package version2.prototype.processor;
 import java.time.LocalDate;
 import java.time.MonthDay;
 
+import version2.prototype.DataDate;
 import version2.prototype.Projection;
 
 /* rewritten by Y.L. on May 31st */
@@ -12,6 +13,7 @@ public class ProcessData {
     private String[] inputFolders;
     private String outputFolder;
     private String qcLevel;
+    private DataDate date;
     private String shapefile;
     private String maskfile;
     private int [] dataBands;
@@ -27,13 +29,14 @@ public class ProcessData {
 
     public ProcessData() { }
 
-    public ProcessData(String [] inputFolders, String outputFolder, String qcLevel, String shapefile,
+    public ProcessData(String [] inputFolders, String outputFolder, DataDate date, String qcLevel, String shapefile,
             String maskfile, int dataBands[], int qcBands[], Projection projection,
             Integer maskResolution, Integer dataResolution, Boolean clipOrNot,
             MonthDay freezingDate, MonthDay heatingDate, double freezingDegree, double heatingDegree)
     {
         this.inputFolders = inputFolders;
         this.outputFolder = outputFolder;
+        this.date = date;
         this.qcLevel = qcLevel;
         this.shapefile = shapefile;
         this.maskfile = maskfile;
@@ -54,6 +57,9 @@ public class ProcessData {
 
     public String getOutputFolder()
     {   return outputFolder;    }
+
+    public DataDate getDateDate()
+    {   return date;        }
 
     public String getQCLevel()
     {   return qcLevel;     }
