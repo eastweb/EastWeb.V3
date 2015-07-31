@@ -166,7 +166,7 @@ public class Reproject {
                 gdal.ReprojectImage(inputDS, outputDS, null, null, resampleAlg);
                 outputDS.GetRasterBand(1).ComputeStatistics(false);
 
-
+                /*
                 Band b = outputDS.GetRasterBand(1);
                 int x = b.getXSize(); int y = b.getYSize();
                 double [] testArr = new double[x * y];
@@ -177,7 +177,7 @@ public class Reproject {
                     }
                 }
 
-
+                 */
                 outputDS.delete();
                 inputDS.delete();
             }
