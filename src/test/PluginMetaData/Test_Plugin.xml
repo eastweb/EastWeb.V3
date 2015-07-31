@@ -5,7 +5,7 @@
 	<Resolution>1000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<DownloadFactoryClassName>DownloadFactory</DownloadFactoryClassName>
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>

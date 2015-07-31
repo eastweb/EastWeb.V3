@@ -63,7 +63,7 @@ public abstract class LocalDownloader extends Process {
             conn.close();
 
             outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
-                    pluginMetaData.ExtraDownloadFiles);
+                    pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
         }
         return newFiles;
     }

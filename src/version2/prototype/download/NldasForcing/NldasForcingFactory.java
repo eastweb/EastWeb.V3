@@ -23,7 +23,7 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class NldasForcingFactory extends DownloadFactory {
 
-    protected NldasForcingFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public NldasForcingFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
         super(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache,  startDate, dData);
     }

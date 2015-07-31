@@ -26,7 +26,7 @@ import version2.prototype.util.DatabaseCache;
  */
 public class ModisLSTFactory extends DownloadFactory {
 
-    protected ModisLSTFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public ModisLSTFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
         super(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
     }

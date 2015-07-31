@@ -178,10 +178,15 @@ public class DatabaseCacheTest {
         Statement stmt = con.createStatement();
         ResultSet rs = null;
         String schemaName = Schemas.getSchemaName(testProjectName, testPluginName);
-        String dateFilePath1 = "path to data file1";
-        String dateFilePath2 = "path to data file2";
-        String qcFilePath1 = "path to qc file1";
-        String qcFilePath2 = "path to qc file2";
+        ArrayList<String> modisTileNames = new ArrayList<String>();
+        String modisTile1 = "v12H42";
+        modisTileNames.add(modisTile1);
+        String dateFilePath1 = "path to data file1 " + modisTile1;
+        String dateFilePath2 = "path to data file2 " + modisTile1;
+        String dateFilePath3 = "path to data file3";
+        String qcFilePath1 = "path to qc file1 " + modisTile1;
+        String qcFilePath2 = "path to qc file2 " + modisTile1;
+        String qcFilePath3 = "path to qc file3";
         String query;
         LocalDate startDate = LocalDate.now().minusDays(8);;
 
@@ -196,15 +201,19 @@ public class DatabaseCacheTest {
         query = String.format("INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\", \"Complete\") VALUES " +
                 "(1, 1, '" + dateFilePath1 + "', TRUE), " +
                 "(1, 2, '" + dateFilePath2 + "', TRUE), " +
+                "(1, 2, '" + dateFilePath3 + "', TRUE), " +
                 "(1, 2, 'blah', FALSE);",
                 testGlobalSchema);
         stmt.execute(query);
 
-        query = String.format("INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES (1, 'QC', '" + qcFilePath1 + "'), (2, 'QC', '" + qcFilePath2 + "');",
+        query = String.format("INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES " +
+                "(1, 'QC', '" + qcFilePath1 + "'), " +
+                "(2, 'QC', '" + qcFilePath2 + "'), " +
+                "(2, 'QC', '" + qcFilePath3 + "');",
                 testGlobalSchema);
         stmt.execute(query);
 
-        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, startDate, extraDownloadFiles);
+        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, startDate, extraDownloadFiles, modisTileNames);
 
         query = "SELECT * FROM \"" + schemaName + "\".\"DownloadCache\"";
         rs = stmt.executeQuery(query);

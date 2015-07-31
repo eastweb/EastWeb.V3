@@ -59,7 +59,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
                 conn.close();
 
                 outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
-                        pluginMetaData.ExtraDownloadFiles);
+                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();

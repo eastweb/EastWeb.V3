@@ -18,6 +18,18 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 @SuppressWarnings("javadoc")
 public class ProjectInfoFileTester {
 
+    //    @Test
+    //    public final void testManualChoosing() throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+    //    InvocationTargetException, ParserConfigurationException, SAXException, IOException
+    //    {
+    //        ProjectInfoFile projectInfo = new ProjectInfoFile(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
+    //        assertTrue("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
+    //                .equals("AreaNameField: R_NAME; Shape File Path: D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaValueField: R_NAME; Temporal Summary: GregorianWeeklyStrategy"));
+    //        System.out.println("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + "\"" + projectInfo.GetSummaries().get(0).toString() + "\"");
+    //        assertTrue("Summary " + projectInfo.GetSummaries().get(1).GetID() + " is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
+    //                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+    //    }
+
     @Test
     public final void testProjectInfoFile() throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
     InvocationTargetException, ParserConfigurationException, SAXException, IOException {
@@ -65,13 +77,13 @@ public class ProjectInfoFileTester {
         assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("2015-06-02"));
         //        assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("--06-02"));
         assertTrue("HeatingDegree is " + projectInfo.GetHeatingDegree(), projectInfo.GetHeatingDegree() == 100.1);
-        assertTrue("Summary 1 is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
+        assertTrue("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
                 .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
-        assertTrue("Summary 2 is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
+        assertTrue("Summary " + projectInfo.GetSummaries().get(1).GetID() + " is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
                 .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
-        assertTrue("Summary 3 is " + projectInfo.GetSummaries().get(2).toString(), projectInfo.GetSummaries().get(2).toString()
+        assertTrue("Summary " + projectInfo.GetSummaries().get(2).GetID() + " is " + projectInfo.GetSummaries().get(2).toString(), projectInfo.GetSummaries().get(2).toString()
                 .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10"));
-        assertTrue("Summary 4 is " + projectInfo.GetSummaries().get(3).toString(), projectInfo.GetSummaries().get(3).toString()
+        assertTrue("Summary " + projectInfo.GetSummaries().get(3).GetID() + " is " + projectInfo.GetSummaries().get(3).toString(), projectInfo.GetSummaries().get(3).toString()
                 .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10"));
     }
 }

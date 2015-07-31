@@ -418,12 +418,13 @@ public class Schemas {
         if(globalEASTWebSchema == null || startDate == null || daysPerInputFile == null || numOfIndices == null || summaries == null || projectID == null || pluginID == null) {
             return new int[0];
         }
+        Statement stmt = conn.createStatement();
         PreparedStatement preparedStmt = conn.prepareStatement(String.format(
-                "INSERT INTO \"%1$s\".\"ExpectedResults\" (\"ProjectID\", \"PluginID\", \"ExpectedTotalResults\", \"TemporalSummaryCompositionStrategyClass\") VALUES (" +
+                "INSERT INTO \"%1$s\".\"ExpectedResults\" (\"ProjectID\", \"PluginID\", \"ExpectedTotalResults\", \"TemporalSummaryCompositionStrategyID\") VALUES (" +
                         projectID + ", " +
                         pluginID + ", " +
                         "?, " +   // 1. ExpectedTotalResults
-                        "? " +  // 2. TemporalSummaryCompositionStrategyClass
+                        "? " +  // 2. TemporalSummaryCompositionStrategyID
                         ")",
                         globalEASTWebSchema
                 ));
@@ -433,7 +434,7 @@ public class Schemas {
         {
             expectedTotalResults = summary.GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
             preparedStmt.setInt(1, expectedTotalResults);
-            preparedStmt.setString(2, summary.GetTemporalSummaryCompositionStrategyClassName());
+            preparedStmt.setInt(2, getTemporalSummaryCompositionStrategyID(globalEASTWebSchema, summary.GetTemporalSummaryCompositionStrategyClassName(), stmt));
             preparedStmt.addBatch();
         }
         return preparedStmt.executeBatch();
@@ -828,7 +829,7 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"TemporalSummaryCompositionStrategy\"\n" +
                         "(\n" +
                         "  \"TemporalSummaryCompositionStrategyID\" serial PRIMARY KEY,\n" +
-                        "  \"Name\" varchar(255) UNIQUE NOT NUL,\n" +
+                        "  \"Name\" varchar(255) UNIQUE NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );

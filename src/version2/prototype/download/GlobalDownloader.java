@@ -217,6 +217,22 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
+        return GetAllDownloadedFiles(null);
+    }
+
+    /**
+     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all projects.
+     *
+     * @param startDate  - the earliest date from which to start getting files
+     * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
+    {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, stmt);
@@ -224,12 +240,19 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         ArrayList<Integer> downloadIDs = new ArrayList<Integer>(0);
         ResultSet rs;
 
-        String query_ = String.format(
+        StringBuilder query = new StringBuilder(String.format(
                 "SELECT A.\"DownloadID\", A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" FROM \"%1$s\".\"Download\" A, \"%1$s\".\"DateGroup\" B " +
-                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND B.\"DateGroupID\"=A.\"DateGroupID\";",
+                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID + " AND B.\"DateGroupID\"=A.\"DateGroupID\"",
                         globalSchema
-                );
-        rs = stmt.executeQuery(query_);
+                ));
+        if(startDate != null)
+        {
+            int year = startDate.getYear();
+            int dayOfYear = startDate.getDayOfYear();
+            query.append(" AND ((B.\"Year\" = " + year + " AND B.\"DayOfYear\" >= " + dayOfYear + ") OR (B.\"Year\" > " + year + "))");
+        }
+        query.append(";");
+        rs = stmt.executeQuery(query.toString());
         if(rs != null)
         {
             while(rs.next())
@@ -240,7 +263,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         }
         rs.close();
 
-        StringBuilder query = new StringBuilder(String.format(
+        query = new StringBuilder(String.format(
                 "SELECT A.\"DownloadID\", A.\"DataName\", A.\"FilePath\", B.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
                         "FROM \"%1$s\".\"ExtraDownload\" A INNER JOIN \"%1$s\".\"Download\" D ON A.\"DownloadID\"=D.\"DownloadID\" " +
                         "INNER JOIN \"%1$s\".\"DateGroup\" B ON D.\"DateGroupID\"=B.\"DateGroupID\"",
