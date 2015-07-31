@@ -18,7 +18,7 @@ import version2.prototype.util.GdalUtils;
  *
  */
 public abstract class IndicesFramework implements IndexCalculator {
-    private static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
+    protected static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
     protected static File[] mInputFiles;
     protected File mOutputFile;
@@ -40,7 +40,7 @@ public abstract class IndicesFramework implements IndexCalculator {
     }
 
     // creates the output file
-    private Dataset createOutput(Dataset[] inputs) throws IOException {
+    protected Dataset createOutput(Dataset[] inputs) throws IOException {
         //        System.out.println("inputs 0 is  "+inputs[0]);
         //        System.out.println(inputs[0].GetRasterXSize());
         //        System.out.println(inputs[0].GetRasterYSize());
