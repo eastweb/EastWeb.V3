@@ -20,8 +20,8 @@ import version2.prototype.util.GdalUtils;
 public abstract class IndicesFramework implements IndexCalculator {
     private static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
-    private static File[] mInputFiles;
-    private File mOutputFile;
+    protected static File[] mInputFiles;
+    protected File mOutputFile;
 
     // constructor which takes the listener to talk back to the UI
     // listener will come from the scheduler
