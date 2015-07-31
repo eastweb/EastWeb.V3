@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.MonthDay;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -290,35 +289,43 @@ public class NldasForcingComposite extends Composite
         double[] cumulative = null;
         File yesterdayFile = null;
 
-        DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), Integer.parseInt(inputFolder.getParent()));
-        if(!(inputFolder.getName().equalsIgnoreCase(String.format("%03d", date.getDayOfYear())) &&
-                inputFolder.getParent().equalsIgnoreCase(String.format("%04d", date.getYear()))))
+        try
         {
-            //Get the day before's values
-            File yesterdayFolder = null;
-
-            int currentDayOfYear = Integer.parseInt(inputFolder.getName());
-            if(currentDayOfYear > 1) {
-                yesterdayFolder = new File(inputFolder.getParentFile().getAbsolutePath() + File.pathSeparator
-                        + String.format("%03d", (currentDayOfYear-1)));
-            }
-            else
+            DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), Integer.parseInt(inputFolder.getParent()));
+            if(!(inputFolder.getName().equalsIgnoreCase(String.format("%03d", date.getDayOfYear())) &&
+                    inputFolder.getParent().equalsIgnoreCase(String.format("%04d", date.getYear()))))
             {
-                // Previous day would be last year day of year = 365
-                yesterdayFolder = new File(inputFolder.getParentFile().getParentFile().getAbsolutePath() + File.pathSeparator
-                        + String.format("%04d", Integer.parseInt(inputFolder.getParent())-1) + File.pathSeparator + "365");
-            }
+                //Get the day before's values
+                File yesterdayFolder = null;
 
-            if(yesterdayFolder != null && yesterdayFolder.exists())
-            {
-                for(File file : yesterdayFolder.listFiles())
+                int currentDayOfYear = Integer.parseInt(inputFolder.getName());
+                if(currentDayOfYear > 1) {
+                    yesterdayFolder = new File(inputFolder.getParentFile().getAbsolutePath() + File.pathSeparator
+                            + String.format("%03d", (currentDayOfYear-1)));
+                }
+                else
                 {
-                    if(file.getName().contains(prefix)) {
-                        yesterdayFile = file;
+                    // Previous day would be last year day of year = 365
+                    yesterdayFolder = new File(inputFolder.getParentFile().getParentFile().getAbsolutePath() + File.pathSeparator
+                            + String.format("%04d", Integer.parseInt(inputFolder.getParent())-1) + File.pathSeparator + "365");
+                }
+
+                if(yesterdayFolder != null && yesterdayFolder.exists())
+                {
+                    for(File file : yesterdayFolder.listFiles())
+                    {
+                        if(file.getName().contains(prefix)) {
+                            yesterdayFile = file;
+                        }
                     }
                 }
             }
         }
+        catch(NumberFormatException e)
+        {
+            e.printStackTrace();
+        }
+
 
         if(yesterdayFile != null) {
             Dataset ds = gdal.Open(yesterdayFile.getPath());
