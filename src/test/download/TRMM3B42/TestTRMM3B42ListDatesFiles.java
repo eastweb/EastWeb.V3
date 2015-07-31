@@ -1,13 +1,10 @@
 package test.download.TRMM3B42;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -19,7 +16,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.download.TRMM3B42.TRMM3B42ListDatesFiles;
-import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 
 public class TestTRMM3B42ListDatesFiles {
 
@@ -32,7 +28,7 @@ public class TestTRMM3B42ListDatesFiles {
     public static void setUpBeforeClass() throws Exception {
         String mode = "FTP";// the protocol type: ftp or http
         FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
-                "/ftp/data/s4pa/TRMM_L3/TRMM_3B42_daily/", "anonymous", "anonymous");
+                "/data/TRMM/Gridded/Derived_Products/3B42_V7/Daily/", "anonymous", "anonymous");
         HTTP myHttp = null;
         String className = null;
         String timeZone = null;

@@ -16,6 +16,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.ListDatesFiles;
 
+// @Author: Yi Liu
 
 public class TRMM3B42ListDatesFiles extends ListDatesFiles
 {
@@ -26,9 +27,10 @@ public class TRMM3B42ListDatesFiles extends ListDatesFiles
     }
 
     @Override
-    protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP() {
+    protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
+    {
         final Pattern yearDirPattern = mData.datePattern;
-        final Pattern dayDirPattern = Pattern.compile("\\d{3}");
+
         FTPClient ftpC = null;
 
         try
@@ -77,45 +79,25 @@ public class TRMM3B42ListDatesFiles extends ListDatesFiles
                             "Couldn't navigate to directory: " + yearDirectory);
                 }
 
-                for (FTPFile dayFolder : ftpC.listFiles())
+                for (FTPFile file : ftpC.listFiles())
                 {
-                    if (!dayFolder.isDirectory()
-                            || !dayDirPattern.matcher(dayFolder.getName()).matches())
-                    { continue; }
-
-                    int day = Integer.parseInt(dayFolder.getName());
-                    if (day < sDate.getDayOfYear())
-                    { continue; }
-
-                    // List files in the day
-                    String dayDirectory =  String.format("%s/%s", yearDirectory, dayFolder.getName());
-
-                    if (!ftpC.changeWorkingDirectory(dayDirectory))
-                    {
-                        throw new IOException(
-                                "Couldn't navigate to directory: " + dayFolder);
-                    }
-
-                    for (FTPFile fileFile : ftpC.listFiles())
+                    if (file.isFile() &&
+                            mData.fileNamePattern.matcher(file.getName()).matches())
                     {
                         /* pattern of TRMM 3B42
-                         * {productname}.%y4.%m2.%d2.7.bin
+                         * 3B42_daily\.(\d{4})\.(\d{2})\.(\d{2})\.7\.bin
                          */
 
-                        String fileName = fileFile.getName();
-                        if (!fileName.contains("xml"))
-                        {
-                            ArrayList<String> fileNames = new ArrayList<String>();
-                            fileNames.add(fileName);
+                        ArrayList<String> fileNames = new ArrayList<String>();
+                        fileNames.add(file.getName());
 
-                            String[] strings = fileName.split("[.]");
-                            final int month = Integer.parseInt(strings[2]);
-                            final int thisday = Integer.parseInt(strings[3]);
-                            DataDate dataDate = new DataDate(thisday, month, year);
-                            if (dataDate.compareTo(sDate) >= 0)
-                            {
-                                mapDatesFiles.put(dataDate, fileNames);
-                            }
+                        String[] strings = file.getName().split("[.]");
+                        final int month = Integer.parseInt(strings[2]);
+                        final int day = Integer.parseInt(strings[3]);
+                        DataDate dataDate = new DataDate(day, month, year);
+                        if (dataDate.compareTo(sDate) >= 0)
+                        {
+                            mapDatesFiles.put(dataDate, fileNames);
                         }
                     }
                 }

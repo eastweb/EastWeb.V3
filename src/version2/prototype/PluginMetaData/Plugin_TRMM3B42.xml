@@ -9,7 +9,7 @@
 		<Mode>ftp</Mode>
 		<FTP>
 			<HostName>disc2.nascom.nasa.gov</HostName>
-			<RootDir>/ftp/data/s4pa/TRMM_L3/TRMM_3B42_daily/</RootDir>
+			<RootDir>/data/TRMM/Gridded/Derived_Products/3B42_V7/Daily/</RootDir>
 			<UserName>anonymous</UserName>
 			<PassWord>anonymous</PassWord>
 		</FTP>
@@ -18,9 +18,9 @@
 		<DatePattern>\d{4}</DatePattern>
 		<FileNamePattern>3B42_daily\.(\d{4})\.(\d{2})\.(\d{2})\.7\.bin</FileNamePattern>
 		<OriginDate>
-			<DayOfMonth>31</DayOfMonth>
-			<Month>December</Month>
-			<Year>1997</Year>
+			<DayOfMonth>01</DayOfMonth>
+			<Month>January</Month>
+			<Year>1998</Year>
 		</OriginDate>
 	</Download>	
 	<Processor>

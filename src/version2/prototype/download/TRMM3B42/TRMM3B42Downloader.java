@@ -58,12 +58,14 @@ public class TRMM3B42Downloader extends DownloaderFramework
                     (FTPClient) ConnectionContext.getConnection(mData);
 
             try {
-                final String destDir =
-                        String.format("%s%d/%03d", mRoot, mDate.getYear(), mDate.getDayOfYear());
 
-                if (!ftpC.changeWorkingDirectory(destDir))
+                final String yearDirectory =
+                        String.format("%s%d", mRoot, mDate.getYear());
+
+                if (!ftpC.changeWorkingDirectory(yearDirectory))
                 {
-                    throw new IOException("Couldn't navigate to directory: " + destDir);
+                    throw new IOException("Couldn't navigate to directory: "
+                            + yearDirectory);
                 }
 
                 // set the directory to store the download file
