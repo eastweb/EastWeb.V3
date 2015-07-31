@@ -30,14 +30,14 @@ public class TestTRMM3B42Downloader {
 
         String mode = "FTP";// the protocol type: ftp or http
         FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
-                "/ftp/data/s4pa/TRMM_L3/TRMM_3B42_daily/", "anonymous", "anonymous");
+                "/data/TRMM/Gridded/Derived_Products/3B42_V7/Daily/", "anonymous", "anonymous");
         HTTP myHttp = null;
         String className = null;
         String timeZone = null;
         int filesPerDay = -1;
         String datePatternStr = "\\d{4}";
         String fileNamePatternStr = "3B42_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.7\\.bin";
-        LocalDate ld = LocalDate.parse("Wed Jul 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
+        LocalDate ld = LocalDate.parse("Sat May 30 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
     }

@@ -46,11 +46,6 @@ public class TRMM3B42RTPrepareProcessTask extends PrepareProcessTask{
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "clip", date.getYear(), date.getDayOfYear());
             break;
-        case 5:
-            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
-                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
-                    "mask", date.getYear(), date.getDayOfYear());
-            break;
         default:
             break;
         }

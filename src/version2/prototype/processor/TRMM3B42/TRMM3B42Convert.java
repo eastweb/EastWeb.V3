@@ -12,9 +12,9 @@ import version2.prototype.processor.Convert;
 import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
 
-public class TRMM3B42Converter extends Convert{
+public class TRMM3B42Convert extends Convert{
 
-    public TRMM3B42Converter(ProcessData data) {
+    public TRMM3B42Convert(ProcessData data) {
         super(data);
     }
 
@@ -26,6 +26,9 @@ public class TRMM3B42Converter extends Convert{
             // size for 3B42
             int xSize = 1440;
             int ySize = 400;
+
+            if (inputFiles == null)
+            { System.out.println("file does not exist");}
 
             for (File f:inputFiles){
                 DataInputStream dis = new DataInputStream(new FileInputStream(f));
@@ -61,6 +64,7 @@ public class TRMM3B42Converter extends Convert{
                 outputDS.GetRasterBand(1).ComputeStatistics(false);
                 outputDS.delete();
             }
+
         }
 
     }

@@ -23,7 +23,7 @@ public class TRMM3B42PrepareProcessTask extends PrepareProcessTask{
     @Override
     public String[] getInputFolders(int stepId) {
 
-        inputFolders = null;
+        inputFolders = new String[1];
 
         switch (stepId){
         case 1:
@@ -45,11 +45,6 @@ public class TRMM3B42PrepareProcessTask extends PrepareProcessTask{
             inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "clip", date.getYear(), date.getDayOfYear());
-            break;
-        case 5:
-            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
-                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
-                    "mask", date.getYear(), date.getDayOfYear());
             break;
         default:
             break;

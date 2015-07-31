@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ProjectInfo>
 <Plugins>
-<Plugin name="TRMM3B42RT">
-<Indicies>TRMM3B42RTCalculator</Indicies>
+<Plugin name="TRMM3B42">
+<Indicies>TRMM3B42Calculator</Indicies>
 <QC> null</QC>
 </Plugin>
 </Plugins>
