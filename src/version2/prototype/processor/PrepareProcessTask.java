@@ -69,7 +69,7 @@ public abstract class PrepareProcessTask {
 
     // post-condition: return the mask resolution for the maskfile in the project
     public Integer getMaskResolution()
-    {   return project.GetMaskingResolution();  }
+    {       return project.GetMaskingResolution();  }
 
     // post-condition: return the data resolution of the plugin product
     public Integer getDataResolution()

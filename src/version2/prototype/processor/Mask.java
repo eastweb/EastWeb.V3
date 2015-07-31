@@ -22,9 +22,9 @@ public class Mask {
     // mask file
     protected File maskFile;
     // mask file resolution
-    protected int maskRes;
+    protected Integer maskRes;
     // data file resolution;
-    protected int dataRes;
+    protected Integer dataRes;
 
     public Mask(ProcessData data)
     {
@@ -39,12 +39,14 @@ public class Mask {
         inputFiles = listOfFiles;
 
         if (data.getMaskfile() != null) {
-            maskFile = new File(data.getMaskfile());
+            maskFile = new File(data.getMaskfile()) ;
         } else {
             maskFile = null;
         }
+
         maskRes = data.getMaskResolution();
         dataRes = data.getDataResolution();
+
     }
 
     // run method for the scheduler

@@ -4,7 +4,8 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
@@ -19,7 +20,6 @@ public class TRMM3B42RTConvert extends Convert {
         super(data);
     }
 
-
     @Override
     protected void convertFiles() throws Exception{
         GdalUtils.register();
@@ -30,10 +30,12 @@ public class TRMM3B42RTConvert extends Convert {
             int ySize = 480;
 
             for (File f:inputFiles){
+
                 DataInputStream dis = new DataInputStream(new FileInputStream(f));
 
-                String fileName = f.getName();
-                File mOutput = new File (outputFolder + fileName);
+                String fileName = FilenameUtils.getBaseName(f.getName());
+
+                File mOutput = new File (outputFolder + File.separator + fileName +".tif");
                 Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                         mOutput.getPath(),
                         xSize, ySize,
