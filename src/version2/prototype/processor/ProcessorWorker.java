@@ -77,7 +77,6 @@ public class ProcessorWorker extends ProcessWorker {
         // Use a map to group CachedFiles based on the dates
         HashMap<DataDate, ArrayList<DownloadFileMetaData>> map =
                 new HashMap<DataDate, ArrayList<DownloadFileMetaData>>();
-
         // extract cachedFiles for download folder
         for (DataFileMetaData dmd : cachedFiles)
         {
@@ -119,26 +118,6 @@ public class ProcessorWorker extends ProcessWorker {
 
                 Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
 
-                Object process =  cnstProcess.newInstance(new ProcessData(
-                        prepareTask.getInputFolders(key),
-                        prepareTask.getOutputFolder(key),
-                        prepareTask.getDataDate(),
-                        prepareTask.getQC(),
-                        prepareTask.getShapeFile(),
-                        prepareTask.getMaskFile(),
-                        prepareTask.getDataBands(),
-                        prepareTask.getQCBands(),
-                        prepareTask.getProjection(),
-                        prepareTask.getMaskResolution(),
-                        prepareTask.getDataResolution(),
-                        prepareTask.getClipOrNot(),
-                        prepareTask.getFreezingDate(),
-                        prepareTask.getHeatingDate(),
-                        prepareTask.getFreezingDegree(),
-                        prepareTask.getHeatingDegree()
-                        )
-                        );
-
                 //copy the downloaded files to the input folders
                 String [] inputFolders = prepareTask.getInputFolders(key);
 
@@ -162,6 +141,26 @@ public class ProcessorWorker extends ProcessWorker {
                 }
 
                 laststepOutputFolder = prepareTask.getOutputFolder(key);
+
+                Object process =  cnstProcess.newInstance(new ProcessData(
+                        prepareTask.getInputFolders(key),
+                        prepareTask.getOutputFolder(key),
+                        prepareTask.getDataDate(),
+                        prepareTask.getQC(),
+                        prepareTask.getShapeFile(),
+                        prepareTask.getMaskFile(),
+                        prepareTask.getDataBands(),
+                        prepareTask.getQCBands(),
+                        prepareTask.getProjection(),
+                        prepareTask.getMaskResolution(),
+                        prepareTask.getDataResolution(),
+                        prepareTask.getClipOrNot(),
+                        prepareTask.getFreezingDate(),
+                        prepareTask.getHeatingDate(),
+                        prepareTask.getFreezingDegree(),
+                        prepareTask.getHeatingDegree()
+                        )
+                        );
 
                 Method methodProcess = process.getClass().getMethod("run");
                 methodProcess.invoke(process);

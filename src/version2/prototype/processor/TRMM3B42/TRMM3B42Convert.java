@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
@@ -32,9 +33,10 @@ public class TRMM3B42Convert extends Convert{
 
             for (File f:inputFiles){
                 DataInputStream dis = new DataInputStream(new FileInputStream(f));
+                String fileName = FilenameUtils.getBaseName(f.getName());
 
-                String fileName = f.getName();
-                File mOutput = new File (outputFolder + fileName);
+                File mOutput = new File (outputFolder + File.separator + fileName +".tif");
+
                 Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                         mOutput.getPath(),
                         xSize, ySize,
@@ -43,13 +45,15 @@ public class TRMM3B42Convert extends Convert{
                         );
 
                 double[] array = new double[xSize];
-                for (int row=0; row<ySize; row++) {
-                    for (int col=0; col<xSize; col++) {
+                for (int row=0; row<ySize; row++)
+                {
+                    for (int col=0; col<xSize; col++)
+                    {
                         array[col] = dis.readFloat();
                     }
-                    //outputDS.GetRasterBand(1).WriteRaster(0, row, xSize, 1, array);
+                    outputDS.GetRasterBand(1).WriteRaster(0, row, xSize, 1, array);
                 }
-                outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,  array);
+
                 dis.close();
 
                 outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);

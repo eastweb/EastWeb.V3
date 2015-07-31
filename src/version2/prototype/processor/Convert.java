@@ -5,7 +5,8 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-/* Modified by YL on May 31st
+/* @author:  Yi Liu
+ *
  * changed Covert from Interface to abstract class
  * added constructor and run method
  */
