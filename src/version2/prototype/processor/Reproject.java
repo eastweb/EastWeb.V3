@@ -123,10 +123,6 @@ public class Reproject {
                     }
                 }
 
-                System.out.println("reproject: " +
-                        (int) Math.ceil((right - left) / (projection.getPixelSize())) + " :/"
-                        + (int) Math.ceil((top - bottom) / (projection.getPixelSize()))
-                        );
 
                 // Project to union of extents
                 Dataset outputDS =
@@ -137,6 +133,7 @@ public class Reproject {
                                         (int) Math.ceil((top - bottom)
                                                 / (projection.getPixelSize())),
                                                 1, gdalconst.GDT_Float32);
+
 
                 // TODO: get projection from project info, and get transform from
                 // shape file
@@ -166,7 +163,7 @@ public class Reproject {
                 gdal.ReprojectImage(inputDS, outputDS, null, null, resampleAlg);
                 outputDS.GetRasterBand(1).ComputeStatistics(false);
 
-                /*
+
                 Band b = outputDS.GetRasterBand(1);
                 int x = b.getXSize(); int y = b.getYSize();
                 double [] testArr = new double[x * y];
@@ -177,7 +174,7 @@ public class Reproject {
                     }
                 }
 
-                 */
+
                 outputDS.delete();
                 inputDS.delete();
             }
