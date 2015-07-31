@@ -106,11 +106,17 @@ public class DataFileMetaData {
         indexNm = null;
 
         ArrayList<DataFileMetaData> extras = new ArrayList<DataFileMetaData>();
-        for(DownloadFileMetaData extra : dData.extraDownloads)
+        if (dData.extraDownloads != null)
         {
-            extras.add(new DataFileMetaData(extra.dataName, dData.dataFilePath, dData.year, dData.day));
+            for(DownloadFileMetaData extra : dData.extraDownloads)
+            {
+                extras.add(new DataFileMetaData(extra.dataName, dData.dataFilePath, dData.year, dData.day));
+            }
+            extraDownloads = extras;
+        } else {
+            extraDownloads = null;
         }
-        extraDownloads = extras;
+
     }
 
     /**
@@ -150,12 +156,17 @@ public class DataFileMetaData {
      */
     public DownloadFileMetaData ReadMetaDataForProcessor()
     {
-        ArrayList<DownloadFileMetaData> extras = new ArrayList<DownloadFileMetaData>(extraDownloads.size());
-        for(DataFileMetaData extraData : extraDownloads)
+        if (extraDownloads != null)
         {
-            extras.add(extraData.ReadMetaDataForProcessor());
+            ArrayList<DownloadFileMetaData> extras = new ArrayList<DownloadFileMetaData>(extraDownloads.size());
+            for(DataFileMetaData extraData : extraDownloads)
+            {
+                extras.add(extraData.ReadMetaDataForProcessor());
+            }
+            return new DownloadFileMetaData(dataName, filePath, year, day, extras);
+        } else {
+            return new DownloadFileMetaData(dataName, filePath, year, day, null);
         }
-        return new DownloadFileMetaData(dataName, filePath, year, day, extras);
     }
 
     /**

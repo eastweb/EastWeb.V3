@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -70,43 +71,39 @@ public class ProcessorWorkerTest {
 
     /**
      * Test method for {@link version2.prototype.processor.ProcessorWorker#call()}.
-     * @throws ParseException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ClassNotFoundException
+     * @throws Exception
      */
     @Test
-    public final void testCall() throws ParseException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    public final void testCall() throws Exception {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\pluginMetaData\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
-        ArrayList<String> extraDownloadFiles;
-        extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, extraDownloadFiles, null,
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\pluginMetaData\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+        //ArrayList<String> extraDownloadFiles;
+        //extraDownloadFiles.add("QC");
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
-        extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
+        // extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day, extraDownloads)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\testProjects\\Amhara\\downloads\\2014\\002\\3B42RT_daily.2014.01.02.bin", 2014, 002, null)));
 
+        //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 
-        DatabaseCache outputCache = new MyDatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, pluginMetaData.ExtraDownloadFiles);
+        DatabaseCache outputCache = new MyDatabaseCache("project_amhara_trmm3b42rt.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
         ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
-        ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
-        fail("Not yet implemented"); // TODO
+        //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
+        worker.call();
     }
 
     protected class MyDatabaseCache extends DatabaseCache
     {
-        public MyDatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
-            super(projectName, pluginName, dataComingFrom, extraDownloadFiles);
+        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
+            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
         }
 
         @Override

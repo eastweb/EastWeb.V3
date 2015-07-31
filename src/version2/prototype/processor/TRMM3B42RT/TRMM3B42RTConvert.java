@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
@@ -17,6 +18,7 @@ public class TRMM3B42RTConvert extends Convert {
     public TRMM3B42RTConvert(ProcessData data) {
         super(data);
     }
+
 
     @Override
     protected void convertFiles() throws Exception{

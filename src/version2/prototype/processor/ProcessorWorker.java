@@ -115,7 +115,7 @@ public class ProcessorWorker extends ProcessWorker {
             {
                 Integer key = step.getKey();
 
-                Class<?> classProcess = Class.forName("version2.prototype.processor." + pluginName + step.getValue());
+                Class<?> classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
 
                 Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
 
