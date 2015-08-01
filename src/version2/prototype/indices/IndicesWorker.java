@@ -115,7 +115,8 @@ public class IndicesWorker extends ProcessWorker{
                 Class<?> clazzIndicies;
                 try
                 {
-                    clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", pluginName, indices));
+                    System.out.println("IndicesWorker: " + pluginName + "  : " + indices);
+                    clazzIndicies = Class.forName(String.format("version2.prototype.indices.%s.%s", pluginName, indices));
                     Constructor<?> ctorIndicies = clazzIndicies.getConstructor();
                     Object indexCalculator =  ctorIndicies.newInstance();
 

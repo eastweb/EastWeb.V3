@@ -32,7 +32,7 @@ public class TRMM3B42Convert extends Convert{
             { System.out.println("file does not exist");}
 
             for (File f:inputFiles){
-                System.out.println("convert : " + f.getAbsolutePath());
+
                 DataInputStream dis = new DataInputStream(new FileInputStream(f));
                 String fileName = FilenameUtils.getBaseName(f.getName());
 

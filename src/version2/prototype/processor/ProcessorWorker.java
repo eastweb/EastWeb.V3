@@ -113,6 +113,7 @@ public class ProcessorWorker extends ProcessWorker {
             for (Entry<Integer, String> step : processStep.entrySet())
             {
                 Integer key = step.getKey();
+                System.out.println(key);
 
                 Class<?> classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
 
@@ -132,6 +133,7 @@ public class ProcessorWorker extends ProcessWorker {
 
                     for (DownloadFileMetaData dFile : entry.getValue())
                     {
+                        System.out.println("processorWorker: " + dFile.dataFilePath);
                         FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
                         if (qcInputFolder != null)
                         {
