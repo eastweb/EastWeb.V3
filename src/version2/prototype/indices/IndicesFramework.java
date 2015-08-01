@@ -71,7 +71,7 @@ public abstract class IndicesFramework implements IndexCalculator {
             Dataset[] inputs = new Dataset[mInputFiles.length];
 
             for (int i = 0; i < mInputFiles.length; i++) {
-                System.out.println("index calculate input files name: "+mInputFiles[i].getPath());
+                // System.out.println("index calculate input files name: "+mInputFiles[i].getPath());
                 inputs[i] = gdal.Open(mInputFiles[i].getPath());
             }
 

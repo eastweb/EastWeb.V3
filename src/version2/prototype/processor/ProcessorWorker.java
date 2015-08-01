@@ -133,7 +133,7 @@ public class ProcessorWorker extends ProcessWorker {
 
                     for (DownloadFileMetaData dFile : entry.getValue())
                     {
-                        System.out.println("processorWorker: " + dFile.dataFilePath);
+                        //System.out.println("processorWorker: " + dFile.dataFilePath);
                         FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
                         if (qcInputFolder != null)
                         {

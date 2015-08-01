@@ -9,6 +9,10 @@ public class TRMM3B42Calculator extends IndicesFramework
     public TRMM3B42Calculator() { }
 
     @Override
+    public void calculate() throws Exception
+    { super.calculate(); }
+
+    @Override
     protected double calculatePixelValue(double[] values) throws Exception {
         if (values[INPUT] == 32767) {
             return -3.4028234663852886E38;
@@ -21,5 +25,4 @@ public class TRMM3B42Calculator extends IndicesFramework
     protected String className() {
         return getClass().getName();
     }
-
 }

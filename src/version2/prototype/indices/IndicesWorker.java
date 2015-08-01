@@ -19,6 +19,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.processor.ProcessData;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
@@ -115,22 +116,25 @@ public class IndicesWorker extends ProcessWorker{
                 Class<?> clazzIndicies;
                 try
                 {
-                    System.out.println("IndicesWorker: " + pluginName + "  : " + indices);
+
                     clazzIndicies = Class.forName(String.format("version2.prototype.indices.%s.%s", pluginName, indices));
                     Constructor<?> ctorIndicies = clazzIndicies.getConstructor();
+
                     Object indexCalculator =  ctorIndicies.newInstance();
 
-                    // set input files
-                    Method method = indexCalculator.getClass().getMethod("setInputFiles", File[].class);
-                    method.invoke(indexCalculator, inputFiles);
+                    //set input files
+                    Method method = indexCalculator.getClass().getMethod("setInputFiles", new Class[]{File[].class});
+                    method.invoke(indexCalculator, new Object[]{inputFiles});
 
                     // set output file
-                    String outFile = outputPath + indices + ".tiff";
-                    method = indexCalculator.getClass().getMethod("setOutputFile", File.class);
-                    method.invoke(indexCalculator, new File(outFile));
+                    String outFile = outputPath + indices + ".tif";
+                    Method methodOut = indexCalculator.getClass().getMethod("setOutputFile", File.class);
+                    methodOut.invoke(indexCalculator, new File(outFile));
 
-                    method = indexCalculator.getClass().getMethod("calculate");
-                    method.invoke(indexCalculator);
+                    Method methodCal = indexCalculator.getClass().getMethod("calculate");
+                    methodCal.invoke(indexCalculator);
+
+
 
                 }catch(Exception e)
                 {
