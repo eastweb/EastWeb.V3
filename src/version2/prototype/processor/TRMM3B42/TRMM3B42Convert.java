@@ -32,6 +32,7 @@ public class TRMM3B42Convert extends Convert{
             { System.out.println("file does not exist");}
 
             for (File f:inputFiles){
+                System.out.println("convert : " + f.getAbsolutePath());
                 DataInputStream dis = new DataInputStream(new FileInputStream(f));
                 String fileName = FilenameUtils.getBaseName(f.getName());
 
@@ -50,9 +51,6 @@ public class TRMM3B42Convert extends Convert{
                     for (int col=0; col<xSize; col++)
                     {
                         array[col] = dis.readFloat();
-                        if ((row < 20) && (col < 20)) {
-                            System.out.println("TRMM4B32Convert : " + array[col] );
-                        }
                     }
                     outputDS.GetRasterBand(1).WriteRaster(0, row, xSize, 1, array);
                 }
@@ -70,6 +68,7 @@ public class TRMM3B42Convert extends Convert{
 
                 outputDS.GetRasterBand(1).ComputeStatistics(false);
                 outputDS.delete();
+
             }
 
         }

@@ -119,24 +119,27 @@ public class ProcessorWorker extends ProcessWorker {
                 Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
 
                 //copy the downloaded files to the input folders
-                String [] inputFolders = prepareTask.getInputFolders(key);
-
-                File dataInputFolder = new File(inputFolders[0]);
-                File qcInputFolder = null;
-                if (inputFolders.length > 1)    // it has a qc folder
+                if (key == 1)
                 {
-                    qcInputFolder =  new File(inputFolders[1]);
-                }
+                    String [] inputFolders = prepareTask.getInputFolders(key);
 
-                for (DownloadFileMetaData dFile : entry.getValue())
-                {
-                    FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
-                    if (qcInputFolder != null)
+                    File dataInputFolder = new File(inputFolders[0]);
+                    File qcInputFolder = null;
+                    if (inputFolders.length > 1)    // it has a qc folder
                     {
-                        // assume QC is the first element in the extraDownloads
-                        FileUtils.copyFileToDirectory(
-                                new File(dFile.extraDownloads.get(0).dataFilePath),
-                                qcInputFolder);
+                        qcInputFolder =  new File(inputFolders[1]);
+                    }
+
+                    for (DownloadFileMetaData dFile : entry.getValue())
+                    {
+                        FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
+                        if (qcInputFolder != null)
+                        {
+                            // assume QC is the first element in the extraDownloads
+                            FileUtils.copyFileToDirectory(
+                                    new File(dFile.extraDownloads.get(0).dataFilePath),
+                                    qcInputFolder);
+                        }
                     }
                 }
 
@@ -190,13 +193,13 @@ public class ProcessorWorker extends ProcessWorker {
 
             // remove the entire temp folder
             // find "temp" in the laststepOutputFolder
-            /*        if (laststepOutputFolder != null)
+            if (laststepOutputFolder != null)
             {
                 String tempFolder = laststepOutputFolder.substring(0, laststepOutputFolder.lastIndexOf("Temp"))+"Temp";
                 FileUtils.deleteDirectory(new File(tempFolder));
             }
 
-             */
+
             // compile the output files in the outputPath to an arraylist of DataFileMetaData and save to the database
             ArrayList<DataFileMetaData> toCache = new ArrayList<DataFileMetaData>();
 

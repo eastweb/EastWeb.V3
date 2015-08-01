@@ -164,15 +164,15 @@ public class Reproject {
                 outputDS.GetRasterBand(1).ComputeStatistics(false);
 
 
-                Band b = outputDS.GetRasterBand(1);
-                int x = b.getXSize(); int y = b.getYSize();
-                double [] testArr = new double[x * y];
-                b.ReadRaster(0, 0, x, y, testArr);
-                for (int i = 0; i < 20; i++) {
-                    for (int j = 0; j<20; j++) {
-                        System.out.println(testArr[i * j + j]);
-                    }
-                }
+                //                Band b = outputDS.GetRasterBand(1);
+                //                int x = b.getXSize(); int y = b.getYSize();
+                //                double [] testArr = new double[x * y];
+                //                b.ReadRaster(0, 0, x, y, testArr);
+                //                for (int i = 0; i < 20; i++) {
+                //                    for (int j = 0; j<20; j++) {
+                //                        System.out.println(testArr[i * j + j]);
+                //                    }
+                //                }
 
 
                 outputDS.delete();
