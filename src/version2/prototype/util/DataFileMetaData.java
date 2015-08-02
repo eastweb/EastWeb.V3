@@ -162,7 +162,6 @@ public class DataFileMetaData {
         //            return new DownloadFileMetaData(dataName, filePath, year, day, extras);
         //        } else {
         //            return new DownloadFileMetaData(dataName, filePath, year, day, null);
-        //        }
         return new DownloadFileMetaData(dataName, filePath, year, day);
     }
 
