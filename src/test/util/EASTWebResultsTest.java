@@ -5,25 +5,84 @@ package test.util;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import version2.prototype.ZonalSummary;
+import version2.prototype.util.EASTWebQuery;
 import version2.prototype.util.EASTWebResults;
+import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
  *
  */
 public class EASTWebResultsTest {
+    private static Connection con;
+    private static String globalSchema = "Test_EW";
+    private static String projectName = "Test_Project";
+    private static String pluginName = "Test_Plugin";
+    private static ArrayList<String> extraDownloadFiles;
+    private static ArrayList<String> summaryNames;
+    private static boolean selectCount = true;
+    private static boolean selectSum = true;
+    private static boolean selectMean = true;
+    private static boolean selectStdDev = true;
+    private static String zoneSign = "<";
+    private static int zoneVal = 300;
+    private static String yearSign = ">";
+    private static int yearVal = 2000;
+    private static String daySign = "=";
+    private static int dayVal = 180;
+    private static ArrayList<String> includedIndices = new ArrayList<String>();
+    private static String[] indices = new String[5];
+    private static String shapeFile = "Settings\\shapeFile";
+    private static String areaValueField = "areaValueField";
+    private static String areaNameField = "areaNameField";
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        con = PostgreSQLConnection.getConnection();
+
+        extraDownloadFiles = new ArrayList<String>();
+        extraDownloadFiles.add("QC");
+
+        includedIndices.add("ModisNBARNDVICalculator");
+        includedIndices.add("ModisNBAREVICalculator");
+        includedIndices.add("ModisNBARNDWI5Calculator");
+        includedIndices.add("ModisNBARNDWI6Calculator");
+        includedIndices.add("ModisNBARSAVICalculator");
+
+        indices[0] = "ModisNBARNDVICalculator";
+        indices[1] = "ModisNBAREVICalculator";
+        indices[2] = "ModisNBARNDWI5Calculator";
+        indices[3] = "ModisNBARNDWI6Calculator";
+        indices[4] = "ModisNBARSAVICalculator";
+
+        summaryNames = new ArrayList<String>();
+        summaryNames.add("Count");
+        summaryNames.add("Sum");
+        summaryNames.add("Mean");
+        summaryNames.add("Max");
+        summaryNames.add("Min");
+        summaryNames.add("StdDev");
+        summaryNames.add("SqrSum");
     }
 
     /**
@@ -31,6 +90,7 @@ public class EASTWebResultsTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        con.close();
     }
 
     /**
@@ -38,6 +98,21 @@ public class EASTWebResultsTest {
      */
     @Before
     public void setUp() throws Exception {
+        Statement stmt = con.createStatement();
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                globalSchema
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(projectName, pluginName)
+                );
+        stmt.execute(query);
+        stmt.close();
+
+        Schemas.CreateProjectPluginSchema(con, globalSchema, projectName, pluginName, summaryNames, extraDownloadFiles, null, null, null, null,
+                null, true);
     }
 
     /**
@@ -50,43 +125,55 @@ public class EASTWebResultsTest {
     /**
      * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String, boolean, boolean, boolean, boolean, java.lang.String, int,
      * java.lang.String, int, java.lang.String, int, java.util.ArrayList, version2.prototype.ZonalSummary)}.
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
     @Test
-    public final void testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() {
-        EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectSum, selectMean, selectStdDev, zoneSign, zoneVal,
+    public final void testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        ZonalSummary zonalSummary = new ZonalSummary(shapeFile, areaValueField, areaNameField);
+        EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectSum, selectMean, selectStdDev, zoneSign, zoneVal,
                 yearSign, yearVal, daySign, dayVal, includedIndices, zonalSummary);
-    }
-
-    /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])}.
-     */
-    @Test
-    public final void testGetEASTWebQueryStringStringStringStringArray() {
-        EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, indices);
-    }
-
-    /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String)}.
-     */
-    @Test
-    public final void testGetEASTWebQueryStringStringString() {
-        EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName);
-    }
-
-    /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebResults(version2.prototype.util.EASTWebQuery)}.
-     */
-    @Test
-    public final void testGetEASTWebResults() {
+        System.out.println("testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary:");
+        System.out.println(query);
+        System.out.println();
         EASTWebResults.GetEASTWebResults(query);
     }
 
     /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetResultCSVFiles(version2.prototype.util.EASTWebQuery)}.
+     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])}.
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
     @Test
-    public final void testGetResultCSVFiles() {
-        EASTWebResults.GetResultCSVFiles(query);
+    public final void testGetEASTWebQueryStringStringStringStringArray() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
+        EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, indices);
+        System.out.println("testGetEASTWebQueryStringStringStringStringArray:");
+        System.out.println(query);
+        System.out.println();
+        EASTWebResults.GetEASTWebResults(query);
+    }
+
+    /**
+     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String)}.
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    @Test
+    public final void testGetEASTWebQueryStringStringString() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
+        EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName);
+        System.out.println("testGetEASTWebQueryStringStringString:");
+        System.out.println(query);
+        System.out.println();
+        EASTWebResults.GetEASTWebResults(query);
     }
 
 }

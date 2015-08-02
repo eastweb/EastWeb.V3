@@ -65,24 +65,24 @@ public class EASTWebResults {
         }
 
         query.append(String.format(
-                " FROM \"%1$s\".\"ZonalStat\" A, \"%2$s\".\"DateGroup\" D, \"%2$s\".\"DateGroup\", \"%2$s\".\"Index\" I, \"%1$s\".\"ZoneMapping\" M , \"%2$s\".\"ZoneVar\" Z, \"%1$s\".\"ZoneField\" F " +
-                        "WHERE (A.\"DateGroupID\" = D.\"DateGroupID\" AND D.\"Year\"" + yearSign + yearVal + " AND D.\"Day\"" + daySign + dayVal + ") " +
+                " \nFROM \"%1$s\".\"ZonalStat\" A, \"%2$s\".\"DateGroup\" D, \"%2$s\".\"Index\" I, \"%1$s\".\"ZoneMapping\" M , \"%2$s\".\"ZoneEW\" Z, \"%1$s\".\"ZoneField\" F " +
+                        "\nWHERE (A.\"DateGroupID\" = D.\"DateGroupID\" AND D.\"Year\"" + yearSign + yearVal + " AND D.\"DayOfYear\"" + daySign + dayVal + ") ",
                         mSchemaName,
                         globalSchema)
                 );
 
         if(includedIndices.size() > 0)
         {
-            query.append("(A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"=" + includedIndices.get(0));
+            query.append("\nAND (A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"='" + includedIndices.get(0) + "'");
             for(int i=1; i < includedIndices.size(); i++)
             {
-                query.append(" OR I.\"Name\"=" + includedIndices.get(i));
+                query.append(" OR I.\"Name\"='" + includedIndices.get(i) + "'");
             }
             query.append(")) ");
         }
 
-        query.append("(Z.\"Name\"=" + zonalSummary.GetAreaNameField() + " AND F.\"ShapeFile\"='" + zonalSummary.GetShapeFile() + "' AND F.\"Field\"='" + zonalSummary.GetAreaValueField() + "') ");
-        query.append("(A.\"ZoneMappingID\"=M.\"ZoneMappingID\" AND M.\"ZoneEWID\"=Z.\"ZoneEWID\" AND M.\"ZoneFieldID\"=F.\"ZoneFieldID\");");
+        query.append("\nAND (Z.\"Name\"='" + zonalSummary.GetAreaNameField() + "' AND F.\"ShapeFile\"='" + zonalSummary.GetShapeFile() + "' AND F.\"Field\"='" + zonalSummary.GetAreaValueField() + "') ");
+        query.append("\nAND (A.\"ZoneMappingID\"=M.\"ZoneMappingID\" AND M.\"ZoneEWID\"=Z.\"ZoneEWID\" AND M.\"ZoneFieldID\"=F.\"ZoneFieldID\");");
 
         return new EASTWebQuery(query.toString());
     }
@@ -109,13 +109,13 @@ public class EASTWebResults {
         // Build query
         ArrayList<String> summaries = Config.getInstance().getSummaryCalculations();
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
-        StringBuilder query = new StringBuilder("SELECT F.\"Field\", F.\"ShapeFile\", Z.\"ZoneName\", C.\"Year\", C.\"Day\", I.\"IndexName\", T.\"ExpectedTotalResults\", " +
-                "A.\"TemporalSummaryCompositionStrategyClass\", A." + summaries.get(0));
+        StringBuilder query = new StringBuilder("SELECT F.\"Field\", F.\"ShapeFile\", Z.\"Name\", C.\"Year\", C.\"DayOfYear\", I.\"Name\", T.\"ExpectedTotalResults\", " +
+                "A.\"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
         for(int i=1; i < summaries.size(); i++)
         {
-            query.append(", A." + summaries.get(i));
+            query.append(", A.\"" + summaries.get(i) + "\"");
         }
-        query.append(" FROM \"" + schemaName + "\".\"ZonalStat\" A, \"" + globalSchema + "\".\"ExpectedResults\" T, (SELECT \"Name\" FROM \"" + globalSchema + "\".\"Index\"");
+        query.append(" FROM \"" + schemaName + "\".\"ZonalStat\" A, \"" + globalSchema + "\".\"ExpectedResults\" T, (SELECT \"Name\", \"IndexID\" FROM \"" + globalSchema + "\".\"Index\"");
         if(indices != null && indices.length > 0)
         {
             query.append(" WHERE (\"Name\" = '" + indices[0] + "'");
@@ -125,8 +125,8 @@ public class EASTWebResults {
             }
             query.append(")");
         }
-        query.append(") I, \"" + globalSchema + "\".\"DateGroup\" C, \"" + schemaName + "\".\"ZoneMapping\" M, \"" + schemaName + "\".\"ZoneField\" F, \"" + globalSchema + "\".\"Zone\" Z " +
-                "WHERE A.\"IndexID\" = I.\"IndexID\" AND A.\"DateGroupID\" = C.\"DateGroupID\" AND A.\"ZoneMapping\" = M.\"ZoneMappingID\" AND M.\"ZoneID\" = Z.\"ZoneID\" AND " +
+        query.append(") I, \"" + globalSchema + "\".\"DateGroup\" C, \"" + schemaName + "\".\"ZoneMapping\" M, \"" + schemaName + "\".\"ZoneField\" F, \"" + globalSchema + "\".\"ZoneEW\" Z " +
+                "WHERE A.\"IndexID\" = I.\"IndexID\" AND A.\"DateGroupID\" = C.\"DateGroupID\" AND A.\"ZoneMappingID\" = M.\"ZoneMappingID\" AND M.\"ZoneEWID\" = Z.\"ZoneEWID\" AND " +
                 "M.\"ZoneFieldID\" = F.\"ZoneFieldID\";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
@@ -204,6 +204,17 @@ public class EASTWebResults {
         return results;
     }
 
+    /**
+     * Gets the list of a zonal summaries queried by the given EASTWebQuery object and returns a list of the files to each of the csv files written.
+     *
+     * @param query  - sql query wrapper object
+     * @return the list of csv result files
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     */
     public static ArrayList<File> GetResultCSVFiles(EASTWebQuery query) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         Statement stmt = PostgreSQLConnection.getConnection().createStatement();
