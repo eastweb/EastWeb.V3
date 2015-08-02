@@ -3,7 +3,6 @@ package version2.prototype.summary;
 import java.util.ArrayList;
 
 import version2.prototype.EASTWebI;
-import version2.prototype.EASTWebManager;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;

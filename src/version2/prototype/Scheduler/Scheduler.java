@@ -35,6 +35,7 @@ import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.summary.Summary;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.FileSystem;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
@@ -125,6 +126,10 @@ public class Scheduler {
         this.configInstance = configInstance;
         this.manager = manager;
 
+        // Make sure directory layout is set up
+        new File(FileSystem.GetRootDirectoryPath(projectInfoFile)).mkdirs();
+        new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName())).mkdirs();
+
         // Update status in EASTWebManager
         NotifyUI(new GeneralUIEventObject(this, null, null, null));
 
@@ -134,6 +139,8 @@ public class Scheduler {
             try
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
+                new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName())).mkdirs();
+
                 // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
                 Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
                         configInstance.getSummaryCalculations(),
@@ -341,6 +348,12 @@ public class Scheduler {
     {
         ArrayList<LocalDownloader> lDownloders = new ArrayList<LocalDownloader>();
 
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.DOWNLOAD)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.DOWNLOAD)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.DOWNLOAD)).mkdirs();
+        new File(FileSystem.GetGlobalDownloadDirectory(configInstance, pluginInfo.GetName())).mkdirs();
+
         // Create "data" DownloadFactory
         Class<?> downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + pluginMetaData.Download.downloadFactoryClassName);
         Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
@@ -353,6 +366,9 @@ public class Scheduler {
 
         for(DownloadMetaData dlMetaData : pluginMetaData.Download.extraDownloads)
         {
+            // Setup directory layout if not existing already
+            new File(FileSystem.GetGlobalDownloadDirectory(configInstance, dlMetaData.name)).mkdirs();
+
             // Create extra ListDatesFiles instance
             downloadFactoryClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + dlMetaData.downloadFactoryClassName);
             downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
@@ -380,6 +396,11 @@ public class Scheduler {
      * @throws ClassNotFoundException
      */
     protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
         Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "ProcessorWorker");
         //        inputCache.addObserver(process);
@@ -399,6 +420,11 @@ public class Scheduler {
      * @throws ClassNotFoundException
      */
     protected Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
         Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "IndicesWorker");
         //        inputCache.addObserver(process);
@@ -417,6 +443,11 @@ public class Scheduler {
      */
     protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException
     {
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+
         Summary process = new Summary(manager, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
         //        inputCache.addObserver(process);
         return process;
