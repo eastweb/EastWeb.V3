@@ -89,7 +89,7 @@ public class ModisListDatesFiles extends ListDatesFiles
                                 for (String line : folderContents)
                                 {
                                     Matcher m = fileNamePattern.matcher(line);
-                                    if(line.contains(".hdf") && !line.contains(".xml") &&
+                                    if(line.contains(".hdf") && !line.contains(".xml") && !line.contains(".jpg") &&
                                             (m.find()))
                                     {
                                         lock.lock();
