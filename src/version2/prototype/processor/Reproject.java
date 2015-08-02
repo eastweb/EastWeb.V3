@@ -58,7 +58,8 @@ public class Reproject {
         reprojectFiles();
 
         // remove the input folder
-        FileUtils.deleteDirectory(inputFolder);
+        // WRITE BACK after fixing the issue
+        //FileUtils.deleteDirectory(inputFolder);
 
     }
 

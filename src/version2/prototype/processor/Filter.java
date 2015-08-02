@@ -87,9 +87,9 @@ public abstract class Filter {
         }
 
         //remove the input folder
-        FileUtils.deleteDirectory(inputFolder1);
-        if (inputFolder2.exists())
-        {   FileUtils.deleteDirectory(inputFolder2);    }
+        //        FileUtils.deleteDirectory(inputFolder1);
+        //        if (inputFolder2.exists())
+        //        {   FileUtils.deleteDirectory(inputFolder2);    }
 
     }
 

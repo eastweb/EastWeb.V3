@@ -193,12 +193,13 @@ public class ProcessorWorker extends ProcessWorker {
 
             // remove the entire temp folder
             // find "temp" in the laststepOutputFolder
+            /*  WRITE BACK:  add back when fix the MODISLST band5 issue
             if ( tempFolderStr!= null)
             {
                 String tempFolder = tempFolderStr.substring(0, tempFolderStr.lastIndexOf("Temp"))+"Temp";
                 FileUtils.deleteDirectory(new File(tempFolder));
             }
-
+             */
 
             // compile the output files in the outputPath to an arraylist of DataFileMetaData and save to the database
             ArrayList<DataFileMetaData> toCache = new ArrayList<DataFileMetaData>();
