@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config>
+	<DownloadDir>C:/Users/michael.devos/Desktop/EASTWeb/Downloads</DownloadDir>
+	<DataBase>
+		<globalSchema>Scheduler_Test_EASTWeb</globalSchema>
+		<hostName>localhost:5432</hostName>
+		<userName>postgres</userName>
+		<passWord>eastweb</passWord>
+	</DataBase>
+	<Output>
+		<SummaryCalculation>Count</SummaryCalculation>
+		<SummaryCalculation>Max</SummaryCalculation>
+		<SummaryCalculation>Mean</SummaryCalculation>
+		<SummaryCalculation>Min</SummaryCalculation>
+		<SummaryCalculation>SqrSum</SummaryCalculation>
+		<SummaryCalculation>StdDev</SummaryCalculation>
+		<SummaryCalculation>Sum</SummaryCalculation>
+	</Output>
+</config>

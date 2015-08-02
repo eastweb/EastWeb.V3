@@ -42,39 +42,39 @@ import version2.prototype.util.DatabaseCache;
  * @author michael.devos
  *
  */
-public class EASTWebManager implements Runnable{
-    private static EASTWebManager instance = null;
-    private static ExecutorService executor;
-    private static int defaultNumOfSimultaneousGlobalDLs = 1;
-    private static int defaultMSBeetweenUpdates = 5000;
+public class EASTWebManager implements Runnable, EASTWebI{
+    protected static EASTWebManager instance = null;
+    protected static ExecutorService executor;
+    protected static int defaultNumOfSimultaneousGlobalDLs = 1;
+    protected static int defaultMSBeetweenUpdates = 5000;
 
     // Logged requests from other threads
-    private static List<SchedulerData> newSchedulerRequests;
-    private static List<Integer> stopExistingSchedulerRequests;
-    private static List<String> stopExistingSchedulerRequestsNames;
-    private static List<Integer> deleteExistingSchedulerRequests;
-    private static List<String> deleteExistingSchedulerRequestsNames;
-    private static List<Integer> startExistingSchedulerRequests;
-    private static List<String> startExistingSchedulerRequestsNames;
-    private static List<GUIUpdateHandler> guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
+    protected static List<SchedulerData> newSchedulerRequests;
+    protected static List<Integer> stopExistingSchedulerRequests;
+    protected static List<String> stopExistingSchedulerRequestsNames;
+    protected static List<Integer> deleteExistingSchedulerRequests;
+    protected static List<String> deleteExistingSchedulerRequestsNames;
+    protected static List<Integer> startExistingSchedulerRequests;
+    protected static List<String> startExistingSchedulerRequestsNames;
+    protected static List<GUIUpdateHandler> guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
 
     // EASTWebManager state
-    private static Integer numOfCreatedGDLs = 0;
-    private static Integer numOfCreatedSchedulers = 0;
-    private static List<SchedulerStatus> schedulerStatuses = new ArrayList<SchedulerStatus>(1);
-    private static BitSet schedulerIDs = new BitSet(100000);
-    private static BitSet globalDLIDs = new BitSet(1000);
-    private static Boolean schedulerStatesChanged = false;
-    private boolean manualUpdate;
-    private boolean justCreateNewSchedulers;
-    private final int msBeetweenUpdates;
+    protected static Integer numOfCreatedGDLs = 0;
+    protected static Integer numOfCreatedSchedulers = 0;
+    protected static List<SchedulerStatus> schedulerStatuses = new ArrayList<SchedulerStatus>(1);
+    protected static BitSet schedulerIDs = new BitSet(100000);
+    protected static BitSet globalDLIDs = new BitSet(1000);
+    protected static Boolean schedulerStatesChanged = false;
+    protected boolean manualUpdate;
+    protected boolean justCreateNewSchedulers;
+    protected final int msBeetweenUpdates;
 
     // Object references of EASTWeb components
-    private List<GlobalDownloader> globalDLs;
-    private List<Scheduler> schedulers;
-    private List<ScheduledFuture<?>> globalDLFutures;
-    private final ScheduledExecutorService globalDLExecutor;
-    private final ExecutorService processWorkerExecutor;
+    protected List<GlobalDownloader> globalDLs;
+    protected List<Scheduler> schedulers;
+    protected List<ScheduledFuture<?>> globalDLFutures;
+    protected final ScheduledExecutorService globalDLExecutor;
+    protected final ExecutorService processWorkerExecutor;
 
     /**
      *  If first time calling, starts up the EASTWebManager background processing thread to handle passively processing logged requests and updating
@@ -118,6 +118,9 @@ public class EASTWebManager implements Runnable{
         }
     }
 
+    /* (non-Javadoc)
+     * @see version2.prototype.EASTWebI#run()
+     */
     @Override
     public void run() {
         do
@@ -606,11 +609,10 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    /**
-     * Updates the local SchedulerStatus listing and sets a boolean flag to signal that the UI needs to be updated.
-     *
-     * @param updatedScheduler  - reference to the Scheduler instance for whom the stored SchedulerStatus object is now out of date
+    /* (non-Javadoc)
+     * @see version2.prototype.EASTWebI#NotifyUI(version2.prototype.Scheduler.Scheduler)
      */
+    @Override
     public void NotifyUI(Scheduler updatedScheduler)
     {
         synchronized (schedulerStatesChanged)
@@ -631,16 +633,10 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    /**
-     * Creates a {@link version2.download#GlobalDownloader GlobalDownloader} using the given factory and schedules it to run daily starting now.
-     * GlobalDownloader objects are singletons and are shared amongst Schedulers. If the GlobalDownloader associated pluginName is not currently
-     * associated with an existing GlobalDownloader then the given one is stored and added to the running list of them.
-     *
-     * @param dlFactory  - factory to use to create the GlobalDownloader
-     * @param createLocalDownloader  - True if the factory should be used to create a LocalDownloader, set it to observe on the created GlobalDownloader, and return it.
-     * @return LocalDownloader if specified to create one, otherwise NULL
-     * @throws IOException
+    /* (non-Javadoc)
+     * @see version2.prototype.EASTWebI#StartGlobalDownloader(version2.prototype.download.DownloadFactory)
      */
+    @Override
     public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException
     {
         synchronized (globalDLs)
@@ -700,13 +696,10 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    /**
-     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
-     * {@link version2#TaskState TaskState} set to STOPPED and to cease execution. If other GlobalDownloaders are waiting to execute then the next
-     * oldest one is started up.
-     *
-     * @param gdlID  - targeted GlobalDownloader's ID
+    /* (non-Javadoc)
+     * @see version2.prototype.EASTWebI#StopGlobalDownloader(int)
      */
+    @Override
     public void StopGlobalDownloader(int gdlID)
     {
         synchronized (globalDLs)
@@ -718,12 +711,10 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    /**
-     * Requests that a {@link version2.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
-     * {@link version2#TaskState TaskState} set to RUNNING and to continue downloading new data files when its given a turn to run again.
-     *
-     * @param gdlID  - targeted GlobalDownloader's ID
+    /* (non-Javadoc)
+     * @see version2.prototype.EASTWebI#StartExistingGlobalDownloader(int)
      */
+    @Override
     public void StartExistingGlobalDownloader(int gdlID)
     {
         synchronized (globalDLs)
@@ -735,12 +726,10 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    /**
-     * Requests that the given {@link version2#ProcesWorker ProcesWorker} be managed and executed.
-     *
-     * @param worker  - {@link version2#ProcesWorker ProcesWorker} to execute on a separate available thread
-     * @return Future object representing the return object of the submitted ProcessWorker which is of type ProcessWorkerReturn
+    /* (non-Javadoc)
+     * @see version2.prototype.EASTWebI#StartNewProcessWorker(version2.prototype.ProcessWorker)
      */
+    @Override
     public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker)
     {
         return processWorkerExecutor.submit(worker);
@@ -749,33 +738,35 @@ public class EASTWebManager implements Runnable{
     /**
      * Empty instance just to allow usage of private classes.
      */
-    private EASTWebManager()
+    protected EASTWebManager()
     {
-        manualUpdate = false;
-        justCreateNewSchedulers = false;
-        msBeetweenUpdates = Integer.MAX_VALUE;
+        //        manualUpdate = false;
+        //        justCreateNewSchedulers = false;
+        //        msBeetweenUpdates = Integer.MAX_VALUE;
+        //
+        //        newSchedulerRequests = null;
+        //        stopExistingSchedulerRequests = null;
+        //        stopExistingSchedulerRequestsNames = null;
+        //        deleteExistingSchedulerRequests = null;
+        //        deleteExistingSchedulerRequestsNames = null;
+        //        startExistingSchedulerRequests = null;
+        //        startExistingSchedulerRequestsNames = null;
+        //
+        //        // Setup for handling executing GlobalDownloaders
+        //        globalDLs = null;
+        //        globalDLExecutor = null;
+        //        globalDLFutures = null;
+        //
+        //        // Setup for handling executing Schedulers
+        //        schedulers = null;
+        //
+        //        // Setup for handling executing ProcessWorkers
+        //        processWorkerExecutor = null;
 
-        newSchedulerRequests = null;
-        stopExistingSchedulerRequests = null;
-        stopExistingSchedulerRequestsNames = null;
-        deleteExistingSchedulerRequests = null;
-        deleteExistingSchedulerRequestsNames = null;
-        startExistingSchedulerRequests = null;
-        startExistingSchedulerRequestsNames = null;
-
-        // Setup for handling executing GlobalDownloaders
-        globalDLs = null;
-        globalDLExecutor = null;
-        globalDLFutures = null;
-
-        // Setup for handling executing Schedulers
-        schedulers = null;
-
-        // Setup for handling executing ProcessWorkers
-        processWorkerExecutor = null;
+        this(1, 1, 1000);
     }
 
-    private EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
+    protected EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
     {
         manualUpdate = false;
         justCreateNewSchedulers = false;
@@ -831,7 +822,7 @@ public class EASTWebManager implements Runnable{
         processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, pwFactory);
     }
 
-    private void handleNewSchedulerRequests(SchedulerData data) throws ParserConfigurationException, SAXException, IOException
+    protected void handleNewSchedulerRequests(SchedulerData data) throws ParserConfigurationException, SAXException, IOException
     {
         synchronized (schedulers)
         {
@@ -859,7 +850,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleStopSchedulerRequests(int schedulerID)
+    protected void handleStopSchedulerRequests(int schedulerID)
     {
         synchronized (schedulers)
         {
@@ -870,7 +861,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleDeleteSchedulerRequests(int schedulerID)
+    protected void handleDeleteSchedulerRequests(int schedulerID)
     {
         synchronized (schedulers)
         {
@@ -886,7 +877,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void handleStartExistingSchedulerRequests(int schedulerID)
+    protected void handleStartExistingSchedulerRequests(int schedulerID)
     {
         synchronized (schedulers)
         {
@@ -897,7 +888,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private void runGUIUpdateHandlers()
+    protected void runGUIUpdateHandlers()
     {
         synchronized (guiHandlers)
         {
@@ -908,7 +899,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private int getLowestAvailableSchedulerID()
+    protected int getLowestAvailableSchedulerID()
     {
         int id = -1;
 
@@ -929,7 +920,7 @@ public class EASTWebManager implements Runnable{
         return id;
     }
 
-    private void releaseSchedulerID(int id)
+    protected void releaseSchedulerID(int id)
     {
         synchronized (schedulerIDs)
         {
@@ -940,7 +931,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private int getLowestAvailableGlobalDLID()
+    protected int getLowestAvailableGlobalDLID()
     {
         int id = -1;
 
@@ -961,7 +952,7 @@ public class EASTWebManager implements Runnable{
         return id;
     }
 
-    private void releaseGlobalDLID(int id)
+    protected void releaseGlobalDLID(int id)
     {
         synchronized (globalDLIDs)
         {
@@ -972,7 +963,7 @@ public class EASTWebManager implements Runnable{
         }
     }
 
-    private boolean IsIDValid(int id, BitSet set)
+    protected boolean IsIDValid(int id, BitSet set)
     {
         if((id >= 0) && (id < set.size())) {
             return true;

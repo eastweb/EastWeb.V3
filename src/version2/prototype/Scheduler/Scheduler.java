@@ -14,12 +14,12 @@ import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
+import version2.prototype.EASTWebI;
 import version2.prototype.EASTWebManager;
 import version2.prototype.GenericProcess;
 import version2.prototype.Process;
@@ -50,7 +50,7 @@ public class Scheduler {
 
     private final int ID;
     private final Config configInstance;
-    private final EASTWebManager manager;
+    private final EASTWebI manager;
     private SchedulerStatus status;
     private TaskState mState;
     private ArrayList<LocalDownloader> localDownloaders;
@@ -72,7 +72,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, EASTWebManager manager) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebI manager) throws ParserConfigurationException, SAXException, IOException
     {
         this(data, myID, TaskState.STOPPED, manager, Config.getInstance());
     }
@@ -89,7 +89,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, EASTWebManager manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
     {
         this(data, myID, TaskState.STOPPED, manager, configInstance);
     }
@@ -106,7 +106,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManager manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
     {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
@@ -271,7 +271,7 @@ public class Scheduler {
         status.UpdateUpdatesBeingProcessed(results);
     }
 
-    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManager manager, TaskState initState)
+    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebI manager, TaskState initState)
     {
         this.data = data;
         this.projectInfoFile = projectInfoFile;
@@ -381,7 +381,7 @@ public class Scheduler {
      */
     protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "ProcessorWorker");
         //        inputCache.addObserver(process);
         return process;
     }
@@ -400,7 +400,7 @@ public class Scheduler {
      */
     protected Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "IndicesWorker");
         //        inputCache.addObserver(process);
         return process;
     }
@@ -415,7 +415,7 @@ public class Scheduler {
      * @return {@link Summary Summary}  - the manager object of SummaryWorkers for the current project and given plugin
      * @param inputCache  - the DatabaseCache object used to acquire files available for summary processing
      */
-    protected Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
+    protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException
     {
         Summary process = new Summary(manager, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
         //        inputCache.addObserver(process);

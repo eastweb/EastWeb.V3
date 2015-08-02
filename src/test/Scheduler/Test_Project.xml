@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="TRMM3B42RT">
+			<Indicies>TRMM3B42RTCalculator</Indicies>
+			<QC> null</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Sat Aug 01 00:00:00 CDT 2015</StartDate>
+	<ProjectName>Test_Project</ProjectName>
+	<WorkingDir>C:\Users\michael.devos\Desktop\EASTWeb</WorkingDir>
+	<Masking>
+		<File>C:\Users\Public\Desktop\3D Vision Photo Viewer.lnk</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>C:\Users\michael.devos\Desktop\EASTWeb\shapefile\shapefile.shp</MasterShapeFile>
+	<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
+	<TotalModisTiles>120</TotalModisTiles>
+	<ModisTiles/>
+	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
+	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+	<Datum>NAD83</Datum>
+	<PixelSize>12</PixelSize>
+	<StandardParallel1>112.1</StandardParallel1>
+	<StandardParallel2>122.2</StandardParallel2>
+	<ScalingFactor>00.00</ScalingFactor>
+	<CentralMeridian>121</CentralMeridian>
+	<FalseEasting>151</FalseEasting>
+	<FalseNorthing>33</FalseNorthing>
+	<LatitudeOfOrigin>111</LatitudeOfOrigin>
+	<FreezingDate>Sat Aug 01 00:00:00 CDT 2015</FreezingDate>
+	<CoolingDegree>0</CoolingDegree>
+	<HeatingDate>Sat Aug 01 00:00:00 CDT 2015</HeatingDate>
+	<HeatingDegree>100.1</HeatingDegree>
+	<Summaries>
+        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Desktop\EASTWeb\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+	</Summaries>
+</ProjectInfo>

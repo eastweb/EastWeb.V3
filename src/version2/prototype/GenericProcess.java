@@ -43,7 +43,7 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * 4. version2.prototype.summary
      * @throws ClassNotFoundException
      */
-    public GenericProcess(EASTWebManager manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public GenericProcess(EASTWebI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache inputCache, DatabaseCache outputCache, String... classNames) throws ClassNotFoundException
     {
         super(manager, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
@@ -91,6 +91,6 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
         case PROCESSOR: name = "Processor"; break;
         case SUMMARY: name = "Summary"; break;
         }
-        scheduler.NotifyUI(new GeneralUIEventObject(this, name + " Finished", 100, pluginInfo.GetName()));
+        //        scheduler.NotifyUI(new GeneralUIEventObject(this, name + " Finished", 100, pluginInfo.GetName()));
     }
 }

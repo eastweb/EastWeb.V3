@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
-import version2.prototype.EASTWebManager;
+import version2.prototype.EASTWebI;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -26,7 +26,7 @@ import version2.prototype.util.DatabaseCache;
  */
 public class ModisNBARFactory extends DownloadFactory {
 
-    public ModisNBARFactory(EASTWebManager manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public ModisNBARFactory(EASTWebI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
         super(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, startDate, dData);
     }
