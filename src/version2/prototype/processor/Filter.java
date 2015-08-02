@@ -15,6 +15,7 @@ import version2.prototype.util.GdalUtils;
 // screen the files and filter out the "bad" data by given value or qcFlag in the data product
 public abstract class Filter {
 
+    protected ProcessData data;
     /* locations for the input files.
      * inputFolders[0] stores the files to be filtered
      * inputFolders[1] stores the QC file(s) if there is any
@@ -35,6 +36,7 @@ public abstract class Filter {
 
     public Filter(ProcessData data) {
 
+        this.data = data;
         /* locations for the input files.
          * inputFolders[0] stores the files to be filtered
          * inputFolders[1] stores the QC file(s) if there is any
@@ -98,7 +100,7 @@ public abstract class Filter {
 
                 // name the output file as the same as the input's
                 Dataset outputDS =
-                        gdal.GetDriverByName("GTiff").CreateCopy(outputFolder + mInput.getName(), inputDS);
+                        gdal.GetDriverByName("GTiff").CreateCopy(outputFolder + File.separator + mInput.getName(), inputDS);
 
                 int xSize = outputDS.GetRasterXSize();
                 int ySize = outputDS.GetRasterYSize();
@@ -110,12 +112,12 @@ public abstract class Filter {
                 // read the whole raster out into the array
                 int readReturn = outputDS.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, array);
                 if (readReturn != 0) {
-                    throw new Exception("Cant read the Raster band : " + mInput.getPath());
+                    throw new Exception("Can't read the Raster band : " + mInput.getPath());
                 }
 
                 // get each unit out and filter it
-                for (int y=0; y<outputDS.GetRasterYSize(); y++) {
-                    for (int x=0; x<outputDS.GetRasterXSize(); x++) {
+                for (int y=0; y<ySize; y++) {
+                    for (int x=0; x<xSize; x++) {
                         int index = y * xSize + x;
                         array[index] = filterValue(array[index]);
                     }

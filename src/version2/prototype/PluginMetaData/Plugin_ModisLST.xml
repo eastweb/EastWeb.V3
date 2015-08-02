@@ -21,8 +21,8 @@
 		</OriginDate>
 	</Download>
 	<Processor>
+		<ProcessStep>ModisLSTMozaic</ProcessStep>
 		<ProcessStep>ModisLSTFilter</ProcessStep>
-		<ProcessStep>ModisLSTMosaic</ProcessStep>
 		<ProcessStep>ModisLSTReproject</ProcessStep>
 		<ProcessStep>ModisLSTMask</ProcessStep>
 		<ProcessStep>ModiLSTClip</ProcessStep>

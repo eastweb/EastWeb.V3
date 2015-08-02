@@ -8,4 +8,9 @@ public class ModisLSTMozaic extends Mozaic{
     public ModisLSTMozaic(ProcessData data) throws InterruptedException {
         super(data);
     }
+
+    @Override
+    protected int[] getBands() {
+        return new int[] {1,2,5,6};
+    }
 }

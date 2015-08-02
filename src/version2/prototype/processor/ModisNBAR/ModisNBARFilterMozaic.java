@@ -54,6 +54,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
         }
     }
 
+
     private void ModisNBARLinkTiles() throws IOException {
         // loop for each band needed be reprojected
         for (int i = 0; i < bands.length; i++) {
@@ -295,5 +296,10 @@ public class ModisNBARFilterMozaic extends Mozaic {
         //if(bandNumber < numberOfBands.length) {
         return binaryFlags.substring(startIndex, (startIndex+4));
         //}
+    }
+
+    @Override
+    protected int[] getBands() {
+        return new int[] {1,2,3,4,5,6,7};
     }
 }

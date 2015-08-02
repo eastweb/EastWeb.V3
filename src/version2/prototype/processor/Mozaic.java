@@ -16,7 +16,7 @@ import version2.prototype.util.GdalUtils;
  */
 
 // Mosaic tiles together
-public class Mozaic {
+public abstract class Mozaic {
 
     //locations for the input files. for this step, will only use inputFolders[0]
     String [] inputFolders ;
@@ -57,7 +57,7 @@ public class Mozaic {
 
         outputFolder = new File(data.getOutputFolder());
 
-        bands = data.getDataBands();
+        bands = getBands();
         outputFiles = new ArrayList<File>();
 
         // read tile data and get size of tiles
@@ -87,6 +87,8 @@ public class Mozaic {
             FileUtils.deleteDirectory(inputFolder);
         }
     }
+
+    abstract protected int [] getBands();
 
     protected void sortTiles() {
         int minH = tileList[0].horizon;

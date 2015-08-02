@@ -1,12 +1,18 @@
 package version2.prototype.processor.ModisLST;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.PrepareProcessTask;
+import version2.prototype.util.FileSystem;
+
+
+// Rewrite by Yi Liu
 
 public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
 
@@ -17,33 +23,43 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
 
     @Override
     public String[] getInputFolders(int stepId) {
-        ArrayList<String> folders = new ArrayList<String>();
-
+        String [] inputFolders =  new String [1];
         // Format: Input (of this step) -> Output (of this step)
         switch(stepId)
         {
         case 1:
-            // Download -> Filter
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\Download\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\QCDownload\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "download", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            // Filter -> Mozaic
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            // Mozaic -> Filter
+            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Mozaic", date.getYear(), date.getDayOfYear());
             break;
         case 3:
-            // Mozaic -> Reproject
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            // Filter -> Reproject
+            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Filter", date.getYear(), date.getDayOfYear());
             break;
         case 4:
             // Reproject -> Mask
-            folders.add(project.GetWorkingDir() + String.format("ModisLST\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear()));
+            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Reproject", date.getYear(), date.getDayOfYear());
+            break;
+        case 5:
+            // Reproject -> clip
+            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Mask", date.getYear(), date.getDayOfYear());
             break;
         default:
-            folders = null;
             break;
         }
-        return folders.toArray(new String[folders.size()]);
+        return inputFolders;
     }
 
     @Override
@@ -54,21 +70,34 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
         switch(stepId)
         {
         case 1:
-            // Download -> Filter
-            outputFolder = project.GetWorkingDir() + String.format("ModisLST\\1\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            // Download -> Mozaic
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Mozaic", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            // Filter -> Mozaic
-            outputFolder = project.GetWorkingDir() + String.format("ModisLST\\2\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            // Mozaic -> Filter
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Filter", date.getYear(), date.getDayOfYear());
             break;
         case 3:
-            // Mozaic -> Reproject
-            outputFolder = project.GetWorkingDir() + String.format("ModisLST\\3\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            // Filter -> Reproject
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Reproject", date.getYear(), date.getDayOfYear());
             break;
         case 4:
             // Reproject -> Mask
-            outputFolder = project.GetWorkingDir() + String.format("ModisLST\\4\\%4d\\%03d", date.getYear(), date.getDayOfYear());
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Mask", date.getYear(), date.getDayOfYear());
             break;
+        case 5:
+            // Mask - >clip
+            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+                    FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
+                    "Output", date.getYear(), date.getDayOfYear());
         default:
             outputFolder = null;
             break;
@@ -79,13 +108,12 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
 
     @Override
     public int[] getDataBands() {
-        return new int[] { 1,5};
+        return new int[] {1,5};
     }
 
     @Override
     public int[] getQCBands() {
-        // TODO: Determine what the QC bands are.
-        return new int[] { 2,6};
+        return new int[] {2,6};
     }
 }
 

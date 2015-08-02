@@ -26,7 +26,7 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         switch(stepId)
         {
         case 1:
-            // Download -> Mozaic
+            // Download -> FilterMosaic
             folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Download", date.getYear(), date.getDayOfYear()));
@@ -35,10 +35,10 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
                     "QCDownload", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
-            // Mozaic -> Reproject
+            // FilterMosaic -> Reproject
             folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
-                    "Mosaic", date.getYear(), date.getDayOfYear()));
+                    "FilterMosaic", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Reproject -> Mask
@@ -69,7 +69,7 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
             // Download/QCDownload -> Mozaic
             outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
-                    "Mosaic", date.getYear(), date.getDayOfYear());
+                    "FilterMosaic", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // Mozaic -> Reproject
