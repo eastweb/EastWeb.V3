@@ -12,7 +12,7 @@ import version2.prototype.processor.PrepareProcessTask;
 import version2.prototype.util.FileSystem;
 
 
-// Rewrite by Yi Liu
+// Rewritten by Yi Liu
 
 public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
 
