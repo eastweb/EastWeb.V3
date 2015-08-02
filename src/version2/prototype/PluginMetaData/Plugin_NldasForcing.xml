@@ -15,8 +15,8 @@
 		</FTP>
 		<TimeZone>CST6CDT</TimeZone>
 		<FilesPerDay>24</FilesPerDay>
-		<DatePattern>\\d{4}</DatePattern>
-		<FileNamePattern>NLDAS_FORA0125_H\\.A(\\d{4})(\\d{4})(\\d{4}).(\\d{4})00\\.002\\.grb</FileNamePattern>
+		<DatePattern>\d{4}</DatePattern>
+		<FileNamePattern>NLDAS_FORA0125_H\.A(\d{4})(\d{4})(\d{4}).(\d{4})00\.002\.grb</FileNamePattern>
 		<OriginDate>
 			<DayOfMonth>01</DayOfMonth>
 			<Month>January</Month>
