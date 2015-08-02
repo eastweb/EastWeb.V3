@@ -35,7 +35,7 @@ public interface TemporalSummaryCompositionStrategy {
      * @param dateInComposite  - the locale (zone) and time zone independent date to find the index for
      * @return the 0-based index of the containing composite
      */
-    int getCompositeIndex(LocalDate startDate, LocalDate dateInComposite);
+    long getCompositeIndex(LocalDate startDate, LocalDate dateInComposite);
 
     /**
      * Gets the number of complete composites (equivalent to number of total expected summary results if end date is current date + 1 day) within the given range of dates.
@@ -45,5 +45,5 @@ public interface TemporalSummaryCompositionStrategy {
      * @param daysPerInputData  - number of days a single raster data file represents
      * @return the number of complete composites that can be created within the given date range and input size
      */
-    int getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData);
+    long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData);
 }

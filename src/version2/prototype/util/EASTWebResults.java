@@ -222,4 +222,9 @@ public class EASTWebResults {
 
         return resultFiles;
     }
+
+    private EASTWebResults()
+    {
+        // no need to instantiate
+    }
 }

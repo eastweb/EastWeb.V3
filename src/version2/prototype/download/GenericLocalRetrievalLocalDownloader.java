@@ -36,6 +36,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
      * Creates a GenericLocalDownloader that expects to finds the GlobalDownloader download records in a locally and globally accessible table in the database.
      *
      * @param manager
+     * @param configInstance
      * @param gdl
      * @param projectInfoFile
      * @param pluginInfo
@@ -58,7 +59,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
                         pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
                 conn.close();
 
-                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
+                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, projectInfoFile.GetStartDate(),
                         pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {

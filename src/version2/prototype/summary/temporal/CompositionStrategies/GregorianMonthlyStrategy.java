@@ -18,13 +18,13 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
     }
 
     @Override
-    public int getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
+    public long getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
         return 0;
         // TODO Auto-generated method stub
     }
 
     @Override
-    public int getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
+    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
         return daysPerInputData;
         // TODO Auto-generated method stub
     }

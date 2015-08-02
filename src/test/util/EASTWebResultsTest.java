@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.util;
 
@@ -10,6 +10,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import version2.prototype.util.EASTWebResults;
 
 /**
  * @author michael.devos
@@ -46,13 +48,13 @@ public class EASTWebResultsTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String, boolean, boolean, boolean, boolean, java.lang.String, int, java.lang.String, int, java.lang.String, int, java.util.ArrayList, version2.prototype.ZonalSummary)}.
+     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String, boolean, boolean, boolean, boolean, java.lang.String, int,
+     * java.lang.String, int, java.lang.String, int, java.util.ArrayList, version2.prototype.ZonalSummary)}.
      */
     @Test
-    public final
-            void
-            testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() {
-        fail("Not yet implemented"); // TODO
+    public final void testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() {
+        EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectSum, selectMean, selectStdDev, zoneSign, zoneVal,
+                yearSign, yearVal, daySign, dayVal, includedIndices, zonalSummary);
     }
 
     /**
@@ -60,7 +62,7 @@ public class EASTWebResultsTest {
      */
     @Test
     public final void testGetEASTWebQueryStringStringStringStringArray() {
-        fail("Not yet implemented"); // TODO
+        EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, indices);
     }
 
     /**
@@ -68,7 +70,7 @@ public class EASTWebResultsTest {
      */
     @Test
     public final void testGetEASTWebQueryStringStringString() {
-        fail("Not yet implemented"); // TODO
+        EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName);
     }
 
     /**
@@ -76,7 +78,7 @@ public class EASTWebResultsTest {
      */
     @Test
     public final void testGetEASTWebResults() {
-        fail("Not yet implemented"); // TODO
+        EASTWebResults.GetEASTWebResults(query);
     }
 
     /**
@@ -84,7 +86,7 @@ public class EASTWebResultsTest {
      */
     @Test
     public final void testGetResultCSVFiles() {
-        fail("Not yet implemented"); // TODO
+        EASTWebResults.GetResultCSVFiles(query);
     }
 
 }
