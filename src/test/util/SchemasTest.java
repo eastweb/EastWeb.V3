@@ -201,7 +201,7 @@ public class SchemasTest {
                 case "GDExpectedResults": break;
                 case "GlobalDownloader": break;
                 case "Download": break;
-                case "ExtraDownload": break;
+                case "DownloadExtra": break;
                 case "TemporalSummaryCompositionStrategy": break;
                 default: fail("Unknown table in test global schema: " + rs.getString("Name"));
                 }
@@ -220,7 +220,7 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertTrue("Test Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 6);
+            assertTrue("Test Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 7);
 
             // Check schema table names
             do{
@@ -230,6 +230,7 @@ public class SchemasTest {
                 case "ZoneField": break;
                 case "ZonalStat": break;
                 case "DownloadCache": break;
+                case "DownloadCacheExtra": break;
                 case "ProcessorCache": break;
                 case "IndicesCache": break;
                 default: fail("Unknown table in test schema: " + rs.getString("Name"));

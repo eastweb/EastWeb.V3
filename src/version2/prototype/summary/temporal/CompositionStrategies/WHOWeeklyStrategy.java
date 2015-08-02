@@ -2,7 +2,9 @@ package version2.prototype.summary.temporal.CompositionStrategies;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
+
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
 public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
@@ -38,16 +40,24 @@ public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
     }
 
     @Override
-    public int
+    public long
     getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
         return 0;
         // TODO Auto-generated method stub
     }
 
     @Override
-    public int getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
-        return daysPerInputData;
-        // TODO Auto-generated method stub
+    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
+        DayOfWeek startDay = startDate.getDayOfWeek();
+
+        if(startDay != DayOfWeek.MONDAY)
+        {
+            int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
+
+            startDate.plusDays(8 - value);
+        }
+
+        return ChronoUnit.WEEKS.between(startDate, endDate);
     }
 
 }

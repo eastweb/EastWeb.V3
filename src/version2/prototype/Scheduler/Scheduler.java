@@ -308,7 +308,7 @@ public class Scheduler {
         DatabaseCache processorCache = new DatabaseCache(configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
         DatabaseCache indicesCache = new DatabaseCache(configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, null);
 
-        localDownloaders.add(SetupDownloadProcess(pluginInfo, plMeta, downloadCache));
+        localDownloaders.addAll(SetupDownloadProcess(pluginInfo, plMeta, downloadCache));
         processorProcesses.add(SetupProcessorProcess(pluginInfo, plMeta, downloadCache, processorCache));
         indicesProcesses.add(SetupIndicesProcess(pluginInfo, plMeta, processorCache, indicesCache));
         summaryProcesses.add(SetupSummaryProcess(pluginInfo, plMeta, indicesCache));
@@ -336,9 +336,11 @@ public class Scheduler {
      * @throws InstantiationException
      * @throws IOException
      */
-    protected LocalDownloader SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache) throws ClassNotFoundException, NoSuchMethodException,
+    protected ArrayList<LocalDownloader> SetupDownloadProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache outputCache) throws ClassNotFoundException, NoSuchMethodException,
     SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, IOException
     {
+        ArrayList<LocalDownloader> lDownloders = new ArrayList<LocalDownloader>();
+
         // Create "data" DownloadFactory
         Class<?> downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + pluginMetaData.Download.downloadFactoryClassName);
         Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
@@ -347,7 +349,7 @@ public class Scheduler {
                 projectInfoFile.GetStartDate(), pluginMetaData.Download);
 
         // Create "data" GenericGlobalDownloader
-        LocalDownloader lDownloder = manager.StartGlobalDownloader(downloadFactory, true);
+        lDownloders.add(manager.StartGlobalDownloader(downloadFactory));
 
         for(DownloadMetaData dlMetaData : pluginMetaData.Download.extraDownloads)
         {
@@ -359,10 +361,10 @@ public class Scheduler {
                     projectInfoFile.GetStartDate(), dlMetaData);
 
             // Create extra GenericGlobalDownloader
-            manager.StartGlobalDownloader(downloadFactory, false);
+            lDownloders.add(manager.StartGlobalDownloader(downloadFactory));
         }
 
-        return lDownloder;
+        return lDownloders;
     }
 
     /**

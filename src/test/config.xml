@@ -2,7 +2,7 @@
 <config>
 	<DownloadDir>C:/Users/michael.devos/Desktop/EASTWeb/Downloads</DownloadDir>
 	<DataBase>
-		<globalSchema>Test_EASTWeb</globalSchema>
+		<globalSchema>Test_EASTWeb1</globalSchema>
 		<hostName>localhost:5432</hostName>
 		<userName>postgres</userName>
 		<passWord>eastweb</passWord>
