@@ -74,7 +74,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
     // For testing with TRMM3B42RT plugin
     private static String testPluginName = "TRMM3B42RT";
     private static int year = 2015;
-    private static int day = 1;
+    private static int day = 182;
     private static int daysPerInputFile = -1;
     private static int numOfIndices = 3;
     private static int filesPerDay = 1;
@@ -119,7 +119,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         dData = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
 
         PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance();
-        PluginMetaData pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
+        pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
         // For testing with ModisNBAR plugin
         //        listDatesFiles = new ModisNBARListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
         //        listDatesFilesQC = new ModisNBARQCListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
@@ -314,11 +314,14 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 "(1, 2, '" + dateFilePath2 + "', FALSE);",
                 testGlobalSchema);
         stmt.execute(query);
-        query = String.format("INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\", \"Complete\") VALUES " +
-                "(2, 1, 'QC', '" + qcFilePath1 + "', TRUE), " +
-                "(2, 2, 'QC', '" + qcFilePath2 + "', FALSE);",
-                testGlobalSchema);
-        stmt.execute(query);
+        if(hasQC)
+        {
+            query = String.format("INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\", \"Complete\") VALUES " +
+                    "(2, 1, 'QC', '" + qcFilePath1 + "', TRUE), " +
+                    "(2, 2, 'QC', '" + qcFilePath2 + "', FALSE);",
+                    testGlobalSchema);
+            stmt.execute(query);
+        }
         stmt.close();
 
         // Get results
