@@ -127,14 +127,12 @@ public class IndicesWorker extends ProcessWorker{
                     method.invoke(indexCalculator, new Object[]{inputFiles});
 
                     // set output file
-                    String outFile = outputPath + indices + ".tif";
-                    Method methodOut = indexCalculator.getClass().getMethod("setOutputFile", File.class);
-                    methodOut.invoke(indexCalculator, new File(outFile));
+                    String outFile = outputPath + File.separator + indices + ".tif";
+                    method = indexCalculator.getClass().getMethod("setOutputFile", File.class);
+                    method.invoke(indexCalculator, new File(outFile));
 
-                    Method methodCal = indexCalculator.getClass().getMethod("calculate");
-                    methodCal.invoke(indexCalculator);
-
-
+                    method = indexCalculator.getClass().getMethod("calculate");
+                    method.invoke(indexCalculator);
 
                 }catch(Exception e)
                 {
