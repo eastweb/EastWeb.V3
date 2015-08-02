@@ -95,8 +95,7 @@ public class ModisLSTFilter extends Filter{
     }
 
     /*
-     * bit no:
-    7  6 5  4  3  2   1  0 ( I assume it uses Most Significant bit order)
+     * bit no:  7  6 5  4  3  2   1  0 ( I assume it uses Most Significant bit order)
     X means we will not consider the value on the bit
     (1) Highest: Accept only high quality data
     XX XX XX 00   (LST produced, good quality, not necessary to examine detailed QA)
