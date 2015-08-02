@@ -29,13 +29,13 @@ public abstract class IndicesFramework implements IndexCalculator {
     { }
 
     // set input file property
-    protected static void setInputFiles(File[] inputFiles) {
+    public static void setInputFiles(File[] inputFiles) {
         assert (inputFiles.length > 0);
         mInputFiles = inputFiles;
     }
 
     // set output file property
-    protected void setOutputFile(File outputFile) {
+    public void setOutputFile(File outputFile) {
         mOutputFile = outputFile;
     }
 
