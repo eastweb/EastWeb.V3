@@ -82,7 +82,6 @@ public abstract class Mozaic {
             sortTiles();
             linkTiles();
 
-
             // remove the input folder
             FileUtils.deleteDirectory(inputFolder);
         }
@@ -121,11 +120,11 @@ public abstract class Mozaic {
             tileMetrix[tileList[i].vertical - minV][tileList[i].horizon - minH] = tileList[i];
         }
 
-        for (int i = 0; i < tileMetrixRow; i++) {
+        /*    for (int i = 0; i < tileMetrixRow; i++) {
             for (int j = 0; j < tileMetrixClo; j++) {
                 System.out.println(Boolean.toString(tileMetrix[i][j] != null) + i + " " + j);
             }
-        }
+        }*/
 
         outputXSize = xSize * tileMetrixClo;
         outputYSize = ySize * tileMetrixRow;
@@ -137,8 +136,6 @@ public abstract class Mozaic {
         for (int i = 0; i < bands.length; i++) {
             int currentBand = bands[i];
             File outputFile = new File(outputFolder, "band" + currentBand + ".tif");
-
-            outputFile.deleteOnExit();
 
             String[] option = { "INTERLEAVE=PIXEL" };
             Dataset output = gdal.GetDriverByName("GTiff").Create(
@@ -166,10 +163,10 @@ public abstract class Mozaic {
                     ImageArray tempArray = null;
 
                     if (tileMetrix[row][col] != null) {
-                        System.out.println("current= "
-                                + currentBand
-                                + " "
-                                + tileMetrix[row][col].sdsName[currentBand - 1]);
+                        //                        System.out.println("current= "
+                        //                                + currentBand
+                        //                                + " "
+                        //                                + tileMetrix[row][col].sdsName[currentBand - 1]);
 
                         Dataset tempTile = gdal.Open(tileMetrix[row][col].sdsName[currentBand - 1]);
                         tempArray = new ImageArray(tempTile.GetRasterBand(1));

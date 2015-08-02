@@ -25,7 +25,7 @@
 		<ProcessStep>ModisLSTFilter</ProcessStep>
 		<ProcessStep>ModisLSTReproject</ProcessStep>
 		<ProcessStep>ModisLSTMask</ProcessStep>
-		<ProcessStep>ModiLSTClip</ProcessStep>
+		<ProcessStep>ModisLSTClip</ProcessStep>
 	</Processor>
 	<Indices>
 		<ClassName>ModisLSTDay</ClassName>

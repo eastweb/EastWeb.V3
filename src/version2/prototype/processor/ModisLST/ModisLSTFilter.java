@@ -27,19 +27,21 @@ public class ModisLSTFilter extends Filter{
     }
 
     @Override
-    protected void filterByQCFlag(String qcLevel) {
+    protected void filterByQCFlag(String qcLevel)
+    {
         // filter pixel by pixel
-
         GdalUtils.register();
+
         synchronized (GdalUtils.lockObject)
         {
             // order: day(band1), night(band5), day_qc(band2), night_qc(band6)
             Band [] bands = new Band[4];
 
             Dataset inputDS = null;
+
             for (File mInput : inputFiles)   // after Mozaic, they should be in separate bands
             {
-                String fName = mInput.getName();
+                String fName = mInput.getAbsolutePath();
                 inputDS = gdal.Open(fName);
 
                 switch (FilenameUtils.getBaseName(fName))
@@ -73,16 +75,17 @@ public class ModisLSTFilter extends Filter{
 
             // name the output file as the same as the input's plus "day"
             Dataset outputDS =
-                    gdal.GetDriverByName("GTiff").Create(File.separator + "day.tif",
+                    gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "day.tif",
                             xSize, ySize, 1);
 
             // filter day band, and write to the day.tif file
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
 
+            outputDS.delete();
             // name the output file as the same as the input's plus "night"
             outputDS =
-                    gdal.GetDriverByName("GTiff").Create(File.separator + "night.tif",
+                    gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "night.tif",
                             xSize, ySize, 1);
 
             // filter night band, and write to the night.tif file
@@ -91,7 +94,9 @@ public class ModisLSTFilter extends Filter{
 
             outputDS.delete();
             inputDS.delete();
+
         }
+
     }
 
     /*
@@ -120,44 +125,51 @@ public class ModisLSTFilter extends Filter{
         String bits1 = null;
         String bits2 = null;
 
+        String bPattern = "%8s";   // to add leading 0s to the binary string
+
         for (int i = 0; i < size; i++)
         {
+            String qBandStr = String.format(bPattern, Integer.toBinaryString(qBand[i])).replace(' ', '0');
+
             //read the every pixel of the qBand and
             //compare it with the qcLevel to set the pixel of dBand
             switch(qcLevel)
             {
-            case "NOSCREENING": // last two bits are 00 or 01
-                bits1 = Integer.toBinaryString(qBand[i]).substring(6, 7);
-                if (!((bits1.equals("00") || bits1.equals("01"))))
-                {
-                    dBand[i] = GdalUtils.NoValue;
-                }
+            case "NOSCREENING": // accept all the data ?
+                // last two bits are 00 or 01
+                break;
             case "LOW":
                 // last two bits are 01, first two except "11", use mask 0xC1F
-                // last two are "00" (covered by the above case)
+                // last two are "00"
                 bitMask = 0XC1F;
                 int r = bitMask ^ qBand[i];
-                bits1 = Integer.toBinaryString(r).substring(0, 1);
-                bits2 = Integer.toBinaryString(r).substring(6, 7);
-                if (bits1.equals("00") && (bits2.equals("00")))
+                String rStr = String.format(bPattern, Integer.toBinaryString(r)).replace(' ', '0');
+                bits1 = rStr.substring(0, 1);
+                bits2 = rStr.substring(6, 7);
+
+                String bits3 = qBandStr.substring(6, 7);
+                if (   (!(bits3.equals("00"))) &&
+                        ( (bits1.equals("00")) && (bits2.equals("00")) ) )
                 {
                     dBand[i] = GdalUtils.NoValue;
-                }
+                };
+                break;
             case "MODERATE":
                 // last two bits are 01, first two are 00  or 01
-                // last two are "00" (covered by the above case)
-                bits1 = Integer.toBinaryString(qBand[i]).substring(0, 1);
-                bits2 = Integer.toBinaryString(qBand[i]).substring(6, 7);
-                if  (bits2.equals("01"))
+                // last two are "00"
+                bits1 = qBandStr.substring(0, 1);
+                bits2 = qBandStr.substring(6, 7);
+
+                if (  (!(bits2.equals("00"))) &&
+                        ( (bits2.equals("01")) && (!((bits1.equals("01")) || (bits1.equals("00")))) ))
                 {
-                    if (!((bits1.equals("01")) || (bits1.equals("00"))))
-                    {
-                        dBand[i] =  GdalUtils.NoValue;
-                    }
-                }
+                    dBand[i] = GdalUtils.NoValue;
+                };
+                break;
+
             case "HIGHEST":
                 // last two should be "00"
-                bits2 = Integer.toBinaryString(qBand[i]).substring(6, 7);
+                bits2 = qBandStr.substring(6, 7);
                 if  (!bits2.equals("00"))
                 {
                     dBand[i] = GdalUtils.NoValue;

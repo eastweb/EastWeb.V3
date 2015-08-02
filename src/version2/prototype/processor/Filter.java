@@ -23,7 +23,7 @@ public abstract class Filter {
     protected String [] inputFolders;
 
     protected File inputFolder1;
-    protected File inputFolder2;
+    protected File inputFolder2 = null;
     //location for the output file
     protected String outputFolder;
     // the files in the input folder
@@ -43,19 +43,23 @@ public abstract class Filter {
          */
         inputFolders = data.getInputFolders();
 
-        //check if there is ate least one input file in the given folder
+        //check if there is at least one input file in the given folder
         inputFolder1 = new File(inputFolders[0]);
         File[] listOfFiles = inputFolder1.listFiles();
         assert (listOfFiles.length >= 1);
         //set the input files
         inputFiles = listOfFiles;
 
-        //check if there is ate least one input file in the given folder
-        inputFolder2 = new File(inputFolders[1]);
-        File[] listOfFiles2= inputFolder2.listFiles();
+        //check if there is input file in the qc folder
+        if (inputFolders.length > 1)
+        {
+            inputFolder2 = new File(inputFolders[1]);
+            File[] listOfFiles2= inputFolder2.listFiles();
 
-        if (listOfFiles2.length >= 1) {
-            qcFiles = listOfFiles2;
+            if (listOfFiles2.length >= 1)
+            {
+                qcFiles = listOfFiles2;
+            }
         }
 
         // set qcLevel
@@ -82,7 +86,7 @@ public abstract class Filter {
             filterByValue();
         }
 
-        // remove the input folder
+        //remove the input folder
         FileUtils.deleteDirectory(inputFolder1);
         if (inputFolder2.exists())
         {   FileUtils.deleteDirectory(inputFolder2);    }

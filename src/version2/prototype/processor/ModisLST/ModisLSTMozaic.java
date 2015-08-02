@@ -11,6 +11,6 @@ public class ModisLSTMozaic extends Mozaic{
 
     @Override
     protected int[] getBands() {
-        return new int[] {1,2,5,6};
+        return new int[] {1,2, 5, 6};
     }
 }

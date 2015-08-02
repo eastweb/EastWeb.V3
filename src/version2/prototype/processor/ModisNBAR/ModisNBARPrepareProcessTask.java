@@ -84,9 +84,9 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
                     "Mask", date.getYear(), date.getDayOfYear());
         case 4:
             // Mask -> Output (Clip)
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
-                    "Output", date.getYear(), date.getDayOfYear());
+                    date.getYear(), date.getDayOfYear());
             break;
         default:
             outputFolder = null;

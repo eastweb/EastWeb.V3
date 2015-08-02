@@ -95,9 +95,10 @@ public class ModisLSTPrepareProcessTask extends PrepareProcessTask {
             break;
         case 5:
             // Mask - >clip
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
-                    "Output", date.getYear(), date.getDayOfYear());
+                    date.getYear(), date.getDayOfYear());
+            break;
         default:
             outputFolder = null;
             break;

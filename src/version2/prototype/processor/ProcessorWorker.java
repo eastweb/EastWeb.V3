@@ -28,7 +28,6 @@ import version2.prototype.util.FileSystem;
 /**
  * An implementation of a ProcessWorker to handle the work for the Processor framework and to be used by a Process extending class.
  *
- * @author michael.devos
  * @author Yi Liu
  *
  */
@@ -108,12 +107,12 @@ public class ProcessorWorker extends ProcessWorker {
                     (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, pluginMetaData, thisDay);
 
             String laststepOutputFolder = null;
+            String tempFolderStr = null;
 
             // process the files for that date
             for (Entry<Integer, String> step : processStep.entrySet())
             {
                 Integer key = step.getKey();
-                System.out.println(key);
 
                 Class<?> classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
 
@@ -123,6 +122,7 @@ public class ProcessorWorker extends ProcessWorker {
                 if (key == 1)
                 {
                     String [] inputFolders = prepareTask.getInputFolders(key);
+                    tempFolderStr = inputFolders[0];
 
                     File dataInputFolder = new File(inputFolders[0]);
                     File qcInputFolder = null;
@@ -134,14 +134,12 @@ public class ProcessorWorker extends ProcessWorker {
                     for (DownloadFileMetaData dFile : entry.getValue())
                     {
                         //System.out.println("processorWorker: " + dFile.dataFilePath);
-                        FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
-                        if (qcInputFolder != null)
-                        {
-                            // assume QC is the first element in the extraDownloads
-                            FileUtils.copyFileToDirectory(
-                                    new File(dFile.extraDownloads.get(0).dataFilePath),
-                                    qcInputFolder);
-                        }
+                        if (dFile.dataName.equalsIgnoreCase("data"))
+                        {   FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder); }
+
+                        if (dFile.dataName.equalsIgnoreCase("QC"))
+                        {   FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), qcInputFolder); }
+
                     }
                 }
 
@@ -195,9 +193,9 @@ public class ProcessorWorker extends ProcessWorker {
 
             // remove the entire temp folder
             // find "temp" in the laststepOutputFolder
-            if (laststepOutputFolder != null)
+            if ( tempFolderStr!= null)
             {
-                String tempFolder = laststepOutputFolder.substring(0, laststepOutputFolder.lastIndexOf("Temp"))+"Temp";
+                String tempFolder = tempFolderStr.substring(0, tempFolderStr.lastIndexOf("Temp"))+"Temp";
                 FileUtils.deleteDirectory(new File(tempFolder));
             }
 

@@ -79,11 +79,11 @@ public class Clip
             {
                 String filename = mInput.getName();
                 File mOutput = new File(outputFolder,filename);
-                System.out.println("clip :" + mInput.getPath());
+                // System.out.println("clip :" + mInput.getPath());
                 Dataset rasterDS = gdal.Open(mInput.getPath());
                 DataSource featureDS = ogr.Open(shapeFile.getPath());
                 Layer featureLyr = featureDS.GetLayer(0);
-                System.out.println("clip : " + rasterDS.GetGeoTransform());
+                // System.out.println("clip : " + rasterDS.GetGeoTransform());
                 final int pixelSize = (int) Math.abs(rasterDS.GetGeoTransform()[1]); // FIXME: getting pixel size won't work for some datasets
                 //System.out.println("PIXEL SIZE: " + pixelSize);
 

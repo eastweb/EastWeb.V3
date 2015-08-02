@@ -1,10 +1,10 @@
 package test.processor;
 
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,18 +19,13 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.util.DataFileMetaData;
-import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
-import version2.prototype.util.PostgreSQLConnection;
-import version2.prototype.util.Schemas;
-import version2.prototype.processor.TRMM3B42.*;
 
-public class TestPW_TRMM3B42 {
+public class Test_PW_ModisLST {
 
-    public TestPW_TRMM3B42() {
+    public Test_PW_ModisLST() {
     }
 
     @BeforeClass
@@ -42,12 +37,11 @@ public class TestPW_TRMM3B42 {
     }
 
     @Test
-    public void testCall() throws Exception
-    {
+    public void testCall() throws Exception {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW2.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_TRMM3B42.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_ModisLST.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
         //        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
@@ -55,8 +49,8 @@ public class TestPW_TRMM3B42 {
         //                pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\TRMM2\\2015\\118\\3B42_daily.2015.04.29.7.bin", 2015, 118)));
-
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2015\\201\\h28v06.hdf", 2015, 201)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2015\\201\\h29v06.hdf", 2015, 201)));
         //"Blah", "Project_TW", "TRMM3B42", ProcessName.Processor, null
 
         // DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
@@ -65,22 +59,6 @@ public class TestPW_TRMM3B42 {
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
         worker.call();
-    }
-
-    protected class MyDatabaseCache extends DatabaseCache
-    {
-        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
-            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
-        }
-
-        @Override
-        public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
-        ParserConfigurationException, SAXException, IOException {
-            for(DataFileMetaData data : filesForASingleComposite)
-            {
-                System.out.println(data.ReadMetaDataForIndices().dataFilePath);
-            }
-        }
     }
 
 }
