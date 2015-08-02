@@ -14,12 +14,12 @@ import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
+import version2.prototype.EASTWebI;
 import version2.prototype.EASTWebManager;
 import version2.prototype.GenericProcess;
 import version2.prototype.Process;
@@ -35,6 +35,7 @@ import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.summary.Summary;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.FileSystem;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
@@ -50,7 +51,7 @@ public class Scheduler {
 
     private final int ID;
     private final Config configInstance;
-    private final EASTWebManager manager;
+    private final EASTWebI manager;
     private SchedulerStatus status;
     private TaskState mState;
     private ArrayList<LocalDownloader> localDownloaders;
@@ -72,7 +73,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, EASTWebManager manager) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebI manager) throws ParserConfigurationException, SAXException, IOException
     {
         this(data, myID, TaskState.STOPPED, manager, Config.getInstance());
     }
@@ -89,7 +90,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, EASTWebManager manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
     {
         this(data, myID, TaskState.STOPPED, manager, configInstance);
     }
@@ -106,7 +107,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManager manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
     {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
@@ -125,6 +126,10 @@ public class Scheduler {
         this.configInstance = configInstance;
         this.manager = manager;
 
+        // Make sure directory layout is set up
+        new File(FileSystem.GetRootDirectoryPath(projectInfoFile)).mkdirs();
+        new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName())).mkdirs();
+
         // Update status in EASTWebManager
         NotifyUI(new GeneralUIEventObject(this, null, null, null));
 
@@ -134,6 +139,8 @@ public class Scheduler {
             try
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
+                new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName())).mkdirs();
+
                 // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
                 Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
                         configInstance.getSummaryCalculations(),
@@ -271,7 +278,7 @@ public class Scheduler {
         status.UpdateUpdatesBeingProcessed(results);
     }
 
-    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManager manager, TaskState initState)
+    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebI manager, TaskState initState)
     {
         this.data = data;
         this.projectInfoFile = projectInfoFile;
@@ -341,6 +348,12 @@ public class Scheduler {
     {
         ArrayList<LocalDownloader> lDownloders = new ArrayList<LocalDownloader>();
 
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.DOWNLOAD)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.DOWNLOAD)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.DOWNLOAD)).mkdirs();
+        new File(FileSystem.GetGlobalDownloadDirectory(configInstance, pluginInfo.GetName())).mkdirs();
+
         // Create "data" DownloadFactory
         Class<?> downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + pluginMetaData.Download.downloadFactoryClassName);
         Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
@@ -353,6 +366,9 @@ public class Scheduler {
 
         for(DownloadMetaData dlMetaData : pluginMetaData.Download.extraDownloads)
         {
+            // Setup directory layout if not existing already
+            new File(FileSystem.GetGlobalDownloadDirectory(configInstance, dlMetaData.name)).mkdirs();
+
             // Create extra ListDatesFiles instance
             downloadFactoryClass = Class.forName("version2.prototype.download" + pluginInfo.GetName() + dlMetaData.downloadFactoryClassName);
             downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
@@ -380,8 +396,13 @@ public class Scheduler {
      * @throws ClassNotFoundException
      */
     protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "ProcessorWorker");
         //        inputCache.addObserver(process);
         return process;
     }
@@ -399,8 +420,13 @@ public class Scheduler {
      * @throws ClassNotFoundException
      */
     protected Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "IndicesWorker");
         //        inputCache.addObserver(process);
         return process;
     }
@@ -415,8 +441,13 @@ public class Scheduler {
      * @return {@link Summary Summary}  - the manager object of SummaryWorkers for the current project and given plugin
      * @param inputCache  - the DatabaseCache object used to acquire files available for summary processing
      */
-    protected Summary SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache)
+    protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException
     {
+        // Setup directory layout if not existing already
+        new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+        new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+        new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+
         Summary process = new Summary(manager, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
         //        inputCache.addObserver(process);
         return process;

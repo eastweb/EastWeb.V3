@@ -84,7 +84,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         String className = null;
         String timeZone = null;
         String datePatternStr = "\\d{4}";
-        String fileNamePatternStr = "MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdfn";
+        String fileNamePatternStr = "MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf";
         LocalDate ld = LocalDate.parse("Feb 18 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("MMM dd HH:mm:ss zzz uuuu"));
 
         dData = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
@@ -202,7 +202,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         gdl.run();
 
         // Test Run. results were written and stored
-        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
+        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/h00v08";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
         Connection con = PostgreSQLConnection.getConnection();

@@ -2,8 +2,7 @@ package version2.prototype.summary;
 
 import java.util.ArrayList;
 
-import version2.prototype.EASTWebManager;
-import version2.prototype.EASTWebManager;
+import version2.prototype.EASTWebI;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -33,7 +32,7 @@ public class Summary extends Process {
      * @param inputProcessName  - name of process to use the output of for its input
      * @param executor  - executor service to use to spawn worker threads
      */
-    public Summary(EASTWebManager manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
+    public Summary(EASTWebI manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
     {
         super(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, null);
         inputCache.addObserver(this);

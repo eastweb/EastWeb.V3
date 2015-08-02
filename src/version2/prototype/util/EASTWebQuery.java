@@ -28,4 +28,9 @@ public final class EASTWebQuery {
     {
         return sql;
     }
+
+    @Override
+    public String toString() {
+        return sql;
+    }
 }

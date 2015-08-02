@@ -5,23 +5,63 @@ package test.Scheduler;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
+
+import version2.prototype.Config;
+import version2.prototype.EASTWebI;
+import version2.prototype.EASTWebManager;
+import version2.prototype.GenericProcess;
+import version2.prototype.Process;
+import version2.prototype.ProcessWorker;
+import version2.prototype.ProcessWorkerReturn;
+import version2.prototype.TaskState;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.Scheduler.SchedulerData;
+import version2.prototype.download.DownloadFactory;
+import version2.prototype.download.DownloaderFactory;
+import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.LocalDownloader;
+import version2.prototype.indices.IndicesWorker;
+import version2.prototype.processor.ProcessorWorker;
+import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
  *
  */
 public class SchedulerTest {
+    private static String testProjectName = "Scheduler_Test_Project";
+    private static String testPluginName = "TRMM3B42RT";
+    private static String testGlobalSchema;        // Scheduler_Test_EASTWeb
+    private static MyEASTWebManager manager;
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        SchedulerTest temp = new SchedulerTest();
+        manager = temp.new MyEASTWebManager();
     }
 
     /**
@@ -36,6 +76,20 @@ public class SchedulerTest {
      */
     @Before
     public void setUp() throws Exception {
+        Connection con = PostgreSQLConnection.getConnection();
+        Statement stmt = con.createStatement();
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                testGlobalSchema
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(testProjectName, testPluginName)
+                );
+        stmt.execute(query);
+        stmt.close();
+        con.close();
     }
 
     /**
@@ -46,19 +100,18 @@ public class SchedulerTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#Scheduler(version2.prototype.Scheduler.SchedulerData, int, version2.prototype.EASTWebManager)}.
+     * Test method for {@link version2.prototype.Scheduler.Scheduler#Scheduler(version2.prototype.Scheduler.SchedulerData, int, version2.prototype.TaskState, version2.prototype.EASTWebManager,
+     * version2.prototype.Config)}.
+     * @throws Exception
      */
     @Test
-    public final void testSchedulerSchedulerDataIntEASTWebManager() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#Scheduler(version2.prototype.Scheduler.SchedulerData, int, version2.prototype.TaskState, version2.prototype.EASTWebManager)}.
-     */
-    @Test
-    public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() {
-        fail("Not yet implemented"); // TODO
+    public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() throws Exception {
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile("src/test/Scheduler/Test_Project.xml");
+        SchedulerData sData = new SchedulerData(projectInfoFile);
+        Scheduler scheduler = new Scheduler(sData, 1, TaskState.RUNNING, manager, Config.getAnInstance("src/test/Scheduler/config.xml"));
+        assertTrue("indicesWorkerSuccess", manager.indicesWorkerSuccess);
+        assertTrue("processorWorkerSuccess", manager.processorWorkerSuccess);
+        assertTrue("summaryWorkerSuccess", manager.summaryWorkerSuccess);
     }
 
     /**
@@ -107,6 +160,136 @@ public class SchedulerTest {
     @Test
     public final void testAttemptUpdate() {
         fail("Not yet implemented"); // TODO
+    }
+
+    private class MyScheduler extends Scheduler
+    {
+        public MyScheduler(SchedulerData data, int myID, EASTWebI manager) throws ParserConfigurationException, SAXException, IOException {
+            super(data, myID, manager);
+        }
+
+        public MyScheduler(SchedulerData data, int myID, TaskState initState, EASTWebI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+        {
+            super(data, myID, initState, manager, configInstance);
+        }
+
+        @Override protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
+            Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "../../../test/Scheduler/ProcessorWorkerTest");
+            return process;
+        }
+
+        @Override
+        protected Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
+            Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "../../../test/Scheduler/IndicesWorkerTest");
+            return process;
+        }
+
+        @Override
+        protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException {
+            Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "../../../test/Scheduler/SummaryWorkerTest");
+            return process;
+        }
+    }
+
+    private class MyEASTWebManager extends EASTWebManager
+    {
+        public boolean processorWorkerSuccess;
+        public boolean indicesWorkerSuccess;
+        public boolean summaryWorkerSuccess;
+
+        public MyEASTWebManager(){
+
+        }
+
+        @Override
+        public void NotifyUI(Scheduler updatedScheduler) {
+
+        }
+
+        @Override
+        public void run() {
+        }
+
+        @Override
+        public void StartExistingGlobalDownloader(int gdlID) {
+        }
+
+        @Override
+        public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException {
+            int id = getLowestAvailableGlobalDLID();
+            LocalDownloader localDl = null;
+            if(IsIDValid(id, globalDLIDs))
+            {
+                DownloaderFactory factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
+                GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
+                int currentGDLIdx = -1;
+                for(int i=0; i < globalDLs.size(); i++)
+                {
+                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
+                    {
+                        currentGDLIdx = i;
+                        break;
+                    }
+                }
+
+                if(currentGDLIdx >= 0)
+                {
+                    releaseGlobalDLID(id);
+                    gdl = globalDLs.get(currentGDLIdx);
+                }
+                else {
+                    localDl = factory.CreateLocalDownloader(gdl);
+                    if(globalDLs.size() == 0)
+                    {
+                        globalDLs.add(id, gdl);
+                        //                        globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                        gdl.run();
+                    }
+                    else
+                    {
+                        GlobalDownloader temp = globalDLs.get(id);
+                        if(temp == null)
+                        {
+                            globalDLs.add(id, gdl);
+                            //                            globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                            gdl.run();
+                        }
+                        else{
+                            globalDLs.set(id, gdl);
+                            //                            globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                            gdl.run();
+                        }
+                    }
+                }
+
+                synchronized (numOfCreatedGDLs) {
+                    numOfCreatedGDLs = globalDLs.size();
+                }
+
+                return localDl;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        @Override
+        public void StopGlobalDownloader(int gdlID) {
+        }
+
+        @Override
+        public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker) {
+            switch(worker.processWorkerName)
+            {
+            case "ProcessorWorkerTest": processorWorkerSuccess = true; break;
+            case "IndicesWorkerTest": indicesWorkerSuccess = true; break;
+            case "SummaryWorkerTest": summaryWorkerSuccess = true; break;
+            }
+
+            return null;
+        }
+
     }
 
 }
