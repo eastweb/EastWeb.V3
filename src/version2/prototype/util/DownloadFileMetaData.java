@@ -12,7 +12,7 @@ public class DownloadFileMetaData {
     public final String dataFilePath;
     public final int year;
     public final int day;
-    public final ArrayList<DownloadFileMetaData> extraDownloads;
+    //    public final ArrayList<DownloadFileMetaData> extraDownloads;
 
     /**
      * Creates a DownloadFileMetaData object initialized to the given values.
@@ -23,11 +23,10 @@ public class DownloadFileMetaData {
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param extraDownloads  - extra download files gotten as define by the plugin metadata
      */
-    public DownloadFileMetaData(String dataName, String dataFilePath, int year, int day, ArrayList<DownloadFileMetaData> extraDownloads) {
+    public DownloadFileMetaData(String dataName, String dataFilePath, int year, int day) {
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
         this.year = year;
         this.day = day;
-        this.extraDownloads = extraDownloads;
     }
 }

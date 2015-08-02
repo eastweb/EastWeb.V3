@@ -641,7 +641,7 @@ public class EASTWebManager implements Runnable{
      * @return LocalDownloader if specified to create one, otherwise NULL
      * @throws IOException
      */
-    public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory, boolean createLocalDownloader) throws IOException
+    public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException
     {
         synchronized (globalDLs)
         {
@@ -663,6 +663,7 @@ public class EASTWebManager implements Runnable{
                 if(currentGDLIdx >= 0)
                 {
                     releaseGlobalDLID(id);
+                    gdl = globalDLs.get(currentGDLIdx);
                 }
                 else {
                     if(globalDLs.size() == 0)
@@ -689,14 +690,8 @@ public class EASTWebManager implements Runnable{
                     numOfCreatedGDLs = globalDLs.size();
                 }
 
-                if(createLocalDownloader)
-                {
-                    LocalDownloader localDl = factory.CreateLocalDownloader(gdl);
-                    return localDl;
-                }
-                else {
-                    return null;
-                }
+                LocalDownloader localDl = factory.CreateLocalDownloader(gdl);
+                return localDl;
             }
             else
             {

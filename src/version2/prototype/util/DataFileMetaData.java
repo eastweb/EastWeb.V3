@@ -14,7 +14,7 @@ public class DataFileMetaData {
     private final int year;
     private final int day;
     private final String indexNm;
-    private final ArrayList<DataFileMetaData> extraDownloads;
+    //    private final ArrayList<DataFileMetaData> extraDownloads;
 
     /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the environmental index to null.
@@ -23,16 +23,14 @@ public class DataFileMetaData {
      * @param filePath  - full path to the data file
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
-     * @param extraDownloads  - the files
      */
-    public DataFileMetaData(String dataName, String filePath, int year, int day, ArrayList<DataFileMetaData> extraDownloads)
+    public DataFileMetaData(String dataName, String filePath, int year, int day)
     {
         this.dataName = dataName;
         this.filePath = filePath;
         this.year = year;
         this.day = day;
         indexNm = null;
-        this.extraDownloads = extraDownloads;
     }
 
     /**
@@ -45,15 +43,15 @@ public class DataFileMetaData {
      * @param indexNm  - the environmental index associated to the data file
      * @param extraDownloads  - collection of the extra downloads specified by the plugin metadata
      */
-    public DataFileMetaData(String dataName, String filePath, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads)
-    {
-        this.dataName = dataName;
-        this.filePath = filePath;
-        this.year = year;
-        this.day = day;
-        this.indexNm = indexNm;
-        this.extraDownloads = extraDownloads;
-    }
+    //    public DataFileMetaData(String dataName, String filePath, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads)
+    //    {
+    //        this.dataName = dataName;
+    //        this.filePath = filePath;
+    //        this.year = year;
+    //        this.day = day;
+    //        this.indexNm = indexNm;
+    //        this.extraDownloads = extraDownloads;
+    //    }
 
     /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the QC file path to null.
@@ -71,7 +69,6 @@ public class DataFileMetaData {
         this.year = year;
         this.day = day;
         this.indexNm = indexNm;
-        extraDownloads = new ArrayList<DataFileMetaData>(0);
     }
 
     /**
@@ -82,15 +79,15 @@ public class DataFileMetaData {
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public DataFileMetaData(String dataName, String filePath, int year, int day)
-    {
-        this.dataName = dataName;
-        this.filePath = filePath;
-        this.year = year;
-        this.day = day;
-        indexNm = null;
-        extraDownloads = new ArrayList<DataFileMetaData>(0);
-    }
+    //    public DataFileMetaData(String dataName, String filePath, int year, int day)
+    //    {
+    //        this.dataName = dataName;
+    //        this.filePath = filePath;
+    //        this.year = year;
+    //        this.day = day;
+    //        indexNm = null;
+    //        extraDownloads = new ArrayList<DataFileMetaData>(0);
+    //    }
 
     /**
      * Copy constructor
@@ -105,18 +102,17 @@ public class DataFileMetaData {
         day = dData.day;
         indexNm = null;
 
-        ArrayList<DataFileMetaData> extras = new ArrayList<DataFileMetaData>();
-        if (dData.extraDownloads != null)
-        {
-            for(DownloadFileMetaData extra : dData.extraDownloads)
-            {
-                extras.add(new DataFileMetaData(extra.dataName, dData.dataFilePath, dData.year, dData.day));
-            }
-            extraDownloads = extras;
-        } else {
-            extraDownloads = null;
-        }
-
+        //        ArrayList<DataFileMetaData> extras = new ArrayList<DataFileMetaData>();
+        //        if (dData.extraDownloads != null)
+        //        {
+        //            for(DownloadFileMetaData extra : dData.extraDownloads)
+        //            {
+        //                extras.add(new DataFileMetaData(extra.dataName, dData.dataFilePath, dData.year, dData.day));
+        //            }
+        //            extraDownloads = extras;
+        //        } else {
+        //            extraDownloads = null;
+        //        }
     }
 
     /**
@@ -131,7 +127,7 @@ public class DataFileMetaData {
         year = pData.year;
         day = pData.day;
         indexNm = null;
-        extraDownloads = null;
+        //        extraDownloads = null;
     }
 
     /**
@@ -146,7 +142,7 @@ public class DataFileMetaData {
         year = iData.year;
         day = iData.day;
         indexNm = iData.indexNm;
-        extraDownloads = null;
+        //        extraDownloads = null;
     }
 
     /**
@@ -156,17 +152,17 @@ public class DataFileMetaData {
      */
     public DownloadFileMetaData ReadMetaDataForProcessor()
     {
-        if (extraDownloads != null)
-        {
-            ArrayList<DownloadFileMetaData> extras = new ArrayList<DownloadFileMetaData>(extraDownloads.size());
-            for(DataFileMetaData extraData : extraDownloads)
-            {
-                extras.add(extraData.ReadMetaDataForProcessor());
-            }
-            return new DownloadFileMetaData(dataName, filePath, year, day, extras);
-        } else {
-            return new DownloadFileMetaData(dataName, filePath, year, day, null);
-        }
+        //        if (extraDownloads != null)
+        //        {
+        //            ArrayList<DownloadFileMetaData> extras = new ArrayList<DownloadFileMetaData>(extraDownloads.size());
+        //            for(DataFileMetaData extraData : extraDownloads)
+        //            {
+        //                extras.add(extraData.ReadMetaDataForProcessor());
+        //            }
+        //            return new DownloadFileMetaData(dataName, filePath, year, day, extras);
+        //        } else {
+        //            return new DownloadFileMetaData(dataName, filePath, year, day, null);
+        return new DownloadFileMetaData(dataName, filePath, year, day);
     }
 
     /**

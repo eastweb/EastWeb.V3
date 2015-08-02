@@ -5,7 +5,6 @@ package test.util;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,12 +23,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
-import version2.prototype.util.DownloadFileMetaData;
-import version2.prototype.util.FileSystem;
 import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.ProcessorFileMetaData;
@@ -44,10 +40,9 @@ public class DatabaseCacheTest {
     private static DatabaseCache testProcessorCache;
     private static DatabaseCache testIndicesCache;
     private static ArrayList<String> extraDownloadFiles;
-    private static String testProjectName = "Test_Project";
-    private static String testPluginName = "Test_Plugin";
-    private static String testGlobalSchema = "Test_EASTWeb";
-    private static String testWorkingDir = "C:/";
+    private static String testProjectName = "Test_Project1";
+    private static String testPluginName = "Test_Plugin1";
+    private static String testGlobalSchema = "Test_EASTWeb1";
     private static Connection con;
     private static int year = 2015;
     private static int day = 100;
@@ -55,7 +50,6 @@ public class DatabaseCacheTest {
     private static int numOfIndices = 3;
     private static int filesPerDay = 1;
     private static String data1FilePath = "Data file path";
-    private static String qc1FilePath = "QC file path";
 
     /**
      * @throws java.lang.Exception
@@ -85,14 +79,16 @@ public class DatabaseCacheTest {
     @Before
     public void setUp() throws Exception {
         Statement stmt = con.createStatement();
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
                 testGlobalSchema
-                ));
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
                 Schemas.getSchemaName(testProjectName, testPluginName)
-                ));
+                );
+        stmt.execute(query);
         stmt.close();
 
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null, extraDownloadFiles,
@@ -122,24 +118,14 @@ public class DatabaseCacheTest {
         filesForASingleComposite.add(new DataFileMetaData("Data", "Data file path", 2015, 100, "Index"));
 
         Statement stmt = con.createStatement();
-        stmt.execute("INSERT INTO \"" + testGlobalSchema + "\".\"GlobalDownloader\" (\"PluginID\") VALUES (1);");
-        String query = String.format(
-                "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
-                        "(1, 1, '" + data1FilePath + "');",
-                        testGlobalSchema
-                );
-        stmt.executeUpdate(query);
-        query = String.format(
-                "INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES\n" +
-                        "(1, 'QC', '" + qc1FilePath + "');",
-                        testGlobalSchema
-                );
-        stmt.executeUpdate(query);
+        stmt.execute("INSERT INTO \"" + testGlobalSchema + "\".\"GlobalDownloader\" (\"PluginID\", \"DataName\") VALUES " +
+                "(1, 'Data')," +
+                "(1, 'QC');");
         stmt.close();
 
         // Cache to ProcessorCache
         filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData("Data", "Data file path", 2015, 100, "Index"));
+        filesForASingleComposite.add(new DataFileMetaData("Data", data1FilePath, 2015, 100, "Index"));
         testProcessorCache.CacheFiles(filesForASingleComposite);
         // Cache to IndicesCache
         testIndicesCache.CacheFiles(filesForASingleComposite);
@@ -166,7 +152,8 @@ public class DatabaseCacheTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.util.DatabaseCache#LoadUnprocessedGlobalDownloadsToLocalDownloader(java.lang.String, java.lang.String, java.lang.String, java.time.LocalDate, java.util.ArrayList)}.
+     * Test method for {@link version2.prototype.util.DatabaseCache#LoadUnprocessedGlobalDownloadsToLocalDownloader(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.time.LocalDate,
+     * java.util.ArrayList, java.util.ArrayList)}.
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
@@ -190,11 +177,14 @@ public class DatabaseCacheTest {
         String query;
         LocalDate startDate = LocalDate.now().minusDays(8);;
 
-        query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES (" + LocalDate.now().getDayOfYear() + ", " + LocalDate.now().getYear() + ")",
+        query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES " +
+                "(" + LocalDate.now().getDayOfYear() + ", " + LocalDate.now().getYear() + ")",
                 testGlobalSchema);
         stmt.execute(query);
 
-        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\") VALUES (1);",
+        query = String.format("INSERT INTO \"%1$s\".\"GlobalDownloader\" (\"PluginID\", \"DataName\") VALUES " +
+                "(1, 'Data')," +
+                "(1, 'QC');",
                 testGlobalSchema);
         stmt.execute(query);
 
@@ -206,58 +196,131 @@ public class DatabaseCacheTest {
                 testGlobalSchema);
         stmt.execute(query);
 
-        query = String.format("INSERT INTO \"%1$s\".\"ExtraDownload\" (\"DownloadID\", \"DataName\", \"FilePath\") VALUES " +
-                "(1, 'QC', '" + qcFilePath1 + "'), " +
-                "(2, 'QC', '" + qcFilePath2 + "'), " +
-                "(2, 'QC', '" + qcFilePath3 + "');",
+        query = String.format("INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DataName\", \"FilePath\", \"DateGroupID\", \"Complete\") VALUES " +
+                "(2, 'QC', '" + qcFilePath1 + "', 1, TRUE), " +
+                "(2, 'QC', '" + qcFilePath2 + "', 2, TRUE), " +
+                "(2, 'QC', '" + qcFilePath3 + "', 2, TRUE);",
                 testGlobalSchema);
         stmt.execute(query);
 
-        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, startDate, extraDownloadFiles, modisTileNames);
+        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "Data", startDate, extraDownloadFiles, modisTileNames);
+        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "QC", startDate, extraDownloadFiles, modisTileNames);
 
         query = "SELECT * FROM \"" + schemaName + "\".\"DownloadCache\"";
         rs = stmt.executeQuery(query);
         if(rs != null)
         {
+            String path1, path2;
+            int downloadID1, downloadID2;
+            int dateGroupID1, dateGroupID2;
+
             if(rs.next())
             {
-                assertTrue(schemaName + ".DownloadCache Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheID") + ", " + rs.getString("DataFilePath") + ", " + rs.getString("QCFilePath") + ", " +
+                if(rs.getInt("DateGroupID") == 1)
+                {
+                    path1 = dateFilePath1;
+                    downloadID1 = 1;
+                    dateGroupID1 = 1;
+                    path2 = dateFilePath2;
+                    downloadID2= 2;
+                    dateGroupID2 = 2;
+                }
+                else
+                {
+                    path1 = dateFilePath2;
+                    downloadID1 = 2;
+                    dateGroupID1 = 2;
+                    path2 = dateFilePath1;
+                    downloadID2= 1;
+                    dateGroupID2 = 1;
+                }
+
+                assertTrue(schemaName + ".DownloadCache Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheID") + ", " + rs.getString("DataFilePath") + ", " +
                         rs.getInt("DownloadID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
                         rs.getInt("DownloadCacheID") == rs.getRow() &&
-                        rs.getString("DataFilePath").equals(dateFilePath1) &&
-                        rs.getString("QCFilePath").equals(qcFilePath1) &&
-                        rs.getInt("DownloadID") == 1 &&
-                        rs.getInt("DateGroupID") == 1 &&
+                        rs.getString("DataFilePath").equals(path1) &&
+                        rs.getInt("DownloadID") == downloadID1 &&
+                        rs.getInt("DateGroupID") == dateGroupID1 &&
                         rs.getBoolean("Retrieved") == false &&
                         rs.getBoolean("Processed") == false);
+
+                if(rs.next())
+                {
+                    assertTrue(schemaName + ".DownloadCache Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheID") + ", " + rs.getString("DataFilePath") + ", " +
+                            rs.getInt("DownloadID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
+                            rs.getInt("DownloadCacheID") == rs.getRow() &&
+                            rs.getString("DataFilePath").equals(path2) &&
+                            rs.getInt("DownloadID") == downloadID2 &&
+                            rs.getInt("DateGroupID") == dateGroupID2 &&
+                            rs.getBoolean("Retrieved") == false &&
+                            rs.getBoolean("Processed") == false);
+
+                    if(rs.next())
+                    {
+                        fail("More than 2 files loaded into DownloadCache.");
+                    }
+                }
             }
+        }
+        rs.close();
+
+        query = "SELECT * FROM \"" + schemaName + "\".\"DownloadCacheExtra\"";
+        rs = stmt.executeQuery(query);
+        if(rs != null)
+        {
             if(rs.next())
             {
-                assertTrue(schemaName + ".DownloadCache Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheID") + ", " + rs.getString("DataFilePath") + ", " + rs.getString("QCFilePath") + ", " +
-                        rs.getInt("DownloadID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
-                        rs.getInt("DownloadCacheID") == rs.getRow() &&
-                        rs.getString("DataFilePath").equals(dateFilePath2) &&
-                        rs.getString("QCFilePath").equals(qcFilePath2) &&
-                        rs.getInt("DownloadID") == 2 &&
-                        rs.getInt("DateGroupID") == 2 &&
+                String path1, path2;
+                int downloadID1, downloadID2;
+                int dateGroupID1, dateGroupID2;
+
+                if(rs.getInt("DateGroupID") == 1)
+                {
+                    path1 = qcFilePath1;
+                    downloadID1 = 1;
+                    dateGroupID1 = 1;
+                    path2 = qcFilePath2;
+                    downloadID2= 2;
+                    dateGroupID2 = 2;
+                }
+                else
+                {
+                    path1 = qcFilePath2;
+                    downloadID1 = 2;
+                    dateGroupID1 = 2;
+                    path2 = qcFilePath1;
+                    downloadID2= 1;
+                    dateGroupID2 = 1;
+                }
+                assertTrue(schemaName + ".DownloadCacheExtra Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheExtraID") + ", " + rs.getString("FilePath") + ", " +
+                        rs.getInt("DownloadExtraID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
+                        rs.getInt("DownloadCacheExtraID") == rs.getRow() &&
+                        rs.getString("FilePath").equals(path1) &&
+                        rs.getInt("DownloadExtraID") == downloadID1 &&
+                        rs.getInt("DateGroupID") == dateGroupID1 &&
                         rs.getBoolean("Retrieved") == false &&
                         rs.getBoolean("Processed") == false);
-            }
-            if(rs.next())
-            {
-                fail("More than 2 files loaded into DownloadCache.");
+
+                if(rs.next())
+                {
+                    assertTrue(schemaName + ".DownloadCacheExtra Row " + rs.getRow() + " contains: (" + rs.getInt("DownloadCacheExtraID") + ", " + rs.getString("FilePath") + ", " +
+                            rs.getInt("DownloadExtraID") + ", " + rs.getInt("DateGroupID") + ", " + rs.getBoolean("Retrieved") + ", " + rs.getBoolean("Processed"),
+                            rs.getInt("DownloadCacheExtraID") == rs.getRow() &&
+                            rs.getString("FilePath").equals(path2) &&
+                            rs.getInt("DownloadExtraID") == downloadID2 &&
+                            rs.getInt("DateGroupID") == dateGroupID2 &&
+                            rs.getBoolean("Retrieved") == false &&
+                            rs.getBoolean("Processed") == false);
+
+                    if(rs.next())
+                    {
+                        fail("More than 2 files loaded into DownloadCacheExtra.");
+                    }
+                }
             }
         }
         rs.close();
         stmt.close();
     }
-
-    //    /**
-    //     * Test method for {@link version2.prototype.util.DatabaseCache#CacheFiles(java.util.ArrayList)}.
-    //     */
-    //    @Test
-    //    public final void testCacheFiles() {
-    //        fail("Not yet implemented"); // TODO
-    //    }
 
 }

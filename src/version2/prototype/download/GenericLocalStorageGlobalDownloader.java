@@ -37,7 +37,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      * Creates a generic GlobalDownloader that expects to be writing downloaded files to a local storage and updating a local database.
      *
      * @param myID  - unique identifier ID of this GlobalDownloader
-     * @param globalSchema
+     * @param configInstance
      * @param pluginName
      * @param metaData
      * @param listDatesFiles
@@ -72,24 +72,23 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
             System.out.println("currentStartDate: " + currentStartDate);
 
             // Step 1: Get all downloads from ListDatesFiles
-            Map<DataDate, ArrayList<String>> datesFiles = new TreeMap<DataDate, ArrayList<String>>(listDatesFiles.getListDatesFiles());
+            Map<DataDate, ArrayList<String>> filesTemp = listDatesFiles.getListDatesFiles();
+            Map<DataDate, ArrayList<String>> datesFiles = new TreeMap<DataDate, ArrayList<String>>(filesTemp);
 
             // Remove from downloads list any which are before the current start date
             Set<DataDate> dateKeys = datesFiles.keySet();
             ArrayList <String> files;
             Iterator<String> fIter;
+            ArrayList<DataDate> removeDates = new ArrayList<DataDate>();
             for(DataDate dd : dateKeys)
             {
                 if(dd.getLocalDate().isBefore(currentStartDate))
                 {
-                    files = datesFiles.get(dd);
-                    fIter = files.iterator();
-                    while(fIter.hasNext())
-                    {
-                        fIter.next();
-                        fIter.remove();
-                    }
+                    removeDates.add(dd);
                 }
+            }
+            for(DataDate dd : removeDates) {
+                datesFiles.remove(dd);
             }
 
             // Step 2: Pull all cached downloads

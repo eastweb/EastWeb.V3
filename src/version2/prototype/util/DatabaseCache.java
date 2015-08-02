@@ -2,13 +2,18 @@ package version2.prototype.util;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Observable;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,79 +83,206 @@ public class DatabaseCache extends Observable{
      * a single day or however large the download composite size is in days.
      *
      * @return a list of available files to process
+     * @throws SQLException | ClassNotFoundException | IOException | SAXException | ParserConfigurationException
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
-     * @throws SQLException
      * @throws ConfigReadException
      * @throws ClassNotFoundException
      */
-    public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws SQLException, ClassNotFoundException, IOException, SAXException, ParserConfigurationException
     {
+        Connection conn = null;
+        Statement stmt = null;
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
-        ArrayList<DataFileMetaData> files = new ArrayList<DataFileMetaData>();
-        Connection conn = PostgreSQLConnection.getConnection();
-        conn.createStatement().execute("BEGIN");
+        TreeMap<Integer, TreeSet<Record>> files = new TreeMap<Integer, TreeSet<Record>>();
+        ArrayList<Integer> rows = new ArrayList<Integer>();
+        int dateGroupID, tempDayOfYear, tempYear;
+        String tempDataName;
+        ResultSet rs = null;
+        TreeSet<Record> temp;
 
-        StringBuilder query = new StringBuilder(String.format(
-                "SELECT A.\"%1$sID\", A.\"DataFilePath\", ",
-                getFromTableName
-                ));
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append("A.\"" + extraDownloadFiles.get(i) + "FilePath\", ");
-        }
-        query.append(String.format("I.\"Name\", A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\" \n" +
-                "FROM \"%1$s\".\"%2$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\") INNER JOIN \"%3$s\".\"Index\" I ON (A.\"IndexID\" = I.\"IndexID\")\n" +
-                "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
-                schemaName,
-                getFromTableName,
-                globalSchema
-                ));
-        final Statement stmt = conn.createStatement();
 
-        synchronized(filesAvailable)
-        {
-            final ResultSet rs = stmt.executeQuery(query.toString());
-            ArrayList<Integer> rows = new ArrayList<Integer>();
-            try {
-                int tempDayOfYear, tempYear;
-                ArrayList<DataFileMetaData> tempExtraDownloads = new ArrayList<DataFileMetaData>();
-                while(rs.next()) {
-                    tempDayOfYear = rs.getInt("DayOfYear");
-                    tempYear = rs.getInt("Year");
+        try {
+            conn = PostgreSQLConnection.getConnection();
+            stmt = conn.createStatement();
+            conn.createStatement().execute("BEGIN");
 
-                    for(String dataName : extraDownloadFiles)
+            if(processCachingFor == ProcessName.DOWNLOAD)
+            {
+                synchronized(filesAvailable)
+                {
+                    // Collect completed but not retrieved records from DownloadCache
+                    String downloadCacheQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + schemaName + "\".\"DownloadCache\" D " +
+                            "INNER JOIN \"" + globalSchema + "\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\"" +
+                            "WHERE \"Completed\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
+                    rs = stmt.executeQuery(downloadCacheQuery);
+                    if(rs != null)
                     {
-                        tempExtraDownloads.add(new DataFileMetaData(dataName, rs.getString(dataName + "FilePath"), tempYear, tempDayOfYear));
+                        while(rs.next()) {
+                            tempDayOfYear = rs.getInt("DayOfYear");
+                            tempYear = rs.getInt("Year");
+                            dateGroupID = rs.getInt("DateGroupID");
+
+                            if(files.isEmpty() || files.get(dateGroupID) == null) {
+                                temp = new TreeSet<Record>();
+                                temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
+                                files.put(dateGroupID, temp);
+                            }
+                            else
+                            {
+                                files.get(dateGroupID).add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
+                            }
+                            rows.add(rs.getInt("DownloadCacheID"));
+                        }
+                        rs.close();
                     }
 
-                    files.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear, tempExtraDownloads));
-                    rows.add(rs.getInt(getFromTableName + "ID"));
-                }
+                    for(int row : rows)
+                    {
+                        conn.createStatement().execute(String.format(
+                                "UPDATE \"%1$s\".\"%2$s\"\n" +
+                                        "SET \"Retrieved\" = TRUE\n" +
+                                        "WHERE \"%2$sID\" = %3$d",
+                                        schemaName,
+                                        "DownloadCache",
+                                        row
+                                ));
+                    }
+                    rows = new ArrayList<Integer>();
 
-                for(int row : rows)
+                    // If necessary, collect completed but not retrieved records from DownloadCacheExtra
+                    String downloadCacheExtraQuery = "";
+                    if(extraDownloadFiles != null && extraDownloadFiles.size() > 0)
+                    {
+                        downloadCacheExtraQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + schemaName + "\".\"DownloadCacheExtra\" D " +
+                                "INNER JOIN \"" + globalSchema + "\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\"" +
+                                "WHERE \"Completed\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
+                        rs = stmt.executeQuery(downloadCacheExtraQuery);
+                        if(rs != null)
+                        {
+                            while(rs.next()) {
+                                tempDayOfYear = rs.getInt("DayOfYear");
+                                tempYear = rs.getInt("Year");
+                                dateGroupID = rs.getInt("DateGroupID");
+                                tempDataName = rs.getString("DataName");
+
+                                if(files.isEmpty() || files.get(dateGroupID) == null) {
+                                    temp = new TreeSet<Record>();
+                                    temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), tempYear, tempDayOfYear)));
+                                    files.put(dateGroupID, temp);
+                                }
+                                else
+                                {
+                                    files.get(dateGroupID).add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), tempYear, tempDayOfYear)));
+                                }
+                                rows.add(rs.getInt("DownloadCacheExtraID"));
+                            }
+                            rs.close();
+                        }
+
+                        for(int row : rows)
+                        {
+                            conn.createStatement().execute(String.format(
+                                    "UPDATE \"%1$s\".\"%2$s\"\n" +
+                                            "SET \"Retrieved\" = TRUE\n" +
+                                            "WHERE \"%2$sID\" = %3$d",
+                                            schemaName,
+                                            "DownloadCacheExtra",
+                                            row
+                                    ));
+                        }
+                    }
+                    conn.createStatement().execute("COMMIT");
+                    filesAvailable = false;
+                }
+            }
+            else
+            {
+                synchronized(filesAvailable)
                 {
-                    conn.createStatement().execute(String.format(
-                            "UPDATE \"%1$s\".\"%2$s\"\n" +
-                                    "SET \"Retrieved\" = TRUE\n" +
-                                    "WHERE \"%2$sID\" = %3$d",
-                                    schemaName,
-                                    getFromTableName,
-                                    row
-                            ));
-                }
-                conn.createStatement().execute("COMMIT");
+                    String indexSelectString;
+                    String indexJoinString;
+                    if(processCachingFor == ProcessName.INDICES) {
+                        indexSelectString = ", I.\"Name\" AS \"IndexName\"";
+                        indexJoinString = " INNER JOIN \"%3$s\".\"Index\" I ON (A.\"IndexID\" = I.\"IndexID\")";
+                    } else {
+                        indexSelectString = "";
+                        indexJoinString = "";
+                    }
 
-                filesAvailable = false;
-            } catch(Exception e) {
-                conn.createStatement().execute("ROLLBACK");
-            } finally {
+                    String query = String.format(
+                            "SELECT A.\"%1$sID\", A.\"DataFilePath\", A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\"" + indexSelectString + "\n" +
+                                    "FROM \"%2$s\".\"%1$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\")" + indexJoinString + "\n" +
+                                    "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
+                                    getFromTableName,
+                                    schemaName,
+                                    globalSchema
+                            );
+
+                    rs = stmt.executeQuery(query);
+
+                    while(rs.next()) {
+                        tempDayOfYear = rs.getInt("DayOfYear");
+                        tempYear = rs.getInt("Year");
+                        dateGroupID = rs.getInt("DateGroupID");
+
+                        if(files.isEmpty() || files.get(dateGroupID) == null) {
+                            temp = new TreeSet<Record>();
+                            files.put(dateGroupID, temp);
+                        }
+                        else {
+                            temp = files.get(dateGroupID);
+                        }
+
+                        if(processCachingFor == ProcessName.INDICES) {
+                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear, rs.getString("IndexName"))));
+                        } else {
+                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
+                        }
+                        rows.add(rs.getInt(getFromTableName + "ID"));
+                    }
+                    rs.close();
+
+                    for(int row : rows)
+                    {
+                        conn.createStatement().execute(String.format(
+                                "UPDATE \"%1$s\".\"%2$s\"\n" +
+                                        "SET \"Retrieved\" = TRUE\n" +
+                                        "WHERE \"%2$sID\" = %3$d",
+                                        schemaName,
+                                        getFromTableName,
+                                        row
+                                ));
+                    }
+                    conn.createStatement().execute("COMMIT");
+                    filesAvailable = false;
+                }
+            }
+        } catch(SQLException | ClassNotFoundException | IOException | SAXException | ParserConfigurationException e) {
+            conn.createStatement().execute("ROLLBACK");
+            if(stmt != null) {
+                stmt.close();
+            }
+            if(rs != null) {
                 rs.close();
             }
+            if(conn != null) {
+                conn.close();
+            }
+            throw e;
         }
 
-        return files;
+        ArrayList<DataFileMetaData> output = new ArrayList<DataFileMetaData>();
+        Collection<TreeSet<Record>> recsCol = files.values();
+        for(TreeSet<Record> recs : recsCol)
+        {
+            for(Record rec : recs)
+            {
+                output.add(rec.data);
+            }
+        }
+        return output;
     }
 
     /**
@@ -159,8 +291,10 @@ public class DatabaseCache extends Observable{
      * @param globalEASTWebSchema  - the schema for the globally accessible EASTWeb schema
      * @param projectName  - name of the project to load downloads to
      * @param pluginName  - name of the plugin to load downloads to
+     * @param dataName
      * @param startDate  - the start date to load downloads beginning from this time or later
      * @param extraDownloadFiles  - names of extra download files listed within the plugin metadata
+     * @param modisTileNames  - modis tile names as listed in project metadata
      * @return number of records effected
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -168,65 +302,164 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws IOException
      */
-    public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, LocalDate startDate, ArrayList<String> extraDownloadFiles,
+    public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate, ArrayList<String> extraDownloadFiles,
             ArrayList<String> modisTileNames) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        int changes = -1;
+        int changes = 0;
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
-        final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, stmt);
+        final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, dataName, stmt);
         final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
+        StringBuilder query;
 
-        // Set up query
-        StringBuilder query = new StringBuilder(String.format(
-                "INSERT INTO \"%1$s\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", ",
-                mSchemaName
-                ));
-        for(String dataName : extraDownloadFiles)
+        // Set up for Download to DownloadCache insert
+        if(dataName.toLowerCase().equals("data"))
         {
-            query.append("\"" + dataName + "FilePath\", ");
+            query = new StringBuilder(String.format(
+                    "INSERT INTO \"%1$s\".\"DownloadCache\" (\"DownloadID\", \"DataFilePath\", \"DateGroupID\") " +
+                            "SELECT D.\"DownloadID\", D.\"DataFilePath\", D.\"DateGroupID\" " +
+                            "FROM \"%2$s\".\"Download\" D " +
+                            "INNER JOIN \"%2$s\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\" " +
+                            "LEFT JOIN \"%1$s\".\"DownloadCache\" C ON D.\"DownloadID\" = C.\"DownloadID\" " +
+                            "WHERE D.\"GlobalDownloaderID\" = " + gdlID +
+                            " AND ((G.\"Year\" = " + startDate.getYear() + " AND G.\"DayOfYear\" >= " + startDate.getDayOfYear() + ") OR (G.\"Year\" > " + startDate.getYear() + "))" +
+                            " AND D.\"Complete\" = TRUE" +
+                            " AND C.\"DownloadID\" IS NULL",
+                            mSchemaName,
+                            globalEASTWebSchema));
+            if(modisTileNames != null)
+            {
+                for(String tile : modisTileNames)
+                {
+                    query.append(" AND D.\"DataFilePath\" LIKE '%" + tile + "%'");
+                }
+            }
+
+            // Execute Download to DownloadCache insert and get number of rows effected
+            changes = stmt.executeUpdate(query.toString());
         }
-        query.append("\"DateGroupID\") "
-                + "SELECT D.\"DownloadID\", D.\"DataFilePath\", ");
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append(Character.toChars('E' + i)[0] + ".\"FilePath\", ");
-        }
-        query.append(String.format("D.\"DateGroupID\" "
-                + "FROM \"%1$s\".\"Download\" D ",
-                globalEASTWebSchema
-                ));
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append(String.format(
-                    "INNER JOIN \"%1$s\".\"ExtraDownload\" " + Character.toChars('E' + i)[0] + " ON D.\"DownloadID\"=" + Character.toChars('E' + i)[0] + ".\"DownloadID\" ",
-                    globalEASTWebSchema));
-        }
-        query.append(String.format("LEFT JOIN \"%1$s\".\"DownloadCache\" L ON D.\"DownloadID\"=L.\"DownloadID\" "
-                + "WHERE D.\"GlobalDownloaderID\" = " + gdlID +
-                " AND D.\"Complete\" = TRUE" +
-                " AND L.\"DownloadID\" IS NULL",
-                mSchemaName));
-        for(String tile : modisTileNames)
-        {
-            query.append(" AND D.\"DataFilePath\" LIKE '%" + tile + "%'");
-        }
-        for(int i=0; i < extraDownloadFiles.size(); i++)
-        {
-            query.append(" AND " + Character.toChars('E' + i)[0] + ".\"DataName\"='" + extraDownloadFiles.get(i) + "';");
+        else{
+            // Set up for DownloadExtra to DownloadCacheExtra insert
+            query = new StringBuilder(String.format(
+                    "INSERT INTO \"%1$s\".\"DownloadCacheExtra\" (\"DownloadExtraID\", \"DataName\", \"FilePath\", \"DateGroupID\") " +
+                            "SELECT D.\"DownloadExtraID\", D.\"DataName\", D.\"FilePath\", D.\"DateGroupID\" " +
+                            "FROM \"%2$s\".\"DownloadExtra\" D ",
+                            mSchemaName,
+                            globalEASTWebSchema
+                    ));
+            query.append(String.format("INNER JOIN \"%1$s\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\" " +
+                    "LEFT JOIN \"%2$s\".\"DownloadCacheExtra\" C ON D.\"DownloadExtraID\" = C.\"DownloadExtraID\" " +
+                    "WHERE D.\"GlobalDownloaderID\" = " + gdlID +
+                    " AND ((G.\"Year\" = " + startDate.getYear() + " AND G.\"DayOfYear\" >= " + startDate.getDayOfYear() + ") OR (G.\"Year\" > " + startDate.getYear() + "))" +
+                    " AND D.\"Complete\" = TRUE" +
+                    " AND C.\"DownloadExtraID\" IS NULL",
+                    globalEASTWebSchema,
+                    mSchemaName));
+            for(String tile : modisTileNames)
+            {
+                query.append(" AND D.\"FilePath\" LIKE '%" + tile + "%'");
+            }
+
+            // Execute Download to DownloadCache insert and get number of rows effected
+            changes += stmt.executeUpdate(query.toString());
         }
 
-        // Execute and get number of rows effected
-        changes = stmt.executeUpdate(query.toString());
+        // Notify observers if changes were made and at least one day of cached data is awaiting processing.
+        /* Steps:
+         * 1) Get all DateGroupIDs from DateGroup table that are equal to or later than the startDate and add them to a ArrayList<Integer> object
+         * 2) Use that list and, for each date, first check if any records exist for it in DownloadCache table and if they're are none then remove the date from the list. Then, IF and ONLY IF there are
+         * extra download files to handle, for each date remaining in the list search the DownloadCacheExtra table for any existing records for it and if none exist then remove the date.
+         * 3) Finally, for all dates that remain, set their 'Completed' fields in DownloadCache, and if necessary, in DownloadCacheExtra tables.
+         */
+        ArrayList<Integer> dates = new ArrayList<Integer>();
+        if(changes > 0)
+        {
+            query = new StringBuilder("SELECT * FROM \"" + globalEASTWebSchema + "\".\"DateGroup\";");
+            ResultSet rs = stmt.executeQuery(query.toString());
+            if(rs != null)
+            {
+                // Step 1
+                while(rs.next())
+                {
+                    dates.add(rs.getInt("DateGroupID"));
+                }
+                rs.close();
+
+                if(dates.size() > 0)
+                {
+                    // Step 2a
+                    PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCache\" WHERE \"DateGroupID\" = ?;");
+                    int id;
+                    Iterator<Integer> it = dates.iterator();
+                    while(it.hasNext())
+                    {
+                        id = it.next();
+                        pstmt.setInt(1, id);
+                        rs = pstmt.executeQuery();
+                        if(rs == null) {
+                            it.remove();
+                        } else {
+                            rs.close();
+                        }
+                    }
+
+                    // Step 2b
+                    if(extraDownloadFiles != null)
+                    {
+                        pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" WHERE \"DateGroupID\" = ? AND \"DataName\" = ?;");
+                        for(String name : extraDownloadFiles)
+                        {
+                            it = dates.iterator();
+                            while(it.hasNext())
+                            {
+                                id = it.next();
+                                pstmt.setInt(1, id);
+                                pstmt.setString(2, name);
+                                rs = pstmt.executeQuery();
+                                if(rs == null) {
+                                    it.remove();
+                                } else {
+                                    rs.close();
+                                }
+                            }
+                        }
+                    }
+
+                    // Step 3
+                    if(dates.size() > 0)
+                    {
+                        pstmt = conn.prepareStatement("UPDATE \"" + mSchemaName + "\".\"DownloadCache\" SET \"Complete\" = TRUE WHERE \"DateGroupID\" = ?");
+                        for(Integer dateID : dates)
+                        {
+                            pstmt.setInt(1, dateID);
+                            pstmt.execute();
+                        }
+
+                        if(extraDownloadFiles != null)
+                        {
+                            pstmt = conn.prepareStatement("UPDATE \"" + mSchemaName + "\".\"DownloadCacheExtra\" SET \"Complete\" = TRUE WHERE \"DateGroupID\" = ?");
+                            for(Integer dateID : dates)
+                            {
+                                pstmt.setInt(1, dateID);
+                                pstmt.execute();
+                            }
+                        }
+                    }
+
+                    pstmt.close();
+                }
+            }
+        }
         stmt.close();
         conn.close();
 
-        // Notify observers
-        synchronized(this)
+        if(dates.size() > 0)
         {
-            filesAvailable = true;
+            synchronized(this) {
+                filesAvailable = true;
+                setChanged();
+                notifyObservers();
+            }
         }
-        setChanged();
-        notifyObservers();
 
         return changes;
     }
@@ -257,10 +490,22 @@ public class DatabaseCache extends Observable{
         IndicesFileMetaData temp = filesForASingleComposite.get(0).ReadMetaDataForSummary();
         Integer dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(temp.year, temp.day), stmt);
         Integer indexID = Schemas.getIndexID(globalSchema, temp.indexNm, stmt);
+        String indexIDSelectString;
+        String indexIDValueString;
+        if(indexID != null && indexID != -1 && processCachingFor == ProcessName.INDICES)
+        {
+            indexIDSelectString = ", \"IndexID\"";
+            indexIDValueString = ", " + indexID;
+        }
+        else
+        {
+            indexIDSelectString = "";
+            indexIDValueString = "";
+        }
         StringBuilder query = new StringBuilder(String.format(
                 "INSERT INTO \"%1$s\".\"%2$s\" \n" +
-                        "(\"DataFilePath\", \"DateGroupID\", \"IndexID\") VALUES \n" +
-                        "('" + temp.dataFilePath + "', " + dateGroupID + ", " + indexID + ")",
+                        "(\"DataFilePath\", \"DateGroupID\"" + indexIDSelectString + ") VALUES \n" +
+                        "('" + temp.dataFilePath + "', " + dateGroupID + indexIDValueString + ")",
                         schemaName,
                         cacheToTableName
                 ));
@@ -268,8 +513,12 @@ public class DatabaseCache extends Observable{
         {
             temp = filesForASingleComposite.get(i).ReadMetaDataForSummary();
             dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(temp.year, temp.day), stmt);
-            indexID = Schemas.getIndexID(globalSchema, temp.indexNm, stmt);
-            query.append(",\n('" + temp.dataFilePath + "', " + dateGroupID + ", " + indexID + ")");
+            if(!indexIDSelectString.equals(""))
+            {
+                indexID = Schemas.getIndexID(globalSchema, temp.indexNm, stmt);
+                indexIDValueString = ", " + indexID;
+            }
+            query.append(",\n('" + temp.dataFilePath + "', " + dateGroupID + indexIDValueString + ")");
         }
         query.append(";");
         stmt.execute(query.toString());
@@ -320,5 +569,30 @@ public class DatabaseCache extends Observable{
     {
         setChanged();
         notifyObservers();
+    }
+
+    protected class Record implements Comparable<Record>
+    {
+        public final int dateGroupID;
+        public final String dataName;
+        public final DataFileMetaData data;
+
+        public Record(int dateGroupID, String dataName, DataFileMetaData data)
+        {
+            this.dateGroupID = dateGroupID;
+            this.dataName = dataName;
+            this.data = data;
+        }
+
+        @Override
+        public int compareTo(Record o) {
+            if(dataName.equals(o.dataName)) {
+                return 0;
+            } else if(dataName.equalsIgnoreCase("Data")) {
+                return -1;
+            } else {
+                return dataName.compareTo(o.dataName);
+            }
+        }
     }
 }
