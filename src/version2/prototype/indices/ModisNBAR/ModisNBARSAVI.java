@@ -2,18 +2,20 @@ package version2.prototype.indices.ModisNBAR;
 
 import version2.prototype.indices.IndicesFramework;
 
-public class ModisNBARNDVICalculator extends IndicesFramework {
-    private static final int RED = 0;
-    private static final int NIR = 1;
+public class ModisNBARSAVI extends IndicesFramework {
+    private final static double L = 0.5;
+    private final static int RED = 0;
+    private final static int NIR = 1;
 
-    public ModisNBARNDVICalculator(){}
+    public ModisNBARSAVI(){}
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
         if (values[NIR] == 32767 || values[RED] == 32767) {
             return -3.40282346639e+038;
         } else {
-            return (values[NIR] - values[RED]) / (values[RED] + values[NIR]);
+            return (values[NIR] - values[RED] * (1 + L))
+                    / (values[NIR] + values[RED] + L);
         }
     }
 
@@ -23,3 +25,4 @@ public class ModisNBARNDVICalculator extends IndicesFramework {
     }
 
 }
+

@@ -16,11 +16,11 @@ import version2.prototype.util.GdalUtils;
  * originalValue - 273.15 = Degrees Celsius
  */
 
-public class NldasNOAHMeanDailySoilTemp40_100Calculator extends IndicesFramework{
+public class NldasNOAHMeanDailySoilTemp100_200 extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySoilTemp40_100Calculator() { }
+    public NldasNOAHMeanDailySoilTemp100_200() { }
 
     @Override
     public void calculate() throws Exception {
@@ -32,7 +32,7 @@ public class NldasNOAHMeanDailySoilTemp40_100Calculator extends IndicesFramework
 
             for(File inputFile : mInputFiles)
             {
-                if(inputFile.getName().contains("Band21"))
+                if(inputFile.getName().contains("Band22"))
                 {
                     inputs[0] = gdal.Open(inputFile.getAbsolutePath());
                 }

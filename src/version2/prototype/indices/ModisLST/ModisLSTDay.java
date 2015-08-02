@@ -3,11 +3,11 @@ package version2.prototype.indices.ModisLST;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
-public class ModisLSTDayCalculator extends IndicesFramework{
+public class ModisLSTDay extends IndicesFramework{
 
     final static int INPUT = 0;
 
-    public ModisLSTDayCalculator(){}
+    public ModisLSTDay(){}
 
     // valid range for data value are from 7500 to 65535
     @Override

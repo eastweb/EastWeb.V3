@@ -11,11 +11,16 @@ import org.gdal.gdal.gdal;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
-public class NldasNOAHMeanDailySnowDepthCalculator extends IndicesFramework{
+/*
+ * Degrees Celsius = Kelvin - 273.15
+ * originalValue - 273.15 = Degrees Celsius
+ */
+
+public class NldasNOAHMeanDailySoilTemp40_100 extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySnowDepthCalculator() { }
+    public NldasNOAHMeanDailySoilTemp40_100() { }
 
     @Override
     public void calculate() throws Exception {
@@ -27,7 +32,7 @@ public class NldasNOAHMeanDailySnowDepthCalculator extends IndicesFramework{
 
             for(File inputFile : mInputFiles)
             {
-                if(inputFile.getName().contains("Band42"))
+                if(inputFile.getName().contains("Band21"))
                 {
                     inputs[0] = gdal.Open(inputFile.getAbsolutePath());
                 }
@@ -62,7 +67,7 @@ public class NldasNOAHMeanDailySnowDepthCalculator extends IndicesFramework{
         else
         {
             //return calculated value
-            return values[INPUT];
+            return values[INPUT] - 273.15;
         }
     }
 

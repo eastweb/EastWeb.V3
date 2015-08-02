@@ -40,11 +40,11 @@
 		<ProcessStep>ModisNBARClip</ProcessStep>
 	</Processor>
 	<Indices>
-		<ClassName>ModisNBARNDVICalculator</ClassName>
-		<ClassName>ModisNBAREVICalculator</ClassName>
-		<ClassName>ModisNBARNDWI5Calculator</ClassName>
-		<ClassName>ModisNBARNDWI6Calculator</ClassName>
-		<ClassName>ModisNBARSAVICalculator</ClassName>
+		<ClassName>ModisNBARNDVI</ClassName>
+		<ClassName>ModisNBAREVI</ClassName>
+		<ClassName>ModisNBARNDWI5</ClassName>
+		<ClassName>ModisNBARNDWI6</ClassName>
+		<ClassName>ModisNBARSAVI</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>

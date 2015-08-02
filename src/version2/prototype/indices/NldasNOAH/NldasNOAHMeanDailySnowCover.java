@@ -1,5 +1,6 @@
 package version2.prototype.indices.NldasNOAH;
 
+
 import java.io.File;
 
 import org.gdal.gdal.Band;
@@ -11,16 +12,11 @@ import org.gdal.gdal.gdal;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
-/*
- * Degrees Celsius = Kelvin - 273.15
- * originalValue - 273.15 = Degrees Celsius
- */
-
-public class NldasNOAHMeanDailySoilTemp10_40Calculator extends IndicesFramework{
+public class NldasNOAHMeanDailySnowCover extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySoilTemp10_40Calculator() { }
+    public NldasNOAHMeanDailySnowCover() { }
 
     @Override
     public void calculate() throws Exception {
@@ -32,7 +28,7 @@ public class NldasNOAHMeanDailySoilTemp10_40Calculator extends IndicesFramework{
 
             for(File inputFile : mInputFiles)
             {
-                if(inputFile.getName().contains("Band20"))
+                if(inputFile.getName().contains("Band43"))
                 {
                     inputs[0] = gdal.Open(inputFile.getAbsolutePath());
                 }
@@ -67,13 +63,15 @@ public class NldasNOAHMeanDailySoilTemp10_40Calculator extends IndicesFramework{
         else
         {
             //return calculated value
-            return values[INPUT] - 273.15;
+            return values[INPUT];
         }
     }
 
     @Override
     protected String className() {
         // TODO Auto-generated method stub
+
         return getClass().getName();
     }
+
 }

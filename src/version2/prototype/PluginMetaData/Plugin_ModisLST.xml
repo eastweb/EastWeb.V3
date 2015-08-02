@@ -28,9 +28,9 @@
 		<ProcessStep>ModiLSTClip</ProcessStep>
 	</Processor>
 	<Indices>
-		<ClassName>ModisLSTDayCalculator</ClassName>
-		<ClassName>ModisLSTNightCalculator</ClassName>
-		<ClassName>ModisLSTMeanCalculator</ClassName>
+		<ClassName>ModisLSTDay</ClassName>
+		<ClassName>ModisLSTNight</ClassName>
+		<ClassName>ModisLSTMean</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>

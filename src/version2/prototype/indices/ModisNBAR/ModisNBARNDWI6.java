@@ -10,11 +10,11 @@ import version2.prototype.indices.IndicesFramework;
  * @author Isaiah Snell-Feikema
  */
 
-public class ModisNBARNDWI6Calculator extends IndicesFramework {
+public class ModisNBARNDWI6 extends IndicesFramework {
     private static final int NIR = 0;
     private static final int SWIR = 1;
 
-    public ModisNBARNDWI6Calculator(){}
+    public ModisNBARNDWI6(){}
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {

@@ -2,11 +2,11 @@ package version2.prototype.indices.TRMM3B42;
 
 import version2.prototype.indices.IndicesFramework;
 
-public class TRMM3B42Calculator extends IndicesFramework
+public class TRMM3B42Index extends IndicesFramework
 {
     private final int INPUT = 0;
 
-    public TRMM3B42Calculator() { }
+    public TRMM3B42Index() { }
 
     @Override
     public void calculate() throws Exception

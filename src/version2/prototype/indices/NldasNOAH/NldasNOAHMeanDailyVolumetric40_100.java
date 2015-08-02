@@ -12,15 +12,15 @@ import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
 /*
- * Degrees Celsius = Kelvin - 273.15
- * originalValue - 273.15 = Degrees Celsius
+ * Volumetric40_100: originalValue * (1/0.6) = ANS
+ *  ANS * (0.001 / 1) = proportion
  */
 
-public class NldasNOAHMeanDailySoilTemp100_200Calculator extends IndicesFramework{
+public class NldasNOAHMeanDailyVolumetric40_100 extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySoilTemp100_200Calculator() { }
+    public NldasNOAHMeanDailyVolumetric40_100() { }
 
     @Override
     public void calculate() throws Exception {
@@ -32,7 +32,7 @@ public class NldasNOAHMeanDailySoilTemp100_200Calculator extends IndicesFramewor
 
             for(File inputFile : mInputFiles)
             {
-                if(inputFile.getName().contains("Band22"))
+                if(inputFile.getName().contains("Band32"))
                 {
                     inputs[0] = gdal.Open(inputFile.getAbsolutePath());
                 }
@@ -67,7 +67,7 @@ public class NldasNOAHMeanDailySoilTemp100_200Calculator extends IndicesFramewor
         else
         {
             //return calculated value
-            return values[INPUT] - 273.15;
+            return (values[INPUT] * (1 / 0.6)) * (0.001 / 1);
         }
     }
 
@@ -77,4 +77,5 @@ public class NldasNOAHMeanDailySoilTemp100_200Calculator extends IndicesFramewor
 
         return getClass().getName();
     }
+
 }

@@ -11,16 +11,11 @@ import org.gdal.gdal.gdal;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
-/*
- * Volumetric40_100: originalValue * (1/0.6) = ANS
- *  ANS * (0.001 / 1) = proportion
- */
-
-public class NldasNOAHMeanDailyVolumetric40_100Calculator extends IndicesFramework{
+public class NldasNOAHMeanDailySnowDepth extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailyVolumetric40_100Calculator() { }
+    public NldasNOAHMeanDailySnowDepth() { }
 
     @Override
     public void calculate() throws Exception {
@@ -32,7 +27,7 @@ public class NldasNOAHMeanDailyVolumetric40_100Calculator extends IndicesFramewo
 
             for(File inputFile : mInputFiles)
             {
-                if(inputFile.getName().contains("Band32"))
+                if(inputFile.getName().contains("Band42"))
                 {
                     inputs[0] = gdal.Open(inputFile.getAbsolutePath());
                 }
@@ -67,7 +62,7 @@ public class NldasNOAHMeanDailyVolumetric40_100Calculator extends IndicesFramewo
         else
         {
             //return calculated value
-            return (values[INPUT] * (1 / 0.6)) * (0.001 / 1);
+            return values[INPUT];
         }
     }
 
@@ -77,5 +72,4 @@ public class NldasNOAHMeanDailyVolumetric40_100Calculator extends IndicesFramewo
 
         return getClass().getName();
     }
-
 }

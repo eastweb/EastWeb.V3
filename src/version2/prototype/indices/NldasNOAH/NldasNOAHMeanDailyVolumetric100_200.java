@@ -11,17 +11,16 @@ import org.gdal.gdal.gdal;
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
-
 /*
- * Volumetric0_10: originalValue * (1/0.1) = ANS
+ * Volumetric100_200: originalValue * (1/1) = ANS
  *  ANS * (0.001 / 1) = proportion
  */
 
-public class NldasNOAHMeanDailyVolumetric0_10Calculator extends IndicesFramework{
+public class NldasNOAHMeanDailyVolumetric100_200 extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailyVolumetric0_10Calculator() { }
+    public NldasNOAHMeanDailyVolumetric100_200() { }
 
     @Override
     public void calculate() throws Exception {
@@ -33,7 +32,7 @@ public class NldasNOAHMeanDailyVolumetric0_10Calculator extends IndicesFramework
 
             for(File inputFile : mInputFiles)
             {
-                if(inputFile.getName().contains("Band30"))
+                if(inputFile.getName().contains("Band33"))
                 {
                     inputs[0] = gdal.Open(inputFile.getAbsolutePath());
                 }
@@ -68,7 +67,7 @@ public class NldasNOAHMeanDailyVolumetric0_10Calculator extends IndicesFramework
         else
         {
             //return calculated value
-            return (values[INPUT] * (1 / 0.1)) * (0.001 / 1);
+            return values[INPUT] * (0.001 / 1);
         }
     }
 

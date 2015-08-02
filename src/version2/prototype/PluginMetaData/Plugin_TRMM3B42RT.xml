@@ -30,7 +30,7 @@
 		<ProcessStep>TRMM3B42RTMask</ProcessStep>
 	</Processor>
 	<Indices>
-		<ClassName>TRMM3B42RTCalculator</ClassName>
+		<ClassName>TRMM3B42RTIndex</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>

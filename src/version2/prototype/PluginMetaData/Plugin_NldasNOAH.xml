@@ -30,16 +30,16 @@
 		<ProcessStep>NldasNOAHMask</ProcessStep>
 	</Processor>
 	<Indices>
-		<ClassName>NldasNOAHMeanDailySnowDepthCalculator</ClassName>
-		<ClassName>NldasNOAHMeanDailySnowCoverCalculator</ClassName>
-		<ClassName>NldasNOAHMeanDailyVolumetric0_10Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailyVolumetric10_40Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailyVolumetric40_100Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailyVolumetric100_200Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailySoilTemp0_10Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailySoilTemp10_40Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailySoilTemp40_100Calculator</ClassName>
-		<ClassName>NldasNOAHMeanDailySoilTemp100_200Calculator</ClassName>
+		<ClassName>NldasNOAHMeanDailySnowDepth</ClassName>
+		<ClassName>NldasNOAHMeanDailySnowCover</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric0_10</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric10_40</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric40_100</ClassName>
+		<ClassName>NldasNOAHMeanDailyVolumetric100_200</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp0_10</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp10_40C</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp40_100</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp100_200</ClassName>
 	</Indices>
 	<Summary>
 		<Temporal>

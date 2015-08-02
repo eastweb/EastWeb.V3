@@ -9,10 +9,10 @@ import version2.prototype.indices.IndicesFramework;
  *@author Isaiah Snell-Feikema
  */
 
-public class ModisNBAREVICalculator extends IndicesFramework
+public class ModisNBAREVI extends IndicesFramework
 {
 
-    public ModisNBAREVICalculator(){}
+    public ModisNBAREVI(){}
 
     private static final double L = 1;
     private static final double C1 = 6;
