@@ -13,6 +13,8 @@ import version2.prototype.indices.IndicesFramework;
 
 public class NldasForcingFreezingDegreeDays extends IndicesFramework {
 
+    public NldasForcingFreezingDegreeDays() { }
+
     @Override
     public void calculate() throws Exception
     {

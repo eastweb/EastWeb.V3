@@ -11,7 +11,9 @@ import org.apache.commons.io.FileUtils;
 
 import version2.prototype.indices.IndicesFramework;
 
-public class NldasForcingMaxAirTemperatureCalculator extends IndicesFramework {
+public class NldasForcingMaxAirTemperature extends IndicesFramework {
+
+    public NldasForcingMaxAirTemperature() {}
 
     @Override
     public void calculate() throws Exception

@@ -11,14 +11,16 @@ import org.apache.commons.io.FileUtils;
 
 import version2.prototype.indices.IndicesFramework;
 
-public class NldasForcingMeanAirTemperatureCalculator extends IndicesFramework {
+public class NldasForcingMinAirTemperature extends IndicesFramework {
+
+    public NldasForcingMinAirTemperature() {}
 
     @Override
     public void calculate() throws Exception
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("band01_Mean_"))
+            if(input.getName().contains("band01_Min_"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
@@ -31,22 +33,26 @@ public class NldasForcingMeanAirTemperatureCalculator extends IndicesFramework {
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        double mean = -9999;
+        double min = 9999;
 
         for(double value : values)
         {
-            // Fill value == 9999
+            // fill value == 9999
             if (value != 9999) {
                 // Tc = Tk - 273.15
-                mean += ((value - 273.15) / values.length);
+                value = value - 273.15;
+
+                if(value < min) {
+                    min = value;
+                }
             }
         }
 
-        if(mean == -9999) {
+        if(min == 9999){
             return -3.4028234663852886E38;
         }
 
-        return mean;
+        return min;
     }
 
     @Override

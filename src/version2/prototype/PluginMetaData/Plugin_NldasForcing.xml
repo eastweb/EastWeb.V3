@@ -32,9 +32,9 @@
 	<Indices>
 		<ClassName>NldasForcingHeatingDegreeDays</ClassName>
 		<ClassName>NldasForcingFreezingDegreeDays</ClassName>
-		<ClassName>NldasForcingMinAirTemperatureCalculator</ClassName>
-		<ClassName>NldasForcingMeanAirTemperatureCalculator</ClassName>
-		<ClassName>NldasForcingMaxAirTemperatureCalculator</ClassName>
+		<ClassName>NldasForcingMinAirTemperature</ClassName>
+		<ClassName>NldasForcingMeanAirTemperature</ClassName>
+		<ClassName>NldasForcingMaxAirTemperature</ClassName>
 		<ClassName>NldasForcingMeanHumidity</ClassName>
 		<ClassName>NldasForcingTotalPrecipitation</ClassName>
 	</Indices>

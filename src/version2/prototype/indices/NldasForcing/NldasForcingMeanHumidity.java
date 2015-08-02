@@ -13,6 +13,8 @@ import version2.prototype.indices.IndicesFramework;
 
 public class NldasForcingMeanHumidity extends IndicesFramework {
 
+    public NldasForcingMeanHumidity() {}
+
     @Override
     public void calculate() throws Exception
     {

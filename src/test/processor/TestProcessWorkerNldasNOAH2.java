@@ -39,7 +39,7 @@ import version2.prototype.util.Schemas;
  * @author michael.devos
  *
  */
-public class TestProcessWorkerNldasNOAH {
+public class TestProcessWorkerNldasNOAH2 {
 
     /**
      * @throws java.lang.Exception
