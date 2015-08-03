@@ -13,7 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebI;
+import version2.prototype.EASTWebManagerI;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -44,7 +44,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
      * @param scheduler
      * @param outputCache
      */
-    public GenericLocalRetrievalLocalDownloader(EASTWebI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public GenericLocalRetrievalLocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache) {
         super(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
     }
@@ -52,7 +52,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
         try {
-            if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
+            if(scheduler.GetState() == TaskState.RUNNING)
             {
                 final Connection conn = PostgreSQLConnection.getConnection();
                 Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),

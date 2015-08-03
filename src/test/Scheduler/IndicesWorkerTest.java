@@ -13,6 +13,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.ProcessorFileMetaData;
 
 /**
  * @author michael.devos
@@ -20,7 +21,7 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class IndicesWorkerTest extends ProcessWorker {
 
-    protected IndicesWorkerTest(String processWorkerName, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public IndicesWorkerTest(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache) {
         super("IndicesWorkerTest", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
     }
@@ -31,6 +32,9 @@ public final class IndicesWorkerTest extends ProcessWorker {
     @Override
     public ProcessWorkerReturn call() throws Exception {
         System.out.println("IndicesWorkerTest executed.");
+        ProcessorFileMetaData pData = cachedFiles.get(0).ReadMetaDataForIndices();
+        cachedFiles.set(0, new DataFileMetaData("Data", pData.dataFilePath, pData.year, pData.day, "Test Index"));
+        outputCache.CacheFiles(cachedFiles);
         return null;
     }
 

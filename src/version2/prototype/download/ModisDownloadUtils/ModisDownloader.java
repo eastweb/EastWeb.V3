@@ -64,7 +64,7 @@ public class ModisDownloader extends DownloaderFramework
          *workingDir\download\ProductName\year\dayOfYear
          */
         String dir = String.format(
-                "%s"+File.separator+"%04d" + File.separator+"%03d" ,
+                "%s"+"%04d" + File.separator+"%03d" ,
                 mOutFolder, mDate.getYear(), mDate.getDayOfYear());
 
         if(!(new File(dir).exists()))
@@ -114,6 +114,7 @@ public class ModisDownloader extends DownloaderFramework
 
     }
 
+    @Override
     public String getOutputFilePath()
     {
         return outFilePath;

@@ -20,7 +20,7 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class ProcessorWorkerTest extends ProcessWorker {
 
-    protected ProcessorWorkerTest(String processWorkerName, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public ProcessorWorkerTest(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache) {
         super("ProcessorWorkerTest", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
     }
@@ -31,6 +31,7 @@ public final class ProcessorWorkerTest extends ProcessWorker {
     @Override
     public ProcessWorkerReturn call() throws Exception {
         System.out.println("ProcessorWorkerTest executed.");
+        outputCache.CacheFiles(cachedFiles);
         return null;
     }
 

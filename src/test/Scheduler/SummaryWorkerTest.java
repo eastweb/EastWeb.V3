@@ -20,7 +20,7 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class SummaryWorkerTest extends ProcessWorker {
 
-    protected SummaryWorkerTest(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public SummaryWorkerTest(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache) {
         super("SummaryWorkerTest", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
     }

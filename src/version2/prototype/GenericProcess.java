@@ -11,7 +11,6 @@ import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
-import version2.prototype.util.GeneralUIEventObject;
 
 /**
  * A generic concrete Process extending class. Can be used in place of a custom built framework Process class to handle managing worker threads for the
@@ -36,15 +35,11 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * @param scheduler  - reference to the controlling Scheduler object
      * @param inputCache  - DatabaseCache to listen on for available file to process
      * @param outputCache  - DatabaseCache to use when caching output files from the process
-     * @param classNames  - worker class names to spawn for each new input file. Expects the class to exist within one of the following packages:
-     * 1. version2.prototype.download
-     * 2. version2.prototype.indices
-     * 3. version2.prototype.processor
-     * 4. version2.prototype.summary
+     * @param classPathNames  - fully qualified worker class names to spawn for each new input file.
      * @throws ClassNotFoundException
      */
-    public GenericProcess(EASTWebI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache inputCache, DatabaseCache outputCache, String... classNames) throws ClassNotFoundException
+    public GenericProcess(EASTWebManagerI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache inputCache, DatabaseCache outputCache, String... classPathNames) throws ClassNotFoundException
     {
         super(manager, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
 
@@ -52,19 +47,12 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
             inputCache.addObserver(this);
         }
 
-        String packageOfWorker = "";
-        switch(processName)
-        {
-        case DOWNLOAD: packageOfWorker = "version2.prototype.download."; break;
-        case INDICES: packageOfWorker = "version2.prototype.indices."; break;
-        case PROCESSOR: packageOfWorker = "version2.prototype.processor."; break;
-        case SUMMARY: packageOfWorker = "version2.prototype.summary."; break;
-        }
-
         processWorkerClasses = new ArrayList<Class<?>>(1);
-        for(String className : classNames)
+        Class<?> tempClass;
+        for(String classPathName : classPathNames)
         {
-            processWorkerClasses.add(Class.forName(packageOfWorker + className));
+            tempClass = Class.forName(classPathName);
+            processWorkerClasses.add(tempClass);
         }
     }
 
@@ -75,7 +63,9 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
         try {
             for(Class<?> cl : processWorkerClasses)
             {
-                cstr = cl.getConstructor(Process.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, ArrayList.class);
+                cstr = cl.getConstructor(version2.prototype.Process.class, version2.prototype.ProjectInfoMetaData.ProjectInfoFile.class,
+                        version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin.class, version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData.class, ArrayList.class,
+                        version2.prototype.util.DatabaseCache.class);
                 manager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

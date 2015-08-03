@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebI;
+import version2.prototype.EASTWebManagerI;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -224,7 +224,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
     private class MyScheduler extends Scheduler
     {
 
-        public MyScheduler(SchedulerData data, int myID, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, EASTWebI manager, Config configInstance,
+        public MyScheduler(SchedulerData data, int myID, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, EASTWebManagerI manager, Config configInstance,
                 TaskState initState) throws ParserConfigurationException, SAXException, IOException {
             super(data, projectInfoFile, pluginMetaDataCollection, myID, configInstance, manager, initState);
         }

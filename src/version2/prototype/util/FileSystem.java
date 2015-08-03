@@ -31,7 +31,7 @@ public final class FileSystem {
     {
         String path = data.GetWorkingDir();
         if(!path.endsWith("/") && path.endsWith("\\")) {
-            path += "/";
+            path += "\\";
         }
         return path;
     }
@@ -91,7 +91,7 @@ public final class FileSystem {
      */
     public static String GetProjectDirectoryPath(String workingDir, String projectName)
     {
-        return CheckDirPath(CheckDirPath(workingDir) + "Projects/" + StandardizeName(projectName) + "/");
+        return CheckDirPath(CheckDirPath(workingDir) + "Projects\\" + StandardizeName(projectName) + "\\");
     }
 
     /**
@@ -105,7 +105,7 @@ public final class FileSystem {
      */
     public static String GetProcessDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return CheckDirPath(GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "/" + GetProcessDirectoryName(processName) + "/");
+        return CheckDirPath(GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "\\" + GetProcessDirectoryName(processName) + "\\");
     }
 
     /**
@@ -119,7 +119,7 @@ public final class FileSystem {
      */
     public static String GetProcessOutputDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output/");
+        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output\\");
     }
 
     /**
@@ -133,7 +133,7 @@ public final class FileSystem {
      */
     public static String GetProcessWorkerTempDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp/");
+        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp\\");
     }
 
     /**
@@ -145,7 +145,7 @@ public final class FileSystem {
      */
     public static String GetGlobalDownloadDirectory(Config configInstance, String pluginName) throws ConfigReadException
     {
-        return CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "/");
+        return CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "\\");
     }
 
     private static String GetProcessDirectoryName(ProcessName name)
@@ -173,7 +173,7 @@ public final class FileSystem {
     public static String CheckDirPath(String dirPath)
     {
         if(!dirPath.endsWith("/") && !dirPath.endsWith("\\")) {
-            dirPath += "/";
+            dirPath += "\\";
         }
         return dirPath;
     }

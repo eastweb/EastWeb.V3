@@ -67,7 +67,7 @@ public class NldasNOAHDownloader extends DownloaderFramework{
                     throw new IOException("Couldn't navigate to directory: " + dayDirectory);
                 }
 
-                String dir = String.format("%s"+File.separator+"%04d" + File.separator+"%03d",
+                String dir = String.format("%s"+"%04d" + File.separator+"%03d",
                         mOutputFolder, mDate.getYear(), mDate.getDayOfYear());
 
                 if(!(new File(dir).exists()))

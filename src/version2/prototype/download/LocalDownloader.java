@@ -12,7 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebI;
+import version2.prototype.EASTWebManagerI;
 import version2.prototype.Process;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -34,7 +34,7 @@ public abstract class LocalDownloader extends Process {
     protected final Config configInstance;
     protected LocalDate currentStartDate;
 
-    protected LocalDownloader(EASTWebI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    protected LocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache) {
         super(manager, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         this.gdl = gdl;
@@ -81,8 +81,10 @@ public abstract class LocalDownloader extends Process {
     public TreeMap<Integer, Integer> AttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         TreeMap<Integer, Integer> newFiles = new TreeMap<Integer, Integer>();
-        if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
+        if(scheduler.GetState() == TaskState.RUNNING)
         {
+            gdl.PerformUpdates();
+
             final Connection conn = PostgreSQLConnection.getConnection();
             newFiles = Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), currentStartDate, pluginMetaData.DaysPerInputData,
                     pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);

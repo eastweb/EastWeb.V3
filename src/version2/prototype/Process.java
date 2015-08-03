@@ -35,7 +35,7 @@ public abstract class Process implements Observer {
     public final PluginMetaData pluginMetaData;
     protected Scheduler scheduler;
     protected DatabaseCache outputCache;
-    protected EASTWebI manager;
+    protected EASTWebManagerI manager;
 
     /**
      * Creates a Process object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName, and acquiring its
@@ -49,7 +49,7 @@ public abstract class Process implements Observer {
      * @param processName  - name of this threaded process
      * @param outputCache  - DatabaseCache object to use when storing output of this process to notify next process of files available for processing
      */
-    protected Process(EASTWebI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    protected Process(EASTWebManagerI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache)
     {
         this.manager = manager;
@@ -83,7 +83,7 @@ public abstract class Process implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        if(scheduler.GetSchedulerStatus().GetState() == TaskState.RUNNING)
+        if(scheduler.GetState() == TaskState.RUNNING)
         {
             if(o instanceof DatabaseCache)
             {
@@ -118,7 +118,7 @@ public abstract class Process implements Observer {
                     Schemas.updateExpectedResults(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
                             pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
                     conn.close();
-                    process(null);
+                    process(new ArrayList<DataFileMetaData>());
                 }
                 catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException |
                         IOException e) {

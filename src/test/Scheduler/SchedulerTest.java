@@ -5,15 +5,19 @@ package test.Scheduler;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,7 +26,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebI;
+import version2.prototype.EASTWebManagerI;
 import version2.prototype.EASTWebManager;
 import version2.prototype.GenericProcess;
 import version2.prototype.Process;
@@ -42,6 +46,7 @@ import version2.prototype.download.LocalDownloader;
 import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.FileSystem;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -80,7 +85,7 @@ public class SchedulerTest {
         Statement stmt = con.createStatement();
         String query = String.format(
                 "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
-                testGlobalSchema
+                Config.getAnInstance("src/test/Scheduler/config.xml").getGlobalSchema()
                 );
         stmt.execute(query);
         query = String.format(
@@ -106,11 +111,24 @@ public class SchedulerTest {
      */
     @Test
     public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() throws Exception {
+
+        FileUtils.deleteDirectory(new File(Config.getAnInstance("src/test/Scheduler/config.xml").getDownloadDir() + testPluginName));
+
         ProjectInfoFile projectInfoFile = new ProjectInfoFile("src/test/Scheduler/Test_Project.xml");
         SchedulerData sData = new SchedulerData(projectInfoFile);
-        Scheduler scheduler = new Scheduler(sData, 1, TaskState.RUNNING, manager, Config.getAnInstance("src/test/Scheduler/config.xml"));
-        assertTrue("indicesWorkerSuccess", manager.indicesWorkerSuccess);
+        MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, Config.getAnInstance("src/test/Scheduler/config.xml"));
+        scheduler.Start();
+        LocalDate startDate = projectInfoFile.GetStartDate();
+        String testFilePath = Config.getAnInstance("src/test/Scheduler/config.xml").getDownloadDir() + testPluginName+ "\\" + startDate.getYear() + "\\" + startDate.getDayOfYear() +
+                "\\3B42RT_daily." + startDate.getYear() + "." + new DecimalFormat("00").format(startDate.getMonthValue()) + "." + new DecimalFormat("00").format(startDate.getDayOfMonth()) + ".bin";
+        File temp = new File(testFilePath);
+        for(int i=0; !temp.exists() && i < 6; i++)
+        {
+            Thread.sleep(10000);
+        }
+        scheduler.AttemptUpdate();
         assertTrue("processorWorkerSuccess", manager.processorWorkerSuccess);
+        assertTrue("indicesWorkerSuccess", manager.indicesWorkerSuccess);
         assertTrue("summaryWorkerSuccess", manager.summaryWorkerSuccess);
     }
 
@@ -164,29 +182,44 @@ public class SchedulerTest {
 
     private class MyScheduler extends Scheduler
     {
-        public MyScheduler(SchedulerData data, int myID, EASTWebI manager) throws ParserConfigurationException, SAXException, IOException {
+        public MyScheduler(SchedulerData data, int myID, EASTWebManagerI manager) throws ParserConfigurationException, SAXException, IOException {
             super(data, myID, manager);
         }
 
-        public MyScheduler(SchedulerData data, int myID, TaskState initState, EASTWebI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+        public MyScheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
         {
             super(data, myID, initState, manager, configInstance);
         }
 
         @Override protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
-            Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "../../../test/Scheduler/ProcessorWorkerTest");
+            // Setup directory layout if not existing already
+            new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+            new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+            new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
+
+            Process process = new GenericProcess<ProcessorWorkerTest>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.ProcessorWorkerTest");
             return process;
         }
 
         @Override
         protected Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
-            Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "../../../test/Scheduler/IndicesWorkerTest");
+            // Setup directory layout if not existing already
+            new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+            new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+            new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
+
+            Process process = new GenericProcess<IndicesWorkerTest>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.IndicesWorkerTest");
             return process;
         }
 
         @Override
         protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException {
-            Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "../../../test/Scheduler/SummaryWorkerTest");
+            // Setup directory layout if not existing already
+            new File(FileSystem.GetProcessDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+            new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+            new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
+
+            Process process = new GenericProcess<SummaryWorkerTest>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "test.Scheduler.SummaryWorkerTest");
             return process;
         }
     }
@@ -285,6 +318,12 @@ public class SchedulerTest {
             case "ProcessorWorkerTest": processorWorkerSuccess = true; break;
             case "IndicesWorkerTest": indicesWorkerSuccess = true; break;
             case "SummaryWorkerTest": summaryWorkerSuccess = true; break;
+            }
+
+            try {
+                worker.call();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             return null;
