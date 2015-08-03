@@ -68,12 +68,13 @@ public class NldasForcingDownloader extends DownloaderFramework
             catch (IOException e) { throw e; }
             finally
             {
-                if(ftpClient.isConnected())
-                {
-                    // Close the FTP session.
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-                }
+                // FIXME: Disconnection
+                //                if(ftpClient.isConnected())
+                //                {
+                //                    // Close the FTP session.
+                //                    ftpClient.logout();
+                //                    ftpClient.disconnect();
+                //                }
                 FTPClientPool.returnFtpClient(mHostName, ftpClient);
             }
 
