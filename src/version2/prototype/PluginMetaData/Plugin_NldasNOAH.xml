@@ -37,7 +37,7 @@
 		<ClassName>NldasNOAHMeanDailyVolumetric40_100</ClassName>
 		<ClassName>NldasNOAHMeanDailyVolumetric100_200</ClassName>
 		<ClassName>NldasNOAHMeanDailySoilTemp0_10</ClassName>
-		<ClassName>NldasNOAHMeanDailySoilTemp10_40C</ClassName>
+		<ClassName>NldasNOAHMeanDailySoilTemp10_40</ClassName>
 		<ClassName>NldasNOAHMeanDailySoilTemp40_100</ClassName>
 		<ClassName>NldasNOAHMeanDailySoilTemp100_200</ClassName>
 	</Indices>
