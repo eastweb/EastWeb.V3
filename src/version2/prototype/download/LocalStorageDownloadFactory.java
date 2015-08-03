@@ -12,7 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebI;
+import version2.prototype.EASTWebManagerI;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -24,7 +24,7 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public final class LocalStorageDownloadFactory implements DownloaderFactory {
-    private final EASTWebI manager;
+    private final EASTWebManagerI manager;
     private final Config configInstance;
     private final String downloaderClassName;
     private final ProjectInfoFile projectInfoFile;
@@ -46,7 +46,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
      * @param listDatesFiles
      * @param startDate
      */
-    public LocalStorageDownloadFactory(EASTWebI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public LocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles, LocalDate startDate)
     {
         this.manager = manager;

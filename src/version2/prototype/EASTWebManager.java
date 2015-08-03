@@ -42,7 +42,7 @@ import version2.prototype.util.DatabaseCache;
  * @author michael.devos
  *
  */
-public class EASTWebManager implements Runnable, EASTWebI{
+public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static EASTWebManager instance = null;
     protected static ExecutorService executor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
@@ -119,7 +119,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebI#run()
+     * @see version2.prototype.EASTWebManagerI#run()
      */
     @Override
     public void run() {
@@ -610,7 +610,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebI#NotifyUI(version2.prototype.Scheduler.Scheduler)
+     * @see version2.prototype.EASTWebManagerI#NotifyUI(version2.prototype.Scheduler.Scheduler)
      */
     @Override
     public void NotifyUI(Scheduler updatedScheduler)
@@ -634,7 +634,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebI#StartGlobalDownloader(version2.prototype.download.DownloadFactory)
+     * @see version2.prototype.EASTWebManagerI#StartGlobalDownloader(version2.prototype.download.DownloadFactory)
      */
     @Override
     public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException
@@ -686,6 +686,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
                     numOfCreatedGDLs = globalDLs.size();
                 }
 
+                gdl.Start();
                 LocalDownloader localDl = factory.CreateLocalDownloader(gdl);
                 return localDl;
             }
@@ -697,7 +698,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebI#StopGlobalDownloader(int)
+     * @see version2.prototype.EASTWebManagerI#StopGlobalDownloader(int)
      */
     @Override
     public void StopGlobalDownloader(int gdlID)
@@ -712,7 +713,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebI#StartExistingGlobalDownloader(int)
+     * @see version2.prototype.EASTWebManagerI#StartExistingGlobalDownloader(int)
      */
     @Override
     public void StartExistingGlobalDownloader(int gdlID)
@@ -727,7 +728,7 @@ public class EASTWebManager implements Runnable, EASTWebI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebI#StartNewProcessWorker(version2.prototype.ProcessWorker)
+     * @see version2.prototype.EASTWebManagerI#StartNewProcessWorker(version2.prototype.ProcessWorker)
      */
     @Override
     public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker)

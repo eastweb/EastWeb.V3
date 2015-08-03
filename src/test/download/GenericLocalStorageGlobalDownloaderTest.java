@@ -54,17 +54,33 @@ import version2.prototype.util.Schemas;
 public class GenericLocalStorageGlobalDownloaderTest {
     private static Config testConfig;
     private static String testProjectName = "Test_Project";
-    private static String testPluginName = "ModisNBAR";
     private static String testGlobalSchema;        // Test_EASTWeb1
     private static Connection con;
     private static ArrayList<String> extraDownloadFiles;
-    private static int year = 2015;
-    private static int day = 1;
-    private static int daysPerInputFile = 8;
-    private static int numOfIndices = 5;
-    private static int filesPerDay = 322;
     private static LocalDate startDate;
     private static DownloadMetaData dData;
+    private static PluginMetaData pluginMetaData;
+    private static ListDatesFiles listDatesFiles;
+    private static ListDatesFiles listDatesFilesQC;
+
+    // For testing with ModisNBAR plugin
+    //    private static String testPluginName = "ModisNBAR";
+    //    private static int year = 2015;
+    //    private static int day = 1;
+    //    private static int daysPerInputFile = 8;
+    //    private static int numOfIndices = 5;
+    //    private static int filesPerDay = 322;
+
+    // For testing with TRMM3B42RT plugin
+    private static String testPluginName = "TRMM3B42RT";
+    private static int year = 2015;
+    private static int day = 182;
+    private static int daysPerInputFile = -1;
+    private static int numOfIndices = 3;
+    private static int filesPerDay = 1;
+
+    private static boolean hasQC;
+
 
     /**
      * @throws java.lang.Exception
@@ -78,16 +94,37 @@ public class GenericLocalStorageGlobalDownloaderTest {
         extraDownloadFiles.add("QC");
         startDate = LocalDate.ofYearDay(year, day);
 
-        String mode = "HTTP";// the protocol type: ftp or http
-        HTTP myHttp = PluginMetaDataCollection.CreateHTTP("http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/");
-        FTP myFtp = null;
         String className = null;
         String timeZone = null;
         String datePatternStr = "\\d{4}";
-        String fileNamePatternStr = "MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf";
-        LocalDate ld = LocalDate.parse("Feb 18 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("MMM dd HH:mm:ss zzz uuuu"));
+
+        // For testing with ModisNBAR plugin
+        //        hasQC = true;
+        //        String mode = "HTTP";// the protocol type: ftp or http
+        //        HTTP myHttp = PluginMetaDataCollection.CreateHTTP("http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/");
+        //        FTP myFtp = null;
+        //        String fileNamePatternStr = "MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf";
+        //        LocalDate ld = LocalDate.parse("Feb 18 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("MMM dd HH:mm:ss zzz uuuu"));
+
+        // For testing with TRMM3B42RT plugin
+        hasQC = false;
+        String mode = "FTP";// the protocol type: ftp or http
+        FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
+                "/data/TRMM/Gridded/Derived_Products/3B42RT/Daily/", "anonymous", "anonymous");
+        HTTP myHttp = null;
+        int filesPerDay = 1;
+        String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
+        LocalDate ld = LocalDate.parse("Jul 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("MMM dd HH:mm:ss zzz uuuu"));
 
         dData = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+
+        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance();
+        pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
+        // For testing with ModisNBAR plugin
+        //        listDatesFiles = new ModisNBARListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
+        //        listDatesFilesQC = new ModisNBARQCListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
+        // For testing with TRMM3B42RT plugin
+        listDatesFiles = new TRMM3B42RTListDatesFiles(new DataDate(startDate), dData);
     }
 
     /**
@@ -150,7 +187,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
     @Test
     public final void testGenericLocalStorageGlobalDownloader() throws Exception {
         // Setup
-        ListDatesFiles listDatesFiles = new TRMM3B42RTListDatesFiles(new DataDate(startDate), dData);
         String downloaderClassName = testPluginName + "Downloader";
         GenericLocalStorageGlobalDownloader gdl = new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName, dData, listDatesFiles, startDate, downloaderClassName);
 
@@ -192,7 +228,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
         FileUtils.deleteDirectory(new File(testConfig.getDownloadDir() + testPluginName));
 
         // Setup
-        ListDatesFiles listDatesFiles = new ModisNBARListDatesFiles(new DataDate(dData.originDate), dData);
         String downloaderClassName = testPluginName + "Downloader";
         GenericLocalStorageGlobalDownloader gdl = new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName, dData, listDatesFiles, startDate, downloaderClassName);
         MyObserver watcher = new MyObserver();
@@ -202,7 +237,10 @@ public class GenericLocalStorageGlobalDownloaderTest {
         gdl.run();
 
         // Test Run. results were written and stored
-        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/h00v08";
+        // For testing with ModisNBAR plugin
+        //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/h00v08";
+        // For testing with TRMM3B42RT plugin
+        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
         Connection con = PostgreSQLConnection.getConnection();
@@ -228,9 +266,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
     @Test
     public final void testSetStartDate() throws ParserConfigurationException, SAXException, IOException, Exception {
         // Setup
-        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance();
-        PluginMetaData pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
-        ListDatesFiles listDatesFiles = new ModisNBARListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
         String downloaderClassName = testPluginName + "Downloader";
         GenericLocalStorageGlobalDownloader gdl = new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName, pluginMetaData.Download, listDatesFiles, startDate, downloaderClassName);
 
@@ -253,19 +288,21 @@ public class GenericLocalStorageGlobalDownloaderTest {
         String qcFilePath1 = "path to qc file1";
         String qcFilePath2 = "path to qc file2";
         String query;
+        GenericLocalStorageGlobalDownloader gdlQC = null;
+        ArrayList<DataFileMetaData> testResultsQC1 = null;
+        ArrayList<DataFileMetaData> testResultsQC2 = null;
 
-        // Setup ModisNBAR GlobalDownloader
-        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance();
-        PluginMetaData pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
-        ListDatesFiles listDatesFiles = new ModisNBARListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
+        // Setup Data GlobalDownloader
         String downloaderClassName = testPluginName + "Downloader";
         GenericLocalStorageGlobalDownloader gdlData = new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName, pluginMetaData.Download, listDatesFiles, startDate, downloaderClassName);
 
-        // Setup ModisNBARQC GlobalDownloader
-        listDatesFiles = new ModisNBARQCListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
-        downloaderClassName = testPluginName + "QC" + "Downloader";
-        GenericLocalStorageGlobalDownloader gdlQC = new GenericLocalStorageGlobalDownloader(2, testConfig, testPluginName, pluginMetaData.Download.extraDownloads.get(0), listDatesFiles, startDate,
-                downloaderClassName);
+        // Setup QC GlobalDownloader
+        if(hasQC)
+        {
+            downloaderClassName = testPluginName + "QC" + "Downloader";
+            gdlQC = new GenericLocalStorageGlobalDownloader(2, testConfig, testPluginName, pluginMetaData.Download.extraDownloads.get(0), listDatesFilesQC, startDate,
+                    downloaderClassName);
+        }
 
         // Setup database entries
         query = String.format("INSERT INTO \"%1$s\".\"DateGroup\" (\"DayOfYear\", \"Year\") VALUES " +
@@ -277,24 +314,33 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 "(1, 2, '" + dateFilePath2 + "', FALSE);",
                 testGlobalSchema);
         stmt.execute(query);
-        query = String.format("INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\", \"Complete\") VALUES " +
-                "(2, 1, 'QC', '" + qcFilePath1 + "', TRUE), " +
-                "(2, 2, 'QC', '" + qcFilePath2 + "', FALSE);",
-                testGlobalSchema);
-        stmt.execute(query);
+        if(hasQC)
+        {
+            query = String.format("INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\", \"Complete\") VALUES " +
+                    "(2, 1, 'QC', '" + qcFilePath1 + "', TRUE), " +
+                    "(2, 2, 'QC', '" + qcFilePath2 + "', FALSE);",
+                    testGlobalSchema);
+            stmt.execute(query);
+        }
         stmt.close();
 
         // Get results
         ArrayList<DataFileMetaData> testResultsData1 = gdlData.GetAllDownloadedFiles();
         ArrayList<DataFileMetaData> testResultsData2 = gdlData.GetAllDownloadedFiles(LocalDate.now().minusDays(1));
-        ArrayList<DataFileMetaData> testResultsQC1 = gdlQC.GetAllDownloadedFiles();
-        ArrayList<DataFileMetaData> testResultsQC2 = gdlQC.GetAllDownloadedFiles(LocalDate.now().minusDays(1));
+        if(hasQC)
+        {
+            testResultsQC1 = gdlQC.GetAllDownloadedFiles();
+            testResultsQC2 = gdlQC.GetAllDownloadedFiles(LocalDate.now().minusDays(1));
+        }
 
         // Test number of rows returned
         assertEquals("testResultsData1 incorrect.", 2, testResultsData1.size());
         assertEquals("testResultsData2 incorrect.", 1, testResultsData2.size());
-        assertEquals("testResultsQC1 incorrect.", 2, testResultsQC1.size());
-        assertEquals("testResultsQC2 incorrect.", 1, testResultsQC2.size());
+        if(hasQC)
+        {
+            assertEquals("testResultsQC1 incorrect.", 2, testResultsQC1.size());
+            assertEquals("testResultsQC2 incorrect.", 1, testResultsQC2.size());
+        }
 
         // Test values returned for gdlData
         DownloadFileMetaData dData;
@@ -325,31 +371,34 @@ public class GenericLocalStorageGlobalDownloaderTest {
         assertEquals("testResultsData2[0] year is incorrect", LocalDate.now().getYear(), dData.year);
 
         // Test values returned for gdlQC
-        for(int i=0; i < testResultsQC1.size(); i++)
+        if(hasQC)
         {
-            dData = testResultsQC1.get(i).ReadMetaDataForProcessor();
-            // DateGroupID = 1
-            if(dData.day == day)
+            for(int i=0; i < testResultsQC1.size(); i++)
             {
-                assertTrue("testResultsQC1[" + i + "] dataName is " + dData.dataName, dData.dataName.equals("QC"));
-                assertTrue("testResultsQC1[" + i + "] dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath1));
-                assertTrue("testResultsQC1[" + i + "] day is " + dData.day, dData.day == startDate.getDayOfYear());
-                assertTrue("testResultsQC1[" + i + "] year is " + dData.year, dData.year == startDate.getYear());
+                dData = testResultsQC1.get(i).ReadMetaDataForProcessor();
+                // DateGroupID = 1
+                if(dData.day == day)
+                {
+                    assertTrue("testResultsQC1[" + i + "] dataName is " + dData.dataName, dData.dataName.equals("QC"));
+                    assertTrue("testResultsQC1[" + i + "] dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath1));
+                    assertTrue("testResultsQC1[" + i + "] day is " + dData.day, dData.day == startDate.getDayOfYear());
+                    assertTrue("testResultsQC1[" + i + "] year is " + dData.year, dData.year == startDate.getYear());
+                }
+                // DateGroupID = 2
+                else
+                {
+                    assertTrue("testResultsQC1[" + i + "] dataName is " + dData.dataName, dData.dataName.equals("QC"));
+                    assertTrue("testResultsQC1[" + i + "] dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath2));
+                    assertTrue("testResultsQC1[" + i + "] day is " + dData.day, dData.day == LocalDate.now().getDayOfYear());
+                    assertTrue("testResultsQC1[" + i + "] year is " + dData.year, dData.year == LocalDate.now().getYear());
+                }
             }
-            // DateGroupID = 2
-            else
-            {
-                assertTrue("testResultsQC1[" + i + "] dataName is " + dData.dataName, dData.dataName.equals("QC"));
-                assertTrue("testResultsQC1[" + i + "] dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath2));
-                assertTrue("testResultsQC1[" + i + "] day is " + dData.day, dData.day == LocalDate.now().getDayOfYear());
-                assertTrue("testResultsQC1[" + i + "] year is " + dData.year, dData.year == LocalDate.now().getYear());
-            }
+            dData = testResultsQC2.get(0).ReadMetaDataForProcessor();
+            assertEquals("testResultsQC2[0] dataName is incorrect", "QC", dData.dataName);
+            assertEquals("testResultsQC2[0] dataFilePath is incorrect", qcFilePath2, dData.dataFilePath);
+            assertEquals("testResultsQC2[0] day is incorrect", LocalDate.now().getDayOfYear(), dData.day);
+            assertEquals("testResultsQC2[0] year is incorrect", LocalDate.now().getYear(), dData.year);
         }
-        dData = testResultsQC2.get(0).ReadMetaDataForProcessor();
-        assertEquals("testResultsQC2[0] dataName is incorrect", "QC", dData.dataName);
-        assertEquals("testResultsQC2[0] dataFilePath is incorrect", qcFilePath2, dData.dataFilePath);
-        assertEquals("testResultsQC2[0] day is incorrect", LocalDate.now().getDayOfYear(), dData.day);
-        assertEquals("testResultsQC2[0] year is incorrect", LocalDate.now().getYear(), dData.year);
     }
 
     private class MyObserver implements Observer

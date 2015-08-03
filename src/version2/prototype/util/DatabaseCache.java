@@ -115,7 +115,7 @@ public class DatabaseCache extends Observable{
                     // Collect completed but not retrieved records from DownloadCache
                     String downloadCacheQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + schemaName + "\".\"DownloadCache\" D " +
                             "INNER JOIN \"" + globalSchema + "\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\"" +
-                            "WHERE \"Completed\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
+                            "WHERE \"Complete\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
                     rs = stmt.executeQuery(downloadCacheQuery);
                     if(rs != null)
                     {
@@ -157,7 +157,7 @@ public class DatabaseCache extends Observable{
                     {
                         downloadCacheExtraQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + schemaName + "\".\"DownloadCacheExtra\" D " +
                                 "INNER JOIN \"" + globalSchema + "\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\"" +
-                                "WHERE \"Completed\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
+                                "WHERE \"Complete\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
                         rs = stmt.executeQuery(downloadCacheExtraQuery);
                         if(rs != null)
                         {
@@ -403,7 +403,7 @@ public class DatabaseCache extends Observable{
                     }
 
                     // Step 2b
-                    if(extraDownloadFiles != null)
+                    if(extraDownloadFiles != null && extraDownloadFiles.size() > 0)
                     {
                         pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" WHERE \"DateGroupID\" = ? AND \"DataName\" = ?;");
                         for(String name : extraDownloadFiles)

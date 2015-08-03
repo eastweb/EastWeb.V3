@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config>
-	<DownloadDir>C:/Users/michael.devos/Desktop/EASTWeb/Downloads</DownloadDir>
+	<DownloadDir>C:\Users\michael.devos\Desktop\EASTWeb\Downloads</DownloadDir>
 	<DataBase>
 		<globalSchema>Scheduler_Test_EASTWeb</globalSchema>
 		<hostName>localhost:5432</hostName>

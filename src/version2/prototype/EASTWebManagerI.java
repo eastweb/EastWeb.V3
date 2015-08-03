@@ -7,7 +7,7 @@ import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.LocalDownloader;
 
-public interface EASTWebI {
+public interface EASTWebManagerI {
 
     public void run();
 
