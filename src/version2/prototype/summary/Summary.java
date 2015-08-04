@@ -23,14 +23,12 @@ public class Summary extends Process {
     /**
      * Creates a Summary object with the defined initial TaskState, owned by the given Scheduler, and acquiring its input from the specified
      * process, inputProcessName.
-     *
+     * @param manager
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param state  - TaskState to initialize this object to
-     * @param inputProcessName  - name of process to use the output of for its input
-     * @param executor  - executor service to use to spawn worker threads
+     * @param inputCache
      */
     public Summary(EASTWebManagerI manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
     {
@@ -40,7 +38,7 @@ public class Summary extends Process {
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        manager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles));
+        manager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null));
     }
 
 }

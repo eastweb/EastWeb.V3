@@ -14,7 +14,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
+import version2.prototype.ErrorLog;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
 /**
@@ -41,89 +43,101 @@ public class Schemas {
      * @param summaries  - relevant to calculating the number of expected results to be found in ZonalStat
      * @param createTablesWithForeignKeyReferences  - TRUE if tables should be created so that their foreign keys are referencing their corresponding primary keys, FALSE if tables shouldn't be created
      * to enforce foreign key rules
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      * @throws ConfigReadException
      * @throws SQLException
      * @throws ClassNotFoundException
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
             ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices,
-            ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences) throws ConfigReadException, SQLException, ClassNotFoundException
+            ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences) throws ParserConfigurationException, SAXException, IOException
     {
-        final Connection conn = postgreSQLConnection;
-        final Statement stmt = conn.createStatement();
-        final String mSchemaName = getSchemaName(projectName, pluginName);
+        final Connection conn;
+        final Statement stmt;
+        final String mSchemaName;
+        try{
+            conn = postgreSQLConnection;
+            stmt = conn.createStatement();
+            mSchemaName = getSchemaName(projectName, pluginName);
 
-        // Drop an existing schema with the same name
-        //        dropSchemaIfExists(stmt, mSchemaName);
+            // Drop an existing schema with the same name
+            //        dropSchemaIfExists(stmt, mSchemaName);
 
-        // Create the schema for this project
-        createSchemaIfNotExist(stmt, mSchemaName);
+            // Create the schema for this project
+            createSchemaIfNotExist(stmt, mSchemaName);
 
-        // Create the global schema for EASTWeb if it doesn't already exist
-        createSchemaIfNotExist(stmt, globalEASTWebSchema);
+            // Create the global schema for EASTWeb if it doesn't already exist
+            createSchemaIfNotExist(stmt, globalEASTWebSchema);
 
-        // Create DateGroup table
-        createDateGroupTable(globalEASTWebSchema, stmt);
+            // Create DateGroup table
+            createDateGroupTable(globalEASTWebSchema, stmt);
 
-        // Create Project table
-        createProjectTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create Project table
+            createProjectTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create Plugin table
-        createPluginTableIfNotExists(globalEASTWebSchema, stmt);
+            // Create Plugin table
+            createPluginTableIfNotExists(globalEASTWebSchema, stmt);
 
-        // Create TemporalSummaryCompositionStrategy table
-        createTemporalSummaryCompositionStrategyTableIfNotExists(globalEASTWebSchema, stmt);
+            // Create TemporalSummaryCompositionStrategy table
+            createTemporalSummaryCompositionStrategyTableIfNotExists(globalEASTWebSchema, stmt);
 
-        // Create ExpectedResults table to keep track of how many results are expected for each plugin for each project
-        createExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create ExpectedResults table to keep track of how many results are expected for each plugin for each project
+            createExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create GlobalDownloader table
-        createGlobalDownloaderTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create GlobalDownloader table
+            createGlobalDownloaderTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create GDExpectedResults table
-        createGlobalDownloaderExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create GDExpectedResults table
+            createGlobalDownloaderExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create Download table
-        createDownloadTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, createTablesWithForeignKeyReferences);
+            // Create Download table
+            createDownloadTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, createTablesWithForeignKeyReferences);
 
-        // Create DownloadExtra table
-        createDownloadExtraTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create DownloadExtra table
+            createDownloadExtraTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create Environmental Index table
-        createIndexTableIfNotExists(globalEASTWebSchema, stmt);
+            // Create Environmental Index table
+            createIndexTableIfNotExists(globalEASTWebSchema, stmt);
 
-        // Create the ZoneEW table
-        createZoneTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create the ZoneEW table
+            createZoneTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create the ZoneVar table
-        createZoneVarTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+            // Create the ZoneVar table
+            createZoneVarTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
-        // Create the ZoneFields table
-        createZoneFieldTableIfNotExists(stmt, mSchemaName);
+            // Create the ZoneFields table
+            createZoneFieldTableIfNotExists(stmt, mSchemaName);
 
-        // Create the ZoneMapping table
-        createZoneMappingTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            // Create the ZoneMapping table
+            createZoneMappingTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-        // Create the ZonalStats table
-        createZonalStatTableIfNotExists(globalEASTWebSchema, summaryNames, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            // Create the ZonalStats table
+            createZonalStatTableIfNotExists(globalEASTWebSchema, summaryNames, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-        // Create cache tables for each framework
-        createDownloadCacheTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-        createDownloadCacheExtraTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-        createProcessorCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-        createIndicesCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            // Create cache tables for each framework
+            createDownloadCacheTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            createDownloadCacheExtraTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            createProcessorCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            createIndicesCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-        // Get DateGroupID
-        int dateGroupID = getDateGroupID(globalEASTWebSchema, startDate, stmt);
+            // Get DateGroupID
+            int dateGroupID = getDateGroupID(globalEASTWebSchema, startDate, stmt);
 
-        // Add entry to Project table
-        int projectID = addProject(globalEASTWebSchema, projectName, numOfIndices, stmt, dateGroupID);
+            // Add entry to Project table
+            int projectID = addProject(globalEASTWebSchema, projectName, numOfIndices, stmt, dateGroupID);
 
-        // Add entry to Plugin table if not already existing
-        int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
+            // Add entry to Plugin table if not already existing
+            int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
 
-        // Add entry to EASTWeb global ExpectedResults table
-        addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn);
+            // Add entry to EASTWeb global ExpectedResults table
+            addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn);
+        }
+        catch(SQLException e)
+        {
+            ErrorLog.add(Config.getInstance(), "SQL Exception in Schemas.", e);
+        }
     }
 
     /**

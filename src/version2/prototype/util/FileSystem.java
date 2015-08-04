@@ -1,5 +1,6 @@
 package version2.prototype.util;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ public final class FileSystem {
         if(!path.endsWith("/") && path.endsWith("\\")) {
             path += "\\";
         }
+        new File(path).mkdirs();
         return path;
     }
 
@@ -91,7 +93,9 @@ public final class FileSystem {
      */
     public static String GetProjectDirectoryPath(String workingDir, String projectName)
     {
-        return CheckDirPath(CheckDirPath(workingDir) + "Projects\\" + StandardizeName(projectName) + "\\");
+        String path = CheckDirPath(CheckDirPath(workingDir) + "Projects\\" + StandardizeName(projectName) + "\\");
+        new File(path).mkdirs();
+        return path;
     }
 
     /**
@@ -105,7 +109,9 @@ public final class FileSystem {
      */
     public static String GetProcessDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return CheckDirPath(GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "\\" + GetProcessDirectoryName(processName) + "\\");
+        String path = CheckDirPath(GetProjectDirectoryPath(workingDir, projectName) + StandardizeName(pluginName) + "\\" + GetProcessDirectoryName(processName) + "\\");
+        new File(path).mkdirs();
+        return path;
     }
 
     /**
@@ -119,7 +125,9 @@ public final class FileSystem {
      */
     public static String GetProcessOutputDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output\\");
+        String path = CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Output\\");
+        new File(path).mkdirs();
+        return path;
     }
 
     /**
@@ -133,11 +141,14 @@ public final class FileSystem {
      */
     public static String GetProcessWorkerTempDirectoryPath(String workingDir, String projectName, String pluginName, ProcessName processName)
     {
-        return CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp\\");
+        String path = CheckDirPath(GetProcessDirectoryPath(workingDir, projectName, pluginName, processName) + "Temp\\");
+        new File(path).mkdirs();
+        return path;
     }
 
     /**
      * Gets the global download directory path for the given type of data downloaded.
+     * @param configInstance
      *
      * @param pluginName  - name of the data type as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
      * @return path to the download directory for the data
@@ -145,7 +156,9 @@ public final class FileSystem {
      */
     public static String GetGlobalDownloadDirectory(Config configInstance, String pluginName) throws ConfigReadException
     {
-        return CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "\\");
+        String path = CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "\\");
+        new File(path).mkdirs();
+        return path;
     }
 
     private static String GetProcessDirectoryName(ProcessName name)

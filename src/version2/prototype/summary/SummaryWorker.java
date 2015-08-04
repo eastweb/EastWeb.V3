@@ -27,8 +27,7 @@ import version2.prototype.util.IndicesFileMetaData;
  */
 public class SummaryWorker extends ProcessWorker {
 
-    public SummaryWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
-            PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles)
+    public SummaryWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
         super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
     }
