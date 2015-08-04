@@ -540,7 +540,7 @@ public class Schemas {
         StringBuilder query_;
         query_ = new StringBuilder(
                 String.format(
-                        "CREATE TABLE \"%1$s\".\"IndicesCache\"\n" +
+                        "CREATE TABLE IF NOT EXISTS \"%1$s\".\"IndicesCache\"\n" +
                                 "(\n" +
                                 "  \"IndicesCacheID\" serial PRIMARY KEY,\n" +
                                 "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
@@ -564,7 +564,7 @@ public class Schemas {
         StringBuilder query_;
         query_ = new StringBuilder(
                 String.format(
-                        "CREATE TABLE \"%1$s\".\"ProcessorCache\"\n" +
+                        "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ProcessorCache\"\n" +
                                 "(\n" +
                                 "  \"ProcessorCacheID\" serial PRIMARY KEY,\n" +
                                 "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
@@ -586,7 +586,7 @@ public class Schemas {
         StringBuilder query_;
         query_ = new StringBuilder(
                 String.format(
-                        "CREATE TABLE \"%1$s\".\"DownloadCacheExtra\"\n" +
+                        "CREATE TABLE IF NOT EXISTS \"%1$s\".\"DownloadCacheExtra\"\n" +
                                 "(\n" +
                                 "  \"DownloadCacheExtraID\" serial PRIMARY KEY,\n" +
                                 "  \"DataName\" varchar(255) NOT NULL,\n" +
@@ -612,7 +612,7 @@ public class Schemas {
         StringBuilder query_;
         query_ = new StringBuilder(
                 String.format(
-                        "CREATE TABLE \"%1$s\".\"DownloadCache\"\n" +
+                        "CREATE TABLE IF NOT EXISTS \"%1$s\".\"DownloadCache\"\n" +
                                 "(\n" +
                                 "  \"DownloadCacheID\" serial PRIMARY KEY,\n" +
                                 "  \"DataFilePath\" varchar(255) UNIQUE NOT NULL,\n" +
@@ -637,7 +637,7 @@ public class Schemas {
         StringBuilder query_;
         query_ = new StringBuilder(
                 String.format(
-                        "CREATE TABLE \"%1$s\".\"ZonalStat\"\n" +
+                        "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ZonalStat\"\n" +
                                 "(\n" +
                                 "  \"ZonalStatID\" serial PRIMARY KEY,\n" +
                                 "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
@@ -664,7 +664,7 @@ public class Schemas {
 
         String query;
         query = String.format(
-                "CREATE TABLE \"%1$s\".\"ZoneMapping\"\n" +
+                "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ZoneMapping\"\n" +
                         "(\n" +
                         "  \"ZoneMappingID\" serial PRIMARY KEY,\n" +
                         "  \"ZoneEWID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"ZoneEW\" (\"ZoneEWID\") " : "") + "NOT NULL,\n" +
@@ -683,7 +683,7 @@ public class Schemas {
 
         String query;
         query = String.format(
-                "CREATE TABLE \"%1$s\".\"ZoneField\"\n" +
+                "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ZoneField\"\n" +
                         "(\n" +
                         "  \"ZoneFieldID\" serial PRIMARY KEY,\n" +
                         "  \"ShapeFile\" varchar(255) NOT NULL,\n" +
