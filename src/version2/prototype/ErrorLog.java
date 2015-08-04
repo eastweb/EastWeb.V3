@@ -3,44 +3,86 @@ package version2.prototype;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.util.FileSystem;
+
+/**
+ * @author michael.devos
+ *
+ */
 public final class ErrorLog {
     private ErrorLog() {
+        // Don't allow instantiation
     }
 
     private static final Object sErrorLogLock = new Object();
-    private static PrintStream sErrorLogPrintStream;
 
     /**
-     * Reports an error.
+     * Reports an error to the error log in the error log directory root.
+     * @param configInstance
      * @param message Error message, suitable for presentation to the user
      * @param cause Cause of the error, may be null
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public static void add(String message, Throwable cause) {
+    public static void add(Config configInstance, String message, Throwable cause) throws ParserConfigurationException, SAXException {
+        String logFileName = getLogFileName();
+        String logPath = configInstance.getDownloadDir();
         synchronized (sErrorLogLock) {
-            printToLogFile(message, cause);
+            printToLogFile(logPath + logFileName, message, cause);
             printToStderr(message, cause);
         }
     }
 
-    private static void printToLogFile(String message, Throwable cause) {
+    /**
+     * Reports an error to the error log for the specified GlobalDownloader.
+     * @param configInstance
+     * @param pluginName
+     * @param message Error message, suitable for presentation to the user
+     * @param cause Cause of the error, may be null
+     * @throws ConfigReadException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     */
+    public static void add(Config configInstance, String pluginName, String message, Throwable cause) throws ConfigReadException, ParserConfigurationException, SAXException
+    {
+        String logFileName = getLogFileName();
+        String logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+        synchronized (sErrorLogLock) {
+            printToLogFile(logPath + logFileName, message, cause);
+            printToStderr(message, cause);
+        }
+    }
+
+    /**
+     * Reports an error to the error log for the specified project.
+     * @param projectInfo
+     * @param message Error message, suitable for presentation to the user
+     * @param cause Cause of the error, may be null
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     */
+    public static void add(ProjectInfoFile projectInfoFile, String message, Throwable cause) throws ParserConfigurationException, SAXException
+    {
+        String logFileName = getLogFileName();
+        String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+        synchronized (sErrorLogLock) {
+            printToLogFile(logPath + logFileName, message, cause);
+            printToStderr(message, cause);
+        }
+    }
+
+    private static void printToLogFile(String logPath, String message, Throwable cause) throws ParserConfigurationException, SAXException {
         try {
-            if (sErrorLogPrintStream == null) {
-                final GregorianCalendar cal = new GregorianCalendar(TimeZone.getDefault());
-                final FileOutputStream fos = new FileOutputStream(String.format(
-                        "%s/errors.%04d-%02d-%02d.%02d%02d%02d.log",
-                        Config.getInstance().getRootDirectory(),
-                        cal.get(GregorianCalendar.YEAR),
-                        cal.get(GregorianCalendar.MONTH) + 1,
-                        cal.get(GregorianCalendar.DAY_OF_MONTH),
-                        cal.get(GregorianCalendar.HOUR_OF_DAY),
-                        cal.get(GregorianCalendar.MINUTE),
-                        cal.get(GregorianCalendar.SECOND)
-                        ));
-                sErrorLogPrintStream = new PrintStream(fos);
-            }
+            final FileOutputStream fos = new FileOutputStream(logPath);
+            PrintStream sErrorLogPrintStream = new PrintStream(fos);
 
             sErrorLogPrintStream.println(message);
             if (cause != null) {
@@ -58,5 +100,10 @@ public final class ErrorLog {
         if (cause != null) {
             cause.printStackTrace();
         }
+    }
+
+    private static String getLogFileName() {
+        LocalDateTime temp = LocalDateTime.now();
+        return "Error_Log_" + LocalDate.now().getYear() + "_" + LocalDate.now().getMonthValue() + "_" + LocalDate.now().getDayOfMonth() + "_" + temp.getHour() + temp.getMinute() + temp.getSecond() + ".log";
     }
 }
