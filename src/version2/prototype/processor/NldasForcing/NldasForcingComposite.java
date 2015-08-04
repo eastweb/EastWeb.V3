@@ -49,6 +49,15 @@ public class NldasForcingComposite extends Composite
                 catch (IOException e) { e.printStackTrace(); }
             }
 
+            List<Dataset> inputDSs = new ArrayList<Dataset>();
+
+            for (File input : inputFiles) {
+                inputDSs.add(gdal.Open(input.getPath()));
+            }
+
+            int rasterX = inputDSs.get(0).GetRasterXSize();
+            int rasterY = inputDSs.get(0).GetRasterYSize();
+
             for(int band : mBands)
             {
                 int outputs = 1;
@@ -59,25 +68,20 @@ public class NldasForcingComposite extends Composite
 
                 for(int output = 0; output < outputs; output++)
                 {
-                    List<Dataset> inputDSs = new ArrayList<Dataset>();
                     ArrayList<String> prefixList = GetFilePrefix(band, output);
 
                     for(String prefix : prefixList)
                     {
-                        File temp = null;
+                        File temp = new File(outputFolder + "\\" + prefix + ".tif");
                         try {
-                            temp = File.createTempFile(prefix,
-                                    ".tif",
-                                    new File(outputFolder));
+                            temp.createNewFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                        catch (IOException e) { e.printStackTrace(); }
 
                         for (File input : inputFiles) {
                             inputDSs.add(gdal.Open(input.getPath()));
                         }
-
-                        int rasterX = inputDSs.get(0).GetRasterXSize();
-                        int rasterY = inputDSs.get(0).GetRasterYSize();
 
                         Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                                 temp.getAbsolutePath(),
@@ -91,12 +95,13 @@ public class NldasForcingComposite extends Composite
 
                         outputDS.GetRasterBand(1).WriteRaster(0, 0, rasterX, rasterY, GetOutputArray(band, output, inputDSs, rasterX, rasterY, prefix));
 
-                        for (Dataset inputDS : inputDSs) {
-                            inputDS.delete();
-                        }
                         outputDS.delete();
                     }
                 }
+            }
+
+            for (Dataset inputDS : inputDSs) {
+                inputDS.delete();
             }
         }
     }
@@ -288,10 +293,11 @@ public class NldasForcingComposite extends Composite
     {
         double[] cumulative = null;
         File yesterdayFile = null;
+        int year = Integer.parseInt(inputFolder.getParent().substring(inputFolder.getParent().length()-4, inputFolder.getParent().length()));
 
         try
         {
-            DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), Integer.parseInt(inputFolder.getParent()));
+            DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), year);
             if(!(inputFolder.getName().equalsIgnoreCase(String.format("%03d", date.getDayOfYear())) &&
                     inputFolder.getParent().equalsIgnoreCase(String.format("%04d", date.getYear()))))
             {
