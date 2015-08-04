@@ -140,9 +140,6 @@ public class Config {
      * Gets the singleton instance of Config reading and parsing the Config.xml file found in EASTWeb's working directory.
      *
      * @return the Config instance
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
      */
     public static Config getInstance()
     {
@@ -158,9 +155,6 @@ public class Config {
      *
      * @param xmlPath  - file path to the xml to read and parse
      * @return a new Config object
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
      */
     public static Config getAnInstance(String xmlPath)
     {
@@ -169,6 +163,7 @@ public class Config {
 
     /**
      * Creates a custom Config object with the given parameters. Doesn't store or reuse the created instance. Meant for testing purposes.
+     * @param errorLogDir
      * @param downloadDir
      * @param globalSchema
      * @param databaseHost
@@ -178,8 +173,7 @@ public class Config {
      * @return a new Config object
      */
     public static Config getAnInstance(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername,
-            String databasePassword,
-            ArrayList<String> summaryCalculations) {
+            String databasePassword, ArrayList<String> summaryCalculations) {
         return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, port, databaseName, databaseUsername, databasePassword, summaryCalculations);
     }
 
