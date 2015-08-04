@@ -11,6 +11,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
+import version2.prototype.ErrorLog;
 
 
 /**
@@ -36,19 +37,41 @@ public class PostgreSQLConnection {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
-            throw new ClassNotFoundException("Failed to find the PostgreSQL JDBC driver", e);
+            ErrorLog.add(Config.getInstance(), "Failed to find the PostgreSQL JDBC driver", e);
         }
 
+        Config configInstance = Config.getInstance();
+        return DriverManager.getConnection(
+                configInstance.getDatabaseHost() + ":" + configInstance.getPort() + "/" + configInstance.getDatabaseName(),
+                configInstance.getDatabaseUsername(),
+                configInstance.getDatabasePassword()
+                );
+    }
+
+    /**
+     * Creates a valid Connection object if a connection could be established with the PostgreSQL database using information from config.xml.
+     * @param configInstance
+     *
+     * @return valid Connection object if successfully connected, otherwise null
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ConfigReadException
+     */
+    public static Connection getConnection(Config configInstance) throws SQLException, ParserConfigurationException, SAXException, IOException, ClassNotFoundException {
+        // Driver Connection Check
         try {
-            return DriverManager.getConnection(
-                    Config.getInstance().getDatabaseHost(),
-                    Config.getInstance().getDatabaseUsername(),
-                    Config.getInstance().getDatabasePassword()
-                    );
-        } catch (ConfigReadException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            ErrorLog.add(configInstance, "Failed to find the PostgreSQL JDBC driver", e);
         }
-        return null;
+
+        return DriverManager.getConnection(
+                configInstance.getDatabaseHost() + ":" + configInstance.getPort() + "/" + configInstance.getDatabaseName(),
+                configInstance.getDatabaseUsername(),
+                configInstance.getDatabasePassword()
+                );
     }
 }

@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <config>
 	<DownloadDir>C:/Users/michael.devos/Desktop/EASTWeb/Downloads</DownloadDir>
-	<DataBase>
-		<globalSchema>Test_EASTWeb1</globalSchema>
-		<hostName>localhost:5432</hostName>
-		<userName>postgres</userName>
-		<passWord>eastweb</passWord>
-	</DataBase>
+	<Database>
+		<GlobalSchema>Test_EASTWeb1</GlobalSchema>
+		<HostName>localhost</HostName>
+		<Port>5432</Port>
+		<DatabaseName>postgres</DatabaseName>
+		<UserName>postgres</UserName>
+		<PassWord>eastweb</PassWord>
+	</Database>
 	<Output>
 		<SummaryCalculation>Count</SummaryCalculation>
 		<SummaryCalculation>Max</SummaryCalculation>

@@ -1,16 +1,20 @@
 <?xml version="1.0"?>
 <config>
-	<ErrorLogDir>C:/EASTWeb</ErrorLogDir>
-	<DownloadDir>C:/EASTWeb/Downloads</DownloadDir>
-	<DataBase>
-		<globalSchema>EASTWeb</globalSchema>
-		<hostName>localhost:5432</hostName>
-		<userName>postgres</userName>
-		<passWord>eastweb</passWord>
-	</DataBase>
+	<ErrorLogDir>C:\EASTWeb</ErrorLogDir>
+	<DownloadDir>C:\EASTWeb\Downloads</DownloadDir>
+	<Database>
+		<GlobalSchema>EASTWeb</GlobalSchema>
+		<HostName>localhost</HostName>
+		<Port>5432</Port>
+		<DatabaseName>postgres</DatabaseName>
+		<UserName>postgres</UserName>
+		<PassWord>eastweb</PassWord>
+	</Database>
 	<!-- <DataBase>
-		<globalSchema>EASTWeb</globalSchema>
-		<hostName>localhost:5432</hostName>
+		<GlobalSchema>EASTWeb</GlobalSchema>
+		<HostName>localhost</HostName>
+		<Port>5432</Port>
+		<DatabaseName>epidemiadb</DatabaseName>
 		<userName>postgres</userName>
 		<passWord>dPpKa2Q8NW</passWord>
 	</DataBase> -->

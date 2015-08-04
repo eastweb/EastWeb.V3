@@ -43,16 +43,10 @@ public class Schemas {
      * @param summaries  - relevant to calculating the number of expected results to be found in ZonalStat
      * @param createTablesWithForeignKeyReferences  - TRUE if tables should be created so that their foreign keys are referencing their corresponding primary keys, FALSE if tables shouldn't be created
      * to enforce foreign key rules
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws ConfigReadException
-     * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
             ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices,
-            ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences) throws ParserConfigurationException, SAXException, IOException
+            ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences)
     {
         final Connection conn;
         final Statement stmt;

@@ -25,11 +25,13 @@ public class Config {
     // Download section
     private static final String DOWNLOAD_DIR_KEY = "DownloadDir";
     // Database section
-    private static final String DATA_BASE_KEY = "DataBase";
-    private static final String GLOBAL_SCHEMA_KEY = "globalSchema";
-    private static final String HOST_NAME_KEY = "hostName";
-    private static final String DATABASE_USERNAME_KEY = "userName";
-    private static final String DATABASE_PASSWORD_KEY = "passWord";
+    private static final String DATA_BASE_KEY = "Database";
+    private static final String GLOBAL_SCHEMA_KEY = "GlobalSchema";
+    private static final String HOST_NAME_KEY = "HostName";
+    private static final String PORT_KEY = "Port";
+    private static final String DATABASE_NAME_KEY = "DatabaseName";
+    private static final String DATABASE_USERNAME_KEY = "UserName";
+    private static final String DATABASE_PASSWORD_KEY = "PassWord";
     // Output section
     private static final String OUTPUT_KEY = "Output";
     // Instance
@@ -52,44 +54,83 @@ public class Config {
     private final String downloadDir;
     private final String globalSchema;
     private final String databaseHost;
+    private final Integer port;
+    private final String databaseName;
     private final String databaseUsername;
     private final String databasePassword;
     private final ArrayList<String> summaryCalculations;
 
-    private Config(String xmlPath) throws ParserConfigurationException, SAXException, IOException {
+    private Config(String xmlPath)
+    {
+        DocumentBuilder dBuilder = null;
+        Document doc = null;
+        Element database = null;
+        Node outputNode = null;
+        NodeList summaryList = null;
+
+        String errorLogDirTemp = null;
+        String downloadDirTemp = null;
+        String globalSchemaTemp = null;
+        String databaseHostTemp = null;
+        Integer portTemp = null;
+        String databaseNameTemp = null;
+        String databaseUsernameTemp = null;
+        String databasePasswordTemp = null;
+        ArrayList<String> summaryCalculationsTemp = null;
+
         File fXmlFile = new File(xmlPath);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(fXmlFile);
-        doc.getDocumentElement().normalize();
+        try {
+            dBuilder = dbFactory.newDocumentBuilder();
+            doc = dBuilder.parse(fXmlFile);
+            doc.getDocumentElement().normalize();
 
-        errorLogDir = ((Element) doc.getElementsByTagName(ERROR_LOG_DIR_KEY).item(0)).getTextContent();
+            errorLogDirTemp = ((Element) doc.getElementsByTagName(ERROR_LOG_DIR_KEY).item(0)).getTextContent();
 
-        // Node: Download
-        downloadDir = ((Element) doc.getElementsByTagName(DOWNLOAD_DIR_KEY).item(0)).getTextContent();
+            // Node: Download
+            downloadDirTemp = ((Element) doc.getElementsByTagName(DOWNLOAD_DIR_KEY).item(0)).getTextContent();
 
-        // Node: Database
-        Element database = (Element) doc.getElementsByTagName(DATA_BASE_KEY).item(0);
-        globalSchema = database.getElementsByTagName(GLOBAL_SCHEMA_KEY).item(0).getTextContent();
-        databaseHost = "jdbc:postgresql://"+database.getElementsByTagName(HOST_NAME_KEY).item(0).getTextContent();
-        databaseUsername = database.getElementsByTagName(DATABASE_USERNAME_KEY).item(0).getTextContent();
-        databasePassword = database.getElementsByTagName(DATABASE_PASSWORD_KEY).item(0).getTextContent();
+            // Node: Database
+            database = (Element) doc.getElementsByTagName(DATA_BASE_KEY).item(0);
+            globalSchemaTemp = database.getElementsByTagName(GLOBAL_SCHEMA_KEY).item(0).getTextContent();
+            databaseHostTemp = "jdbc:postgresql://"+database.getElementsByTagName(HOST_NAME_KEY).item(0).getTextContent();
+            portTemp = Integer.parseInt(database.getElementsByTagName(PORT_KEY).item(0).getTextContent());
+            databaseNameTemp = database.getElementsByTagName(DATABASE_NAME_KEY).item(0).getTextContent();
+            databaseUsernameTemp = database.getElementsByTagName(DATABASE_USERNAME_KEY).item(0).getTextContent();
+            databasePasswordTemp = database.getElementsByTagName(DATABASE_PASSWORD_KEY).item(0).getTextContent();
 
-        // Node: Output
-        Node outputNode = doc.getElementsByTagName(OUTPUT_KEY).item(0);
-        // Node(s): SummaryCalculation
-        summaryCalculations = new ArrayList<String>(1);
-        NodeList summaryList = ((Element) outputNode).getElementsByTagName("SummaryCalculation");
-        for(int i=0; i < summaryList.getLength(); i++) {
-            summaryCalculations.add(summaryList.item(i).getTextContent());
+            // Node: Output
+            outputNode = doc.getElementsByTagName(OUTPUT_KEY).item(0);
+            // Node(s): SummaryCalculation
+            summaryCalculationsTemp = new ArrayList<String>(1);
+            summaryList = ((Element) outputNode).getElementsByTagName("SummaryCalculation");
+            for(int i=0; i < summaryList.getLength(); i++) {
+                summaryCalculationsTemp.add(summaryList.item(i).getTextContent());
+            }
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            ErrorLog.add("Problem getting Config instance", e);
         }
+
+        errorLogDir = errorLogDirTemp;
+        downloadDir = downloadDirTemp;
+        globalSchema = globalSchemaTemp;
+        databaseHost = databaseHostTemp;
+        port = portTemp;
+        databaseName = databaseNameTemp;
+        databaseUsername = databaseUsernameTemp;
+        databasePassword = databasePasswordTemp;
+        summaryCalculations = summaryCalculationsTemp;
     }
 
-    private Config(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword, ArrayList<String> summaryCalculations) {
+    private Config(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername, String databasePassword,
+            ArrayList<String> summaryCalculations)
+    {
         this.errorLogDir = errorLogDir;
         this.downloadDir = downloadDir;
         this.globalSchema = globalSchema;
         this.databaseHost = databaseHost;
+        this.port = port;
+        this.databaseName = databaseName;
         this.databaseUsername = databaseUsername;
         this.databasePassword = databasePassword;
         this.summaryCalculations = summaryCalculations;
@@ -103,7 +144,8 @@ public class Config {
      * @throws SAXException
      * @throws IOException
      */
-    public static Config getInstance() throws ParserConfigurationException, SAXException, IOException {
+    public static Config getInstance()
+    {
         if(instance == null) {
             instance = new Config(CONFIG_FILENAME);
         }
@@ -120,7 +162,8 @@ public class Config {
      * @throws SAXException
      * @throws IOException
      */
-    public static Config getAnInstance(String xmlPath) throws ParserConfigurationException, SAXException, IOException {
+    public static Config getAnInstance(String xmlPath)
+    {
         return new Config(xmlPath);
     }
 
@@ -134,9 +177,10 @@ public class Config {
      * @param summaryCalculations
      * @return a new Config object
      */
-    public static Config getAnInstance(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword,
+    public static Config getAnInstance(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername,
+            String databasePassword,
             ArrayList<String> summaryCalculations) {
-        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, databaseUsername, databasePassword, summaryCalculations);
+        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, port, databaseName, databaseUsername, databasePassword, summaryCalculations);
     }
 
     public String getErrorLogDir() {
@@ -153,6 +197,14 @@ public class Config {
 
     public String getDatabaseHost() {
         return databaseHost;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     public String getDatabaseUsername() {

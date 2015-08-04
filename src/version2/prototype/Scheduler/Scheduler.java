@@ -17,7 +17,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.EASTWebManagerI;
 import version2.prototype.EASTWebManager;
@@ -87,11 +86,8 @@ public class Scheduler {
      * @param myID  - a unique ID for this Scheduler instance
      * @param manager  - reference to the EASTWebManager creating this Scheduler
      * @param configInstance
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+    public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager, Config configInstance)
     {
         this(data, myID, TaskState.STOPPED, manager, configInstance);
     }
@@ -104,11 +100,9 @@ public class Scheduler {
      * @param myID  - a unique ID for this Scheduler instance
      * @param initState  - Initial TaskState to set this Scheduler to.
      * @param manager  - reference to the EASTWebManager creating this Scheduler
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
+     * @param configInstance
      */
-    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance) throws IOException, ParserConfigurationException, SAXException
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance)
     {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
@@ -150,7 +144,7 @@ public class Scheduler {
                 SetupProcesses(item);
             }
             catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
-                    | IllegalArgumentException | InvocationTargetException | ParseException | ConfigReadException | SQLException e) {
+                    | IllegalArgumentException | InvocationTargetException | ParseException | SQLException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(projectInfoFile, "Problem setting up Scheduler.", e);
             }
         }
