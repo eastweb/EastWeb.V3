@@ -88,7 +88,7 @@ public class SummaryWorker extends ProcessWorker {
                         summary.GetZonalSummary().GetAreaNameField(),    // zoneField
                         new SummariesCollection(Config.getInstance().getSummaryCalculations())); // summariesCollection
                 zonalSummaryCal.calculate();
-                outputFiles.add(new DataFileMetaData("Data", outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
+                outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
             }
         }
         return new ProcessWorkerReturn(outputFiles);

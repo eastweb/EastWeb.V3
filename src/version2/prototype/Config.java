@@ -21,6 +21,7 @@ import version2.prototype.util.FileSystem;
  */
 public class Config {
     private static final String CONFIG_FILENAME = ".//config.xml";
+    private static final String ERROR_LOG_DIR_KEY = "ErrorLogDir";
     // Download section
     private static final String DOWNLOAD_DIR_KEY = "DownloadDir";
     // Database section
@@ -47,6 +48,7 @@ public class Config {
     //        }
     //    };
 
+    private final String errorLogDir;
     private final String downloadDir;
     private final String globalSchema;
     private final String databaseHost;
@@ -60,6 +62,8 @@ public class Config {
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(fXmlFile);
         doc.getDocumentElement().normalize();
+
+        errorLogDir = ((Element) doc.getElementsByTagName(ERROR_LOG_DIR_KEY).item(0)).getTextContent();
 
         // Node: Download
         downloadDir = ((Element) doc.getElementsByTagName(DOWNLOAD_DIR_KEY).item(0)).getTextContent();
@@ -81,7 +85,8 @@ public class Config {
         }
     }
 
-    private Config(String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword, ArrayList<String> summaryCalculations) {
+    private Config(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword, ArrayList<String> summaryCalculations) {
+        this.errorLogDir = errorLogDir;
         this.downloadDir = downloadDir;
         this.globalSchema = globalSchema;
         this.databaseHost = databaseHost;
@@ -129,8 +134,13 @@ public class Config {
      * @param summaryCalculations
      * @return a new Config object
      */
-    public static Config getAnInstance(String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword, ArrayList<String> summaryCalculations) {
-        return new Config(downloadDir, globalSchema, databaseHost, databaseUsername, databasePassword, summaryCalculations);
+    public static Config getAnInstance(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, String databaseUsername, String databasePassword,
+            ArrayList<String> summaryCalculations) {
+        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, databaseUsername, databasePassword, summaryCalculations);
+    }
+
+    public String getErrorLogDir() {
+        return FileSystem.CheckDirPath(errorLogDir);
     }
 
     public String getDownloadDir() {

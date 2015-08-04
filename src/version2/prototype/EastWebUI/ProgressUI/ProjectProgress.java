@@ -36,7 +36,7 @@ public class ProjectProgress {
             public void run() {
                 try {
                     ProjectProgress window = new ProjectProgress(null);
-                    window.frame.setVisible(true);
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -62,6 +62,7 @@ public class ProjectProgress {
         frame.setBounds(100, 100, 400, 500);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
+        frame.setVisible(true);
 
         CreateProgressView();
         CreateLogView();

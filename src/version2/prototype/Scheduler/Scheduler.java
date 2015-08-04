@@ -283,10 +283,12 @@ public class Scheduler {
         {
             results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
         }
+        Start();
         status.UpdateUpdatesBeingProcessed(results);
     }
 
-    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager, TaskState initState)
+    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager,
+            TaskState initState)
     {
         this.data = data;
         this.projectInfoFile = projectInfoFile;
@@ -410,7 +412,8 @@ public class Scheduler {
         new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
 
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "version2.prototype.processor.ProcessorWorker");
+        Process process = new GenericProcess<ProcessorWorker>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
+                "version2.prototype.processor.ProcessorWorker");
         //        inputCache.addObserver(process);
         return process;
     }
@@ -434,7 +437,8 @@ public class Scheduler {
         new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
 
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "version2.prototype.indices.IndicesWorker");
+        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
+                "version2.prototype.indices.IndicesWorker");
         //        inputCache.addObserver(process);
         return process;
     }

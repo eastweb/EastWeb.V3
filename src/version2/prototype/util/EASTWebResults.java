@@ -71,7 +71,7 @@ public class EASTWebResults {
                         globalSchema)
                 );
 
-        if(includedIndices.size() > 0)
+        if(includedIndices != null && includedIndices.size() > 0)
         {
             query.append("\nAND (A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"='" + includedIndices.get(0) + "'");
             for(int i=1; i < includedIndices.size(); i++)

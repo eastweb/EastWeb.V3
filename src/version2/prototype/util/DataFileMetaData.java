@@ -56,15 +56,14 @@ public class DataFileMetaData {
     /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the QC file path to null.
      *
-     * @param dataName  - name of the data this file represents (data name = plugin name)
      * @param filePath  - full path to the data file
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param indexNm  - the environmental index associated to the data file
      */
-    public DataFileMetaData(String dataName, String filePath, int year, int day, String indexNm)
+    public DataFileMetaData(String filePath, int year, int day, String indexNm)
     {
-        this.dataName = dataName;
+        dataName = "Data";
         this.filePath = filePath;
         this.year = year;
         this.day = day;

@@ -94,7 +94,17 @@ public class Reproject {
             features.add(ogr.Open(masterShapeFile));
 
             // Find union of extents
-            double[] extent = features.get(0).GetLayer(0).GetExtent(); // Ordered: left, right, bottom, top
+            double[] extent = null;
+            try{
+                extent = features.get(0).GetLayer(0).GetExtent(); // Ordered: left, right, bottom, top
+            }catch(Exception e)
+            {
+                System.out.println(e.toString());
+                for(StackTraceElement el : e.getStackTrace())
+                {
+                    System.out.println(el.toString());
+                }
+            }
 
             double left = extent[0];
             double right = extent[1];
