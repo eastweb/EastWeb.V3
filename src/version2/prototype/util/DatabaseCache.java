@@ -34,6 +34,7 @@ import version2.prototype.Scheduler.ProcessName;
 public class DatabaseCache extends Observable{
     static final Pattern filePathPattern = Pattern.compile("(\\w+)\\\\(\\w+)\\\\(\\w+)\\\\(\\d{4})\\\\(\\d{3})\\\\");   // To save time
     static final Pattern dateStringPattern = Pattern.compile("(\\d{4})\\\\(\\d{3})\\\\");   // To save time
+    static final Pattern modisPattern = Pattern.compile(".*modis.*");
 
     private final String globalSchema;
     private final String projectName;
@@ -236,7 +237,7 @@ public class DatabaseCache extends Observable{
                         }
 
                         if(processCachingFor == ProcessName.INDICES) {
-                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear, rs.getString("IndexName"))));
+                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData(rs.getString("DataFilePath"), tempYear, tempDayOfYear, rs.getString("IndexName"))));
                         } else {
                             temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
                         }
@@ -310,6 +311,12 @@ public class DatabaseCache extends Observable{
         final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, dataName, stmt);
         final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         StringBuilder query;
+
+        // Only use modisTileNames if the plugin uses Modis data
+        if(!modisPattern.matcher(pluginName.toLowerCase()).matches())
+        {
+            modisTileNames = null;
+        }
 
         // Set up for Download to DownloadCache insert
         if(dataName.toLowerCase().equals("data"))

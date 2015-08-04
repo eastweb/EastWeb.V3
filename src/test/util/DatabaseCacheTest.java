@@ -115,7 +115,7 @@ public class DatabaseCacheTest {
     public final void testCachingFilesAndRetrievingCachedFiles() throws ClassNotFoundException, SQLException, ParseException, ParserConfigurationException, SAXException, IOException {
         // Setup input
         ArrayList<DataFileMetaData> filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData("Data", "Data file path", 2015, 100, "Index"));
+        filesForASingleComposite.add(new DataFileMetaData("Data file path", 2015, 100, "Index"));
 
         Statement stmt = con.createStatement();
         stmt.execute("INSERT INTO \"" + testGlobalSchema + "\".\"GlobalDownloader\" (\"PluginID\", \"DataName\") VALUES " +
@@ -125,7 +125,7 @@ public class DatabaseCacheTest {
 
         // Cache to ProcessorCache
         filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData("Data", data1FilePath, 2015, 100, "Index"));
+        filesForASingleComposite.add(new DataFileMetaData(data1FilePath, 2015, 100, "Index"));
         testProcessorCache.CacheFiles(filesForASingleComposite);
         // Cache to IndicesCache
         testIndicesCache.CacheFiles(filesForASingleComposite);

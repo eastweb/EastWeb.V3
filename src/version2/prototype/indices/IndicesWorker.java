@@ -44,6 +44,7 @@ public class IndicesWorker extends ProcessWorker{
      * @param pluginInfo  - information about the plugin being used for the acquired data files.
      * @param pluginMetaData  - information relevant to this ProcessWorker about the plugin being used gotten from the plugin's info xml.
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
+     * @param outputCache
      */
     public IndicesWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
@@ -88,9 +89,11 @@ public class IndicesWorker extends ProcessWorker{
 
         IndexMetaData iMetaData = pluginMetaData.Indices;
         ArrayList<String> indicesNames  = iMetaData.indicesNames;
+        ArrayList<DataFileMetaData> output;
 
         for (Map.Entry<DataDate, ArrayList<ProcessorFileMetaData>> entry : map.entrySet())
         {
+            output = new ArrayList<DataFileMetaData>();
             DataDate thisDay = entry.getKey();
 
             File [] inputFiles =  new File [entry.getValue().size()];
@@ -103,7 +106,7 @@ public class IndicesWorker extends ProcessWorker{
             }
 
             // output file path
-            String outputPath = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+            String outputPath = String.format("%s" + "%04d" + File.separator+"%03d",
                     outputFolder, thisDay.getYear(), thisDay.getDayOfYear());
 
             if(!(new File(outputPath).exists()))
@@ -134,12 +137,13 @@ public class IndicesWorker extends ProcessWorker{
                     method = indexCalculator.getClass().getMethod("calculate");
                     method.invoke(indexCalculator);
 
+                    output.add(new DataFileMetaData(outFile, thisDay.getYear(), thisDay.getDayOfYear(), indices));
                 }catch(Exception e)
                 {
                     throw new EmptyStackException(); // class not found
                 }
             }
-
+            outputCache.CacheFiles(output);
         }
 
         return null;

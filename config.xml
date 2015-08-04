@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <config>
+	<ErrorLogDir>C:/EASTWeb</ErrorLogDir>
 	<DownloadDir>C:/EASTWeb/Downloads</DownloadDir>
 	<DataBase>
 		<globalSchema>EASTWeb</globalSchema>

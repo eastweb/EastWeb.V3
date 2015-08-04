@@ -54,7 +54,7 @@ public class Schemas {
         final String mSchemaName = getSchemaName(projectName, pluginName);
 
         // Drop an existing schema with the same name
-        dropSchemaIfExists(stmt, mSchemaName);
+        //        dropSchemaIfExists(stmt, mSchemaName);
 
         // Create the schema for this project
         createSchemaIfNotExist(stmt, mSchemaName);
