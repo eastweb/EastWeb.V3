@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -170,14 +171,19 @@ public class Schemas {
                 globalEASTWebSchema
                 ));
 
-        int temporalSummaryCompositionStrategyID;
         int expectedResultsID;
         long expectedTotalResults;
+        int filesPerDay = getFilesPerDay(globalEASTWebSchema, pluginID, stmt);
         for(ProjectInfoSummary summary : summaries)
         {
-            temporalSummaryCompositionStrategyID = getTemporalSummaryCompositionStrategyID(globalEASTWebSchema, summary.GetTemporalSummaryCompositionStrategyClassName(), stmt);
-            expectedResultsID = getExpectedResultsID(globalEASTWebSchema, projectID, pluginID, temporalSummaryCompositionStrategyID, stmt);
-            expectedTotalResults = summary.GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
+            expectedResultsID = getExpectedResultsID(globalEASTWebSchema, projectID, pluginID, summary.GetID(), stmt);
+            if(summary.GetTemporalFileStore() != null) {
+                expectedTotalResults = summary.GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
+            }
+            else {
+                expectedTotalResults = ((ChronoUnit.DAYS.between(startDate, LocalDate.now().plusDays(1)) * filesPerDay) / daysPerInputFile) * numOfIndices;
+                //                expectedTotalResults = 0;
+            }
             preparedStmt.setLong(1, expectedTotalResults);
             preparedStmt.setInt(2, expectedResultsID);
             preparedStmt.addBatch();
@@ -364,13 +370,13 @@ public class Schemas {
         return projectID;
     }
 
-    public static int getTemporalSummaryCompositionStrategyID(String globalEASTWebSchema, String temporalSummaryCompositionStrategyClassName, Statement stmt) throws SQLException {
+    public static Integer getTemporalSummaryCompositionStrategyID(String globalEASTWebSchema, String temporalSummaryCompositionStrategyClassName, Statement stmt) throws SQLException {
         if(globalEASTWebSchema == null || temporalSummaryCompositionStrategyClassName == null) {
-            return -1;
+            return null;
         }
 
         ResultSet rs;
-        int temporalSummaryCompositionStrategyID = -1;
+        Integer temporalSummaryCompositionStrategyID = null;
         String selectQuery = String.format("SELECT \"TemporalSummaryCompositionStrategyID\" FROM \"%1$s\".\"TemporalSummaryCompositionStrategy\" " +
                 "WHERE \"Name\"='" + temporalSummaryCompositionStrategyClassName + "';",
                 globalEASTWebSchema
@@ -396,16 +402,16 @@ public class Schemas {
         return temporalSummaryCompositionStrategyID;
     }
 
-    public static int getExpectedResultsID(String globalEASTWebSchema, Integer projectID, Integer pluginID, Integer temporalSummaryCompositionStrategyID, Statement stmt) throws SQLException
+    public static int getExpectedResultsID(String globalEASTWebSchema, Integer projectID, Integer pluginID, Integer summaryID, Statement stmt) throws SQLException
     {
-        if(globalEASTWebSchema == null || projectID == null || pluginID == null || temporalSummaryCompositionStrategyID == null) {
+        if(globalEASTWebSchema == null || projectID == null || pluginID == null || summaryID == null) {
             return -1;
         }
 
         ResultSet rs;
         int expectedResultsID = -1;
         rs = stmt.executeQuery(String.format("SELECT \"ExpectedResultsID\" FROM \"%1$s\".\"ExpectedResults\" " +
-                "WHERE \"ProjectID\"=" + projectID + " AND \"PluginID\"=" + pluginID + " AND \"TemporalSummaryCompositionStrategyID\"=" + temporalSummaryCompositionStrategyID + ";",
+                "WHERE \"ProjectID\"=" + projectID + " AND \"PluginID\"=" + pluginID + " AND \"SummaryIDNum\"=" + summaryID + ";",
                 globalEASTWebSchema
                 ));
         if(rs != null && rs.next())
@@ -447,6 +453,18 @@ public class Schemas {
         return FileSystem.StandardizeName(builder.toString());
     }
 
+    private static int getFilesPerDay(String globalEASTWebSchema, int pluginID, Statement stmt) throws SQLException
+    {
+        int filesPerDay = 0;
+        ResultSet rs = stmt.executeQuery("SELECT \"FilesPerDay\" FROM \"" + globalEASTWebSchema + "\".\"Plugin\" WHERE \"PluginID\" = " + pluginID);
+        if(rs != null && rs.next())
+        {
+            filesPerDay = rs.getInt("FilesPerDay");
+        }
+        rs.close();
+        return filesPerDay;
+    }
+
     private static int[] addExpectedResults(String globalEASTWebSchema, LocalDate startDate, Integer daysPerInputFile, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries, Integer projectID,
             Integer pluginID, final Connection conn) throws SQLException{
         if(globalEASTWebSchema == null || startDate == null || daysPerInputFile == null || numOfIndices == null || summaries == null || projectID == null || pluginID == null) {
@@ -454,21 +472,36 @@ public class Schemas {
         }
         Statement stmt = conn.createStatement();
         PreparedStatement preparedStmt = conn.prepareStatement(String.format(
-                "INSERT INTO \"%1$s\".\"ExpectedResults\" (\"ProjectID\", \"PluginID\", \"ExpectedTotalResults\", \"TemporalSummaryCompositionStrategyID\") VALUES (" +
+                "INSERT INTO \"%1$s\".\"ExpectedResults\" (\"ProjectID\", \"PluginID\", \"SummaryIDNum\", \"ExpectedTotalResults\", \"TemporalSummaryCompositionStrategyID\") VALUES (" +
                         projectID + ", " +
                         pluginID + ", " +
-                        "?, " +   // 1. ExpectedTotalResults
-                        "? " +  // 2. TemporalSummaryCompositionStrategyID
+                        "?, " +     // 1. SummaryIDNum
+                        "?, " +     // 2. ExpectedTotalResults
+                        "? " +      // 3. TemporalSummaryCompositionStrategyID
                         ")",
                         globalEASTWebSchema
                 ));
 
         long expectedTotalResults;
+        int filesPerDay = getFilesPerDay(globalEASTWebSchema, pluginID, stmt);
         for(ProjectInfoSummary summary : summaries)
         {
-            expectedTotalResults = summary.GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
-            preparedStmt.setLong(1, expectedTotalResults);
-            preparedStmt.setInt(2, getTemporalSummaryCompositionStrategyID(globalEASTWebSchema, summary.GetTemporalSummaryCompositionStrategyClassName(), stmt));
+            preparedStmt.setInt(1, summary.GetID());
+            if(summary.GetTemporalFileStore() != null) {
+                expectedTotalResults = summary.GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
+            }
+            else {
+                expectedTotalResults = ((ChronoUnit.DAYS.between(startDate, LocalDate.now().plusDays(1)) * filesPerDay) / daysPerInputFile) * numOfIndices;
+                //                expectedTotalResults = 0;
+            }
+            preparedStmt.setLong(2, expectedTotalResults);
+            Integer temporalCompStrategyID = getTemporalSummaryCompositionStrategyID(globalEASTWebSchema, summary.GetTemporalSummaryCompositionStrategyClassName(), stmt);
+            if(temporalCompStrategyID == null) {
+                preparedStmt.setNull(3, java.sql.Types.INTEGER);
+            }
+            else {
+                preparedStmt.setInt(3, temporalCompStrategyID);
+            }
             preparedStmt.addBatch();
         }
         return preparedStmt.executeBatch();
@@ -845,9 +878,10 @@ public class Schemas {
                         "  \"ExpectedResultsID\" serial PRIMARY KEY,\n" +
                         "  \"ProjectID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Project\" (\"ProjectID\") " : "") + "NOT NULL,\n" +
                         "  \"PluginID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Plugin\" (\"PluginID\") " : "") + "NOT NULL,\n" +
+                        "  \"SummaryIDNum\" integer NOT NULL,\n" +
                         "  \"ExpectedTotalResults\" bigint NOT NULL,\n" +
                         "  \"TemporalSummaryCompositionStrategyID\" integer "
-                        + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"TemporalSummaryCompositionStrategy\" (\"TemporalSummaryCompositionStrategyID\") " : "") + "NOT NULL\n" +
+                        + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"TemporalSummaryCompositionStrategy\" (\"TemporalSummaryCompositionStrategyID\") " : "") + "\n" +
                         ")",
                         globalEASTWebSchema
                 );

@@ -1,16 +1,24 @@
 package version2.prototype.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.io.FileUtils;
+import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
@@ -55,7 +63,7 @@ public class ProcessorWorker extends ProcessWorker {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public ProcessWorkerReturn call() throws Exception
+    public ProcessWorkerReturn call()
     {
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
@@ -66,12 +74,17 @@ public class ProcessorWorker extends ProcessWorker {
         Map<Integer, String> processStep = pMetaData.processStep;
 
         // get each plugin's PrepareProcessTask
-        Class <?> classPrepareTask =
-                Class.forName("version2.prototype.processor." + pluginName + "." + pluginName +"PrepareProcessTask" );
+        Class<?> classPrepareTask = null;
+        Constructor<?> cnstPrepareTask = null;
+        try {
+            classPrepareTask = Class.forName("version2.prototype.processor." + pluginName + "." + pluginName +"PrepareProcessTask" );
 
-        Constructor<?> cnstPrepareTask =
-                classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class,
-                        PluginMetaData.class, DataDate.class);
+            cnstPrepareTask =
+                    classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class,
+                            PluginMetaData.class, DataDate.class);
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+            ErrorLog.add(projectInfoFile, "Problem with reflection in PrepareTask.", e);
+        }
 
         // Use a map to group CachedFiles based on the dates
         HashMap<DataDate, ArrayList<DownloadFileMetaData>> map =
@@ -103,8 +116,12 @@ public class ProcessorWorker extends ProcessWorker {
             DataDate thisDay = entry.getKey();
 
             //create necessary folders for the date
-            PrepareProcessTask prepareTask =
-                    (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, pluginMetaData, thisDay);
+            PrepareProcessTask prepareTask = null;
+            try {
+                prepareTask = (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, pluginMetaData, thisDay);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                ErrorLog.add(projectInfoFile, "Problem with instantiation of PrepareProcessTask.", e);
+            }
 
             String laststepOutputFolder = null;
             String tempFolderStr = null;
@@ -114,9 +131,19 @@ public class ProcessorWorker extends ProcessWorker {
             {
                 Integer key = step.getKey();
 
-                Class<?> classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
+                Class<?> classProcess = null;
+                try {
+                    classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
+                } catch (ClassNotFoundException e) {
+                    ErrorLog.add(projectInfoFile, "Problem with reflection of classProcess '" + "version2.prototype.processor." + pluginName + "." + step.getValue() + "'.", e);
+                }
 
-                Constructor<?> cnstProcess = classProcess.getConstructor(ProcessData.class);
+                Constructor<?> cnstProcess = null;
+                try {
+                    cnstProcess = classProcess.getConstructor(ProcessData.class);
+                } catch (NoSuchMethodException | SecurityException e) {
+                    ErrorLog.add(projectInfoFile, "Problem with reflection of classProcess.", e);
+                }
 
                 //copy the downloaded files to the input folders
                 if (key == 1)
@@ -135,38 +162,61 @@ public class ProcessorWorker extends ProcessWorker {
                     {
                         //System.out.println("processorWorker: " + dFile.dataFilePath);
                         if (dFile.dataName.equalsIgnoreCase("data"))
-                        {   FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder); }
+                        {
+                            try {
+                                FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
+                            } catch (IOException e) {
+                                ErrorLog.add(projectInfoFile, "Problem with copying of downloaded data.", e);
+                            }
+                        }
 
                         if (dFile.dataName.equalsIgnoreCase("QC"))
-                        {   FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), qcInputFolder); }
+                        {
+                            try {
+                                FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), qcInputFolder);
+                            } catch (IOException e) {
+                                ErrorLog.add(projectInfoFile, "Problem with copying of downloaded QC.", e);
+                            }
+                        }
 
                     }
                 }
 
                 laststepOutputFolder = prepareTask.getOutputFolder(key);
 
-                Object process =  cnstProcess.newInstance(new ProcessData(
-                        prepareTask.getInputFolders(key),
-                        prepareTask.getOutputFolder(key),
-                        prepareTask.getDataDate(),
-                        prepareTask.getQC(),
-                        prepareTask.getShapeFile(),
-                        prepareTask.getMaskFile(),
-                        prepareTask.getDataBands(),
-                        prepareTask.getQCBands(),
-                        prepareTask.getProjection(),
-                        prepareTask.getMaskResolution(),
-                        prepareTask.getDataResolution(),
-                        prepareTask.getClipOrNot(),
-                        prepareTask.getFreezingDate(),
-                        prepareTask.getHeatingDate(),
-                        prepareTask.getFreezingDegree(),
-                        prepareTask.getHeatingDegree()
-                        )
-                        );
+                Object process = null;
+                try {
+                    process = cnstProcess.newInstance(new ProcessData(
+                            prepareTask.getInputFolders(key),
+                            prepareTask.getOutputFolder(key),
+                            prepareTask.getDataDate(),
+                            prepareTask.getQC(),
+                            prepareTask.getShapeFile(),
+                            prepareTask.getMaskFile(),
+                            prepareTask.getDataBands(),
+                            prepareTask.getQCBands(),
+                            prepareTask.getProjection(),
+                            prepareTask.getMaskResolution(),
+                            prepareTask.getDataResolution(),
+                            prepareTask.getClipOrNot(),
+                            prepareTask.getFreezingDate(),
+                            prepareTask.getHeatingDate(),
+                            prepareTask.getFreezingDegree(),
+                            prepareTask.getHeatingDegree()
+                            )
+                            );
+                } catch (InstantiationException | IllegalAccessException
+                        | IllegalArgumentException | InvocationTargetException e) {
+                    ErrorLog.add(projectInfoFile, "Problem with cnstProcess instantion.", e);
+                }
 
-                Method methodProcess = process.getClass().getMethod("run");
-                methodProcess.invoke(process);
+                Method methodProcess;
+                try {
+                    methodProcess = process.getClass().getMethod("run");
+                    methodProcess.invoke(process);
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    ErrorLog.add(projectInfoFile, "Problem with calling run.", e);
+                }
             }
 
             // check if the laststepOutputFolder is the  final outputFolder for the processor
@@ -179,14 +229,18 @@ public class ProcessorWorker extends ProcessWorker {
                 File outputDir = new File(outputPath);
                 if(!(outputDir.exists()))
                 {
-                    FileUtils.forceMkdir(outputDir);
+                    outputDir.mkdirs();
                 }
 
                 // copy the output files to the system output directory
                 if (laststepOutputFolder != null)
                 {
                     for (File f: new File(laststepOutputFolder).listFiles()) {
-                        FileUtils.copyFileToDirectory(f, outputDir);
+                        try {
+                            FileUtils.copyFileToDirectory(f, outputDir);
+                        } catch (IOException e) {
+                            ErrorLog.add(projectInfoFile, "Copying data to different directory.", e);
+                        }
                     }
                 }
             }
@@ -214,7 +268,11 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             // cache to the database
-            outputCache.CacheFiles(toCache);
+            try {
+                outputCache.CacheFiles(toCache);
+            } catch (ClassNotFoundException | SQLException | ParseException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(projectInfoFile, "Faching files.", e);
+            }
         }
 
         return null;

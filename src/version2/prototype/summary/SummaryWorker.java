@@ -38,7 +38,7 @@ public class SummaryWorker extends ProcessWorker {
     @Override
     public ProcessWorkerReturn call() throws Exception {
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
-        ArrayList<DataFileMetaData> tempFiles = new ArrayList<DataFileMetaData>(0);
+        ArrayList<DataFileMetaData> tempFiles = cachedFiles;
         IndicesFileMetaData cachedFileData;
 
         for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
