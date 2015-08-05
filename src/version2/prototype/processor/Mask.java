@@ -72,7 +72,8 @@ public class Mask {
         }
 
         // remove the input folder
-        FileUtils.deleteDirectory(inputFolder);
+        // WRITE BACK: after fixing the problems
+        // FileUtils.deleteDirectory(inputFolder);
     }
 
     protected void maskFiles() throws IOException

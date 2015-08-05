@@ -64,7 +64,8 @@ public class Clip
             }
         }
         // remove the input folder
-        FileUtils.deleteDirectory(inputFolder);
+        // WRITE BACK:
+        // FileUtils.deleteDirectory(inputFolder);
     }
 
 

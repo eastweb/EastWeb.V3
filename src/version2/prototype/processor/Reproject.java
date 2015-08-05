@@ -22,7 +22,7 @@ import version2.prototype.util.GdalUtils;
  * Reproject the file from original projection to the specified projection
  */
 
-public class Reproject {
+public abstract class Reproject {
     //locations for the input files. for this step, will only have one folder
     private String [] inputFolders;
     //location for the output file
@@ -32,6 +32,7 @@ public class Reproject {
     private File [] inputFiles;
     private String shapefile;
     private Projection projection;
+    protected String wktStr;
 
     public Reproject(ProcessData data) {
         inputFolders = data.getInputFolders();
@@ -45,6 +46,7 @@ public class Reproject {
         assert (listOfFiles.length >1);
         //set the input files
         inputFiles = listOfFiles;
+        wktStr = null;
     }
 
     // run method for the scheduler
@@ -62,6 +64,8 @@ public class Reproject {
         //FileUtils.deleteDirectory(inputFolder);
 
     }
+
+    public abstract void setInputWKT();
 
     // reproject all the input Files and save them to the outputFolder
     private void reprojectFiles()  {
@@ -83,20 +87,22 @@ public class Reproject {
         {
             Dataset inputDS = gdal.Open(input);
             SpatialReference inputRef = new SpatialReference();
+
+            inputRef.ImportFromWkt(wktStr);
             //inputRef.ImportFromWkt("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"EPSG\",4326]]");
 
+            //inputRef.ImportFromWkt("GEOGCS[\"GCS_Undefined\",DATUM[\"Undefined\",SPHEROID[\"User_Defined_Spheroid\",6371007.181,0.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Sinusoidal\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],UNIT[\"Meter\",1.0]");
             // FIXME: abstract it somehow?
-            inputRef.ImportFromWkt("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
+            // inputRef.ImportFromWkt("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
 
             inputDS.SetProjection(inputRef.ExportToWkt());
-            List<DataSource> features = new ArrayList<DataSource>();
 
-            features.add(ogr.Open(masterShapeFile));
+            DataSource feature = ogr.Open(masterShapeFile);
 
             // Find union of extents
             double[] extent = null;
             try{
-                extent = features.get(0).GetLayer(0).GetExtent(); // Ordered: left, right, bottom, top
+                extent = feature.GetLayer(0).GetExtent(); // Ordered: left, right, bottom, top
             }catch(Exception e)
             {
                 System.out.println(e.toString());
@@ -111,21 +117,6 @@ public class Reproject {
             double bottom = extent[2];
             double top = extent[3];
 
-            for (int i=1; i<features.size(); i++)
-            {
-                extent = features.get(i).GetLayer(0).GetExtent();
-                System.out.println("reporject : " + extent.toString());
-                if (extent[0] < left) {
-                    left = extent[0];
-                } else if (extent[1] > right) {
-                    right = extent[1];
-                } else if (extent[2] < bottom) {
-                    bottom = extent[2];
-                } else if (extent[3] > top) {
-                    top = extent[3];
-                }
-            }
-
             Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                     output.getPath(),
                     (int) Math.ceil((right-left)/projection.getPixelSize()),
@@ -134,8 +125,7 @@ public class Reproject {
                     gdalconst.GDT_Float32
                     );
 
-            // FIXME: hack --should get projection from project info somehow
-            String outputProjection = features.get(0).GetLayer(0).GetSpatialRef().ExportToWkt();
+            String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
 
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] {
