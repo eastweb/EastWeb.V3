@@ -49,8 +49,8 @@ public class Test_PW_ModisLST {
         //                pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2015\\201\\h28v06.hdf", 2015, 201)));
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2015\\201\\h29v06.hdf", 2015, 201)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h28v06.hdf", 2014, 81)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h29v06.hdf", 2014, 81)));
         //"Blah", "Project_TW", "TRMM3B42", ProcessName.Processor, null
 
         // DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
