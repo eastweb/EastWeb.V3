@@ -57,6 +57,8 @@ public abstract class Reproject {
         if (!outputDir.exists())
         {   FileUtils.forceMkdir(outputDir); }
 
+        setInputWKT();
+
         reprojectFiles();
 
         // remove the input folder
@@ -126,6 +128,10 @@ public abstract class Reproject {
                     );
 
             String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
+
+            System.out.println("Reproject: input : " + inputRef.ExportToWkt());
+            System.out.println("Reproject: output : " + outputProjection);
+            System.out.println("Reproject: GeoTransform: " + left + " : " + top);
 
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] {
