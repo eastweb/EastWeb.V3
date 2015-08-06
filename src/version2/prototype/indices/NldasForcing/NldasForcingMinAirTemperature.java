@@ -22,7 +22,7 @@ public class NldasForcingMinAirTemperature extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("band01_Min_"))
+            if(input.getName().contains("AirTemp_Min"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
