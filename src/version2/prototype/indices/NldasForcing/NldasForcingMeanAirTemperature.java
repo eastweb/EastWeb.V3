@@ -22,7 +22,7 @@ public class NldasForcingMeanAirTemperature extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("band01_Mean_"))
+            if(input.getName().contains("AirTemp_Mean"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
