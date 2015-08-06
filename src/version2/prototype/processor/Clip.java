@@ -137,15 +137,18 @@ public class Clip
                 int[] maskArray = new int[maskDS.GetRasterXSize()];
                 int[] rasterArray = new int[maskDS.GetRasterXSize()];
 
+                int xSize = maskDS.GetRasterXSize();
+                int ySize = maskDS.GetRasterYSize();
+
                 // FIXME: optimize it!
-                for (int y=0; y<maskDS.GetRasterYSize(); y++) {
-                    maskDS.GetRasterBand(1).ReadRaster(0, y, maskDS.GetRasterXSize(), 1, maskArray);
+                for (int y=0; y<ySize; y++) {
+                    maskDS.GetRasterBand(1).ReadRaster(0, y, xSize, 1, maskArray);
                     /* removed offsets from the parameters in the following statement
                      *  rasterDS.GetRasterBand(1).ReadRaster(xOffset, yOffset + y, maskDS.GetRasterXSize(), 1, rasterArray);
                      *  8/28/13 by J. Hu
                      */
 
-                    rasterDS.GetRasterBand(1).ReadRaster(0, y, maskDS.GetRasterXSize(), 1, rasterArray);
+                    rasterDS.GetRasterBand(1).ReadRaster(0, y, xSize, 1, rasterArray);
                     for (int i=0; i<maskArray.length; i++) {
                         if (maskArray[i] == 0)
                         {
@@ -153,7 +156,7 @@ public class Clip
                         }
                     }
 
-                    outputDS.GetRasterBand(1).WriteRaster(0, y, maskDS.GetRasterXSize(), 1, rasterArray);
+                    outputDS.GetRasterBand(1).WriteRaster(0, y, xSize, 1, rasterArray);
                 }
 
                 // Calculate statistics
