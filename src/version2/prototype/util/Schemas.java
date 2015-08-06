@@ -36,7 +36,6 @@ public class Schemas {
      * @param projectName  - name of project to create schema for
      * @param pluginName  - name of plugin to create schema for
      * @param summaryNames  - used to define ZonalStat table
-     * @param extraDownloadFiles  - used to define cache tables and global Download table
      * @param startDate  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param daysPerInputFile  - relevant to plugin entry creation and calculating the number of expected results to be found in ZonalStat
      * @param filesPerDay  - relevant to plugin entry creation and calculating when downloads are ready to be loaded by the LocalDownloader
@@ -46,8 +45,7 @@ public class Schemas {
      * to enforce foreign key rules
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, String projectName, String pluginName, ArrayList<String> summaryNames,
-            ArrayList<String> extraDownloadFiles, LocalDate startDate, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices,
-            ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences)
+            LocalDate startDate, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices, ArrayList<ProjectInfoSummary> summaries, boolean createTablesWithForeignKeyReferences)
     {
         final Connection conn;
         final Statement stmt;
@@ -88,7 +86,7 @@ public class Schemas {
             createGlobalDownloaderExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
             // Create Download table
-            createDownloadTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, createTablesWithForeignKeyReferences);
+            createDownloadTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
             // Create DownloadExtra table
             createDownloadExtraTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
@@ -108,14 +106,8 @@ public class Schemas {
             // Create the ZoneMapping table
             createZoneMappingTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-            // Create the ZonalStats table
-            createZonalStatTableIfNotExists(globalEASTWebSchema, summaryNames, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-
-            // Create cache tables for each framework
-            createDownloadCacheTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-            createDownloadCacheExtraTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-            createProcessorCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
-            createIndicesCacheTableIfNotExists(globalEASTWebSchema, extraDownloadFiles, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            // Create the ProjectSummary table
+            createProjectSummaryTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
             // Get DateGroupID
             int dateGroupID = getDateGroupID(globalEASTWebSchema, startDate, stmt);
@@ -126,8 +118,23 @@ public class Schemas {
             // Add entry to Plugin table if not already existing
             int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
 
+            // Add summaries to ProjectSummary table
+            for(ProjectInfoSummary summary : summaries) {
+                addProjectSummaryID(globalEASTWebSchema, projectName, summary.GetID(), summary.GetZonalSummary().GetAreaNameField(), summary.GetZonalSummary().GetShapeFile(),
+                        summary.GetZonalSummary().GetAreaValueField(), summary.GetTemporalSummaryCompositionStrategyClassName(), stmt);
+            }
+
             // Add entry to EASTWeb global ExpectedResults table
             addExpectedResults(globalEASTWebSchema, startDate, daysPerInputFile, numOfIndices, summaries, projectID, pluginID, conn);
+
+            // Create the ZonalStats table
+            createZonalStatTableIfNotExists(globalEASTWebSchema, mSchemaName, summaryNames, stmt, createTablesWithForeignKeyReferences);
+
+            // Create cache tables for each framework
+            createDownloadCacheTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            createDownloadCacheExtraTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            createProcessorCacheTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
+            createIndicesCacheTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
         }
         catch(SQLException e)
         {
@@ -208,6 +215,74 @@ public class Schemas {
         }
 
         return stmt.execute("INSERT INTO \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" (\"PluginID\", \"DataName\") VALUES (" + pluginID + ", '" + dataName + "');");
+    }
+
+    public static int getProjectSummaryID(final String globalEASTWebSchema, final String projectName, final Integer summaryNumID, final Statement stmt) throws SQLException
+    {
+        if(globalEASTWebSchema == null || summaryNumID == null || projectName == null) {
+            return -1;
+        }
+
+        ResultSet rs;
+        int projectSummaryID = -1;
+        int projectID = getProjectID(globalEASTWebSchema, projectName, stmt);
+        String selectQuery = String.format("SELECT \"ProjectSummaryID\" FROM \"%1$s\".\"ProjectSummary\" WHERE \"ProjectID\" = " + projectID + " AND \"SummaryIDNum\" = " + summaryNumID + ";",
+                globalEASTWebSchema);
+
+        rs = stmt.executeQuery(selectQuery);
+        if(rs != null && rs.next()) {
+            projectSummaryID = rs.getInt("ProjectSummaryID");
+        }
+
+        return projectSummaryID;
+    }
+
+    public static int getProjectSummaryID(final String globalEASTWebSchema, final Integer projectID, final Integer summaryNumID, final Statement stmt) throws SQLException
+    {
+        if(globalEASTWebSchema == null || summaryNumID == null || projectID == null) {
+            return -1;
+        }
+
+        ResultSet rs;
+        int projectSummaryID = -1;
+        String selectQuery = String.format("SELECT \"ProjectSummaryID\" FROM \"%1$s\".\"ProjectSummary\" WHERE \"ProjectID\" = " + projectID + " AND \"SummaryIDNum\" = " + summaryNumID + ";",
+                globalEASTWebSchema);
+
+        rs = stmt.executeQuery(selectQuery);
+        if(rs != null && rs.next()) {
+            projectSummaryID = rs.getInt("ProjectSummaryID");
+        }
+
+        return projectSummaryID;
+    }
+
+    public static void addProjectSummaryID(final String globalEASTWebSchema, final String projectName, final Integer summaryNumID, final String areaNameField, final String shapeFilePath,
+            final String areaValueField, final String temporalCompositionStrategyClassName, final Statement stmt) throws SQLException
+    {
+        if(globalEASTWebSchema == null || summaryNumID == null || projectName == null || areaNameField == null || shapeFilePath == null || areaValueField == null ||
+                temporalCompositionStrategyClassName == null) {
+            return;
+        }
+
+        ResultSet rs;
+        int projectID = getProjectID(globalEASTWebSchema, projectName, stmt);
+        String query = String.format("SELECT \"ProjectSummaryID\" FROM \"%1$s\".\"ProjectSummary\" WHERE \"ProjectID\" = " + projectID + " AND \"SummaryIDNum\" = " + summaryNumID + ";",
+                globalEASTWebSchema);
+
+        rs = stmt.executeQuery(query);
+        if(rs == null || !rs.next()) {
+            query = String.format("INSERT INTO \"%1$s\".\"ProjectSummary\" (\"ProjectID\", \"SummaryIDNum\", \"AreaNameField\", \"ShapeFilePath\", \"AreaValueField\", " +
+                    "\"temporalCompositionStrategyClassName\") VALUES (%2$d, %3$d, '%4$s', '%5$s', '%6$s', '%7$s');",
+                    globalEASTWebSchema,
+                    projectID,
+                    summaryNumID,
+                    areaNameField,
+                    shapeFilePath,
+                    areaValueField,
+                    temporalCompositionStrategyClassName
+                    );
+            stmt.executeUpdate(query);
+        }
     }
 
     public static int getDateGroupID(final String globalEASTWebSchema, final LocalDate lDate, final Statement stmt) throws SQLException {
@@ -402,6 +477,26 @@ public class Schemas {
         return temporalSummaryCompositionStrategyID;
     }
 
+    public static int getExpectedResultsID(String globalEASTWebSchema, Integer projectSummaryID, Integer pluginID, Statement stmt) throws SQLException
+    {
+        if(globalEASTWebSchema == null || projectSummaryID == null || pluginID == null) {
+            return -1;
+        }
+
+        ResultSet rs;
+        int expectedResultsID = -1;
+        rs = stmt.executeQuery(String.format("SELECT \"ExpectedResultsID\" FROM \"%1$s\".\"ExpectedResults\" " +
+                "WHERE \"ProjectSummaryID\"=" + projectSummaryID + " AND \"PluginID\"=" + pluginID + ";",
+                globalEASTWebSchema
+                ));
+        if(rs != null && rs.next())
+        {
+            expectedResultsID = rs.getInt("ExpectedResultsID");
+        }
+        rs.close();
+        return expectedResultsID;
+    }
+
     public static int getExpectedResultsID(String globalEASTWebSchema, Integer projectID, Integer pluginID, Integer summaryID, Statement stmt) throws SQLException
     {
         if(globalEASTWebSchema == null || projectID == null || pluginID == null || summaryID == null) {
@@ -472,12 +567,14 @@ public class Schemas {
         }
         Statement stmt = conn.createStatement();
         PreparedStatement preparedStmt = conn.prepareStatement(String.format(
-                "INSERT INTO \"%1$s\".\"ExpectedResults\" (\"ProjectID\", \"PluginID\", \"SummaryIDNum\", \"ExpectedTotalResults\", \"TemporalSummaryCompositionStrategyID\") VALUES (" +
+                "INSERT INTO \"%1$s\".\"ExpectedResults\" (\"ProjectSummaryID\", \"ProjectID\", \"PluginID\", \"SummaryIDNum\", \"ExpectedTotalResults\", \"TemporalSummaryCompositionStrategyID\") "
+                        + "VALUES (" +
+                        "?, " +     // 1. ProjectSummaryID
                         projectID + ", " +
                         pluginID + ", " +
-                        "?, " +     // 1. SummaryIDNum
-                        "?, " +     // 2. ExpectedTotalResults
-                        "? " +      // 3. TemporalSummaryCompositionStrategyID
+                        "?, " +     // 2. SummaryIDNum
+                        "?, " +     // 3. ExpectedTotalResults
+                        "? " +      // 4. TemporalSummaryCompositionStrategyID
                         ")",
                         globalEASTWebSchema
                 ));
@@ -486,7 +583,8 @@ public class Schemas {
         int filesPerDay = getFilesPerDay(globalEASTWebSchema, pluginID, stmt);
         for(ProjectInfoSummary summary : summaries)
         {
-            preparedStmt.setInt(1, summary.GetID());
+            preparedStmt.setInt(1, getProjectSummaryID(globalEASTWebSchema, projectID, summary.GetID(), stmt));
+            preparedStmt.setInt(2, summary.GetID());
             if(summary.GetTemporalFileStore() != null) {
                 expectedTotalResults = summary.GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
             }
@@ -494,13 +592,13 @@ public class Schemas {
                 expectedTotalResults = ((ChronoUnit.DAYS.between(startDate, LocalDate.now().plusDays(1)) * filesPerDay) / daysPerInputFile) * numOfIndices;
                 //                expectedTotalResults = 0;
             }
-            preparedStmt.setLong(2, expectedTotalResults);
+            preparedStmt.setLong(3, expectedTotalResults);
             Integer temporalCompStrategyID = getTemporalSummaryCompositionStrategyID(globalEASTWebSchema, summary.GetTemporalSummaryCompositionStrategyClassName(), stmt);
             if(temporalCompStrategyID == null) {
-                preparedStmt.setNull(3, java.sql.Types.INTEGER);
+                preparedStmt.setNull(4, java.sql.Types.INTEGER);
             }
             else {
-                preparedStmt.setInt(3, temporalCompStrategyID);
+                preparedStmt.setInt(4, temporalCompStrategyID);
             }
             preparedStmt.addBatch();
         }
@@ -572,9 +670,9 @@ public class Schemas {
         return projectID;
     }
 
-    private static void createIndicesCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName,
+    private static void createIndicesCacheTableIfNotExists(String globalEASTWebSchema, final Statement stmt, final String mSchemaName,
             boolean createTablesWithForeignKeyReferences) throws SQLException {
-        if(globalEASTWebSchema == null || mSchemaName == null || extraDownloadFiles == null) {
+        if(globalEASTWebSchema == null || mSchemaName == null) {
             return;
         }
 
@@ -596,9 +694,9 @@ public class Schemas {
         stmt.executeUpdate(query_.toString());
     }
 
-    private static void createProcessorCacheTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, final String mSchemaName,
+    private static void createProcessorCacheTableIfNotExists(String globalEASTWebSchema, final Statement stmt, final String mSchemaName,
             boolean createTablesWithForeignKeyReferences) throws SQLException {
-        if(globalEASTWebSchema == null || mSchemaName == null || extraDownloadFiles == null) {
+        if(globalEASTWebSchema == null || mSchemaName == null) {
             return;
         }
 
@@ -669,8 +767,8 @@ public class Schemas {
         stmt.executeUpdate(query_.toString());
     }
 
-    private static void createZonalStatTableIfNotExists(String globalEASTWebSchema, ArrayList<String> summaryNames, final Statement stmt, final String mSchemaName,
-            boolean createTablesWithForeignKeyReferences) throws SQLException {
+    private static void createZonalStatTableIfNotExists(final String globalEASTWebSchema, final String mSchemaName, final ArrayList<String> summaryNames, final Statement stmt,
+            final boolean createTablesWithForeignKeyReferences) throws SQLException {
         if(globalEASTWebSchema == null || mSchemaName == null || summaryNames == null) {
             return;
         }
@@ -681,6 +779,7 @@ public class Schemas {
                         "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ZonalStat\"\n" +
                                 "(\n" +
                                 "  \"ZonalStatID\" serial PRIMARY KEY,\n" +
+                                "  \"ProjectSummaryID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"ProjectSummary\" (\"ProjectSummaryID\") " : "") + "NOT NULL,\n" +
                                 "  \"DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
                                 "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
                                 "  \"ZoneMappingID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ZoneMapping\" (\"ZoneMappingID\") " : "") + "NOT NULL,\n" +
@@ -696,6 +795,26 @@ public class Schemas {
         }
         query_.append("\n)");
         stmt.executeUpdate(query_.toString());
+    }
+
+    private static void createProjectSummaryTableIfNotExists(final String globalEASTWebSchema, final Statement stmt, final boolean createTablesWithForeignKeyReferences) throws SQLException
+    {
+        if(globalEASTWebSchema == null || stmt == null) {
+            return;
+        }
+        String query = String.format(
+                "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ProjectSummary\" (\n" +
+                        "  \"ProjectSummaryID\" serial PRIMARY KEY,\n" +
+                        "  \"ProjectID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Project\" (\"ProjectID\") " : "") + "NOT NULL,\n" +
+                        "  \"SummaryIDNum\" integer NOT NULL,\n" +
+                        "  \"AreaNameField\" varchar(255) NOT NULL,\n" +
+                        "  \"ShapeFilePath\" varchar(255) NOT NULL,\n" +
+                        "  \"AreaValueField\" varchar(255) NOT NULL,\n" +
+                        "  \"temporalCompositionStrategyClassName\" varchar(255) NOT NULL\n" +
+                        ")",
+                        globalEASTWebSchema
+                );
+        stmt.executeUpdate(query);
     }
 
     private static void createZoneMappingTableIfNotExists(String globalEASTWebSchema, final Statement stmt, final String mSchemaName, boolean createTablesWithForeignKeyReferences) throws SQLException {
@@ -809,9 +928,9 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
-    private static void createDownloadTableIfNotExists(String globalEASTWebSchema, ArrayList<String> extraDownloadFiles, final Statement stmt, boolean createTablesWithForeignKeyReferences)
+    private static void createDownloadTableIfNotExists(String globalEASTWebSchema, final Statement stmt, boolean createTablesWithForeignKeyReferences)
             throws SQLException {
-        if(globalEASTWebSchema == null || extraDownloadFiles == null) {
+        if(globalEASTWebSchema == null) {
             return;
         }
 
@@ -876,6 +995,7 @@ public class Schemas {
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ExpectedResults\"\n" +
                         "(\n" +
                         "  \"ExpectedResultsID\" serial PRIMARY KEY,\n" +
+                        "  \"ProjectSummaryID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ProjectSummary\" (\"ProjectSummaryID\") " : "") + "NOT NULL,\n" +
                         "  \"ProjectID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Project\" (\"ProjectID\") " : "") + "NOT NULL,\n" +
                         "  \"PluginID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Plugin\" (\"PluginID\") " : "") + "NOT NULL,\n" +
                         "  \"SummaryIDNum\" integer NOT NULL,\n" +

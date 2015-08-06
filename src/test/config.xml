@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <config>
-	<DownloadDir>C:/Users/michael.devos/Desktop/EASTWeb/Downloads</DownloadDir>
+	<ErrorLogDir>C:\Users\michael.devos\Desktop\EASTWeb</ErrorLogDir>
+	<DownloadDir>C:\Users\michael.devos\Desktop\EASTWeb\Downloads</DownloadDir>
 	<Database>
 		<GlobalSchema>Test_EASTWeb1</GlobalSchema>
 		<HostName>localhost</HostName>

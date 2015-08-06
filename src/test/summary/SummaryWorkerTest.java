@@ -90,8 +90,7 @@ public class SummaryWorkerTest {
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFilePath)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         ArrayList<String> extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, extraDownloadFiles, null,
-                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();

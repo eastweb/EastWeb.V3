@@ -39,8 +39,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.download.GenericLocalStorageGlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.download.ModisNBAR.ModisNBARListDatesFiles;
-import version2.prototype.download.ModisNBAR.ModisNBARQCListDatesFiles;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
@@ -146,7 +144,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null, extraDownloadFiles,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null,
                 LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, null, true);
     }
 

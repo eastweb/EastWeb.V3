@@ -15,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import test.processor.Test_ProcessorWorker_TRMM3B42RT.MyDatabaseCache;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -48,7 +47,7 @@ public class Test_ProcessorWorker_TRMM3B42 {
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_TRMM3B42.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
                 pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 

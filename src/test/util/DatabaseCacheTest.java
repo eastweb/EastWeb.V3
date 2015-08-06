@@ -46,7 +46,7 @@ public class DatabaseCacheTest {
     private static Connection con;
     private static int year = 2015;
     private static int day = 100;
-    private static int daysPerInputFile = -1;
+    private static int daysPerInputFile = 1;
     private static int numOfIndices = 3;
     private static int filesPerDay = 1;
     private static String data1FilePath = "Data file path";
@@ -91,8 +91,8 @@ public class DatabaseCacheTest {
         stmt.execute(query);
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null, extraDownloadFiles,
-                LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, null, true);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null, LocalDate.ofYearDay(year, day), daysPerInputFile,
+                filesPerDay, numOfIndices, null, true);
     }
 
     /**

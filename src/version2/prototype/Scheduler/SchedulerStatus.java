@@ -157,10 +157,4 @@ public class SchedulerStatus {
      */
     public TreeMap<String, TreeMap<Integer, Boolean>> GetResultsUpToDate() { return resultsUpToDate; }
 
-    /**
-     * Gets the last modified time for this SchedulerStatus.
-     * @return LocalDateTime of last time something in the SchedulerStatus object was modified
-     */
-    public LocalDateTime GetLastModifiedTime() { return LastModifiedTime; }
-
 }

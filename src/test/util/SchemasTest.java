@@ -75,7 +75,7 @@ public class SchemasTest {
         System.out.println("Project name to use: " + args[1]);
         System.out.println("Plugin name to use: " + args[2]);
         System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, extraDownloadFiles, LocalDate.now().minusDays(8), 8, 3, 1, null,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, LocalDate.now().minusDays(8), 8, 3, 1, null,
                 createTablesWithForeignKeyReferences);
         System.out.println("DONE");
     }
@@ -157,8 +157,8 @@ public class SchemasTest {
         ResultSet rs = null;
 
         // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, extraDownloadFiles, startDate, daysPerInputFile,
-                numOfIndices, filesPerDay, summaries, true);
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, startDate, daysPerInputFile, numOfIndices,
+                filesPerDay, summaries, true);
 
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
