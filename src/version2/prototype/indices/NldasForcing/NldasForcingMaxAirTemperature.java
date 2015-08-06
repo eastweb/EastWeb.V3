@@ -22,7 +22,7 @@ public class NldasForcingMaxAirTemperature extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("band01_Max_"))
+            if(input.getName().contains("AirTemp_Max"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
