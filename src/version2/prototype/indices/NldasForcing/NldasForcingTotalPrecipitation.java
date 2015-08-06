@@ -22,7 +22,7 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("band10_"))
+            if(input.getName().contains("Precip_Total"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
