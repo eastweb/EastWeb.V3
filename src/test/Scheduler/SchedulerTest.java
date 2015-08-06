@@ -248,12 +248,18 @@ public class SchedulerTest {
         }
 
         @Override
-        public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException {
+        public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
+        {
             int id = getLowestAvailableGlobalDLID();
             LocalDownloader localDl = null;
             if(IsIDValid(id, globalDLIDs))
             {
-                DownloaderFactory factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
+                DownloaderFactory factory = null;
+                try {
+                    factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
                 int currentGDLIdx = -1;
                 for(int i=0; i < globalDLs.size(); i++)

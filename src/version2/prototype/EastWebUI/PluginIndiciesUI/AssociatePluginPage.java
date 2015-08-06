@@ -12,11 +12,14 @@ import javax.swing.ListModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JButton;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 
@@ -43,7 +46,7 @@ public class AssociatePluginPage {
                     AssociatePluginPage window = new AssociatePluginPage(null);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "AssociatePluginPage.main problem with running a AssociatePluginPage window.", e);
                 }
             }
         });

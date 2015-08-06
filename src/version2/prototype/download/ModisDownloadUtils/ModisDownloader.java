@@ -10,7 +10,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.download.DownloadFailedException;
@@ -100,14 +102,9 @@ public class ModisDownloader extends DownloaderFramework
 
                 DownloadUtils.downloadToFile(new URL(fileURL), outputFile);
             }
-            catch (MalformedURLException e)
+            catch (IOException e)
             {
-                e.printStackTrace();
-                return;
-            }
-            catch (IOException eIO)
-            {
-                eIO.printStackTrace();
+                ErrorLog.add(Config.getInstance(), "Modis", "ModisDownloader.download problem while attempting to download to file.", e);
                 return;
             }
         }

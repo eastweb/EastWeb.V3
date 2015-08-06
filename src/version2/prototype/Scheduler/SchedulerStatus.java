@@ -1,9 +1,8 @@
 package version2.prototype.Scheduler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Observable;
 import java.util.TreeMap;
 
 import version2.prototype.TaskState;
@@ -11,61 +10,124 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
 /**
- * Records the status of a Scheduler instance at the time of SchedulerStatus creation.
+ * Records the status of a Scheduler instance at a single point in time.
  *
  * @author michael.devos
  *
  */
-public class SchedulerStatus extends Observable {
-    public final int schedulerID;
-    public final String projectName;
-    public final ArrayList<ProjectInfoPlugin> pluginInfo;
-    public final ArrayList<ProjectInfoSummary> summaries;
+public class SchedulerStatus {
+    /**
+     * Scheduler instance assigned unique identifier.
+     */
+    public final int SchedulerID;
+    /**
+     * Project name associated with the Scheduler.
+     */
+    public final String ProjectName;
+    /**
+     * ProjectInfoPlugin list originally parsed from project info metadata file the Scheduler was instantiated to run with.
+     */
+    public final ArrayList<ProjectInfoPlugin> PluginInfo;
+    /**
+     * ProjectInfoSummary list originally parsed from project info metadata file the Scheduler was instantiated to run with. Each have an ID attributed to them within the project metadata file.
+     */
+    public final ArrayList<ProjectInfoSummary> Summaries;
+    /**
+     * The running TaskState of the Scheduler.
+     */
+    public final TaskState State;
+    /**
+     * True if number of results published equals number of expected results calculated from project metadata and plugin metadata. False, otherwise.
+     */
+    public final boolean ProjectUpToDate;
+    /**
+     * A timestamp depicting the last time this SchedulerStatus object was updated by its Scheduler.
+     */
+    public final LocalDateTime LastModifiedTime;
+    /**
+     * A timestamp depicting the time this SchedulerStatus object was created/retrieved.
+     */
+    public final LocalDateTime RetrievedTime;
 
-    private TreeMap<String, TreeMap<Integer, Integer>> newUpdatesBeingProcessed;
-    private List<Integer> downloadProgresses;
-    private List<Integer> processorProgresses;
-    private List<Integer> indicesProgresses;
-    private List<Integer> summaryProgresses;
+    private final TreeMap<String, Double> downloadProgresses;
+    private final TreeMap<String, Double> processorProgresses;
+    private final TreeMap<String, Double> indicesProgresses;
+    private final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
     private List<String> log;
-    private TaskState state;
+    private final TreeMap<String, TreeMap<Integer, Boolean>> resultsUpToDate;
+    private final TreeMap<String, Integer> numOfFilesDownloaded;
+    private final TreeMap<String, TreeMap<Integer, Integer>> numOfResultsPublished;
 
-    public SchedulerStatus(int schedulerID, String projectName, ArrayList<ProjectInfoPlugin> pluginInfo, ArrayList<ProjectInfoSummary> summaries, TaskState state)
+    /**
+     *
+     * @param SchedulerID
+     * @param ProjectName
+     * @param PluginInfo
+     * @param Summaries
+     * @param downloadProgresses
+     * @param processorProgresses
+     * @param indicesProgresses
+     * @param summaryProgresses
+     * @param log
+     * @param State
+     * @param resultsUpToDate
+     * @param numOfFilesDownloaded
+     * @param numOfResultsPublished
+     * @param ProjectUpToDate
+     * @param LastModifiedTime
+     * @param RetrievedTime
+     */
+    public SchedulerStatus(int SchedulerID, String ProjectName, ArrayList<ProjectInfoPlugin> PluginInfo, ArrayList<ProjectInfoSummary> Summaries, TreeMap<String, Double> downloadProgresses,
+            TreeMap<String, Double> processorProgresses, TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, List<String> log,
+            TaskState State, TreeMap<String, TreeMap<Integer, Boolean>> resultsUpToDate, TreeMap<String, Integer> numOfFilesDownloaded,
+            TreeMap<String, TreeMap<Integer, Integer>> numOfResultsPublished, boolean ProjectUpToDate, LocalDateTime LastModifiedTime, LocalDateTime RetrievedTime)
     {
-        this.schedulerID = schedulerID;
-        this.projectName = projectName;
-        this.pluginInfo = pluginInfo;
-        this.summaries = summaries;
-        downloadProgresses = Collections.synchronizedList(new ArrayList<Integer>(1));
-        processorProgresses = Collections.synchronizedList(new ArrayList<Integer>(1));
-        indicesProgresses = Collections.synchronizedList(new ArrayList<Integer>(1));
-        summaryProgresses = Collections.synchronizedList(new ArrayList<Integer>(1));
-        log = Collections.synchronizedList(new ArrayList<String>(1));
-        this.state = state;
-
-        newUpdatesBeingProcessed = new TreeMap<String, TreeMap<Integer, Integer>>();
-        TreeMap<Integer, Integer> tempSummaries;
-        for(ProjectInfoPlugin plugin : pluginInfo)
-        {
-            tempSummaries = new TreeMap<Integer, Integer>();
-            for(ProjectInfoSummary summary : summaries)
-            {
-                tempSummaries.put(summary.GetID(), 0);
-            }
-            newUpdatesBeingProcessed.put(plugin.GetName(), tempSummaries);
-        }
+        this.SchedulerID = SchedulerID;
+        this.ProjectName = ProjectName;
+        this.PluginInfo = PluginInfo;
+        this.Summaries = Summaries;
+        this.downloadProgresses = downloadProgresses;
+        this.processorProgresses = processorProgresses;
+        this.indicesProgresses = indicesProgresses;
+        this.summaryProgresses = summaryProgresses;
+        this.log = log;
+        this.State = State;
+        this.resultsUpToDate = resultsUpToDate;
+        this.numOfFilesDownloaded = numOfFilesDownloaded;
+        this.numOfResultsPublished = numOfResultsPublished;
+        this.ProjectUpToDate = ProjectUpToDate;
+        this.LastModifiedTime = LastModifiedTime;
+        this.RetrievedTime = RetrievedTime;
     }
 
-    public TreeMap<String, TreeMap<Integer, Integer>> GetNewUpdatesBeingProcessed() { synchronized (newUpdatesBeingProcessed) { return newUpdatesBeingProcessed; } }
+    /**
+     * Gets the download progress of all the plugins being processed in this project.
+     * @return a map of plugin names to their download progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, Double> GetDownloadProgress() { return downloadProgresses; }
 
-    public List<Integer> GetDownloadProgress() { synchronized (downloadProgresses) { return downloadProgresses; } }
+    /**
+     * Gets the processor progress of all the plugins being processed in this project.
+     * @return a map of plugin names to their processor progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, Double> GetProcessorProgress() { return processorProgresses; }
 
-    public List<Integer> GetProcessorProgress() { synchronized (processorProgresses) { return processorProgresses; } }
+    /**
+     * Gets the indices progress of all the plugins being processed in this project.
+     * @return a map of plugin names to their indices progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, Double> GetIndicesProgress() { return indicesProgresses; }
 
-    public List<Integer> GetIndicesProgress() { synchronized (indicesProgresses) { return indicesProgresses; } }
+    /**
+     * Gets the summary progress of all the plugins being processed in this project.
+     * @return a map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, TreeMap<Integer, Double>> GetSummaryProgress() { return summaryProgresses; }
 
-    public List<Integer> GetSummaryProgress() { synchronized (summaryProgresses) { return summaryProgresses; } }
-
+    /**
+     * Get the additions to the log.
+     * @return List of new strings to add to the log
+     */
     public List<String> GetAndClearLog()
     {
         List<String> output;
@@ -77,91 +139,28 @@ public class SchedulerStatus extends Observable {
         }
     }
 
-    public TaskState GetState() { return state; }
+    /**
+     * Gets the number of files downloaded per plugin used in this project.
+     * @return a map of plugin names to their total number of files downloaded
+     */
+    public TreeMap<String, Integer> GetNumOfFilesDownloaded() { return numOfFilesDownloaded; }
 
-    public void UpdateUpdatesBeingProcessed(TreeMap<String, TreeMap<Integer, Integer>> summaryUpdates)
-    {
-        synchronized (newUpdatesBeingProcessed)
-        {
-            newUpdatesBeingProcessed = summaryUpdates;
-        }
-    }
+    /**
+     * Gets the number of results published for each summary for each plugin used in this project.
+     * @return a map of plugin names to their maps of summary IDs to their total number of results published
+     */
+    public TreeMap<String, TreeMap<Integer, Integer>> GetNumOfResultsPublished() { return numOfResultsPublished; }
 
-    public void UpdateUpdatesBeingProcessed(String pluginName, TreeMap<Integer, Integer> summaryUpdates)
-    {
-        synchronized (newUpdatesBeingProcessed)
-        {
-            newUpdatesBeingProcessed.put(pluginName, summaryUpdates);
-        }
-    }
+    /**
+     * Gets a mapping of boolean values denoting whether summaries listed in the project metadata, per each plugin, are up to date with processing loaded downloads.
+     * @return a map of plugin names to their maps of summary IDs to their status of up to date (TRUE) or still processing data (FALSE)
+     */
+    public TreeMap<String, TreeMap<Integer, Boolean>> GetResultsUpToDate() { return resultsUpToDate; }
 
-    public void UpdateDownloadProgress(int progress, String pluginName)
-    {
-        for(int i=0; i < pluginInfo.size(); i++)
-        {
-            if(pluginInfo.get(i).GetName().equals(pluginName))
-            {
-                downloadProgresses.set(i, progress);
-                i = pluginInfo.size();
-            }
-        }
-        setChanged();
-        notifyObservers();
-    }
+    /**
+     * Gets the last modified time for this SchedulerStatus.
+     * @return LocalDateTime of last time something in the SchedulerStatus object was modified
+     */
+    public LocalDateTime GetLastModifiedTime() { return LastModifiedTime; }
 
-    public void UpdateProcessorProgress(int progress, String pluginName)
-    {
-        for(int i=0; i < pluginInfo.size(); i++)
-        {
-            if(pluginInfo.get(i).GetName().equals(pluginName))
-            {
-                processorProgresses.set(i, progress);
-                i = pluginInfo.size();
-            }
-        }
-        setChanged();
-        notifyObservers();
-    }
-
-    public void UpdateIndicesProgress(int progress, String pluginName)
-    {
-        for(int i=0; i < pluginInfo.size(); i++)
-        {
-            if(pluginInfo.get(i).GetName().equals(pluginName))
-            {
-                indicesProgresses.set(i, progress);
-                i = pluginInfo.size();
-            }
-        }
-        setChanged();
-        notifyObservers();
-    }
-
-    public void UpdateSummaryProgress(int progress, String pluginName)
-    {
-        for(int i=0; i < pluginInfo.size(); i++)
-        {
-            if(pluginInfo.get(i).GetName().equals(pluginName))
-            {
-                summaryProgresses.set(i, progress);
-                i = pluginInfo.size();
-            }
-        }
-        setChanged();
-        notifyObservers();
-    }
-
-    public void UpdateSchedulerTaskState(TaskState state)
-    {
-        this.state = state;
-        setChanged();
-        notifyObservers();
-    }
-
-    public void AddToLog(String logText)
-    {
-        log.add(logText);
-        setChanged();
-        notifyObservers();
-    }
 }

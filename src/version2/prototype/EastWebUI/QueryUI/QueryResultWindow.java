@@ -14,6 +14,9 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -43,7 +46,7 @@ public class QueryResultWindow {
                     QueryResultWindow window = new QueryResultWindow(results);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "QueryResultWindow.main problem with running a QueryResultWindow window.", e);
                 }
             }
         });
@@ -86,7 +89,7 @@ public class QueryResultWindow {
                     }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(frame, "File not found");
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "QueryResultWindow.initialize problem with openning query in notepad.", e);
                 }
             }
         });
@@ -111,7 +114,7 @@ public class QueryResultWindow {
                         }
                     } catch (IOException e) {
                         JOptionPane.showMessageDialog(frame, "Folder not found");
-                        e.printStackTrace();
+                        ErrorLog.add(Config.getInstance(), "QueryResultWindow.initialize problem with copying files to different directory.", e);
                     }
                 }
             }

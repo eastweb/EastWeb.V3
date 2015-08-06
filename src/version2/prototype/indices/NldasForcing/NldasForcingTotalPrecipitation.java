@@ -9,6 +9,8 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.indices.IndicesFramework;
 
 public class NldasForcingTotalPrecipitation extends IndicesFramework {
@@ -77,7 +79,7 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
             int length;
             //copy the file content in bytes
             while ((length = inStream.read(buffer)) > 0){
-
+                ;
                 outStream.write(buffer, 0, length);
 
             }
@@ -91,7 +93,7 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
             System.out.println("File is copied successful!");
 
         }catch(IOException e){
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "NldasForcingTotalPrecipitation.MoveFile problem with file stream opperations.", e);
         }
     }
 }

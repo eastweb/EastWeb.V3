@@ -11,7 +11,9 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.processor.Composite;
 import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
@@ -45,8 +47,9 @@ public class NldasForcingComposite extends Composite
         synchronized (GdalUtils.lockObject) {
 
             if(!(new File(outputFolder).exists())){
-                try { FileUtils.forceMkdir(new File(outputFolder)); }
-                catch (IOException e) { e.printStackTrace(); }
+                new File(outputFolder).mkdirs();
+                //                try { FileUtils.forceMkdir(new File(outputFolder)); }
+                //                catch (IOException e) { ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error", e); }
             }
 
             List<Dataset> inputDSs = new ArrayList<Dataset>();
@@ -77,7 +80,7 @@ public class NldasForcingComposite extends Composite
                         try {
                             temp.createNewFile();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error while creating new file.", e);
                         }
 
                         for (File input : inputFiles) {
@@ -339,7 +342,7 @@ public class NldasForcingComposite extends Composite
         }
         catch(NumberFormatException e)
         {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "NldasForcingComposite.GetPreviousValues error.", e);
         }
 
 

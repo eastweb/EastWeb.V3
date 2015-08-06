@@ -52,8 +52,7 @@ public class Scheduler {
     private final int ID;
     private final Config configInstance;
     private final EASTWebManagerI manager;
-    private SchedulerStatus status;
-    private TaskState mState;
+    private SchedulerStatusContainer statusContainer;
     private ArrayList<LocalDownloader> localDownloaders;
     private ArrayList<Process> processorProcesses;
     private ArrayList<Process> indicesProcesses;
@@ -108,8 +107,7 @@ public class Scheduler {
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
-        status = new SchedulerStatus(myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
-        mState = initState;
+        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
         localDownloaders = new ArrayList<LocalDownloader>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
@@ -166,9 +164,9 @@ public class Scheduler {
      */
     public SchedulerStatus GetSchedulerStatus()
     {
-        synchronized (status)
+        synchronized (statusContainer)
         {
-            return status;
+            return statusContainer.GetStatus();
         }
     }
 
@@ -179,10 +177,9 @@ public class Scheduler {
      */
     public void Start()
     {
-        mState = TaskState.RUNNING;
-        synchronized (status)
+        synchronized (statusContainer)
         {
-            status.UpdateSchedulerTaskState(mState);
+            statusContainer.UpdateSchedulerTaskState(TaskState.RUNNING);
         }
         for(DatabaseCache cache : downloadCaches)
         {
@@ -206,10 +203,9 @@ public class Scheduler {
      */
     public void Stop()
     {
-        mState = TaskState.STOPPED;
-        synchronized (status)
+        synchronized (statusContainer)
         {
-            status.UpdateSchedulerTaskState(mState);
+            statusContainer.UpdateSchedulerTaskState(TaskState.STOPPED);
         }
     }
 
@@ -221,7 +217,7 @@ public class Scheduler {
      */
     public TaskState GetState()
     {
-        return mState;
+        return statusContainer.GetState();
     }
 
     /**
@@ -235,25 +231,25 @@ public class Scheduler {
         {
             Process process = (Process)e.getSource();
 
-            synchronized (status)
+            synchronized (statusContainer)
             {
                 switch(process.processName)
                 {
                 case DOWNLOAD:
-                    status.UpdateDownloadProgress(e.getProgress(), e.getPluginName());
+                    statusContainer.UpdateDownloadProgress(e.getProgress(), e.getPluginName());
                     break;
                 case PROCESSOR:
-                    status.UpdateProcessorProgress(e.getProgress(), e.getPluginName());
+                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName());
                     break;
                 case INDICES:
-                    status.UpdateIndicesProgress(e.getProgress(), e.getPluginName());
+                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName());
                     break;
                 default:    // SUMMARY
-                    status.UpdateSummaryProgress(e.getProgress(), e.getPluginName());
+                    statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID());
                     break;
                 }
 
-                status.AddToLog(e.getStatus());
+                statusContainer.AddToLog(e.getStatus());
             }
         }
 
@@ -264,7 +260,6 @@ public class Scheduler {
      * Checks for new work from associated GlobalDownloaders using the stored LocalDownloaders which gets the number of available files to process from each of them and updates their local caches to
      * start processing the new files.
      *
-     * @return String - the plugin name, Integer - number of new files to process for that plugin
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
@@ -279,7 +274,7 @@ public class Scheduler {
             results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
         }
         Start();
-        status.UpdateUpdatesBeingProcessed(results);
+        statusContainer.CheckIfProjectIsUpToDate(true, true);
     }
 
     protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager,
@@ -291,7 +286,7 @@ public class Scheduler {
         ID = myID;
         this.configInstance = configInstance;
         this.manager = manager;
-        status = new SchedulerStatus(myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
+        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
     }
 
     /**

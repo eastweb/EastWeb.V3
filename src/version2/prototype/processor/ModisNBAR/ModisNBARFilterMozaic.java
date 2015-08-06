@@ -14,6 +14,8 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.processor.ImageArray;
 import version2.prototype.processor.ModisTileData;
 import version2.prototype.processor.Mozaic;
@@ -48,8 +50,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
                 // remove the input folder
                 FileUtils.deleteDirectory(inputFolder);
             } catch (IOException e) {
-                // TODO: Write to log
-                e.printStackTrace();
+                ErrorLog.add(Config.getInstance(), "ModisNBARFilterMozaic.run error.", e);
             }
         }
     }

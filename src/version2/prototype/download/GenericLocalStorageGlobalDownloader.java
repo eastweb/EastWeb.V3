@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
@@ -139,14 +140,14 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
                             downloader.download();
                             AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running running DownloaderFramework or AddDownloadFile.", e);
                         }
                     }
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
         }
     }
 }

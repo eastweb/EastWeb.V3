@@ -71,9 +71,22 @@ public abstract class IndicesFramework implements IndexCalculator {
             Dataset[] inputs = new Dataset[mInputFiles.length];
 
             for (int i = 0; i < mInputFiles.length; i++) {
-                // System.out.println("index calculate input files name: "+mInputFiles[i].getPath());
                 inputs[i] = gdal.Open(mInputFiles[i].getPath());
             }
+
+            /*   System.out.println("ind:  calculate(): " + mInputFiles[0].getPath());
+            Band b1 = inputs[0].GetRasterBand(1);
+            int xSize = b1.GetXSize();
+            int ySize = b1.getYSize();
+            double [] myArr = new double[xSize * ySize];
+            b1.ReadRaster(0,0,xSize, ySize, myArr );
+
+            for (int i = 0; i < xSize*ySize; i++)
+            {
+                if ((myArr[i] > 0.0) && (myArr[i] < 32767.0))
+                {System.out.println(myArr[i]);}
+            }
+             */
 
             Dataset outputDS = createOutput(inputs);
             process(inputs, outputDS);// Process the output and inputs

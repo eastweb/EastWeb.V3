@@ -18,7 +18,8 @@ public class ZonalSummary implements Serializable {
      * Creates a ZonalSummary object pairing of shape file and zone field.
      *
      * @param shapeFile  - shape file to be used in this zonal summary
-     * @param field  - zone field to be used in this zonal summary
+     * @param areaValueField
+     * @param areaNameField
      */
     public ZonalSummary(String shapeFile, String areaValueField, String areaNameField) {
         this.shapeFile = shapeFile;

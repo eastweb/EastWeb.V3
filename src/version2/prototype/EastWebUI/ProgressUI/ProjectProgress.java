@@ -10,9 +10,12 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JList;
 
-import java.util.List;
+import java.util.Iterator;
+import java.util.TreeMap;
 
+import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
+import version2.prototype.ErrorLog;
 import version2.prototype.GUIUpdateHandler;
 import version2.prototype.Scheduler.SchedulerStatus;
 
@@ -39,7 +42,7 @@ public class ProjectProgress {
 
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "ProjectProgress.main problem with running a ProjectProgress window.", e);
                 }
             }
         });
@@ -48,7 +51,7 @@ public class ProjectProgress {
     /**
      * Create the application.
      */
-    public ProjectProgress(String  projectName) {
+    public ProjectProgress(String projectName) {
         initialize();
 
         EASTWebManager.RegisterGUIUpdateHandler(new GUIUpdateHandlerImplementation(projectName));
@@ -130,10 +133,10 @@ public class ProjectProgress {
         public void run() {
             SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
 
-            downloadProgressBar.setValue(GetAverage(status.GetDownloadProgress()));
-            processProgressBar.setValue(GetAverage(status.GetProcessorProgress()));
-            indiciesProgressBar.setValue(GetAverage(status.GetIndicesProgress()));
-            summaryProgressBar.setValue(GetAverage(status.GetSummaryProgress()));
+            downloadProgressBar.setValue(GetAverage1(status.GetDownloadProgress()));
+            processProgressBar.setValue(GetAverage1(status.GetProcessorProgress()));
+            indiciesProgressBar.setValue(GetAverage1(status.GetIndicesProgress()));
+            summaryProgressBar.setValue(GetAverage2(status.GetSummaryProgress()));
 
             for(String log : status.GetAndClearLog())
             {
@@ -141,15 +144,39 @@ public class ProjectProgress {
             }
         }
 
-        private int GetAverage(List<Integer> TotalProgress){
+        private int GetAverage1(TreeMap<String, Double> TotalProgress){
 
             int total = 0;
 
-            for(int each: TotalProgress){
-                total += each;
+            Iterator<String> pluginIt = TotalProgress.keySet().iterator();
+            while(pluginIt.hasNext())
+            {
+                total += TotalProgress.get(pluginIt.next());
             }
 
             return total / TotalProgress.size();
+        }
+
+        private int GetAverage2(TreeMap<String, TreeMap<Integer, Double>> TotalProgress){
+
+            int total = 0;
+            int count = 0;
+
+            Iterator<String> pluginIt = TotalProgress.keySet().iterator();
+            Iterator<Integer> summaryIt;
+            TreeMap<Integer, Double> pluginTemp;
+            while(pluginIt.hasNext())
+            {
+                pluginTemp = TotalProgress.get(pluginIt.next());
+                summaryIt = pluginTemp.keySet().iterator();
+                while(summaryIt.hasNext())
+                {
+                    total += pluginTemp.get(summaryIt.next());
+                    count++;
+                }
+            }
+
+            return total / count;
         }
 
     }

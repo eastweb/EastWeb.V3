@@ -1,6 +1,7 @@
 package version2.prototype.indices.TRMM3B42RT;
 
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GdalUtils;
 
 public class TRMM3B42RTIndex extends IndicesFramework
 {
@@ -10,7 +11,8 @@ public class TRMM3B42RTIndex extends IndicesFramework
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[INPUT] == 32767) {
+        if (values[INPUT] == GdalUtils.NoValue) {
+            //   System.out.println("novalue : " + values[INPUT]);
             return -3.4028234663852886E38;
         } else {
             return values[INPUT];

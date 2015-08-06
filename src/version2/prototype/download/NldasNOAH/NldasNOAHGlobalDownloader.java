@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
@@ -93,19 +94,16 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
 
                         try {
                             downloader.download();
-                        } catch (DownloadFailedException e1) {
-                            // TODO Auto-generated catch block
-                            e1.printStackTrace();
-                        } catch (Exception e1) {
-                            // TODO Auto-generated catch block
-                            e1.printStackTrace();
+                        } catch (DownloadFailedException e) {
+                            ErrorLog.add(Config.getInstance(), pluginName, "NldasNOAHGlobalDownloader.run problem while running NldasNOAHDownloader.", e);
+                        } catch (Exception e) {
+                            ErrorLog.add(Config.getInstance(), pluginName, "NldasNOAHGlobalDownloader.run problem while running NldasNOAHDownloader.", e);
                         }
                     }
 
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                ErrorLog.add(Config.getInstance(), pluginName, "NldasNOAHGlobalDownloader.run problem while attempting to handle downloading.", e);
             }
 
         }
