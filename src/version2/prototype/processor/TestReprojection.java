@@ -36,7 +36,7 @@ public class TestReprojection
                     p, new File("D:\\project\\TRMM_p.tif"));*/
 
             //extract NOAH
-            String noah = "D:\\project\\download\\NOAH\\noah_2015_214.grb";
+            String noah = "D:\\project\\download\\NOAH\\noah_2015_0604.grb";
             String outFile = "D:\\project\\Noah_b19.tif";
             GdalUtils.register();
             synchronized (GdalUtils.lockObject)
@@ -60,6 +60,7 @@ public class TestReprojection
                 System.out.println("original prj ref: " + inputDS.GetProjection());
                 String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
 
+
                 outputDS.SetProjection(wktStr);
                 System.out.println(outputDS.GetProjection());
                 double [] geoTrans = inputDS.GetGeoTransform();
@@ -82,23 +83,23 @@ public class TestReprojection
 
     private static void projection(String input, String masterShapeFile, Projection projection, File output)
     {
-        String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-
+        //String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+        String wktStr = " ";
         assert (masterShapeFile != null);
         GdalUtils.register();
         synchronized (GdalUtils.lockObject)
         {
             Dataset inputDS = gdal.Open(input);
-            SpatialReference inputRef = new SpatialReference();
+            //  SpatialReference inputRef = new SpatialReference();
 
-            inputRef.ImportFromWkt(wktStr);
+            //  inputRef.ImportFromWkt(wktStr);
             //inputRef.ImportFromWkt("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"EPSG\",4326]]");
 
             //inputRef.ImportFromWkt("GEOGCS[\"GCS_Undefined\",DATUM[\"Undefined\",SPHEROID[\"User_Defined_Spheroid\",6371007.181,0.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Sinusoidal\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],UNIT[\"Meter\",1.0]");
             // FIXME: abstract it somehow?
             // inputRef.ImportFromWkt("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
 
-            inputDS.SetProjection(inputRef.ExportToWkt());
+            // inputDS.SetProjection(inputRef.ExportToWkt());
 
             DataSource feature = ogr.Open(masterShapeFile);
 
@@ -120,6 +121,7 @@ public class TestReprojection
             double bottom = extent[2];
             double top = extent[3];
 
+
             Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                     output.getPath(),
                     (int) Math.ceil((right-left)/projection.getPixelSize()),
@@ -130,7 +132,7 @@ public class TestReprojection
 
             String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
 
-            System.out.println("Reproject: input : " + inputRef.ExportToWkt());
+            // System.out.println("Reproject: input : " + inputRef.ExportToWkt());
             System.out.println("Reproject: output : " + outputProjection);
             System.out.println("Reproject: GeoTransform: " + left + " : " + right + " : " + bottom + " : " + top);
 

@@ -33,6 +33,7 @@ public abstract class Reproject {
     private String shapefile;
     private Projection projection;
     protected String wktStr;
+    protected boolean NoProj;  // no reprojection =  true
 
     public Reproject(ProcessData data) {
         inputFolders = data.getInputFolders();
@@ -47,6 +48,9 @@ public abstract class Reproject {
         //set the input files
         inputFiles = listOfFiles;
         wktStr = null;
+
+        // FIXME:  allow the users to choose whether to do reprojection
+        NoProj =  true;
     }
 
     // run method for the scheduler
@@ -59,12 +63,20 @@ public abstract class Reproject {
 
         setInputWKT();
 
-        reprojectFiles();
+        if (NoProj)    // no projection
+        {
+            // copy files in the input folder to the output folder
+            for (File f: inputFiles) {
+                FileUtils.copyFileToDirectory(f, outputDir);
+            }
+        }
+        else {
+            reprojectFiles();    // reprojection
+        }
 
         // remove the input folder
         // WRITE BACK after fixing the issue
         //FileUtils.deleteDirectory(inputFolder);
-
     }
 
     public abstract void setInputWKT();
@@ -129,9 +141,9 @@ public abstract class Reproject {
 
             String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
 
-            System.out.println("Reproject: input : " + inputRef.ExportToWkt());
-            System.out.println("Reproject: output : " + outputProjection);
-            System.out.println("Reproject: GeoTransform: " + left + " : " + top);
+            //            System.out.println("Reproject: input : " + inputRef.ExportToWkt());
+            //            System.out.println("Reproject: output : " + outputProjection);
+            //            System.out.println("Reproject: GeoTransform: " + left + " : " + top);
 
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] {
