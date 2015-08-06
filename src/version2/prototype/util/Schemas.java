@@ -76,6 +76,9 @@ public class Schemas {
             // Create TemporalSummaryCompositionStrategy table
             createTemporalSummaryCompositionStrategyTableIfNotExists(globalEASTWebSchema, stmt);
 
+            // Create the ProjectSummary table
+            createProjectSummaryTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
+
             // Create ExpectedResults table to keep track of how many results are expected for each plugin for each project
             createExpectedResultsTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
 
@@ -106,9 +109,6 @@ public class Schemas {
             // Create the ZoneMapping table
             createZoneMappingTableIfNotExists(globalEASTWebSchema, stmt, mSchemaName, createTablesWithForeignKeyReferences);
 
-            // Create the ProjectSummary table
-            createProjectSummaryTableIfNotExists(globalEASTWebSchema, stmt, createTablesWithForeignKeyReferences);
-
             // Get DateGroupID
             int dateGroupID = getDateGroupID(globalEASTWebSchema, startDate, stmt);
 
@@ -119,9 +119,12 @@ public class Schemas {
             int pluginID = addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
 
             // Add summaries to ProjectSummary table
-            for(ProjectInfoSummary summary : summaries) {
-                addProjectSummaryID(globalEASTWebSchema, projectName, summary.GetID(), summary.GetZonalSummary().GetAreaNameField(), summary.GetZonalSummary().GetShapeFile(),
-                        summary.GetZonalSummary().GetAreaValueField(), summary.GetTemporalSummaryCompositionStrategyClassName(), stmt);
+            if(summaries != null)
+            {
+                for(ProjectInfoSummary summary : summaries) {
+                    addProjectSummaryID(globalEASTWebSchema, projectName, summary.GetID(), summary.GetZonalSummary().GetAreaNameField(), summary.GetZonalSummary().GetShapeFile(),
+                            summary.GetZonalSummary().GetAreaValueField(), summary.GetTemporalSummaryCompositionStrategyClassName(), stmt);
+                }
             }
 
             // Add entry to EASTWeb global ExpectedResults table
@@ -259,8 +262,7 @@ public class Schemas {
     public static void addProjectSummaryID(final String globalEASTWebSchema, final String projectName, final Integer summaryNumID, final String areaNameField, final String shapeFilePath,
             final String areaValueField, final String temporalCompositionStrategyClassName, final Statement stmt) throws SQLException
     {
-        if(globalEASTWebSchema == null || summaryNumID == null || projectName == null || areaNameField == null || shapeFilePath == null || areaValueField == null ||
-                temporalCompositionStrategyClassName == null) {
+        if(globalEASTWebSchema == null || summaryNumID == null || projectName == null || areaNameField == null || shapeFilePath == null || areaValueField == null) {
             return;
         }
 
@@ -272,14 +274,14 @@ public class Schemas {
         rs = stmt.executeQuery(query);
         if(rs == null || !rs.next()) {
             query = String.format("INSERT INTO \"%1$s\".\"ProjectSummary\" (\"ProjectID\", \"SummaryIDNum\", \"AreaNameField\", \"ShapeFilePath\", \"AreaValueField\", " +
-                    "\"temporalCompositionStrategyClassName\") VALUES (%2$d, %3$d, '%4$s', '%5$s', '%6$s', '%7$s');",
+                    "\"TemporalSummaryCompositionStrategyID\") VALUES (%2$d, %3$d, '%4$s', '%5$s', '%6$s', %7$d);",
                     globalEASTWebSchema,
                     projectID,
                     summaryNumID,
                     areaNameField,
                     shapeFilePath,
                     areaValueField,
-                    temporalCompositionStrategyClassName
+                    getTemporalSummaryCompositionStrategyID(globalEASTWebSchema, temporalCompositionStrategyClassName, stmt)
                     );
             stmt.executeUpdate(query);
         }
@@ -784,7 +786,8 @@ public class Schemas {
                                 "  \"IndexID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Index\" (\"IndexID\") " : "") + "NOT NULL,\n" +
                                 "  \"ZoneMappingID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"ZoneMapping\" (\"ZoneMappingID\") " : "") + "NOT NULL,\n" +
                                 "  \"ExpectedResultsID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"ExpectedResults\" (\"ExpectedResultsID\") " : "") + " NOT NULL,\n" +
-                                "  \"TemporalSummaryCompositionStrategyClass\" varchar(255) NOT NULL,\n" +
+                                "  \"TemporalSummaryCompositionStrategyID\" integer "
+                                + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"TemporalSummaryCompositionStrategy\" (\"TemporalSummaryCompositionStrategyID\") " : "") + ",\n" +
                                 "  \"FilePath\" varchar(255) NOT NULL",
                                 mSchemaName,
                                 globalEASTWebSchema
@@ -805,12 +808,13 @@ public class Schemas {
         String query = String.format(
                 "CREATE TABLE IF NOT EXISTS \"%1$s\".\"ProjectSummary\" (\n" +
                         "  \"ProjectSummaryID\" serial PRIMARY KEY,\n" +
-                        "  \"ProjectID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%2$s\".\"Project\" (\"ProjectID\") " : "") + "NOT NULL,\n" +
+                        "  \"ProjectID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"Project\" (\"ProjectID\") " : "") + "NOT NULL,\n" +
                         "  \"SummaryIDNum\" integer NOT NULL,\n" +
                         "  \"AreaNameField\" varchar(255) NOT NULL,\n" +
                         "  \"ShapeFilePath\" varchar(255) NOT NULL,\n" +
                         "  \"AreaValueField\" varchar(255) NOT NULL,\n" +
-                        "  \"temporalCompositionStrategyClassName\" varchar(255) NOT NULL\n" +
+                        "  \"TemporalSummaryCompositionStrategyID\" integer "
+                        + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"TemporalSummaryCompositionStrategy\" (\"TemporalSummaryCompositionStrategyID\") " : "") + "\n" +
                         ")",
                         globalEASTWebSchema
                 );

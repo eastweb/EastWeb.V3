@@ -105,12 +105,12 @@ public class EASTWebResults {
         if(projectName == null || pluginName == null) {
             return null;
         }
-
+        // TemporalSummaryCompositionStrategyID
         // Build query
         ArrayList<String> summaries = Config.getInstance().getSummaryCalculations();
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
         StringBuilder query = new StringBuilder("SELECT F.\"Field\", F.\"ShapeFile\", Z.\"Name\", C.\"Year\", C.\"DayOfYear\", I.\"Name\", T.\"ExpectedTotalResults\", " +
-                "A.\"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
+                "T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
         for(int i=1; i < summaries.size(); i++)
         {
             query.append(", A.\"" + summaries.get(i) + "\"");
@@ -125,9 +125,10 @@ public class EASTWebResults {
             }
             query.append(")");
         }
-        query.append(") I, \"" + globalSchema + "\".\"DateGroup\" C, \"" + schemaName + "\".\"ZoneMapping\" M, \"" + schemaName + "\".\"ZoneField\" F, \"" + globalSchema + "\".\"ZoneEW\" Z " +
+        query.append(") I, \"" + globalSchema + "\".\"DateGroup\" C, \"" + schemaName + "\".\"ZoneMapping\" M, \"" + schemaName + "\".\"ZoneField\" F, \"" + globalSchema + "\".\"ZoneEW\" Z, " +
+                "\"" + globalSchema + "\".\"TemporalSummaryCompositionStrategy\" T " +
                 "WHERE A.\"IndexID\" = I.\"IndexID\" AND A.\"DateGroupID\" = C.\"DateGroupID\" AND A.\"ZoneMappingID\" = M.\"ZoneMappingID\" AND M.\"ZoneEWID\" = Z.\"ZoneEWID\" AND " +
-                "M.\"ZoneFieldID\" = F.\"ZoneFieldID\";");
+                "M.\"ZoneFieldID\" = F.\"ZoneFieldID\" AND A.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
         return new EASTWebQuery(query.toString());

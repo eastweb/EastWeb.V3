@@ -23,7 +23,7 @@ public class ProjectInfoCollection {
     SAXException, ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
     IllegalArgumentException, InvocationTargetException
     {
-        File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
+        File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
         File[] fl = getXMLFiles(fileDir);
         if(fl.length > 0)
         {

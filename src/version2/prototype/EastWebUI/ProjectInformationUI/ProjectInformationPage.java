@@ -188,7 +188,7 @@ public class ProjectInformationPage {
             });
             frame.getContentPane().add(projectCollectionComboBox);
 
-            File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
+            File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
 
             for(File fXmlFile: getXMLFiles(fileDir)){
                 projectCollectionComboBox.addItem(fXmlFile.getName().replace(".xml", ""));
@@ -855,7 +855,7 @@ public class ProjectInformationPage {
 
     private void CreateNewProject(){
 
-        File theDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\" + projectName.getText() + ".xml" );
+        File theDir = new File(System.getProperty("user.dir") + "\\projects\\" + projectName.getText() + ".xml" );
 
         try {
 
