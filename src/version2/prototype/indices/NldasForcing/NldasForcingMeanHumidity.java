@@ -22,7 +22,7 @@ public class NldasForcingMeanHumidity extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("band02_"))
+            if(input.getName().contains("Humidity_Mean"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
