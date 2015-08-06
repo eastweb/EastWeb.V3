@@ -22,7 +22,7 @@ public class NldasForcingFreezingDegreeDays extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("FreezingDegreeDays_"))
+            if(input.getName().equals("FreezingDegreeDays"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
