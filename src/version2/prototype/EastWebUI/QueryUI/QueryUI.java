@@ -398,7 +398,7 @@ public class QueryUI {
     }
 
     private void populateProjectList() {
-        File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
+        File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
         projectListComboBox.removeAllItems();
         projectListComboBox.addItem("");
 

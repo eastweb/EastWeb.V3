@@ -173,7 +173,7 @@ public class MainWindow {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String fileName = JOptionPane.showInputDialog("Enter plugin name", JOptionPane.YES_NO_OPTION );
-                File theDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\" + fileName + ".xml" );
+                File theDir = new File(System.getProperty("user.dir") + "\\plugins\\" + fileName + ".xml" );
                 try {
                     theDir.createNewFile();
                     // TODO: could create a mock template
@@ -386,7 +386,7 @@ public class MainWindow {
      * populate project list
      */
     private void populateProjectList() {
-        File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\");
+        File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
         projectList.removeAllItems();
 
         for(File fXmlFile: getXMLFiles(fileDir)){

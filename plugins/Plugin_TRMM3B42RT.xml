@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<PluginMetadata>
+	<Title>TRMM3B42RT</Title>
+	<DaysPerInputData>1</DaysPerInputData>
+	<Resolution>25000</Resolution>
+	<ExtraDownloadFiles/>
+	<Download>
+		<DownloadFactoryClassName>TRMM3B42RTFactory</DownloadFactoryClassName>
+		<Mode>ftp</Mode>
+		<FTP>
+			<HostName>disc2.nascom.nasa.gov</HostName>
+			<RootDir>/data/TRMM/Gridded/Derived_Products/3B42RT/Daily/</RootDir>
+			<UserName>anonymous</UserName>
+			<PassWord>anonymous</PassWord>
+		</FTP>
+		<TimeZone>CST6CDT</TimeZone>
+		<FilesPerDay>1</FilesPerDay>
+		<DatePattern>\d{4}</DatePattern>
+		<FileNamePattern>3B42RT_daily\.(\d{4})\.(\d{2})\.(\d{2})\.bin</FileNamePattern>
+		<OriginDate>
+			<DayOfMonth>01</DayOfMonth>
+			<Month>March</Month>
+			<Year>2000</Year>
+		</OriginDate>
+	</Download>	
+	<Processor>
+		<ProcessStep>TRMM3B42RTConvert</ProcessStep>
+		<ProcessStep>TRMM3B42RTReproject</ProcessStep>
+		<ProcessStep>TRMM3B42RTClip</ProcessStep>
+		<ProcessStep>TRMM3B42RTMask</ProcessStep>
+	</Processor>
+	<Indices>
+		<ClassName>TRMM3B42RTIndex</ClassName>
+	</Indices>
+	<Summary>
+		<Temporal>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass/>
+		</Temporal>
+	</Summary>
+	<QualityControl/>
+</PluginMetadata>
