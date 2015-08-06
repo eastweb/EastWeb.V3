@@ -6,7 +6,6 @@ import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
