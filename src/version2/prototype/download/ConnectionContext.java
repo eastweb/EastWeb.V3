@@ -5,6 +5,10 @@ import java.lang.reflect.Method;
 import java.net.ConnectException;
 
 
+
+
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 
 
@@ -33,7 +37,7 @@ public class ConnectionContext {
             Method method=clsStg.getDeclaredMethod("buildConn", paramDatadate);
             connection=method.invoke(obj, ci);
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "ConnectionContext.getConnection problem with creating conection.", e);
         }
         System.out.println(connection);
         return connection;

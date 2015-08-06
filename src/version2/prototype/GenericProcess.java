@@ -60,16 +60,18 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
         Constructor<?> cstr;
+        Class<?> cl = null;
         try {
-            for(Class<?> cl : processWorkerClasses)
+            for(int i=0; i < processWorkerClasses.size(); i++)
             {
+                cl = processWorkerClasses.get(i);
                 cstr = cl.getConstructor(version2.prototype.Process.class, version2.prototype.ProjectInfoMetaData.ProjectInfoFile.class,
                         version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin.class, version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData.class, ArrayList.class,
                         version2.prototype.util.DatabaseCache.class);
                 manager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            e.printStackTrace();
+            ErrorLog.add(projectInfoFile, processName, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);
         }
 
         // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.

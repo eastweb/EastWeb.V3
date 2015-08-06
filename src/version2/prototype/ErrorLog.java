@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.FileSystem;
 
 /**
@@ -24,15 +26,15 @@ public final class ErrorLog {
 
     /**Reports an error to the path of the class loader or where the program was executed from. Used mainly to handle Config issues as the others require a Config instance.
      * @param message
-     * @param cause
+     * @param e
      */
-    public static void add(String message, Throwable cause)
+    public static void add(String message, Throwable e)
     {
         String logFileName = getLogFileName();
         String logPath = ClassLoader.getSystemClassLoader().getResource(".").getPath();
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, cause);
-            printToStderr(message, cause);
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
         }
     }
 
@@ -40,15 +42,15 @@ public final class ErrorLog {
      * Reports an error to the error log in the error log directory root.
      * @param configInstance
      * @param message Error message, suitable for presentation to the user
-     * @param cause Cause of the error, may be null
+     * @param e Cause of the error, may be null
      */
-    public static void add(Config configInstance, String message, Throwable cause)
+    public static void add(Config configInstance, String message, Throwable e)
     {
         String logFileName = getLogFileName();
         String logPath = configInstance.getErrorLogDir();
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, cause);
-            printToStderr(message, cause);
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
         }
     }
 
@@ -57,20 +59,20 @@ public final class ErrorLog {
      * @param configInstance
      * @param pluginName
      * @param message Error message, suitable for presentation to the user
-     * @param cause Cause of the error, may be null
+     * @param e Cause of the error, may be null
      */
-    public static void add(Config configInstance, String pluginName, String message, Throwable cause)
+    public static void add(Config configInstance, String pluginName, String message, Throwable e)
     {
         String logFileName = getLogFileName();
         String logPath = configInstance.getErrorLogDir();
         try {
             logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
-        } catch (ConfigReadException e) {
-            add(configInstance, "Problem logging error.", e);
+        } catch (ConfigReadException cause) {
+            add(configInstance, "Problem logging error.", cause);
         }
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, cause);
-            printToStderr(message, cause);
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
         }
     }
 
@@ -78,39 +80,56 @@ public final class ErrorLog {
      * Reports an error to the error log for the specified project.
      * @param projectInfoFile
      * @param message Error message, suitable for presentation to the user
-     * @param cause Cause of the error, may be null
+     * @param e Cause of the error, may be null
      */
-    public static void add(ProjectInfoFile projectInfoFile, String message, Throwable cause)
+    public static void add(ProjectInfoFile projectInfoFile, String message, Throwable e)
     {
         String logFileName = getLogFileName();
         String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, cause);
-            printToStderr(message, cause);
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
         }
     }
 
-    private static void printToLogFile(String logPath, String message, Throwable cause)
+    /**
+     * Reports an error to the error log for the specified process and project.
+     * @param projectInfoFile
+     * @param process
+     * @param message Error message, suitable for presentation to the user
+     * @param e Cause of the error, may be null
+     */
+    public static void add(ProjectInfoFile projectInfoFile, ProcessName process, String message, Throwable e)
+    {
+        String logFileName = process + "_" + getLogFileName();
+        String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+        synchronized (sErrorLogLock) {
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
+        }
+    }
+
+    private static void printToLogFile(String logPath, String message, Throwable e)
     {
         try {
             final FileOutputStream fos = new FileOutputStream(logPath);
             PrintStream sErrorLogPrintStream = new PrintStream(fos);
 
             sErrorLogPrintStream.println(message);
-            if (cause != null) {
-                cause.printStackTrace(sErrorLogPrintStream);
+            if (e != null) {
+                e.printStackTrace(sErrorLogPrintStream);
             }
             sErrorLogPrintStream.println();
             sErrorLogPrintStream.flush();
-        } catch (IOException e) {
+        } catch (IOException cause) {
             System.err.println("Failed to write to the error log");
         }
     }
 
-    private static void printToStderr(String message, Throwable cause) {
+    private static void printToStderr(String message, Throwable r) {
         System.err.println("ERROR: " + message);
-        if (cause != null) {
-            cause.printStackTrace();
+        if (r != null) {
+            r.printStackTrace();
         }
     }
 

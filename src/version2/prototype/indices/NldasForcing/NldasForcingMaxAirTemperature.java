@@ -9,6 +9,8 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.indices.IndicesFramework;
 
 public class NldasForcingMaxAirTemperature extends IndicesFramework {
@@ -89,7 +91,7 @@ public class NldasForcingMaxAirTemperature extends IndicesFramework {
             System.out.println("File is copied successful!");
 
         }catch(IOException e){
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "NldasForcingMaxAirTemperature.MoveFile problem with file stream opperations.", e);
         }
     }
 }

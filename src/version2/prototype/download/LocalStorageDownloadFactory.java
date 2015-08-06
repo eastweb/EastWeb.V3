@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -37,6 +38,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
 
     /**
      * @param manager
+     * @param configInstance
      * @param downloaderClassName
      * @param projectInfoFile
      * @param pluginInfo
@@ -78,7 +80,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
         try {
             downloader = new GenericLocalStorageGlobalDownloader(myID, configInstance, pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, startDate, downloaderClassName);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | ParserConfigurationException | SAXException | IOException | SQLException e) {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
         }
         return downloader;
     }

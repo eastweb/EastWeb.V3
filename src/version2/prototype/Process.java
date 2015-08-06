@@ -98,17 +98,8 @@ public abstract class Process implements Observer {
                     // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
                     //                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
                 }
-                catch (ConfigReadException | ClassNotFoundException | SQLException e) {
-                    e.printStackTrace();
-                } catch (ParserConfigurationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                catch (ClassNotFoundException | SQLException | IOException | SAXException | ParserConfigurationException e) {
+                    ErrorLog.add(projectInfoFile, processName, "Process.update error during processing of update notification from DatabaseCache.", e);
                 }
             }
             else if(o instanceof GlobalDownloader)
@@ -120,9 +111,8 @@ public abstract class Process implements Observer {
                     conn.close();
                     process(new ArrayList<DataFileMetaData>());
                 }
-                catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException |
-                        IOException e) {
-                    e.printStackTrace();
+                catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                    ErrorLog.add(projectInfoFile, processName, "Process.update error during processing of update notification from GlobalDownloader.", e);
                 }
             }
         }

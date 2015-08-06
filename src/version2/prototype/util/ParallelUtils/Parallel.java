@@ -7,6 +7,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
+
 public class Parallel {
     private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
     private static final ExecutorService forPool = Executors.newFixedThreadPool(NUM_CORES * 2, new NamedThreadFactory("Parallel.For", false));
@@ -16,7 +19,7 @@ public class Parallel {
             // invokeAll blocks for us until all submitted tasks in the call complete
             forPool.invokeAll(createCallables(elements, operation));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "Parallel.ForEach error during custom parllelized for each method.", e);
         }
     }
 

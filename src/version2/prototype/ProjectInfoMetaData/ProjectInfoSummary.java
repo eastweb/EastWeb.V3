@@ -25,13 +25,14 @@ public class ProjectInfoSummary {
      * @param zonalSummary  - ZonalSummary object representing zonal data from a project metadata xml
      * @param fileStore  - TemporalSummaryRasterFileStore object representing temporal data gotten from a project metadata xml
      * @param temporalSummaryCompositionStrategyClassName  - class name of the used TemporalSummaryCompositionStrategy in making the filestore parameter
+     * @param summaryID
      */
-    public ProjectInfoSummary(ZonalSummary zonalSummary, TemporalSummaryRasterFileStore fileStore, String temporalSummaryCompositionStrategyClassName, int ID)
+    public ProjectInfoSummary(ZonalSummary zonalSummary, TemporalSummaryRasterFileStore fileStore, String temporalSummaryCompositionStrategyClassName, int summaryID)
     {
         this.zonalSummary = zonalSummary;
         this.fileStore = fileStore;
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
-        this.ID = ID;
+        ID = summaryID;
     }
 
     /**

@@ -10,7 +10,9 @@ import java.util.Map;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.ListDatesFiles;
 
@@ -208,7 +210,9 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
                 }
             }
         }
-        catch (Exception e) { e.printStackTrace(); }
+        catch (Exception e) {
+            ErrorLog.add(Config.getInstance(), "NldasForcing", "NldasForcingListDatesFiles.Actual_ListDatesFilesFTP problem while creating list using FTP.", e);
+        }
         finally
         {
             try
@@ -219,7 +223,9 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
                     ftpClient.disconnect();
                 }
             }
-            catch (IOException e) { e.printStackTrace(); }
+            catch (IOException e) {
+                ErrorLog.add(Config.getInstance(), "NldasForcing", "NldasForcingListDatesFiles.Actual_ListDatesFilesFTP problem while logging out and disconnecting FTP connection.", e);
+            }
         }
 
         return mapDatesToFiles;

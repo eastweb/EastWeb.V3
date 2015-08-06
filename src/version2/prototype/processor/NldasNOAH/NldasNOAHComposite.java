@@ -8,6 +8,8 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.processor.Composite;
 import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
@@ -78,8 +80,7 @@ public class NldasNOAHComposite extends Composite{
                 try {
                     outputFile.createNewFile();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "NldasNOAHComposite.composeFiles error while creating new file.", e);
                 }
 
                 Dataset outputDS = gdal.GetDriverByName("GTiff").Create(outputFile.getAbsolutePath(),

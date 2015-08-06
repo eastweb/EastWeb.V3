@@ -4,18 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
@@ -45,11 +46,13 @@ public class PluginMetaDataCollection {
      * Gets the stored PluginMetaDataCollection instance or creates a new one if none exists with all the plugin metadata files read in.
      *
      * @return a PluginMetaDataCollection instance
-     * @throws ParserConfigurationException
-     * @throws SAXException
      * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws DOMException
+     * @throws PatternSyntaxException
      */
-    public static PluginMetaDataCollection getInstance() throws ParserConfigurationException, SAXException, IOException, Exception
+    public static PluginMetaDataCollection getInstance() throws PatternSyntaxException, DOMException, ParserConfigurationException, SAXException, IOException
     {
         if(instance == null) {
             File fileDir = new File(System.getProperty("user.dir") + "\\src\\version2\\prototype\\PluginMetaData\\");
@@ -66,8 +69,10 @@ public class PluginMetaDataCollection {
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+     * @throws DOMException
+     * @throws PatternSyntaxException
      */
-    public static PluginMetaDataCollection getInstance(File xmlFile) throws ParserConfigurationException, SAXException, IOException, Exception
+    public static PluginMetaDataCollection getInstance(File xmlFile) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
     {
         if(instance == null) {
             File[] xmlFileArr = new File[1];
@@ -85,8 +90,10 @@ public class PluginMetaDataCollection {
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+     * @throws DOMException
+     * @throws PatternSyntaxException
      */
-    public static PluginMetaDataCollection getInstance(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, Exception
+    public static PluginMetaDataCollection getInstance(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
     {
         if(instance == null) {
             instance = new PluginMetaDataCollection(xmlFiles);
@@ -106,13 +113,15 @@ public class PluginMetaDataCollection {
      * @param filesPerDay
      * @param datePatternStr
      * @param fileNamePatternStr
+     * @param originDate
      * @return a customized DownloadMetaData object
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+     * @throws PatternSyntaxException
      */
     public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay,
-            String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
+            String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
         return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
@@ -130,13 +139,16 @@ public class PluginMetaDataCollection {
      * @param filesPerDay
      * @param datePatternStr
      * @param fileNamePatternStr
+     * @param extraDownloads
+     * @param originDate
      * @return a customized DownloadMetaData object
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+     * @throws PatternSyntaxException
      */
     public static DownloadMetaData CreateDownloadMetaData(String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay,
-            String datePatternStr, String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
+            String datePatternStr, String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
         return collection.new DownloadMetaData(null, null, null, null, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr,
@@ -145,7 +157,7 @@ public class PluginMetaDataCollection {
 
     /**
      * Provides a means to create a custom DownloadMetaData object mainly for testing purposes. Creates a DownloadMetaData object to represent one of the extra downloads.
-     *
+     * @param name
      * @param mode
      * @param myFtp
      * @param myHttp
@@ -154,13 +166,15 @@ public class PluginMetaDataCollection {
      * @param filesPerDay
      * @param datePatternStr
      * @param fileNamePatternStr
+     * @param originDate
      * @return a customized DownloadMetaData object
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
+     * @throws PatternSyntaxException
      */
     public static DownloadMetaData CreateDownloadMetaData(String name, String mode, FTP myFtp, HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay,
-            String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException
+            String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
         return collection.new DownloadMetaData(null, null, null, null, name, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, originDate);
@@ -238,7 +252,8 @@ public class PluginMetaDataCollection {
         return collection.new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, Resolution, ExtraDownloadFiles);
     }
 
-    private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, Exception{
+    private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
+    {
         pluginList = new ArrayList<String>();
         pluginMetaDataMap = createMap(xmlFiles);
     }
@@ -247,7 +262,8 @@ public class PluginMetaDataCollection {
         pluginList = new ArrayList<String>();
     }
 
-    private Map<String, PluginMetaData> createMap(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, Exception{
+    private Map<String, PluginMetaData> createMap(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
+    {
         Map<String,PluginMetaData> myMap=new HashMap<String,PluginMetaData>();
         for(File fXmlFile: xmlFiles){
             // Setup Document
@@ -375,7 +391,8 @@ public class PluginMetaDataCollection {
         public final ArrayList<DownloadMetaData> extraDownloads;
         public final LocalDate originDate;
 
-        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) throws Exception{
+        public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) throws DOMException, PatternSyntaxException
+        {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempName = null;
             String tempMode = null;
@@ -407,7 +424,7 @@ public class PluginMetaDataCollection {
                     }
                     else if(!temp.hasAttribute("Name"))
                     {
-                        throw new Exception("A Download element is missing the attribute \"Name\"");
+                        throw new DOMException((short) 0, "A Download element is missing the attribute \"Name\".");
                     }
                 }
 
@@ -415,7 +432,7 @@ public class PluginMetaDataCollection {
                     name = FileSystem.StandardizeName(tempName);
                 }
                 else {
-                    throw new Exception("Missing Download element with attribute Name=\"Date\"");
+                    throw new DOMException((short) 0, "Missing Download element with attribute Name=\"Date\".");
                 }
             }
             else
@@ -426,7 +443,7 @@ public class PluginMetaDataCollection {
                 {
                     name = "Data";
                 } else {
-                    throw new Exception("Missing Download element with attribute Name=\"Date\"");
+                    throw new DOMException((short) 0, "Missing Download element with attribute Name=\"Date\".");
                 }
             }
 
@@ -478,7 +495,7 @@ public class PluginMetaDataCollection {
         }
 
         public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode, FTP myFtp, HTTP myHttp,
-                String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
+                String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             name = "Data";
@@ -496,7 +513,7 @@ public class PluginMetaDataCollection {
 
         public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode, FTP myFtp, HTTP myHttp,
                 String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
-                ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate)
+                ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             name = "Data";
@@ -513,7 +530,7 @@ public class PluginMetaDataCollection {
         }
 
         public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String name, String mode, FTP myFtp,
-                HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate)
+                HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             this.name = name;
@@ -530,7 +547,7 @@ public class PluginMetaDataCollection {
         }
 
         private DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, Node extraDownloadNode, String defaultTimeZone,
-                int defaultFilesPerDay, LocalDate dataOriginDate) throws Exception
+                int defaultFilesPerDay, LocalDate dataOriginDate) throws PatternSyntaxException, DOMException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             String tempMode = null;
@@ -548,7 +565,7 @@ public class PluginMetaDataCollection {
             if(((Element) extraDownloadNode).hasAttribute("Name")) {
                 name = FileSystem.StandardizeName(((Element) extraDownloadNode).getAttribute("Name"));
             } else {
-                throw new Exception("A Download element is missing the attribute \"Name\"");
+                throw new DOMException((short) 0, "A Download element is missing the attribute \"Name\".");
             }
 
             if(((Element) extraDownloadNode).getElementsByTagName("TimeZone").getLength() > 0) {

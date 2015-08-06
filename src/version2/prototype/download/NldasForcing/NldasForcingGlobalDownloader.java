@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
@@ -54,8 +55,8 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
                 mapDatesToFiles.put(downloadDate, files);
             }
         }
-        catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e2) {
-            e2.printStackTrace();
+        catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+            ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while setting up current list of missing download files.", e);
         }
 
         for(Map.Entry<DataDate, ArrayList<String>> entry : mapDatesToFiles.entrySet())
@@ -71,15 +72,23 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
                 {
                     NldasForcingDownloader downloader = new NldasForcingDownloader(dd, outFolder, metaData, f);
 
-                    try { downloader.download(); }
-                    catch (Exception e1) { e1.printStackTrace(); }
+                    try {
+                        downloader.download();
+                    }
+                    catch (Exception e) {
+                        ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while running NldasForcingDownloader.", e);
+                    }
 
-                    try { AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath()); }
-                    catch (ClassNotFoundException | SQLException e) { e.printStackTrace(); }
+                    try {
+                        AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                    }
+                    catch (ClassNotFoundException | SQLException e) {
+                        ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while attempting to add download file.", e);
+                    }
                 }
 
             } catch (ParserConfigurationException | SAXException | IOException e) {
-                e.printStackTrace();
+                ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while attempting to handle download.", e);
             }
         }
     }

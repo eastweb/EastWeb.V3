@@ -11,7 +11,9 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.ListDatesFiles;
@@ -112,7 +114,7 @@ public class TRMM3B42ListDatesFiles extends ListDatesFiles
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "TRMM3B42", "TRMM3B42ListDatesFiles.ListDatesFilesFTP problem while creating list using FTP.", e);
             return null;
         }
 

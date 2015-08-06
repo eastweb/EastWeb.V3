@@ -30,6 +30,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
+import version2.prototype.ErrorLog;
 import version2.prototype.TaskState;
 import version2.prototype.EastWebUI.ProgressUI.ProjectProgress;
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
@@ -75,7 +78,7 @@ public class MainWindow {
                     MainWindow window = new MainWindow();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "MainWindow.main problem with running a MainWindow window.", e);
                 }
             }
         });
@@ -124,18 +127,8 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     new ProjectInformationPage(true,  new mainWindowListenerImplementation());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ParserConfigurationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                } catch (IOException | ParserConfigurationException | SAXException | ParseException e) {
+                    ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new ProjectInformationPage.", e);
                 }
             }
         });
@@ -150,18 +143,8 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     new ProjectInformationPage(false, new mainWindowListenerImplementation());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ParserConfigurationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                } catch (IOException | ParserConfigurationException | SAXException | ParseException e) {
+                    ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new ProjectInformationPage.", e);
                 }
             }
         });
@@ -195,7 +178,7 @@ public class MainWindow {
                     theDir.createNewFile();
                     // TODO: could create a mock template
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file, '" + theDir.getPath() + "', from Desktop.", e1);
                 }
             }
         });
@@ -215,8 +198,7 @@ public class MainWindow {
                 try {
                     Desktop.getDesktop().open(new File(intermidateDumpPath.getText()));
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with opening file, '" + intermidateDumpPath.getText() + "', from Desktop.", e);
                 }
             }
         });
@@ -232,8 +214,7 @@ public class MainWindow {
                     try {
                         FileUtils.cleanDirectory(new File(intermidateDumpPath.getText()));
                     } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                        ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with cleaning directory '" + intermidateDumpPath.getText() + "'.", e1);
                     }
                 }
             }
@@ -391,21 +372,8 @@ public class MainWindow {
                     SchedulerData data = new SchedulerData(project);
                     EASTWebManager.StartNewScheduler(data, true);
 
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ParserConfigurationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                } catch (IOException | ParserConfigurationException | SAXException | ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
                 }
             }
         });
@@ -569,7 +537,7 @@ public class MainWindow {
 
             String projectName = value.toString();
 
-            if(EASTWebManager.GetSchedulerStatus(projectName).GetState() == TaskState.RUNNING) {
+            if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
                 setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
 
             } else {
@@ -616,7 +584,7 @@ public class MainWindow {
 
             String projectName = label.toString();
 
-            if(EASTWebManager.GetSchedulerStatus(projectName).GetState() == TaskState.RUNNING) {
+            if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
             } else {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
@@ -631,7 +599,7 @@ public class MainWindow {
             if (isPushed) {
                 String projectName = label.toString();
 
-                if(EASTWebManager.GetSchedulerStatus(projectName).GetState() == TaskState.RUNNING) {
+                if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
                     EASTWebManager.StartExistingScheduler(projectName);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 
@@ -732,7 +700,7 @@ public class MainWindow {
 
                 for(SchedulerStatus item : schedulersStatus)
                 {
-                    String currentProjectName = item.projectName;
+                    String currentProjectName = item.ProjectName;
 
                     if(currentProjectName.equals(projectName)) {
                         removeProject = schedulersStatus.indexOf(item);

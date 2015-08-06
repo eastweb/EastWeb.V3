@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.util.ReadShapefile;
 import version2.prototype.util.ShapefileException;
 
@@ -33,7 +35,7 @@ public class AssociateSummaryPage {
                     AssociateSummaryPage window = new AssociateSummaryPage(null);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "AssociateSummaryPage.main problem running an AssociateSummaryPage window.", e);
                 }
             }
         });
@@ -123,7 +125,7 @@ public class AssociateSummaryPage {
                     try {
                         populateShapeFiles(shapeFileComboBox, filePathText.getText());
                     } catch (ShapefileException e) {
-                        e.printStackTrace();
+                        ErrorLog.add(Config.getInstance(), "AssociateSummaryPage.initialize problem with populating shape files.", e);
                     }
                 } else {
                     System.out.println("No Selection ");

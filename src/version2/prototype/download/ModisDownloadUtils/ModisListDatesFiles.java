@@ -12,7 +12,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.ListDatesFiles;
@@ -106,7 +108,7 @@ public class ModisListDatesFiles extends ListDatesFiles
                         }
                         catch(Exception e)
                         {
-                            e.printStackTrace();
+                            ErrorLog.add(Config.getInstance(), "Modis", "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
                             return;
                         }
                     }
@@ -115,7 +117,7 @@ public class ModisListDatesFiles extends ListDatesFiles
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            ErrorLog.add(Config.getInstance(), "Modis", "ModisListDatesFiles.ListDatesFilesHTTP problem while setting up download stream or ParallelForEach.", e);
             return null;
         }
 

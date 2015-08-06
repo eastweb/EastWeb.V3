@@ -36,6 +36,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.ModisTile;
 import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
 import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
@@ -116,7 +118,7 @@ public class ProjectInformationPage {
                     ProjectInformationPage window =  new ProjectInformationPage(true, null);
                     window.frame.setVisible(true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "ProjectInformationPage.main problem with running a ProjectInformationPage window.", e);
                 }
             }
         });
@@ -179,7 +181,7 @@ public class ProjectInformationPage {
                             | InvocationTargetException | IOException
                             | ParserConfigurationException | SAXException
                             | ParseException e) {
-                        e.printStackTrace();
+                        ErrorLog.add(Config.getInstance(), "ProjectInformationPage.uiConstrain problem with populating project info.", e);
                     }
 
                 }
@@ -378,7 +380,7 @@ public class ProjectInformationPage {
                 try {
                     new AssociatePluginPage(new indiciesListenerImplementation());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "ProjectInformationPage.PopulatePluginList problem with creating new AssociatePluginPage.", e);
                 }
             }
         });
@@ -1057,10 +1059,8 @@ public class ProjectInformationPage {
             System.out.println("File saved!");
             mainWindowEvent.fire();
 
-        } catch (ParserConfigurationException pce) {
-            pce.printStackTrace();
-        } catch (TransformerException tfe) {
-            tfe.printStackTrace();
+        } catch (ParserConfigurationException | TransformerException e) {
+            ErrorLog.add(Config.getInstance(), "ProjectInformationPage.CreateNewProject problem with creating new project.", e);
         }
     }
 

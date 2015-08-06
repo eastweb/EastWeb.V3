@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
@@ -82,21 +83,8 @@ public class ModisNBARQCGlobalDownloader extends GlobalDownloader
 
                 datesFiles.put(thisDate, files);
             }
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARQCGlobalDownloader.run problem while setting up current list of missing download files.", e);
         }
 
         // Step 4
@@ -121,36 +109,20 @@ public class ModisNBARQCGlobalDownloader extends GlobalDownloader
 
                         try{
                             downloader.download();
-                        } catch (DownloadFailedException e1) {
-                            // TODO Auto-generated catch block
-                            e1.printStackTrace();
-                        } catch (Exception e1) {
-                            // TODO Auto-generated catch block
-                            e1.printStackTrace();
+                        } catch (DownloadFailedException e) {
+                            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARQCGlobalDownloader.run problem while running ModisNBARQCDownloader.", e);
+                        } catch (Exception e) {
+                            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARQCGlobalDownloader.run problem while running ModisNBARQCDownloader.", e);
                         }
                         try {
                             AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
-                        } catch (ClassNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        } catch (SQLException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                        } catch (ClassNotFoundException | SQLException e) {
+                            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARQCGlobalDownloader.run problem while attempting to add download file.", e);
                         }
                     }
                 }
-            } catch (ConfigReadException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
-            } catch (ParserConfigurationException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
-            } catch (SAXException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
-            } catch (IOException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARQCGlobalDownloader.run problem while attempting to handle download.", e);
             }
 
         }

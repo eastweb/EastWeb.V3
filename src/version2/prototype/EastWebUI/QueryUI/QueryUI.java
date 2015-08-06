@@ -34,6 +34,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -84,7 +85,7 @@ public class QueryUI {
                     QueryUI window = new QueryUI(new JComboBox<String>());
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "QueryUI.main problem with running a QueryUI window.", e);
                 }
             }
         });
@@ -147,8 +148,7 @@ public class QueryUI {
                         | InvocationTargetException | IOException
                         | ParserConfigurationException | SAXException
                         | ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
                 }
 
             }
@@ -190,8 +190,7 @@ public class QueryUI {
                         | InvocationTargetException | IOException
                         | ParserConfigurationException | SAXException
                         | ParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
                 }
 
                 ArrayList<File> listFile = null;
@@ -210,8 +209,7 @@ public class QueryUI {
                                 | ClassNotFoundException | SQLException
                                 | ParserConfigurationException
                                 | SAXException | IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
                         }
 
                     }

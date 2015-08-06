@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
+import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -78,20 +79,24 @@ public abstract class LocalDownloader extends Process {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public TreeMap<Integer, Integer> AttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public TreeMap<Integer, Integer> AttemptUpdate()
     {
         TreeMap<Integer, Integer> newFiles = new TreeMap<Integer, Integer>();
         if(scheduler.GetState() == TaskState.RUNNING)
         {
-            gdl.PerformUpdates();
+            try {
+                gdl.PerformUpdates();
 
-            final Connection conn = PostgreSQLConnection.getConnection();
-            newFiles = Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), currentStartDate, pluginMetaData.DaysPerInputData,
-                    pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
-            conn.close();
+                final Connection conn = PostgreSQLConnection.getConnection();
+                newFiles = Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), currentStartDate, pluginMetaData.DaysPerInputData,
+                        pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
+                conn.close();
 
-            outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, currentStartDate,
-                    pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
+                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, currentStartDate,
+                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
+            } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(projectInfoFile, processName, "LocalDownloader.AttemptUpdate error", e);
+            }
         }
         return newFiles;
     }
