@@ -63,6 +63,7 @@ public class NldasForcingComposite extends Composite
                 int outputs = 1;
 
                 if(band == 1) {
+                    // Used to differentiate Min--Mean/DegreeDays--Max Air Temp
                     outputs = 3;
                 }
 
@@ -109,21 +110,27 @@ public class NldasForcingComposite extends Composite
     private ArrayList<String> GetFilePrefix(int band, int output)
     {
         ArrayList<String> prefixList = new ArrayList<String>();
-        String prefix = String.format("band%02d_", band);
+        String prefix = "";
 
         if(band == 1)
         {
             if(output == 0) {
-                prefix = String.format("band%02d_Min_", band);
+                prefix = "AirTemp_Min";
             }
             else if(output == 1) {
-                prefixList.add("HeatingDegreeDays_");
-                prefixList.add("FreezingDegreeDays_");
-                prefix = String.format("band%02d_Mean_", band);
+                prefixList.add("HeatingDegreeDays");
+                prefixList.add("FreezingDegreeDays");
+                prefix = "AirTemp_Mean";
             }
             else if(output == 2) {
-                prefix = String.format("band%02d_Max_", band);
+                prefix = "AirTemp_Max";
             }
+        }
+        else if (band == 2) {
+            prefix = "Humidity_Mean";
+        }
+        else if (band == 10) {
+            prefix = "Precip_Total";
         }
         prefixList.add(prefix);
 
@@ -135,7 +142,36 @@ public class NldasForcingComposite extends Composite
         double[] inputArray = new double[rasterX * rasterY];
         double[] outputArray = new double[rasterX * rasterY];
 
-        if(band == 1 && output != 1)
+        if ((band == 1 && output == 1) || band == 2)
+        {
+            // Always take the average.
+            for (Dataset inputDS : inputDSs)
+            {
+                inputDS.GetRasterBand(band).ReadRaster(0, 0, rasterX, rasterY, inputArray);
+
+                for (int i = 0; i < inputArray.length; i++) {
+                    // Get the proportional average for each input.
+                    outputArray[i] += (inputArray[i] / inputDSs.size());
+                }
+            }
+
+            if(band == 1)
+            {
+                // Convert the values from Kelvin to Celsius
+                for(int i = 0; i < outputArray.length; i++) {
+                    // Tc = Tk - 273.15
+                    outputArray[i] = outputArray[i] - 273.15;
+                }
+
+                if(prefix.equalsIgnoreCase("HeatingDegreeDays")) {
+                    outputArray = GetCumulativeHeatingDegreeDays(outputArray, prefix);
+                }
+                else if (prefix.equalsIgnoreCase("FreezingDegreeDays")) {
+                    outputArray = GetCumulativeFreezingDegreeDays(outputArray, prefix);
+                }
+            }
+        }
+        else if(band == 1)
         {
             if(output == 0) {
                 outputArray = FindMinValues(inputDSs, rasterX, rasterY);
@@ -144,38 +180,11 @@ public class NldasForcingComposite extends Composite
                 outputArray = FindMaxValues(inputDSs, rasterX, rasterY);
             }
         }
-        else if(band == 2 || (band == 1 && output == 1))
-        {
-            for (Dataset inputDS : inputDSs)
-            {
-                inputDS.GetRasterBand(band).ReadRaster(0, 0, inputDS.GetRasterXSize(), inputDS.GetRasterYSize(), inputArray);
-
-                for (int i=0; i<inputArray.length; i++) {
-                    outputArray[i] += (inputArray[i] / inputDSs.size());
-                }
-
-                if(band == 1) {
-                    for(int i = 0; i < outputArray.length; i++) {
-                        // Tc = Tk - 273.15
-                        outputArray[i] = outputArray[i] - 273.15;
-                    }
-                }
-
-                if(prefix.equalsIgnoreCase("HeatingDegreeDays_")) {
-                    GetCumulativeHeatingDegreeDays(outputArray, prefix);
-                }
-                else if (prefix.equalsIgnoreCase("FreezingDegreeDays_")) {
-                    GetCumulativeFreezingDegreeDays(outputArray, prefix);
-                }
-            }
-        }
         else if(band == 10)
         {
-            for (Dataset inputDS : inputDSs)
-            {
-                inputDS.GetRasterBand(band).ReadRaster(0, 0, inputDS.GetRasterXSize(), inputDS.GetRasterYSize(), inputArray);
-                for (int i=0; i < inputArray.length; i++)
-                {
+            for (Dataset inputDS : inputDSs) {
+                inputDS.GetRasterBand(band).ReadRaster(0, 0, rasterX, rasterY, inputArray);
+                for (int i=0; i < inputArray.length; i++) {
                     // band 10 == precipitation hourly total, so we don't want the average but rather the total
                     // No conversion necessary because the
                     // density of water is approximately 1000 kg/m^3,
@@ -258,7 +267,7 @@ public class NldasForcingComposite extends Composite
             }
 
             // Fill value is 9999.
-            if(meanValues[i] > hDegree && meanValues[i] != 9999) {
+            if(meanValues[i] != 9999 && meanValues[i] > hDegree) {
                 meanValues[i] = previousVal + (meanValues[i] - hDegree);
             } else {
                 meanValues[i] = previousVal;
@@ -280,7 +289,7 @@ public class NldasForcingComposite extends Composite
             }
 
             // Fill value is 9999.
-            if(meanValues[i] < fDegree && meanValues[i] != 9999) {
+            if(meanValues[i] != 9999 && meanValues[i] < fDegree) {
                 meanValues[i] = previousVal + (fDegree - meanValues[i]);
             } else {
                 meanValues[i] = previousVal;
@@ -293,27 +302,28 @@ public class NldasForcingComposite extends Composite
     {
         double[] cumulative = null;
         File yesterdayFile = null;
-        int year = Integer.parseInt(inputFolder.getParent().substring(inputFolder.getParent().length()-4, inputFolder.getParent().length()));
 
         try
         {
-            DataDate date = new DataDate(start.getDayOfMonth(), start.getMonthValue(), year);
-            if(!(inputFolder.getName().equalsIgnoreCase(String.format("%03d", date.getDayOfYear())) &&
-                    inputFolder.getParent().equalsIgnoreCase(String.format("%04d", date.getYear()))))
+            int year = Integer.parseInt(inputFolder.getParentFile().getName());
+            DataDate startDate = new DataDate(start.getDayOfMonth(), start.getMonthValue(), year);
+
+            // if we're currently processing the start date,
+            // we don't want to continue with the previous run of heating degree days
+            if(!(inputFolder.getName().equalsIgnoreCase(String.format("%03d", startDate.getDayOfYear()))))
             {
                 //Get the day before's values
                 File yesterdayFolder = null;
-
                 int currentDayOfYear = Integer.parseInt(inputFolder.getName());
+
                 if(currentDayOfYear > 1) {
                     yesterdayFolder = new File(inputFolder.getParentFile().getAbsolutePath() + File.pathSeparator
                             + String.format("%03d", (currentDayOfYear-1)));
                 }
-                else
-                {
-                    // Previous day would be last year day of year = 365
+                else {
+                    // Previous day would be last year and day of year = 365
                     yesterdayFolder = new File(inputFolder.getParentFile().getParentFile().getAbsolutePath() + File.pathSeparator
-                            + String.format("%04d", Integer.parseInt(inputFolder.getParent())-1) + File.pathSeparator + "365");
+                            + String.format("%04d", (year-1)) + File.pathSeparator + "365");
                 }
 
                 if(yesterdayFolder != null && yesterdayFolder.exists())
