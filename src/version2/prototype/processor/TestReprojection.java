@@ -35,11 +35,48 @@ public class TestReprojection
                     "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
                     p, new File("D:\\project\\TRMM_p.tif"));*/
 
+            //extract NOAH
+            String noah = "D:\\project\\download\\NOAH\\noah_2015_214.grb";
+            String outFile = "D:\\project\\Noah_b19.tif";
+            GdalUtils.register();
+            synchronized (GdalUtils.lockObject)
+            {
+                Dataset inputDS = gdal.Open(noah);
+                int xSize = inputDS.getRasterXSize();
+                int ySize = inputDS.getRasterYSize();
+                Dataset outputDS = gdal.GetDriverByName("GTiff").
+                        Create(
+                                outFile,
+                                xSize, ySize,
+                                1,
+                                gdalconst.GDT_Float32
+                                );
 
-            projection("D:\\project\\band20.tif",
+                Band b20 = inputDS.GetRasterBand(19);
+
+                double[] arr = new double[xSize * ySize];
+                b20.ReadRaster(0,  0 , xSize, ySize, arr);
+
+                System.out.println("original prj ref: " + inputDS.GetProjection());
+                String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+
+                outputDS.SetProjection(wktStr);
+                System.out.println(outputDS.GetProjection());
+                double [] geoTrans = inputDS.GetGeoTransform();
+                System.out.println(geoTrans[0] + " : " + geoTrans[1] + " : " + geoTrans[2] + " : " + geoTrans[3] + " : " + geoTrans[4] + " : " + geoTrans[5]);
+
+                outputDS.SetGeoTransform(inputDS.GetGeoTransform());
+
+                outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, arr);
+                outputDS.delete();
+                inputDS.delete();
+            }
+
+            projection("D:\\project\\Noah_b19.tif",
+                    //"D:\\project\\band20.tif",
                     //"D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
                     "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
-                    p, new File("D:\\project\\band2p.tif"));
+                    p, new File("D:\\project\\Noah_b19p.tif"));
         }
     }
 
@@ -95,7 +132,7 @@ public class TestReprojection
 
             System.out.println("Reproject: input : " + inputRef.ExportToWkt());
             System.out.println("Reproject: output : " + outputProjection);
-            System.out.println("Reproject: GeoTransform: " + left + " : " + top);
+            System.out.println("Reproject: GeoTransform: " + left + " : " + right + " : " + bottom + " : " + top);
 
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] {

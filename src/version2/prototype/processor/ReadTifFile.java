@@ -23,7 +23,7 @@ public class ReadTifFile
             //String tifFile = "C:\\Users\\yi.liu\\Desktop\\tw_618\\indices\\trmmrt\\2014\\077\\TW_DIS_F_P_Dis_REGION\\trmmrt.tif";
 
             // String tifFile = "D:\\test_data\\trmmClip.tif";
-            String tifFile = "D:\\project\\band2p.tif";
+            String tifFile = "D:\\project\\Noah_b19p.tif";
 
             Dataset baseDS= gdal.Open(tifFile);
 
