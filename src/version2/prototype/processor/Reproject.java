@@ -153,7 +153,7 @@ public abstract class Reproject {
                 resampleAlg = gdalconst.GRA_CubicSpline;
             }
 
-            System.out.println("return : " + gdal.ReprojectImage(inputDS, outputDS, wktStr, outputProjection, resampleAlg));
+            System.out.println("Reproject image return : " + gdal.ReprojectImage(inputDS, outputDS, wktStr, outputProjection, resampleAlg));
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
             inputDS.delete();

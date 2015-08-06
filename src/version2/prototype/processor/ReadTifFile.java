@@ -19,10 +19,11 @@ public class ReadTifFile
             //String tifFile = "D:\\testProjects\\TW\\Projects\\Project_TW\\TRMM3B42RT\\Processor\\Output\\2014\\077\\3B42RT_daily.2014.03.18.tif";
 
             // String tifFile = "D:\\testProjects\\TW_trmmRT\\Projects\\Project_TW\\TRMM3B42RT\\Processor\\Output\\2014\\077\\3B42RT_daily.2014.03.18.tif";
-            String tifFile = "D:\\testProjects\\TW_trmmRT\\Projects\\Project_TW\\TRMM3B42RT\\Indices\\Output\\2014\\077\\TRMM3B42RTIndex.tif";
+            // String tifFile = "D:\\testProjects\\TW_trmmRT\\Projects\\Project_TW\\TRMM3B42RT\\Indices\\Output\\2014\\077\\TRMM3B42RTIndex.tif";
             //String tifFile = "C:\\Users\\yi.liu\\Desktop\\tw_618\\indices\\trmmrt\\2014\\077\\TW_DIS_F_P_Dis_REGION\\trmmrt.tif";
 
             // String tifFile = "D:\\test_data\\trmmClip.tif";
+            String tifFile = "D:\\project\\band2p.tif";
 
             Dataset baseDS= gdal.Open(tifFile);
 
@@ -37,7 +38,7 @@ public class ReadTifFile
             int count = 0;
             for (int i = 0; i < xSize*ySize; i++)
             {
-                if ((baseArr[i] > 0.0) && (baseArr[i] < 32767.0))
+                if (baseArr[i] > 0.0)
                 {System.out.println(baseArr[i]);
                 count++;
                 }

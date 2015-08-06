@@ -36,55 +36,53 @@ public class TestReprojection
                     p, new File("D:\\project\\TRMM_p.tif"));*/
 
 
-            project("D:\\project\\band20.tif",
+            projection("D:\\project\\band20.tif",
                     //"D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
                     "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
-                    p, new File("D:\\project\\band2-_p.tif"));
+                    p, new File("D:\\project\\band2p.tif"));
 
         }
     }
 
-    private static void project(String input, String masterShapeFile, Projection projection, File output)
+    private static void projection(String input, String masterShapeFile, Projection projection, File output)
     {
+        String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+
         assert (masterShapeFile != null);
         GdalUtils.register();
         synchronized (GdalUtils.lockObject)
         {
             Dataset inputDS = gdal.Open(input);
             SpatialReference inputRef = new SpatialReference();
+
+            inputRef.ImportFromWkt(wktStr);
             //inputRef.ImportFromWkt("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"EPSG\",4326]]");
 
-            inputRef.ImportFromWkt("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
+            //inputRef.ImportFromWkt("GEOGCS[\"GCS_Undefined\",DATUM[\"Undefined\",SPHEROID[\"User_Defined_Spheroid\",6371007.181,0.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Sinusoidal\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],UNIT[\"Meter\",1.0]");
+            // FIXME: abstract it somehow?
+            // inputRef.ImportFromWkt("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
 
             inputDS.SetProjection(inputRef.ExportToWkt());
-            List<DataSource> features = new ArrayList<DataSource>();
 
-            features.add(ogr.Open(masterShapeFile));
+            DataSource feature = ogr.Open(masterShapeFile);
 
             // Find union of extents
-            double[] extent = features.get(0).GetLayer(0).GetExtent(); // Ordered: left, right, bottom, top
+            double[] extent = null;
+            try{
+                extent = feature.GetLayer(0).GetExtent(); // Ordered: left, right, bottom, top
+            }catch(Exception e)
+            {
+                System.out.println(e.toString());
+                for(StackTraceElement el : e.getStackTrace())
+                {
+                    System.out.println(el.toString());
+                }
+            }
 
             double left = extent[0];
             double right = extent[1];
             double bottom = extent[2];
             double top = extent[3];
-
-            System.out.println("reporject : " + left + " : " + right+ " : " + bottom+ " : " + top );
-
-            for (int i=1; i<features.size(); i++)
-            {
-                extent = features.get(i).GetLayer(0).GetExtent();
-
-                if (extent[0] < left) {
-                    left = extent[0];
-                } else if (extent[1] > right) {
-                    right = extent[1];
-                } else if (extent[2] < bottom) {
-                    bottom = extent[2];
-                } else if (extent[3] > top) {
-                    top = extent[3];
-                }
-            }
 
             Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                     output.getPath(),
@@ -94,11 +92,12 @@ public class TestReprojection
                     gdalconst.GDT_Float32
                     );
 
-            // FIXME: hack --should get projection from project info somehow
-            String outputProjection = features.get(0).GetLayer(0).GetSpatialRef().ExportToWkt();
+            String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
 
-            System.out.println("outputProjection: " + outputProjection);
-            System.out.println("inputRef : " + inputRef.ExportToWkt());
+            System.out.println("Reproject: input : " + inputRef.ExportToWkt());
+            System.out.println("Reproject: output : " + outputProjection);
+            System.out.println("Reproject: GeoTransform: " + left + " : " + top);
+
             outputDS.SetProjection(outputProjection);
             outputDS.SetGeoTransform(new double[] {
                     left, (projection.getPixelSize()), 0,
@@ -119,7 +118,7 @@ public class TestReprojection
                 resampleAlg = gdalconst.GRA_CubicSpline;
             }
 
-            gdal.ReprojectImage(inputDS, outputDS, null, null, resampleAlg);
+            System.out.println("Reproject image return : " + gdal.ReprojectImage(inputDS, outputDS, wktStr, outputProjection, resampleAlg));
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
             inputDS.delete();
