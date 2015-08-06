@@ -81,14 +81,14 @@ public class ProcessorWorkerTest {
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\pluginMetaData\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
         // extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\testProjects\\Amhara\\downloads\\2014\\002\\3B42RT_daily.2014.01.02.bin", 2014, 002, null)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\testProjects\\Amhara\\downloads\\2014\\002\\3B42RT_daily.2014.01.02.bin", 2014, 002)));
 
         //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 

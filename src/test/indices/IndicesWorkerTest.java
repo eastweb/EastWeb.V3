@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -69,26 +70,41 @@ public class IndicesWorkerTest {
 
     /**
      * Test method for {@link version2.prototype.indices.IndicesWorker#call()}.
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParseException
      */
     @Test
-    public final void testCall() {
+    public final void testCall() throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException, SQLException, ParseException {
         // Set up parameters
+        String globalSchema = "";
+        String xmlLocation = "";
+        String pluginMetaDataFile = "";
+        int day = 0;
+        int year = 0;
         Process process = null;
         ProjectInfoFile projectInfoFile = new ProjectInfoFile(xmlLocation);
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
-        ArrayList<String> extraDownloadFiles;
-        extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, extraDownloadFiles, null,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
-        extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
+        extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day));
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day, extraDownloads)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day)));
 
-        DatabaseCache outputCache = new MyDatabaseCache(projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
+        DatabaseCache outputCache = new MyDatabaseCache(globalSchema, projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
         ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
@@ -98,8 +114,8 @@ public class IndicesWorkerTest {
 
     protected class MyDatabaseCache extends DatabaseCache
     {
-        public MyDatabaseCache(String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
-            super(projectName, pluginName, dataComingFrom, extraDownloadFiles);
+        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
+            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
         }
 
         @Override

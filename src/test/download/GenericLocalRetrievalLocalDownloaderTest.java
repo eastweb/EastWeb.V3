@@ -131,7 +131,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null, extraDownloadFiles,
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null,
                 LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, summaries, true);
     }
 

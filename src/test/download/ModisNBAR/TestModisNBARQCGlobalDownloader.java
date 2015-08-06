@@ -14,14 +14,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.download.ModisNBAR.ModisNBARGlobalDownloader;
-import version2.prototype.download.ModisNBAR.ModisNBARListDatesFiles;
 import version2.prototype.download.ModisNBAR.ModisNBARQCGlobalDownloader;
 import version2.prototype.download.ModisNBAR.ModisNBARQCListDatesFiles;
 
@@ -53,8 +52,9 @@ public class TestModisNBARQCGlobalDownloader {
     @Test
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         ListDatesFiles ldf= new ModisNBARQCListDatesFiles(new DataDate(data.originDate), data);
+        LocalDate startDate = LocalDate.now().minusDays(14);
 
-        ModisNBARQCGlobalDownloader ttd = new ModisNBARQCGlobalDownloader(1,"ModisNBAR",  data,  ldf);
+        ModisNBARQCGlobalDownloader ttd = new ModisNBARQCGlobalDownloader(1, Config.getAnInstance("test/config.xml"), "ModisNBAR",  data,  ldf, startDate);
 
         ttd.run();
     }

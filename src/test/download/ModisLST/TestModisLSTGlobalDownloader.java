@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -55,8 +56,9 @@ public class TestModisLSTGlobalDownloader {
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException
     {
         ListDatesFiles ldf= new ModisLSTListDatesFiles(new DataDate(data.originDate), data);
+        LocalDate startDate = LocalDate.now().minusDays(14);
 
-        ModisLSTGlobalDownloader ttd = new ModisLSTGlobalDownloader(1,"ModisLST",  data,  ldf);
+        ModisLSTGlobalDownloader ttd = new ModisLSTGlobalDownloader(1, Config.getAnInstance("test/config.xml"), "ModisLST",  data,  ldf, startDate);
 
         ttd.run();
         System.out.println("done");

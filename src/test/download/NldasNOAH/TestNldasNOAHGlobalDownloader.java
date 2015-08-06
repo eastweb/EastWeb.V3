@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
@@ -50,8 +51,9 @@ public class TestNldasNOAHGlobalDownloader {
     @Test
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         ListDatesFiles ldf= new NldasNOAHListDatesFiles(new DataDate(data.originDate), data);
+        LocalDate startDate = LocalDate.now().minusDays(14);
 
-        NldasNOAHGlobalDownloader ttd = new NldasNOAHGlobalDownloader(1,"NLDASNOAH",  data,  ldf);
+        NldasNOAHGlobalDownloader ttd = new NldasNOAHGlobalDownloader(1, Config.getAnInstance("test/config.xml"), "NLDASNOAH", data, ldf, startDate);
 
         ttd.run();
 

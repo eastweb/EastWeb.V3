@@ -45,8 +45,17 @@ import version2.prototype.util.Schemas;
  *
  */
 public class Scheduler {
+    /**
+     * SchedulerData object this Scheduler was created with.
+     */
     public final SchedulerData data;
+    /**
+     * ProjectInfoFile object gotten from SchedulerData during Scheduler creation.
+     */
     public final ProjectInfoFile projectInfoFile;
+    /**
+     * PluginMetaDataCollection object gotten from SchedulerData during Scheduler creation.
+     */
     public final PluginMetaDataCollection pluginMetaDataCollection;
 
     private final int ID;
@@ -136,8 +145,7 @@ public class Scheduler {
 
                 // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
                 Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
-                        configInstance.getSummaryCalculations(),
-                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(),
+                        configInstance.getSummaryCalculations(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(),
                         projectInfoFile.GetSummaries(), true);
                 SetupProcesses(item);
             }
