@@ -22,7 +22,7 @@ public class NldasForcingHeatingDegreeDays extends IndicesFramework {
     {
         for(File input : mInputFiles)
         {
-            if(input.getName().contains("HeatingDegreeDays_"))
+            if(input.getName().contains("HeatingDegreeDays"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
                 if(!input.renameTo(mOutputFile)) {
