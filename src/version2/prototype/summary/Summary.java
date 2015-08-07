@@ -2,6 +2,7 @@ package version2.prototype.summary;
 
 import java.util.ArrayList;
 
+import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -19,26 +20,30 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public class Summary extends Process {
+    private Config configInstance;
 
     /**
      * Creates a Summary object with the defined initial TaskState, owned by the given Scheduler, and acquiring its input from the specified
      * process, inputProcessName.
      * @param manager
+     * @param configInstance
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
      * @param inputCache
      */
-    public Summary(EASTWebManagerI manager, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache inputCache)
+    public Summary(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+            DatabaseCache inputCache)
     {
         super(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, null);
+        this.configInstance = configInstance;
         inputCache.addObserver(this);
     }
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        manager.StartNewProcessWorker(new SummaryWorker(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null));
+        manager.StartNewProcessWorker(new SummaryWorker(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null));
     }
 
 }

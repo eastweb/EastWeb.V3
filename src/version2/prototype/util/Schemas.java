@@ -519,6 +519,15 @@ public class Schemas {
         return expectedResultsID;
     }
 
+    public static int getZoneMappingID(String globalEASTWebSchema, Integer projectID, Integer pluginID, Integer summaryID, Statement stmt)
+    {
+        int zoneMappingID = -1;
+
+
+
+        return zoneMappingID;
+    }
+
     /**
      * Gets the name of the specified project's database schema. The returned name does not need to be quoted to use in SQL.
      *

@@ -435,8 +435,8 @@ public class Scheduler {
      */
     protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException
     {
-        //        Summary process = new Summary(manager, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
-        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "version2.prototype.summary.SummaryWorker");
+        Summary process = new Summary(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
+        //        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "version2.prototype.summary.SummaryWorker");
         //        inputCache.addObserver(process);
         return process;
     }

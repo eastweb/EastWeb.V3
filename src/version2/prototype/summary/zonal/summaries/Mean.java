@@ -43,8 +43,18 @@ public class Mean extends SummaryCalculation {
             Map<Integer, Double> sumRs = sum.getResult();
             Map<Integer, Double> countRs = count.getResult();
 
+            Double tempSum;
+            Double tempCount;
+            Double tempR;
             for(int i=0; i < countRs.size(); i++){
-                resultMap.put(i, sumRs.get(i)/countRs.get(i));
+                tempSum = sumRs.get(i);
+                tempCount = countRs.get(i);
+                if(tempSum == null || tempCount == null) {
+                    tempR = null;
+                } else {
+                    tempR = tempSum/tempCount;
+                }
+                resultMap.put(i, tempR);
             }
         }
         return resultMap;

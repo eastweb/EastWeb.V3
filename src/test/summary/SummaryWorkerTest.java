@@ -7,8 +7,11 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -32,6 +36,7 @@ import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.EASTWebResult;
 import version2.prototype.util.EASTWebResults;
+import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -40,19 +45,44 @@ import version2.prototype.util.Schemas;
  *
  */
 public class SummaryWorkerTest {
-    private static String testProjectName = "Test_Project";
-    private static String testPluginName = "Test_Plugin";
-    private static String testGlobalSchema = "Test_EASTWeb";
-    private static String projectInfoFilePath = "";
-    private static String pluginMetaDataFilePath = "";
-    private static int year;
-    private static int day;
-    ;
+    private static Config configInstance;
+    private static String projectName = "Test_Summary";
+    private static String pluginName = "Test_TRMM3B42RT";
+    private static String globalSchema = "Test_EASTWeb";
+    private static ProjectInfoFile projectInfoFile;
+    private static LocalDate startDate;
+    private static ProjectInfoPlugin pluginInfo;
+    private static PluginMetaData pluginMetaData;
+
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        configInstance = Config.getAnInstance("src\\test\\config.xml");
+        globalSchema = configInstance.getGlobalSchema();
+        projectInfoFile = new ProjectInfoFile("src\\test\\summary\\Test_Project.xml");
+        startDate = projectInfoFile.GetStartDate();
+        pluginInfo = projectInfoFile.GetPlugins().get(0);
+        pluginMetaData = PluginMetaDataCollection.getInstance(new File("plugins\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+
+        Connection con = PostgreSQLConnection.getConnection();
+        Statement stmt = con.createStatement();
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                globalSchema
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(projectName, pluginName)
+                );
+        stmt.execute(query);
+        stmt.close();
+        con.close();
+
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), globalSchema, projectName, pluginName, null, null, pluginMetaData.DaysPerInputData,
+                pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
     }
 
     /**
@@ -82,43 +112,38 @@ public class SummaryWorkerTest {
      */
     @Test
     public final void testCall() throws Exception {
-        // Set up parameters
-        String globalSchema = "";
-        Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile(projectInfoFilePath);
-        ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFilePath)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
-        ArrayList<String> extraDownloadFiles = new ArrayList<String>();
-        extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
-        extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day));
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day)));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm1.tif", startDate.getYear(), startDate.minusDays(6).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm2.tif", startDate.getYear(), startDate.minusDays(5).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm3.tif", startDate.getYear(), startDate.minusDays(4).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm4.tif", startDate.getYear(), startDate.minusDays(3).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm5.tif", startDate.getYear(), startDate.minusDays(2).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm6.tif", startDate.getYear(), startDate.minusDays(1).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm7.tif", startDate.getYear(), startDate.getDayOfYear(), "TRMM3B42RTIndex")));
 
-        DatabaseCache outputCache = new MyDatabaseCache(testGlobalSchema, projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
-        SummaryWorker worker = new SummaryWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        SummaryWorker worker = new SummaryWorker(configInstance, null, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        worker.call();
 
         // Verify results
         ArrayList<EASTWebResult> results = EASTWebResults.GetEASTWebResults(EASTWebResults.GetEASTWebQuery(globalSchema, projectInfoFile.GetProjectName(), pluginInfo.GetName()));
-        fail("Not yet implemented"); // TODO
+        assertTrue("Results empty.", results.size() > 0);
     }
 
-    protected class MyDatabaseCache extends DatabaseCache
-    {
-        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
-            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
-        }
-
-        @Override
-        public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
-        ParserConfigurationException, SAXException, IOException {
-            for(DataFileMetaData data : filesForASingleComposite)
-            {
-                System.out.println(data.ReadMetaDataForSummary().dataFilePath);
-            }
-        }
-    }
+    //    protected class MyDatabaseCache extends DatabaseCache
+    //    {
+    //        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
+    //            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
+    //        }
+    //
+    //        @Override
+    //        public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
+    //        ParserConfigurationException, SAXException, IOException {
+    //            for(DataFileMetaData data : filesForASingleComposite)
+    //            {
+    //                System.out.println(data.ReadMetaDataForSummary().dataFilePath);
+    //            }
+    //        }
+    //    }
 }

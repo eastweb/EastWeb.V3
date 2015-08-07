@@ -46,19 +46,32 @@ public class StdDev extends SummaryCalculation {
             //            Map<Integer, Double> sqrSumRs = sqrSum.getResult();
             Map<Integer, Double> countRs = count.getResult();
             Map<Integer, Double> meanRs = mean.getResult();
-            double tempSum;
-            double tempResult;
+            Double tempSum;
+            Double tempResult;
+            Double tempValue;
+            Double tempMeanRs;
+            LinkedList<Double> tempValuesList;
 
             for(int i=0; i < countRs.size(); i++){
                 //                tempResult = Math.sqrt((sqrSumRs.get(i)/countRs.get(i)) - (meanRs.get(i) * meanRs.get(i)));       // Approximation, accurate up to 14 decimal positions.
-                tempSum = 0;
-                for(int x_i=0; x_i < valuesMap.get(i).size(); x_i++)
+                tempSum = 0.0;
+                tempValuesList = valuesMap.get(i);
+                if(tempValuesList != null)
                 {
-                    // Summation of the squared differences from the mean
-                    tempSum += Math.pow(valuesMap.get(i).get(x_i) - meanRs.get(i), 2);
+                    for(int x_i=0; x_i < tempValuesList.size(); x_i++)
+                    {
+                        // Summation of the squared differences from the mean
+                        tempValue = valuesMap.get(i).get(x_i);
+                        tempMeanRs = meanRs.get(i);
+                        if(tempValue != null && tempMeanRs != null) {
+                            tempSum += Math.pow(tempValue - tempMeanRs, 2);
+                        }
+                    }
+                    // Calculate variance and std dev
+                    tempResult = Math.sqrt(tempSum / tempValuesList.size());
+                } else {
+                    tempResult = 0.0;
                 }
-                // Calculate variance and std dev
-                tempResult = Math.sqrt(tempSum / valuesMap.get(i).size());
                 if(new Double(tempResult).equals(Double.NaN)) {
                     resultMap.put(i, 0.0);
                 }

@@ -26,10 +26,13 @@ import version2.prototype.util.IndicesFileMetaData;
  *
  */
 public class SummaryWorker extends ProcessWorker {
+    private Config configInstance;
 
-    public SummaryWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
+    public SummaryWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles,
+            DatabaseCache outputCache)
     {
         super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        this.configInstance = configInstance;
     }
 
     /* (non-Javadoc)
@@ -75,6 +78,7 @@ public class SummaryWorker extends ProcessWorker {
                 outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
                         pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
                 ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
+                        configInstance.getGlobalSchema(),
                         projectInfoFile.GetWorkingDir(),
                         projectInfoFile.GetProjectName(),   // projectName
                         pluginInfo.GetName(),   // pluginName
@@ -84,8 +88,9 @@ public class SummaryWorker extends ProcessWorker {
                         new File(cachedFileData.dataFilePath),   // inRasterFile
                         new File(summary.GetZonalSummary().GetShapeFile()),  // inShapeFile
                         outputFile,   // outTableFile
-                        summary.GetZonalSummary().GetAreaNameField(),    // zoneField
-                        new SummariesCollection(Config.getInstance().getSummaryCalculations())); // summariesCollection
+                        summary.GetZonalSummary().GetAreaValueField(),    // zoneField
+                        new SummariesCollection(Config.getInstance().getSummaryCalculations()),
+                        summary); // summariesCollection
                 zonalSummaryCal.calculate();
                 outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
             }
