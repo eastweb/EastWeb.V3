@@ -66,8 +66,6 @@ import com.toedter.calendar.JDateChooser;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
-import javax.swing.event.AncestorListener;
-import javax.swing.event.AncestorEvent;
 
 public class ProjectInformationPage {
 
@@ -303,9 +301,9 @@ public class ProjectInformationPage {
         masterShapeTextField.setText(project.GetMasterShapeFile());
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
-        //freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        freezingDateChooser.setDate(Date.from(project.GetFreezingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         coolingTextField.setText(project.GetCoolingDegree().toString());
-        //heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         heatingTextField.setText(project.GetHeatingDegree().toString());
 
 

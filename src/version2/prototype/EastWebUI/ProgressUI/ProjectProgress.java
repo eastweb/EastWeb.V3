@@ -38,6 +38,7 @@ public class ProjectProgress {
             @Override
             public void run() {
                 try {
+                    @SuppressWarnings("unused")
                     ProjectProgress window = new ProjectProgress(null);
 
 
