@@ -51,17 +51,17 @@ public class NldasForcingComposite extends Composite
                 //                catch (IOException e) { ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error", e); }
             }
 
-            List<Dataset> inputDSs = new ArrayList<Dataset>();
-
-            for (File input : inputFiles) {
-                inputDSs.add(gdal.Open(input.getPath()));
-            }
-
-            int rasterX = inputDSs.get(0).GetRasterXSize();
-            int rasterY = inputDSs.get(0).GetRasterYSize();
-
             for(int band : mBands)
             {
+                List<Dataset> inputDSs = new ArrayList<Dataset>();
+
+                for (File input : inputFiles) {
+                    inputDSs.add(gdal.Open(input.getPath()));
+                }
+
+                int rasterX = inputDSs.get(0).GetRasterXSize();
+                int rasterY = inputDSs.get(0).GetRasterYSize();
+
                 int outputs = 1;
 
                 if(band == 1) {
@@ -101,10 +101,10 @@ public class NldasForcingComposite extends Composite
                         outputDS.delete();
                     }
                 }
-            }
 
-            for (Dataset inputDS : inputDSs) {
-                inputDS.delete();
+                for (Dataset inputDS : inputDSs) {
+                    inputDS.delete();
+                }
             }
         }
     }
@@ -160,10 +160,10 @@ public class NldasForcingComposite extends Composite
             if(band == 1)
             {
                 // Convert the values from Kelvin to Celsius
-                for(int i = 0; i < outputArray.length; i++) {
-                    // Tc = Tk - 273.15
-                    outputArray[i] = outputArray[i] - 273.15;
-                }
+                //for(int i = 0; i < outputArray.length; i++) {
+                // Tc = Tk - 273.15
+                //    outputArray[i] = outputArray[i] - 273.15;
+                //}
 
                 if(prefix.equalsIgnoreCase("HeatingDegreeDays")) {
                     outputArray = GetCumulativeHeatingDegreeDays(outputArray, prefix);
@@ -199,7 +199,7 @@ public class NldasForcingComposite extends Composite
         return outputArray;
     }
 
-    private static double[] FindMinValues(List<Dataset> inputDSs, int rasterX, int rasterY)
+    private double[] FindMinValues(List<Dataset> inputDSs, int rasterX, int rasterY)
     {
         double[][] inputArrays = new double[inputDSs.size()][rasterX * rasterY];
         double[] outputArray = new double[rasterX * rasterY];
@@ -210,25 +210,25 @@ public class NldasForcingComposite extends Composite
 
         for(int pos = 0; pos < outputArray.length; pos++)
         {
-            double minVal = 9999;
+            double minVal = inputArrays[0][pos];
             for (int i = 0; i < inputDSs.size(); i++) {
-                // Fill value is 9999.
-                if(inputArrays[i][pos] != 9999 && inputArrays[i][pos] < minVal) {
+                // Fill value is 9999.0
+                if(inputArrays[i][pos] != 9999.0 && inputArrays[i][pos] < minVal) {
                     minVal = inputArrays[i][pos];
                 }
             }
             outputArray[pos] = minVal;
         }
 
-        for(int i = 0; i < outputArray.length; i++) {
-            // Tc = Tk - 273.15
-            outputArray[i] = outputArray[i] - 273.15;
-        }
+        //for(int i = 0; i < outputArray.length; i++) {
+        // Tc = Tk - 273.15
+        //outputArray[i] = outputArray[i] - 273.15;
+        //}
 
         return outputArray;
     }
 
-    private static double[] FindMaxValues(List<Dataset> inputDSs, int rasterX, int rasterY)
+    private double[] FindMaxValues(List<Dataset> inputDSs, int rasterX, int rasterY)
     {
         double[][] inputArrays = new double[inputDSs.size()][rasterX * rasterY];
         double[] outputArray = new double[rasterX * rasterY];
@@ -239,20 +239,20 @@ public class NldasForcingComposite extends Composite
 
         for(int pos = 0; pos < outputArray.length; pos++)
         {
-            double maxVal = -9999;
+            double maxVal = inputArrays[0][pos];
             for (int i = 0; i < inputDSs.size(); i++) {
                 // Fill value is 9999.
-                if(inputArrays[i][pos] != 9999 && inputArrays[i][pos] > maxVal) {
+                if(inputArrays[i][pos] != 9999.0 && inputArrays[i][pos] > maxVal) {
                     maxVal = inputArrays[i][pos];
                 }
             }
             outputArray[pos] = maxVal;
         }
 
-        for(int i = 0; i < outputArray.length; i++) {
-            // Tc = Tk - 273.15
-            outputArray[i] = outputArray[i] - 273.15;
-        }
+        //for(int i = 0; i < outputArray.length; i++) {
+        //    // Tc = Tk - 273.15
+        //outputArray[i] = outputArray[i] - 273.15;
+        //}
 
         return outputArray;
     }
@@ -268,8 +268,8 @@ public class NldasForcingComposite extends Composite
                 previousVal = cumulative[i];
             }
 
-            // Fill value is 9999.
-            if(meanValues[i] != 9999 && meanValues[i] > hDegree) {
+            // Fill value is 9999.0
+            if(meanValues[i] != 9999.0 && meanValues[i] > hDegree) {
                 meanValues[i] = previousVal + (meanValues[i] - hDegree);
             } else {
                 meanValues[i] = previousVal;
@@ -290,8 +290,8 @@ public class NldasForcingComposite extends Composite
                 previousVal = cumulative[i];
             }
 
-            // Fill value is 9999.
-            if(meanValues[i] != 9999 && meanValues[i] < fDegree) {
+            // Fill value is 9999.0
+            if(meanValues[i] != 9999.0 && meanValues[i] < fDegree) {
                 meanValues[i] = previousVal + (fDegree - meanValues[i]);
             } else {
                 meanValues[i] = previousVal;
@@ -320,13 +320,13 @@ public class NldasForcingComposite extends Composite
                 int currentDayOfYear = Integer.parseInt(inputFolder.getName());
 
                 if(currentDayOfYear > 1) {
-                    yesterdayFolder = new File(inputFolder.getParentFile().getAbsolutePath() + File.pathSeparator
+                    yesterdayFolder = new File(new File(outputFolder).getParentFile().getAbsolutePath() + File.separator
                             + String.format("%03d", (currentDayOfYear-1)));
                 }
                 else {
                     // Previous day would be last year and day of year = 365
-                    yesterdayFolder = new File(inputFolder.getParentFile().getParentFile().getAbsolutePath() + File.pathSeparator
-                            + String.format("%04d", (year-1)) + File.pathSeparator + "365");
+                    yesterdayFolder = new File(new File(outputFolder).getParentFile().getParentFile().getAbsolutePath() + File.separator
+                            + String.format("%04d", (year-1)) + File.separator + "365");
                 }
 
                 if(yesterdayFolder != null && yesterdayFolder.exists())
@@ -335,6 +335,7 @@ public class NldasForcingComposite extends Composite
                     {
                         if(file.getName().contains(prefix)) {
                             yesterdayFile = file;
+                            break;
                         }
                     }
                 }
@@ -344,7 +345,6 @@ public class NldasForcingComposite extends Composite
         {
             ErrorLog.add(Config.getInstance(), "NldasForcingComposite.GetPreviousValues error.", e);
         }
-
 
         if(yesterdayFile != null) {
             Dataset ds = gdal.Open(yesterdayFile.getPath());
