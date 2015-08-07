@@ -297,6 +297,7 @@ public class NldasForcingComposite extends Composite
                 meanValues[i] = previousVal;
             }
         }
+
         return meanValues;
     }
 
