@@ -330,7 +330,7 @@ public class MainWindow {
     {
         defaultTableModel = new DefaultTableModel();
         defaultTableModel.setDataVector(new Object[][] {},
-                new Object[] { "Projects", " Total Progress", "Summary Composite", "Intermidiate Selection", "Actions", "Delete" });
+                new Object[] { "Project Progress", " Total Progress", "Intermidiate Selection", "Actions", "Delete" });
 
         JTable table = new JTable(defaultTableModel);
         table.getColumn("Projects").setCellRenderer(new ProgressButtonRenderer());
@@ -361,7 +361,6 @@ public class MainWindow {
                 defaultTableModel.addRow(new Object[] {
                         String.valueOf(projectList.getSelectedItem()),
                         "75 %",
-                        "Summary Queries",
                         chckbxIntermidiateFiles.isSelected(),
                         String.valueOf(projectList.getSelectedItem()),
                         String.valueOf(projectList.getSelectedItem())});
