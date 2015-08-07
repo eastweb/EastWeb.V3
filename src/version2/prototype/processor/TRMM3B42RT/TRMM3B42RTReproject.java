@@ -8,6 +8,7 @@ public class TRMM3B42RTReproject extends Reproject{
 
     public TRMM3B42RTReproject(ProcessData data) {
         super(data);
+        NoProj =  false;
     }
 
     @Override

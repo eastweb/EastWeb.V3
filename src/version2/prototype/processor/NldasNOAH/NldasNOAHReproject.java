@@ -7,6 +7,7 @@ public class NldasNOAHReproject extends Reproject{
 
     public NldasNOAHReproject(ProcessData data) {
         super(data);
+        NoProj =  true;
     }
 
     @Override

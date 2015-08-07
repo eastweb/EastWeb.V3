@@ -7,6 +7,7 @@ public class ModisNBARReproject extends Reproject {
 
     public ModisNBARReproject(ProcessData data) {
         super(data);
+        NoProj =  false;
     }
 
     @Override

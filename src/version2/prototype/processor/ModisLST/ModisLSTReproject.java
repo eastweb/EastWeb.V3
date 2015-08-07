@@ -7,6 +7,7 @@ public class ModisLSTReproject extends Reproject{
 
     public ModisLSTReproject(ProcessData data) {
         super(data);
+        NoProj =  false;
     }
 
     @Override

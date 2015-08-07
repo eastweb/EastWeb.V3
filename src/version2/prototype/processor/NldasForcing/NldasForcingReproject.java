@@ -7,6 +7,7 @@ public class NldasForcingReproject extends Reproject {
 
     public NldasForcingReproject(ProcessData data) {
         super(data);
+        NoProj =  true;
     }
 
     @Override

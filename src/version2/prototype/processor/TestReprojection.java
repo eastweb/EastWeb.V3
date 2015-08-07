@@ -58,10 +58,14 @@ public class TestReprojection
                 b20.ReadRaster(0,  0 , xSize, ySize, arr);
 
                 System.out.println("original prj ref: " + inputDS.GetProjection());
-                String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+                String outputProjStr = "+proj=longlat +datum=WGS84 +no_defs";
+                //String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+                SpatialReference output = new SpatialReference();
+                output.ImportFromProj4(outputProjStr);
 
+                outputDS.SetProjection(output.ExportToWkt());
 
-                outputDS.SetProjection(wktStr);
+                //outputDS.SetProjection(wktStr);
                 System.out.println(outputDS.GetProjection());
                 double [] geoTrans = inputDS.GetGeoTransform();
                 System.out.println(geoTrans[0] + " : " + geoTrans[1] + " : " + geoTrans[2] + " : " + geoTrans[3] + " : " + geoTrans[4] + " : " + geoTrans[5]);
@@ -130,17 +134,22 @@ public class TestReprojection
                     gdalconst.GDT_Float32
                     );
 
-            String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
+
+            SpatialReference outputRef = new SpatialReference();
+            outputRef.ImportFromProj4("+proj=utm +zone=1 +datum=WGS84 +units=m +no_defs");
+
+            //String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
+            String outputProjection = outputRef.ExportToWkt();
+            // String outputProjection ="PROJCS[\"WGS_1984_UTM_Zone_14N\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"False_Easting\",500000.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",39.0],PARAMETER[\"Scale_Factor\",0.9996],PARAMETER[\"Latitude_Of_Origin\",0.0],UNIT[\"Meter\",1.0]]";
+            //String outputProjection = "+proj=utm +zone=37 +datum=WGS84 +units=m +no_defs";
 
             // System.out.println("Reproject: input : " + inputRef.ExportToWkt());
             System.out.println("Reproject: output : " + outputProjection);
             System.out.println("Reproject: GeoTransform: " + left + " : " + right + " : " + bottom + " : " + top);
 
             outputDS.SetProjection(outputProjection);
-            outputDS.SetGeoTransform(new double[] {
-                    left, (projection.getPixelSize()), 0,
-                    top, 0, -(double)(projection.getPixelSize())
-            });
+            //outputDS.SetProjection(outputProjection);
+            outputDS.SetGeoTransform(new double[] { left, (projection.getPixelSize()), 0, top, 0, -(double)(projection.getPixelSize()) });
 
             // get resample argument
             int resampleAlg = -1;
