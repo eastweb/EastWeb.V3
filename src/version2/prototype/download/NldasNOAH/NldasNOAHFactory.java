@@ -36,6 +36,6 @@ public class NldasNOAHFactory extends DownloadFactory {
 
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new NldasNOAHListDatesFiles(new DataDate(startDate), dData);
+        return new NldasNOAHListDatesFiles(new DataDate(startDate), dData, projectInfoFile);
     }
 }

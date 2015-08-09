@@ -15,6 +15,7 @@ import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.ListDatesFiles;
 
@@ -23,9 +24,9 @@ import version2.prototype.download.ListDatesFiles;
 public class TRMM3B42ListDatesFiles extends ListDatesFiles
 {
 
-    public TRMM3B42ListDatesFiles(DataDate startDate, DownloadMetaData data)
+    public TRMM3B42ListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project)
             throws IOException {
-        super(startDate, data);
+        super(startDate, data, project);
     }
 
     @Override

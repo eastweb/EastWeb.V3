@@ -7,6 +7,7 @@ import java.util.Map;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
 public abstract class ListDatesFiles
 {
@@ -14,13 +15,15 @@ public abstract class ListDatesFiles
     protected DataDate sDate;
     protected DownloadMetaData mData;
     protected Map<DataDate, ArrayList<String>>  mapDatesFiles;
+    protected ProjectInfoFile mProject;
 
-    public ListDatesFiles(DataDate startDate, DownloadMetaData data) throws IOException
+    public ListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException
     {
         sDate = startDate;
         mData = data;
         lDates = null;
         mapDatesFiles =  null;
+        mProject =  project;
 
         if ((mData.mode).equalsIgnoreCase("FTP"))
         {

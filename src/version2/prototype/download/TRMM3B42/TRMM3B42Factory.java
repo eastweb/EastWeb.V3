@@ -33,7 +33,7 @@ public class TRMM3B42Factory extends DownloadFactory {
 
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new TRMM3B42ListDatesFiles(new DataDate(startDate), dData);
+        return new TRMM3B42ListDatesFiles(new DataDate(startDate), dData, projectInfoFile);
     }
 }
 

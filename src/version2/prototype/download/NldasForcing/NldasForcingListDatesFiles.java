@@ -14,6 +14,7 @@ import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ListDatesFiles;
 
 public class NldasForcingListDatesFiles extends ListDatesFiles {
@@ -22,8 +23,8 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
     private String mPassword;
     private String mRootDir;
 
-    public NldasForcingListDatesFiles(DataDate startDate, DownloadMetaData data) throws IOException {
-        super(startDate, data);
+    public NldasForcingListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException {
+        super(startDate, data, project);
 
         mHostName = data.myFtp.hostName;
         mUsername = data.myFtp.userName;

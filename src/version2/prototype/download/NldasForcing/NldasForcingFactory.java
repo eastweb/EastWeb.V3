@@ -36,6 +36,6 @@ public final class NldasForcingFactory extends DownloadFactory {
 
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new NldasForcingListDatesFiles(new DataDate(startDate), dData);
+        return new NldasForcingListDatesFiles(new DataDate(startDate), dData, projectInfoFile);
     }
 }

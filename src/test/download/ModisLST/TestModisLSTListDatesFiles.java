@@ -17,11 +17,13 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ModisLST.ModisLSTListDatesFiles;
 
 public class TestModisLSTListDatesFiles {
 
     private static DownloadMetaData data;
+    private static ProjectInfoFile projectInfoFile;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -39,6 +41,11 @@ public class TestModisLSTListDatesFiles {
         LocalDate ld = LocalDate.parse("Sun Mar 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
+
+        ArrayList <String> modisTiles = projectInfoFile.GetModisTiles();
+        for (String tile : modisTiles)
+        {System.out.println(tile);}
 
     }
 
@@ -50,13 +57,13 @@ public class TestModisLSTListDatesFiles {
     @Test
     public void testListDatesFilesHTTP() throws IOException
     {
-        ModisLSTListDatesFiles mld = new ModisLSTListDatesFiles(new DataDate(data.originDate), data);
+        ModisLSTListDatesFiles mld = new ModisLSTListDatesFiles(new DataDate(data.originDate), data,  projectInfoFile );
 
         Map<DataDate, ArrayList<String>> tempDatesFiles = mld.getListDatesFiles();
 
         for (Map.Entry<DataDate, ArrayList<String>> entry : tempDatesFiles.entrySet())
         {
-            System.out.println(entry.getKey() + " : /" + entry.getValue().get(0));
+            System.out.println(entry.getKey() + " : /" + entry.getValue().get(0) + " : " +  entry.getValue().get(1));
         }
 
     }

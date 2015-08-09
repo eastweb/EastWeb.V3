@@ -45,7 +45,7 @@ public class ModisLSTFactory extends DownloadFactory {
      */
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new ModisLSTListDatesFiles(new DataDate(startDate), dData);
+        return new ModisLSTListDatesFiles(new DataDate(startDate), dData, projectInfoFile);
     }
 
 }

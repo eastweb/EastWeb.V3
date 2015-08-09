@@ -14,14 +14,15 @@ import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.ListDatesFiles;
 
 public class NldasNOAHListDatesFiles extends ListDatesFiles{
 
-    public NldasNOAHListDatesFiles(DataDate date, DownloadMetaData data) throws IOException
+    public NldasNOAHListDatesFiles(DataDate date, DownloadMetaData data, ProjectInfoFile project) throws IOException
     {
-        super(date, data);
+        super(date, data, project);
     }
 
 

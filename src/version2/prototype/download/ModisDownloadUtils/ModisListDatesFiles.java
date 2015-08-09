@@ -16,6 +16,7 @@ import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.util.ParallelUtils.Parallel;
@@ -27,11 +28,10 @@ import version2.prototype.util.ParallelUtils.Parallel;
 
 public class ModisListDatesFiles extends ListDatesFiles
 {
-
-    public ModisListDatesFiles(DataDate startDate, DownloadMetaData data)
+    public ModisListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project)
             throws IOException
     {
-        super(startDate, data);
+        super(startDate, data, project);
     }
 
     @Override
@@ -43,6 +43,8 @@ public class ModisListDatesFiles extends ListDatesFiles
     protected Map<DataDate, ArrayList<String>> ListDatesFilesHTTP()
     {
         mapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
+
+        final ArrayList<String> modisTiles = mProject.GetModisTiles();
 
         final String mHostURL = mData.myHttp.url;
 
@@ -91,12 +93,19 @@ public class ModisListDatesFiles extends ListDatesFiles
                                 for (String line : folderContents)
                                 {
                                     Matcher m = fileNamePattern.matcher(line);
-                                    if(line.contains(".hdf") && !line.contains(".xml") && !line.contains(".jpg") &&
-                                            (m.find()))
+                                    if(line.contains(".hdf") && !line.contains(".xml") && (m.find()))
                                     {
-                                        lock.lock();
-                                        fileList.add(m.group(0));
-                                        lock.unlock();
+                                        // limit to the targeted MODIS tiles only
+                                        for (String tile : modisTiles)
+                                        {
+                                            if (line.contains(tile))
+                                            {
+                                                lock.lock();
+                                                fileList.add(m.group(0));
+                                                lock.unlock();
+                                            }
+                                        }
+
                                     }
                                 }
 
