@@ -50,7 +50,7 @@ public class TestTRMM3B42ListDatesFiles {
     public void testListDatesFilesFTP() {
         TRMM3B42ListDatesFiles testy;
         try {
-            testy = new TRMM3B42ListDatesFiles(new DataDate(data.originDate), data);
+            testy = new TRMM3B42ListDatesFiles(new DataDate(data.originDate), data, null);
             Map<DataDate, ArrayList<String>> tempDatesFiles = testy.getListDatesFiles();
 
             for (Map.Entry<DataDate, ArrayList<String>> entry : tempDatesFiles.entrySet())

@@ -20,6 +20,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.ModisLST.ModisLSTListDatesFiles;
 import version2.prototype.download.ModisLST.ModisLSTGlobalDownloader;
@@ -27,6 +28,7 @@ import version2.prototype.download.ModisLST.ModisLSTGlobalDownloader;
 public class TestModisLSTGlobalDownloader {
 
     private static DownloadMetaData data;
+    private static ProjectInfoFile p;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
@@ -45,6 +47,8 @@ public class TestModisLSTGlobalDownloader {
 
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
 
+        p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
+
     }
 
     @AfterClass
@@ -55,7 +59,7 @@ public class TestModisLSTGlobalDownloader {
     @Test
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException
     {
-        ListDatesFiles ldf= new ModisLSTListDatesFiles(new DataDate(data.originDate), data);
+        ListDatesFiles ldf= new ModisLSTListDatesFiles(new DataDate(data.originDate), data,p);
         LocalDate startDate = LocalDate.now().minusDays(14);
 
         ModisLSTGlobalDownloader ttd = new ModisLSTGlobalDownloader(1, Config.getAnInstance("test/config.xml"), "ModisLST",  data,  ldf, startDate);

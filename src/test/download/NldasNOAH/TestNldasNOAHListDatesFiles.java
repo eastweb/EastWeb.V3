@@ -63,7 +63,7 @@ public class TestNldasNOAHListDatesFiles {
 
     @Test
     public void testListDatesFilesFTP() throws IOException {
-        NldasNOAHListDatesFiles testy = new NldasNOAHListDatesFiles(new DataDate(data.originDate), data);
+        NldasNOAHListDatesFiles testy = new NldasNOAHListDatesFiles(new DataDate(data.originDate), data, null);
 
         Map<DataDate, ArrayList<String>> tempDatesFiles = testy.getListDatesFiles();
         Map<Integer, Map.Entry<DataDate, ArrayList<String>>> datesFilesSorted = new TreeMap<Integer, Map.Entry<DataDate, ArrayList<String>>>();

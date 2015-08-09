@@ -50,7 +50,7 @@ public class TestNldasNOAHGlobalDownloader {
 
     @Test
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
-        ListDatesFiles ldf= new NldasNOAHListDatesFiles(new DataDate(data.originDate), data);
+        ListDatesFiles ldf= new NldasNOAHListDatesFiles(new DataDate(data.originDate), data, null);
         LocalDate startDate = LocalDate.now().minusDays(14);
 
         NldasNOAHGlobalDownloader ttd = new NldasNOAHGlobalDownloader(1, Config.getAnInstance("test/config.xml"), "NLDASNOAH", data, ldf, startDate);

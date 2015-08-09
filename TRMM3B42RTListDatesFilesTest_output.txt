@@ -1,5 +1,5 @@
 OriginDate: 2000-03-01
-5623
+5639
 {year: 2000, month: 3, day: 1, dayOfYear: 61} : /3B42RT_daily.2000.03.01.bin
 {year: 2000, month: 3, day: 2, dayOfYear: 62} : /3B42RT_daily.2000.03.02.bin
 {year: 2000, month: 3, day: 3, dayOfYear: 63} : /3B42RT_daily.2000.03.03.bin
@@ -5619,3 +5619,19 @@ OriginDate: 2000-03-01
 {year: 2015, month: 7, day: 21, dayOfYear: 202} : /3B42RT_daily.2015.07.21.bin
 {year: 2015, month: 7, day: 22, dayOfYear: 203} : /3B42RT_daily.2015.07.22.bin
 {year: 2015, month: 7, day: 23, dayOfYear: 204} : /3B42RT_daily.2015.07.23.bin
+{year: 2015, month: 7, day: 24, dayOfYear: 205} : /3B42RT_daily.2015.07.24.bin
+{year: 2015, month: 7, day: 25, dayOfYear: 206} : /3B42RT_daily.2015.07.25.bin
+{year: 2015, month: 7, day: 26, dayOfYear: 207} : /3B42RT_daily.2015.07.26.bin
+{year: 2015, month: 7, day: 27, dayOfYear: 208} : /3B42RT_daily.2015.07.27.bin
+{year: 2015, month: 7, day: 28, dayOfYear: 209} : /3B42RT_daily.2015.07.28.bin
+{year: 2015, month: 7, day: 29, dayOfYear: 210} : /3B42RT_daily.2015.07.29.bin
+{year: 2015, month: 7, day: 30, dayOfYear: 211} : /3B42RT_daily.2015.07.30.bin
+{year: 2015, month: 7, day: 31, dayOfYear: 212} : /3B42RT_daily.2015.07.31.bin
+{year: 2015, month: 8, day: 1, dayOfYear: 213} : /3B42RT_daily.2015.08.01.bin
+{year: 2015, month: 8, day: 2, dayOfYear: 214} : /3B42RT_daily.2015.08.02.bin
+{year: 2015, month: 8, day: 3, dayOfYear: 215} : /3B42RT_daily.2015.08.03.bin
+{year: 2015, month: 8, day: 4, dayOfYear: 216} : /3B42RT_daily.2015.08.04.bin
+{year: 2015, month: 8, day: 5, dayOfYear: 217} : /3B42RT_daily.2015.08.05.bin
+{year: 2015, month: 8, day: 6, dayOfYear: 218} : /3B42RT_daily.2015.08.06.bin
+{year: 2015, month: 8, day: 7, dayOfYear: 219} : /3B42RT_daily.2015.08.07.bin
+{year: 2015, month: 8, day: 8, dayOfYear: 220} : /3B42RT_daily.2015.08.08.bin

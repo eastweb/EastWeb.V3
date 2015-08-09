@@ -53,7 +53,7 @@ public class TestTRMM3B42RTGlobalDownloader {
 
     @Test
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
-        ListDatesFiles ldf= new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data);
+        ListDatesFiles ldf= new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data, null);
 
         TRMM3B42RTGlobalDownloader ttd = new TRMM3B42RTGlobalDownloader(1, Config.getAnInstance("src/test/config.xml"), "TRMM3B42RT",  data,  ldf, LocalDate.ofYearDay(2015, 1));
 

@@ -24,6 +24,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 
 /**
@@ -36,6 +37,7 @@ public class TRMM3B42RTListDatesFilesTest {
     private static DownloadMetaData data;
     private static File outputFile;
     private static FileWriter writer;
+    private static ProjectInfoFile p;
 
     /**
      * @throws java.lang.Exception
@@ -62,6 +64,8 @@ public class TRMM3B42RTListDatesFilesTest {
         LocalDate ld = LocalDate.parse("Wed Mar 01 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
         writer.write("OriginDate: " + ld.toString() + "\n");
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        p = null;
+
     }
 
     /**
@@ -79,7 +83,7 @@ public class TRMM3B42RTListDatesFilesTest {
      */
     @Test
     public final void testListDatesFilesFTP() throws IOException {
-        TRMM3B42RTListDatesFiles testy = new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data);
+        TRMM3B42RTListDatesFiles testy = new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data, p);
 
         Map<DataDate, ArrayList<String>> tempDatesFiles = testy.getListDatesFiles();
         Map<Integer, Map.Entry<DataDate, ArrayList<String>>> datesFilesSorted = new TreeMap<Integer, Map.Entry<DataDate, ArrayList<String>>>();

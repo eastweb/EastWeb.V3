@@ -17,12 +17,14 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ModisLST.ModisLSTListDatesFiles;
 import version2.prototype.download.ModisNBAR.ModisNBARListDatesFiles;
 
 public class TestNBAR_listfiles {
 
     private static DownloadMetaData data;
+    private static ProjectInfoFile p;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -39,6 +41,7 @@ public class TestNBAR_listfiles {
         LocalDate ld = LocalDate.parse("Sun Mar 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
 
     }
 
@@ -49,7 +52,7 @@ public class TestNBAR_listfiles {
 
     @Test
     public void testListDatesFilesHTTP() throws IOException {
-        ModisNBARListDatesFiles mld = new ModisNBARListDatesFiles(new DataDate(data.originDate), data);
+        ModisNBARListDatesFiles mld = new ModisNBARListDatesFiles(new DataDate(data.originDate), data, p);
 
         Map<DataDate, ArrayList<String>> tempDatesFiles = mld.getListDatesFiles();
 

@@ -20,6 +20,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.ModisNBAR.ModisNBARQCGlobalDownloader;
 import version2.prototype.download.ModisNBAR.ModisNBARQCListDatesFiles;
@@ -27,6 +28,7 @@ import version2.prototype.download.ModisNBAR.ModisNBARQCListDatesFiles;
 public class TestModisNBARQCGlobalDownloader {
 
     private static DownloadMetaData data;
+    private static ProjectInfoFile p;
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         String mode = "HTTP";// the protocol type: ftp or http
@@ -43,6 +45,7 @@ public class TestModisNBARQCGlobalDownloader {
         LocalDate ld = LocalDate.parse("Sun Mar 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
         data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
     }
 
     @AfterClass
@@ -51,7 +54,7 @@ public class TestModisNBARQCGlobalDownloader {
 
     @Test
     public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
-        ListDatesFiles ldf= new ModisNBARQCListDatesFiles(new DataDate(data.originDate), data);
+        ListDatesFiles ldf= new ModisNBARQCListDatesFiles(new DataDate(data.originDate), data, p);
         LocalDate startDate = LocalDate.now().minusDays(14);
 
         ModisNBARQCGlobalDownloader ttd = new ModisNBARQCGlobalDownloader(1, Config.getAnInstance("test/config.xml"), "ModisNBAR",  data,  ldf, startDate);
