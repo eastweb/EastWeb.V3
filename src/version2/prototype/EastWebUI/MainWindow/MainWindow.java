@@ -390,11 +390,25 @@ public class MainWindow {
      * populate project list
      */
     private void populateProjectList() {
-        File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
-        projectList.removeAllItems();
+        ProjectInfoCollection projectCollection = new ProjectInfoCollection();
+        try {
+            ArrayList<ProjectInfoFile> projects = projectCollection.ReadInAllProjectInfoFiles();
+            //            File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
+            projectList.removeAllItems();
 
-        for(File fXmlFile: getXMLFiles(fileDir)){
-            projectList.addItem(fXmlFile.getName().replace(".xml", ""));
+            //            for(File fXmlFile: getXMLFiles(fileDir)){
+            //                projectList.addItem(fXmlFile.getName().replace(".xml", ""));
+            //            }
+            for(ProjectInfoFile project : projects)
+            {
+                projectList.addItem(project.GetProjectName());
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException
+                | SecurityException | InstantiationException
+                | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | IOException
+                | ParserConfigurationException | SAXException | ParseException e) {
+            ErrorLog.add(Config.getInstance(), "MainWindow.populateProjectList problem with reading in all project xml files from projects folder.", e);
         }
     }
 

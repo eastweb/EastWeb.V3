@@ -17,10 +17,10 @@
 	</Plugins>
 	<StartDate>Sun Jan 18 12:56:49 CST 2015</StartDate>
 	<ProjectName>Project_EA</ProjectName>
-	<WorkingDir>D:\testProjects</WorkingDir>
-	<MaskingFile>d:\testProjects\Amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
+	<WorkingDir>C:\Users\michael.devos\Desktop\EASTWeb</WorkingDir>
+	<MaskingFile>C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
 	<Resolution >1000</Resolution>
-	<MasterShapeFile>d:\testProjects\Amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
+	<MasterShapeFile>C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>true</Clipping>
 	<FreezingDate>Tue Sep 01 12:58:25 CDT 1970</FreezingDate>
@@ -41,7 +41,7 @@
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
 		<Summary ID="1">AreaNameField: WID; Shape File Path:
-			C:\Users\veronica\Documents\32-bit\workspace\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp;
-			AreaCodeField: WID;; Temporal Summary: GregorianWeeklyStrategy</Summary>
+			C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp;
+			AreaCodeField: WID; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>

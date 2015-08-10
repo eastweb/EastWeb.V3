@@ -8,10 +8,10 @@
 </Plugins>
 <StartDate>Tue Jul 01 10:04:13 CDT 2014</StartDate>
 <ProjectName>Project_TW2</ProjectName>
-<WorkingDir>D:\testProjects\TW2</WorkingDir>
+<WorkingDir>C:\Users\michael.devos\Desktop\EASTWeb</WorkingDir>
 <MaskingFile/>
 <Resolution/>
-<MasterShapeFile>D:\testProjects\TW\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
+<MasterShapeFile>C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
 <TimeZone>(GMT+8:00) Asia/Chongqing</TimeZone>
 <Clipping>true</Clipping>
 <FreezingDate>Tue Sep 01 10:08:11 CDT 1970</FreezingDate>
@@ -34,6 +34,6 @@
 <FalseNothing>0.0</FalseNothing>
 <ScalingFactor>0.9996</ScalingFactor>
 <Summaries>
-	<Summary ID="1">AreaNameField: N_ID2; Shape File Path: D:\testProjects\TW\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaCodeField: N_ID2;; Temporal Summary: GregorianWeeklyStrategy</Summary>
+	<Summary ID="1">AreaNameField: N_ID2; Shape File Path: C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaCodeField: N_ID2; Temporal Summary: GregorianWeeklyStrategy</Summary>
 </Summaries>
 </ProjectInfo>
