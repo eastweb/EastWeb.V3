@@ -52,6 +52,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -297,7 +298,7 @@ public class ProjectInformationPage {
         projectName.setText(project.GetProjectName());
         workingDirectory.setText(project.GetWorkingDir());
         maskFile.setText(project.GetMaskingFile());
-        resolutionTextField.setText(project.GetMaskingResolution().toString());
+        resolutionTextField.setText((project.GetMaskingResolution() != null) ? project.GetMaskingResolution().toString() : null);
         masterShapeTextField.setText(project.GetMasterShapeFile());
         timeZoneComboBox.setSelectedItem(project.GetTimeZone());
         isClippingCheckBox.setSelected(project.GetClipping());
@@ -1050,6 +1051,8 @@ public class ProjectInformationPage {
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(theDir);
 

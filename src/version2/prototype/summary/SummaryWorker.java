@@ -28,6 +28,15 @@ import version2.prototype.util.IndicesFileMetaData;
 public class SummaryWorker extends ProcessWorker {
     private Config configInstance;
 
+    /**
+     * @param configInstance
+     * @param process
+     * @param projectInfoFile
+     * @param pluginInfo
+     * @param pluginMetaData
+     * @param cachedFiles
+     * @param outputCache
+     */
     public SummaryWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles,
             DatabaseCache outputCache)
     {
@@ -54,14 +63,15 @@ public class SummaryWorker extends ProcessWorker {
                     cachedFileData = cachedFile.ReadMetaDataForSummary();
                     TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
                             projectInfoFile.GetWorkingDir(),
-                            projectInfoFile.GetProjectName(),   // projectName
-                            pluginInfo.GetName(),   // pluginName
-                            new File(cachedFileData.dataFilePath),     // inRasterFile
-                            null,   // inDataDate
-                            pluginMetaData.DaysPerInputData,      // daysPerInputData
-                            summary.GetTemporalFileStore(),   // TemporalSummaryRasterFileStore
-                            null,   // InterpolateStrategy
-                            new AvgGdalRasterFileMerge() // (Framework user defined)
+                            projectInfoFile.GetProjectName(),       // projectName
+                            pluginInfo.GetName(),                   // pluginName
+                            cachedFileData.indexNm,                 // Index name
+                            new File(cachedFileData.dataFilePath),  // inRasterFile
+                            null,                                   // inDataDate
+                            pluginMetaData.DaysPerInputData,        // daysPerInputData
+                            summary.GetTemporalFileStore(),         // TemporalSummaryRasterFileStore
+                            null,                                   // InterpolateStrategy
+                            new AvgGdalRasterFileMerge()            // (Framework user defined)
                             );
                     tempFiles.add(temporalSummaryCal.calculate());
                 }
@@ -80,15 +90,15 @@ public class SummaryWorker extends ProcessWorker {
                 ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
                         configInstance.getGlobalSchema(),
                         projectInfoFile.GetWorkingDir(),
-                        projectInfoFile.GetProjectName(),   // projectName
-                        pluginInfo.GetName(),   // pluginName
+                        projectInfoFile.GetProjectName(),       // projectName
+                        pluginInfo.GetName(),                   // pluginName
                         cachedFileData.indexNm,
                         cachedFileData.year,
                         cachedFileData.day,
-                        new File(cachedFileData.dataFilePath),   // inRasterFile
-                        outputFile,   // outTableFile
+                        new File(cachedFileData.dataFilePath),  // inRasterFile
+                        outputFile,                             // outTableFile
                         new SummariesCollection(Config.getInstance().getSummaryCalculations()),
-                        summary); // summariesCollection
+                        summary);                               // summariesCollection
                 zonalSummaryCal.calculate();
                 outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
             }

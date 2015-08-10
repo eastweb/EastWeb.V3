@@ -3,6 +3,8 @@ package version2.prototype.summary.temporal;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 import version2.prototype.DataDate;
 
@@ -13,8 +15,11 @@ import version2.prototype.DataDate;
  *
  */
 public class TemporalSummaryRasterFileStore {
+    /**
+     * The TemporalSummaryCompositionStrategy object created for this summary as specified in the project metadata.
+     */
     public final TemporalSummaryCompositionStrategy compStrategy;
-    private static ArrayList<TemporalSummaryComposition> compositions = new ArrayList<TemporalSummaryComposition>(0);
+    private static Map<String, ArrayList<TemporalSummaryComposition>> compositionsMap = new TreeMap<String, ArrayList<TemporalSummaryComposition>>();
 
     /**
      * Creates a TemporalSummaryRasterFileStore utilizing the given composition strategy.
@@ -32,12 +37,14 @@ public class TemporalSummaryRasterFileStore {
      * @param f  - raster file to add
      * @param d  - Datadate associated to the raster file
      * @param daysPerInputData - returns the composition made full by the new file if there is such a composition, otherwise null.
+     * @param indexName  - index the file was calculated from
      * @return if file store can create a complete composite with the newly added file a new TemporalSummaryComposition is returned of the newly completed composite
      * while removing used files from the storage.
      * @throws Exception
      */
-    public TemporalSummaryComposition addFile(File f, DataDate d, int daysPerInputData) throws Exception
+    public TemporalSummaryComposition addFile(File f, DataDate d, int daysPerInputData, String indexName) throws Exception
     {
+        ArrayList<TemporalSummaryComposition> compositions = getCompositionList(indexName);
         TemporalSummaryComposition modifiedComp = null;
         LocalDate lDate = compStrategy.getStartDate(d.getLocalDate());
         int i;
@@ -68,5 +75,17 @@ public class TemporalSummaryRasterFileStore {
         }
 
         return modifiedComp;
+    }
+
+    private ArrayList<TemporalSummaryComposition> getCompositionList(String indexName)
+    {
+        ArrayList<TemporalSummaryComposition> compositionList = compositionsMap.get(indexName);
+
+        if(compositionList == null)
+        {
+            compositionList = new ArrayList<TemporalSummaryComposition>(0);
+        }
+
+        return compositionList;
     }
 }

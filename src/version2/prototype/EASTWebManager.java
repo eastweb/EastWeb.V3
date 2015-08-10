@@ -358,6 +358,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         //        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
         //            ErrorLog.add(Config.getInstance(), "Problem while getting list of registered TemporalSummaryCompositionStragies.", e);
         //        }
+        strategyNames.add("");
         strategyNames.add("GregorianWeeklyStrategy");
         strategyNames.add("GregorianMonthlyStrategy");
         strategyNames.add("CDCWeeklyStrategy");
