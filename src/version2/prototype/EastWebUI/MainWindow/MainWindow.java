@@ -747,8 +747,18 @@ public class MainWindow {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+
             setBackground(Color.YELLOW);
             setForeground(Color.YELLOW);
+            setToolTipText("Project is still processing ");
+
+            setBackground(Color.RED);
+            setForeground(Color.RED);
+            setToolTipText("Project has a fatal error (check log file or Progress UI)");
+
+            setBackground(Color.GREEN);
+            setForeground(Color.GREEN);
+            setToolTipText("Project is up to date");
 
             //todo: set up logic to change color base on status
 
@@ -786,6 +796,16 @@ public class MainWindow {
 
             button.setBackground(Color.YELLOW);
             button.setForeground(Color.YELLOW);
+            button.setToolTipText("Project is still processing ");
+
+            button.setBackground(Color.RED);
+            button.setForeground(Color.RED);
+            button.setToolTipText("Project has a fatal error (check log file or Progress UI)");
+
+            button.setBackground(Color.GREEN);
+            button.setForeground(Color.GREEN);
+            button.setToolTipText("Project is up to date");
+
 
             label = (value == null) ? "" : value.toString();
 
