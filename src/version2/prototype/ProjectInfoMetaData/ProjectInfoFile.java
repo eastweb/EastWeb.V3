@@ -683,7 +683,7 @@ public class ProjectInfoFile {
                         summary.indexOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ")));
                 if(summary.indexOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG) == -1)
                 {
-                    areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ").length());
+                    areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ").length());
                     if(areaValueField.endsWith(";")) {
                         areaValueField = areaValueField.substring(0, areaValueField.length() - 1);
                     }
@@ -692,8 +692,8 @@ public class ProjectInfoFile {
                 }
                 else
                 {
-                    areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ").length(),
-                            summary.indexOf(";", summary.indexOf(ProjectInfoSummary.AREA_VALUE_FIELD_TAG + ": ")));
+                    areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ").length(),
+                            summary.indexOf(";", summary.indexOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ")));
                     temporalSummaryCompositionStrategyClassName = summary.substring(summary.indexOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG + ": ") +
                             String.valueOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG + ": ").length());
                     if(temporalSummaryCompositionStrategyClassName.endsWith(";")) {

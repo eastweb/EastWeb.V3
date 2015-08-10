@@ -77,7 +77,9 @@ public class PluginMetaDataCollectionTester {
         ZoneId zid = ZoneId.of(downloadData.timeZone);
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
-        assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
+        if(downloadData.extraDownloads != null) {
+            assertEquals("ExtraDownloads list is not empty or null.", 0, downloadData.extraDownloads.size());
+        }
         assertTrue("OriginDate is " + downloadData.originDate.toString(), downloadData.originDate.toString().equals("2015-06-02"));
 
         Matcher matcher;
@@ -170,7 +172,9 @@ public class PluginMetaDataCollectionTester {
         zid = ZoneId.of(downloadData.timeZone);
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Central Time"));
         assertTrue("FilesPerDay is " + downloadData.filesPerDay, downloadData.filesPerDay == 1);
-        assertTrue("ExtraDownloads list is " + (downloadData.extraDownloads == null ? "NULL" : downloadData.extraDownloads.toString()), downloadData.extraDownloads == null);
+        if(downloadData.extraDownloads != null) {
+            assertEquals("ExtraDownloads list is not empty or null.", 0, downloadData.extraDownloads.size());
+        }
         assertEquals("OriginDate is not equal to the data's origin date.", dataOriginDate, downloadData.originDate);
 
         // TODO: Test downloadData.datePattern.

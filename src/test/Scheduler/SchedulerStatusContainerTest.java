@@ -287,14 +287,14 @@ public class SchedulerStatusContainerTest {
         assertEquals("Number of results for '" + pluginName2 + "' summary ID = " + summaryID2 + " incorrect.", new Integer(0), tempPlugin2.get(summaryID2));
 
         // Insert values
-        String insertUpdate = "INSERT INTO \"%s\".\"ZonalStat\" (\"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"ZoneMappingID\", \"ExpectedResultsID\", " +
-                "\"TemporalSummaryCompositionStrategyClass\", \"FilePath\", \"Count\", \"Max\", \"Mean\", \"Min\", \"SqrSum\", \"StdDev\", \"Sum\") VALUES " +
+        String insertUpdate = "INSERT INTO \"%s\".\"ZonalStat\" (\"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"ExpectedResultsID\", " +
+                "\"AreaCode\", \"AreaName\", \"FilePath\", \"Count\", \"Max\", \"Mean\", \"Min\", \"SqrSum\", \"StdDev\", \"Sum\") VALUES " +
                 "(?" +  // 1. ProjectSummaryID
                 ",?" +  // 2. DateGroupID
                 ",?" +  // 3. IndexID
-                ",?" +  // 4. ZoneMappingID
-                ",?" +  // 5. ExpectedResultsID
-                ",?" +  // 6. TemporalSummaryCompositionStrategyClass
+                ",?" +  // 4. ExpectedResultsID
+                ",?" +  // 5. AreaCode
+                ",?" +  // 6. AreaName
                 ",?" +  // 7. FilePath
                 ",?" +  // 8. Count
                 ",?" +  // 9. Max
@@ -310,8 +310,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path1");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -327,8 +327,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path2");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -342,8 +342,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path3");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -362,8 +362,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path4");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -377,8 +377,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path5");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -392,8 +392,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path6");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -409,8 +409,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path7");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -424,8 +424,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path8");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -439,8 +439,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path9");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -454,8 +454,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path10");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -518,14 +518,14 @@ public class SchedulerStatusContainerTest {
 
 
         // Insert values into ZonalStat
-        String insertUpdate = "INSERT INTO \"%s\".\"ZonalStat\" (\"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"ZoneMappingID\", \"ExpectedResultsID\", " +
-                "\"TemporalSummaryCompositionStrategyClass\", \"FilePath\", \"Count\", \"Max\", \"Mean\", \"Min\", \"SqrSum\", \"StdDev\", \"Sum\") VALUES " +
+        String insertUpdate = "INSERT INTO \"%s\".\"ZonalStat\" (\"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"ExpectedResultsID\", " +
+                "\"AreaCode\", \"AreaName\", \"FilePath\", \"Count\", \"Max\", \"Mean\", \"Min\", \"SqrSum\", \"StdDev\", \"Sum\") VALUES " +
                 "(?" +  // 1. ProjectSummaryID
                 ",?" +  // 2. DateGroupID
                 ",?" +  // 3. IndexID
-                ",?" +  // 4. ZoneMappingID
-                ",?" +  // 5. ExpectedResultsID
-                ",?" +  // 6. TemporalSummaryCompositionStrategyClass
+                ",?" +  // 4. ExpectedResultsID
+                ",?" +  // 5. AreaCode
+                ",?" +  // 6. AreaName
                 ",?" +  // 7. FilePath
                 ",?" +  // 8. Count
                 ",?" +  // 9. Max
@@ -541,8 +541,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path1");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -558,8 +558,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path2");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -573,8 +573,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path3");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -593,8 +593,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path4");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -608,8 +608,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path5");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -623,8 +623,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path6");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -640,8 +640,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path7");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -655,8 +655,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path8");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -670,8 +670,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path9");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);
@@ -685,8 +685,8 @@ public class SchedulerStatusContainerTest {
         pStmt.setInt(2, 1);
         pStmt.setInt(3, 1);
         pStmt.setInt(4, 1);
-        pStmt.setInt(5, 1);
-        pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
+        pStmt.setInt(5, 11);
+        pStmt.setString(6, "AreaName");
         pStmt.setString(7, "File Path10");
         pStmt.setDouble(8, 1);
         pStmt.setDouble(9, 2);

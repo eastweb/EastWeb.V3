@@ -11,19 +11,19 @@ import java.io.Serializable;
 public class ZonalSummary implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String shapeFile;
-    private final String areaValueField;
+    private final String areaIDField;
     private final String areaNameField;
 
     /**
      * Creates a ZonalSummary object pairing of shape file and zone field.
      *
      * @param shapeFile  - shape file to be used in this zonal summary
-     * @param areaValueField
+     * @param areaIDField
      * @param areaNameField
      */
-    public ZonalSummary(String shapeFile, String areaValueField, String areaNameField) {
+    public ZonalSummary(String shapeFile, String areaIDField, String areaNameField) {
         this.shapeFile = shapeFile;
-        this.areaValueField = areaValueField;
+        this.areaIDField = areaIDField;
         this.areaNameField = areaNameField;
     }
 
@@ -37,12 +37,22 @@ public class ZonalSummary implements Serializable {
     }
 
     /**
-     * Gets the paired area value field.
+     * @deprecated
+     * Gets the paired area ID field.
      *
-     * @return zone field name
+     * @return area ID
      */
+    @Deprecated
     public String GetAreaValueField() {
-        return areaValueField;
+        return areaIDField;
+    }
+
+    /**
+     * Gets the paired area code field.
+     * @return area code field
+     */
+    public String GetAreaCodeField() {
+        return areaIDField;
     }
 
     /**
@@ -60,8 +70,8 @@ public class ZonalSummary implements Serializable {
     @Override
     public String toString() {
         return String.format(
-                "[shapefile=%s, areaValueField=%s, areaNameField=%s]",
-                shapeFile, areaValueField, areaNameField
+                "[shapefile=%s, areaIDField=%s, areaNameField=%s]",
+                shapeFile, areaIDField, areaNameField
                 );
     }
 }

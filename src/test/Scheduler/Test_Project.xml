@@ -33,6 +33,6 @@
 	<HeatingDate>Sat Aug 01 00:00:00 CDT 2015</HeatingDate>
 	<HeatingDegree>100.1</HeatingDegree>
 	<Summaries>
-        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Desktop\EASTWeb\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Desktop\EASTWeb\shapefile\shapefile.shp; AreaIDField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>

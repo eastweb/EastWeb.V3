@@ -88,8 +88,8 @@ public class FileSystemTest {
          * Expected Result Form:
          *  workingDir + "/Projects/" + FileSystem.StandardizeName(testProjectName) + "/"
          */
-        assertTrue("ProjectDirectoryPath is '" + FileSystem.GetProjectDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName) + "'",
-                FileSystem.GetProjectDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName).equals(testProjectInfo.GetWorkingDir() + "/Projects/" + FileSystem.StandardizeName(testProjectName) + "/"));
+        assertEquals("ProjectDirectoryPath is incorrect.", testProjectInfo.GetWorkingDir() + "Projects\\" + FileSystem.StandardizeName(testProjectName) + "\\",
+                FileSystem.GetProjectDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName));
     }
 
     /**
@@ -103,13 +103,12 @@ public class FileSystemTest {
          */
         ArrayList<String> expectedResults = new ArrayList<String>(4);
         for(ProcessName name : testProcessNames) {
-            expectedResults.add(testProjectInfo.GetWorkingDir() + "/Projects/" + FileSystem.StandardizeName(testProjectName) + "/" + FileSystem.StandardizeName(testPluginName) + "/" + name + "/");
+            expectedResults.add(testProjectInfo.GetWorkingDir() + "Projects\\" + FileSystem.StandardizeName(testProjectName) + "\\" + FileSystem.StandardizeName(testPluginName) + "\\" + name + "\\");
         }
 
         // Test
         for(int i=0; i < testProcessNames.size(); i++) {
-            assertTrue("ProcessDirectoryPath is '" + FileSystem.GetProcessDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)) + "'",
-                    FileSystem.GetProcessDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)).equals(expectedResults.get(i)));
+            assertEquals("ProcessDirectoryPath is incorrect.", expectedResults.get(i), FileSystem.GetProcessDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)));
         }
     }
 
@@ -124,13 +123,12 @@ public class FileSystemTest {
          */
         ArrayList<String> expectedResults = new ArrayList<String>(4);
         for(ProcessName name : testProcessNames) {
-            expectedResults.add(testProjectInfo.GetWorkingDir() + "/Projects/" + FileSystem.StandardizeName(testProjectName) + "/" + FileSystem.StandardizeName(testPluginName) + "/" + name + "/Output/");
+            expectedResults.add(testProjectInfo.GetWorkingDir() + "Projects\\" + FileSystem.StandardizeName(testProjectName) + "\\" + FileSystem.StandardizeName(testPluginName) + "\\" + name + "\\Output\\");
         }
 
         // Test
         for(int i=0; i < testProcessNames.size(); i++) {
-            assertTrue("ProcessOutputDirectoryPath is '" + FileSystem.GetProcessOutputDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)) + "'",
-                    FileSystem.GetProcessOutputDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)).equals(expectedResults.get(i)));
+            assertEquals("ProcessOutputDirectoryPath is incorrect", expectedResults.get(i), FileSystem.GetProcessOutputDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)));
         }
     }
 
@@ -145,13 +143,13 @@ public class FileSystemTest {
          */
         ArrayList<String> expectedResults = new ArrayList<String>(4);
         for(ProcessName name : testProcessNames) {
-            expectedResults.add(testProjectInfo.GetWorkingDir() + "/Projects/" + FileSystem.StandardizeName(testProjectName) + "/" + FileSystem.StandardizeName(testPluginName) + "/" + name + "/Temp/");
+            expectedResults.add(testProjectInfo.GetWorkingDir() + "Projects\\" + FileSystem.StandardizeName(testProjectName) + "\\" + FileSystem.StandardizeName(testPluginName) + "\\" + name + "\\Temp\\");
         }
 
         // Test
         for(int i=0; i < testProcessNames.size(); i++) {
-            assertTrue("ProcessWorkerTempDirectoryPath is '" + FileSystem.GetProcessWorkerTempDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i))
-                    + "'", FileSystem.GetProcessWorkerTempDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)).equals(expectedResults.get(i)));
+            assertEquals("ProcessWorkerTempDirectoryPath is incorrect.", expectedResults.get(i),
+                    FileSystem.GetProcessWorkerTempDirectoryPath(testProjectInfo.GetWorkingDir(), testProjectName, testPluginName, testProcessNames.get(i)));
         }
     }
 
@@ -165,8 +163,7 @@ public class FileSystemTest {
          * Expected Result Form:
          *  testConfigInstance.getDownloadDir() + "/" + FileSystem.StandardizeName(testPluginName) + "/"
          */
-        assertTrue("GlobalDownloadDirectory is '" + FileSystem.GetGlobalDownloadDirectory(testConfigInstance, testPluginName) + "'",
-                FileSystem.GetGlobalDownloadDirectory(testConfigInstance, testPluginName).equals(testConfigInstance.getDownloadDir() + "/" + FileSystem.StandardizeName(testPluginName) + "/"));
+        assertEquals("GlobalDownloadDirectory is incorrect.", testConfigInstance.getDownloadDir() + FileSystem.StandardizeName(testPluginName) + "\\", FileSystem.GetGlobalDownloadDirectory(testConfigInstance, testPluginName));
     }
 
 }

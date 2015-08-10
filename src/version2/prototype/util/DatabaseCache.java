@@ -361,9 +361,12 @@ public class DatabaseCache extends Observable{
                     " AND C.\"DownloadExtraID\" IS NULL",
                     globalEASTWebSchema,
                     mSchemaName));
-            for(String tile : modisTileNames)
+            if(modisTileNames != null)
             {
-                query.append(" AND D.\"FilePath\" LIKE '%" + tile + "%'");
+                for(String tile : modisTileNames)
+                {
+                    query.append(" AND D.\"FilePath\" LIKE '%" + tile + "%'");
+                }
             }
 
             // Execute Download to DownloadCache insert and get number of rows effected

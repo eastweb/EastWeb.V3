@@ -41,7 +41,7 @@ public class DatabaseCacheTest {
     private static DatabaseCache testIndicesCache;
     private static ArrayList<String> extraDownloadFiles;
     private static String testProjectName = "Test_Project1";
-    private static String testPluginName = "Test_Plugin1";
+    private static String testPluginName = "Test_Modis";
     private static String testGlobalSchema = "Test_EASTWeb1";
     private static Connection con;
     private static int year = 2015;

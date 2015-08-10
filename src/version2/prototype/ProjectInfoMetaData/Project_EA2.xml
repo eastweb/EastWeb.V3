@@ -42,6 +42,6 @@
 	<Summaries>
 		<Summary ID="1">AreaNameField: WID; Shape File Path:
 			C:\Users\veronica\Documents\32-bit\workspace\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp;
-			AreaValueField: WID;; Temporal Summary: GregorianWeeklyStrategy</Summary>
+			AreaIDField: WID;; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>

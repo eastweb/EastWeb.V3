@@ -333,8 +333,8 @@ public class MainWindow {
                 new Object[] { "Project Progress", " Total Progress", "Intermidiate Selection", "Actions", "Delete" });
 
         JTable table = new JTable(defaultTableModel);
-        table.getColumn("Projects").setCellRenderer(new ProgressButtonRenderer());
-        table.getColumn("Projects").setCellEditor(new ProgressButtonEditor(new JCheckBox()));
+        table.getColumn("Project Progress").setCellRenderer(new ProgressButtonRenderer());
+        table.getColumn("Project Progress").setCellEditor(new ProgressButtonEditor(new JCheckBox()));
 
         table.getColumn("Actions").setMaxWidth(50);
         table.getColumn("Actions").setCellRenderer(new ActionButtonRenderer());

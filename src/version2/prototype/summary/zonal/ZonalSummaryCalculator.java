@@ -42,9 +42,10 @@ import version2.prototype.util.Schemas;
  */
 public class ZonalSummaryCalculator {
     private final File mRasterFile;
-    private final File mLayerFile;
+    private final String shapeFilePath;
     private final File mTableFile;
-    private final String mField;
+    private final String areaIDField;
+    private final String areaNameField;
     private final SummariesCollection summariesCollection;
     private final String globalSchema;
     private final String projectName;
@@ -56,21 +57,27 @@ public class ZonalSummaryCalculator {
 
     /**
      * Creates a ZonalSummaryCalculator.
+     * @param globalSchema
+     * @param workingDir
      *
      * @param projectName  - current project's name
+     * @param pluginName
+     * @param indexNm
+     * @param year
+     * @param day
      * @param inRasterFile  - input raster file
-     * @param inShapeFile  - input shape file
      * @param outTableFile  - where to write output to
-     * @param zoneField  - zone field name to use
      * @param summariesCollection  - collection of summary calculations to run on raster data
+     * @param summary
      */
-    public ZonalSummaryCalculator(String globalSchema, String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile, File inShapeFile,
-            File outTableFile, String zoneField, SummariesCollection summariesCollection, ProjectInfoSummary summary)
+    public ZonalSummaryCalculator(String globalSchema, String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile,
+            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary)
     {
         mRasterFile = inRasterFile;
-        mLayerFile = inShapeFile;
         mTableFile = outTableFile;
-        mField = zoneField;
+        shapeFilePath = summary.GetZonalSummary().GetShapeFile();
+        areaIDField = summary.GetZonalSummary().GetAreaCodeField();
+        areaNameField = summary.GetZonalSummary().GetAreaNameField();
         this.summariesCollection = summariesCollection;
         this.globalSchema = globalSchema;
         this.projectName = projectName;
@@ -97,22 +104,22 @@ public class ZonalSummaryCalculator {
             try {
                 // Open inputs
                 raster = gdal.Open(mRasterFile.getPath()); GdalUtils.errorCheck();
-                layerSource = ogr.Open(mLayerFile.getPath());
+                layerSource = ogr.Open(shapeFilePath);
                 if (layerSource == null) {
-                    throw new IOException("Could not load " + mLayerFile.getPath());
+                    throw new IOException("Could not load " + shapeFilePath);
                 }
                 layer = layerSource.GetLayer(0);
                 if (layer == null) {
-                    throw new IOException("Could not load layer 0 of " + mLayerFile.getPath());
+                    throw new IOException("Could not load layer 0 of " + shapeFilePath);
                 }
 
                 // Validate inputs
                 if (!isSameProjection(raster, layer)) {
-                    throw new IOException("\"" + mRasterFile.getPath() + "\" isn't in same projection as \"" + mLayerFile.getPath() + "\"");
+                    throw new IOException("\"" + mRasterFile.getPath() + "\" isn't in same projection as \"" + shapeFilePath + "\"");
                 }
 
                 if (!isLayerSubsetOfRaster(layer, raster)) {
-                    throw new IOException("\"" + mLayerFile.getPath() + "\" isn't a subset of \"" + mRasterFile.getPath() + "\".");
+                    throw new IOException("\"" + shapeFilePath + "\" isn't a subset of \"" + mRasterFile.getPath() + "\".");
                 }
 
                 // Create the zone raster
@@ -128,7 +135,7 @@ public class ZonalSummaryCalculator {
                 writeTable(layer, countMap);
 
                 // Write to database
-                uploadResultsToDb(globalSchema, projectName, mRasterFile.getPath(), layer, mLayerFile.getPath(), mField, countMap);
+                uploadResultsToDb(globalSchema, projectName, mRasterFile.getPath(), layer, shapeFilePath, areaIDField, countMap);
             } finally { // Clean up
                 if (raster != null) {
                     raster.delete(); GdalUtils.errorCheck();
@@ -249,7 +256,7 @@ public class ZonalSummaryCalculator {
 
         // Burn the values
         Vector<String> options = new Vector<String>();
-        options.add("ATTRIBUTE=" + mField);
+        options.add("ATTRIBUTE=" + areaIDField);
 
         gdal.RasterizeLayer(zoneRaster, new int[] {1}, layer, null, options); GdalUtils.errorCheck();
 
@@ -321,7 +328,7 @@ public class ZonalSummaryCalculator {
         }
 
         while (feature != null) {
-            int zone = feature.GetFieldAsInteger(mField); GdalUtils.errorCheck();
+            int zone = feature.GetFieldAsInteger(areaIDField); GdalUtils.errorCheck();
             if (countMap.get(zone) != null && countMap.get(zone) != 0) {
                 writer.print(zone + ",");
                 for(int i=0; i < results.size(); i++){
@@ -338,7 +345,7 @@ public class ZonalSummaryCalculator {
         writer.close();
     }
 
-    private void uploadResultsToDb(String globalSchema, String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String field,
+    private void uploadResultsToDb(String globalSchema, String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String areaIDField,
             Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException,
             ClassNotFoundException, ParserConfigurationException, SAXException {
         final Connection conn = PostgreSQLConnection.getConnection();
@@ -346,180 +353,72 @@ public class ZonalSummaryCalculator {
         final boolean previousAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
-        //        String index = "";
-        //        int year = -1;
-        //        int day = -1;
-        //
-        //        // C:\Users\michael.devos\Desktop\eastweb-data\projects\tw_test\indices\trmm\2013\204\TW_DIS_F_P_Dis_REGION
-        //        // Get position of index folder found after project name folder and index folder name
-        //        int pos = rasterFilePath.indexOf("\\", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
-        //        if(pos == -1) {
-        //            pos = rasterFilePath.indexOf("/", rasterFilePath.indexOf(projectName) + projectName.length() + 1) + 1;
-        //        }
-        //
-        //        index = rasterFilePath.substring(pos, rasterFilePath.indexOf(File.separator, pos));
-        //        year = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 1, rasterFilePath.indexOf(File.separator, pos + index.length() + 1)));
-        //        day = Integer.parseInt(rasterFilePath.substring(pos + index.length() + 6, rasterFilePath.indexOf(File.separator, pos + index.length() + 6)));
 
         try {
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
-            int indexKey = Schemas.getIndexID(globalSchema, indexNm, stmt);
+            int indexID = Schemas.getIndexID(globalSchema, indexNm, stmt);
             layer.ResetReading(); GdalUtils.errorCheck();
             Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
-            Map<Integer, Double> sumMap = new HashMap<Integer, Double>();
-            Map<Integer, Double> meanMap = new HashMap<Integer, Double>();
-            Map<Integer, Double> stdDevMap = new HashMap<Integer, Double>();
-            String insertUpdate = "INSERT INTO \"%s\".\"ZonalStat\" (\"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"ZoneMappingID\", \"ExpectedResultsID\", " +
-                    "\"TemporalSummaryCompositionStrategyClass\", \"FilePath\", \"Count\", \"Max\", \"Mean\", \"Min\", \"SqrSum\", \"StdDev\", \"Sum\") VALUES " +
-                    "(?" +  // 1. ProjectSummaryID
-                    ",?" +  // 2. DateGroupID
-                    ",?" +  // 3. IndexID
-                    ",?" +  // 4. ZoneMappingID
-                    ",?" +  // 5. ExpectedResultsID
-                    ",?" +  // 6. TemporalSummaryCompositionStrategyClass
-                    ",?" +  // 7. FilePath
-                    ",?" +  // 8. Count
-                    ",?" +  // 9. Max
-                    ",?" +  // 10. Mean
-                    ",?" +  // 11. Min
-                    ",?" +  // 12. SqrSum
-                    ",?" +  // 13. StdDev
-                    ",?" +  // 14. Sum
-                    ");";
-            PreparedStatement pStmt = conn.prepareStatement(String.format(insertUpdate, mSchemaName));
+            StringBuilder insertUpdate = new StringBuilder("INSERT INTO \"%s\".\"ZonalStat\" ("
+                    + "\"ProjectSummaryID\", "
+                    + "\"AreaName\", "
+                    + "\"AreaCode\", "
+                    + "\"DateGroupID\", "
+                    + "\"IndexID\", "
+                    + "\"ExpectedResultsID\", "
+                    + "\"FilePath\""
+                    );
+            for(SummaryNameResultPair result : results)
+            {
+                insertUpdate.append(", \"" + result.getSimpleName() + "\"");
+            }
+            insertUpdate.append(") VALUES (" +
+                    "?" +   // 1. ProjectSummaryID
+                    ",?" +  // 2. AreaName
+                    ",?" +  // 3. AreaCode
+                    ",?" +  // 4. DateGroupID
+                    ",?" +  // 5. IndexID
+                    ",?" +  // 6. ExpectedResultsID
+                    ",?");  // 7. FilePath
+            for(SummaryNameResultPair result : results)
+            {
+                insertUpdate.append(",?");
+            }
+
+            PreparedStatement pStmt = conn.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
+            int areaCode;
+            String areaName;
             while (feature != null)
             {
-                int zone = feature.GetFieldAsInteger(mField); GdalUtils.errorCheck();
-                if (countMap.get(zone) != null && countMap.get(zone) != 0)
+                areaCode = feature.GetFieldAsInteger(areaIDField);
+                GdalUtils.errorCheck();
+                areaName = feature.GetFieldAsString(areaNameField);
+                GdalUtils.errorCheck();
+                if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0)
                 {
-                    for(SummaryNameResultPair pair : results){
-                        System.out.println(pair.toString());
-                        switch(pair.getSimpleName())
-                        {
-                        case "Sum": sumMap = pair.getResult(); break;
-                        case "Mean": meanMap = pair.getResult(); break;
-                        case "StdDev": stdDevMap = pair.getResult(); break;
-                        }
-
-                        if(pair.getSimpleName().equalsIgnoreCase("Count")) {
-                            countMap = pair.getResult();
-                        }
-                    }
-
-                    final int zoneId = getZoneId(conn, mSchemaName, getZoneFieldId(conn, mSchemaName, shapefilePath, field), zone);
-
                     // Insert values
                     int projectSummaryID = Schemas.getProjectSummaryID(globalSchema, projectName, summary.GetID(), stmt);
-                    //                    pStmt.setInt(1, projectSummaryID);
-                    //                    pStmt.setInt(2, Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt));
-                    //                    pStmt.setInt(3, indexKey);
-                    //                    pStmt.setInt(4, Schemas.get);
-                    //                    pStmt.setInt(5, Schemas.getExpectedResultsID(globalSchema, projectSummaryID, Schemas.getPluginID(globalSchema, pluginName, stmt), stmt));
-                    //                    pStmt.setString(6, "TemporalSummaryCompositionStrategyClass");
-                    //                    pStmt.setString(7, "File Path1");
-                    //                    pStmt.setDouble(8, 1);
-                    //                    pStmt.setDouble(9, 2);
-                    //                    pStmt.setDouble(10, 3);
-                    //                    pStmt.setDouble(11, 4);
-                    //                    pStmt.setDouble(12, 5);
-                    //                    pStmt.setDouble(13, 6);
-                    //                    pStmt.setDouble(14, 7);
-                    //                    pStmt.addBatch();
-
-
-                    //                    _query = String.format(
-                    //                            "SELECT COUNT(*)\n" +
-                    //                                    "FROM \"%1$s\".\"ZonalStats\"\n" +
-                    //                                    "WHERE\n" +
-                    //                                    "  \"index\" = ? AND\n" +
-                    //                                    "  \"year\" = ? AND\n" +
-                    //                                    "  \"day\" = ? AND\n" +
-                    //                                    "  \"zoneID\" = ?\n",
-                    //                                    mSchemaName
-                    //                            );
-                    //                    final PreparedStatement psExists = conn.prepareStatement(_query);
-                    //                    psExists.setInt(1, indexKey);
-                    //                    psExists.setInt(2, year);
-                    //                    psExists.setInt(3, day);
-                    //                    psExists.setInt(4, zoneId);
-                    //                    final ResultSet rsExists = psExists.executeQuery();
-                    //                    final int numMatchingRows;
-                    //                    try {
-                    //                        if (!rsExists.next()) {
-                    //                            throw new SQLException("Expected one result row");
-                    //                        }
-                    //                        numMatchingRows = rsExists.getInt(1);
-                    //                    } finally {
-                    //                        rsExists.close();
-                    //                    }
-                    //
-                    //                    if (numMatchingRows == 0) {
-                    //                        _query = String.format(
-                    //                                "INSERT INTO \"%1$s\".\"ZonalStats\" (\n" +
-                    //                                        "  \"index\",\n" +
-                    //                                        "  \"year\",\n" +
-                    //                                        "  \"day\",\n" +
-                    //                                        "  \"zoneID\",\n" +
-                    //                                        "  \"Count\",\n" +
-                    //                                        "  \"Sum\",\n" +
-                    //                                        "  \"Mean\",\n" +
-                    //                                        "  \"StdDev\"\n" +
-                    //                                        ") VALUES (\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?,\n" +
-                    //                                        "  ?\n" +
-                    //                                        ")",
-                    //                                        mSchemaName
-                    //                                );
-                    //                        final PreparedStatement psInsert = conn.prepareStatement(_query);
-                    //                        psInsert.setInt(1, indexKey);
-                    //                        psInsert.setInt(2, year);
-                    //                        psInsert.setInt(3, day);
-                    //                        psInsert.setInt(4, zoneId);
-                    //                        psInsert.setDouble(5, countMap.get(zone));
-                    //                        psInsert.setDouble(6, sumMap.get(zone));
-                    //                        psInsert.setDouble(7, meanMap.get(zone));
-                    //                        psInsert.setDouble(8, stdDevMap.get(zone));
-                    //                        psInsert.executeUpdate();
-                    //                    } else {
-                    //                        _query = String.format(
-                    //                                "UPDATE \"%1$s\".\"ZonalStats\"\n" +
-                    //                                        "SET\n" +
-                    //                                        "  \"count\" = ?,\n" +
-                    //                                        "  \"sum\" = ?,\n" +
-                    //                                        "  \"mean\" = ?,\n" +
-                    //                                        "  \"stdev\" = ?\n" +
-                    //                                        "WHERE\n" +
-                    //                                        "  \"index\" = ? AND\n" +
-                    //                                        "  \"year\" = ? AND\n" +
-                    //                                        "  \"day\" = ? AND\n" +
-                    //                                        "  \"zoneID\" = ?\n",
-                    //                                        mSchemaName
-                    //                                );
-                    //                        final PreparedStatement psUpdate = conn.prepareStatement(_query);
-                    //                        psUpdate.setDouble(1, countMap.get(zone));
-                    //                        psUpdate.setDouble(2, sumMap.get(zone));
-                    //                        psUpdate.setDouble(3, meanMap.get(zone));
-                    //                        psUpdate.setDouble(4, stdDevMap.get(zone));
-                    //                        psUpdate.setInt(5, indexKey);
-                    //                        psUpdate.setInt(6, year);
-                    //                        psUpdate.setInt(7, day);
-                    //                        psUpdate.setInt(8, zoneId);
-                    //                        psUpdate.executeUpdate();
-                    //                    }
+                    pStmt.setInt(1, projectSummaryID);
+                    pStmt.setString(2, areaName);
+                    pStmt.setInt(3, areaCode);
+                    pStmt.setInt(4, Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt));
+                    pStmt.setInt(5, indexID);
+                    pStmt.setInt(6, Schemas.getExpectedResultsID(globalSchema, projectSummaryID, Schemas.getPluginID(globalSchema, pluginName, stmt), stmt));
+                    pStmt.setString(7, "File Path1");
+                    SummaryNameResultPair pair;
+                    for(int i=0; i < results.size(); i++)
+                    {
+                        pair = results.get(i);
+                        pStmt.setDouble(8 + i, pair.getResult().get(areaCode));
+                    }
+                    pStmt.addBatch();
                 }
 
                 feature = layer.GetNextFeature(); GdalUtils.errorCheck();
             }
-            //            pStmt.executeBatch();
+            pStmt.executeBatch();
             pStmt.close();
-
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();
@@ -528,156 +427,6 @@ public class ZonalSummaryCalculator {
             conn.setAutoCommit(previousAutoCommit);
             stmt.close();
             conn.close();
-        }
-    }
-
-    /**
-     * Looks up the zoneFieldID for the specified (shapefile, field) pair. Returns null if there is no matching record.
-     *
-     * @throws SQLException
-     * @param conn  - database connection
-     * @param mSchemaName  - name of schema for this zonal summary
-     * @param shapefile  - the currently used shape file
-     * @param field  - zonal field to use
-     * @return field ID of zone field.
-     * @throws SQLException
-     */
-    public Integer lookupZoneFieldId(Connection conn, String mSchemaName, String shapefile, String field) throws SQLException {
-        String _query = String.format(
-                "SELECT \"zoneFieldID\"\n" +
-                        "FROM \"%1$s\".\"ZoneFields\"\n" +
-                        "WHERE \"shapefile\" = ? AND \"field\" = ?",
-                        mSchemaName
-                );
-        final PreparedStatement ps = conn.prepareStatement(_query);
-        ps.setString(1, shapefile);
-        ps.setString(2, field);
-
-        final ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Looks up the zoneFieldID for the specified (shapefile, field) pair. A new zoneFieldID is created if there is no matching record. Do this in a transaction!
-     *
-     * @throws SQLException
-     * @param conn  - database connection
-     * @param mSchemaName  - name of schema for this zonal summary
-     * @param shapefile  - the currently used shape file
-     * @param field  - zonal field to use
-     * @return ID of a zone field
-     * @throws SQLException
-     */
-    public int getZoneFieldId(Connection conn, String mSchemaName, String shapefile, String field) throws SQLException {
-        Integer lookup = lookupZoneFieldId(conn, mSchemaName, shapefile, field);
-        if (lookup != null) {
-            return lookup;
-        }
-
-        String _query = String.format(
-                "INSERT INTO \"%1$s\".\"ZoneFields\" (\n" +
-                        "  \"shapefile\",\n" +
-                        "  \"field\"\n" +
-                        ") VALUES (\n" +
-                        "  ?,\n" +
-                        "  ?\n" +
-                        ")",
-                        mSchemaName
-                );
-        final PreparedStatement ps = conn.prepareStatement(_query);
-        ps.setString(1, shapefile);
-        ps.setString(2, field);
-        ps.executeUpdate();
-
-        _query = String.format(
-                "SELECT currval(\"%1$s\".\"ZoneFields_zoneFieldID_seq\")",
-                mSchemaName
-                );
-        final ResultSet rs = conn.prepareStatement(_query).executeQuery();
-
-        if (rs.next()) {
-            return rs.getInt(1);
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * Looks up the ZoneID for the specified (zoneFieldID, zone) pair. Returns null if there is no matching record.
-     *
-     * @throws SQLException
-     * @param conn  - database connection
-     * @param mSchemaName  - name of schema for this zonal summary
-     * @param zoneFieldId  - ID of zone field within database
-     * @param zone  - field name associated with the zoneFieldId
-     * @return zone ID for zoneFieldID and zone pairing, null if none exists.
-     * @throws SQLException
-     */
-    public Integer lookupZoneId(Connection conn, String mSchemaName, int zoneFieldId, int zone) throws SQLException {
-        String _query = String.format(
-                "SELECT \"zoneID\"\n" +
-                        "FROM \"%1$s\".\"Zones\"\n" +
-                        "WHERE \"zoneFieldID\" = ? AND \"name\" = ?",
-                        mSchemaName
-                );
-        final PreparedStatement ps = conn.prepareStatement(_query);
-        ps.setInt(1, zoneFieldId);
-        ps.setInt(2, zone);
-
-        final ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Looks up the zoneID for the specified (zoneFieldID, zone) pair. A new zoneID is created if there is no matching record. Do this in a transaction!
-     *
-     * @throws SQLException
-     * @param conn  - database connection
-     * @param mSchemaName  - name of schema for this zonal summary
-     * @param zoneFieldId  - ID of zone field within database
-     * @param zone  - field name associated with the zoneFieldId
-     * @return zone ID for zoneFieldID and zone pairing, null if none exists.
-     * @throws SQLException
-     */
-    public int getZoneId(Connection conn, String mSchemaName, int zoneFieldId, int zone) throws SQLException {
-        Integer lookup = lookupZoneId(conn, mSchemaName, zoneFieldId, zone);
-        if (lookup != null) {
-            return lookup;
-        }
-
-        String _query = String.format(
-                "INSERT INTO \"%1$s\".\"Zones\" (\n" +
-                        "  \"zoneFieldID\",\n" +
-                        "  \"fieldID\"\n" +
-                        ") VALUES (\n" +
-                        "  ?,\n" +
-                        "  ?\n" +
-                        ")",
-                        mSchemaName
-                );
-        final PreparedStatement ps = conn.prepareStatement(_query);
-        ps.setInt(1, zoneFieldId);
-        ps.setInt(2, zone);
-        ps.executeUpdate();
-
-        _query = String.format(
-                "SELECT currval(\"%1$s\".\"Zones_zoneID_seq\")",
-                mSchemaName
-                );
-        final ResultSet rs = conn.prepareStatement(_query).executeQuery();
-
-        if (rs.next()) {
-            return rs.getInt(1);
-        } else {
-            return 0;
         }
     }
 }

@@ -34,6 +34,6 @@
 <FalseNothing>0.0</FalseNothing>
 <ScalingFactor>0.9996</ScalingFactor>
 <Summaries>
-	<Summary ID="1">AreaNameField: N_ID2; Shape File Path: D:\testProjects\TW\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaValueField: N_ID2;; Temporal Summary: GregorianWeeklyStrategy</Summary>
+	<Summary ID="1">AreaNameField: N_ID2; Shape File Path: D:\testProjects\TW\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaCodeField: N_ID2;; Temporal Summary: GregorianWeeklyStrategy</Summary>
 </Summaries>
 </ProjectInfo>

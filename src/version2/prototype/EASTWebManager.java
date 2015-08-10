@@ -2,7 +2,9 @@ package version2.prototype;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -27,6 +29,8 @@ import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
+import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.Schemas;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -320,6 +324,46 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         }while((msBeetweenUpdates > 0) && !manualUpdate);
         manualUpdate = false;
         justCreateNewSchedulers = false;
+    }
+
+    public static ArrayList<String> GetRegisteredTemporalSummaryCompositionStrategies()
+    {
+        ArrayList<String> strategyNames = new ArrayList<String>();
+        String selectQuery = "SELECT \"Name\" FROM \"" + Config.getInstance().getGlobalSchema() + "\".\"TemporalSummaryCompositionStrategy\"";
+        ResultSet rs;
+        Statement stmt;
+
+        // Add missing TemporalCompositionStrategies
+        // TODO: Need to set this up to look in a predefined directory for these java files at runtime, compile them, and then load them before adding them to this list. Should also remove newly missing ones.
+        // SEE PluginMetaDataCollection.getXMLFiles for possibility.
+        // SEE: http://stackoverflow.com/questions/21544446/how-do-you-dynamically-compile-and-load-external-java-classes
+        // SEE: http://stackoverflow.com/questions/2946338/how-do-i-programmatically-compile-and-instantiate-a-java-class
+        // SEE: http://docs.oracle.com/javase/7/docs/api/javax/tools/JavaCompiler.html
+
+        //        try {
+        //            stmt = PostgreSQLConnection.getConnection().createStatement();
+        //
+        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "GregorianWeeklyStrategy", stmt);
+        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "GregorianMonthlyStrategy", stmt);
+        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "CDCWeeklyStrategy", stmt);
+        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "WHOWeeklyStrategy", stmt);
+        //
+        //            rs = stmt.executeQuery(selectQuery);
+        //            if(rs != null)
+        //            {
+        //                while(rs.next())
+        //                {
+        //                    strategyNames.add(rs.getString("Name"));
+        //                }
+        //            }
+        //        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+        //            ErrorLog.add(Config.getInstance(), "Problem while getting list of registered TemporalSummaryCompositionStragies.", e);
+        //        }
+        strategyNames.add("GregorianWeeklyStrategy");
+        strategyNames.add("GregorianMonthlyStrategy");
+        strategyNames.add("CDCWeeklyStrategy");
+        strategyNames.add("WHOWeeklyStrategy");
+        return strategyNames;
     }
 
     /**

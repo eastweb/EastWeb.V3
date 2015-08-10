@@ -34,7 +34,9 @@
 	<FalseNothing>0.0</FalseNothing>
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: R_NAME; Shape File Path: C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaValueField: R_NAME;</Summary>
-		<!-- <Summary ID="1">AreaNameField: R_NAME; Shape File Path: C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaValueField: R_NAME;; Temporal Summary: GregorianWeeklyStrategy</Summary> -->
+		<Summary ID="1">AreaNameField: R_NAME; Shape File Path: C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; 
+			AreaIDField: R_NAME;</Summary>
+		<Summary ID="2">AreaNameField: R_NAME; Shape File Path: C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; 
+			AreaIDField: R_NAME;; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>
