@@ -117,7 +117,9 @@ public class Schemas {
                 String strategyName;
                 for(ProjectInfoSummary summary : summaries) {
                     strategyName = summary.GetTemporalSummaryCompositionStrategyClassName();
-                    strategyName = strategyName.substring(strategyName.lastIndexOf(".") + 1);
+                    if(strategyName != null) {
+                        strategyName = strategyName.substring(strategyName.lastIndexOf(".") + 1);
+                    }
                     addProjectSummaryID(globalEASTWebSchema, projectName, summary.GetID(), summary.GetZonalSummary().GetAreaNameField(), summary.GetZonalSummary().GetShapeFile(),
                             summary.GetZonalSummary().GetAreaCodeField(), strategyName, stmt);
                 }
