@@ -162,12 +162,12 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                         null, startDate, downloaderClassName), projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
 
         // Setup and precheck
-        int projectID = Schemas.getProjectID(testGlobalSchema, testProjectName, stmt);
+        int projectSummaryID = Schemas.getProjectSummaryID(testGlobalSchema, testProjectName, summaries.get(0).GetID(), stmt);
         int pluginID = Schemas.getPluginID(testGlobalSchema, testPluginName, stmt);
-        int temporalStrategyId = Schemas.getTemporalSummaryCompositionStrategyID(testGlobalSchema, temporalSummaryCompositionStrategyClass, stmt);
-        int expectedResultsId = Schemas.getExpectedResultsID(testGlobalSchema, projectID, pluginID, temporalStrategyId, stmt);
+        int expectedResultsId = Schemas.getExpectedResultsID(testGlobalSchema, projectSummaryID, pluginID, stmt);
         String selectResultsQuery = "SELECT E.*, T.\"Name\" FROM \"" + testGlobalSchema + "\".\"ExpectedResults\" E " +
-                "INNER JOIN \"" + testGlobalSchema + "\".\"TemporalSummaryCompositionStrategy\" T ON E.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\" " +
+                "INNER JOIN \"" + testGlobalSchema + "\".\"ProjectSummary\" P ON E.\"ProjectSummaryID\" = P.\"ProjectSummaryID\" " +
+                "INNER JOIN \"" + testGlobalSchema + "\".\"TemporalSummaryCompositionStrategy\" T ON P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\" " +
                 "WHERE \"ExpectedResultsID\" = " + expectedResultsId + ";";
         rs = stmt.executeQuery(selectResultsQuery);
         if(rs != null && rs.next())

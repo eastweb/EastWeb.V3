@@ -52,6 +52,7 @@ import version2.prototype.util.Schemas;
 public class GenericLocalStorageGlobalDownloaderTest {
     private static Config testConfig;
     private static String testProjectName = "Test_Project";
+    private static String testPluginName = "TRMM3B42RT";
     private static String testGlobalSchema;        // Test_EASTWeb1
     private static Connection con;
     private static ArrayList<String> extraDownloadFiles;
@@ -70,7 +71,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
     //    private static int filesPerDay = 322;
 
     // For testing with TRMM3B42RT plugin
-    private static String testPluginName = "TRMM3B42RT";
     private static int year = 2015;
     private static int day = 182;
     private static int daysPerInputFile = -1;

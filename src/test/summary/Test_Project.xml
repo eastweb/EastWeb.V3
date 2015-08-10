@@ -33,6 +33,6 @@
 	<HeatingDate>Sat Aug 01 00:00:00 CDT 2015</HeatingDate>
 	<HeatingDegree>100.1</HeatingDegree>
 	<Summaries>
-        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Desktop\EASTWeb\Files\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaValueField: N_ID2</Summary>
+        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Desktop\EASTWeb\Files\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaIDField: N_ID2</Summary>
 	</Summaries>
 </ProjectInfo>

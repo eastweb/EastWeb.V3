@@ -198,13 +198,12 @@ public class QueryUI {
                 for(ProjectInfoPlugin s : project.GetPlugins()) {
                     for(ProjectInfoSummary summary : project.GetSummaries()) {
                         try {
-                            listFile =  EASTWebResults.GetResultCSVFiles( EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
+                            listFile =  EASTWebResults.GetResultCSVFiles(EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
                                     chckbxCount.isSelected(), chckbxSum.isSelected(), chckbxMean.isSelected(), chckbxStdev.isSelected(),
                                     String.valueOf(zoneComboBox.getSelectedItem()), Integer.parseInt(zoneTextField.getText()),
                                     String.valueOf(yearComboBox.getSelectedItem()), Integer.parseInt(yearTextField.getText()),
                                     String.valueOf(dayComboBox.getSelectedItem()), Integer.parseInt(dayTextField.getText()),
-                                    null,
-                                    summary.GetZonalSummary()));
+                                    null));
                         } catch (NumberFormatException
                                 | ClassNotFoundException | SQLException
                                 | ParserConfigurationException

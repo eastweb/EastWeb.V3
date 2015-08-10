@@ -55,7 +55,7 @@ import version2.prototype.util.Schemas;
  *
  */
 public class SchedulerTest {
-    private static String testProjectName = "Scheduler_Test_Project";
+    private static String testProjectName = "Test_Project";
     private static String testPluginName = "TRMM3B42RT";
     private static String testGlobalSchema;        // Scheduler_Test_EASTWeb
     private static MyEASTWebManager manager;
@@ -111,13 +111,15 @@ public class SchedulerTest {
      */
     @Test
     public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() throws Exception {
-
         FileUtils.deleteDirectory(new File(Config.getAnInstance("src/test/Scheduler/config.xml").getDownloadDir() + testPluginName));
-
         ProjectInfoFile projectInfoFile = new ProjectInfoFile("src/test/Scheduler/Test_Project.xml");
         SchedulerData sData = new SchedulerData(projectInfoFile);
         MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, Config.getAnInstance("src/test/Scheduler/config.xml"));
+
         scheduler.Start();
+        assertEquals("Scheduler state is STOPPED.", TaskState.RUNNING, scheduler.GetState());
+        assertEquals("SchedulerStatus state is STOPPED.", TaskState.RUNNING, scheduler.GetSchedulerStatus().State);
+
         LocalDate startDate = projectInfoFile.GetStartDate();
         String testFilePath = Config.getAnInstance("src/test/Scheduler/config.xml").getDownloadDir() + testPluginName+ "\\" + startDate.getYear() + "\\" + startDate.getDayOfYear() +
                 "\\3B42RT_daily." + startDate.getYear() + "." + new DecimalFormat("00").format(startDate.getMonthValue()) + "." + new DecimalFormat("00").format(startDate.getDayOfMonth()) + ".bin";
@@ -130,38 +132,10 @@ public class SchedulerTest {
         assertTrue("processorWorkerSuccess", manager.processorWorkerSuccess);
         assertTrue("indicesWorkerSuccess", manager.indicesWorkerSuccess);
         assertTrue("summaryWorkerSuccess", manager.summaryWorkerSuccess);
-    }
 
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#GetID()}.
-     */
-    @Test
-    public final void testGetID() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#GetSchedulerStatus()}.
-     */
-    @Test
-    public final void testGetSchedulerStatus() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#Start()}.
-     */
-    @Test
-    public final void testStart() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#GetState()}.
-     */
-    @Test
-    public final void testGetState() {
-        fail("Not yet implemented"); // TODO
+        scheduler.Stop();
+        assertEquals("Scheduler state is RUNNING.", TaskState.STOPPED, scheduler.GetState());
+        assertEquals("SchedulerStatus state is RUNNING.", TaskState.STOPPED, scheduler.GetSchedulerStatus().State);
     }
 
     /**

@@ -132,9 +132,9 @@ public class EASTWebResultsTest {
      */
     @Test
     public final void testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        ZonalSummary zonalSummary = new ZonalSummary(shapeFile, areaValueField, areaNameField);
+        //        ZonalSummary zonalSummary = new ZonalSummary(shapeFile, areaValueField, areaNameField);
         EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectSum, selectMean, selectStdDev, zoneSign, zoneVal,
-                yearSign, yearVal, daySign, dayVal, includedIndices, zonalSummary);
+                yearSign, yearVal, daySign, dayVal, includedIndices);
         System.out.println("testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary:");
         System.out.println(query);
         System.out.println();

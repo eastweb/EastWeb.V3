@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import version2.prototype.Config;
+import version2.prototype.EASTWebManager;
 import version2.prototype.ErrorLog;
 import version2.prototype.util.ReadShapefile;
 import version2.prototype.util.ShapefileException;
@@ -82,11 +83,10 @@ public class AssociateSummaryPage {
         // combo box for temporal
         final JComboBox<String> temporalComboBox = new JComboBox<String>();
         temporalComboBox.setBounds(172, 86, 150, 20);
-        //FIXME:
-        temporalComboBox.addItem("GregorianWeeklyStrategy");
-        temporalComboBox.addItem("GregorianMonthlyStrategy");
-        temporalComboBox.addItem("CDCWeeklyStrategy");
-        temporalComboBox.addItem("WHOWeeklyStrategy");
+        for(String strategy : EASTWebManager.GetRegisteredTemporalSummaryCompositionStrategies())
+        {
+            temporalComboBox.addItem(strategy);
+        }
         myPanel.add(temporalComboBox);
 
         // combo box populated by the selected shapefile
@@ -154,7 +154,7 @@ public class AssociateSummaryPage {
                 String summary = "";
                 String temporal = String.valueOf(temporalComboBox.getSelectedItem());
 
-                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaValueField: %s;", String.valueOf(shapeFileComboBox.getSelectedItem()), filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
+                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaCodeField: %s;", String.valueOf(shapeFileComboBox.getSelectedItem()), filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
 
                 if(temporal != null & !temporal.isEmpty() ) {
                     summary = String.format("%s; Temporal Summary: %s",summary, String.valueOf(temporalComboBox.getSelectedItem()));

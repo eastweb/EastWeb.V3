@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -86,7 +87,7 @@ public class SchemasTest {
         testProjectName = "Test_Project";
         testPluginName = "Test_Plugin";
         testGlobalSchema = "Test_EASTWeb";
-        testSchemaName = testProjectName + "_" + testPluginName;
+        testSchemaName = "test_project_test_plugin";
         shapeFile = "C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp";
         areaValueField = "COUNTYNS10";
         areaNameField = "NAME10";
@@ -107,7 +108,10 @@ public class SchemasTest {
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
+    }
 
+    @Before
+    public void setUpBeforeTests() throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException {
         // Remove test schemas if they exist
         Statement stmt = con.createStatement();
         stmt.execute(String.format(
@@ -118,20 +122,15 @@ public class SchemasTest {
                 "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
                 testSchemaName
                 ));
+
+        // Run method under test - defined for MODIS plugin
+        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, startDate, daysPerInputFile, numOfIndices,
+                filesPerDay, summaries, true);
+        stmt.close();
     }
 
     @After
     public void tearDownAfterTests() throws SQLException {
-        Statement stmt = con.createStatement();
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-                testGlobalSchema
-                ));
-        stmt.execute(String.format(
-                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
-                testSchemaName
-                ));
-        stmt.close();
     }
 
     @AfterClass
@@ -156,10 +155,6 @@ public class SchemasTest {
         Statement stmt = con.createStatement();
         ResultSet rs = null;
 
-        // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, startDate, daysPerInputFile, numOfIndices,
-                filesPerDay, summaries, true);
-
         // Check the created test schemas
         String query = "select n.nspname as \"Name\", count(*) over() as \"RowCount\" " +
                 "from pg_catalog.pg_namespace n " +
@@ -170,7 +165,7 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertTrue("Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 1);
+            assertTrue("Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 2);
         } else {
             fail("ResultSet is null from querying schemas");
         }
@@ -185,7 +180,7 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertEquals("Not expected number of tables in the created Global Schema.", 13, rs.getInt("RowCount"));
+            assertEquals("Not expected number of tables in the created Global Schema.", 11, rs.getInt("RowCount"));
 
             // Check global schema table names
             do{
@@ -193,8 +188,6 @@ public class SchemasTest {
                 {
                 case "DateGroup": break;
                 case "Index": break;
-                case "ZoneEW": break;
-                case "ZoneVar": break;
                 case "ExpectedResults": break;
                 case "Project": break;
                 case "Plugin": break;
@@ -221,14 +214,12 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertTrue("Test Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 7);
+            assertTrue("Test Schema Check row count is " + rs.getInt("RowCount"), rs.getInt("RowCount") == 5);
 
             // Check schema table names
             do{
                 switch(rs.getString("Name"))
                 {
-                case "ZoneMapping": break;
-                case "ZoneField": break;
                 case "ZonalStat": break;
                 case "DownloadCache": break;
                 case "DownloadCacheExtra": break;

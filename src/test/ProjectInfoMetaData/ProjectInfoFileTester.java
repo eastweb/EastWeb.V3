@@ -24,10 +24,10 @@ public class ProjectInfoFileTester {
     //    {
     //        ProjectInfoFile projectInfo = new ProjectInfoFile(System.getProperty("user.dir") + "\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
     //        assertTrue("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
-    //                .equals("AreaNameField: R_NAME; Shape File Path: D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaValueField: R_NAME; Temporal Summary: GregorianWeeklyStrategy"));
+    //                .equals("AreaNameField: R_NAME; Shape File Path: D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaCodeField: R_NAME; Temporal Summary: GregorianWeeklyStrategy"));
     //        System.out.println("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + "\"" + projectInfo.GetSummaries().get(0).toString() + "\"");
     //        assertTrue("Summary " + projectInfo.GetSummaries().get(1).GetID() + " is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
-    //                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+    //                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
     //    }
 
     @Test
@@ -43,7 +43,7 @@ public class ProjectInfoFileTester {
         assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndices().get(2), projectInfo.GetPlugins().get(0).GetIndices().get(2).equals("GdalModisLST_NIGHTCalculator"));
         assertTrue("StartDate is " + projectInfo.GetStartDate().toString(), projectInfo.GetStartDate().toString().equals("2015-06-02"));
         assertTrue("ProjectName is " + projectInfo.GetProjectName(), projectInfo.GetProjectName().equals("sufi_Project"));
-        assertTrue("WorkingDir is " + projectInfo.GetWorkingDir(), projectInfo.GetWorkingDir().equals("C:\\Users\\sufi/"));
+        assertTrue("WorkingDir is " + projectInfo.GetWorkingDir(), projectInfo.GetWorkingDir().equals("C:\\Users\\sufi\\"));
         assertTrue("Masking File is " + projectInfo.GetMaskingFile(), projectInfo.GetMaskingFile().equals("C:\\Users\\Public\\Desktop\\3D Vision Photo Viewer.lnk"));
         assertTrue("Masking Resolution is " + projectInfo.GetMaskingResolution(), projectInfo.GetMaskingResolution() == 1000);
         assertTrue("MasterShapeFile is " + projectInfo.GetMasterShapeFile(), projectInfo.GetMasterShapeFile().equals("C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp"));
@@ -78,12 +78,12 @@ public class ProjectInfoFileTester {
         //        assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("--06-02"));
         assertTrue("HeatingDegree is " + projectInfo.GetHeatingDegree(), projectInfo.GetHeatingDegree() == 100.1);
         assertTrue("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary " + projectInfo.GetSummaries().get(1).GetID() + " is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary " + projectInfo.GetSummaries().get(2).GetID() + " is " + projectInfo.GetSummaries().get(2).toString(), projectInfo.GetSummaries().get(2).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10"));
         assertTrue("Summary " + projectInfo.GetSummaries().get(3).GetID() + " is " + projectInfo.GetSummaries().get(3).toString(), projectInfo.GetSummaries().get(3).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaValueField: COUNTYNS10"));
+                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10"));
     }
 }

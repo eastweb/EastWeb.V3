@@ -46,9 +46,9 @@
 	</HeatingDate> -->
 	<HeatingDegree>100.1</HeatingDegree>
 	<Summaries>
-        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
-        <Summary ID="2">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
-        <Summary ID="3">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10</Summary>
-        <Summary ID="4">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaValueField: COUNTYNS10;</Summary>
+        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary ID="2">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
+        <Summary ID="3">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10</Summary>
+        <Summary ID="4">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10;</Summary>
 	</Summaries>
 </ProjectInfo>

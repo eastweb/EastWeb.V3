@@ -8,11 +8,13 @@ import java.util.ArrayList;
  *
  */
 public class EASTWebResult {
-    public final String indexNm;
+    public final String indexName;
     public final int year;
     public final int day;
-    public final String field;
-    public final String zone;
+    public final String areaNameField;
+    public final String areaCodeField;
+    public final String areaName;
+    public final int areaCode;
     public final String shapeFilePath;
     public final int expectedTotalResults;
     public final String temporalSummaryCompositionStrategyClassName;
@@ -25,18 +27,26 @@ public class EASTWebResult {
      * @param indexNm  - name of the environmental index this result is for
      * @param year  - the earliest year this result is based in
      * @param day  - the earliest day this result is based on
-     * @param zoneFieldNm  - the name of the zone field this result is summarized for
+     * @param areaNameField  - the name of the zone field this result is using for zonal summarization
+     * @param areaName  - the name of the zone this result is summarized for
+     * @param areaCodeField  - the name of the zone code field this result is using for zonal summarization
+     * @param areaCode  - the zone code this result is summarized for
+     * @param shapeFilePath
+     * @param expectedTotalResults
+     * @param temporalSummaryCompositionStrategyClassName
      * @param summaryNames  - the name of the summary calculations found in the summaryCalculations list in the order they are given in it
      * @param summaryCalculations  - the summary result calculations in the order defined by summaryNames
      */
-    public EASTWebResult(String indexNm, int year, int day, String field, String zone, String shapeFilePath, int expectedTotalResults, String temporalSummaryCompositionStrategyClassName,
-            ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations)
+    public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath, int expectedTotalResults,
+            String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations)
     {
-        this.indexNm = indexNm;
+        indexName = indexNm;
         this.year = year;
         this.day = day;
-        this.field = field;
-        this.zone = zone;
+        this.areaNameField = areaNameField;
+        this.areaName = areaName;
+        this.areaCodeField = areaCodeField;
+        this.areaCode = areaCode;
         this.shapeFilePath = shapeFilePath;
         this.expectedTotalResults = expectedTotalResults;
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
