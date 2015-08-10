@@ -363,12 +363,6 @@ public class MainWindow {
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                defaultTableModel.addRow(new Object[] {
-                        String.valueOf(projectList.getSelectedItem()),
-                        chckbxIntermidiateFiles.isSelected(),
-                        String.valueOf(projectList.getSelectedItem()),
-                        String.valueOf(projectList.getSelectedItem()),
-                        String.valueOf(projectList.getSelectedItem())});
 
                 String selectedProject = String.valueOf(projectList.getSelectedItem());
                 try {
@@ -379,6 +373,12 @@ public class MainWindow {
                 } catch (IOException | ParserConfigurationException | SAXException | ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
                 }
+                defaultTableModel.addRow(new Object[] {
+                        String.valueOf(projectList.getSelectedItem()),
+                        chckbxIntermidiateFiles.isSelected(),
+                        String.valueOf(projectList.getSelectedItem()),
+                        String.valueOf(projectList.getSelectedItem()),
+                        String.valueOf(projectList.getSelectedItem())});
             }
         });
 
@@ -761,6 +761,16 @@ public class MainWindow {
             setToolTipText("Project is up to date");
 
             //todo: set up logic to change color base on status
+            String projectName = (value == null) ? "" : value.toString();
+            if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
+                setBackground(Color.YELLOW);
+                setForeground(Color.YELLOW);
+                setToolTipText("Project is still processing ");
+            } else {
+                setBackground(Color.GREEN);
+                setForeground(Color.GREEN);
+                setToolTipText("Project is up to date");
+            }
 
             setText((value == null) ? "" : value.toString());
             return this;
@@ -810,6 +820,16 @@ public class MainWindow {
             label = (value == null) ? "" : value.toString();
 
             //todo: set up logic to change color base on status
+            String projectName = (value == null) ? "" : value.toString();
+            if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
+                button.setBackground(Color.YELLOW);
+                button.setForeground(Color.YELLOW);
+                button.setToolTipText("Project is still processing ");
+            } else {
+                button.setBackground(Color.GREEN);
+                button.setForeground(Color.GREEN);
+                button.setToolTipText("Project is up to date");
+            }
 
             isPushed = true;
 

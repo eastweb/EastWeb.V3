@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
-
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
@@ -25,6 +24,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.EASTWebManager;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -89,7 +89,8 @@ public class SchedulerStatusContainerTest {
         summaries.add(new ProjectInfoSummary(zonalSummary, fileStore, temporalSummaryCompositionStrategyClassName, summaryID2));
         TaskState state = TaskState.STOPPED;
 
-        container = new SchedulerStatusContainer(configInstance, schedulerID, projectName, pluginInfo, summaries, state);
+        SchedulerStatusContainerTest temp = new SchedulerStatusContainerTest();
+        container = new SchedulerStatusContainer(temp.new MyEASTWebManager(), configInstance, schedulerID, projectName, pluginInfo, summaries, state);
 
         con = PostgreSQLConnection.getConnection();
         stmt = con.createStatement();
@@ -190,7 +191,7 @@ public class SchedulerStatusContainerTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.Scheduler.SchedulerStatusContainer#UpdateSummaryProgress(double, java.lang.String)}.
+     * Test method for {@link version2.prototype.Scheduler.SchedulerStatusContainer#UpdateSummaryProgress(double, java.lang.String, int)}.
      */
     @Test
     public final void testUpdateSummaryProgress() {
@@ -737,4 +738,17 @@ public class SchedulerStatusContainerTest {
         assertTrue("Project is not up to date.", status.ProjectUpToDate);
     }
 
+
+    private class MyEASTWebManager extends EASTWebManager
+    {
+        public MyEASTWebManager(){
+
+        }
+
+        @Override
+        public void NotifyUI(SchedulerStatus updatedStatus) {
+
+        }
+
+    }
 }

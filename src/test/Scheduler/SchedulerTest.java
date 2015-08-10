@@ -7,13 +7,11 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -39,12 +37,11 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
+import version2.prototype.Scheduler.SchedulerStatus;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
-import version2.prototype.indices.IndicesWorker;
-import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.PostgreSQLConnection;
@@ -57,7 +54,6 @@ import version2.prototype.util.Schemas;
 public class SchedulerTest {
     private static String testProjectName = "Test_Project";
     private static String testPluginName = "TRMM3B42RT";
-    private static String testGlobalSchema;        // Scheduler_Test_EASTWeb
     private static MyEASTWebManager manager;
 
     /**
@@ -209,7 +205,7 @@ public class SchedulerTest {
         }
 
         @Override
-        public void NotifyUI(Scheduler updatedScheduler) {
+        public void NotifyUI(SchedulerStatus updatedStatus) {
 
         }
 

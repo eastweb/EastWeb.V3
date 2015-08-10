@@ -22,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.EASTWebManagerI;
 import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
@@ -50,6 +51,7 @@ public class SchedulerStatusContainer {
      */
     public final ArrayList<ProjectInfoSummary> summaries;
 
+    private final EASTWebManagerI manager;
     private final Config configInstance;
     private TreeMap<String, Double> downloadProgresses;
     private TreeMap<String, Double> processorProgresses;
@@ -65,6 +67,7 @@ public class SchedulerStatusContainer {
 
     /**
      * Creates a SchedulerStatusContainer
+     * @param manager
      * @param configInstance
      * @param schedulerID
      * @param projectName
@@ -82,11 +85,12 @@ public class SchedulerStatusContainer {
      * @param numOfResultsPublished
      * @param lastModifiedTime
      */
-    public SchedulerStatusContainer(Config configInstance, int schedulerID, String projectName, ArrayList<ProjectInfoPlugin> pluginInfo, ArrayList<ProjectInfoSummary> summaries,
+    public SchedulerStatusContainer(EASTWebManagerI manager, Config configInstance, int schedulerID, String projectName, ArrayList<ProjectInfoPlugin> pluginInfo, ArrayList<ProjectInfoSummary> summaries,
             List<String> log, TaskState state, TreeMap<String, Double> downloadProgresses, TreeMap<String, Double> processorProgresses, TreeMap<String, Double> indicesProgresses,
             TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, boolean projectUpToDate, TreeMap<String, TreeMap<Integer, Boolean>> resultsUpToDate,
             TreeMap<String, Integer> numOfFilesLoaded, TreeMap<String, TreeMap<Integer, Integer>> numOfResultsPublished, LocalDateTime lastModifiedTime)
     {
+        this.manager = manager;
         this.configInstance = configInstance;
         this.schedulerID = schedulerID;
         this.projectName = projectName;
@@ -107,6 +111,7 @@ public class SchedulerStatusContainer {
 
     /**
      * Creates a default SchedulerStatusContainer with everything set to either the current time, 0, false, or the associated value given.
+     * @param manager
      * @param configInstance
      * @param schedulerID
      * @param projectName
@@ -114,8 +119,10 @@ public class SchedulerStatusContainer {
      * @param summaries
      * @param state
      */
-    public SchedulerStatusContainer(Config configInstance, int schedulerID, String projectName, ArrayList<ProjectInfoPlugin> pluginInfo, ArrayList<ProjectInfoSummary> summaries, TaskState state)
+    public SchedulerStatusContainer(EASTWebManagerI manager, Config configInstance, int schedulerID, String projectName, ArrayList<ProjectInfoPlugin> pluginInfo, ArrayList<ProjectInfoSummary> summaries,
+            TaskState state)
     {
+        this.manager = manager;
         this.configInstance = configInstance;
         this.schedulerID = schedulerID;
         this.projectName = projectName;
@@ -159,7 +166,7 @@ public class SchedulerStatusContainer {
             numOfFilesLoaded.put(info.GetName(), 0);
         }
 
-        lastModifiedTime = LocalDateTime.now();
+        updateLastModifiedTime();
     }
 
     /**
@@ -538,5 +545,6 @@ public class SchedulerStatusContainer {
 
     private synchronized void updateLastModifiedTime() {
         lastModifiedTime = LocalDateTime.now();
+        manager.NotifyUI(GetStatus());
     }
 }

@@ -25,12 +25,11 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
+import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
-import version2.prototype.util.PostgreSQLConnection;
-import version2.prototype.util.Schemas;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -648,11 +647,12 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         }
     }
 
-    /* (non-Javadoc)
-     * @see version2.prototype.EASTWebManagerI#NotifyUI(version2.prototype.Scheduler.Scheduler)
+    /*
+     * (non-Javadoc)
+     * @see version2.prototype.EASTWebManagerI#NotifyUI(version2.prototype.Scheduler.SchedulerStatus)
      */
     @Override
-    public void NotifyUI(Scheduler updatedScheduler)
+    public void NotifyUI(SchedulerStatus updatedStatus)
     {
         synchronized (schedulerStatesChanged)
         {
@@ -662,9 +662,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             {
                 for(int i=0; i < schedulerStatuses.size(); i++)
                 {
-                    if(schedulerStatuses.get(i).SchedulerID == updatedScheduler.GetID())
+                    if(schedulerStatuses.get(i).SchedulerID == updatedStatus.SchedulerID)
                     {
-                        schedulerStatuses.set(i, updatedScheduler.GetSchedulerStatus());
+                        schedulerStatuses.set(i, updatedStatus);
                         break;
                     }
                 }

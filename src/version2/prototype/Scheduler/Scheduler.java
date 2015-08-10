@@ -116,7 +116,7 @@ public class Scheduler {
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
-        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
+        statusContainer = new SchedulerStatusContainer(manager, configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
         localDownloaders = new ArrayList<LocalDownloader>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
@@ -260,8 +260,6 @@ public class Scheduler {
         }
 
         statusContainer.AddToLog(e.getStatus());
-
-        manager.NotifyUI(this);
     }
 
     /**
@@ -294,7 +292,7 @@ public class Scheduler {
         ID = myID;
         this.configInstance = configInstance;
         this.manager = manager;
-        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
+        statusContainer = new SchedulerStatusContainer(manager, configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
     }
 
     /**
