@@ -1,5 +1,6 @@
 package version2.prototype.EastWebUI.MainWindow;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.EventQueue;
@@ -330,17 +331,21 @@ public class MainWindow {
     {
         defaultTableModel = new DefaultTableModel();
         defaultTableModel.setDataVector(new Object[][] {},
-                new Object[] { "Project Progress", " Total Progress", "Intermidiate Selection", "Actions", "Delete" });
+                new Object[] { "Project Progress", "Intermidiate Selection", "Status",  "Actions", "Delete" });
 
         JTable table = new JTable(defaultTableModel);
-        table.getColumn("Projects").setCellRenderer(new ProgressButtonRenderer());
-        table.getColumn("Projects").setCellEditor(new ProgressButtonEditor(new JCheckBox()));
+        table.getColumn("Project Progress").setCellRenderer(new ProgressButtonRenderer());
+        table.getColumn("Project Progress").setCellEditor(new ProgressButtonEditor(new JCheckBox()));
 
-        table.getColumn("Actions").setMaxWidth(50);
+        table.getColumn("Status").setMaxWidth(100);
+        table.getColumn("Status").setCellRenderer(new StatusButtonRenderer());
+        table.getColumn("Status").setCellEditor(new StatusButtonEditor(new JCheckBox()));
+
+        table.getColumn("Actions").setMaxWidth(100);
         table.getColumn("Actions").setCellRenderer(new ActionButtonRenderer());
         table.getColumn("Actions").setCellEditor(new ActionButtonEditor(new JCheckBox()));
 
-        table.getColumn("Delete").setMaxWidth(50);
+        table.getColumn("Delete").setMaxWidth(100);
         table.getColumn("Delete").setCellRenderer(new DeleteButtonRenderer());
         table.getColumn("Delete").setCellEditor(new DeleteButtonEditor(new JCheckBox()));
 
@@ -360,8 +365,8 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 defaultTableModel.addRow(new Object[] {
                         String.valueOf(projectList.getSelectedItem()),
-                        "75 %",
                         chckbxIntermidiateFiles.isSelected(),
+                        String.valueOf(projectList.getSelectedItem()),
                         String.valueOf(projectList.getSelectedItem()),
                         String.valueOf(projectList.getSelectedItem())});
 
@@ -710,6 +715,92 @@ public class MainWindow {
                     defaultTableModel.removeRow(removeProject);
                 }
             }
+            isPushed = false;
+            return new String(label);
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        @Override
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
+    }
+
+
+
+    /** button to be render for technical progress
+     * @author sufi
+     *
+     */
+    class StatusButtonRenderer extends JButton implements TableCellRenderer {
+        private static final long serialVersionUID = 1L;
+
+        public StatusButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            setBackground(Color.YELLOW);
+            setForeground(Color.YELLOW);
+
+            //todo: set up logic to change color base on status
+
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    /**
+     * editor for the technical progress
+     * @author sufi
+     *
+     */
+    class StatusButtonEditor extends DefaultCellEditor {
+        private static final long serialVersionUID = 1L;
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public StatusButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+
+            button.setBackground(Color.YELLOW);
+            button.setForeground(Color.YELLOW);
+
+            label = (value == null) ? "" : value.toString();
+
+            //todo: set up logic to change color base on status
+
+            isPushed = true;
+
+
+
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+
             isPushed = false;
             return new String(label);
         }
