@@ -76,13 +76,17 @@ public class AssociateSummaryPage {
         myPanel.add(filePathText);
         filePathText.setColumns(10);
 
-        final JLabel shapeFileLabel = new JLabel("Field Name");
-        shapeFileLabel.setBounds(10, 58, 152, 14);
-        myPanel.add(shapeFileLabel);
+        final JLabel areaCodeFieldLabel = new JLabel("Area Code Field");
+        areaCodeFieldLabel.setBounds(10, 58, 152, 14);
+        myPanel.add(areaCodeFieldLabel);
+
+        final JLabel areaNameFieldLabel = new JLabel("Area Name Field");
+        areaNameFieldLabel.setBounds(10, 89, 152, 14);
+        myPanel.add(areaNameFieldLabel);
 
         // combo box for temporal
         final JComboBox<String> temporalComboBox = new JComboBox<String>();
-        temporalComboBox.setBounds(172, 86, 150, 20);
+        temporalComboBox.setBounds(172, 116, 150, 20);
         for(String strategy : EASTWebManager.GetRegisteredTemporalSummaryCompositionStrategies())
         {
             temporalComboBox.addItem(strategy);
@@ -90,18 +94,31 @@ public class AssociateSummaryPage {
         myPanel.add(temporalComboBox);
 
         // combo box populated by the selected shapefile
-        final JComboBox<String> shapeFileComboBox = new JComboBox<String>();
-        shapeFileComboBox.addActionListener(new ActionListener() {
+        final JComboBox<String> areaCodeFieldComboBox = new JComboBox<String>();
+        areaCodeFieldComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String temporal = String.valueOf(shapeFileComboBox.getSelectedItem());
+                String temporal = String.valueOf(areaCodeFieldComboBox.getSelectedItem());
                 if(temporal != null & !temporal.isEmpty()) {
                     temporalComboBox.setEnabled(true);
                 }
             }
         });
-        shapeFileComboBox.setBounds(172, 55, 150, 20);
-        myPanel.add(shapeFileComboBox);
+        areaCodeFieldComboBox.setBounds(172, 55, 150, 20);
+        myPanel.add(areaCodeFieldComboBox);
+
+        final JComboBox<String> areaNameFieldComboBox = new JComboBox<String>();
+        areaNameFieldComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                String temporal = String.valueOf(areaNameFieldComboBox.getSelectedItem());
+                if(temporal != null & !temporal.isEmpty()) {
+                    temporalComboBox.setEnabled(true);
+                }
+            }
+        });
+        areaNameFieldComboBox.setBounds(172, 86, 150, 20);
+        myPanel.add(areaNameFieldComboBox);
 
 
 
@@ -123,7 +140,8 @@ public class AssociateSummaryPage {
                     System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
                     filePathText.setText(chooser.getSelectedFile().toString());
                     try {
-                        populateShapeFiles(shapeFileComboBox, filePathText.getText());
+                        populateShapeFiles(areaNameFieldComboBox, filePathText.getText());
+                        populateShapeFiles(areaCodeFieldComboBox, filePathText.getText());
                     } catch (ShapefileException e) {
                         ErrorLog.add(Config.getInstance(), "AssociateSummaryPage.initialize problem with populating shape files.", e);
                     }
@@ -135,7 +153,7 @@ public class AssociateSummaryPage {
         myPanel.add(browseButton);
 
         JLabel lblNewLabel_1 = new JLabel("Temporal Summary");
-        lblNewLabel_1.setBounds(10, 89, 152, 14);
+        lblNewLabel_1.setBounds(10, 119, 152, 14);
         myPanel.add(lblNewLabel_1);
 
 
@@ -154,7 +172,7 @@ public class AssociateSummaryPage {
                 String summary = "";
                 String temporal = String.valueOf(temporalComboBox.getSelectedItem());
 
-                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaCodeField: %s;", String.valueOf(shapeFileComboBox.getSelectedItem()), filePathText.getText(), String.valueOf(shapeFileComboBox.getSelectedItem()));
+                summary = String.format("AreaNameField: %s; Shape File Path: %s; AreaCodeField: %s;", String.valueOf(areaNameFieldComboBox.getSelectedItem()), filePathText.getText(), String.valueOf(areaCodeFieldComboBox.getSelectedItem()));
 
                 if(temporal != null & !temporal.isEmpty() ) {
                     summary = String.format("%s; Temporal Summary: %s",summary, String.valueOf(temporalComboBox.getSelectedItem()));
