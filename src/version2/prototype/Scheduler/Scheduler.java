@@ -151,7 +151,7 @@ public class Scheduler {
             }
             catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                     | IllegalArgumentException | InvocationTargetException | ParseException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                ErrorLog.add(projectInfoFile, "Problem setting up Scheduler.", e);
+                ErrorLog.add(projectInfoFile, this, "Problem setting up Scheduler.", e);
             }
         }
     }
@@ -256,10 +256,10 @@ public class Scheduler {
                     statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID());
                     break;
                 }
-
-                statusContainer.AddToLog(e.getStatus());
             }
         }
+
+        statusContainer.AddToLog(e.getStatus());
 
         manager.NotifyUI(this);
     }

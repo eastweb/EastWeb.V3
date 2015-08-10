@@ -8,9 +8,13 @@ import java.time.LocalDateTime;
 
 
 
+
+
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.FileSystem;
+import version2.prototype.util.GeneralUIEventObject;
 
 /**
  * @author michael.devos
@@ -79,16 +83,36 @@ public final class ErrorLog {
     /**
      * Reports an error to the error log for the specified project.
      * @param projectInfoFile
+     * @param scheduler
      * @param message Error message, suitable for presentation to the user
      * @param e Cause of the error, may be null
      */
-    public static void add(ProjectInfoFile projectInfoFile, String message, Throwable e)
+    public static void add(ProjectInfoFile projectInfoFile, Scheduler scheduler, String message, Throwable e)
     {
         String logFileName = getLogFileName();
         String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message));
+        }
+    }
+
+    /**
+     * Reports an error to the error log for the specified project.
+     * @param projectInfoFile
+     * @param process
+     * @param message Error message, suitable for presentation to the user
+     * @param e Cause of the error, may be null
+     */
+    public static void add(ProjectInfoFile projectInfoFile, Process process, String message, Throwable e)
+    {
+        String logFileName = getLogFileName();
+        String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+        synchronized (sErrorLogLock) {
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
+            process.NotifyUI(new GeneralUIEventObject(e.getCause(), message));
         }
     }
 
@@ -96,16 +120,18 @@ public final class ErrorLog {
      * Reports an error to the error log for the specified process and project.
      * @param projectInfoFile
      * @param process
+     * @param scheduler
      * @param message Error message, suitable for presentation to the user
      * @param e Cause of the error, may be null
      */
-    public static void add(ProjectInfoFile projectInfoFile, ProcessName process, String message, Throwable e)
+    public static void add(ProjectInfoFile projectInfoFile, ProcessName process, Scheduler scheduler, String message, Throwable e)
     {
         String logFileName = process + "_" + getLogFileName();
         String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message));
         }
     }
 

@@ -99,7 +99,7 @@ public abstract class Process implements Observer {
                     //                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
                 }
                 catch (ClassNotFoundException | SQLException | IOException | SAXException | ParserConfigurationException e) {
-                    ErrorLog.add(projectInfoFile, processName, "Process.update error during processing of update notification from DatabaseCache.", e);
+                    ErrorLog.add(projectInfoFile, processName, scheduler, "Process.update error during processing of update notification from DatabaseCache.", e);
                 }
             }
             else if(o instanceof GlobalDownloader)
@@ -112,7 +112,7 @@ public abstract class Process implements Observer {
                     process(new ArrayList<DataFileMetaData>());
                 }
                 catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                    ErrorLog.add(projectInfoFile, processName, "Process.update error during processing of update notification from GlobalDownloader.", e);
+                    ErrorLog.add(projectInfoFile, processName, scheduler, "Process.update error during processing of update notification from GlobalDownloader.", e);
                 }
             }
         }

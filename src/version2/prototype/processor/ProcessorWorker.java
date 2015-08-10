@@ -83,7 +83,7 @@ public class ProcessorWorker extends ProcessWorker {
                     classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class,
                             PluginMetaData.class, DataDate.class);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
-            ErrorLog.add(projectInfoFile, "Problem with reflection in PrepareTask.", e);
+            ErrorLog.add(projectInfoFile, process, "Problem with reflection in PrepareTask.", e);
         }
 
         // Use a map to group CachedFiles based on the dates
@@ -120,7 +120,7 @@ public class ProcessorWorker extends ProcessWorker {
             try {
                 prepareTask = (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, pluginMetaData, thisDay);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                ErrorLog.add(projectInfoFile, "Problem with instantiation of PrepareProcessTask.", e);
+                ErrorLog.add(projectInfoFile, process, "Problem with instantiation of PrepareProcessTask.", e);
             }
 
             String laststepOutputFolder = null;
@@ -135,14 +135,14 @@ public class ProcessorWorker extends ProcessWorker {
                 try {
                     classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
                 } catch (ClassNotFoundException e) {
-                    ErrorLog.add(projectInfoFile, "Problem with reflection of classProcess '" + "version2.prototype.processor." + pluginName + "." + step.getValue() + "'.", e);
+                    ErrorLog.add(projectInfoFile, process, "Problem with reflection of classProcess '" + "version2.prototype.processor." + pluginName + "." + step.getValue() + "'.", e);
                 }
 
                 Constructor<?> cnstProcess = null;
                 try {
                     cnstProcess = classProcess.getConstructor(ProcessData.class);
                 } catch (NoSuchMethodException | SecurityException e) {
-                    ErrorLog.add(projectInfoFile, "Problem with reflection of classProcess.", e);
+                    ErrorLog.add(projectInfoFile, process, "Problem with reflection of classProcess.", e);
                 }
 
                 //copy the downloaded files to the input folders
@@ -166,7 +166,7 @@ public class ProcessorWorker extends ProcessWorker {
                             try {
                                 FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
                             } catch (IOException e) {
-                                ErrorLog.add(projectInfoFile, "Problem with copying of downloaded data.", e);
+                                ErrorLog.add(projectInfoFile, process, "Problem with copying of downloaded data.", e);
                             }
                         }
 
@@ -175,7 +175,7 @@ public class ProcessorWorker extends ProcessWorker {
                             try {
                                 FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), qcInputFolder);
                             } catch (IOException e) {
-                                ErrorLog.add(projectInfoFile, "Problem with copying of downloaded QC.", e);
+                                ErrorLog.add(projectInfoFile, process, "Problem with copying of downloaded QC.", e);
                             }
                         }
 
@@ -207,7 +207,7 @@ public class ProcessorWorker extends ProcessWorker {
                             );
                 } catch (InstantiationException | IllegalAccessException
                         | IllegalArgumentException | InvocationTargetException e) {
-                    ErrorLog.add(projectInfoFile, "Problem with cnstProcess instantion.", e);
+                    ErrorLog.add(projectInfoFile, this.process, "Problem with cnstProcess instantion.", e);
                 }
 
                 Method methodProcess;
@@ -215,7 +215,7 @@ public class ProcessorWorker extends ProcessWorker {
                     methodProcess = process.getClass().getMethod("run");
                     methodProcess.invoke(process);
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    ErrorLog.add(projectInfoFile, "Problem with calling run.", e);
+                    ErrorLog.add(projectInfoFile, this.process, "Problem with calling run.", e);
                 }
             }
 
@@ -239,7 +239,7 @@ public class ProcessorWorker extends ProcessWorker {
                         try {
                             FileUtils.copyFileToDirectory(f, outputDir);
                         } catch (IOException e) {
-                            ErrorLog.add(projectInfoFile, "Copying data to different directory.", e);
+                            ErrorLog.add(projectInfoFile, process, "Copying data to different directory.", e);
                         }
                     }
                 }
@@ -271,7 +271,7 @@ public class ProcessorWorker extends ProcessWorker {
             try {
                 outputCache.CacheFiles(toCache);
             } catch (ClassNotFoundException | SQLException | ParseException | ParserConfigurationException | SAXException | IOException e) {
-                ErrorLog.add(projectInfoFile, "Faching files.", e);
+                ErrorLog.add(projectInfoFile, process, "Faching files.", e);
             }
         }
 

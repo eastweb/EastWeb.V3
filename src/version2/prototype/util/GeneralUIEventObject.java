@@ -15,6 +15,21 @@ public class GeneralUIEventObject  extends EventObject{
     private Integer summaryID;
 
     /**
+     * Creates a GeneralUIEventObject for a progress update solely for sending a log entry (status).
+     * @param source
+     * @param status
+     * @param progress
+     * @param pluginName
+     */
+    public GeneralUIEventObject(Object source, String status) {
+        super(source);
+        this.status = status;
+        progress = null;
+        pluginName = null;
+        summaryID = null;
+    }
+
+    /**
      * Creates a GeneralUIEventObject for a progress update not related to summary progress.
      * @param source
      * @param status
