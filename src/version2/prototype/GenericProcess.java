@@ -71,7 +71,7 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
                 manager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            ErrorLog.add(projectInfoFile, processName, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);
+            ErrorLog.add(projectInfoFile, processName, scheduler, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);
         }
 
         // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.

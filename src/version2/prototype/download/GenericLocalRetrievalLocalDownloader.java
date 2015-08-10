@@ -64,7 +64,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
                         pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-            ErrorLog.add(projectInfoFile, processName, "GenericLocalRetrievalLocalDownloader.process error.", e);
+            ErrorLog.add(projectInfoFile, processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
         }
     }
 
