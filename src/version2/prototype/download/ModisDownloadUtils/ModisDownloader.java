@@ -88,7 +88,7 @@ public class ModisDownloader extends DownloaderFramework
             throw new Exception("the download file does not contain tile number!");
         }
 
-        outFilePath = String.format("%s"+File.separator+"%s",dir, outFileName);
+        outFilePath = String.format("%s"+File.separator+"%s",dir, outFileName+".hdf");
         File outputFile  = new File(outFilePath);
 
         if (mMode.equalsIgnoreCase("HTTP"))

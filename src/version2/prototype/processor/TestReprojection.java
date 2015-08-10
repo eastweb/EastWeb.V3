@@ -30,58 +30,58 @@ public class TestReprojection
             Projection p = new Projection(ProjectionType.TRANSVERSE_MERCATOR, ResamplingType.BILINEAR,
                     Datum.WGS84, 1000, 0.0, 0.0, 0.9996, 39.0, 500000.0, 0.0, 0.0);
 
-            /*project("D:\\project\\TRMM_t.tif",
+            projection("D:\\project\\band_JM.tif",
                     //"D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
                     "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
-                    p, new File("D:\\project\\TRMM_p.tif"));*/
+                    p, new File("D:\\project\\band1_JMP.tif"));
 
             //extract NOAH
-            String noah = "D:\\project\\download\\NOAH\\noah_2015_0604.grb";
-            String outFile = "D:\\project\\Noah_b19.tif";
-            GdalUtils.register();
-            synchronized (GdalUtils.lockObject)
-            {
-                Dataset inputDS = gdal.Open(noah);
-                int xSize = inputDS.getRasterXSize();
-                int ySize = inputDS.getRasterYSize();
-                Dataset outputDS = gdal.GetDriverByName("GTiff").
-                        Create(
-                                outFile,
-                                xSize, ySize,
-                                1,
-                                gdalconst.GDT_Float32
-                                );
-
-                Band b20 = inputDS.GetRasterBand(19);
-
-                double[] arr = new double[xSize * ySize];
-                b20.ReadRaster(0,  0 , xSize, ySize, arr);
-
-                System.out.println("original prj ref: " + inputDS.GetProjection());
-                String outputProjStr = "+proj=longlat +datum=WGS84 +no_defs";
-                //String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-                SpatialReference output = new SpatialReference();
-                output.ImportFromProj4(outputProjStr);
-
-                outputDS.SetProjection(output.ExportToWkt());
-
-                //outputDS.SetProjection(wktStr);
-                System.out.println(outputDS.GetProjection());
-                double [] geoTrans = inputDS.GetGeoTransform();
-                System.out.println(geoTrans[0] + " : " + geoTrans[1] + " : " + geoTrans[2] + " : " + geoTrans[3] + " : " + geoTrans[4] + " : " + geoTrans[5]);
-
-                outputDS.SetGeoTransform(inputDS.GetGeoTransform());
-
-                outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, arr);
-                outputDS.delete();
-                inputDS.delete();
-            }
-
-            projection("D:\\project\\Noah_b19.tif",
-                    //"D:\\project\\band20.tif",
-                    //"D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
-                    "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
-                    p, new File("D:\\project\\Noah_b19p.tif"));
+            //            String noah = "D:\\project\\download\\NOAH\\noah_2015_0604.grb";
+            //            String outFile = "D:\\project\\Noah_b19.tif";
+            //            GdalUtils.register();
+            //            synchronized (GdalUtils.lockObject)
+            //            {
+            //                Dataset inputDS = gdal.Open(noah);
+            //                int xSize = inputDS.getRasterXSize();
+            //                int ySize = inputDS.getRasterYSize();
+            //                Dataset outputDS = gdal.GetDriverByName("GTiff").
+            //                        Create(
+            //                                outFile,
+            //                                xSize, ySize,
+            //                                1,
+            //                                gdalconst.GDT_Float32
+            //                                );
+            //
+            //                Band b20 = inputDS.GetRasterBand(19);
+            //
+            //                double[] arr = new double[xSize * ySize];
+            //                b20.ReadRaster(0,  0 , xSize, ySize, arr);
+            //
+            //                System.out.println("original prj ref: " + inputDS.GetProjection());
+            //                String outputProjStr = "+proj=longlat +datum=WGS84 +no_defs";
+            //                //String wktStr = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\"],SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+            //                SpatialReference output = new SpatialReference();
+            //                output.ImportFromProj4(outputProjStr);
+            //
+            //                outputDS.SetProjection(output.ExportToWkt());
+            //
+            //                //outputDS.SetProjection(wktStr);
+            //                System.out.println(outputDS.GetProjection());
+            //                double [] geoTrans = inputDS.GetGeoTransform();
+            //                System.out.println(geoTrans[0] + " : " + geoTrans[1] + " : " + geoTrans[2] + " : " + geoTrans[3] + " : " + geoTrans[4] + " : " + geoTrans[5]);
+            //
+            //                outputDS.SetGeoTransform(inputDS.GetGeoTransform());
+            //
+            //                outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, arr);
+            //                outputDS.delete();
+            //                inputDS.delete();
+            //            }
+            //
+            //            projection("D:\\project\\Noah_b19.tif",
+            //                    //"D:\\project\\band20.tif",
+            //                    //"D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
+            //                    "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
+            //                    p, new File("D:\\project\\Noah_b19p.tif"));
         }
     }
 
@@ -94,6 +94,7 @@ public class TestReprojection
         synchronized (GdalUtils.lockObject)
         {
             Dataset inputDS = gdal.Open(input);
+            wktStr = inputDS.GetProjection();
             //  SpatialReference inputRef = new SpatialReference();
 
             //  inputRef.ImportFromWkt(wktStr);
@@ -136,7 +137,7 @@ public class TestReprojection
 
 
             SpatialReference outputRef = new SpatialReference();
-            outputRef.ImportFromProj4("+proj=utm +zone=1 +datum=WGS84 +units=m +no_defs");
+            outputRef.ImportFromProj4("+proj=utm +zone=37 +datum=WGS84 +units=m +no_defs");
 
             //String outputProjection = feature.GetLayer(0).GetSpatialRef().ExportToWkt();
             String outputProjection = outputRef.ExportToWkt();
