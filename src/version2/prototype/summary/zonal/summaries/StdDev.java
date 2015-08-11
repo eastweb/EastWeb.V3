@@ -1,6 +1,7 @@
 package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -51,18 +52,21 @@ public class StdDev extends SummaryCalculation {
             Double tempValue;
             Double tempMeanRs;
             LinkedList<Double> tempValuesList;
+            Iterator<Integer> keys = countRs.keySet().iterator();
+            Integer key;
 
-            for(int i=0; i < countRs.size(); i++){
-                //                tempResult = Math.sqrt((sqrSumRs.get(i)/countRs.get(i)) - (meanRs.get(i) * meanRs.get(i)));       // Approximation, accurate up to 14 decimal positions.
+            while(keys.hasNext())
+            {
+                key = keys.next();
                 tempSum = 0.0;
-                tempValuesList = valuesMap.get(i);
+                tempValuesList = valuesMap.get(key);
                 if(tempValuesList != null)
                 {
                     for(int x_i=0; x_i < tempValuesList.size(); x_i++)
                     {
                         // Summation of the squared differences from the mean
-                        tempValue = valuesMap.get(i).get(x_i);
-                        tempMeanRs = meanRs.get(i);
+                        tempValue = valuesMap.get(key).get(x_i);
+                        tempMeanRs = meanRs.get(key);
                         if(tempValue != null && tempMeanRs != null) {
                             tempSum += Math.pow(tempValue - tempMeanRs, 2);
                         }
@@ -73,10 +77,10 @@ public class StdDev extends SummaryCalculation {
                     tempResult = 0.0;
                 }
                 if(new Double(tempResult).equals(Double.NaN)) {
-                    resultMap.put(i, 0.0);
+                    resultMap.put(key, 0.0);
                 }
                 else{
-                    resultMap.put(i, tempResult);
+                    resultMap.put(key, tempResult);
                 }
             }
         }

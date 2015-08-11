@@ -43,12 +43,12 @@ public class SummariesCollectionTester {
         double ansStdDev1_4 = Math.sqrt((Math.pow(4 - m4, 2) + Math.pow(4 - m4, 2) + Math.pow(4 - m4, 2)) / 3);
         double ansStdDev1_5 = Math.sqrt((Math.pow(5 - m5, 2) + Math.pow(5 - m5, 2) + Math.pow(5 - m5, 2)) / 3);
         double ansStdDev1_6 = Math.sqrt((Math.pow(6 - m6, 2) + Math.pow(6 - m6, 2) + Math.pow(6 - m6, 2)) / 3);
-        stdDevResults1.put(0, ansStdDev1_1);
-        stdDevResults1.put(1, ansStdDev1_2);
-        stdDevResults1.put(2, ansStdDev1_3);
-        stdDevResults1.put(3, ansStdDev1_4);
-        stdDevResults1.put(4, ansStdDev1_5);
-        stdDevResults1.put(5, ansStdDev1_6);
+        stdDevResults1.put(10, ansStdDev1_1);
+        stdDevResults1.put(11, ansStdDev1_2);
+        stdDevResults1.put(12, ansStdDev1_3);
+        stdDevResults1.put(13, ansStdDev1_4);
+        stdDevResults1.put(14, ansStdDev1_5);
+        stdDevResults1.put(15, ansStdDev1_6);
 
         m1 = 2.5;
         m2 = 2.0;
@@ -60,24 +60,24 @@ public class SummariesCollectionTester {
         for(int i=0; i < 6; i++)
         {
             // Collection 1 results
-            countResults1.put(i, 3.0);
-            sumResults1.put(i, 3.0 * (i + 1));
-            meanResults1.put(i, new Double(i+1));
+            countResults1.put(10 + i, 3.0);
+            sumResults1.put(10 + i, 3.0 * (i + 1));
+            meanResults1.put(10 + i, new Double(i+1));
 
             // Collection 2 results
             if(i == 0)
             {
-                countResults2.put(i, 4.0);
-                sumResults2.put(i, 10.0);
-                meanResults2.put(i, new Double(2.5));
-                stdDevResults2.put(i, ansStdDev2_1);
+                countResults2.put(10 + i, 4.0);
+                sumResults2.put(10 + i, 10.0);
+                meanResults2.put(10 + i, new Double(2.5));
+                stdDevResults2.put(10 + i, ansStdDev2_1);
             }
             else
             {
-                countResults2.put(i, 3.0);
-                sumResults2.put(i, 6.0);
-                meanResults2.put(i, new Double(2));
-                stdDevResults2.put(i, ansStdDev2_2);
+                countResults2.put(10 + i, 3.0);
+                sumResults2.put(10 + i, 6.0);
+                meanResults2.put(10 + i, new Double(2));
+                stdDevResults2.put(10 + i, ansStdDev2_2);
             }
         }
 
@@ -131,50 +131,50 @@ public class SummariesCollectionTester {
     }
 
     private void testData1(SummariesCollection col) {
-        col.add(0, 1.0);
-        col.add(1, 2.0);
-        col.add(2, 3.0);
-        col.add(3, 4.0);
-        col.add(4, 5.0);
-        col.add(5, 6.0);
+        col.add(10 + 0, 1.0);
+        col.add(10 + 1, 2.0);
+        col.add(10 + 2, 3.0);
+        col.add(10 + 3, 4.0);
+        col.add(10 + 4, 5.0);
+        col.add(10 + 5, 6.0);
 
-        col.add(0, 1.0);
-        col.add(1, 2.0);
-        col.add(2, 3.0);
-        col.add(3, 4.0);
-        col.add(4, 5.0);
-        col.add(5, 6.0);
+        col.add(10 + 0, 1.0);
+        col.add(10 + 1, 2.0);
+        col.add(10 + 2, 3.0);
+        col.add(10 + 3, 4.0);
+        col.add(10 + 4, 5.0);
+        col.add(10 + 5, 6.0);
 
-        col.add(0, 1.0);
-        col.add(1, 2.0);
-        col.add(2, 3.0);
-        col.add(3, 4.0);
-        col.add(4, 5.0);
-        col.add(5, 6.0);
+        col.add(10 + 0, 1.0);
+        col.add(10 + 1, 2.0);
+        col.add(10 + 2, 3.0);
+        col.add(10 + 3, 4.0);
+        col.add(10 + 4, 5.0);
+        col.add(10 + 5, 6.0);
     }
 
     private static void testData2(SummariesCollection col) {
-        col.add(0, 1.0);
-        col.add(1, 1.0);
-        col.add(2, 1.0);
-        col.add(3, 1.0);
-        col.add(4, 1.0);
-        col.add(5, 1.0);
+        col.add(10 + 0, 1.0);
+        col.add(10 + 1, 1.0);
+        col.add(10 + 2, 1.0);
+        col.add(10 + 3, 1.0);
+        col.add(10 + 4, 1.0);
+        col.add(10 + 5, 1.0);
 
-        col.add(0, 2.0);
-        col.add(1, 2.0);
-        col.add(2, 2.0);
-        col.add(3, 2.0);
-        col.add(4, 2.0);
-        col.add(5, 2.0);
+        col.add(10 + 0, 2.0);
+        col.add(10 + 1, 2.0);
+        col.add(10 + 2, 2.0);
+        col.add(10 + 3, 2.0);
+        col.add(10 + 4, 2.0);
+        col.add(10 + 5, 2.0);
 
-        col.add(0, 3.0);
-        col.add(1, 3.0);
-        col.add(2, 3.0);
-        col.add(3, 3.0);
-        col.add(4, 3.0);
-        col.add(5, 3.0);
+        col.add(10 + 0, 3.0);
+        col.add(10 + 1, 3.0);
+        col.add(10 + 2, 3.0);
+        col.add(10 + 3, 3.0);
+        col.add(10 + 4, 3.0);
+        col.add(10 + 5, 3.0);
 
-        col.add(0, 4.0);
+        col.add(10 + 0, 4.0);
     }
 }

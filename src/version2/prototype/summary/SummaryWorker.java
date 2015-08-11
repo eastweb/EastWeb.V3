@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
@@ -53,55 +54,65 @@ public class SummaryWorker extends ProcessWorker {
         ArrayList<DataFileMetaData> tempFiles = cachedFiles;
         IndicesFileMetaData cachedFileData;
 
-        for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
-        {
-            // Check if doing temporal summarization
-            if(summary.GetTemporalFileStore() != null)
+        try{
+            for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
             {
-                for(DataFileMetaData cachedFile : cachedFiles)
+                // Check if doing temporal summarization
+                if(summary.GetTemporalFileStore() != null)
                 {
-                    cachedFileData = cachedFile.ReadMetaDataForSummary();
-                    TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
+                    for(DataFileMetaData cachedFile : cachedFiles)
+                    {
+                        cachedFileData = cachedFile.ReadMetaDataForSummary();
+                        TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
+                                projectInfoFile.GetWorkingDir(),
+                                projectInfoFile.GetProjectName(),       // projectName
+                                pluginInfo.GetName(),                   // pluginName
+                                cachedFileData.indexNm,                 // Index name
+                                new File(cachedFileData.dataFilePath),  // inRasterFile
+                                null,                                   // inDataDate
+                                pluginMetaData.DaysPerInputData,        // daysPerInputData
+                                summary.GetTemporalFileStore(),         // TemporalSummaryRasterFileStore
+                                null,                                   // InterpolateStrategy
+                                new AvgGdalRasterFileMerge()            // (Framework user defined)
+                                );
+                        tempFiles.add(temporalSummaryCal.calculate());
+                    }
+                }
+            }
+            cachedFiles = tempFiles;
+        }catch(Exception e)
+        {
+            ErrorLog.add(projectInfoFile, process, "Problem during zonal summary calculation.", e);
+        }
+
+        try{
+            File outputFile;
+            for(DataFileMetaData cachedFile : cachedFiles)
+            {
+                cachedFileData = cachedFile.ReadMetaDataForSummary();
+                for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
+                {
+                    outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
+                            pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
+                    ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
+                            configInstance.getGlobalSchema(),
                             projectInfoFile.GetWorkingDir(),
                             projectInfoFile.GetProjectName(),       // projectName
                             pluginInfo.GetName(),                   // pluginName
-                            cachedFileData.indexNm,                 // Index name
+                            cachedFileData.indexNm,
+                            cachedFileData.year,
+                            cachedFileData.day,
                             new File(cachedFileData.dataFilePath),  // inRasterFile
-                            null,                                   // inDataDate
-                            pluginMetaData.DaysPerInputData,        // daysPerInputData
-                            summary.GetTemporalFileStore(),         // TemporalSummaryRasterFileStore
-                            null,                                   // InterpolateStrategy
-                            new AvgGdalRasterFileMerge()            // (Framework user defined)
-                            );
-                    tempFiles.add(temporalSummaryCal.calculate());
+                            outputFile,                             // outTableFile
+                            new SummariesCollection(Config.getInstance().getSummaryCalculations()),
+                            summary);                               // summariesCollection
+                    zonalSummaryCal.calculate();
+                    outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
                 }
             }
-        }
-        cachedFiles = tempFiles;
-
-        File outputFile;
-        for(DataFileMetaData cachedFile : cachedFiles)
+        }catch(Exception e)
         {
-            cachedFileData = cachedFile.ReadMetaDataForSummary();
-            for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
-            {
-                outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
-                        pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
-                ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
-                        configInstance.getGlobalSchema(),
-                        projectInfoFile.GetWorkingDir(),
-                        projectInfoFile.GetProjectName(),       // projectName
-                        pluginInfo.GetName(),                   // pluginName
-                        cachedFileData.indexNm,
-                        cachedFileData.year,
-                        cachedFileData.day,
-                        new File(cachedFileData.dataFilePath),  // inRasterFile
-                        outputFile,                             // outTableFile
-                        new SummariesCollection(Config.getInstance().getSummaryCalculations()),
-                        summary);                               // summariesCollection
-                zonalSummaryCal.calculate();
-                outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
-            }
+            ErrorLog.add(projectInfoFile, process, "Problem during zonal summary calculation.", e);
         }
         return new ProcessWorkerReturn(outputFiles);
     }

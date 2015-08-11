@@ -200,9 +200,12 @@ public class QueryUI {
                         try {
                             listFile =  EASTWebResults.GetResultCSVFiles(EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
                                     chckbxCount.isSelected(), chckbxSum.isSelected(), chckbxMean.isSelected(), chckbxStdev.isSelected(),
-                                    String.valueOf(zoneComboBox.getSelectedItem()), Integer.parseInt(zoneTextField.getText()),
-                                    String.valueOf(yearComboBox.getSelectedItem()), Integer.parseInt(yearTextField.getText()),
-                                    String.valueOf(dayComboBox.getSelectedItem()), Integer.parseInt(dayTextField.getText()),
+                                    String.valueOf(zoneComboBox.getSelectedItem()),
+                                    (zoneTextField.getText().equals("") ? null : Integer.parseInt(zoneTextField.getText())),
+                                    String.valueOf(yearComboBox.getSelectedItem()),
+                                    (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
+                                    String.valueOf(dayComboBox.getSelectedItem()),
+                                    (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
                                     null));
                         } catch (NumberFormatException
                                 | ClassNotFoundException | SQLException

@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -44,7 +42,7 @@ public class ZonalSummaryCalculator {
     private final File mRasterFile;
     private final String shapeFilePath;
     private final File mTableFile;
-    private final String areaIDField;
+    private final String areaCodeField;
     private final String areaNameField;
     private final SummariesCollection summariesCollection;
     private final String globalSchema;
@@ -76,7 +74,7 @@ public class ZonalSummaryCalculator {
         mRasterFile = inRasterFile;
         mTableFile = outTableFile;
         shapeFilePath = summary.GetZonalSummary().GetShapeFile();
-        areaIDField = summary.GetZonalSummary().GetAreaCodeField();
+        areaCodeField = summary.GetZonalSummary().GetAreaCodeField();
         areaNameField = summary.GetZonalSummary().GetAreaNameField();
         this.summariesCollection = summariesCollection;
         this.globalSchema = globalSchema;
@@ -135,7 +133,7 @@ public class ZonalSummaryCalculator {
                 writeTable(layer, countMap);
 
                 // Write to database
-                uploadResultsToDb(globalSchema, projectName, mRasterFile.getPath(), layer, shapeFilePath, areaIDField, countMap);
+                uploadResultsToDb(globalSchema, Schemas.getSchemaName(projectName, pluginName), mRasterFile.getPath(), layer, shapeFilePath, areaCodeField, countMap);
             } finally { // Clean up
                 if (raster != null) {
                     raster.delete(); GdalUtils.errorCheck();
@@ -189,21 +187,6 @@ public class ZonalSummaryCalculator {
         int layerMinY = (int) Math.round(Math.min(min[1], max[1]));
         int layerMaxY = (int) Math.round(Math.max(min[1], max[1]));
 
-        System.out.format(
-                "Layer extent: %d %d %d %d\n",
-                layerMinX,
-                layerMaxX,
-                layerMinY,
-                layerMaxY
-                );
-
-
-        System.out.format(
-                "%d %d\n",
-                raster.GetRasterXSize(),
-                raster.GetRasterYSize()
-                );
-
         int rasterMinX = 0;
         int rasterMaxX = raster.GetRasterXSize(); GdalUtils.errorCheck();
         int rasterMinY = 0;
@@ -235,8 +218,6 @@ public class ZonalSummaryCalculator {
 
         // Create the raster to burn values into
         double[] layerExtent = layer.GetExtent(); GdalUtils.errorCheck();
-        System.out.format("Feature extent: %s\n", Arrays.toString(layerExtent));
-        System.out.println(Arrays.toString(transform));
 
         Dataset zoneRaster = gdal.GetDriverByName("MEM").Create(
                 "",
@@ -256,7 +237,7 @@ public class ZonalSummaryCalculator {
 
         // Burn the values
         Vector<String> options = new Vector<String>();
-        options.add("ATTRIBUTE=" + areaIDField);
+        options.add("ATTRIBUTE=" + areaCodeField);
 
         gdal.RasterizeLayer(zoneRaster, new int[] {1}, layer, null, options); GdalUtils.errorCheck();
 
@@ -296,7 +277,6 @@ public class ZonalSummaryCalculator {
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
         Map<Integer, Double> countMap = new HashMap<Integer, Double>(1);
         for(SummaryNameResultPair pair : results){
-            System.out.println(pair.toString());
             if(pair.getSimpleName().equalsIgnoreCase("count")) {
                 countMap = pair.getResult();
             }
@@ -316,7 +296,7 @@ public class ZonalSummaryCalculator {
         Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
 
-        writer.print("Zone ID, Value Count, ");
+        writer.print("Area Name, Area Code, Value Count, ");
         for(int i=0; i < results.size(); i++)
         {
             String name = results.get(i).getSimpleName();
@@ -327,15 +307,20 @@ public class ZonalSummaryCalculator {
             }
         }
 
+        int areaCode;
+        String areaName;
         while (feature != null) {
-            int zone = feature.GetFieldAsInteger(areaIDField); GdalUtils.errorCheck();
-            if (countMap.get(zone) != null && countMap.get(zone) != 0) {
-                writer.print(zone + ",");
+            areaCode = feature.GetFieldAsInteger(areaCodeField);
+            GdalUtils.errorCheck();
+            areaName = feature.GetFieldAsString(areaNameField);
+            GdalUtils.errorCheck();
+            if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0) {
+                writer.print(areaName + ", " + areaCode + ", ");
                 for(int i=0; i < results.size(); i++){
                     if(i < results.size() - 1) {
-                        writer.print(results.get(i).getResult().get(zone) + ", ");
+                        writer.print(results.get(i).getResult().get(areaCode) + ", ");
                     } else {
-                        writer.println(results.get(i).getResult().get(zone));
+                        writer.println(results.get(i).getResult().get(areaCode));
                     }
                 }
             }
@@ -350,6 +335,7 @@ public class ZonalSummaryCalculator {
             ClassNotFoundException, ParserConfigurationException, SAXException {
         final Connection conn = PostgreSQLConnection.getConnection();
         Statement stmt = conn.createStatement();
+        PreparedStatement pStmt = null;
         final boolean previousAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
@@ -381,14 +367,18 @@ public class ZonalSummaryCalculator {
                     ",?" +  // 5. IndexID
                     ",?" +  // 6. ExpectedResultsID
                     ",?");  // 7. FilePath
-            for(SummaryNameResultPair result : results)
+            for(@SuppressWarnings("unused") SummaryNameResultPair result : results)
             {
                 insertUpdate.append(",?");
             }
+            insertUpdate.append(")");
 
-            PreparedStatement pStmt = conn.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
+            pStmt = conn.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
             int areaCode;
             String areaName;
+            SummaryNameResultPair pair;
+            double value;
+            Map<Integer, Double> result;
             while (feature != null)
             {
                 areaCode = feature.GetFieldAsInteger(areaIDField);
@@ -405,12 +395,13 @@ public class ZonalSummaryCalculator {
                     pStmt.setInt(4, Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt));
                     pStmt.setInt(5, indexID);
                     pStmt.setInt(6, Schemas.getExpectedResultsID(globalSchema, projectSummaryID, Schemas.getPluginID(globalSchema, pluginName, stmt), stmt));
-                    pStmt.setString(7, "File Path1");
-                    SummaryNameResultPair pair;
+                    pStmt.setString(7, mTableFile.getCanonicalPath());
                     for(int i=0; i < results.size(); i++)
                     {
                         pair = results.get(i);
-                        pStmt.setDouble(8 + i, pair.getResult().get(areaCode));
+                        result = pair.getResult();
+                        value = result.get(areaCode);
+                        pStmt.setDouble(8 + i, value);
                     }
                     pStmt.addBatch();
                 }
@@ -418,7 +409,6 @@ public class ZonalSummaryCalculator {
                 feature = layer.GetNextFeature(); GdalUtils.errorCheck();
             }
             pStmt.executeBatch();
-            pStmt.close();
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();
@@ -426,6 +416,9 @@ public class ZonalSummaryCalculator {
         } finally {
             conn.setAutoCommit(previousAutoCommit);
             stmt.close();
+            if(pStmt != null) {
+                pStmt.close();
+            }
             conn.close();
         }
     }

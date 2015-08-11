@@ -20,6 +20,7 @@ public class EASTWebResult {
     public final String temporalSummaryCompositionStrategyClassName;
     public final ArrayList<String> summaryNames;
     private final ArrayList<Double> summaryCalculations;
+    private final String filePath;
 
     /**
      * Creates an immutable EASTWebResult initialized with the given values.
@@ -36,9 +37,10 @@ public class EASTWebResult {
      * @param temporalSummaryCompositionStrategyClassName
      * @param summaryNames  - the name of the summary calculations found in the summaryCalculations list in the order they are given in it
      * @param summaryCalculations  - the summary result calculations in the order defined by summaryNames
+     * @param filePath  - file path of resulting csv file
      */
     public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath, int expectedTotalResults,
-            String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations)
+            String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations, String filePath)
     {
         indexName = indexNm;
         this.year = year;
@@ -52,6 +54,7 @@ public class EASTWebResult {
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
         this.summaryNames = summaryNames;
         this.summaryCalculations = summaryCalculations;
+        this.filePath = filePath;
     }
 
     /**

@@ -1,6 +1,7 @@
 package version2.prototype.summary.zonal.summaries;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 import version2.prototype.summary.zonal.SummariesCollection;
@@ -46,15 +47,19 @@ public class Mean extends SummaryCalculation {
             Double tempSum;
             Double tempCount;
             Double tempR;
-            for(int i=0; i < countRs.size(); i++){
-                tempSum = sumRs.get(i);
-                tempCount = countRs.get(i);
+            Iterator<Integer> keys = countRs.keySet().iterator();
+            Integer key;
+            while(keys.hasNext())
+            {
+                key = keys.next();
+                tempSum = sumRs.get(key);
+                tempCount = countRs.get(key);
                 if(tempSum == null || tempCount == null) {
                     tempR = null;
                 } else {
                     tempR = tempSum/tempCount;
                 }
-                resultMap.put(i, tempR);
+                resultMap.put(key, tempR);
             }
         }
         return resultMap;

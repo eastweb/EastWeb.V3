@@ -767,7 +767,7 @@ public class ProjectInformationPage {
         latitudeOfOrigin.setBounds(146, 215, 140, 16);
         panel_2.add(latitudeOfOrigin);
 
-        JLabel falseNothingLabel = new JLabel("False nothing");
+        JLabel falseNothingLabel = new JLabel("False northing");
         falseNothingLabel.setBounds(6, 241, 109, 14);
         panel_2.add(falseNothingLabel);
         falseNothing = new JTextField();

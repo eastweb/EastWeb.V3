@@ -97,6 +97,7 @@ public class Schemas {
             createIndexTableIfNotExists(globalEASTWebSchema, stmt);
 
             // Add temporal summary composition strategies
+            addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "", stmt);
             addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "GregorianWeeklyStrategy", stmt);
             addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "GregorianMonthlyStrategy", stmt);
             addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "CDCWeeklyStrategy", stmt);
