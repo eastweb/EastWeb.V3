@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
+import version2.prototype.ErrorLog;
 import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
@@ -293,58 +294,66 @@ public class SchedulerStatusContainer {
      * @throws SAXException
      * @throws IOException
      */
-    public void UpdateNumOfResultsPublished() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public void UpdateNumOfResultsPublished()
     {
         synchronized(numOfResultsPublished)
         {
-            Connection con = PostgreSQLConnection.getConnection(configInstance);
-            Statement stmt = con.createStatement();
+            Connection con;
+            Statement stmt = null;
             ResultSet rs = null;
-            String formatStringPublished = "SELECT A.\"ProjectSummaryID\", Count(A.\"ZonalStatID\") AS \"ZonalStatIDCount\", B.\"SummaryIDNum\" FROM \"%1$s\".\"ZonalStat\" A " +
-                    "INNER JOIN \"%2$s\".\"ProjectSummary\" B ON A.\"ProjectSummaryID\" = B.\"ProjectSummaryID\" GROUP BY A.\"ProjectSummaryID\", B.\"SummaryIDNum\";";
-            String projectPluginSchema;
+            try {
+                con = PostgreSQLConnection.getConnection(configInstance);
+                stmt = con.createStatement();
+                rs = null;
+                String formatStringPublished = "SELECT A.\"ProjectSummaryID\", Count(A.\"ZonalStatID\") AS \"ZonalStatIDCount\", B.\"SummaryIDNum\" FROM \"%1$s\".\"ZonalStat\" A " +
+                        "INNER JOIN \"%2$s\".\"ProjectSummary\" B ON A.\"ProjectSummaryID\" = B.\"ProjectSummaryID\" GROUP BY A.\"ProjectSummaryID\", B.\"SummaryIDNum\";";
+                String projectPluginSchema;
 
-            numOfResultsPublished = new TreeMap<String, TreeMap<Integer, Integer>>();
-            TreeMap<Integer, Integer> pluginResults;
-            for(ProjectInfoPlugin info : pluginInfo)
-            {
-                pluginResults = new TreeMap<Integer, Integer>();
-
-                projectPluginSchema = Schemas.getSchemaName(projectName, info.GetName());
-                rs = stmt.executeQuery(String.format(formatStringPublished,
-                        projectPluginSchema,
-                        configInstance.getGlobalSchema()));
-                if(rs != null)
+                numOfResultsPublished = new TreeMap<String, TreeMap<Integer, Integer>>();
+                TreeMap<Integer, Integer> pluginResults;
+                for(ProjectInfoPlugin info : pluginInfo)
                 {
-                    while(rs.next()) {
-                        pluginResults.put(rs.getInt("SummaryIDNum"), rs.getInt("ZonalStatIDCount"));
-                    }
-                    if(pluginResults.keySet().size() != summaries.size())
-                    {
-                        Set<Integer> keys = pluginResults.keySet();
+                    pluginResults = new TreeMap<Integer, Integer>();
 
-                        for(ProjectInfoSummary summary : summaries)
+                    projectPluginSchema = Schemas.getSchemaName(projectName, info.GetName());
+                    rs = stmt.executeQuery(String.format(formatStringPublished,
+                            projectPluginSchema,
+                            configInstance.getGlobalSchema()));
+                    if(rs != null)
+                    {
+                        while(rs.next()) {
+                            pluginResults.put(rs.getInt("SummaryIDNum"), rs.getInt("ZonalStatIDCount"));
+                        }
+                        if(pluginResults.keySet().size() != summaries.size())
                         {
-                            if(!keys.contains(summary.GetID())) {
-                                pluginResults.put(summary.GetID(), 0);
+                            Set<Integer> keys = pluginResults.keySet();
+
+                            for(ProjectInfoSummary summary : summaries)
+                            {
+                                if(!keys.contains(summary.GetID())) {
+                                    pluginResults.put(summary.GetID(), 0);
+                                }
                             }
                         }
                     }
-                }
-                else {
-                    for(ProjectInfoSummary summary : summaries)
-                    {
-                        pluginResults.put(summary.GetID(), 0);
+                    else {
+                        for(ProjectInfoSummary summary : summaries)
+                        {
+                            pluginResults.put(summary.GetID(), 0);
+                        }
                     }
+                    rs.close();
+
+                    numOfResultsPublished.put(info.GetName(), pluginResults);
                 }
-                rs.close();
-
-                numOfResultsPublished.put(info.GetName(), pluginResults);
-            }
-
-            stmt.close();
-            if(rs != null) {
-                rs.close();
+                if(stmt != null) {
+                    stmt.close();
+                }
+                if(rs != null) {
+                    rs.close();
+                }
+            } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(Config.getInstance(), "Problem in SchedulerStatusContainer.UpdateNumOfResultsPublished.", e);
             }
             updateLastModifiedTime();
         }
@@ -372,51 +381,58 @@ public class SchedulerStatusContainer {
      * @throws SAXException
      * @throws IOException
      */
-    public void CheckIfResultsUpToDate(boolean updateNumOfResultsPublished) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public void CheckIfResultsUpToDate(boolean updateNumOfResultsPublished)
     {
         synchronized(resultsUpToDate)
         {
-            Connection con = PostgreSQLConnection.getConnection(configInstance);
-            Statement stmt = con.createStatement();
-            PreparedStatement pStmtExpected = con.prepareStatement("SELECT \"ExpectedTotalResults\" FROM \"" + configInstance.getGlobalSchema() + "\".\"ExpectedResults\" WHERE " +
-                    "\"ProjectSummaryID\" = ? AND \"PluginID\" = ?;");
-            ResultSet rs;
-            int expectedNumOfResults;
-            int currentNumOfResults;
+            Connection con = null;
+            Statement stmt = null;
+            PreparedStatement pStmtExpected = null;
+            try {
+                con = PostgreSQLConnection.getConnection(configInstance);
+                stmt = con.createStatement();
+                pStmtExpected = con.prepareStatement("SELECT \"ExpectedTotalResults\" FROM \"" + configInstance.getGlobalSchema() + "\".\"ExpectedResults\" WHERE " +
+                        "\"ProjectSummaryID\" = ? AND \"PluginID\" = ?;");
+                ResultSet rs;
+                int expectedNumOfResults;
+                int currentNumOfResults;
 
-            if(updateNumOfResultsPublished) {
-                UpdateNumOfResultsPublished();
-            }
-
-            resultsUpToDate = new TreeMap<String, TreeMap<Integer, Boolean>>();
-            TreeMap<Integer, Boolean> pluginResults;
-            for(ProjectInfoPlugin info : pluginInfo)
-            {
-                pluginResults = new TreeMap<Integer, Boolean>();
-                for(ProjectInfoSummary summary : summaries)
-                {
-                    // Get ExpectedTotalResults
-                    expectedNumOfResults = -1;
-                    currentNumOfResults = -1;
-                    pStmtExpected.setInt(1, Schemas.getProjectSummaryID(configInstance.getGlobalSchema(), projectName, summary.GetID(), stmt));
-                    pStmtExpected.setInt(2, Schemas.getPluginID(configInstance.getGlobalSchema(), info.GetName(), stmt));
-                    rs = pStmtExpected.executeQuery();
-                    if(rs != null && rs.next()) {
-                        expectedNumOfResults = rs.getInt("ExpectedTotalResults");
-                    }
-                    rs.close();
-
-                    // Get actual total number of results
-                    currentNumOfResults = numOfResultsPublished.get(info.GetName()).get(summary.GetID());
-
-                    // Update plugin results
-                    pluginResults.put(summary.GetID(), (((currentNumOfResults != -1) && (expectedNumOfResults != -1) && (currentNumOfResults == expectedNumOfResults)) ? true : false));
+                if(updateNumOfResultsPublished) {
+                    UpdateNumOfResultsPublished();
                 }
-                resultsUpToDate.put(info.GetName(), pluginResults);
-            }
 
-            stmt.close();
-            pStmtExpected.close();
+                resultsUpToDate = new TreeMap<String, TreeMap<Integer, Boolean>>();
+                TreeMap<Integer, Boolean> pluginResults;
+                for(ProjectInfoPlugin info : pluginInfo)
+                {
+                    pluginResults = new TreeMap<Integer, Boolean>();
+                    for(ProjectInfoSummary summary : summaries)
+                    {
+                        // Get ExpectedTotalResults
+                        expectedNumOfResults = -1;
+                        currentNumOfResults = -1;
+                        pStmtExpected.setInt(1, Schemas.getProjectSummaryID(configInstance.getGlobalSchema(), projectName, summary.GetID(), stmt));
+                        pStmtExpected.setInt(2, Schemas.getPluginID(configInstance.getGlobalSchema(), info.GetName(), stmt));
+                        rs = pStmtExpected.executeQuery();
+                        if(rs != null && rs.next()) {
+                            expectedNumOfResults = rs.getInt("ExpectedTotalResults");
+                        }
+                        rs.close();
+
+                        // Get actual total number of results
+                        currentNumOfResults = numOfResultsPublished.get(info.GetName()).get(summary.GetID());
+
+                        // Update plugin results
+                        pluginResults.put(summary.GetID(), (((currentNumOfResults != -1) && (expectedNumOfResults != -1) && (currentNumOfResults == expectedNumOfResults)) ? true : false));
+                    }
+                    resultsUpToDate.put(info.GetName(), pluginResults);
+                }
+
+                stmt.close();
+                pStmtExpected.close();
+            } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(Config.getInstance(), "Problem in SchedulerStatusContainer.CheckIfResultsUpToDate", e);
+            }
             updateLastModifiedTime();
         }
     }
@@ -431,8 +447,7 @@ public class SchedulerStatusContainer {
      * @throws SAXException
      * @throws IOException
      */
-    public synchronized void CheckIfProjectIsUpToDate(boolean updateResultsUpToDateListing, boolean updateNumOfResultsPublished) throws ClassNotFoundException, SQLException,
-    ParserConfigurationException, SAXException, IOException
+    public synchronized void CheckIfProjectIsUpToDate(boolean updateResultsUpToDateListing, boolean updateNumOfResultsPublished)
     {
         boolean isUpToDate = true;
         if(updateResultsUpToDateListing) {

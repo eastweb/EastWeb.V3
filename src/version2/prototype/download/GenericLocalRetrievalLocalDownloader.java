@@ -52,19 +52,29 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
+        Connection conn = null;
         try {
             if(scheduler.GetState() == TaskState.RUNNING)
             {
-                final Connection conn = PostgreSQLConnection.getConnection();
+                conn = PostgreSQLConnection.getConnection();
                 Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
                         pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
-                conn.close();
 
                 outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, projectInfoFile.GetStartDate(),
                         pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add(projectInfoFile, processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
+        }
+        finally
+        {
+            if(conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    ErrorLog.add(projectInfoFile, processName, scheduler, "Problem in GenericLocalRetrievalLocalDownloader.process while closing connection.", e);
+                }
+            }
         }
     }
 

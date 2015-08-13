@@ -5,6 +5,7 @@ package version2.prototype.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -189,13 +190,15 @@ public class EASTWebResults {
      */
     public static ArrayList<EASTWebResult> GetEASTWebResults(EASTWebQuery query) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
-        Statement stmt = PostgreSQLConnection.getConnection().createStatement();
+        Connection con = PostgreSQLConnection.getConnection();
+        Statement stmt = con.createStatement();
         ResultSet rs;
         ArrayList<Double> summaryCalculations;
         ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>(0);
         boolean valid;
         boolean foundColumn;
 
+        con.close();
         // Run EASTWebQuery
         rs = stmt.executeQuery(query.GetSQL());
         if(rs != null)

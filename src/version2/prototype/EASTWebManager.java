@@ -85,34 +85,39 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static void Start(int numOfSimultaneousGlobalDLs, int msBeetweenUpdates)
     {
-        if(instance == null)
-        {
-            instance = new EASTWebManager(
-                    numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
-                    ((Runtime.getRuntime().availableProcessors() < 4) ?
-                            1 : (Runtime.getRuntime().availableProcessors() - 3)), // Number of ProcessWorkers allowed to be simultaneously active
-                            msBeetweenUpdates
-                    );
-
-            // If passive updating desired
-            if(msBeetweenUpdates > 0)
+        try{
+            if(instance == null)
             {
-                executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-                    @Override
-                    public Thread newThread(Runnable target) {
-                        final Thread thread = new Thread(target);
-                        //                log.debug("Creating new worker thread");
-                        thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                            @Override
-                            public void uncaughtException(Thread t, Throwable e) {
-                                //                        log.error("Uncaught Exception", e);
-                            }
-                        });
-                        return thread;
-                    }
-                });
-                executor.execute(instance);
+                instance = new EASTWebManager(
+                        numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
+                        ((Runtime.getRuntime().availableProcessors() < 4) ?
+                                1 : (Runtime.getRuntime().availableProcessors() - 3)), // Number of ProcessWorkers allowed to be simultaneously active
+                                msBeetweenUpdates
+                        );
+
+                // If passive updating desired
+                if(msBeetweenUpdates > 0)
+                {
+                    executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                        @Override
+                        public Thread newThread(Runnable target) {
+                            final Thread thread = new Thread(target);
+                            //                log.debug("Creating new worker thread");
+                            thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+                                @Override
+                                public void uncaughtException(Thread t, Throwable e) {
+                                    //                        log.error("Uncaught Exception", e);
+                                }
+                            });
+                            return thread;
+                        }
+                    });
+                    executor.execute(instance);
+                }
             }
+        } catch(Exception e)
+        {
+            ErrorLog.add(Config.getInstance(), "Problem while starting EASTWebManager.", e);
         }
     }
 

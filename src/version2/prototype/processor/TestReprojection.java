@@ -22,7 +22,8 @@ public class TestReprojection
 {
     public static void main(String [] args)
     {
-        GdalUtils.register();
+        //        GdalUtils.register();
+        gdal.AllRegister();
 
         synchronized (GdalUtils.lockObject)
         {

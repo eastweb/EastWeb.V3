@@ -56,11 +56,9 @@ public class Projection implements Serializable {
      * @param resamplingType
      * @param datum
      * @param pixelSize
-     * @param semiMajorAxis
-     * @param semiMinorAxis
-     * @param standardParallel1 only for AEA and LCC projections
-     * @param standardParallel2 only AEA and LCC projections
-     * @param factor only for transverse Mercator projection
+     * @param standardParallel1  - only for AEA and LCC projections
+     * @param standardParallel2  - only AEA and LCC projections
+     * @param scalingFactor
      * @param centralMeridian
      * @param falseEasting
      * @param falseNorthing

@@ -24,7 +24,6 @@ public class ReadShapefile {
 
     public ReadShapefile(String filename) throws ShapefileException{
         if (filename != null){
-
             GdalUtils.register();
             synchronized (GdalUtils.lockObject) {
                 shapefile = ogr.Open(filename);
@@ -45,7 +44,9 @@ public class ReadShapefile {
     public ArrayList<String []> getFeatureList()
     {
         synchronized (GdalUtils.lockObject) {
+            System.out.println("ShapeFile count: " + shapefile.GetLayerCount());
             for (int iLayer=0; iLayer<shapefile.GetLayerCount(); iLayer++) {
+                System.out.println("Test_Layer: " + iLayer);
                 Layer layer = shapefile.GetLayer(iLayer);
                 FeatureDefn layerDefn = layer.GetLayerDefn();
 

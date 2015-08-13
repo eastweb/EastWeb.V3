@@ -27,6 +27,8 @@ import org.gdal.ogr.ogr;
 import org.gdal.osr.SpatialReference;
 import org.xml.sax.SAXException;
 
+import version2.prototype.ErrorLog;
+import version2.prototype.Process;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
@@ -39,6 +41,10 @@ import version2.prototype.util.Schemas;
  *
  */
 public class ZonalSummaryCalculator {
+    private final int fileNum;
+    private final int count;
+    private final Process process;
+    private final String workingDir;
     private final File mRasterFile;
     private final String shapeFilePath;
     private final File mTableFile;
@@ -55,9 +61,9 @@ public class ZonalSummaryCalculator {
 
     /**
      * Creates a ZonalSummaryCalculator.
+     * @param process
      * @param globalSchema
      * @param workingDir
-     *
      * @param projectName  - current project's name
      * @param pluginName
      * @param indexNm
@@ -68,9 +74,13 @@ public class ZonalSummaryCalculator {
      * @param summariesCollection  - collection of summary calculations to run on raster data
      * @param summary
      */
-    public ZonalSummaryCalculator(String globalSchema, String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile,
+    public ZonalSummaryCalculator(int fileNum, int count, Process process, String globalSchema, String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile,
             File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary)
     {
+        this.fileNum = fileNum;
+        this.count = count;
+        this.process = process;
+        this.workingDir = workingDir;
         mRasterFile = inRasterFile;
         mTableFile = outTableFile;
         shapeFilePath = summary.GetZonalSummary().GetShapeFile();
@@ -88,7 +98,6 @@ public class ZonalSummaryCalculator {
 
     /**
      * Run ZonalSummaryCalculator.
-     *
      * @throws Exception
      */
     public void calculate() throws Exception {
@@ -134,18 +143,29 @@ public class ZonalSummaryCalculator {
 
                 // Write to database
                 uploadResultsToDb(globalSchema, Schemas.getSchemaName(projectName, pluginName), mRasterFile.getPath(), layer, shapeFilePath, areaCodeField, countMap);
-            } finally { // Clean up
-                if (raster != null) {
-                    raster.delete(); GdalUtils.errorCheck();
-                }
-                if (layer != null) {
-                    layer.delete(); GdalUtils.errorCheck();
-                }
-                if (layerSource != null) {
-                    layerSource.delete(); GdalUtils.errorCheck();
-                }
-                if (zoneRaster != null) {
-                    zoneRaster.delete(); GdalUtils.errorCheck();
+            }
+            catch (SQLException | IllegalArgumentException | UnsupportedOperationException | IOException | ClassNotFoundException | ParserConfigurationException | SAXException e)
+            {
+                ErrorLog.add(workingDir, projectName, process, "Problem with calculating zonal summaries.", e);
+            }
+            finally
+            {
+                try {
+                    if (raster != null) {
+                        raster.delete();
+                        GdalUtils.errorCheck();
+                    }
+                    if (layer != null) {
+                        layer.delete(); GdalUtils.errorCheck();
+                    }
+                    if (layerSource != null) {
+                        layerSource.delete(); GdalUtils.errorCheck();
+                    }
+                    if (zoneRaster != null) {
+                        zoneRaster.delete(); GdalUtils.errorCheck();
+                    }
+                } catch (IllegalArgumentException | UnsupportedOperationException | IOException e) {
+                    ErrorLog.add(workingDir, projectName, process, "Problem with deleting Gdal related resources.", e);
                 }
             }
         }
@@ -212,9 +232,12 @@ public class ZonalSummaryCalculator {
      * @param layer  - shape file
      * @param transform  - raster data in single double array
      * @return all data after rasterization
+     * @throws IOException
+     * @throws UnsupportedOperationException
+     * @throws IllegalArgumentException
      * @throws Exception
      */
-    private Dataset rasterize(Layer layer, double[] transform) throws Exception {
+    private Dataset rasterize(Layer layer, double[] transform) throws IllegalArgumentException, UnsupportedOperationException, IOException {
 
         // Create the raster to burn values into
         double[] layerExtent = layer.GetExtent(); GdalUtils.errorCheck();
@@ -245,7 +268,7 @@ public class ZonalSummaryCalculator {
     }
 
 
-    private Map<Integer, Double> calculateStatistics(Dataset rasterDS, Dataset featureDS) throws Exception {
+    private Map<Integer, Double> calculateStatistics(Dataset rasterDS, Dataset featureDS) throws IllegalArgumentException, UnsupportedOperationException, IOException {
         // Calculate zonal statistics
         Band zoneBand = featureDS.GetRasterBand(1); GdalUtils.errorCheck();
         Band rasterBand = rasterDS.GetRasterBand(1); GdalUtils.errorCheck();
@@ -286,7 +309,7 @@ public class ZonalSummaryCalculator {
     }
 
 
-    private void writeTable(Layer layer, Map<Integer, Double> countMap) throws Exception {
+    private void writeTable(Layer layer, Map<Integer, Double> countMap) throws IllegalArgumentException, UnsupportedOperationException, IOException {
         // Write the table
         String directory = mTableFile.getCanonicalPath().substring(0, mTableFile.getCanonicalPath().lastIndexOf("\\"));
         new File(directory).mkdirs();
@@ -331,13 +354,12 @@ public class ZonalSummaryCalculator {
     }
 
     private void uploadResultsToDb(String globalSchema, String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String areaIDField,
-            Map<Integer, Double> countMap) throws SQLException, IllegalArgumentException, UnsupportedOperationException, IOException,
-            ClassNotFoundException, ParserConfigurationException, SAXException {
+            Map<Integer, Double> countMap) throws IllegalArgumentException, UnsupportedOperationException, IOException,
+            ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         final Connection conn = PostgreSQLConnection.getConnection();
         Statement stmt = conn.createStatement();
         PreparedStatement pStmt = null;
         final boolean previousAutoCommit = conn.getAutoCommit();
-        conn.setAutoCommit(false);
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
 
         try {
@@ -408,13 +430,18 @@ public class ZonalSummaryCalculator {
 
                 feature = layer.GetNextFeature(); GdalUtils.errorCheck();
             }
+            System.out.println("Executing batch update to ZonalStat for fileNum=" + fileNum + ", summaryID=" + summary.GetID() + ", SummaryWorkerNum=" + count);
+            //            conn.setAutoCommit(false);
             pStmt.executeBatch();
-            conn.commit();
-        } catch (SQLException e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            conn.setAutoCommit(previousAutoCommit);
+            //            conn.commit();
+            System.out.println("Finished batch update to ZonalStat for fileNum=" + fileNum + ", summaryID=" + summary.GetID() + ", SummaryWorkerNum=" + count);
+        }
+        catch (SQLException e) {
+            ErrorLog.add(workingDir, projectName, process, "Problem in ZonalSummaryCalculator.uploadResultsToDb executing zonal summaries results.", e);
+            //            conn.rollback();
+        }
+        finally {
+            //            conn.setAutoCommit(previousAutoCommit);
             stmt.close();
             if(pStmt != null) {
                 pStmt.close();

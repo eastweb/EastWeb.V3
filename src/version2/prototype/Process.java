@@ -104,15 +104,24 @@ public abstract class Process implements Observer {
             }
             else if(o instanceof GlobalDownloader)
             {
+                Connection conn = null;
                 try {
-                    final Connection conn = PostgreSQLConnection.getConnection();
+                    conn = PostgreSQLConnection.getConnection();
                     Schemas.updateExpectedResults(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
                             pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
-                    conn.close();
                     process(new ArrayList<DataFileMetaData>());
                 }
                 catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
                     ErrorLog.add(projectInfoFile, processName, scheduler, "Process.update error during processing of update notification from GlobalDownloader.", e);
+                }
+                finally{
+                    if(conn != null) {
+                        try {
+                            conn.close();
+                        } catch (SQLException e) {
+                            ErrorLog.add(projectInfoFile, processName, scheduler, "Problem in Process.update while closing connection.", e);
+                        }
+                    }
                 }
             }
         }

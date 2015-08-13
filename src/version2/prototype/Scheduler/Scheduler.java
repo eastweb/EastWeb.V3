@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -136,22 +137,31 @@ public class Scheduler {
         NotifyUI(new GeneralUIEventObject(this, null, null, null));
 
         PluginMetaData pluginMetaData;
-        for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
-        {
-            try
+        Connection con = null;
+        try {
+            con = PostgreSQLConnection.getConnection();
+            for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
                 new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName())).mkdirs();
 
                 // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
-                Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
+                Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
                         configInstance.getSummaryCalculations(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(),
                         projectInfoFile.GetSummaries(), true);
                 SetupProcesses(item);
             }
-            catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
-                    | IllegalArgumentException | InvocationTargetException | ParseException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                ErrorLog.add(projectInfoFile, this, "Problem setting up Scheduler.", e);
+        } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException | SQLException e) {
+            ErrorLog.add(projectInfoFile, this, "Problem setting up Scheduler.", e);
+        }
+        finally {
+            if(con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    ErrorLog.add(projectInfoFile, this, "Problem closing connection.", e);
+                }
             }
         }
     }

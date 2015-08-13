@@ -130,6 +130,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        con.close();
     }
 
     /**
@@ -144,7 +145,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null,
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, testProjectName, testPluginName, null,
                 LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, null, true);
     }
 
@@ -241,7 +242,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
         String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
-        Connection con = PostgreSQLConnection.getConnection();
         Statement stmt = con.createStatement();
         int gdlID = Schemas.getGlobalDownloaderID(testConfig.getGlobalSchema(), testPluginName, dData.name, stmt);
         int dateGroupId = Schemas.getDateGroupID(testConfig.getGlobalSchema(), LocalDate.ofYearDay(testYear, testDay), stmt);

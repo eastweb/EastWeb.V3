@@ -28,6 +28,8 @@ import version2.prototype.util.IndicesFileMetaData;
  */
 public class SummaryWorker extends ProcessWorker {
     private Config configInstance;
+    private static Integer count = -1;
+    private int myCount;
 
     /**
      * @param configInstance
@@ -43,6 +45,10 @@ public class SummaryWorker extends ProcessWorker {
     {
         super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
         this.configInstance = configInstance;
+        synchronized (count) {
+            count = count + 1;
+            myCount = count;
+        }
     }
 
     /* (non-Javadoc)
@@ -87,14 +93,19 @@ public class SummaryWorker extends ProcessWorker {
 
         try{
             File outputFile;
+            int fileNum = -1;
             for(DataFileMetaData cachedFile : cachedFiles)
             {
+                fileNum++;
                 cachedFileData = cachedFile.ReadMetaDataForSummary();
                 for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
                 {
                     outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
                             pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
                     ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
+                            fileNum,
+                            count,
+                            process,
                             configInstance.getGlobalSchema(),
                             projectInfoFile.GetWorkingDir(),
                             projectInfoFile.GetProjectName(),       // projectName

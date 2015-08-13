@@ -84,18 +84,27 @@ public abstract class LocalDownloader extends Process {
         TreeMap<Integer, Integer> newFiles = new TreeMap<Integer, Integer>();
         if(scheduler.GetState() == TaskState.RUNNING)
         {
+            Connection conn = null;
             try {
                 gdl.PerformUpdates();
 
-                final Connection conn = PostgreSQLConnection.getConnection();
+                conn = PostgreSQLConnection.getConnection();
                 newFiles = Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), currentStartDate, pluginMetaData.DaysPerInputData,
                         pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
-                conn.close();
 
                 outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, currentStartDate,
                         pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
             } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(projectInfoFile, processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
+            }
+            finally {
+                if(conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        ErrorLog.add(projectInfoFile, processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
+                    }
+                }
             }
         }
         return newFiles;

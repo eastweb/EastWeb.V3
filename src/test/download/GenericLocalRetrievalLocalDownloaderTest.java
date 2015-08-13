@@ -117,6 +117,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        con.close();
     }
 
     /**
@@ -131,7 +132,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, null,
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, testProjectName, testPluginName, null,
                 LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, summaries, true);
     }
 

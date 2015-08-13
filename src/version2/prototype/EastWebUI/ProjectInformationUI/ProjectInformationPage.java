@@ -187,10 +187,16 @@ public class ProjectInformationPage {
             });
             frame.getContentPane().add(projectCollectionComboBox);
 
-            File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
-
-            for(File fXmlFile: getXMLFiles(fileDir)){
-                projectCollectionComboBox.addItem(fXmlFile.getName().replace(".xml", ""));
+            ProjectInfoCollection projectCollection = new ProjectInfoCollection();
+            try {
+                ArrayList<ProjectInfoFile> projects = projectCollection.ReadInAllProjectInfoFiles();
+                for(ProjectInfoFile project : projects)
+                {
+                    projectCollectionComboBox.addItem(project.GetProjectName());
+                }
+            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | IOException | ParserConfigurationException | SAXException | ParseException e) {
+                ErrorLog.add(Config.getInstance(), "ProjectInformationPage.uiConstrain problem with populating project collection combo box.", e);
             }
         }
     }
@@ -307,10 +313,12 @@ public class ProjectInformationPage {
         heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         heatingTextField.setText(project.GetHeatingDegree().toString());
 
-
         // set modis info
-        for(String modis: project.GetModisTiles()){
-            modisListModel.addElement(modis);
+        if(project.GetModisTiles() != null)
+        {
+            for(String modis: project.GetModisTiles()){
+                modisListModel.addElement(modis);
+            }
         }
 
         // set projection info

@@ -3,8 +3,11 @@ package version2.prototype;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+
 
 
 
@@ -117,6 +120,25 @@ public final class ErrorLog {
     }
 
     /**
+     * Reports an error to the error log for the specified project.
+     * @param workingDirectory
+     * @param projectName
+     * @param process
+     * @param message Error message, suitable for presentation to the user
+     * @param e Cause of the error, may be null
+     */
+    public static void add(String workingDirectory, String projectName, Process process, String message, Throwable e)
+    {
+        String logFileName = getLogFileName();
+        String logPath = FileSystem.GetProjectDirectoryPath(workingDirectory, projectName);
+        synchronized (sErrorLogLock) {
+            printToLogFile(logPath + logFileName, message, e);
+            printToStderr(message, e);
+            process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message));
+        }
+    }
+
+    /**
      * Reports an error to the error log for the specified process and project.
      * @param projectInfoFile
      * @param process
@@ -142,12 +164,25 @@ public final class ErrorLog {
             PrintStream sErrorLogPrintStream = new PrintStream(fos);
 
             sErrorLogPrintStream.println(message);
-            if (e != null) {
-                e.printStackTrace(sErrorLogPrintStream);
-            }
+            Throwable tempError = e;
+            do{
+                if (tempError != null) {
+                    tempError.printStackTrace(sErrorLogPrintStream);
+
+                    if(tempError instanceof SQLException)
+                    {
+                        SQLException sqlError = (SQLException) tempError;
+                        tempError = sqlError.getNextException();
+                    }
+                    else
+                    {
+                        tempError = null;
+                    }
+                }
+            }while(tempError != null);
             sErrorLogPrintStream.println();
             sErrorLogPrintStream.flush();
-        } catch (IOException cause) {
+        } catch (Exception cause) {
             System.err.println("Failed to write to the error log");
         }
     }

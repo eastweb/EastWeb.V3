@@ -27,7 +27,7 @@
 	<CoolingDegree>5</CoolingDegree>
 	<HeatingDate>Thu Jan 01 12:58:42 CST 1970</HeatingDate>
 	<HeatingDegree>20</HeatingDegree>
-	<ModisTiles />
+	<ModisTiles/>
 	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
 	<ReSampling>BILINEAR</ReSampling>
 	<Datum>WGS84</Datum>
