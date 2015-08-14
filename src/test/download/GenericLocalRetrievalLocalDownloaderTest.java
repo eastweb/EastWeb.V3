@@ -17,6 +17,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -29,6 +30,8 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
+import version2.prototype.ProcessWorker;
+import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -39,8 +42,11 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
+import version2.prototype.Scheduler.SchedulerStatus;
+import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.GenericLocalRetrievalLocalDownloader;
 import version2.prototype.download.GenericLocalStorageGlobalDownloader;
+import version2.prototype.download.LocalDownloader;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.util.DatabaseCache;
@@ -107,7 +113,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         SchedulerData data = new SchedulerData(projectInfoFile, null);
         GenericLocalRetrievalLocalDownloaderTest tester = new GenericLocalRetrievalLocalDownloaderTest();
         PluginMetaDataCollection pluginMetaDataCollection = PluginMetaDataCollection.getInstance(new File("src/test/download/Test_" + testPluginName + ".xml"));
-        scheduler = tester.new MyScheduler(data, 1, projectInfoFile, pluginMetaDataCollection, null, testConfig, TaskState.RUNNING);
+        scheduler = tester.new MyScheduler(data, 1, projectInfoFile, pluginMetaDataCollection, new GenericLocalRetrievalLocalDownloaderTest().new MyEASTWebManager(), testConfig, TaskState.RUNNING);
         outputCache = new DatabaseCache(testGlobalSchema, testProjectName, testPluginName, ProcessName.DOWNLOAD, indices);
         downloaderClassName = "TRMM3B42RTDownloader";
     }
@@ -220,6 +226,49 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         assertEquals("LDL start date not as expected.", startDate, ldl.GetStartDate());
         ldl.SetStartDate(startDate.minusDays(1));
         assertEquals("LDL start date not as expected.", startDate.minusDays(1), ldl.GetStartDate());
+    }
+
+    private class MyEASTWebManager implements EASTWebManagerI
+    {
+
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void NotifyUI(SchedulerStatus updatedStatus) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
+                throws IOException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void StopGlobalDownloader(int gdlID) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void StartExistingGlobalDownloader(int gdlID) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public Future<ProcessWorkerReturn> StartNewProcessWorker(
+                ProcessWorker worker) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
     private class MyScheduler extends Scheduler

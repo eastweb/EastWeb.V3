@@ -64,6 +64,24 @@ public class PluginMetaDataCollection {
     /**
      * Gets the stored PluginMetaDataCollection instance or creates a new one if none exists with only the data read from the specified plugin metadata file.
      *
+     * @param xmlFilePath  - the xml file path to read in
+     * @return a PluginMetaDataCollection instance
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     * @throws DOMException
+     * @throws PatternSyntaxException
+     */
+    public static PluginMetaDataCollection getInstance(String xmlFilePath) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
+    {
+        File[] xmlFileArr = new File[1];
+        xmlFileArr[0] = new File(xmlFilePath);
+        return new PluginMetaDataCollection(xmlFileArr);
+    }
+
+    /**
+     * Gets the stored PluginMetaDataCollection instance or creates a new one if none exists with only the data read from the specified plugin metadata file.
+     *
      * @param xmlFile  - the xml file to read in
      * @return a PluginMetaDataCollection instance
      * @throws ParserConfigurationException
@@ -74,12 +92,9 @@ public class PluginMetaDataCollection {
      */
     public static PluginMetaDataCollection getInstance(File xmlFile) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
     {
-        if(instance == null) {
-            File[] xmlFileArr = new File[1];
-            xmlFileArr[0] = xmlFile;
-            instance = new PluginMetaDataCollection(xmlFileArr);
-        }
-        return instance;
+        File[] xmlFileArr = new File[1];
+        xmlFileArr[0] = xmlFile;
+        return new PluginMetaDataCollection(xmlFileArr);
     }
 
     /**
@@ -95,10 +110,7 @@ public class PluginMetaDataCollection {
      */
     public static PluginMetaDataCollection getInstance(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
     {
-        if(instance == null) {
-            instance = new PluginMetaDataCollection(xmlFiles);
-        }
-        return instance;
+        return new PluginMetaDataCollection(xmlFiles);
     }
 
     /**

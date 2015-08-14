@@ -116,7 +116,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
 
         dData = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
 
-        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance();
+        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance("C:\\Users\\michael.devos\\Google Drive\\EASTWeb\\EASTWeb-Projects\\EastWeb.V2\\plugins\\Plugin_TRMM3B42RT.xml");
         pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
         // For testing with ModisNBAR plugin
         //        listDatesFiles = new ModisNBARListDatesFiles(new DataDate(startDate), pluginMetaData.Download);

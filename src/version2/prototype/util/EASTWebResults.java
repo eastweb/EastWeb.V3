@@ -198,9 +198,9 @@ public class EASTWebResults {
         boolean valid;
         boolean foundColumn;
 
-        con.close();
         // Run EASTWebQuery
         rs = stmt.executeQuery(query.GetSQL());
+        con.close();
         if(rs != null)
         {
             while(rs.next())

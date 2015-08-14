@@ -379,7 +379,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
+        boolean result = Schemas.registerGlobalDownloader(globalSchema, pluginName, metaData.name, stmt);
         conn.close();
-        return Schemas.registerGlobalDownloader(globalSchema, pluginName, metaData.name, stmt);
+        return result;
     }
 }

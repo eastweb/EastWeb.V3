@@ -134,22 +134,6 @@ public class SchedulerTest {
         assertEquals("SchedulerStatus state is RUNNING.", TaskState.STOPPED, scheduler.GetSchedulerStatus().State);
     }
 
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#NotifyUI(version2.prototype.util.GeneralUIEventObject)}.
-     */
-    @Test
-    public final void testNotifyUI() {
-        fail("Not yet implemented"); // TODO
-    }
-
-    /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#AttemptUpdate()}.
-     */
-    @Test
-    public final void testAttemptUpdate() {
-        fail("Not yet implemented"); // TODO
-    }
-
     private class MyScheduler extends Scheduler
     {
         public MyScheduler(SchedulerData data, int myID, EASTWebManagerI manager) throws ParserConfigurationException, SAXException, IOException {
