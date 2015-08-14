@@ -1,5 +1,6 @@
 package version2.prototype.ProjectInfoMetaData;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -351,7 +352,12 @@ public class ProjectInfoFile {
         NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.", "Masking");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
         if(values.size() > 0) {
-            return values.get(0);
+            String temp = values.get(0);
+            if(temp.startsWith("\\") || temp.startsWith("/"))
+            {
+                temp = System.getProperty("user.dir") + temp;
+            }
+            return temp;
         }
         return null;
     }
@@ -371,7 +377,12 @@ public class ProjectInfoFile {
         NodeList nodes = GetUpperLevelNodeList("MasterShapeFile", "Missing master shape file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing master shape file.");
         if(values.size() > 0) {
-            return values.get(0);
+            String temp = values.get(0);
+            if(temp.startsWith("\\") || temp.startsWith("/"))
+            {
+                temp = System.getProperty("user.dir") + temp;
+            }
+            return temp;
         }
         return null;
     }
@@ -681,6 +692,10 @@ public class ProjectInfoFile {
                         summary.indexOf(";"));
                 shapefile = summary.substring(summary.indexOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ") + String.valueOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ").length(), summary.indexOf(";",
                         summary.indexOf(ProjectInfoSummary.SHAPE_FILE_TAG + ": ")));
+                if(shapefile.startsWith("\\") || shapefile.startsWith("/"))
+                {
+                    shapefile = System.getProperty("user.dir") + shapefile;
+                }
                 if(summary.indexOf(ProjectInfoSummary.TEMPORAL_SUMMARY_TAG) == -1)
                 {
                     areaValueField = summary.substring(summary.indexOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ") + String.valueOf(ProjectInfoSummary.AREA_CODE_FIELD_TAG + ": ").length());
