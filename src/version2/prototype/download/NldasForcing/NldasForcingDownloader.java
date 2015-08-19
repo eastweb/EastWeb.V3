@@ -53,8 +53,8 @@ public class NldasForcingDownloader extends DownloaderFramework
             FTPClient ftpClient = FTPClientPool.getFtpClient(mHostName, mUsername, mPassword);
             try
             {
-                if(!ftpClient.changeWorkingDirectory(mRootDir + String.format("/%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()))) {
-                    throw new IOException("Couldn't navigate to " + mData.myFtp.rootDir + String.format("/%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()));
+                if(!ftpClient.changeWorkingDirectory(mRootDir + String.format("%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()))) {
+                    throw new IOException("Couldn't navigate to " + mData.myFtp.rootDir + String.format("%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()));
                 }
 
                 if(!outputDestination.exists()) {
@@ -90,8 +90,8 @@ public class NldasForcingDownloader extends DownloaderFramework
 
                 ftpClient.enterLocalPassiveMode();
 
-                if(!ftpClient.changeWorkingDirectory(mData.myFtp.rootDir + String.format("/%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()))){
-                    throw new IOException("Couldn't navigate to " + mData.myFtp.rootDir + String.format("/%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()));
+                if(!ftpClient.changeWorkingDirectory(mData.myFtp.rootDir + String.format("%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()))){
+                    throw new IOException("Couldn't navigate to " + mData.myFtp.rootDir + String.format("%04d/%03d/", mDate.getYear(), mDate.getDayOfYear()));
                 }
 
                 if(!new File(mOutputFolder).exists()) {
