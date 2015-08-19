@@ -26,7 +26,7 @@
 		<ProcessStep>ModisLSTReproject</ProcessStep>
 		<ProcessStep>ModisLSTMask</ProcessStep>
 		<ProcessStep>ModisLSTClip</ProcessStep>
-		<NumberOfOutput>2 </NumberOfOutput>
+		<NumberOfOutput>2</NumberOfOutput>
 	</Processor>
 	<Indices>
 		<ClassName>ModisLSTDay</ClassName>

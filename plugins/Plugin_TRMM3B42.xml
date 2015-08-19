@@ -28,6 +28,7 @@
 		<ProcessStep>TRMM3B42Reproject</ProcessStep>
 		<ProcessStep>TRMM3B42Clip</ProcessStep>
 		<ProcessStep>TRMM3B42Mask</ProcessStep>
+		<NumberOfOutput>1</NumberOfOutput>
 	</Processor>
 	<Indices>
 		<ClassName>TRMM3B42Index</ClassName>
