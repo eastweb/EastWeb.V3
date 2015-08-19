@@ -19,9 +19,9 @@
 	<classpathentry kind="lib" path="forms-1.3.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/gdal/gdal.jar" sourcepath="sources/gdal-2.0.0-sources.jar">
+	<classpathentry kind="lib" path="C:/Users/michael.devos/Google Drive/EASTWeb/EASTWeb-Projects/EastWeb.V2/lib/gdal/gdal-1.11.1.jar" sourcepath="sources/gdal-1.11.1-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/michael.devos/Google%20Drive/EASTWeb/EASTWeb-Projects/EastWeb.V2/doc/gdal-2.0.0-javadoc/"/>
+			<attribute name="javadoc_location" value="file:/C:/Users/michael.devos/Google%20Drive/EASTWeb/EASTWeb-Projects/EastWeb.V2/doc/gdal-1.11.1-javadoc/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
