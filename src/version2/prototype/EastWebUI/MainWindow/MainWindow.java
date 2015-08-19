@@ -331,7 +331,7 @@ public class MainWindow {
     {
         defaultTableModel = new DefaultTableModel();
         defaultTableModel.setDataVector(new Object[][] {},
-                new Object[] { "Project Progress", "Intermidiate Selection", "Status",  "Actions", "Delete" });
+                new Object[] { "Project Progress", "Intermediate Selection", "Status",  "Actions", "Delete" });
 
         JTable table = new JTable(defaultTableModel);
         table.getColumn("Project Progress").setCellRenderer(new ProgressButtonRenderer());
