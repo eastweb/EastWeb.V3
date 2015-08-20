@@ -123,6 +123,7 @@ public class PluginMetaDataCollectionTester {
         tempStep.put(3, "NldasConvertor");
         tempStep.put(4, "NldasFilter");
         assertTrue("Processor Steps are: " + tempStep.toString(), processorData.processStep.equals(tempStep));
+        assertEquals("Processor NumberOfOutputs incorrect.", 10, processorData.numOfOutput.intValue());
 
         // Test getting IndicesMetaData
         ArrayList<String> indicesData = pluginMetaData.IndicesMetaData;

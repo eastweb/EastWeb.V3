@@ -28,7 +28,7 @@
 		<ProcessStep>NldasNOAHReproject</ProcessStep>
 		<ProcessStep>NldasNOAHClip</ProcessStep>
 		<ProcessStep>NldasNOAHMask</ProcessStep>
-		<!-- <NumberOfOutput>10</NumberOfOutput> -->
+		<NumberOfOutput>10</NumberOfOutput>
 	</Processor>
 	<Indices>
 		<ClassName>NldasNOAHMeanDailySnowDepth</ClassName>

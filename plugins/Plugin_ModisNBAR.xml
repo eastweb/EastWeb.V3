@@ -38,7 +38,7 @@
 		<ProcessStep>ModisNBARReproject</ProcessStep>
 		<ProcessStep>ModisNBARMask</ProcessStep>
 		<ProcessStep>ModisNBARClip</ProcessStep>
-		<!-- <NumberOfOutput>7</NumberOfOutput> -->
+		<NumberOfOutput>7</NumberOfOutput>
 	</Processor>
 	<Indices>
 		<ClassName>ModisNBARNDVI</ClassName>

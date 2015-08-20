@@ -234,10 +234,10 @@ public class PluginMetaDataCollection {
      * @throws SAXException
      * @throws IOException
      */
-    public static ProcessorMetaData CreateProcessorMetaData(Map<Integer, String> processSteps) throws ParserConfigurationException, SAXException, IOException
+    public static ProcessorMetaData CreateProcessorMetaData(Map<Integer, String> processSteps, Integer numberOfOutputs) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new ProcessorMetaData(null, null, null, null, processSteps);
+        return collection.new ProcessorMetaData(null, null, null, null, processSteps, numberOfOutputs);
     }
 
     /**
@@ -655,26 +655,30 @@ public class PluginMetaDataCollection {
         private NodeList nList;
 
         public final Map<Integer, String> processStep;
+        public final Integer numOfOutput;
 
         public ProcessorMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n){
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             nList = n;
             processStep = new HashMap<Integer, String>();
-            Node processorNode = nList.item(0);
+            Element processorNode = (Element) nList.item(0);
 
-            NodeList processSteps = ((Element) processorNode).getElementsByTagName("ProcessStep");
+            NodeList processSteps = processorNode.getElementsByTagName("ProcessStep");
 
             for(int i=0; i < processSteps.getLength(); i++)
             {
                 processStep.put(i+1, processSteps.item(i).getTextContent());
             }
+
+            numOfOutput = Integer.parseInt(processorNode.getElementsByTagName("NumberOfOutput").item(0).getTextContent());
         }
 
         public ProcessorMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles,
-                Map<Integer, String> processSteps)
+                Map<Integer, String> processSteps, Integer numOfOutput)
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             processStep = processSteps;
+            this.numOfOutput = numOfOutput;
         }
     }
 

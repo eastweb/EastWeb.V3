@@ -43,6 +43,7 @@
 		<ProcessStep>NldasMozaic</ProcessStep>
 		<ProcessStep>NldasConvertor</ProcessStep>
 		<ProcessStep>NldasFilter</ProcessStep>
+		<NumberOfOutput>10</NumberOfOutput>
 	</Processor>
 	<Indices>
 		<ClassName>GdalNldasCalculator</ClassName>
