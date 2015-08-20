@@ -378,7 +378,7 @@ public class Scheduler {
         {
             // Create extra ListDatesFiles instance
             downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + dlMetaData.downloadFactoryClassName);
-            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManager.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
+            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
                     DatabaseCache.class, LocalDate.class, DownloadMetaData.class);
             downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
                     projectInfoFile.GetStartDate(), dlMetaData);

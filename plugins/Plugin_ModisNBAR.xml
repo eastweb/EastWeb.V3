@@ -23,7 +23,7 @@
 		</OriginDate>
 	</Download>
 	<Download Name="QC">
-		<DownloadFactoryClassName>LocalStorageDownloadFactory</DownloadFactoryClassName>
+		<DownloadFactoryClassName>ModisNBARQCFactory</DownloadFactoryClassName>
 		<Mode>http</Mode>
 		<HTTP>
 			<URL>http://e4ftl01.cr.usgs.gov/MOTA/MCD43B2.005/</URL>
