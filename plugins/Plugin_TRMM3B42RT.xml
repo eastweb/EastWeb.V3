@@ -28,7 +28,7 @@
 		<ProcessStep>TRMM3B42RTReproject</ProcessStep>
 		<ProcessStep>TRMM3B42RTClip</ProcessStep>
 		<ProcessStep>TRMM3B42RTMask</ProcessStep>
-		<NumberOfOutput>1</NumberOfOutput>
+		<!-- <NumberOfOutput>1</NumberOfOutput> -->
 	</Processor>
 	<Indices>
 		<ClassName>TRMM3B42RTIndex</ClassName>

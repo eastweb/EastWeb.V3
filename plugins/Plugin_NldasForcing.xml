@@ -28,7 +28,7 @@
 		<ProcessStep>NldasForcingReproject</ProcessStep>
 		<ProcessStep>NldasForcingClip</ProcessStep>
 		<ProcessStep>NldasForcingMask</ProcessStep>
-		<NumberOfOutput>7</NumberOfOutput>
+		<!-- <NumberOfOutput>7</NumberOfOutput> -->
 	</Processor>
 	<Indices>
 		<ClassName>NldasForcingHeatingDegreeDays</ClassName>

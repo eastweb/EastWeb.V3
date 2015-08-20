@@ -110,15 +110,11 @@ public class ZonalSummaryCalculator {
             Dataset zoneRaster = null;
             try {
                 // Open inputs
-                raster = gdal.Open(mRasterFile.getPath()); GdalUtils.errorCheck();
+                raster = gdal.Open(mRasterFile.getPath());
+                GdalUtils.errorCheck();
                 layerSource = ogr.Open(shapeFilePath);
-                if (layerSource == null) {
-                    throw new IOException("Could not load " + shapeFilePath);
-                }
+                GdalUtils.errorCheck();
                 layer = layerSource.GetLayer(0);
-                if (layer == null) {
-                    throw new IOException("Could not load layer 0 of " + shapeFilePath);
-                }
 
                 // Validate inputs
                 if (!isSameProjection(raster, layer)) {
