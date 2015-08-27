@@ -51,7 +51,7 @@ public class TestTRMM3B42ListDatesFiles {
         TRMM3B42ListDatesFiles testy;
         try {
             testy = new TRMM3B42ListDatesFiles(new DataDate(data.originDate), data, null);
-            Map<DataDate, ArrayList<String>> tempDatesFiles = testy.getListDatesFiles();
+            Map<DataDate, ArrayList<String>> tempDatesFiles = testy.CloneListDatesFiles();
 
             for (Map.Entry<DataDate, ArrayList<String>> entry : tempDatesFiles.entrySet())
             {

@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -46,6 +48,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
 import version2.prototype.ErrorLog;
+import version2.prototype.GUIUpdateHandler;
 import version2.prototype.TaskState;
 import version2.prototype.EastWebUI.ProgressUI.ProjectProgress;
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
@@ -349,7 +352,6 @@ public class MainWindow {
         table.getColumn("Delete").setCellRenderer(new DeleteButtonRenderer());
         table.getColumn("Delete").setCellEditor(new DeleteButtonEditor(new JCheckBox()));
 
-
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(10, 123, 1181, 567);
         frame.getContentPane().add(scrollPane);
@@ -370,15 +372,15 @@ public class MainWindow {
                     SchedulerData data = new SchedulerData(project);
                     EASTWebManager.StartNewScheduler(data, true);
 
+                    defaultTableModel.addRow(new Object[] {
+                            String.valueOf(projectList.getSelectedItem()),
+                            chckbxIntermidiateFiles.isSelected(),
+                            String.valueOf(projectList.getSelectedItem()),
+                            String.valueOf(projectList.getSelectedItem()),
+                            String.valueOf(projectList.getSelectedItem())});
                 } catch (IOException | ParserConfigurationException | SAXException | ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
                 }
-                defaultTableModel.addRow(new Object[] {
-                        String.valueOf(projectList.getSelectedItem()),
-                        chckbxIntermidiateFiles.isSelected(),
-                        String.valueOf(projectList.getSelectedItem()),
-                        String.valueOf(projectList.getSelectedItem()),
-                        String.valueOf(projectList.getSelectedItem())});
             }
         });
 
@@ -753,9 +755,11 @@ public class MainWindow {
      */
     class StatusButtonRenderer extends JButton implements TableCellRenderer {
         private static final long serialVersionUID = 1L;
+        private String label;
 
         public StatusButtonRenderer() {
             setOpaque(true);
+            label = null;
         }
 
         @Override
@@ -774,6 +778,10 @@ public class MainWindow {
             setForeground(Color.GREEN);
             setToolTipText("Project is up to date");
 
+            if(value != null && label == null) {
+                EASTWebManager.RegisterGUIUpdateHandler(new GUIUpdateHandlerImplementation(value.toString(), this));
+            }
+
             //todo: set up logic to change color base on status
             String projectName = (value == null) ? "" : value.toString();
             if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
@@ -788,6 +796,31 @@ public class MainWindow {
 
             setText((value == null) ? "" : value.toString());
             return this;
+        }
+
+        private class GUIUpdateHandlerImplementation implements GUIUpdateHandler{
+            private String projectName;
+            private JButton button;
+
+            public GUIUpdateHandlerImplementation(String projectName, JButton button){
+                this.projectName = projectName;
+                this.button = button;
+            }
+
+            @Override
+            public void run() {
+                SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
+
+                if(status.State == TaskState.RUNNING) {
+                    button.setBackground(Color.YELLOW);
+                    button.setForeground(Color.YELLOW);
+                    button.setToolTipText("Project is still processing ");
+                } else {
+                    button.setBackground(Color.GREEN);
+                    button.setForeground(Color.GREEN);
+                    button.setToolTipText("Project is up to date");
+                }
+            }
         }
     }
 
@@ -804,6 +837,7 @@ public class MainWindow {
 
         public StatusButtonEditor(JCheckBox checkBox) {
             super(checkBox);
+            label = null;
             button = new JButton();
             button.setOpaque(true);
             button.addActionListener(new ActionListener() {
@@ -830,8 +864,14 @@ public class MainWindow {
             button.setForeground(Color.GREEN);
             button.setToolTipText("Project is up to date");
 
-
-            label = (value == null) ? "" : value.toString();
+            if(value != null) {
+                if(label == null) {
+                    EASTWebManager.RegisterGUIUpdateHandler(new GUIUpdateHandlerImplementation(value.toString(), button));
+                }
+                label = value.toString();
+            } else {
+                label = "";
+            }
 
             //todo: set up logic to change color base on status
             String projectName = (value == null) ? "" : value.toString();
@@ -846,8 +886,6 @@ public class MainWindow {
             }
 
             isPushed = true;
-
-
 
             return button;
         }
@@ -868,6 +906,31 @@ public class MainWindow {
         @Override
         protected void fireEditingStopped() {
             super.fireEditingStopped();
+        }
+
+        private class GUIUpdateHandlerImplementation implements GUIUpdateHandler{
+            private String projectName;
+            private JButton button;
+
+            public GUIUpdateHandlerImplementation(String projectName, JButton button){
+                this.projectName = projectName;
+                this.button = button;
+            }
+
+            @Override
+            public void run() {
+                SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
+
+                if(status.State == TaskState.RUNNING) {
+                    button.setBackground(Color.YELLOW);
+                    button.setForeground(Color.YELLOW);
+                    button.setToolTipText("Project is still processing ");
+                } else {
+                    button.setBackground(Color.GREEN);
+                    button.setForeground(Color.GREEN);
+                    button.setToolTipText("Project is up to date");
+                }
+            }
         }
     }
 

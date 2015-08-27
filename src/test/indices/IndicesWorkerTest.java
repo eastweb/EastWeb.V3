@@ -27,10 +27,12 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
+import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -96,7 +98,7 @@ public class IndicesWorkerTest {
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
-                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
+                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
@@ -104,7 +106,7 @@ public class IndicesWorkerTest {
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day)));
 
-        DatabaseCache outputCache = new MyDatabaseCache(globalSchema, projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
+        DatabaseCache outputCache = new MyDatabaseCache(globalSchema, projectInfoFile.GetProjectName(), pluginInfo, ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
         ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
@@ -114,8 +116,10 @@ public class IndicesWorkerTest {
 
     protected class MyDatabaseCache extends DatabaseCache
     {
-        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
-            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
+        public MyDatabaseCache(String globalSchema, String projectName, ProjectInfoPlugin pluginInfo, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles)
+                throws ParseException, ParserConfigurationException, SAXException, IOException {
+            super(new MyScheduler(), globalSchema, projectName, pluginInfo, PluginMetaDataCollection.CreatePluginMetaData(null, null, null, null, null, null, null, null, extraDownloadFiles), null,
+                    dataComingFrom);
         }
 
         @Override
@@ -125,6 +129,18 @@ public class IndicesWorkerTest {
             {
                 System.out.println(data.ReadMetaDataForSummary().dataFilePath);
             }
+        }
+    }
+
+    private class MyScheduler extends Scheduler
+    {
+        public MyScheduler() {
+            super(null, null, 0, null, null);
+        }
+
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
+            // Do nothing
         }
     }
 

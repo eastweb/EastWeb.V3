@@ -68,7 +68,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
      */
     @Override
     public LocalDownloader CreateLocalDownloader(GlobalDownloader gdl) {
-        return new GenericLocalRetrievalLocalDownloader(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        return new GenericLocalRetrievalLocalDownloader(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
     /* (non-Javadoc)

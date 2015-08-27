@@ -19,7 +19,6 @@
 		<passWord>dPpKa2Q8NW</passWord>
 	</DataBase> -->
 	<Output>
-		<SummaryCalculation>Count</SummaryCalculation>
 		<SummaryCalculation>Max</SummaryCalculation>
 		<SummaryCalculation>Mean</SummaryCalculation>
 		<SummaryCalculation>Min</SummaryCalculation>

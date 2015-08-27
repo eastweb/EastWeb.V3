@@ -15,7 +15,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -40,6 +39,9 @@ public class PluginMetaDataCollection {
      * For the typical case, this would make the plugin's 'Title' element equal to this value.
      */
     public Map<String,PluginMetaData> pluginMetaDataMap;
+    /**
+     * List of plugin titles from loaded plugin metadata files.
+     */
     public ArrayList<String> pluginList;
 
     /**
@@ -226,9 +228,10 @@ public class PluginMetaDataCollection {
     }
 
     /**
-     * Provides a means to create a custom ProcessorMetaData mainly object for testing purposes.
+     * Provides a means to create a custom ProcessorMetaData object mainly for testing purposes.
      *
      * @param processSteps
+     * @param numberOfOutputs
      * @return a customized ProcessorMetaData object
      * @throws ParserConfigurationException
      * @throws SAXException
@@ -241,7 +244,22 @@ public class PluginMetaDataCollection {
     }
 
     /**
-     * Provides a means to create a custom SummaryMetaData mainly object for testing purposes.
+     * Provides a means to create a custom IndicesMetaData object mainly for testing purposes.
+     *
+     * @param indicesNames
+     * @return a customized IndicesMetaData object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static IndicesMetaData CreateIndicesMetaData(ArrayList<String> indicesNames) throws ParserConfigurationException, SAXException, IOException
+    {
+        PluginMetaDataCollection collection = new PluginMetaDataCollection();
+        return collection.new IndicesMetaData(null, null, null, null, indicesNames);
+    }
+
+    /**
+     * Provides a means to create a custom SummaryMetaData object mainly for testing purposes.
      *
      * @param mergeStrategyClass
      * @param interpolateStrategyClass
@@ -256,12 +274,28 @@ public class PluginMetaDataCollection {
         return collection.new SummaryMetaData(null, null, null, null, mergeStrategyClass, interpolateStrategyClass);
     }
 
-    public static PluginMetaData CreatePluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndexMetaData Indices, SummaryMetaData Summary, ArrayList<String> IndicesMetaData,
-            ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles) throws ParserConfigurationException, SAXException,
-            IOException
+    /**
+     * Provides a means to create a custom PluginMetaData object mainly for testing purposes.
+     *
+     * @param Download
+     * @param Processor
+     * @param Indices
+     * @param Summary
+     * @param QualityControlMetaData
+     * @param Title
+     * @param DaysPerInputData
+     * @param Resolution
+     * @param ExtraDownloadFiles
+     * @return a customized PluginMetaData object
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static PluginMetaData CreatePluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndicesMetaData Indices, SummaryMetaData Summary, ArrayList<String> QualityControlMetaData,
+            String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, Resolution, ExtraDownloadFiles);
+        return collection.new PluginMetaData(Download, Processor, Indices, Summary, QualityControlMetaData, Title, DaysPerInputData, Resolution, ExtraDownloadFiles);
     }
 
     private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
@@ -307,19 +341,13 @@ public class PluginMetaDataCollection {
             // Get process specific metadata
             DownloadMetaData Download = new DownloadMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Download"));
             ProcessorMetaData Processor = new ProcessorMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Processor"));
-            ArrayList<String> IndicesMetaData = new ArrayList<String>();
-            NodeList tempIndices = doc.getElementsByTagName("Indices");
-            int nodesIndices = ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").getLength();
-            for(int i = 0; i < nodesIndices; i++) {
-                IndicesMetaData.add( ((Element) tempIndices.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
-            }
-            IndexMetaData Indices = new IndexMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, tempIndices);
+            IndicesMetaData Indices = new IndicesMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Indices"));
             SummaryMetaData Summary = new SummaryMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Summary"));
 
             // Setup map
-            String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
-            pluginList.add(pluginName);
-            myMap.put(pluginName, new PluginMetaData(Download, Processor, Indices, Summary, IndicesMetaData, QualityControlMetaData, Title, DaysPerInputData, resolution, ExtraDownloadFiles));
+            //            String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
+            pluginList.add(Title);
+            myMap.put(Title, new PluginMetaData(Download, Processor, Indices, Summary, QualityControlMetaData, Title, DaysPerInputData, resolution, ExtraDownloadFiles));
 
         }
         return myMap;
@@ -348,23 +376,21 @@ public class PluginMetaDataCollection {
     public class PluginMetaData {
         public final DownloadMetaData Download;
         public final ProcessorMetaData Processor;
-        public final IndexMetaData Indices;
+        public final IndicesMetaData Indices;
         public final SummaryMetaData Summary;
-        public final ArrayList<String> IndicesMetaData; // Deprecated. Eventually IndicesMetaData will be a type and replace IndexMetaData. Property replaced by 'Indices'.
         public final ArrayList<String> QualityControlMetaData;
         public final String Title;
         public final Integer DaysPerInputData;
         public final Integer Resolution;
         public final ArrayList<String> ExtraDownloadFiles;
 
-        public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndexMetaData Indices, SummaryMetaData Summary, ArrayList<String> IndicesMetaData,
-                ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles)
+        public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndicesMetaData Indices, SummaryMetaData Summary, ArrayList<String> QualityControlMetaData, String Title,
+                Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles)
         {
             this.Download = Download;
             this.Processor = Processor;
             this.Indices = Indices;
             this.Summary = Summary;
-            this.IndicesMetaData = IndicesMetaData;
             this.QualityControlMetaData = QualityControlMetaData;
             this.Title = Title;
             this.DaysPerInputData = DaysPerInputData;
@@ -517,15 +543,23 @@ public class PluginMetaDataCollection {
             this.downloadFactoryClassName = downloadFactoryClassName;
             this.timeZone = timeZone;
             this.filesPerDay = filesPerDay;
-            datePattern = Pattern.compile(datePatternStr);
-            fileNamePattern = Pattern.compile(fileNamePatternStr);
+            if(datePatternStr != null) {
+                datePattern = Pattern.compile(datePatternStr);
+            } else {
+                datePattern = null;
+            }
+            if(fileNamePatternStr != null) {
+                fileNamePattern = Pattern.compile(fileNamePatternStr);
+            } else {
+                fileNamePattern = null;
+            }
             extraDownloads = null;
             this.originDate = originDate;
         }
 
         public DownloadMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, String mode, FTP myFtp, HTTP myHttp,
-                String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr,
-                ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate) throws PatternSyntaxException
+                String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, ArrayList<DownloadMetaData> extraDownloads, LocalDate originDate)
+                        throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             name = "Data";
@@ -535,8 +569,16 @@ public class PluginMetaDataCollection {
             this.downloadFactoryClassName = downloadFactoryClassName;
             this.timeZone = timeZone;
             this.filesPerDay = filesPerDay;
-            datePattern = Pattern.compile(datePatternStr);
-            fileNamePattern = Pattern.compile(fileNamePatternStr);
+            if(datePatternStr != null) {
+                datePattern = Pattern.compile(datePatternStr);
+            } else {
+                datePattern = null;
+            }
+            if(fileNamePatternStr != null) {
+                fileNamePattern = Pattern.compile(fileNamePatternStr);
+            } else {
+                fileNamePattern = null;
+            }
             this.extraDownloads = extraDownloads;
             this.originDate = originDate;
         }
@@ -552,8 +594,16 @@ public class PluginMetaDataCollection {
             this.downloadFactoryClassName = downloadFactoryClassName;
             this.timeZone = timeZone;
             this.filesPerDay = filesPerDay;
-            datePattern = Pattern.compile(datePatternStr);
-            fileNamePattern = Pattern.compile(fileNamePatternStr);
+            if(datePatternStr != null) {
+                datePattern = Pattern.compile(datePatternStr);
+            } else {
+                datePattern = null;
+            }
+            if(fileNamePatternStr != null) {
+                fileNamePattern = Pattern.compile(fileNamePatternStr);
+            } else {
+                fileNamePattern = null;
+            }
             extraDownloads = new ArrayList<DownloadMetaData>();
             this.originDate = originDate;
         }
@@ -682,12 +732,12 @@ public class PluginMetaDataCollection {
         }
     }
 
-    public class IndexMetaData extends ProcessMetaData {
+    public class IndicesMetaData extends ProcessMetaData {
         public final ArrayList<String> indicesNames;
 
         private NodeList nList;
 
-        public IndexMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) {
+        public IndicesMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             nList = n;
 
@@ -696,6 +746,13 @@ public class PluginMetaDataCollection {
             for(int i = 0; i < nodesIndices; i++) {
                 indicesNames.add( ((Element) nList.item(0)).getElementsByTagName("ClassName").item(i).getTextContent());
             }
+        }
+
+        public IndicesMetaData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, ArrayList<String> indicesNames)
+        {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
+            this.indicesNames = indicesNames;
+            nList = null;
         }
     }
 

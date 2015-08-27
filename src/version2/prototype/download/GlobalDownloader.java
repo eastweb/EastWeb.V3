@@ -102,7 +102,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public final void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
@@ -258,7 +258,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
+    public ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
@@ -338,7 +338,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws SAXException
      * @throws IOException
      */
-    protected final void AddDownloadFile(int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+    protected void AddDownloadFile(int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
         final LocalDate lDate = LocalDate.ofYearDay(year, dayOfYear);
@@ -375,7 +375,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         conn.close();
     }
 
-    private boolean RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException
+    protected boolean RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException
     {
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();

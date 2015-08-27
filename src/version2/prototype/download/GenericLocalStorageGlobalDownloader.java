@@ -73,7 +73,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
             System.out.println("currentStartDate: " + currentStartDate);
 
             // Step 1: Get all downloads from ListDatesFiles
-            Map<DataDate, ArrayList<String>> filesTemp = listDatesFiles.getListDatesFiles();
+            Map<DataDate, ArrayList<String>> filesTemp = listDatesFiles.CloneListDatesFiles();
             Map<DataDate, ArrayList<String>> datesFiles = new TreeMap<DataDate, ArrayList<String>>(filesTemp);
 
             // Remove from downloads list any which are before the current start date

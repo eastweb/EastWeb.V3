@@ -74,7 +74,7 @@ public class EASTWebResults {
         }
 
         StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"ShapeFile\", D.\"Year\", D.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
-                "E.\"ExpectedTotalResults\", T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"FilePath\"");
+                "T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"FilePath\"");
 
         if(selectCount) {
             query.append(", A.\"Count\"");
@@ -90,8 +90,7 @@ public class EASTWebResults {
         }
 
         query.append(String.format(
-                " \nFROM \"%1$s\".\"ZonalStat\" A, \"%2$s\".\"DateGroup\" D, \"%2$s\".\"Index\" I, \"%2$s\".\"ProjectSummary\" P, \"%2$s\".\"TemporalSummaryCompositionStrategy\" T, " +
-                        "\"%2$s\".\"ExpectedResults\" E \n" +
+                " \nFROM \"%1$s\".\"ZonalStat\" A, \"%2$s\".\"DateGroup\" D, \"%2$s\".\"Index\" I, \"%2$s\".\"ProjectSummary\" P, \"%2$s\".\"TemporalSummaryCompositionStrategy\" T " +
                         "WHERE (A.\"DateGroupID\" = D.\"DateGroupID\"" + yearCondition + dayCondition + ")\n",
                         mSchemaName,
                         globalSchema)
@@ -136,13 +135,13 @@ public class EASTWebResults {
         ArrayList<String> summaries = Config.getInstance().getSummaryCalculations();
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
         StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"ShapeFile\", C.\"Year\", C.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
-                "E.\"ExpectedTotalResults\", T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
+                "T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
         for(int i=1; i < summaries.size(); i++)
         {
             query.append(", A.\"" + summaries.get(i) + "\"");
         }
         query.append(", A.\"FilePath\"");
-        query.append(" FROM \"" + schemaName + "\".\"ZonalStat\" A, \"" + globalSchema + "\".\"ExpectedResults\" E, (SELECT \"Name\", \"IndexID\" FROM \"" + globalSchema + "\".\"Index\"");
+        query.append(" FROM \"" + schemaName + "\".\"ZonalStat\" A, (SELECT \"Name\", \"IndexID\" FROM \"" + globalSchema + "\".\"Index\"");
         if(indices != null && indices.length > 0)
         {
             query.append(" WHERE (\"Name\" = '" + indices[0] + "'");
@@ -225,7 +224,7 @@ public class EASTWebResults {
                 }
                 if(valid) {
                     results.add(new EASTWebResult(rs.getString("IndexName"), rs.getInt("Year"), rs.getInt("Day"), rs.getString("AreaNameField"), rs.getString("AreaName"), rs.getString("AreaCodeField"),
-                            rs.getInt("AreaCode"), rs.getString("ShapeFile"), rs.getInt("ExpectedTotalResults"), rs.getString("TemporalSummaryCompositionStrategyClass"),
+                            rs.getInt("AreaCode"), rs.getString("ShapeFile"), rs.getString("TemporalSummaryCompositionStrategyClass"),
                             Config.getInstance().getSummaryCalculations(), summaryCalculations, rs.getString("FilePath")));
                 }
             }

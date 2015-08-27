@@ -54,7 +54,7 @@ public class TestNBAR_listfiles {
     public void testListDatesFilesHTTP() throws IOException {
         ModisNBARListDatesFiles mld = new ModisNBARListDatesFiles(new DataDate(data.originDate), data, p);
 
-        Map<DataDate, ArrayList<String>> tempDatesFiles = mld.getListDatesFiles();
+        Map<DataDate, ArrayList<String>> tempDatesFiles = mld.CloneListDatesFiles();
 
         for (Map.Entry<DataDate, ArrayList<String>> entry : tempDatesFiles.entrySet())
         {

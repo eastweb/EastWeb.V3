@@ -1,6 +1,5 @@
 package version2.prototype.ProjectInfoMetaData;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -34,9 +33,18 @@ public class ProjectInfoFile {
     private DocumentBuilderFactory domFactory;
     private DocumentBuilder builder;
     private Document doc;
-    public String xmlLocation;
 
+    /**
+     * XML filepath of the file that was parsed to create this ProjectInfoFile object. Null if this object is custom made instead of from a parsed xml file.
+     */
+    public final String xmlLocation;
+    /**
+     * True if there has been an error during parsing.
+     */
     public boolean error;
+    /**
+     * List of error messages if any. Empty if no errors.
+     */
     public ArrayList<String> errorMsg;
     //    private final String rootElement = "ProjectInfo";
     private final ArrayList<ProjectInfoPlugin> plugins;
@@ -130,8 +138,9 @@ public class ProjectInfoFile {
      */
     public ProjectInfoFile(ArrayList<ProjectInfoPlugin> plugins, LocalDate startDate, String projectName, String workingDir, String maskingFile, Integer maskingResolution, String masterShapeFile,
             String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate,
-            Double heatingDegree, ArrayList<ProjectInfoSummary> summaries) {
-
+            Double heatingDegree, ArrayList<ProjectInfoSummary> summaries)
+    {
+        xmlLocation = null;
         this.plugins = plugins;
         this.startDate = startDate;
         this.projectName = projectName;

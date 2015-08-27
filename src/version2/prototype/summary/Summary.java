@@ -32,18 +32,19 @@ public class Summary extends Process {
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
      * @param inputCache
+     * @param outputCache
      */
     public Summary(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache inputCache)
+            DatabaseCache inputCache, DatabaseCache outputCache)
     {
-        super(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, null);
+        super(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         this.configInstance = configInstance;
         inputCache.addObserver(this);
     }
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        manager.StartNewProcessWorker(new SummaryWorker(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null));
+        manager.StartNewProcessWorker(new SummaryWorker(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
     }
 
 }

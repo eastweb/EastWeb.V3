@@ -2,6 +2,7 @@ package version2.prototype.download;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +38,20 @@ public abstract class ListDatesFiles
     }
 
     // gets a map of each day and its associated files
-    public Map<DataDate, ArrayList<String>> getListDatesFiles()
+    public Map<DataDate, ArrayList<String>> CloneListDatesFiles()
     {
-        return mapDatesFiles;
+        Map<DataDate, ArrayList<String>> filesMap = new HashMap<DataDate, ArrayList<String>>();
+        ArrayList<String> files;
+        for(DataDate dd : mapDatesFiles.keySet())
+        {
+            files = new ArrayList<String>();
+            for(String file :  mapDatesFiles.get(dd))
+            {
+                files.add(new String(file));
+            }
+            filesMap.put(dd, files);
+        }
+        return filesMap;
     }
 
     /* Overridden by each plugin using FTP protocol

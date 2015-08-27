@@ -26,16 +26,28 @@ public class ProjectInfoPlugin {
         QC = qc;
     }
 
+    /**
+     * Gets the name of the plugin being described.
+     * @return the plugin name
+     */
     public String GetName()
     {
         return Name;
     }
 
+    /**
+     * Gets the list of the names of the indices to process for the described plugin.
+     * @return list of the names of the indices to calculate
+     */
     public ArrayList<String> GetIndices()
     {
         return Indices;
     }
 
+    /**
+     * Value of the QC flag to use during processing for the described plugin.
+     * @return QC flag value to use
+     */
     public String GetQC()
     {
         return QC;

@@ -48,15 +48,45 @@ public class SchedulerStatus {
      * A timestamp depicting the time this SchedulerStatus object was created/retrieved.
      */
     public final LocalDateTime RetrievedTime;
+    /**
+     * A map of plugin names to their named data to their download progress at the time specified by lastModifiedTime.
+     */
+    public final TreeMap<String, TreeMap<String, Double>> downloadProgressesByData;
+    /**
+     * A map of plugin names to their expected number of data files.
+     */
+    public final TreeMap<String, Integer> downloadExpectedDataFiles;
+    /**
+     * A map of plugin names to their indices progress at the time specified by lastModifiedTime.
+     */
+    public final TreeMap<String, Double> processorProgresses;
+    /**
+     * A map of plugin names to their expected number of outputs from the Processor step.
+     */
+    public final TreeMap<String, Integer> processorExpectedNumOfOutputs;
+    /**
+     * A map of plugin names to their indices progress at the time specified by lastModifiedTime.
+     */
+    public final TreeMap<String, Double> indicesProgresses;
+    /**
+     * A map of plugin names to their expected number of outputs from the Indices step.
+     */
+    public final TreeMap<String, Integer> indicesExpectedNumOfOutputs;
+    /**
+     * A map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime.
+     */
+    public final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
+    /**
+     * A map of plugin names to their maps of summary IDs to their expected number of outputs from the Summary step.
+     */
+    public final TreeMap<String, TreeMap<Integer, Integer>> summaryExpectedNumOfOutputsTemp;
+    /**
+     * A map of plugin names to their total number of files downloaded.
+     */
+    public final TreeMap<String, Integer> numOfFilesDownloaded;
 
-    private final TreeMap<String, Double> downloadProgresses;
-    private final TreeMap<String, Double> processorProgresses;
-    private final TreeMap<String, Double> indicesProgresses;
-    private final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
     private List<String> log;
-    private final TreeMap<String, TreeMap<Integer, Boolean>> resultsUpToDate;
-    private final TreeMap<String, Integer> numOfFilesDownloaded;
-    private final TreeMap<String, TreeMap<Integer, Integer>> numOfResultsPublished;
+    private int logReaderPos;
 
     /**
      *
@@ -64,97 +94,100 @@ public class SchedulerStatus {
      * @param ProjectName
      * @param PluginInfo
      * @param Summaries
-     * @param downloadProgresses
+     * @param downloadProgressesByData
+     * @param downloadExpectedDataFiles
      * @param processorProgresses
+     * @param processorExpectedNumOfOutputs
      * @param indicesProgresses
+     * @param indicesExpectedNumOfOutputs
      * @param summaryProgresses
+     * @param summaryExpectedNumOfOutputsTemp
      * @param log
      * @param State
-     * @param resultsUpToDate
      * @param numOfFilesDownloaded
-     * @param numOfResultsPublished
      * @param ProjectUpToDate
      * @param LastModifiedTime
      * @param RetrievedTime
      */
-    public SchedulerStatus(int SchedulerID, String ProjectName, ArrayList<ProjectInfoPlugin> PluginInfo, ArrayList<ProjectInfoSummary> Summaries, TreeMap<String, Double> downloadProgresses,
-            TreeMap<String, Double> processorProgresses, TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, List<String> log,
-            TaskState State, TreeMap<String, TreeMap<Integer, Boolean>> resultsUpToDate, TreeMap<String, Integer> numOfFilesDownloaded,
-            TreeMap<String, TreeMap<Integer, Integer>> numOfResultsPublished, boolean ProjectUpToDate, LocalDateTime LastModifiedTime, LocalDateTime RetrievedTime)
+    public SchedulerStatus(int SchedulerID, String ProjectName, ArrayList<ProjectInfoPlugin> PluginInfo, ArrayList<ProjectInfoSummary> Summaries,
+            TreeMap<String, TreeMap<String, Double>> downloadProgressesByData, TreeMap<String, Integer> downloadExpectedDataFiles, TreeMap<String, Double> processorProgresses,
+            TreeMap<String, Integer> processorExpectedNumOfOutputs, TreeMap<String, Double> indicesProgresses, TreeMap<String, Integer> indicesExpectedNumOfOutputs,
+            TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, TreeMap<String, TreeMap<Integer, Integer>> summaryExpectedNumOfOutputsTemp, List<String> log, TaskState State,
+            TreeMap<String, Integer> numOfFilesDownloaded, boolean ProjectUpToDate, LocalDateTime LastModifiedTime, LocalDateTime RetrievedTime)
     {
         this.SchedulerID = SchedulerID;
         this.ProjectName = ProjectName;
         this.PluginInfo = PluginInfo;
         this.Summaries = Summaries;
-        this.downloadProgresses = downloadProgresses;
+        this.downloadProgressesByData = downloadProgressesByData;
+        this.downloadExpectedDataFiles = downloadExpectedDataFiles;
         this.processorProgresses = processorProgresses;
+        this.processorExpectedNumOfOutputs = processorExpectedNumOfOutputs;
         this.indicesProgresses = indicesProgresses;
+        this.indicesExpectedNumOfOutputs = indicesExpectedNumOfOutputs;
         this.summaryProgresses = summaryProgresses;
+        this.summaryExpectedNumOfOutputsTemp = summaryExpectedNumOfOutputsTemp;
         this.log = log;
+        logReaderPos = 0;
         this.State = State;
-        this.resultsUpToDate = resultsUpToDate;
         this.numOfFilesDownloaded = numOfFilesDownloaded;
-        this.numOfResultsPublished = numOfResultsPublished;
         this.ProjectUpToDate = ProjectUpToDate;
         this.LastModifiedTime = LastModifiedTime;
         this.RetrievedTime = RetrievedTime;
     }
 
     /**
-     * Gets the download progress of all the plugins being processed in this project.
-     * @return a map of plugin names to their download progress at the time specified by lastModifiedTime
+     * Gets status of new log entries list.
+     * @return boolean - TRUE if new log entries are within this status, FALSE otherwise is list is null or empty
      */
-    public TreeMap<String, Double> GetDownloadProgress() { return downloadProgresses; }
-
-    /**
-     * Gets the processor progress of all the plugins being processed in this project.
-     * @return a map of plugin names to their processor progress at the time specified by lastModifiedTime
-     */
-    public TreeMap<String, Double> GetProcessorProgress() { return processorProgresses; }
-
-    /**
-     * Gets the indices progress of all the plugins being processed in this project.
-     * @return a map of plugin names to their indices progress at the time specified by lastModifiedTime
-     */
-    public TreeMap<String, Double> GetIndicesProgress() { return indicesProgresses; }
-
-    /**
-     * Gets the summary progress of all the plugins being processed in this project.
-     * @return a map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime
-     */
-    public TreeMap<String, TreeMap<Integer, Double>> GetSummaryProgress() { return summaryProgresses; }
-
-    /**
-     * Get the additions to the log.
-     * @return List of new strings to add to the log
-     */
-    public List<String> GetAndClearLog()
-    {
-        List<String> output;
-        synchronized (log)
-        {
-            output = new ArrayList<String>(log);
-            log = new ArrayList<String>(0);
-            return output;
+    public boolean HasLogEntries() {
+        if(log != null && log.size() > 0){
+            return true;
+        } else {
+            return false;
         }
     }
 
     /**
-     * Gets the number of files downloaded per plugin used in this project.
-     * @return a map of plugin names to their total number of files downloaded
+     * Reads the next log entry. Incrementing position counter.
+     * @return String - next log entry if there is one, otherwise null if empty or all log entries read.
      */
-    public TreeMap<String, Integer> GetNumOfFilesDownloaded() { return numOfFilesDownloaded; }
+    public String ReadNextLogEntry()
+    {
+        if(logReaderPos < log.size()) {
+            return log.get(logReaderPos++);
+        } else {
+            return null;
+        }
+    }
 
     /**
-     * Gets the number of results published for each summary for each plugin used in this project.
-     * @return a map of plugin names to their maps of summary IDs to their total number of results published
+     * Returns a String list of log entries either as a subset of the total list of the whole list depending on the current reader position in the list. After calling the reader will return null until
+     * it is reset.
+     * @return list of log entries strings from the current reader position. If reader hasn't been used or has been reset immediately prior to this call then this list will contain the entire list of new
+     * log entries.
      */
-    public TreeMap<String, TreeMap<Integer, Integer>> GetNumOfResultsPublished() { return numOfResultsPublished; }
+    public List<String> ReadAllRemainingLogEntries()
+    {
+        if(logReaderPos < log.size())
+        {
+            ArrayList<String> logEntries = new ArrayList<String>();
+            for(;logReaderPos < log.size(); logReaderPos++)
+            {
+                logEntries.add(log.get(logReaderPos));
+            }
+            return logEntries;
+        } else {
+            return new ArrayList<String>(0);
+        }
+    }
 
     /**
-     * Gets a mapping of boolean values denoting whether summaries listed in the project metadata, per each plugin, are up to date with processing loaded downloads.
-     * @return a map of plugin names to their maps of summary IDs to their status of up to date (TRUE) or still processing data (FALSE)
+     * Resets the log reader to start position.
      */
-    public TreeMap<String, TreeMap<Integer, Boolean>> GetResultsUpToDate() { return resultsUpToDate; }
+    public void ResetLogReader()
+    {
+        logReaderPos = 0;
+    }
 
 }

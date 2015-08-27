@@ -21,10 +21,12 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
+import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -49,7 +51,7 @@ public class Test_ProcessorWorker_TRMM3B42 {
         //extraDownloadFiles.add("QC");
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
-                pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
+                pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
 
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
@@ -57,7 +59,7 @@ public class Test_ProcessorWorker_TRMM3B42 {
 
         //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 
-        DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42rt.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
+        DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42rt.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo, ProcessName.PROCESSOR, null);
         ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
@@ -67,8 +69,10 @@ public class Test_ProcessorWorker_TRMM3B42 {
 
     protected class MyDatabaseCache extends DatabaseCache
     {
-        public MyDatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException {
-            super(globalSchema, projectName, pluginName, dataComingFrom, extraDownloadFiles);
+        public MyDatabaseCache(String globalSchema, String projectName, ProjectInfoPlugin pluginInfo, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException,
+        ParserConfigurationException, SAXException, IOException {
+            super(new MyScheduler(), globalSchema, projectName, pluginInfo, PluginMetaDataCollection.CreatePluginMetaData(null, null, null, null, null, null, null, null, extraDownloadFiles), null,
+                    dataComingFrom);
         }
 
         @Override
@@ -78,6 +82,18 @@ public class Test_ProcessorWorker_TRMM3B42 {
             {
                 System.out.println(data.ReadMetaDataForIndices().dataFilePath);
             }
+        }
+    }
+
+    private class MyScheduler extends Scheduler
+    {
+        public MyScheduler() {
+            super(null, null, 0, null, null);
+        }
+
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
+            // Do nothing
         }
     }
 

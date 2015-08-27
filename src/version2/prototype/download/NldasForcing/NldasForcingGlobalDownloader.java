@@ -31,7 +31,7 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
     @Override
     public void run()
     {
-        Map<DataDate, ArrayList<String>> mapDatesToFiles = listDatesFiles.getListDatesFiles();
+        Map<DataDate, ArrayList<String>> mapDatesToFiles = listDatesFiles.CloneListDatesFiles();
         try
         {
             for(DataFileMetaData dataMetaData : GetAllDownloadedFiles())

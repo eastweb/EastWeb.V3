@@ -126,7 +126,7 @@ public class PluginMetaDataCollectionTester {
         assertEquals("Processor NumberOfOutputs incorrect.", 10, processorData.numOfOutput.intValue());
 
         // Test getting IndicesMetaData
-        ArrayList<String> indicesData = pluginMetaData.IndicesMetaData;
+        ArrayList<String> indicesData = pluginMetaData.Indices.indicesNames;
         ArrayList<String> compareData = new ArrayList<String>(1);
         compareData.add("GdalNldasCalculator");
         assertTrue("Indices are " + indicesData.toString(), indicesData.equals(compareData));

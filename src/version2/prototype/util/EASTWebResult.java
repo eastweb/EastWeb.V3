@@ -16,7 +16,6 @@ public class EASTWebResult {
     public final String areaName;
     public final int areaCode;
     public final String shapeFilePath;
-    public final int expectedTotalResults;
     public final String temporalSummaryCompositionStrategyClassName;
     public final ArrayList<String> summaryNames;
     private final ArrayList<Double> summaryCalculations;
@@ -33,13 +32,12 @@ public class EASTWebResult {
      * @param areaCodeField  - the name of the zone code field this result is using for zonal summarization
      * @param areaCode  - the zone code this result is summarized for
      * @param shapeFilePath
-     * @param expectedTotalResults
      * @param temporalSummaryCompositionStrategyClassName
      * @param summaryNames  - the name of the summary calculations found in the summaryCalculations list in the order they are given in it
      * @param summaryCalculations  - the summary result calculations in the order defined by summaryNames
      * @param filePath  - file path of resulting csv file
      */
-    public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath, int expectedTotalResults,
+    public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath,
             String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations, String filePath)
     {
         indexName = indexNm;
@@ -50,7 +48,6 @@ public class EASTWebResult {
         this.areaCodeField = areaCodeField;
         this.areaCode = areaCode;
         this.shapeFilePath = shapeFilePath;
-        this.expectedTotalResults = expectedTotalResults;
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
         this.summaryNames = summaryNames;
         this.summaryCalculations = summaryCalculations;
