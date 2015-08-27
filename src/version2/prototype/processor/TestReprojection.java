@@ -31,10 +31,11 @@ public class TestReprojection
             Projection p = new Projection(ProjectionType.TRANSVERSE_MERCATOR, ResamplingType.BILINEAR,
                     Datum.WGS84, 1000, 0.0, 0.0, 0.9996, 39.0, 500000.0, 0.0, 0.0);
 
-            projection("D:\\project\\band_JM.tif",
+            projection("D:\\project\\test\\band1.tif",
+                    //"D:\\project\\day.tif",
                     //"D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
                     "D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
-                    p, new File("D:\\project\\band1_JMP.tif"));
+                    p, new File("D:\\project\\day_Pp.tif"));
 
             //extract NOAH
             //            String noah = "D:\\project\\download\\NOAH\\noah_2015_0604.grb";
@@ -96,10 +97,10 @@ public class TestReprojection
         {
             Dataset inputDS = gdal.Open(input);
             wktStr = inputDS.GetProjection();
-            //  SpatialReference inputRef = new SpatialReference();
+            SpatialReference inputRef = new SpatialReference();
 
             //  inputRef.ImportFromWkt(wktStr);
-            //inputRef.ImportFromWkt("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"EPSG\",4326]]");
+            inputRef.ImportFromWkt("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433],AUTHORITY[\"EPSG\",4326]]");
 
             //inputRef.ImportFromWkt("GEOGCS[\"GCS_Undefined\",DATUM[\"Undefined\",SPHEROID[\"User_Defined_Spheroid\",6371007.181,0.0]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Sinusoidal\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],UNIT[\"Meter\",1.0]");
             // FIXME: abstract it somehow?
@@ -136,7 +137,6 @@ public class TestReprojection
                     gdalconst.GDT_Float32
                     );
 
-
             SpatialReference outputRef = new SpatialReference();
             outputRef.ImportFromProj4("+proj=utm +zone=37 +datum=WGS84 +units=m +no_defs");
 
@@ -167,7 +167,7 @@ public class TestReprojection
                 resampleAlg = gdalconst.GRA_CubicSpline;
             }
 
-            System.out.println("Reproject image return : " + gdal.ReprojectImage(inputDS, outputDS, wktStr, outputProjection, resampleAlg));
+            System.out.println("Reproject image return : " + (gdal.ReprojectImage(inputDS, outputDS, wktStr, outputProjection, resampleAlg) == gdalconst.CE_Failure));
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
             inputDS.delete();

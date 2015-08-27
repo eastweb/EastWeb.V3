@@ -10,6 +10,8 @@ import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
 
+// @author: Yi Liu
+
 public class HDF4Reader
 {
     private String fname;
