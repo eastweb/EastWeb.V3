@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,6 +30,8 @@ import org.xml.sax.SAXException;
 import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
@@ -58,6 +60,7 @@ public class ZonalSummaryCalculator {
     private final int year;
     private final int day;
     private final ProjectInfoSummary summary;
+    private final DatabaseCache outputCache;
 
     /**
      * Creates a ZonalSummaryCalculator.
@@ -73,9 +76,10 @@ public class ZonalSummaryCalculator {
      * @param outTableFile  - where to write output to
      * @param summariesCollection  - collection of summary calculations to run on raster data
      * @param summary
+     * @param outputCache
      */
     public ZonalSummaryCalculator(int fileNum, int count, Process process, String globalSchema, String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile,
-            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary)
+            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary, DatabaseCache outputCache)
     {
         this.fileNum = fileNum;
         this.count = count;
@@ -94,6 +98,7 @@ public class ZonalSummaryCalculator {
         this.year = year;
         this.day = day;
         this.summary = summary;
+        this.outputCache = outputCache;
     }
 
     /**
@@ -138,7 +143,7 @@ public class ZonalSummaryCalculator {
                 writeTable(layer, countMap);
 
                 // Write to database
-                uploadResultsToDb(globalSchema, Schemas.getSchemaName(projectName, pluginName), mRasterFile.getPath(), layer, shapeFilePath, areaCodeField, countMap);
+                uploadResultsToDb(mTableFile, layer, areaCodeField, areaNameField, indexNm, summary, summariesCollection, year, day, process, count, fileNum);
             }
             catch (SQLException | IllegalArgumentException | UnsupportedOperationException | IOException | ClassNotFoundException | ParserConfigurationException | SAXException e)
             {
@@ -349,100 +354,65 @@ public class ZonalSummaryCalculator {
         writer.close();
     }
 
-    private void uploadResultsToDb(String globalSchema, String mSchemaName, String rasterFilePath, Layer layer, String shapefilePath, String areaIDField,
-            Map<Integer, Double> countMap) throws IllegalArgumentException, UnsupportedOperationException, IOException,
-            ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
+    private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, SummariesCollection summariesCollection, int year,
+            int day, Process process, int count, int fileNum) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException,
+            SQLException {
+        ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
         final Connection conn = PostgreSQLConnection.getConnection();
         Statement stmt = conn.createStatement();
-        PreparedStatement pStmt = null;
-        final boolean previousAutoCommit = conn.getAutoCommit();
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
-
-        try {
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-            int indexID = Schemas.getIndexID(globalSchema, indexNm, stmt);
-            layer.ResetReading(); GdalUtils.errorCheck();
-            Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
-            StringBuilder insertUpdate = new StringBuilder("INSERT INTO \"%s\".\"ZonalStat\" ("
-                    + "\"ProjectSummaryID\", "
-                    + "\"AreaName\", "
-                    + "\"AreaCode\", "
-                    + "\"DateGroupID\", "
-                    + "\"IndexID\", "
-                    + "\"ExpectedResultsID\", "
-                    + "\"FilePath\""
-                    );
-            for(SummaryNameResultPair result : results)
+        Map<Integer, Double> countMap = null;
+        for(SummaryNameResultPair result : results)
+        {
+            if(result.getSimpleName().equals("Count"))
             {
-                insertUpdate.append(", \"" + result.getSimpleName() + "\"");
+                countMap = result.getResult();
+                break;
             }
-            insertUpdate.append(") VALUES (" +
-                    "?" +   // 1. ProjectSummaryID
-                    ",?" +  // 2. AreaName
-                    ",?" +  // 3. AreaCode
-                    ",?" +  // 4. DateGroupID
-                    ",?" +  // 5. IndexID
-                    ",?" +  // 6. ExpectedResultsID
-                    ",?");  // 7. FilePath
-            for(@SuppressWarnings("unused") SummaryNameResultPair result : results)
-            {
-                insertUpdate.append(",?");
-            }
-            insertUpdate.append(")");
+        }
 
-            pStmt = conn.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
-            int areaCode;
-            String areaName;
-            SummaryNameResultPair pair;
-            double value;
-            Map<Integer, Double> result;
-            while (feature != null)
+        layer.ResetReading(); GdalUtils.errorCheck();
+        Feature feature = layer.GetNextFeature(); GdalUtils.errorCheck();
+        int indexID = Schemas.getIndexID(globalSchema, indexNm, stmt);
+        int areaCode;
+        int projectSummaryID;
+        int dateGroupID;
+        double value;
+        String areaName;
+        String filePath = mTableFile.getCanonicalPath();
+        SummaryNameResultPair pair;
+        Map<Integer, Double> result;
+        Map<String, Double> summaryAreaResult;
+        while (feature != null)
+        {
+            summaryAreaResult = new HashMap<String, Double>();
+            areaCode = feature.GetFieldAsInteger(areaCodeField);
+            GdalUtils.errorCheck();
+            areaName = feature.GetFieldAsString(areaNameField);
+            GdalUtils.errorCheck();
+            if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0)
             {
-                areaCode = feature.GetFieldAsInteger(areaIDField);
-                GdalUtils.errorCheck();
-                areaName = feature.GetFieldAsString(areaNameField);
-                GdalUtils.errorCheck();
-                if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0)
+                // Insert values
+                projectSummaryID = Schemas.getProjectSummaryID(globalSchema, projectName, summary.GetID(), stmt);
+                dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt);
+                for(int i=0; i < results.size(); i++)
                 {
-                    // Insert values
-                    int projectSummaryID = Schemas.getProjectSummaryID(globalSchema, projectName, summary.GetID(), stmt);
-                    pStmt.setInt(1, projectSummaryID);
-                    pStmt.setString(2, areaName);
-                    pStmt.setInt(3, areaCode);
-                    pStmt.setInt(4, Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt));
-                    pStmt.setInt(5, indexID);
-                    pStmt.setInt(6, Schemas.getExpectedResultsID(globalSchema, projectSummaryID, Schemas.getPluginID(globalSchema, pluginName, stmt), stmt));
-                    pStmt.setString(7, mTableFile.getCanonicalPath());
-                    for(int i=0; i < results.size(); i++)
-                    {
-                        pair = results.get(i);
-                        result = pair.getResult();
-                        value = result.get(areaCode);
-                        pStmt.setDouble(8 + i, value);
-                    }
-                    pStmt.addBatch();
+                    pair = results.get(i);
+                    result = pair.getResult();
+                    value = result.get(areaCode);
+                    summaryAreaResult.put(pair.getSimpleName(), value);
                 }
+                newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, dateGroupID, indexID, filePath, summaryAreaResult));
+            }
 
-                feature = layer.GetNextFeature(); GdalUtils.errorCheck();
-            }
-            System.out.println("Executing batch update to ZonalStat for fileNum=" + fileNum + ", summaryID=" + summary.GetID() + ", SummaryWorkerNum=" + count);
-            //            conn.setAutoCommit(false);
-            pStmt.executeBatch();
-            //            conn.commit();
-            System.out.println("Finished batch update to ZonalStat for fileNum=" + fileNum + ", summaryID=" + summary.GetID() + ", SummaryWorkerNum=" + count);
+            feature = layer.GetNextFeature(); GdalUtils.errorCheck();
         }
-        catch (SQLException e) {
-            ErrorLog.add(workingDir, projectName, process, "Problem in ZonalSummaryCalculator.uploadResultsToDb executing zonal summaries results.", e);
-            //            conn.rollback();
+
+        TemporalSummaryCompositionStrategy compStrategy = null;
+        if(summary.GetTemporalFileStore() != null) {
+            compStrategy = summary.GetTemporalFileStore().compStrategy;
         }
-        finally {
-            //            conn.setAutoCommit(previousAutoCommit);
-            stmt.close();
-            if(pStmt != null) {
-                pStmt.close();
-            }
-            conn.close();
-        }
+        outputCache.UploadResultsToDb(newResults, summary.GetID(), compStrategy, year, day, process, count, fileNum);
     }
+
 }

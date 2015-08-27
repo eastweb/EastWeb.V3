@@ -268,10 +268,12 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             // cache to the database
-            try {
+            try{
                 outputCache.CacheFiles(toCache);
-            } catch (ClassNotFoundException | SQLException | ParseException | ParserConfigurationException | SAXException | IOException e) {
-                ErrorLog.add(projectInfoFile, process, "Faching files.", e);
+            }
+            catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e)
+            {
+                ErrorLog.add(projectInfoFile, process, "Problem encountered while caching data for ProcessorWorker.", e);
             }
         }
 

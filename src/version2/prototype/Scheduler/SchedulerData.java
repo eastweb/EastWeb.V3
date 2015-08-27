@@ -17,8 +17,14 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
  *
  */
 public class SchedulerData {
-    public ProjectInfoFile projectInfoFile;
-    public PluginMetaDataCollection pluginMetaDataCollection;
+    /**
+     * The project metadata to use within the Scheduler this object is sent to.
+     */
+    public final ProjectInfoFile projectInfoFile;
+    /**
+     * The PluginMetaDataCollection to use within the Scheduler this object is sent to.
+     */
+    public final PluginMetaDataCollection pluginMetaDataCollection;
 
     /**
      * Creates a SchedulerData object containing the project's metadata and the collection of available plugin metadata.
@@ -32,15 +38,27 @@ public class SchedulerData {
      */
     public SchedulerData(ProjectInfoFile projectInfoFile) throws PatternSyntaxException, DOMException, ParserConfigurationException, SAXException, IOException
     {
-        this.projectInfoFile= projectInfoFile;
+        this.projectInfoFile = projectInfoFile;
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance();
+    }
+
+    /**
+     * Creates a SchedulerData object containing the project's metadata and the collection of available plugin metadata.
+     *
+     * @param projectInfoFile  - the project metadata to use within the Scheduler this object is sent to
+     * @param pluginMetaDataCollection  - the PluginMetaDataCollection to use within the Scheduler this object is sent to
+     */
+    public SchedulerData(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection)
+    {
+        this.projectInfoFile = projectInfoFile;
+        this.pluginMetaDataCollection = pluginMetaDataCollection;
     }
 
     /**
      * Creates a SchedulerData object containing the given project metadata and the plugin metadata from the given file path.
      *
      * @param projectInfoFile  - the project metadata to use within the Scheduler this object is sent to
-     * @param pluginMetaDataFile  - the path to the plugin metadata xml to use within the Scheduler this object is sent to
+     * @param pluginMetaDataFile  - The path to the plugin metadata xml to use within the Scheduler this object is sent to. If an empty string then pluginMetaDataCollection will be null.
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
@@ -51,7 +69,13 @@ public class SchedulerData {
     {
         this.projectInfoFile = projectInfoFile;
         if(pluginMetaDataFile != null) {
-            pluginMetaDataCollection = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile));
+            if(pluginMetaDataFile.isEmpty()) {
+                pluginMetaDataCollection = null;
+            } else {
+                pluginMetaDataCollection = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile));
+            }
+        } else {
+            pluginMetaDataCollection = null;
         }
     }
 }

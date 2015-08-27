@@ -55,7 +55,9 @@ public class ProjectProgress {
     public ProjectProgress(String projectName) {
         initialize();
 
-        EASTWebManager.RegisterGUIUpdateHandler(new GUIUpdateHandlerImplementation(projectName));
+        GUIUpdateHandlerImplementation updateHandler = new GUIUpdateHandlerImplementation(projectName);
+        updateHandler.run();
+        EASTWebManager.RegisterGUIUpdateHandler(updateHandler);
     }
 
     /**
@@ -134,20 +136,20 @@ public class ProjectProgress {
         public void run() {
             SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
 
-            downloadProgressBar.setValue(GetAverage1(status.GetDownloadProgress()));
-            processProgressBar.setValue(GetAverage1(status.GetProcessorProgress()));
-            indiciesProgressBar.setValue(GetAverage1(status.GetIndicesProgress()));
-            summaryProgressBar.setValue(GetAverage2(status.GetSummaryProgress()));
+            downloadProgressBar.setValue(GetAverageDownload(status.downloadProgressesByData).intValue());   // Truncates the double (so value always equates to double rounded down)
+            processProgressBar.setValue(GetAverage(status.processorProgresses).intValue());
+            indiciesProgressBar.setValue(GetAverage(status.indicesProgresses).intValue());
+            summaryProgressBar.setValue(GetAverageSummary(status.summaryProgresses).intValue());
 
-            for(String log : status.GetAndClearLog())
+            for(String log : status.ReadAllRemainingLogEntries())
             {
                 itemLog.addElement(log);
             }
         }
 
-        private int GetAverage1(TreeMap<String, Double> TotalProgress){
+        private Double GetAverage(TreeMap<String, Double> TotalProgress){
 
-            int total = 0;
+            double total = 0;
 
             Iterator<String> pluginIt = TotalProgress.keySet().iterator();
             while(pluginIt.hasNext())
@@ -158,9 +160,9 @@ public class ProjectProgress {
             return total / TotalProgress.size();
         }
 
-        private int GetAverage2(TreeMap<String, TreeMap<Integer, Double>> TotalProgress){
+        private Double GetAverageSummary(TreeMap<String, TreeMap<Integer, Double>> TotalProgress){
 
-            int total = 0;
+            double total = 0;
             int count = 0;
 
             Iterator<String> pluginIt = TotalProgress.keySet().iterator();
@@ -180,5 +182,24 @@ public class ProjectProgress {
             return total / count;
         }
 
+        private Double GetAverageDownload(TreeMap<String, TreeMap<String, Double>> TotalProgress){
+
+            double total = 0;
+            int count = 0;
+
+            Iterator<String> pluginIt = TotalProgress.keySet().iterator();
+            TreeMap<String, Double> dataMap;
+            while(pluginIt.hasNext())
+            {
+                dataMap = TotalProgress.get(pluginIt.next());
+                for(Double value : dataMap.values())
+                {
+                    total += value;
+                    count++;
+                }
+            }
+
+            return total / count;
+        }
     }
 }

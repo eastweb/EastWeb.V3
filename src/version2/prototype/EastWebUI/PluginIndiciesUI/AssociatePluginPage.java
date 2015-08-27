@@ -199,7 +199,7 @@ public class AssociatePluginPage {
                 PluginMetaData plugin = pluginMetaDataCollection.pluginMetaDataMap.get(String.valueOf(pluginComboBox.getSelectedItem()));
 
                 indiciesComboBox.removeAllItems();
-                for(String indicies:plugin.IndicesMetaData) {
+                for(String indicies : plugin.Indices.indicesNames) {
                     indiciesComboBox.addItem(indicies);
                 }
 

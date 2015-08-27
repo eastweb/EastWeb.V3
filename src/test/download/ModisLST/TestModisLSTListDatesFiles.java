@@ -59,7 +59,7 @@ public class TestModisLSTListDatesFiles {
     {
         ModisLSTListDatesFiles mld = new ModisLSTListDatesFiles(new DataDate(data.originDate), data,  projectInfoFile );
 
-        Map<DataDate, ArrayList<String>> tempDatesFiles = mld.getListDatesFiles();
+        Map<DataDate, ArrayList<String>> tempDatesFiles = mld.CloneListDatesFiles();
 
         for (Map.Entry<DataDate, ArrayList<String>> entry : tempDatesFiles.entrySet())
         {

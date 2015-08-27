@@ -1,20 +1,27 @@
 package version2.prototype.indices;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.io.FileUtils;
+import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.IndexMetaData;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.IndicesMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -87,7 +94,7 @@ public class IndicesWorker extends ProcessWorker{
             map.put(thisDate, files);
         }
 
-        IndexMetaData iMetaData = pluginMetaData.Indices;
+        IndicesMetaData iMetaData = pluginMetaData.Indices;
         ArrayList<String> indicesNames  = iMetaData.indicesNames;
         ArrayList<DataFileMetaData> output;
 
@@ -143,7 +150,13 @@ public class IndicesWorker extends ProcessWorker{
                     throw new EmptyStackException(); // class not found
                 }
             }
-            outputCache.CacheFiles(output);
+            try{
+                outputCache.CacheFiles(output);
+            }
+            catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e)
+            {
+                ErrorLog.add(projectInfoFile, process, "Problem encountered while caching data for IndicesWorker.", e);
+            }
         }
 
         return null;

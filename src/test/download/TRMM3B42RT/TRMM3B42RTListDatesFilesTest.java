@@ -85,7 +85,7 @@ public class TRMM3B42RTListDatesFilesTest {
     public final void testListDatesFilesFTP() throws IOException {
         TRMM3B42RTListDatesFiles testy = new TRMM3B42RTListDatesFiles(new DataDate(data.originDate), data, p);
 
-        Map<DataDate, ArrayList<String>> tempDatesFiles = testy.getListDatesFiles();
+        Map<DataDate, ArrayList<String>> tempDatesFiles = testy.CloneListDatesFiles();
         Map<Integer, Map.Entry<DataDate, ArrayList<String>>> datesFilesSorted = new TreeMap<Integer, Map.Entry<DataDate, ArrayList<String>>>();
 
         writer.write(tempDatesFiles.size() + "\n");

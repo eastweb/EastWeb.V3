@@ -43,7 +43,7 @@ public class SummaryWorker extends ProcessWorker {
     public SummaryWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles,
             DatabaseCache outputCache)
     {
-        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         this.configInstance = configInstance;
         synchronized (count) {
             count = count + 1;
@@ -104,7 +104,7 @@ public class SummaryWorker extends ProcessWorker {
                             pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
                     ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
                             fileNum,
-                            count,
+                            myCount,
                             process,
                             configInstance.getGlobalSchema(),
                             projectInfoFile.GetWorkingDir(),
@@ -116,7 +116,8 @@ public class SummaryWorker extends ProcessWorker {
                             new File(cachedFileData.dataFilePath),  // inRasterFile
                             outputFile,                             // outTableFile
                             new SummariesCollection(Config.getInstance().getSummaryCalculations()),
-                            summary);                               // summariesCollection
+                            summary,                               // summariesCollection
+                            outputCache);
                     zonalSummaryCal.calculate();
                     outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
                 }

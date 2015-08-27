@@ -1,5 +1,6 @@
 package version2.prototype.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +12,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Observable;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -19,10 +22,24 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.gdal.ogr.Feature;
+import org.gdal.ogr.Layer;
 import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
+import version2.prototype.DataDate;
+import version2.prototype.ErrorLog;
+import version2.prototype.Process;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.download.ListDatesFiles;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.zonal.SummariesCollection;
+import version2.prototype.summary.zonal.SummaryNameResultPair;
+import version2.prototype.summary.zonal.SummaryResult;
 
 /**
  * Database cache system interface. Frameworks use this to get and submit files from and to the database cache. Internally tracks and logs acquired and available
@@ -36,35 +53,49 @@ public class DatabaseCache extends Observable{
     static final Pattern dateStringPattern = Pattern.compile("(\\d{4})\\\\(\\d{3})\\\\");   // To save time
     static final Pattern modisPattern = Pattern.compile(".*modis.*");
 
-    private final String globalSchema;
-    private final String projectName;
-    private final String pluginName;
-    private final String getFromTableName;
-    private final String cacheToTableName;
-    private final ProcessName processCachingFor;
-    private final ArrayList<String> extraDownloadFiles;
+    public final String globalSchema;
+    public final String mSchemaName;
+    public final String projectName;
+    public final ProjectInfoPlugin pluginInfo;
+    public final PluginMetaData pluginMetaData;
+    public final String pluginName;
+    public final String workingDir;
+    public final String getFromTableName;
+    public final String cacheToTableName;
+    public final ProcessName processCachingFor;
+    public final ArrayList<String> extraDownloadFiles;
+
+    private final Scheduler scheduler;
     private Boolean filesAvailable;
 
     /**
      * Creates a DatabaseCache object set to cache files to and get file listings from the table identified by the given information.
      *
+     * @param scheduler
      * @param globalSchema
      * @param projectName  - project schema to look under
-     * @param pluginName  - plugin schema to look under
+     * @param pluginInfo
+     * @param pluginMetaData  - plugin metadata to use
+     * @param workingDir  - the working directory gotten from ProjectInfoFile
      * @param processCachingFor  - name of process to cache output for
-     * @param extraDownloadFiles  - the data names of the extra download files associated with the related plugin metadata
      * @throws ParseException
      */
-    public DatabaseCache(String globalSchema, String projectName, String pluginName, ProcessName processCachingFor, ArrayList<String> extraDownloadFiles) throws ParseException
+    public DatabaseCache(Scheduler scheduler, String globalSchema, String projectName, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, String workingDir, ProcessName processCachingFor)
+            throws ParseException
     {
+        this.scheduler = scheduler;
         this.globalSchema = globalSchema;
+        pluginName = pluginInfo.GetName();
+        mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         this.projectName = projectName;
-        this.pluginName = pluginName;
+        this.pluginInfo = pluginInfo;
+        this.pluginMetaData = pluginMetaData;
+        this.workingDir = workingDir;
         this.processCachingFor = processCachingFor;
-        if(extraDownloadFiles != null) {
-            this.extraDownloadFiles = extraDownloadFiles;
+        if(pluginMetaData.ExtraDownloadFiles != null) {
+            extraDownloadFiles = pluginMetaData.ExtraDownloadFiles;
         } else {
-            this.extraDownloadFiles = new ArrayList<String>();
+            extraDownloadFiles = new ArrayList<String>();
         }
         filesAvailable = false;
 
@@ -74,7 +105,7 @@ public class DatabaseCache extends Observable{
         case DOWNLOAD: cacheToTableName = "DownloadCache"; getFromTableName = null; break;
         case PROCESSOR: cacheToTableName = "ProcessorCache"; getFromTableName = "ProcessorCache"; break;
         case INDICES: cacheToTableName = "IndicesCache"; getFromTableName = "IndicesCache"; break;
-        case SUMMARY: cacheToTableName = null; getFromTableName = null; break;
+        case SUMMARY: cacheToTableName = "ZonalStat"; getFromTableName = null; break;
         default: throw new ParseException("ProcessName 'processCachingFor' doesn't contain an expected framework identifier.", 0);
         }
     }
@@ -95,7 +126,6 @@ public class DatabaseCache extends Observable{
     {
         Connection conn = null;
         Statement stmt = null;
-        String schemaName = Schemas.getSchemaName(projectName, pluginName);
         TreeMap<Integer, TreeSet<Record>> files = new TreeMap<Integer, TreeSet<Record>>();
         ArrayList<Integer> rows = new ArrayList<Integer>();
         int dateGroupID, tempDayOfYear, tempYear;
@@ -114,7 +144,7 @@ public class DatabaseCache extends Observable{
                 synchronized(filesAvailable)
                 {
                     // Collect completed but not retrieved records from DownloadCache
-                    String downloadCacheQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + schemaName + "\".\"DownloadCache\" D " +
+                    String downloadCacheQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + mSchemaName + "\".\"DownloadCache\" D " +
                             "INNER JOIN \"" + globalSchema + "\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\"" +
                             "WHERE \"Complete\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
                     rs = stmt.executeQuery(downloadCacheQuery);
@@ -145,7 +175,7 @@ public class DatabaseCache extends Observable{
                                 "UPDATE \"%1$s\".\"%2$s\"\n" +
                                         "SET \"Retrieved\" = TRUE\n" +
                                         "WHERE \"%2$sID\" = %3$d",
-                                        schemaName,
+                                        mSchemaName,
                                         "DownloadCache",
                                         row
                                 ));
@@ -156,7 +186,7 @@ public class DatabaseCache extends Observable{
                     String downloadCacheExtraQuery = "";
                     if(extraDownloadFiles != null && extraDownloadFiles.size() > 0)
                     {
-                        downloadCacheExtraQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + schemaName + "\".\"DownloadCacheExtra\" D " +
+                        downloadCacheExtraQuery = "SELECT D.*, G.\"Year\", G.\"DayOfYear\", G.\"DateGroupID\" FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" D " +
                                 "INNER JOIN \"" + globalSchema + "\".\"DateGroup\" G ON D.\"DateGroupID\" = G.\"DateGroupID\"" +
                                 "WHERE \"Complete\" = TRUE AND \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;";
                         rs = stmt.executeQuery(downloadCacheExtraQuery);
@@ -188,7 +218,7 @@ public class DatabaseCache extends Observable{
                                     "UPDATE \"%1$s\".\"%2$s\"\n" +
                                             "SET \"Retrieved\" = TRUE\n" +
                                             "WHERE \"%2$sID\" = %3$d",
-                                            schemaName,
+                                            mSchemaName,
                                             "DownloadCacheExtra",
                                             row
                                     ));
@@ -217,7 +247,7 @@ public class DatabaseCache extends Observable{
                                     "FROM \"%2$s\".\"%1$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\")" + indexJoinString + "\n" +
                                     "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
                                     getFromTableName,
-                                    schemaName,
+                                    mSchemaName,
                                     globalSchema
                             );
 
@@ -251,7 +281,7 @@ public class DatabaseCache extends Observable{
                                 "UPDATE \"%1$s\".\"%2$s\"\n" +
                                         "SET \"Retrieved\" = TRUE\n" +
                                         "WHERE \"%2$sID\" = %3$d",
-                                        schemaName,
+                                        mSchemaName,
                                         getFromTableName,
                                         row
                                 ));
@@ -296,6 +326,7 @@ public class DatabaseCache extends Observable{
      * @param startDate  - the start date to load downloads beginning from this time or later
      * @param extraDownloadFiles  - names of extra download files listed within the plugin metadata
      * @param modisTileNames  - modis tile names as listed in project metadata
+     * @param listDatesFiles
      * @return number of records effected
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -304,12 +335,11 @@ public class DatabaseCache extends Observable{
      * @throws IOException
      */
     public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate, ArrayList<String> extraDownloadFiles,
-            ArrayList<String> modisTileNames) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+            ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = 0;
         final Connection conn = PostgreSQLConnection.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, dataName, stmt);
-        final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         StringBuilder query;
 
         // Only use modisTileNames if the plugin uses Modis data
@@ -397,7 +427,7 @@ public class DatabaseCache extends Observable{
                 if(dates.size() > 0)
                 {
                     // Step 2a
-                    PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCache\" WHERE \"DateGroupID\" = ?;");
+                    PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCache\" WHERE \"Complete\" = FALSE AND \"DateGroupID\" = ?;");
                     int id;
                     Iterator<Integer> it = dates.iterator();
                     while(it.hasNext())
@@ -405,7 +435,7 @@ public class DatabaseCache extends Observable{
                         id = it.next();
                         pstmt.setInt(1, id);
                         rs = pstmt.executeQuery();
-                        if(rs == null) {
+                        if(rs == null || !rs.next()) {
                             it.remove();
                         } else {
                             rs.close();
@@ -415,7 +445,7 @@ public class DatabaseCache extends Observable{
                     // Step 2b
                     if(extraDownloadFiles != null && extraDownloadFiles.size() > 0)
                     {
-                        pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" WHERE \"DateGroupID\" = ? AND \"DataName\" = ?;");
+                        pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" WHERE \"Complete\" = FALSE AND \"DateGroupID\" = ? AND \"DataName\" = ?;");
                         for(String name : extraDownloadFiles)
                         {
                             it = dates.iterator();
@@ -425,7 +455,7 @@ public class DatabaseCache extends Observable{
                                 pstmt.setInt(1, id);
                                 pstmt.setString(2, name);
                                 rs = pstmt.executeQuery();
-                                if(rs == null) {
+                                if(rs == null || !rs.next()) {
                                     it.remove();
                                 } else {
                                     rs.close();
@@ -459,9 +489,83 @@ public class DatabaseCache extends Observable{
                 }
             }
         }
+
+        // Update progress bar
+        String progressQuery;
+        double progress = 0;
+        int currentCount = 0;
+        int expectedCount = 0;
+        if(dataName.toLowerCase().equals("data"))
+        {
+            progressQuery = "SELECT Count(\"DownloadCacheID\") AS \"DownloadCacheIDCount\" FROM \"" + mSchemaName + "\".\"DownloadCache\";";
+            ResultSet rs = stmt.executeQuery(progressQuery);
+            if(rs != null && rs.next())
+            {
+                currentCount = rs.getInt("DownloadCacheIDCount");
+                for(ArrayList<String> files : listDatesFiles.CloneListDatesFiles().values())
+                {
+                    if(modisTileNames != null && modisTileNames.size() > 0)
+                    {
+                        Iterator<String> tileIt;
+                        for(String file : files)
+                        {
+                            tileIt = modisTileNames.iterator();
+                            while(tileIt.hasNext())
+                            {
+                                if(file.contains(tileIt.next())) {
+                                    expectedCount += 1;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        expectedCount += files.size();
+                    }
+                }
+                rs.close();
+            }
+        }
+        else
+        {
+            progressQuery = "SELECT Count(\"DownloadCacheExtraID\") AS \"DownloadCacheExtraIDCount\" FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\";";
+            ResultSet rs = stmt.executeQuery(progressQuery);
+            if(rs != null && rs.next())
+            {
+                currentCount = rs.getInt("DownloadCacheExtraIDCount");
+                for(ArrayList<String> files : listDatesFiles.CloneListDatesFiles().values())
+                {
+                    if(modisTileNames != null && modisTileNames.size() > 0)
+                    {
+                        Iterator<String> tileIt;
+                        for(String file : files)
+                        {
+                            tileIt = modisTileNames.iterator();
+                            while(tileIt.hasNext())
+                            {
+                                if(file.contains(tileIt.next())) {
+                                    expectedCount += 1;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        expectedCount += files.size();
+                    }
+                }
+                rs.close();
+            }
+        }
+
+        if(expectedCount > 0 && currentCount > 0)
+        {
+            progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
+        }
+        scheduler.NotifyUI(new GeneralUIEventObject(this, null, progress, pluginName, dataName, expectedCount));
+
         stmt.close();
         conn.close();
 
+        // Signal to observers that changes occurred
         if(dates.size() > 0)
         {
             synchronized(this) {
@@ -493,7 +597,6 @@ public class DatabaseCache extends Observable{
         if(filesForASingleComposite.size() == 0) {
             return;
         }
-        String schemaName = Schemas.getSchemaName(projectName, pluginName);
         Connection conn = PostgreSQLConnection.getConnection();
         Statement stmt = conn.createStatement();
 
@@ -516,7 +619,7 @@ public class DatabaseCache extends Observable{
                 "INSERT INTO \"%1$s\".\"%2$s\" \n" +
                         "(\"DataFilePath\", \"DateGroupID\"" + indexIDSelectString + ") VALUES \n" +
                         "('" + temp.dataFilePath + "', " + dateGroupID + indexIDValueString + ")",
-                        schemaName,
+                        mSchemaName,
                         cacheToTableName
                 ));
         for(int i=1; i < filesForASingleComposite.size(); i++)
@@ -532,6 +635,32 @@ public class DatabaseCache extends Observable{
         }
         query.append(";");
         stmt.execute(query.toString());
+
+        // Update progress bar
+        String progressQuery = "SELECT Count(\"" + cacheToTableName + "ID\") AS \"" + cacheToTableName + "IDCount\" FROM \"" + mSchemaName + "\".\"" + cacheToTableName + "\";";
+        double progress = 0;
+        int currentCount = 0;
+        int expectedCount = 0;
+        ResultSet rs = stmt.executeQuery(progressQuery);
+        if(rs != null && rs.next())
+        {
+            currentCount = rs.getInt(cacheToTableName + "IDCount");
+            rs.close();
+        }
+        if(processCachingFor == ProcessName.PROCESSOR)
+        {
+            expectedCount = pluginMetaData.Processor.numOfOutput * scheduler.GetSchedulerStatus().downloadExpectedDataFiles.get(pluginName);
+        }
+        else if(processCachingFor == ProcessName.INDICES)
+        {
+            expectedCount = pluginMetaData.Indices.indicesNames.size() * scheduler.GetSchedulerStatus().processorExpectedNumOfOutputs.get(pluginName);
+        }
+        if(expectedCount > 0 && currentCount > 0)
+        {
+            progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
+        }
+        scheduler.NotifyUI(new GeneralUIEventObject(this, null, progress, pluginName, expectedCount));
+
         stmt.close();
         conn.close();
 
@@ -539,6 +668,139 @@ public class DatabaseCache extends Observable{
         {
             filesAvailable = true;
         }
+        setChanged();
+        notifyObservers();
+    }
+
+    /**
+     * Uploads summary results to the database as the "cache" update for summary as there is no actual cache to be used by it but results are stored in the database for UI retrieval. Summary calculators are
+     * expected to produce result files which the mTableFile refers to.
+     * @param newResults
+     * @param summaryID
+     * @param compStrategy
+     * @param year
+     * @param day
+     * @param process
+     * @param count
+     * @param fileNum
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws SQLException
+     */
+    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryID, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int count, int fileNum)
+            throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
+        final Connection conn = PostgreSQLConnection.getConnection();
+        Statement stmt = conn.createStatement();
+        PreparedStatement pStmt = null;
+        //        final boolean previousAutoCommit = conn.getAutoCommit();
+
+        try {
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+            StringBuilder insertUpdate = new StringBuilder("INSERT INTO \"%s\".\"ZonalStat\" ("
+                    + "\"ProjectSummaryID\", "
+                    + "\"AreaName\", "
+                    + "\"AreaCode\", "
+                    + "\"DateGroupID\", "
+                    + "\"IndexID\", "
+                    + "\"FilePath\""
+                    );
+            for(String summarySimpleName : newResults.get(0).summaryResults.keySet())
+            {
+                insertUpdate.append(", \"" + summarySimpleName + "\"");
+            }
+            insertUpdate.append(") VALUES (" +
+                    "?" +   // 1. ProjectSummaryID
+                    ",?" +  // 2. AreaName
+                    ",?" +  // 3. AreaCode
+                    ",?" +  // 4. DateGroupID
+                    ",?" +  // 5. IndexID
+                    ",?");  // 6. FilePath
+            for(@SuppressWarnings("unused") String summarySimpleName : newResults.get(0).summaryResults.keySet())
+            {
+                insertUpdate.append(",?");
+            }
+            insertUpdate.append(")");
+
+            pStmt = conn.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
+
+            int i;
+            for(SummaryResult newResult : newResults)
+            {
+                pStmt.setInt(1, newResult.projectSummaryID);
+                pStmt.setString(2, newResult.areaName);
+                pStmt.setInt(3, newResult.areaCode);
+                pStmt.setInt(4, newResult.dateGroupID);
+                pStmt.setInt(5, newResult.indexID);
+                pStmt.setString(6, newResult.filePath);
+
+                i = 0;
+                for(Double value : newResult.summaryResults.values())
+                {
+                    pStmt.setDouble(7 + i++, value);
+                }
+                pStmt.addBatch();
+            }
+
+            //            conn.setAutoCommit(false);
+            pStmt.executeBatch();
+            //            conn.commit();
+
+            // Update progress bar
+            String progressQuery = "SELECT Count(A.\"ZonalStatID\") AS \"ZonalStatIDCount\", B.\"SummaryIDNum\" FROM \"" + mSchemaName + "\".\"ZonalStat\" A INNER JOIN \""
+                    + globalSchema + "\".\"ProjectSummary\" B ON A.\"ProjectSummaryID\" = B.\"ProjectSummaryID\" WHERE B.\"SummaryIDNum\"=" + summaryID + " GROUP BY B.\"SummaryIDNum\";";
+            double progress = 0;
+            int currentCount = 0;
+            int expectedCount = 0;
+            ResultSet rs = stmt.executeQuery(progressQuery);
+            if(rs != null && rs.next())
+            {
+                currentCount = rs.getInt("ZonalStatIDCount");
+                rs.close();
+
+                if(compStrategy != null) {
+                    rs = stmt.executeQuery("SELECT Count(A.\"DateGroupID\") AS \"DateGroupIDCount\", Max(D.\"Year\") AS \"MaxYear\", Max(D.\"DayOfYear\") AS \"MaxDay\", Min(D.\"Year\") AS \"MinYear\", " +
+                            "Min(D.\"DayOfYear\") AS \"MinDay\" FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + globalSchema + "\".\"DateGroup\" D ON A.\"DateGroupID\"=D.\"DateGroupID\";");
+                    if(rs != null && rs.next()) {
+                        expectedCount = (int) ((rs.getInt("DateGroupIDCount") / compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
+                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), 1)) * pluginInfo.GetIndices().size());
+                        rs.close();
+                    }
+                }
+                else {
+                    expectedCount = scheduler.GetSchedulerStatus().indicesExpectedNumOfOutputs.get(pluginName);
+                }
+            }
+
+            if(expectedCount > 0 && currentCount > 0)
+            {
+                progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
+            }
+            scheduler.NotifyUI(new GeneralUIEventObject(this, null, progress, pluginName, summaryID, expectedCount));
+        }
+        catch (SQLException e) {
+            ErrorLog.add(workingDir, projectName, process, "Problem in ZonalSummaryCalculator.uploadResultsToDb executing zonal summaries results.", e);
+            //            conn.rollback();
+        }
+        finally {
+            //            conn.setAutoCommit(previousAutoCommit);
+            stmt.close();
+            if(pStmt != null) {
+                pStmt.close();
+            }
+            conn.close();
+        }
+    }
+
+    /**
+     * Forces the state of this DatabaseCache to that of "changed" and notifies any and all observers to act and check for available updates.
+     */
+    public void NotifyObserversToCheckForPastUpdates()
+    {
         setChanged();
         notifyObservers();
     }
@@ -572,15 +834,6 @@ public class DatabaseCache extends Observable{
         return new DataFileMetaData("Data", fullPath, year, day);
     }
 
-    /**
-     * Forces the state of this DatabaseCache to that of "changed" and notifies any and all observers to act and check for available updates.
-     */
-    public void NotifyObserversToCheckForPastUpdates()
-    {
-        setChanged();
-        notifyObservers();
-    }
-
     protected class Record implements Comparable<Record>
     {
         public final int dateGroupID;
@@ -605,4 +858,5 @@ public class DatabaseCache extends Observable{
             }
         }
     }
+
 }

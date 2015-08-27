@@ -82,7 +82,7 @@ public class SummaryWorkerTest {
         con.close();
 
         Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), globalSchema, projectName, pluginName, null, null, pluginMetaData.DaysPerInputData,
-                pluginMetaData.Download.filesPerDay, pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
+                pluginMetaData.Download.filesPerDay, pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
     }
 
     /**

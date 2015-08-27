@@ -2,7 +2,6 @@ package version2.prototype.download;
 
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.TreeMap;
@@ -22,8 +21,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.DatabaseCache;
-import version2.prototype.util.PostgreSQLConnection;
-import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
@@ -34,18 +31,17 @@ public abstract class LocalDownloader extends Process {
     protected final String dataName;
     protected final Config configInstance;
     protected LocalDate currentStartDate;
+    protected final ListDatesFiles listDatesFiles;
 
     protected LocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, DatabaseCache outputCache) {
+            Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
         super(manager, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         this.gdl = gdl;
         dataName = gdl.metaData.name;
         this.configInstance = configInstance;
         currentStartDate = projectInfoFile.GetStartDate();
-
-        if(gdl != null) {
-            gdl.addObserver(this);
-        }
+        this.listDatesFiles = listDatesFiles;
+        gdl.addObserver(this);
     }
 
     /**
@@ -73,38 +69,19 @@ public abstract class LocalDownloader extends Process {
      * Checks for new work from associated GlobalDownloader in the Download table, calculates the available files to process, and updates the local cache to start processing them.
      *
      * @return number of new files to process per the ordered Summaries defined by the project metadata Summaries section
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public TreeMap<Integer, Integer> AttemptUpdate()
     {
         TreeMap<Integer, Integer> newFiles = new TreeMap<Integer, Integer>();
         if(scheduler.GetState() == TaskState.RUNNING)
         {
-            Connection conn = null;
             try {
                 gdl.PerformUpdates();
 
-                conn = PostgreSQLConnection.getConnection();
-                newFiles = Schemas.updateExpectedResults(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), currentStartDate, pluginMetaData.DaysPerInputData,
-                        pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
-
                 outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, currentStartDate,
-                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles());
+                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
             } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(projectInfoFile, processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
-            }
-            finally {
-                if(conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        ErrorLog.add(projectInfoFile, processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
-                    }
-                }
             }
         }
         return newFiles;

@@ -20,7 +20,6 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.EASTWebManagerI;
-import version2.prototype.EASTWebManager;
 import version2.prototype.ErrorLog;
 import version2.prototype.GenericProcess;
 import version2.prototype.Process;
@@ -62,7 +61,7 @@ public class Scheduler {
     private final int ID;
     private final Config configInstance;
     private final EASTWebManagerI manager;
-    private SchedulerStatusContainer statusContainer;
+    protected SchedulerStatusContainer statusContainer;
     private ArrayList<LocalDownloader> localDownloaders;
     private ArrayList<Process> processorProcesses;
     private ArrayList<Process> indicesProcesses;
@@ -117,7 +116,8 @@ public class Scheduler {
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
-        statusContainer = new SchedulerStatusContainer(manager, configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
+        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(),
+                pluginMetaDataCollection, initState);
         localDownloaders = new ArrayList<LocalDownloader>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
@@ -134,7 +134,7 @@ public class Scheduler {
         new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName())).mkdirs();
 
         // Update status in EASTWebManager
-        NotifyUI(new GeneralUIEventObject(this, null, null, null));
+        manager.NotifyUI(statusContainer.GetStatus());
 
         PluginMetaData pluginMetaData;
         Connection con = null;
@@ -149,7 +149,7 @@ public class Scheduler {
                 Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
                         configInstance.getSummaryCalculations(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(),
                         projectInfoFile.GetSummaries(), true);
-                SetupProcesses(item);
+                SetupProcesses(item, pluginMetaData);
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException | SQLException e) {
@@ -245,7 +245,7 @@ public class Scheduler {
      */
     public void NotifyUI(GeneralUIEventObject e)
     {
-        if(e.getSource() instanceof Process)
+        if((e.getSource() instanceof Process) && (e.getProgress() != null) && (e.getPluginName() != null) && (e.getExpectedNumOfOutputs() != null))
         {
             Process process = (Process)e.getSource();
 
@@ -254,22 +254,57 @@ public class Scheduler {
                 switch(process.processName)
                 {
                 case DOWNLOAD:
-                    statusContainer.UpdateDownloadProgress(e.getProgress(), e.getPluginName());
+                    if(e.getDataName() != null) {
+                        statusContainer.UpdateDownloadProgressByData(e.getProgress(), e.getPluginName(), e.getDataName(), e.getExpectedNumOfOutputs());
+                    }
                     break;
                 case PROCESSOR:
-                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName());
+                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
                     break;
                 case INDICES:
-                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName());
+                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
                     break;
                 default:    // SUMMARY
-                    statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID());
+                    if(e.getSummaryID() != null) {
+                        statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID(), e.getExpectedNumOfOutputs());
+                    }
+                    break;
+                }
+            }
+        }
+        else if((e.getSource() instanceof DatabaseCache) && (e.getProgress() != null) && (e.getPluginName() != null) && (e.getExpectedNumOfOutputs() != null))
+        {
+            DatabaseCache cache = (DatabaseCache)e.getSource();
+
+            synchronized (statusContainer)
+            {
+                switch(cache.processCachingFor)
+                {
+                case DOWNLOAD:
+                    if(e.getDataName() != null) {
+                        statusContainer.UpdateDownloadProgressByData(e.getProgress(), e.getPluginName(), e.getDataName(), e.getExpectedNumOfOutputs());
+                    }
+                    break;
+                case PROCESSOR:
+                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
+                    break;
+                case INDICES:
+                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
+                    break;
+                default:    // SUMMARY
+                    if(e.getSummaryID() != null) {
+                        statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID(), e.getExpectedNumOfOutputs());
+                    }
                     break;
                 }
             }
         }
 
-        statusContainer.AddToLog(e.getStatus());
+        if(e.getStatus() != null) {
+            statusContainer.AddToLog(e.getStatus());
+        }
+
+        manager.NotifyUI(statusContainer.GetStatus());
     }
 
     /**
@@ -290,19 +325,29 @@ public class Scheduler {
             results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
         }
         Start();
-        statusContainer.CheckIfProjectIsUpToDate(true, true);
+        statusContainer.CheckIfProjectIsUpToDate();
+        manager.NotifyUI(statusContainer.GetStatus());
     }
 
-    protected Scheduler(SchedulerData data, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager,
-            TaskState initState)
+    protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager)
     {
-        this.data = data;
+        data = new SchedulerData(projectInfoFile, pluginMetaDataCollection);
         this.projectInfoFile = projectInfoFile;
         this.pluginMetaDataCollection = pluginMetaDataCollection;
         ID = myID;
         this.configInstance = configInstance;
         this.manager = manager;
-        statusContainer = new SchedulerStatusContainer(manager, configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), initState);
+    }
+
+    protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager, SchedulerStatusContainer statusContainer)
+    {
+        data = new SchedulerData(projectInfoFile, pluginMetaDataCollection);
+        this.projectInfoFile = projectInfoFile;
+        this.pluginMetaDataCollection = pluginMetaDataCollection;
+        ID = myID;
+        this.configInstance = configInstance;
+        this.manager = manager;
+        this.statusContainer = statusContainer;
     }
 
     /**
@@ -323,18 +368,23 @@ public class Scheduler {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    protected void SetupProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-    IllegalArgumentException, InvocationTargetException, ParseException, IOException, ParserConfigurationException, SAXException
+    protected void SetupProcesses(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException,
+    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException, IOException, ParserConfigurationException, SAXException
     {
-        PluginMetaData plMeta = pluginMetaDataCollection.pluginMetaDataMap.get(pluginInfo.GetName());
-        DatabaseCache downloadCache = new DatabaseCache(configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.DOWNLOAD, plMeta.ExtraDownloadFiles);
-        DatabaseCache processorCache = new DatabaseCache(configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
-        DatabaseCache indicesCache = new DatabaseCache(configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES, null);
+        //Scheduler scheduler, String globalSchema, String projectName, String pluginName, String workingDir, ProcessName processCachingFor, ArrayList<String> extraDownloadFiles
+        DatabaseCache downloadCache = new DatabaseCache(this, configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo, pluginMetaData, data.projectInfoFile.GetWorkingDir(),
+                ProcessName.DOWNLOAD);
+        DatabaseCache processorCache = new DatabaseCache(this, configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo, pluginMetaData, data.projectInfoFile.GetWorkingDir(),
+                ProcessName.PROCESSOR);
+        DatabaseCache indicesCache = new DatabaseCache(this, configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo, pluginMetaData, data.projectInfoFile.GetWorkingDir(),
+                ProcessName.INDICES);
+        DatabaseCache outputCache = new DatabaseCache(this, configInstance.getGlobalSchema(), data.projectInfoFile.GetProjectName(), pluginInfo, pluginMetaData, data.projectInfoFile.GetWorkingDir(),
+                ProcessName.SUMMARY);
 
-        localDownloaders.addAll(SetupDownloadProcess(pluginInfo, plMeta, downloadCache));
-        processorProcesses.add(SetupProcessorProcess(pluginInfo, plMeta, downloadCache, processorCache));
-        indicesProcesses.add(SetupIndicesProcess(pluginInfo, plMeta, processorCache, indicesCache));
-        summaryProcesses.add(SetupSummaryProcess(pluginInfo, plMeta, indicesCache));
+        localDownloaders.addAll(SetupDownloadProcess(pluginInfo, pluginMetaData, downloadCache));
+        processorProcesses.add(SetupProcessorProcess(pluginInfo, pluginMetaData, downloadCache, processorCache));
+        indicesProcesses.add(SetupIndicesProcess(pluginInfo, pluginMetaData, processorCache, indicesCache));
+        summaryProcesses.add(SetupSummaryProcess(pluginInfo, pluginMetaData, indicesCache, outputCache));
 
         downloadCaches.add(downloadCache);
         processorCaches.add(processorCache);
@@ -441,9 +491,9 @@ public class Scheduler {
      * @return {@link Summary Summary}  - the manager object of SummaryWorkers for the current project and given plugin
      * @param inputCache  - the DatabaseCache object used to acquire files available for summary processing
      */
-    protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache) throws ClassNotFoundException
+    protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException
     {
-        Summary process = new Summary(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache);
+        Summary process = new Summary(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
         //        Process process = new GenericProcess<IndicesWorker>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "version2.prototype.summary.SummaryWorker");
         //        inputCache.addObserver(process);
         return process;
@@ -464,6 +514,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws IOException
      */
+    @SuppressWarnings("unused")
     @Deprecated
     private void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
@@ -498,6 +549,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws IOException
      */
+    @SuppressWarnings("unused")
     @Deprecated
     private void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
@@ -550,6 +602,7 @@ public class Scheduler {
      * @throws SAXException
      * @throws IOException
      */
+    @SuppressWarnings("unused")
     @Deprecated
     private void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
     IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException

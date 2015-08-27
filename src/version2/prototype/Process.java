@@ -1,7 +1,6 @@
 package version2.prototype;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Observable;
@@ -20,8 +19,6 @@ import version2.prototype.download.GlobalDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
-import version2.prototype.util.PostgreSQLConnection;
-import version2.prototype.util.Schemas;
 
 /**
  * Abstract framework thread management class. Frameworks are to use a concrete class that extends this class to handle creating their worker threads.
@@ -73,7 +70,7 @@ public abstract class Process implements Observer {
      *
      * @param e  - progress update
      */
-    public final void NotifyUI(GeneralUIEventObject e)
+    public void NotifyUI(GeneralUIEventObject e)
     {
         scheduler.NotifyUI(e);
     }
@@ -104,25 +101,7 @@ public abstract class Process implements Observer {
             }
             else if(o instanceof GlobalDownloader)
             {
-                Connection conn = null;
-                try {
-                    conn = PostgreSQLConnection.getConnection();
-                    Schemas.updateExpectedResults(Config.getInstance().getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), projectInfoFile.GetStartDate(),
-                            pluginMetaData.DaysPerInputData, pluginInfo.GetIndices().size(), projectInfoFile.GetSummaries(), conn);
-                    process(new ArrayList<DataFileMetaData>());
-                }
-                catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                    ErrorLog.add(projectInfoFile, processName, scheduler, "Process.update error during processing of update notification from GlobalDownloader.", e);
-                }
-                finally{
-                    if(conn != null) {
-                        try {
-                            conn.close();
-                        } catch (SQLException e) {
-                            ErrorLog.add(projectInfoFile, processName, scheduler, "Problem in Process.update while closing connection.", e);
-                        }
-                    }
-                }
+                process(new ArrayList<DataFileMetaData>());
             }
         }
     }

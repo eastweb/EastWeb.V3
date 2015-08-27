@@ -25,7 +25,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
-import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
@@ -44,7 +43,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static EASTWebManager instance = null;
     protected static ExecutorService executor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
-    protected static int defaultMSBeetweenUpdates = 5000;
+    //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
+    protected static int defaultMSBeetweenUpdates = 5000;       // 5 seconds
 
     // Logged requests from other threads
     protected static List<SchedulerData> newSchedulerRequests;
@@ -130,7 +130,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             try
             {
-                Thread.sleep(msBeetweenUpdates);
+                if(!manualUpdate) {
+                    Thread.sleep(msBeetweenUpdates);
+                }
 
                 // Tell Schedulers to attempt updating their projects
                 for(Scheduler scheduler : schedulers)

@@ -45,7 +45,7 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
     public void run()
     {
         // Step 1: get all downloads from ListDatesFiles
-        Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.getListDatesFiles();
+        Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.CloneListDatesFiles();
 
         // Step 2: Pull all cached downloads
         ArrayList<DataFileMetaData> cachedD = new ArrayList<DataFileMetaData>();

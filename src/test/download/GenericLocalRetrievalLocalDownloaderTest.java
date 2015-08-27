@@ -5,20 +5,15 @@ package test.download;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.concurrent.Future;
-
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
@@ -29,27 +24,22 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebManagerI;
-import version2.prototype.ProcessWorker;
-import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
-import version2.prototype.Scheduler.SchedulerData;
-import version2.prototype.Scheduler.SchedulerStatus;
-import version2.prototype.download.DownloadFactory;
+import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.download.GenericLocalRetrievalLocalDownloader;
-import version2.prototype.download.GenericLocalStorageGlobalDownloader;
-import version2.prototype.download.LocalDownloader;
-import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
+import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.ListDatesFiles;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.PostgreSQLConnection;
 import version2.prototype.util.Schemas;
 
@@ -60,25 +50,22 @@ import version2.prototype.util.Schemas;
 public class GenericLocalRetrievalLocalDownloaderTest {
     private static Config testConfig;
     private static String testProjectName = "Test_Project";
-    private static String testPluginName = "TRMM3B42RT";
+    private static String testPluginName = "ModisNBAR";
     private static String testGlobalSchema;
     private static Connection con;
     private static ArrayList<String> extraDownloadFiles;
-    private static int year = LocalDate.now().minusDays(7).getYear();
-    private static int day = LocalDate.now().minusDays(7).getDayOfYear();
+    private static int year = LocalDate.now().minusDays(8).getYear();
+    private static int day = LocalDate.now().minusDays(8).getDayOfYear();
     private static int daysPerInputFile = 1;
     private static int numOfIndices = 1;
     private static int filesPerDay = 1;
     private static LocalDate startDate;
-    private static String temporalSummaryCompositionStrategyClass = "GregorianWeeklyStrategy";
-    private static long expectedTotalResults = 0;
     private static ArrayList<ProjectInfoSummary> summaries;
     private static ProjectInfoPlugin pluginInfo;
     private static PluginMetaData pluginMetaData;
     private static ProjectInfoFile projectInfoFile;
     private static Scheduler scheduler;
-    private static DatabaseCache outputCache;
-    private static String downloaderClassName;
+    private static MyDatabaseCache outputCache;
 
     /**
      * @throws java.lang.Exception
@@ -94,28 +81,21 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         ArrayList<String> indices  = new ArrayList<String>();
         indices.add("TRMM3B42RTCalculator");
         pluginInfo = new ProjectInfoPlugin(testPluginName, indices, "Level 1");
-        pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, null, null, null, null, null, null, 1, null, extraDownloadFiles);
+        pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, null, null, null, null, null, 1, null, extraDownloadFiles);
         ArrayList<ProjectInfoPlugin> plugins = new ArrayList<ProjectInfoPlugin>();
         plugins.add(pluginInfo);
         summaries = new ArrayList<ProjectInfoSummary>();
-        Class<?>strategyClass = Class.forName("version2.prototype.summary.temporal.CompositionStrategies." + temporalSummaryCompositionStrategyClass);
-        Constructor<?> ctorStrategy = strategyClass.getConstructor();
         summaries.add(new ProjectInfoSummary(new ZonalSummary("", "", ""),
-                new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance()),
-                temporalSummaryCompositionStrategyClass,
+                null,
+                null,
                 1));
 
         projectInfoFile = new ProjectInfoFile(plugins, startDate, testProjectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null,
                 0, null, null, null, null, null, null, summaries);
 
-        expectedTotalResults = summaries.get(0).GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate, LocalDate.now().plusDays(1), daysPerInputFile) * numOfIndices;
-
-        SchedulerData data = new SchedulerData(projectInfoFile, null);
         GenericLocalRetrievalLocalDownloaderTest tester = new GenericLocalRetrievalLocalDownloaderTest();
-        PluginMetaDataCollection pluginMetaDataCollection = PluginMetaDataCollection.getInstance(new File("src/test/download/Test_" + testPluginName + ".xml"));
-        scheduler = tester.new MyScheduler(data, 1, projectInfoFile, pluginMetaDataCollection, new GenericLocalRetrievalLocalDownloaderTest().new MyEASTWebManager(), testConfig, TaskState.RUNNING);
-        outputCache = new DatabaseCache(testGlobalSchema, testProjectName, testPluginName, ProcessName.DOWNLOAD, indices);
-        downloaderClassName = "TRMM3B42RTDownloader";
+        scheduler = tester.new MyScheduler(1, testConfig);
+        outputCache = tester.new MyDatabaseCache(scheduler, testGlobalSchema, testProjectName, pluginInfo, pluginMetaData, null, ProcessName.DOWNLOAD);
     }
 
     /**
@@ -131,6 +111,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
      */
     @Before
     public void setUp() throws Exception {
+        outputCache.expectedStartDate = startDate;
         Statement stmt = con.createStatement();
         stmt.execute(String.format(
                 "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
@@ -161,50 +142,23 @@ public class GenericLocalRetrievalLocalDownloaderTest {
      */
     @Test
     public final void testAttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, NoSuchMethodException, SecurityException {
-        Statement stmt = con.createStatement();
-        ResultSet rs;
-        GenericLocalRetrievalLocalDownloader ldl = new GenericLocalRetrievalLocalDownloader(null, testConfig,
-                new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName,
-                        PluginMetaDataCollection.CreateDownloadMetaData("Data", null, null, null, null, filesPerDay, "", "", null, null),
-                        null, startDate, downloaderClassName), projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        LocalDate startDate2 = LocalDate.ofYearDay(year, day).minusDays(8);
+        MyGlobalDownloader gdl = new MyGlobalDownloader(1, testConfig, testPluginName, PluginMetaDataCollection.CreateDownloadMetaData("Data", null, null, null, null, filesPerDay, "", "", null, null),
+                null, startDate);
+        GenericLocalRetrievalLocalDownloader ldlData = new GenericLocalRetrievalLocalDownloader(null, testConfig, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, null);
 
-        // Setup and precheck
-        int projectSummaryID = Schemas.getProjectSummaryID(testGlobalSchema, testProjectName, summaries.get(0).GetID(), stmt);
-        int pluginID = Schemas.getPluginID(testGlobalSchema, testPluginName, stmt);
-        int expectedResultsId = Schemas.getExpectedResultsID(testGlobalSchema, projectSummaryID, pluginID, stmt);
-        String selectResultsQuery = "SELECT E.*, T.\"Name\" FROM \"" + testGlobalSchema + "\".\"ExpectedResults\" E " +
-                "INNER JOIN \"" + testGlobalSchema + "\".\"ProjectSummary\" P ON E.\"ProjectSummaryID\" = P.\"ProjectSummaryID\" " +
-                "INNER JOIN \"" + testGlobalSchema + "\".\"TemporalSummaryCompositionStrategy\" T ON P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\" " +
-                "WHERE \"ExpectedResultsID\" = " + expectedResultsId + ";";
-        rs = stmt.executeQuery(selectResultsQuery);
-        if(rs != null && rs.next())
-        {
-            assertEquals("TemporalSummaryCompositionStrategyClass is incorrect.", temporalSummaryCompositionStrategyClass, rs.getString("Name"));
-            assertEquals("ExpectedTotalResults incorrect.", expectedTotalResults, rs.getInt("ExpectedTotalResults"));
-        } else {
-            fail("Didn't find anything in " + testGlobalSchema + ".ExpectedResults table.");
-        }
+        // Test Global Downloader performed updates and Local Downloader loaded new updates with correct start date
+        ldlData.AttemptUpdate();
+        assertEquals("GlobalDownloader performed updates", true, gdl.performedUpdates);
+        gdl.performedUpdates = false;
 
-        ldl.SetStartDate(startDate.minusDays(7));
-        long newExpectedTotalResults = summaries.get(0).GetTemporalFileStore().compStrategy.getNumberOfCompleteCompositesInRange(startDate.minusDays(7), LocalDate.now().plusDays(1), daysPerInputFile)
-                * numOfIndices;
-        assertNotEquals("newExpectedTotalResults is equal to the old value", newExpectedTotalResults, expectedTotalResults);
+        // Update start date
+        ldlData.SetStartDate(startDate2);
+        outputCache.expectedStartDate = startDate2;
 
-        // Run AttemptUpdate
-        ldl.AttemptUpdate();
-
-        // Test results
-        rs = stmt.executeQuery(selectResultsQuery);
-        if(rs != null && rs.next())
-        {
-            assertEquals("TemporalSummaryCompositionStrategyClass is incorrect.", temporalSummaryCompositionStrategyClass, rs.getString("Name"));
-            assertEquals("ExpectedTotalResults incorrect.", newExpectedTotalResults, rs.getInt("ExpectedTotalResults"));
-        } else {
-            fail("Didn't fine anything in " + testGlobalSchema + ".ExpectedResults table.");
-        }
-
-        rs.close();
-        stmt.close();
+        // Test Global Downloader performed updates and Local Downloader loaded new updates with correct start date
+        ldlData.AttemptUpdate();
+        assertEquals("GlobalDownloader performed updates", true, gdl.performedUpdates);
     }
 
     /**
@@ -217,9 +171,9 @@ public class GenericLocalRetrievalLocalDownloaderTest {
     @Test
     public final void testSetStartDate() throws ParserConfigurationException, SAXException, IOException, Exception {
         GenericLocalRetrievalLocalDownloader ldl = new GenericLocalRetrievalLocalDownloader(null, testConfig,
-                new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName,
+                new MyGlobalDownloader(1, testConfig, testPluginName,
                         PluginMetaDataCollection.CreateDownloadMetaData("Data", null, null, null, null, filesPerDay, "", "", null, null),
-                        null, startDate, downloaderClassName), projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+                        null, startDate), projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, null);
 
         assertEquals("LDL start date not as expected.", startDate, ldl.GetStartDate());
         ldl.SetStartDate(startDate.plusDays(1));
@@ -228,62 +182,67 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         assertEquals("LDL start date not as expected.", startDate.minusDays(1), ldl.GetStartDate());
     }
 
-    private class MyEASTWebManager implements EASTWebManagerI
-    {
-
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void NotifyUI(SchedulerStatus updatedStatus) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
-                throws IOException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void StopGlobalDownloader(int gdlID) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void StartExistingGlobalDownloader(int gdlID) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public Future<ProcessWorkerReturn> StartNewProcessWorker(
-                ProcessWorker worker) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-    }
-
     private class MyScheduler extends Scheduler
     {
-
-        public MyScheduler(SchedulerData data, int myID, ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, EASTWebManagerI manager, Config configInstance,
-                TaskState initState) throws ParserConfigurationException, SAXException, IOException {
-            super(data, projectInfoFile, pluginMetaDataCollection, myID, configInstance, manager, initState);
+        public MyScheduler(int myID, Config configInstance) throws ParserConfigurationException, SAXException, IOException {
+            super(null, null, myID, configInstance, null, new SchedulerStatusContainer(null, 1, null, null, null, null, TaskState.RUNNING, null, null, null, null, null, null, null, null, false, null,
+                    null));
         }
 
         @Override
-        protected void SetupProcesses(ProjectInfoPlugin pluginInfo) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-        IllegalArgumentException, InvocationTargetException, ParseException, IOException, ParserConfigurationException, SAXException {
+        protected void SetupProcesses(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException,
+        IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParseException, IOException, ParserConfigurationException, SAXException {
+            // Do nothing
+        }
+
+        @Override
+        public void NotifyUI(GeneralUIEventObject e) {
             // Do nothing
         }
     }
 
+    private class MyGlobalDownloader extends GlobalDownloader
+    {
+        public boolean performedUpdates;
+
+        public MyGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException,
+        ParserConfigurationException, SAXException, IOException, SQLException {
+            super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
+            performedUpdates = false;
+        }
+
+        @Override
+        public void run() {
+            // do nothing
+        }
+
+        @Override
+        protected boolean RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
+            // do nothing
+            return true;
+        }
+
+        @Override
+        public void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+            performedUpdates = true;
+        }
+    }
+
+    private class MyDatabaseCache extends DatabaseCache
+    {
+        public LocalDate expectedStartDate;
+
+        public MyDatabaseCache(Scheduler scheduler, String globalSchema, String projectName, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, String workingDir, ProcessName processCachingFor)
+                throws ParseException {
+            super(scheduler, globalSchema, projectName, pluginInfo, pluginMetaData, workingDir, processCachingFor);
+        }
+
+        @Override
+        public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate,
+                ArrayList<String> extraDownloadFiles, ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
+                IOException {
+            assertEquals("StartDate incorrect.", expectedStartDate, startDate);
+            return 1;
+        }
+    }
 }
