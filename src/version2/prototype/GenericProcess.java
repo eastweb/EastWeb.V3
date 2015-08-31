@@ -27,7 +27,8 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * Creates a GenericFrameworkProcess object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName,
      * and acquiring its input from the specified process (inputProcessName).
      *
-     * @param manager  - EASTWebManager reference
+     * @param manager  - EASTWebManager reference to use and pass on
+     * @param configInstance  - Config reference to use and pass on
      * @param processName  - name of this threaded process
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
@@ -38,10 +39,10 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * @param classPathNames  - fully qualified worker class names to spawn for each new input file.
      * @throws ClassNotFoundException
      */
-    public GenericProcess(EASTWebManagerI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache inputCache, DatabaseCache outputCache, String... classPathNames) throws ClassNotFoundException
+    public GenericProcess(EASTWebManagerI manager, Config configInstance, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+            Scheduler scheduler, DatabaseCache inputCache, DatabaseCache outputCache, String... classPathNames) throws ClassNotFoundException
     {
-        super(manager, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        super(manager, configInstance, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
 
         if(inputCache != null) {
             inputCache.addObserver(this);
@@ -65,24 +66,13 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
             for(int i=0; i < processWorkerClasses.size(); i++)
             {
                 cl = processWorkerClasses.get(i);
-                cstr = cl.getConstructor(version2.prototype.Process.class, version2.prototype.ProjectInfoMetaData.ProjectInfoFile.class,
+                cstr = cl.getConstructor(version2.prototype.Config.class, version2.prototype.Process.class, version2.prototype.ProjectInfoMetaData.ProjectInfoFile.class,
                         version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin.class, version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData.class, ArrayList.class,
                         version2.prototype.util.DatabaseCache.class);
-                manager.StartNewProcessWorker((WorkerType) cstr.newInstance(this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
+                manager.StartNewProcessWorker((WorkerType) cstr.newInstance(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             ErrorLog.add(projectInfoFile, processName, scheduler, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);
         }
-
-        // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
-        String name = null;
-        switch(processName)
-        {
-        case DOWNLOAD: name = "Download"; break;
-        case INDICES: name = "Indices"; break;
-        case PROCESSOR: name = "Processor"; break;
-        case SUMMARY: name = "Summary"; break;
-        }
-        //        scheduler.NotifyUI(new GeneralUIEventObject(this, name + " Finished", 100, pluginInfo.GetName()));
     }
 }

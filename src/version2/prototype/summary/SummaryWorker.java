@@ -43,7 +43,7 @@ public class SummaryWorker extends ProcessWorker {
     public SummaryWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles,
             DatabaseCache outputCache)
     {
-        super("SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        super(configInstance, "SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         this.configInstance = configInstance;
         synchronized (count) {
             count = count + 1;

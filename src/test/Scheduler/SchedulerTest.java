@@ -55,6 +55,7 @@ public class SchedulerTest {
     private static String testProjectName = "Test_Project";
     private static String testPluginName = "TRMM3B42RT";
     private static MyEASTWebManager manager;
+    private static Config configInstance = Config.getAnInstance("src/test/Scheduler/config.xml");
 
     /**
      * @throws java.lang.Exception
@@ -81,7 +82,7 @@ public class SchedulerTest {
         Statement stmt = con.createStatement();
         String query = String.format(
                 "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
-                Config.getAnInstance("src/test/Scheduler/config.xml").getGlobalSchema()
+                configInstance.getGlobalSchema()
                 );
         stmt.execute(query);
         query = String.format(
@@ -107,17 +108,17 @@ public class SchedulerTest {
      */
     @Test
     public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() throws Exception {
-        FileUtils.deleteDirectory(new File(Config.getAnInstance("src/test/Scheduler/config.xml").getDownloadDir() + testPluginName));
+        FileUtils.deleteDirectory(new File(configInstance.getDownloadDir() + testPluginName));
         ProjectInfoFile projectInfoFile = new ProjectInfoFile("src/test/Scheduler/Test_Project.xml");
         SchedulerData sData = new SchedulerData(projectInfoFile);
-        MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, Config.getAnInstance("src/test/Scheduler/config.xml"));
+        MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, configInstance);
 
         scheduler.Start();
         assertEquals("Scheduler state is STOPPED.", TaskState.RUNNING, scheduler.GetState());
         assertEquals("SchedulerStatus state is STOPPED.", TaskState.RUNNING, scheduler.GetSchedulerStatus().State);
 
         LocalDate startDate = projectInfoFile.GetStartDate();
-        String testFilePath = Config.getAnInstance("src/test/Scheduler/config.xml").getDownloadDir() + testPluginName+ "\\" + startDate.getYear() + "\\" + startDate.getDayOfYear() +
+        String testFilePath = configInstance.getDownloadDir() + testPluginName+ "\\" + startDate.getYear() + "\\" + startDate.getDayOfYear() +
                 "\\3B42RT_daily." + startDate.getYear() + "." + new DecimalFormat("00").format(startDate.getMonthValue()) + "." + new DecimalFormat("00").format(startDate.getDayOfMonth()) + ".bin";
         File temp = new File(testFilePath);
         for(int i=0; !temp.exists() && i < 6; i++)
@@ -151,7 +152,7 @@ public class SchedulerTest {
             new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
             new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
 
-            Process process = new GenericProcess<ProcessorWorkerTest>(manager, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.ProcessorWorkerTest");
+            Process process = new GenericProcess<ProcessorWorkerTest>(manager, configInstance, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.ProcessorWorkerTest");
             return process;
         }
 
@@ -162,7 +163,7 @@ public class SchedulerTest {
             new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
             new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
 
-            Process process = new GenericProcess<IndicesWorkerTest>(manager, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.IndicesWorkerTest");
+            Process process = new GenericProcess<IndicesWorkerTest>(manager, configInstance, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.IndicesWorkerTest");
             return process;
         }
 
@@ -173,7 +174,7 @@ public class SchedulerTest {
             new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
             new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetTimeZone(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
 
-            Process process = new GenericProcess<SummaryWorkerTest>(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "test.Scheduler.SummaryWorkerTest");
+            Process process = new GenericProcess<SummaryWorkerTest>(manager, configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "test.Scheduler.SummaryWorkerTest");
             return process;
         }
     }

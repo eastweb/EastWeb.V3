@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -24,6 +25,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.ProcessorFileMetaData;
 
 public class TestInd_TRMM3B42RT {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public TestInd_TRMM3B42RT() {
     }
@@ -52,7 +54,7 @@ public class TestInd_TRMM3B42RT {
         cachedFiles.add(new DataFileMetaData(new ProcessorFileMetaData("D:\\testProjects\\TW\\Projects\\Project_TW\\TRMM3B42RT\\Processor\\Output\\2014\\077\\3B42RT_daily.2014.03.18.tif", 2014, 77)));
 
 
-        IndicesWorker worker = new IndicesWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        IndicesWorker worker = new IndicesWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         worker.call();
     }

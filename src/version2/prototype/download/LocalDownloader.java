@@ -29,16 +29,14 @@ import version2.prototype.util.DatabaseCache;
 public abstract class LocalDownloader extends Process {
     protected final GlobalDownloader gdl;
     protected final String dataName;
-    protected final Config configInstance;
     protected LocalDate currentStartDate;
     protected final ListDatesFiles listDatesFiles;
 
     protected LocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
-        super(manager, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        super(manager, configInstance, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         this.gdl = gdl;
         dataName = gdl.metaData.name;
-        this.configInstance = configInstance;
         currentStartDate = projectInfoFile.GetStartDate();
         this.listDatesFiles = listDatesFiles;
         gdl.addObserver(this);

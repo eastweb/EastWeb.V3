@@ -16,6 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.Process;
@@ -26,7 +27,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
-import version2.prototype.processor.ProcessData;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
@@ -46,6 +46,7 @@ public class IndicesWorker extends ProcessWorker{
      * An implementation of ProcessWorker that handles the indexing of a list of raster files after being handled by the Processor framework. Output used by the
      * Summary framework. Meant to be ran on its own thread.
      *
+     * @param configInstance  - Config reference to use
      * @param process  - the parent Process object to this threaded worker.
      * @param projectInfoFile  - information about the project gotten from the project's info xml.
      * @param pluginInfo  - information about the plugin being used for the acquired data files.
@@ -53,10 +54,10 @@ public class IndicesWorker extends ProcessWorker{
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
      * @param outputCache
      */
-    public IndicesWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    public IndicesWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
-        super("IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        super(configInstance, "IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
     }
 
     /* (non-Javadoc)
