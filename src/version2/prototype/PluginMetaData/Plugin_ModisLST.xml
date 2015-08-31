@@ -44,4 +44,7 @@
 		<Level>LOW</Level>
 		<Level>NOSCREENING</Level>
 	</QualityControl>
+	<ExtraInfo>
+		<Tiles>true</Tiles>
+	</ExtraInfo>
 </PluginMetadata>

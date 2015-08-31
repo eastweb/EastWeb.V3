@@ -39,5 +39,8 @@
 		</Temporal>
 	</Summary>
 	<QualityControl/>
+	<ExtraInfo>
+		<Tiles>false</Tiles>
+	</ExtraInfo>
 </PluginMetadata>
 
