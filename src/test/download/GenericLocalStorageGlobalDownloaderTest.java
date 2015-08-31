@@ -42,7 +42,7 @@ import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -87,7 +87,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
     public static void setUpBeforeClass() throws Exception {
         testConfig = Config.getAnInstance("src/test/config.xml");
         testGlobalSchema = testConfig.getGlobalSchema();        // Test_EASTWeb1
-        con = PostgreSQLConnection.getConnection();
+        con = DatabaseConnector.getConnection();
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
         startDate = LocalDate.ofYearDay(year, day);

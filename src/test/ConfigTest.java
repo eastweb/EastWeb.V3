@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 
 /**
  * @author Mike
@@ -37,7 +37,7 @@ public class ConfigTest {
      */
     public static void main(String[] args) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        Connection con = PostgreSQLConnection.getConnection(Config.getAnInstance(args[0]));
+        Connection con = DatabaseConnector.getConnection(Config.getAnInstance(args[0]));
         ResultSet rs = con.createStatement().executeQuery("select 1");
         if(rs != null) {
             System.out.println("Sucessfully connected to database");
@@ -66,7 +66,7 @@ public class ConfigTest {
         assertEquals("Config Database databaseName incorrect.", "postgres", config.getDatabaseName());
         assertTrue("Config Database userName is " + config.getDatabaseUsername(), config.getDatabaseUsername().equals("postgres"));
         assertTrue("Config Database passWord is " + config.getDatabasePassword(), config.getDatabasePassword().equals("eastweb"));
-        Connection con = PostgreSQLConnection.getConnection();
+        Connection con = DatabaseConnector.getConnection();
         assertNotNull("Database connection failed.", con.createStatement().executeQuery("select 1"));
 
         ArrayList<String> summariesExpected = new ArrayList<String>();

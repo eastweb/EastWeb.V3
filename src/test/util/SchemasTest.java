@@ -28,7 +28,7 @@ import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 @SuppressWarnings("javadoc")
@@ -76,14 +76,14 @@ public class SchemasTest {
         System.out.println("Project name to use: " + args[1]);
         System.out.println("Plugin name to use: " + args[2]);
         System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), args[0], args[1], args[2], summaryNames, LocalDate.now().minusDays(8), 8, 3, 1, null,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), args[0], args[1], args[2], summaryNames, LocalDate.now().minusDays(8), 8, 3, 1, null,
                 createTablesWithForeignKeyReferences);
         System.out.println("DONE");
     }
 
     @BeforeClass
     public static void setUpBeforeClass() throws SQLException, ParserConfigurationException, SAXException, IOException, ClassNotFoundException {
-        con = PostgreSQLConnection.getConnection();
+        con = DatabaseConnector.getConnection();
         testProjectName = "Test_Project";
         testPluginName = "Test_Plugin";
         testGlobalSchema = "Test_EASTWeb";
@@ -124,7 +124,7 @@ public class SchemasTest {
                 ));
 
         // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, startDate, daysPerInputFile, numOfIndices,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, startDate, daysPerInputFile, numOfIndices,
                 filesPerDay, summaries, true);
         stmt.close();
     }

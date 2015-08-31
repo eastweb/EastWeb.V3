@@ -34,7 +34,7 @@ import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -89,7 +89,7 @@ public class SchedulerStatusContainerTest {
 
         container = new SchedulerStatusContainer(configInstance, schedulerID, projectName, pluginInfo, summaries, PluginMetaDataCollection.getInstance(), state);
 
-        con = PostgreSQLConnection.getConnection();
+        con = DatabaseConnector.getConnection();
         stmt = con.createStatement();
     }
 
@@ -123,9 +123,9 @@ public class SchedulerStatusContainerTest {
                 );
         stmt.execute(query);
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), globalSchema, projectName, pluginName1, configInstance.getSummaryCalculations(),
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), globalSchema, projectName, pluginName1, configInstance.getSummaryCalculations(),
                 LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, summaries, false);
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), globalSchema, projectName, pluginName2, configInstance.getSummaryCalculations(),
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), globalSchema, projectName, pluginName2, configInstance.getSummaryCalculations(),
                 LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, summaries, false);
     }
 
@@ -243,7 +243,7 @@ public class SchedulerStatusContainerTest {
         assertEquals("Number of files loaded for '" + pluginName2 + "'.", new Integer(0), temp.get(pluginName2));
 
         // Insert values
-        Connection con = PostgreSQLConnection.getConnection(Config.getAnInstance("config.xml"));
+        Connection con = DatabaseConnector.getConnection(Config.getAnInstance("config.xml"));
         String insertUpdate = "INSERT INTO \"%s\".\"DownloadCache\" (\"DataFilePath\", \"DownloadID\", \"DateGroupID\") VALUES (?,?,?);";
         PreparedStatement pStmt = con.prepareStatement(String.format(insertUpdate, projectSchema1));
         pStmt.setString(1, "Data File Path 1");

@@ -52,7 +52,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.IndicesFileMetaData;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.ProcessorFileMetaData;
 import version2.prototype.util.Schemas;
 
@@ -133,7 +133,7 @@ public class DatabaseCacheTest {
         projectInfoSummary1 = new ProjectInfoSummary(new ZonalSummary("ShapeFile1", "AreaCodeField1", "AreaNameField1"),
                 new TemporalSummaryRasterFileStore(tester.new MyTemporalSummaryCompositionStrategy()), "MyTemporalSummaryCompositionStrategy", 1);
 
-        con = PostgreSQLConnection.getConnection();
+        con = DatabaseConnector.getConnection();
     }
 
     /**
@@ -164,7 +164,7 @@ public class DatabaseCacheTest {
 
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(projectInfoSummary1);
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, LocalDate.ofYearDay(year, day), daysPerInputFile,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, LocalDate.ofYearDay(year, day), daysPerInputFile,
                 filesPerDay, numOfIndices, summaries, true);
     }
 

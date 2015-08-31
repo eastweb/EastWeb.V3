@@ -37,7 +37,7 @@ import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.EASTWebResult;
 import version2.prototype.util.EASTWebResults;
 import version2.prototype.util.IndicesFileMetaData;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -66,7 +66,7 @@ public class SummaryWorkerTest {
         pluginInfo = projectInfoFile.GetPlugins().get(0);
         pluginMetaData = PluginMetaDataCollection.getInstance(new File("plugins\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
 
-        Connection con = PostgreSQLConnection.getConnection();
+        Connection con = DatabaseConnector.getConnection();
         Statement stmt = con.createStatement();
         String query = String.format(
                 "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
@@ -81,7 +81,7 @@ public class SummaryWorkerTest {
         stmt.close();
         con.close();
 
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), globalSchema, projectName, pluginName, null, null, pluginMetaData.DaysPerInputData,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), globalSchema, projectName, pluginName, null, null, pluginMetaData.DaysPerInputData,
                 pluginMetaData.Download.filesPerDay, pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
     }
 

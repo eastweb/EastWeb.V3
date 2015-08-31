@@ -77,7 +77,7 @@ public final class ErrorLog {
     }
 
     /**
-     * Reports an error to the error log for the specified project.
+     * Reports an error to the error log for the specified project. Sends the custom message as a new log message to the UI.
      * @param projectInfoFile
      * @param scheduler
      * @param message Error message, suitable for presentation to the user
@@ -90,12 +90,12 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message));
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message + " [Error Logged: " + logPath + "]"));
         }
     }
 
     /**
-     * Reports an error to the error log for the specified project.
+     * Reports an error to the error log for the specified project. Sends the custom message as a new log message to the UI.
      * @param projectInfoFile
      * @param process
      * @param message Error message, suitable for presentation to the user
@@ -108,12 +108,12 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            process.NotifyUI(new GeneralUIEventObject(e.getCause(), message));
+            process.NotifyUI(new GeneralUIEventObject(e.getCause(), message + " [Error Logged: " + logPath + "]"));
         }
     }
 
     /**
-     * Reports an error to the error log for the specified project.
+     * Reports an error to the error log for the specified project. Sends the custom message as a new log message to the UI.
      * @param workingDirectory
      * @param projectName
      * @param process
@@ -127,12 +127,12 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message));
+            process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
         }
     }
 
     /**
-     * Reports an error to the error log for the specified process and project.
+     * Reports an error to the error log for the specified process and project. Sends the custom message as a new log message to the UI.
      * @param projectInfoFile
      * @param process
      * @param scheduler
@@ -146,7 +146,7 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message));
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message + " [Error Logged: " + logPath + "]"));
         }
     }
 

@@ -820,6 +820,8 @@ public class MainWindow {
                     button.setForeground(Color.GREEN);
                     button.setToolTipText("Project is up to date");
                 }
+
+                frame.repaint();
             }
         }
     }
@@ -930,6 +932,8 @@ public class MainWindow {
                     button.setForeground(Color.GREEN);
                     button.setToolTipText("Project is up to date");
                 }
+
+                frame.repaint();
             }
         }
     }

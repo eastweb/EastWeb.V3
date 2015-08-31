@@ -20,7 +20,7 @@ import version2.prototype.Config;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 
@@ -104,7 +104,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, metaData.name, stmt);
         int filesPerDay = metaData.filesPerDay;
@@ -260,7 +260,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, metaData.name, stmt);
         ArrayList<DataFileMetaData> downloadsList = new ArrayList<DataFileMetaData>();
@@ -339,7 +339,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws IOException
      */
     protected void AddDownloadFile(int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         final LocalDate lDate = LocalDate.ofYearDay(year, dayOfYear);
         // If inserting a "Data" labeled file then insert its record into the 'Download' table
@@ -377,7 +377,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
 
     protected boolean RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException
     {
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         boolean result = Schemas.registerGlobalDownloader(globalSchema, pluginName, metaData.name, stmt);
         conn.close();

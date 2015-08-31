@@ -37,7 +37,7 @@ import version2.prototype.summary.Summary;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.GeneralUIEventObject;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -139,7 +139,7 @@ public class Scheduler {
         PluginMetaData pluginMetaData;
         Connection con = null;
         try {
-            con = PostgreSQLConnection.getConnection();
+            con = DatabaseConnector.getConnection();
             for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
@@ -152,7 +152,7 @@ public class Scheduler {
                 SetupProcesses(item, pluginMetaData);
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException | SQLException e) {
+                | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add(projectInfoFile, this, "Problem setting up Scheduler.", e);
         }
         finally {

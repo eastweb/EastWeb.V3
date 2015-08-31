@@ -189,7 +189,7 @@ public class EASTWebResults {
      */
     public static ArrayList<EASTWebResult> GetEASTWebResults(EASTWebQuery query) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
-        Connection con = PostgreSQLConnection.getConnection();
+        Connection con = DatabaseConnector.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs;
         ArrayList<Double> summaryCalculations;
@@ -246,7 +246,7 @@ public class EASTWebResults {
      */
     public static ArrayList<File> GetResultCSVFiles(EASTWebQuery query) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        Statement stmt = PostgreSQLConnection.getConnection().createStatement();
+        Statement stmt = DatabaseConnector.getConnection().createStatement();
         ResultSet rs;
         ArrayList<File> resultFiles = new ArrayList<File>(1);
 

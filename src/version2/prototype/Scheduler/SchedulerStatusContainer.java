@@ -24,7 +24,7 @@ import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -288,7 +288,7 @@ public class SchedulerStatusContainer {
     {
         synchronized(numOfFilesLoaded)
         {
-            Connection con = PostgreSQLConnection.getConnection(configInstance);
+            Connection con = DatabaseConnector.getConnection(configInstance);
             Statement stmt = con.createStatement();
             String formatStringDownloadsLoaded = "SELECT Count(\"DownloadCacheID\") AS \"DownloadCacheIDCount\" FROM \"%s\".\"DownloadCache\";";
             ResultSet rs = null;

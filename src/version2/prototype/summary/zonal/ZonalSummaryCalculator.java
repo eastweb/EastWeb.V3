@@ -33,7 +33,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GdalUtils;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -358,7 +358,7 @@ public class ZonalSummaryCalculator {
             int day, Process process, int count, int fileNum) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException,
             SQLException {
         ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
         Map<Integer, Double> countMap = null;
