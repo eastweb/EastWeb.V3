@@ -44,7 +44,7 @@ import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -77,7 +77,7 @@ public class SchedulerTest {
      */
     @Before
     public void setUp() throws Exception {
-        Connection con = PostgreSQLConnection.getConnection();
+        Connection con = DatabaseConnector.getConnection();
         Statement stmt = con.createStatement();
         String query = String.format(
                 "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",

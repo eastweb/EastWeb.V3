@@ -32,6 +32,7 @@ public class Config {
     private static final String DATABASE_NAME_KEY = "DatabaseName";
     private static final String DATABASE_USERNAME_KEY = "UserName";
     private static final String DATABASE_PASSWORD_KEY = "PassWord";
+    private static final String MAX_NUM_OF_CONNECTIONS_PER_INSTANCE_KEY = "MaxNumOfConnectionsPerInstance";
     // Output section
     private static final String OUTPUT_KEY = "Output";
     // Instance
@@ -58,6 +59,7 @@ public class Config {
     private final String databaseName;
     private final String databaseUsername;
     private final String databasePassword;
+    private final Integer maxNumOfConnectionsPerInstance;
     private final ArrayList<String> summaryCalculations;
 
     private Config(String xmlPath)
@@ -76,6 +78,7 @@ public class Config {
         String databaseNameTemp = null;
         String databaseUsernameTemp = null;
         String databasePasswordTemp = null;
+        Integer maxNumOfConnectionsPerInstanceTemp = null;
         ArrayList<String> summaryCalculationsTemp = null;
 
         File fXmlFile = new File(xmlPath);
@@ -98,6 +101,7 @@ public class Config {
             databaseNameTemp = database.getElementsByTagName(DATABASE_NAME_KEY).item(0).getTextContent();
             databaseUsernameTemp = database.getElementsByTagName(DATABASE_USERNAME_KEY).item(0).getTextContent();
             databasePasswordTemp = database.getElementsByTagName(DATABASE_PASSWORD_KEY).item(0).getTextContent();
+            maxNumOfConnectionsPerInstanceTemp = Integer.parseInt(database.getElementsByTagName(MAX_NUM_OF_CONNECTIONS_PER_INSTANCE_KEY).item(0).getTextContent());
 
             // Node: Output
             outputNode = doc.getElementsByTagName(OUTPUT_KEY).item(0);
@@ -121,10 +125,11 @@ public class Config {
         databaseUsername = databaseUsernameTemp;
         databasePassword = databasePasswordTemp;
         summaryCalculations = summaryCalculationsTemp;
+        maxNumOfConnectionsPerInstance = maxNumOfConnectionsPerInstanceTemp;
     }
 
     private Config(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername, String databasePassword,
-            ArrayList<String> summaryCalculations)
+            Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryCalculations)
     {
         this.errorLogDir = errorLogDir;
         this.downloadDir = downloadDir;
@@ -135,6 +140,7 @@ public class Config {
         this.databaseUsername = databaseUsername;
         this.databasePassword = databasePassword;
         this.summaryCalculations = summaryCalculations;
+        this.maxNumOfConnectionsPerInstance = maxNumOfConnectionsPerInstance;
     }
 
     /**
@@ -168,14 +174,17 @@ public class Config {
      * @param downloadDir
      * @param globalSchema
      * @param databaseHost
+     * @param port
+     * @param databaseName
      * @param databaseUsername
      * @param databasePassword
+     * @param maxNumOfConnectionsPerInstance
      * @param summaryCalculations
      * @return a new Config object
      */
     public static Config getAnInstance(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername,
-            String databasePassword, ArrayList<String> summaryCalculations) {
-        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, port, databaseName, databaseUsername, databasePassword, summaryCalculations);
+            String databasePassword, Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryCalculations) {
+        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, port, databaseName, databaseUsername, databasePassword, maxNumOfConnectionsPerInstance, summaryCalculations);
     }
 
     public String getErrorLogDir() {
@@ -208,6 +217,10 @@ public class Config {
 
     public String getDatabasePassword() {
         return databasePassword;
+    }
+
+    public Integer getMaxNumOfConnectionsPerInstance() {
+        return maxNumOfConnectionsPerInstance;
     }
 
     public ArrayList<String> getSummaryCalculations() {

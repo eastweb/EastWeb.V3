@@ -40,7 +40,7 @@ import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -74,7 +74,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
     public static void setUpBeforeClass() throws Exception {
         testConfig = Config.getAnInstance("src/test/config.xml");
         testGlobalSchema = testConfig.getGlobalSchema();        // Test_EASTWeb
-        con = PostgreSQLConnection.getConnection();
+        con = DatabaseConnector.getConnection();
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
         startDate = LocalDate.ofYearDay(year, day);

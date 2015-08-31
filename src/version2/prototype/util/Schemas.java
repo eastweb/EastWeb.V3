@@ -30,7 +30,7 @@ public class Schemas {
      * Recreates or creates a full schema identified by the given project name and plugin name.
      * Creates all database cache tables required by frameworks and download classes.
      *
-     * @param postgreSQLConnection  - a connection object (can be obtained from PostgreSQLConnection.getConnection())
+     * @param postgreSQLConnection  - a connection object (can be obtained from DatabaseConnector.getConnection())
      * @param globalEASTWebSchema  - the global schema name (can be gotten from Config.getInstance().getGlobalSchema()
      * @param projectName  - name of project to create schema for
      * @param pluginName  - name of plugin to create schema for

@@ -23,7 +23,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.ZonalSummary;
 import version2.prototype.util.EASTWebQuery;
 import version2.prototype.util.EASTWebResults;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -58,7 +58,7 @@ public class EASTWebResultsTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        con = PostgreSQLConnection.getConnection();
+        con = DatabaseConnector.getConnection();
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");

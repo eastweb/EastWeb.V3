@@ -1,6 +1,5 @@
 package version2.prototype.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,9 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Observable;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -22,23 +19,17 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.gdal.ogr.Feature;
-import org.gdal.ogr.Layer;
 import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
-import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.zonal.SummariesCollection;
-import version2.prototype.summary.zonal.SummaryNameResultPair;
 import version2.prototype.summary.zonal.SummaryResult;
 
 /**
@@ -135,7 +126,7 @@ public class DatabaseCache extends Observable{
 
 
         try {
-            conn = PostgreSQLConnection.getConnection();
+            conn = DatabaseConnector.getConnection();
             stmt = conn.createStatement();
             conn.createStatement().execute("BEGIN");
 
@@ -290,7 +281,7 @@ public class DatabaseCache extends Observable{
                     filesAvailable = false;
                 }
             }
-        } catch(SQLException | ClassNotFoundException | IOException | SAXException | ParserConfigurationException e) {
+        } catch(SQLException e) {
             conn.createStatement().execute("ROLLBACK");
             if(stmt != null) {
                 stmt.close();
@@ -337,7 +328,7 @@ public class DatabaseCache extends Observable{
     public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate, ArrayList<String> extraDownloadFiles,
             ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = 0;
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, dataName, stmt);
         StringBuilder query;
@@ -597,7 +588,7 @@ public class DatabaseCache extends Observable{
         if(filesForASingleComposite.size() == 0) {
             return;
         }
-        Connection conn = PostgreSQLConnection.getConnection();
+        Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
 
         IndicesFileMetaData temp = filesForASingleComposite.get(0).ReadMetaDataForSummary();
@@ -693,7 +684,7 @@ public class DatabaseCache extends Observable{
      */
     public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryID, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int count, int fileNum)
             throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
-        final Connection conn = PostgreSQLConnection.getConnection();
+        final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
         PreparedStatement pStmt = null;
         //        final boolean previousAutoCommit = conn.getAutoCommit();

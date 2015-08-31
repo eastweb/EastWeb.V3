@@ -25,7 +25,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTDownloader;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**

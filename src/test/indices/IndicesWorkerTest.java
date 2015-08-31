@@ -33,7 +33,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.GeneralUIEventObject;
-import version2.prototype.util.PostgreSQLConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 /**
@@ -97,7 +97,7 @@ public class IndicesWorkerTest {
         ProjectInfoFile projectInfoFile = new ProjectInfoFile(xmlLocation);
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
-        Schemas.CreateProjectPluginSchema(PostgreSQLConnection.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
                 pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
 
         // Setup test files
