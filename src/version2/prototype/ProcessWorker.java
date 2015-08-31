@@ -16,27 +16,34 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
-    public String processWorkerName;
-    protected Process process;
-    protected ProjectInfoFile projectInfoFile;
-    protected ProjectInfoPlugin pluginInfo;
-    protected PluginMetaData pluginMetaData;
+    /**
+     * The name of the ProcessWorker.
+     */
+    public final String processWorkerName;
+    protected final Config configInstance;
+    protected final Process process;
+    protected final ProjectInfoFile projectInfoFile;
+    protected final ProjectInfoPlugin pluginInfo;
+    protected final PluginMetaData pluginMetaData;
     protected ArrayList<DataFileMetaData> cachedFiles;
-    protected DatabaseCache outputCache;
+    protected final DatabaseCache outputCache;
 
     /**
      * Creates a ProcessWorker object labeled by the given processWorkerName, owned by the given process, and set to work on the given cachedFiles.
      *
+     * @param configInstance  - Config reference to use
      * @param processWorkerName  - name of this worker
      * @param process  - reference to the owning process object
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param cachedFiles  - the files to process
+     * @param outputCache  - DatbaseCache instance to use as the outputCache
      */
-    protected ProcessWorker(String processWorkerName, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    protected ProcessWorker(Config configInstance, String processWorkerName, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
+        this.configInstance = configInstance;
         this.processWorkerName = processWorkerName;
         this.process = process;
         this.projectInfoFile = projectInfoFile;

@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import test.processor.ProcessorWorkerTest.MyDatabaseCache;
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -31,6 +32,7 @@ import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
 public class Test_ProcessorWorker_TRMM3B42RT {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -60,7 +62,7 @@ public class Test_ProcessorWorker_TRMM3B42RT {
 
         //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 
-        ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();

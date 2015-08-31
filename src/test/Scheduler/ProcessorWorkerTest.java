@@ -5,6 +5,7 @@ package test.Scheduler;
 
 import java.util.ArrayList;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
@@ -20,9 +21,9 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class ProcessorWorkerTest extends ProcessWorker {
 
-    public ProcessorWorkerTest(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public ProcessorWorkerTest(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache) {
-        super("ProcessorWorkerTest", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        super(configInstance, "ProcessorWorkerTest", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
     }
 
     /* (non-Javadoc)

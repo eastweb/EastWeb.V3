@@ -6,24 +6,24 @@ import java.io.File;
 import java.util.ArrayList;
 
 
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-
 import version2.prototype.indices.IndicesWorker;
-
 import version2.prototype.util.DataFileMetaData;
-
 import version2.prototype.util.ProcessorFileMetaData;
 
 
 public class TestInd_TRMM3B42 {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public TestInd_TRMM3B42() {
     }
@@ -51,7 +51,7 @@ public class TestInd_TRMM3B42 {
         cachedFiles.add(new DataFileMetaData(new ProcessorFileMetaData("D:\\testProjects\\TW\\Projects\\Project_TW\\TRMM3B42\\Processor\\Output\\2015\\118\\3B42_daily.2015.04.29.7.tif", 2015, 118)));
 
 
-        IndicesWorker worker = new IndicesWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        IndicesWorker worker = new IndicesWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         worker.call();
     }

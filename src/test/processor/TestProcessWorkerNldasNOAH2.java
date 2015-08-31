@@ -40,6 +40,7 @@ import version2.prototype.util.Schemas;
  *
  */
 public class TestProcessWorkerNldasNOAH2 {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     /**
      * @throws java.lang.Exception
@@ -90,7 +91,7 @@ public class TestProcessWorkerNldasNOAH2 {
         }
 
         // DatabaseCache outputCache = new MyDatabaseCache("Project_EA_NldasNOAH.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
-        ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();

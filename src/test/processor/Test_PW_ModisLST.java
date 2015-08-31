@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -24,6 +25,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 
 public class Test_PW_ModisLST {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public Test_PW_ModisLST() {
     }
@@ -54,7 +56,7 @@ public class Test_PW_ModisLST {
         //"Blah", "Project_TW", "TRMM3B42", ProcessName.Processor, null
 
         // DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
-        ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();

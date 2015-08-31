@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.Process;
@@ -45,16 +46,18 @@ public class ProcessorWorker extends ProcessWorker {
      * An implementation of ProcessWorker that handles the major processing of a list of raster files after being downloaded and handled by the Download framework.
      * Output is used by the Indices framework. Meant to be ran on its own thread.
      *
+     * @param configInstance  - Config reference to use
      * @param process  - the parent Process object to this threaded worker.
      * @param projectInfoFile  - information about the project gotten from the project's info xml.
      * @param pluginInfo  - information about the plugin being used for the acquired data files.
      * @param pluginMetaData  - information relevant to this ProcessWorker about the plugin being used gotten from the plugin's info xml.
      * @param cachedFiles  - the list of files to process in this ProcessWorker.
+     * @param outputCache
      */
-    public ProcessorWorker(Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    public ProcessorWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
-        super("ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        super(configInstance, "ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         // TODO Auto-generated constructor stub
 
     }

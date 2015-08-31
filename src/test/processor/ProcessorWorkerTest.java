@@ -42,6 +42,7 @@ import version2.prototype.util.Schemas;
  *
  */
 public class ProcessorWorkerTest {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     /**
      * @throws java.lang.Exception
@@ -95,7 +96,7 @@ public class ProcessorWorkerTest {
         //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 
         DatabaseCache outputCache = new MyDatabaseCache("project_amhara_trmm3b42rt.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo, ProcessName.PROCESSOR, null);
-        ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();

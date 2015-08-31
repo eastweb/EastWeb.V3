@@ -20,13 +20,12 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public class Summary extends Process {
-    private Config configInstance;
 
     /**
      * Creates a Summary object with the defined initial TaskState, owned by the given Scheduler, and acquiring its input from the specified
      * process, inputProcessName.
-     * @param manager
-     * @param configInstance
+     * @param manager  - EASTWebManager reference to use and pass on
+     * @param configInstance  - Config reference to use and pass on
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
@@ -37,8 +36,7 @@ public class Summary extends Process {
     public Summary(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache inputCache, DatabaseCache outputCache)
     {
-        super(manager, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
-        this.configInstance = configInstance;
+        super(manager, configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         inputCache.addObserver(this);
     }
 

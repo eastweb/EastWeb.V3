@@ -21,6 +21,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
@@ -41,6 +42,7 @@ import version2.prototype.util.Schemas;
  *
  */
 public class IndicesWorkerTest {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     /**
      * @throws java.lang.Exception
@@ -107,7 +109,7 @@ public class IndicesWorkerTest {
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day)));
 
         DatabaseCache outputCache = new MyDatabaseCache(globalSchema, projectInfoFile.GetProjectName(), pluginInfo, ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
-        ProcessorWorker worker = new ProcessorWorker(process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
+        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
 
         // Verify results
         ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();

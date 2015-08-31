@@ -30,26 +30,29 @@ public abstract class Process implements Observer {
     public final ProjectInfoPlugin pluginInfo;
     public final ProjectInfoFile projectInfoFile;
     public final PluginMetaData pluginMetaData;
-    protected Scheduler scheduler;
-    protected DatabaseCache outputCache;
-    protected EASTWebManagerI manager;
+    protected final EASTWebManagerI manager;
+    protected final Config configInstance;
+    protected final Scheduler scheduler;
+    protected final DatabaseCache outputCache;
 
     /**
      * Creates a Process object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName, and acquiring its
      * input from the specified process, inputProcessName.
      *
+     * @param manager  - EASTWebManager instance to use and pass on
+     * @param configInstance  - Config instance to use and pass on
+     * @param processName  - name of this threaded process
      * @param projectInfoFile  - the current project's information
      * @param pluginInfo  - the current plugin's general information
      * @param pluginMetaData  - the current plugin's xml data mapped
      * @param scheduler  - reference to the controlling Scheduler object
-     * @param state  - TaskState to initialize this object to
-     * @param processName  - name of this threaded process
      * @param outputCache  - DatabaseCache object to use when storing output of this process to notify next process of files available for processing
      */
-    protected Process(EASTWebManagerI manager, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    protected Process(EASTWebManagerI manager, Config configInstance, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache)
     {
         this.manager = manager;
+        this.configInstance = configInstance;
         this.processName = processName;
         this.scheduler = scheduler;
         this.pluginInfo = pluginInfo;
