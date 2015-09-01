@@ -1,7 +1,5 @@
 package version2.prototype.util;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author michael.devos
@@ -10,6 +8,7 @@ import java.util.ArrayList;
 public class DownloadFileMetaData {
     public final String dataName;
     public final String dataFilePath;
+    public final int dateGroupID;
     public final int year;
     public final int day;
     //    public final ArrayList<DownloadFileMetaData> extraDownloads;
@@ -19,13 +18,15 @@ public class DownloadFileMetaData {
      *
      * @param dataName  - name of the data file this object represents
      * @param dataFilePath  - full path to the data file
+     * @param dateGroupID  - the combination key ID of year and day
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param extraDownloads  - extra download files gotten as define by the plugin metadata
      */
-    public DownloadFileMetaData(String dataName, String dataFilePath, int year, int day) {
+    public DownloadFileMetaData(String dataName, String dataFilePath, int dateGroupID, int year, int day) {
         this.dataName = dataName;
         this.dataFilePath = dataFilePath;
+        this.dateGroupID = dateGroupID;
         this.year = year;
         this.day = day;
     }

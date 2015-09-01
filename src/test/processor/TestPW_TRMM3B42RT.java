@@ -59,7 +59,7 @@ public class TestPW_TRMM3B42RT {
         //                pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\TRMM2\\2014\\077\\3B42RT_daily.2014.03.18.bin", 2014, 77)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\TRMM2\\2014\\077\\3B42RT_daily.2014.03.18.bin", 1, 2014, 77)));
 
         //"Blah", "Project_TW", "TRMM3B42", ProcessName.Processor, null
 

@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -148,12 +147,12 @@ public class DatabaseCache extends Observable{
 
                             if(files.isEmpty() || files.get(dateGroupID) == null) {
                                 temp = new TreeSet<Record>();
-                                temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
+                                temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)));
                                 files.put(dateGroupID, temp);
                             }
                             else
                             {
-                                files.get(dateGroupID).add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
+                                files.get(dateGroupID).add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"),dateGroupID, tempYear, tempDayOfYear)));
                             }
                             rows.add(rs.getInt("DownloadCacheID"));
                         }
@@ -191,12 +190,12 @@ public class DatabaseCache extends Observable{
 
                                 if(files.isEmpty() || files.get(dateGroupID) == null) {
                                     temp = new TreeSet<Record>();
-                                    temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), tempYear, tempDayOfYear)));
+                                    temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), dateGroupID, tempYear, tempDayOfYear)));
                                     files.put(dateGroupID, temp);
                                 }
                                 else
                                 {
-                                    files.get(dateGroupID).add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), tempYear, tempDayOfYear)));
+                                    files.get(dateGroupID).add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), dateGroupID, tempYear, tempDayOfYear)));
                                 }
                                 rows.add(rs.getInt("DownloadCacheExtraID"));
                             }
@@ -258,9 +257,9 @@ public class DatabaseCache extends Observable{
                         }
 
                         if(processCachingFor == ProcessName.INDICES) {
-                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData(rs.getString("DataFilePath"), tempYear, tempDayOfYear, rs.getString("IndexName"))));
+                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData(rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear, rs.getString("IndexName"))));
                         } else {
-                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), tempYear, tempDayOfYear)));
+                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)));
                         }
                         rows.add(rs.getInt(getFromTableName + "ID"));
                     }
@@ -280,6 +279,18 @@ public class DatabaseCache extends Observable{
                     conn.createStatement().execute("COMMIT");
                     filesAvailable = false;
                 }
+            }
+            if(stmt != null) {
+                stmt.close();
+                stmt = null;
+            }
+            if(rs != null) {
+                rs.close();
+                rs = null;
+            }
+            if(conn != null) {
+                conn.close();
+                conn = null;
             }
         } catch(SQLException e) {
             conn.createStatement().execute("ROLLBACK");
@@ -794,35 +805,6 @@ public class DatabaseCache extends Observable{
     {
         setChanged();
         notifyObservers();
-    }
-
-    /**
-     * Can be used to get a DataFileMetaData object created from parsing the given file path. Assumes data name of the file is "Data".
-     *
-     * @param fullPath  - path to the data file
-     * @return returns the DataFileMetaData equivalent to the information that could be parsed from the path string passed in
-     * @throws SQLException
-     * @throws ParseException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    public static DataFileMetaData Parse(String fullPath) throws SQLException, ParseException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
-    {
-        int year, day;
-
-        // Parse out date directory
-        Matcher matcher = filePathPattern.matcher(fullPath);
-        if(matcher.find()) {
-            year = Integer.parseInt(matcher.group(4));
-            day = Integer.parseInt(matcher.group(5));
-        } else {
-            throw new ParseException("Filepath doesn't contain expected formatted project, plugin, year, and day. Expecting path to be of form \"" + filePathPattern.pattern() + "\"."
-                    + " Path \"" + fullPath + "\" doesn't match.", 0);
-        }
-
-        return new DataFileMetaData("Data", fullPath, year, day);
     }
 
     protected class Record implements Comparable<Record>

@@ -1,17 +1,23 @@
 package version2.prototype.summary.temporal.MergeStrategies;
 
 import java.io.File;
+import java.sql.Statement;
 import java.time.LocalDate;
+
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
+import version2.prototype.Config;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.summary.temporal.MergeStrategy;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.GdalUtils;
+import version2.prototype.util.Schemas;
 
 /**
  * Concrete MergeStrategy. Represents a merging based on averages of values in raster files.
@@ -25,8 +31,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
      * @see version2.prototype.summary.temporal.MergeStrategy#Merge(java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.io.File[])
      */
     @Override
-    public DataFileMetaData Merge(String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles)
-            throws Exception {
+    public DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles) throws Exception {
         GdalUtils.register();
         DataFileMetaData mergedFile = null;
         String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, ProcessName.SUMMARY) +
@@ -77,7 +82,11 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
             avgArray = null;
             avgRasterDs.delete();
 
-            mergedFile = new DataFileMetaData("Data", newFilePath, firstDate.getYear(), firstDate.getDayOfYear());
+            DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+            Statement stmt = con.createStatement();
+            mergedFile = new DataFileMetaData("Data", newFilePath, Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt), firstDate.getYear(), firstDate.getDayOfYear());
+            stmt.close();
+            con.close();
         }
         return mergedFile;
     }

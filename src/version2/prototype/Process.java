@@ -3,8 +3,11 @@ package version2.prototype;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -92,11 +95,13 @@ public abstract class Process implements Observer {
                 try {
                     cachedFiles = inputCache.GetUnprocessedCacheFiles();
                     if(cachedFiles.size() > 0) {
-                        process(cachedFiles);
+                        Map<Integer, ArrayList<DataFileMetaData>> cachedFileMap = splitUpCachedFilesByDate(cachedFiles);
+                        Set<Integer> dateGroupIDs = cachedFileMap.keySet();
+                        for(Integer dateGroupID : dateGroupIDs)
+                        {
+                            process(cachedFileMap.get(dateGroupID));
+                        }
                     }
-
-                    // TODO: Need to define when "finished" state has been reached as this doesn't work with asynchronous.
-                    //                scheduler.NotifyUI(new GeneralUIEventObject(this, "Summary Finished", 100, pluginInfo.GetName()));
                 }
                 catch (ClassNotFoundException | SQLException | IOException | SAXException | ParserConfigurationException e) {
                     ErrorLog.add(projectInfoFile, processName, scheduler, "Process.update error during processing of update notification from DatabaseCache.", e);
@@ -108,4 +113,27 @@ public abstract class Process implements Observer {
             }
         }
     }
+
+    protected Map<Integer, ArrayList<DataFileMetaData>> splitUpCachedFilesByDate(ArrayList<DataFileMetaData> cachedFiles)
+    {
+        Map<Integer, ArrayList<DataFileMetaData>> outputMap = new HashMap<Integer, ArrayList<DataFileMetaData>>();
+        ArrayList<DataFileMetaData> tempList;
+
+        for(DataFileMetaData file : cachedFiles)
+        {
+            if(outputMap.get(file.ReadMetaDataForProcessor().dateGroupID) == null)
+            {
+                tempList = new ArrayList<DataFileMetaData>();
+                tempList.add(file);
+                outputMap.put(file.ReadMetaDataForProcessor().dateGroupID, tempList);
+            }
+            else
+            {
+                outputMap.get(file.ReadMetaDataForProcessor().dateGroupID).add(file);
+            }
+        }
+
+        return outputMap;
+    }
+
 }

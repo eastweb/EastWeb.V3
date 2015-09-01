@@ -91,7 +91,7 @@ public class ProcessorWorkerTest {
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
         // extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day, null));
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\testProjects\\Amhara\\downloads\\2014\\002\\3B42RT_daily.2014.01.02.bin", 2014, 002)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\testProjects\\Amhara\\downloads\\2014\\002\\3B42RT_daily.2014.01.02.bin", 1, 2014, 002)));
 
         //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 

@@ -286,9 +286,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             {
                 if(downloadsList.size() < rs.getInt("DateGroupID"))
                 {
-                    downloadsList.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                    downloadsList.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
                 } else {
-                    downloadsList.add(rs.getInt("DateGroupID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                    downloadsList.add(rs.getInt("DateGroupID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
                 }
             }
         }
@@ -313,9 +313,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             {
                 if(downloadsList.size() < rs.getInt("DateGroupID"))
                 {
-                    downloadsList.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                    downloadsList.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
                 } else {
-                    downloadsList.add(rs.getInt("DateGroupID") + 1, new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                    downloadsList.add(rs.getInt("DateGroupID") + 1, new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
                 }
             }
         }

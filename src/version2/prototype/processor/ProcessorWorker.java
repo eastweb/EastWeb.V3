@@ -6,6 +6,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +31,11 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
+import version2.prototype.util.Schemas;
 
 
 /**
@@ -266,8 +270,19 @@ public class ProcessorWorker extends ProcessWorker {
             File[] dirList = dir.listFiles();
 
             // add each file into DataFileMetaData
-            for (File oFile : dirList) {
-                toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), thisDay.getYear(), thisDay.getDayOfYear()));
+            DatabaseConnection con = null;
+            Statement stmt = null;
+            try {
+                con = DatabaseConnector.getConnection(configInstance);
+                stmt = con.createStatement();
+                for (File oFile : dirList) {
+                    toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(),
+                            thisDay.getDayOfYear()));
+                }
+                stmt.close();
+                con.close();
+            } catch (SQLException e) {
+                ErrorLog.add(projectInfoFile, process, "Problem while creating list for output cache.", e);
             }
 
             // cache to the database

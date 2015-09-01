@@ -34,7 +34,7 @@ public final class IndicesWorkerTest extends ProcessWorker {
     public ProcessWorkerReturn call() throws Exception {
         System.out.println("IndicesWorkerTest executed.");
         ProcessorFileMetaData pData = cachedFiles.get(0).ReadMetaDataForIndices();
-        cachedFiles.set(0, new DataFileMetaData(pData.dataFilePath, pData.year, pData.day, "Test Index"));
+        cachedFiles.set(0, new DataFileMetaData(pData.dataFilePath, 1, pData.year, pData.day, "Test Index"));
         outputCache.CacheFiles(cachedFiles);
         return null;
     }

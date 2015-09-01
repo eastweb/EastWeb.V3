@@ -48,7 +48,7 @@ public class TestInd_TRMM3B42 {
         // Setup test files
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new ProcessorFileMetaData("D:\\testProjects\\TW\\Projects\\Project_TW\\TRMM3B42\\Processor\\Output\\2015\\118\\3B42_daily.2015.04.29.7.tif", 2015, 118)));
+        cachedFiles.add(new DataFileMetaData(new ProcessorFileMetaData("D:\\testProjects\\TW\\Projects\\Project_TW\\TRMM3B42\\Processor\\Output\\2015\\118\\3B42_daily.2015.04.29.7.tif", 1, 2015, 118)));
 
 
         IndicesWorker worker = new IndicesWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);

@@ -3,6 +3,7 @@ package version2.prototype.summary.temporal;
 import java.io.File;
 import java.time.LocalDate;
 
+import version2.prototype.Config;
 import version2.prototype.util.DataFileMetaData;
 
 /**
@@ -15,6 +16,7 @@ public interface MergeStrategy {
     /**
      * Merge method. Returns metadata about created merged raster file.
      *
+     * @param configInstance
      * @param workingDir  - working directory of project
      * @param projectName  - current project's name
      * @param pluginName  - current plugin's name
@@ -23,5 +25,5 @@ public interface MergeStrategy {
      * @return metadata about single merged file created
      * @throws Exception
      */
-    DataFileMetaData Merge(String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles) throws Exception;
+    DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles) throws Exception;
 }

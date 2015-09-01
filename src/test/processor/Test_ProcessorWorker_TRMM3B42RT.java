@@ -57,8 +57,8 @@ public class Test_ProcessorWorker_TRMM3B42RT {
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         //cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\TRMM\\2014\\020\\3B42RT_daily.2014.01.20.bin", 2014, 020)));
 
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h28v06.hdf", 2015, 201)));
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h29v06.hdf", 2015, 201)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h28v06.hdf", 1, 2015, 201)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h29v06.hdf", 1, 2015, 201)));
 
         //"Blah", "Project_Amhara", "TRMM3B42RT", ProcessName.DOWNLOAD, null
 

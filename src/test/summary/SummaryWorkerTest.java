@@ -115,13 +115,13 @@ public class SummaryWorkerTest {
 
         // Setup test files
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm1.tif", startDate.getYear(), startDate.minusDays(6).getDayOfYear(), "TRMM3B42RTIndex")));
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm2.tif", startDate.getYear(), startDate.minusDays(5).getDayOfYear(), "TRMM3B42RTIndex")));
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm3.tif", startDate.getYear(), startDate.minusDays(4).getDayOfYear(), "TRMM3B42RTIndex")));
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm4.tif", startDate.getYear(), startDate.minusDays(3).getDayOfYear(), "TRMM3B42RTIndex")));
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm5.tif", startDate.getYear(), startDate.minusDays(2).getDayOfYear(), "TRMM3B42RTIndex")));
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm6.tif", startDate.getYear(), startDate.minusDays(1).getDayOfYear(), "TRMM3B42RTIndex")));
-        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm7.tif", startDate.getYear(), startDate.getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm1.tif", 1, startDate.getYear(), startDate.minusDays(6).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm2.tif", 1, startDate.getYear(), startDate.minusDays(5).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm3.tif", 1, startDate.getYear(), startDate.minusDays(4).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm4.tif", 1, startDate.getYear(), startDate.minusDays(3).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm5.tif", 1, startDate.getYear(), startDate.minusDays(2).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm6.tif", 1, startDate.getYear(), startDate.minusDays(1).getDayOfYear(), "TRMM3B42RTIndex")));
+        cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm7.tif", 1, startDate.getYear(), startDate.getDayOfYear(), "TRMM3B42RTIndex")));
 
         SummaryWorker worker = new SummaryWorker(configInstance, null, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
         worker.call();

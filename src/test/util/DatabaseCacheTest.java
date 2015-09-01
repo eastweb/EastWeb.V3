@@ -195,7 +195,7 @@ public class DatabaseCacheTest {
         String data1FilePath = "Data file path1";
         String data2FilePath = "Data file path2";
         ArrayList<DataFileMetaData> filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData(data1FilePath, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), "Index"));
+        filesForASingleComposite.add(new DataFileMetaData(data1FilePath, 2, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), "Index"));
 
         // Cache to ProcessorCache
         scheduler.expectedNumOfProcessorOutputs = 2;
@@ -228,7 +228,7 @@ public class DatabaseCacheTest {
         assertEquals("Number of results returned is incorrect.", 0, result.size());
 
         filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData(data2FilePath, startDate.getYear(), startDate.getDayOfYear(), "Index"));
+        filesForASingleComposite.add(new DataFileMetaData(data2FilePath, 1, startDate.getYear(), startDate.getDayOfYear(), "Index"));
 
         // Cache to ProcessorCache
         scheduler.expectedProcessorProgress = 100.0;

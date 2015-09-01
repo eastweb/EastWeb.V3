@@ -104,9 +104,9 @@ public class IndicesWorkerTest {
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
-        extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", year, day));
+        extraDownloads.add(new DownloadFileMetaData("QC", "QC download file path", 1, year, day));
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", year, day)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "Data download file path", 1, year, day)));
 
         DatabaseCache outputCache = new MyDatabaseCache(globalSchema, projectInfoFile.GetProjectName(), pluginInfo, ProcessName.INDICES, pluginMetaData.ExtraDownloadFiles);
         ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);

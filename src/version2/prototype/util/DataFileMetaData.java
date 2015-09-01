@@ -1,6 +1,5 @@
 package version2.prototype.util;
 
-import java.util.ArrayList;
 
 /**
  * Represents the metadata stored for a cached data file within the database. To read the data within it must be gotten from one of the given Read* methods that return specific *FileMetaData objects.
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 public class DataFileMetaData {
     private final String dataName;
     private final String filePath;
+    private final int dateGroupID;
     private final int year;
     private final int day;
     private final String indexNm;
@@ -21,72 +21,38 @@ public class DataFileMetaData {
      *
      * @param dataName  - name of the data this file represents (data name = plugin name)
      * @param filePath  - full path to the data file
+     * @param dateGroupID  - the combination key ID of year and day
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      */
-    public DataFileMetaData(String dataName, String filePath, int year, int day)
+    public DataFileMetaData(String dataName, String filePath, int dateGroupID, int year, int day)
     {
         this.dataName = dataName;
         this.filePath = filePath;
+        this.dateGroupID = dateGroupID;
         this.year = year;
         this.day = day;
         indexNm = null;
     }
 
     /**
-     * Creates a DataFileMetaData object initialized with the given metadata.
-     *
-     * @param dataName  - name of the data this file represents (data name = plugin name)
-     * @param filePath  - full path to the data file
-     * @param year  - the Gregorian year the data file is relevant to
-     * @param day  - the Gregorian day of the year the data file is relevant to
-     * @param indexNm  - the environmental index associated to the data file
-     * @param extraDownloads  - collection of the extra downloads specified by the plugin metadata
-     */
-    //    public DataFileMetaData(String dataName, String filePath, int year, int day, String indexNm, ArrayList<DataFileMetaData> extraDownloads)
-    //    {
-    //        this.dataName = dataName;
-    //        this.filePath = filePath;
-    //        this.year = year;
-    //        this.day = day;
-    //        this.indexNm = indexNm;
-    //        this.extraDownloads = extraDownloads;
-    //    }
-
-    /**
      * Creates a DataFileMetaData object initialized with the given metadata and defaults the QC file path to null.
      *
      * @param filePath  - full path to the data file
+     * @param dateGroupID  - the combination key ID of year and day
      * @param year  - the Gregorian year the data file is relevant to
      * @param day  - the Gregorian day of the year the data file is relevant to
      * @param indexNm  - the environmental index associated to the data file
      */
-    public DataFileMetaData(String filePath, int year, int day, String indexNm)
+    public DataFileMetaData(String filePath, int dateGroupID, int year, int day, String indexNm)
     {
         dataName = "Data";
         this.filePath = filePath;
+        this.dateGroupID = dateGroupID;
         this.year = year;
         this.day = day;
         this.indexNm = indexNm;
     }
-
-    /**
-     * Creates a DataFileMetaData object. Defaults the environmental index to null, extraDownloads list to an empty list, and others to that given.
-     *
-     * @param dataName  - name of the data this file represents (name is that of what's found for the 'Name' attribute of the 'Download' node in the plugin metadata this file is for)
-     * @param filePath  - full path to the data file
-     * @param year  - the Gregorian year the data file is relevant to
-     * @param day  - the Gregorian day of the year the data file is relevant to
-     */
-    //    public DataFileMetaData(String dataName, String filePath, int year, int day)
-    //    {
-    //        this.dataName = dataName;
-    //        this.filePath = filePath;
-    //        this.year = year;
-    //        this.day = day;
-    //        indexNm = null;
-    //        extraDownloads = new ArrayList<DataFileMetaData>(0);
-    //    }
 
     /**
      * Copy constructor
@@ -97,21 +63,10 @@ public class DataFileMetaData {
     {
         dataName = dData.dataName;
         filePath = dData.dataFilePath;
+        dateGroupID = dData.dateGroupID;
         year = dData.year;
         day = dData.day;
         indexNm = null;
-
-        //        ArrayList<DataFileMetaData> extras = new ArrayList<DataFileMetaData>();
-        //        if (dData.extraDownloads != null)
-        //        {
-        //            for(DownloadFileMetaData extra : dData.extraDownloads)
-        //            {
-        //                extras.add(new DataFileMetaData(extra.dataName, dData.dataFilePath, dData.year, dData.day));
-        //            }
-        //            extraDownloads = extras;
-        //        } else {
-        //            extraDownloads = null;
-        //        }
     }
 
     /**
@@ -123,6 +78,7 @@ public class DataFileMetaData {
     {
         dataName = null;
         filePath = pData.dataFilePath;
+        dateGroupID = pData.dateGroupID;
         year = pData.year;
         day = pData.day;
         indexNm = null;
@@ -138,6 +94,7 @@ public class DataFileMetaData {
     {
         dataName = null;
         filePath = iData.dataFilePath;
+        dateGroupID = iData.dateGroupID;
         year = iData.year;
         day = iData.day;
         indexNm = iData.indexNm;
@@ -161,7 +118,7 @@ public class DataFileMetaData {
         //            return new DownloadFileMetaData(dataName, filePath, year, day, extras);
         //        } else {
         //            return new DownloadFileMetaData(dataName, filePath, year, day, null);
-        return new DownloadFileMetaData(dataName, filePath, year, day);
+        return new DownloadFileMetaData(dataName, filePath, dateGroupID, year, day);
     }
 
     /**
@@ -171,7 +128,7 @@ public class DataFileMetaData {
      */
     public ProcessorFileMetaData ReadMetaDataForIndices()
     {
-        return new ProcessorFileMetaData(filePath, year, day);
+        return new ProcessorFileMetaData(filePath, dateGroupID, year, day);
     }
 
     /**
@@ -181,6 +138,6 @@ public class DataFileMetaData {
      */
     public IndicesFileMetaData ReadMetaDataForSummary()
     {
-        return new IndicesFileMetaData(filePath, year, day, indexNm);
+        return new IndicesFileMetaData(filePath, dateGroupID, year, day, indexNm);
     }
 }

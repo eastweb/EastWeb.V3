@@ -70,7 +70,8 @@ public class SummaryWorker extends ProcessWorker {
                     {
                         cachedFileData = cachedFile.ReadMetaDataForSummary();
                         TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
-                                projectInfoFile.GetWorkingDir(),
+                                configInstance,                         // configInstance
+                                projectInfoFile.GetWorkingDir(),        // workingDir
                                 projectInfoFile.GetProjectName(),       // projectName
                                 pluginInfo.GetName(),                   // pluginName
                                 cachedFileData.indexNm,                 // Index name
@@ -119,7 +120,7 @@ public class SummaryWorker extends ProcessWorker {
                             summary,                               // summariesCollection
                             outputCache);
                     zonalSummaryCal.calculate();
-                    outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
+                    outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.dateGroupID, cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
                 }
             }
         }catch(Exception e)

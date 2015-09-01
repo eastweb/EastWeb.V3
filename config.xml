@@ -9,7 +9,7 @@
 		<DatabaseName>postgres</DatabaseName>
 		<UserName>postgres</UserName>
 		<PassWord>eastweb</PassWord>
-		<MaxNumOfConnectionsPerInstance>100</MaxNumOfConnectionsPerInstance>
+		<MaxNumOfConnectionsPerInstance>50</MaxNumOfConnectionsPerInstance>
 	</Database>
 	<!-- <DataBase>
 		<GlobalSchema>EASTWeb</GlobalSchema>

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
@@ -29,8 +30,11 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.ProcessorFileMetaData;
+import version2.prototype.util.Schemas;
 
 
 /**
@@ -145,7 +149,11 @@ public class IndicesWorker extends ProcessWorker{
                     method = indexCalculator.getClass().getMethod("calculate");
                     method.invoke(indexCalculator);
 
-                    output.add(new DataFileMetaData(outFile, thisDay.getYear(), thisDay.getDayOfYear(), indices));
+                    DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+                    Statement stmt = con.createStatement();
+                    output.add(new DataFileMetaData(outFile, Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(), thisDay.getDayOfYear(), indices));
+                    stmt.close();
+                    con.close();
                 }catch(Exception e)
                 {
                     throw new EmptyStackException(); // class not found

@@ -3,6 +3,7 @@ package version2.prototype.summary.temporal;
 import java.io.File;
 import java.util.ArrayList;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.util.DataFileMetaData;
 
@@ -13,6 +14,7 @@ import version2.prototype.util.DataFileMetaData;
  *
  */
 public class TemporalSummaryCalculator {
+    private final Config configInstance;
     private String workingDir;
     private String projectName;
     private String pluginName;
@@ -28,6 +30,7 @@ public class TemporalSummaryCalculator {
      * Creates a TemporalSummaryCalculator. Uses a shared TemporalSummaryRasterFileStore and breaks apart and combines files depending on the values for
      * daysPerInputData and daysPerOutputData.
      *
+     * @param configInstance
      * @param projectName  - name of current project
      * @param workingDir  - path to current working directory
      * @param pluginName  - name of current plugin
@@ -39,8 +42,9 @@ public class TemporalSummaryCalculator {
      * @param mergeStrategy  - merge strategy for combining multiple files into a single one representing more days than any single file
      * @param fileStore  - common storage object to hold files waiting to be merged together into a single composite
      */
-    public TemporalSummaryCalculator(String workingDir, String projectName, String pluginName, String indexName, File inRasterFile, DataDate inDataDate,
+    public TemporalSummaryCalculator(Config configInstance, String workingDir, String projectName, String pluginName, String indexName, File inRasterFile, DataDate inDataDate,
             int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) {
+        this.configInstance = configInstance;
         this.workingDir = workingDir;
         this.projectName = projectName;
         this.pluginName = pluginName;
@@ -93,7 +97,7 @@ public class TemporalSummaryCalculator {
                 for(FileDatePair fdPair : tempComp.files) {
                     files.add(fdPair.file);
                 }
-                output = mergeStrategy.Merge(workingDir, projectName, pluginName, tempComp.startDate, (File[])files.toArray());
+                output = mergeStrategy.Merge(configInstance, workingDir, projectName, pluginName, tempComp.startDate, (File[])files.toArray());
             }
         }
         return output;

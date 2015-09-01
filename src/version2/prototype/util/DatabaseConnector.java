@@ -206,6 +206,14 @@ public class DatabaseConnector {
     }
 
     /**
+     * Gets the current number of active database connections.
+     * @return  int - number of active database connections.
+     */
+    public static int getConnectionCount() {
+        return connectionCount;
+    }
+
+    /**
      * Ends the connection and updates the state of the DatabaseConnector.
      * @param ID  - DatabaseConnection ID
      */

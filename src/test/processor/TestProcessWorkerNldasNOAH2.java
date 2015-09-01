@@ -87,7 +87,7 @@ public class TestProcessWorkerNldasNOAH2 {
         assert (list.length > 1);
         for(File input : list)
         {
-            cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", input.getAbsolutePath(), 2015, 155)));
+            cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", input.getAbsolutePath(), 1, 2015, 155)));
         }
 
         // DatabaseCache outputCache = new MyDatabaseCache("Project_EA_NldasNOAH.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
