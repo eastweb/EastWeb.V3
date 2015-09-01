@@ -107,7 +107,7 @@ public class ProcessorWorkerTest {
     {
         public MyDatabaseCache(String globalSchema, String projectName, ProjectInfoPlugin pluginInfo, ProcessName dataComingFrom, ArrayList<String> extraDownloadFiles) throws ParseException,
         ParserConfigurationException, SAXException, IOException {
-            super(new MyScheduler(), globalSchema, projectName, pluginInfo, PluginMetaDataCollection.CreatePluginMetaData(null, null, null, null, null, null, null, null, extraDownloadFiles), null,
+            super(new MyScheduler(), globalSchema, projectName, pluginInfo, PluginMetaDataCollection.CreatePluginMetaData(null, null, null, extraDownloadFiles, null, null, null, null, null, null), null,
                     dataComingFrom);
         }
 

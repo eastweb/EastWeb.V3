@@ -180,7 +180,7 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertEquals("Not expected number of tables in the created Global Schema.", 11, rs.getInt("RowCount"));
+            assertEquals("Not expected number of tables in the created Global Schema.", 9, rs.getInt("RowCount"));
 
             // Check global schema table names
             do{
@@ -188,10 +188,8 @@ public class SchemasTest {
                 {
                 case "DateGroup": break;
                 case "Index": break;
-                case "ExpectedResults": break;
                 case "Project": break;
                 case "Plugin": break;
-                case "GDExpectedResults": break;
                 case "GlobalDownloader": break;
                 case "Download": break;
                 case "DownloadExtra": break;

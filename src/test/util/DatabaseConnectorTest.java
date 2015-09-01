@@ -24,12 +24,25 @@ import version2.prototype.util.DatabaseConnector;
  *
  */
 public class DatabaseConnectorTest {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        configInstance = Config.getAnInstance(
+                "C:\\Users\\michael.devos\\Desktop\\EASTWeb",    // ErrorLogDir
+                "C:\\Users\\michael.devos\\Desktop\\EASTWeb\\Downloads",    // DownloadDir
+                "Test_EASTWeb1",   // GlobalSchema
+                "localhost",        // HostName
+                5432,               // Port
+                "postgres",       // DatabaseName
+                "postgres",   // UserName
+                "eastweb",   // PassWord
+                5,     // MaxNumOfConnectionsPerInstance
+                null);   // SummaryCalculation
+        DatabaseConnector.closeAllConnections();
     }
 
     /**
@@ -71,7 +84,6 @@ public class DatabaseConnectorTest {
      */
     @Test
     public final void testGetConnectionConfig() throws SQLException {
-        Config configInstance = Config.getAnInstance("src/test/config.xml");
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
         Statement stmt = con.createStatement();
         stmt.execute("SELECT 1;");
@@ -81,10 +93,10 @@ public class DatabaseConnectorTest {
     /**
      * Test method for {@link version2.prototype.util.DatabaseConnector#getConnection(Config, boolean)} and {@link version2.prototype.util.DatabaseConnector#getConnection(Config, boolean, Integer)}.
      * @throws SQLException
+     * @throws InterruptedException
      */
     @Test
     public final void testGetConnectionConfigBooleanInteger() throws SQLException {
-        Config configInstance = Config.getAnInstance("src/test/config.xml");
         // Test Case 1
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance, false);
         Statement stmt = con.createStatement();
@@ -117,6 +129,33 @@ public class DatabaseConnectorTest {
         for(DatabaseConnection conn : connections)
         {
             conn.close();
+        }
+    }
+
+    @Test
+    public final void testCloseAllConnections() throws SQLException, Exception
+    {
+        ArrayList<DatabaseConnection> connections = new ArrayList<DatabaseConnection>();
+        DatabaseConnection con;
+        for(int i=0; i < configInstance.getMaxNumOfConnectionsPerInstance(); i++)
+        {
+            // Test Case 3
+            con = DatabaseConnector.getConnection(configInstance, false, 2);
+            if(con == null) {
+                fail("Connection["+ i +"] failed.");
+            } else {
+                connections.add(con);
+            }
+        }
+
+        DatabaseConnector.closeAllConnections();
+
+        for(int i=0; i < connections.size(); i++)
+        {
+            if(!connections.get(i).isClosed())
+            {
+                fail("Connection["+ i +"] not closed.");
+            }
         }
     }
 

@@ -134,7 +134,7 @@ public class Config {
         this.errorLogDir = errorLogDir;
         this.downloadDir = downloadDir;
         this.globalSchema = globalSchema;
-        this.databaseHost = databaseHost;
+        this.databaseHost = "jdbc:postgresql://"+databaseHost;
         this.port = port;
         this.databaseName = databaseName;
         this.databaseUsername = databaseUsername;

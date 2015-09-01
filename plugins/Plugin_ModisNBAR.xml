@@ -59,4 +59,7 @@
 		<Level>Low</Level>
 		<Level>NoScreening</Level>
 	</QualityControl>
+	<ExtraInfo>
+		<Tiles>true</Tiles>
+	</ExtraInfo>
 </PluginMetadata>

@@ -9,7 +9,7 @@
 		<DatabaseName>postgres</DatabaseName>
 		<UserName>postgres</UserName>
 		<PassWord>eastweb</PassWord>
-		<MaxNumOfConnectionsPerInstance>5</MaxNumOfConnectionsPerInstance>
+		<MaxNumOfConnectionsPerInstance>100</MaxNumOfConnectionsPerInstance>
 	</Database>
 	<Output>
 		<SummaryCalculation>Max</SummaryCalculation>

@@ -115,7 +115,7 @@ public class DatabaseCacheTest {
         DownloadMetaData downloadMD = PluginMetaDataCollection.CreateDownloadMetaData(null, null, null, null, null, filesPerDay, null, null, null, null);
         ProcessorMetaData processorMD = PluginMetaDataCollection.CreateProcessorMetaData(null, 1);
         IndicesMetaData indicesMD = PluginMetaDataCollection.CreateIndicesMetaData(indicesNames);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(downloadMD, processorMD, indicesMD, null, null, null, null, null, extraDownloadFiles);
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, null, null, extraDownloadFiles, downloadMD, processorMD, indicesMD, null, null, null);
         testDownloadCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.DOWNLOAD);
         testProcessorCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.PROCESSOR);
         testIndicesCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.INDICES);

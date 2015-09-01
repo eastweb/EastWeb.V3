@@ -286,16 +286,17 @@ public class PluginMetaDataCollection {
      * @param DaysPerInputData
      * @param Resolution
      * @param ExtraDownloadFiles
+     * @param ExtraInfo
      * @return a customized PluginMetaData object
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
      */
-    public static PluginMetaData CreatePluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndicesMetaData Indices, SummaryMetaData Summary, ArrayList<String> QualityControlMetaData,
-            String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles) throws ParserConfigurationException, SAXException, IOException
+    public static PluginMetaData CreatePluginMetaData(String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles, DownloadMetaData Download, ProcessorMetaData Processor,
+            IndicesMetaData Indices, SummaryMetaData Summary, ArrayList<String> QualityControlMetaData, ExtraInfoData ExtraInfo) throws ParserConfigurationException, SAXException, IOException
     {
         PluginMetaDataCollection collection = new PluginMetaDataCollection();
-        return collection.new PluginMetaData(Download, Processor, Indices, Summary, QualityControlMetaData, Title, DaysPerInputData, Resolution, ExtraDownloadFiles);
+        return collection.new PluginMetaData(Title, DaysPerInputData, Resolution, ExtraDownloadFiles, Download, Processor, Indices, Summary, QualityControlMetaData, ExtraInfo);
     }
 
     private PluginMetaDataCollection(File[] xmlFiles) throws ParserConfigurationException, SAXException, IOException, DOMException, PatternSyntaxException
@@ -344,10 +345,13 @@ public class PluginMetaDataCollection {
             IndicesMetaData Indices = new IndicesMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Indices"));
             SummaryMetaData Summary = new SummaryMetaData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("Summary"));
 
+            // Extra Info
+            ExtraInfoData ExtraInfo = new ExtraInfoData(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles, doc.getElementsByTagName("ExtraInfo"));
+
             // Setup map
             //            String pluginName = FilenameUtils.removeExtension(fXmlFile.getName()).replace("Plugin_","");
             pluginList.add(Title);
-            myMap.put(Title, new PluginMetaData(Download, Processor, Indices, Summary, QualityControlMetaData, Title, DaysPerInputData, resolution, ExtraDownloadFiles));
+            myMap.put(Title, new PluginMetaData(Title, DaysPerInputData, resolution, ExtraDownloadFiles, Download, Processor, Indices, Summary, QualityControlMetaData, ExtraInfo));
 
         }
         return myMap;
@@ -374,18 +378,19 @@ public class PluginMetaDataCollection {
     }
 
     public class PluginMetaData {
+        public final String Title;
+        public final Integer DaysPerInputData;
+        public final Integer Resolution;
+        public final ArrayList<String> ExtraDownloadFiles;
         public final DownloadMetaData Download;
         public final ProcessorMetaData Processor;
         public final IndicesMetaData Indices;
         public final SummaryMetaData Summary;
         public final ArrayList<String> QualityControlMetaData;
-        public final String Title;
-        public final Integer DaysPerInputData;
-        public final Integer Resolution;
-        public final ArrayList<String> ExtraDownloadFiles;
+        public final ExtraInfoData ExtraInfo;
 
-        public PluginMetaData(DownloadMetaData Download, ProcessorMetaData Processor, IndicesMetaData Indices, SummaryMetaData Summary, ArrayList<String> QualityControlMetaData, String Title,
-                Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles)
+        public PluginMetaData(String Title, Integer DaysPerInputData, Integer Resolution, ArrayList<String> ExtraDownloadFiles, DownloadMetaData Download, ProcessorMetaData Processor, IndicesMetaData Indices,
+                SummaryMetaData Summary, ArrayList<String> QualityControlMetaData, ExtraInfoData ExtraInfo)
         {
             this.Download = Download;
             this.Processor = Processor;
@@ -396,6 +401,7 @@ public class PluginMetaDataCollection {
             this.DaysPerInputData = DaysPerInputData;
             this.Resolution = Resolution;
             this.ExtraDownloadFiles = ExtraDownloadFiles;
+            this.ExtraInfo = ExtraInfo;
         }
     }
 
@@ -790,6 +796,21 @@ public class PluginMetaDataCollection {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
             this.mergeStrategyClass = mergeStrategyClass;
             this.interpolateStrategyClass = interpolateStrategyClass;
+        }
+    }
+
+    public class ExtraInfoData extends ProcessMetaData {
+        public final Boolean Tiles;
+
+        private final NodeList nList;
+
+        protected ExtraInfoData(ArrayList<String> QualityControlMetaData, String Title, Integer DaysPerInputData, ArrayList<String> ExtraDownloadFiles, NodeList n) {
+            super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
+            nList = n;
+
+            Node extraInfo = nList.item(0);
+
+            Tiles = Boolean.parseBoolean(((Element) extraInfo).getElementsByTagName("Tiles").item(0).getTextContent().toUpperCase());
         }
     }
 }

@@ -56,13 +56,14 @@ public class PluginMetaDataCollectionTester {
         PluginMetaDataCollection instance = PluginMetaDataCollection.getInstance(testFiles);
         assertNotNull(instance);
         assertTrue("Plugin list size is " + instance.pluginMetaDataMap.size(), instance.pluginMetaDataMap.size() == 2);
-        assertTrue("First plugin file name is " + instance.pluginList.get(0), instance.pluginList.get(0).equals("Test_Plugin"));
+        assertTrue("First plugin file name is " + instance.pluginList.get(0), instance.pluginList.get(0).equals("Test Plugin"));
         assertTrue("First plugin title is " + instance.pluginList.get(0), instance.pluginMetaDataMap.get(instance.pluginList.get(0)).Title.equals("Test Plugin"));
         PluginMetaData pluginMetaData = instance.pluginMetaDataMap.get(instance.pluginList.get(0));
         assertNotNull(pluginMetaData);
         assertTrue("Plugin DaysPerInputData is " + pluginMetaData.DaysPerInputData, pluginMetaData.DaysPerInputData == 1);
         assertTrue("Plugin Resolution is " + pluginMetaData.Resolution, pluginMetaData.Resolution == 1000);
         assertTrue("ExtraDownloadFiles list is " + pluginMetaData.ExtraDownloadFiles.toString(), pluginMetaData.ExtraDownloadFiles.size() == 0);
+        assertTrue("ExtraInfo.Tiles is false", pluginMetaData.ExtraInfo.Tiles);
 
         // Test getting DownloadMetaData
         DownloadMetaData downloadData = pluginMetaData.Download;
@@ -139,10 +140,11 @@ public class PluginMetaDataCollectionTester {
 
 
         // Use file Test_MultipleDownloads.xml to test multiple Download elements and missing TimeZone and FilesPerDay elements from "QC" Download
-        assertTrue("Second plugin file name is " + instance.pluginList.get(1), instance.pluginList.get(1).equals("Test_MultipleDownloads"));
+        assertTrue("Second plugin file name is " + instance.pluginList.get(1), instance.pluginList.get(1).equals("Test Multiple Downloads"));
         assertTrue("Second plugin title is " + instance.pluginList.get(1), instance.pluginMetaDataMap.get(instance.pluginList.get(1)).Title.equals("Test Multiple Downloads"));
         pluginMetaData = instance.pluginMetaDataMap.get(instance.pluginList.get(1));
         assertTrue("ExtraDownloadFiles list is " + pluginMetaData.ExtraDownloadFiles.toString(), pluginMetaData.ExtraDownloadFiles.size() == 1);
+        assertTrue("ExtraInfo.Tiles is false", pluginMetaData.ExtraInfo.Tiles);
 
         downloadData = pluginMetaData.Download;
         assertTrue("ExtraDownloads list is null", downloadData.extraDownloads != null);

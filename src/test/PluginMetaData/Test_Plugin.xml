@@ -45,4 +45,7 @@
 		<Level>Level 2</Level>
 		<Level>Level 3</Level>
 	</QualityControl>
+	<ExtraInfo>
+		<Tiles>true</Tiles>
+	</ExtraInfo>
 </PluginMetadata>

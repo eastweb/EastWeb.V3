@@ -29,34 +29,37 @@ import java.util.concurrent.Executor;
 public class DatabaseConnection implements AutoCloseable, Connection {
     private final DatabaseConnector connector;
     private final Connection connection;
+    private final Integer ID;
 
     /**
      * Create a DatabaseConnection object; storing the reference to the monitoring DatabaseConnector object.
      * @param connector
      * @param connection
+     * @param ID
      */
-    public DatabaseConnection(DatabaseConnector connector, Connection connection)
+    public DatabaseConnection(DatabaseConnector connector, Connection connection, Integer ID)
     {
         this.connector = connector;
         this.connection = connection;
+        this.ID = ID;
     }
 
     @Override
     protected void finalize() throws Throwable {
-        connector.closingConnection();
+        connector.endConnection(ID);
         super.finalize();
     }
 
     @Override
     public void close() throws SQLException {
         connection.close();
-        connector.closingConnection();
+        connector.endConnection(ID);
     }
 
     @Override
     public void abort(Executor executor) throws SQLException {
         connection.abort(executor);
-        connector.closingConnection();
+        connector.endConnection(ID);
     }
 
     @Override

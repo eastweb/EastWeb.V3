@@ -21,7 +21,7 @@
 		</OriginDate>
 	</Download>
 	<Processor>
-		<ProcessStep>ModisLSTMozaic</ProcessStep>
+		<ProcessStep>ModisLSTMozaic_HDF4</ProcessStep>
 		<ProcessStep>ModisLSTFilter</ProcessStep>
 		<ProcessStep>ModisLSTReproject</ProcessStep>
 		<ProcessStep>ModisLSTMask</ProcessStep>
@@ -45,4 +45,7 @@
 		<Level>LOW</Level>
 		<Level>NOSCREENING</Level>
 	</QualityControl>
+	<ExtraInfo>
+		<Tiles>true</Tiles>
+	</ExtraInfo>
 </PluginMetadata>
