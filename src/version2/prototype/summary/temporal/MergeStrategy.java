@@ -20,10 +20,11 @@ public interface MergeStrategy {
      * @param workingDir  - working directory of project
      * @param projectName  - current project's name
      * @param pluginName  - current plugin's name
+     * @param indexNm  - current index name
      * @param firstDate  - date of first data file in composite
      * @param rasterFiles  - list of files to create composite from
      * @return metadata about single merged file created
      * @throws Exception
      */
-    DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles) throws Exception;
+    DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception;
 }

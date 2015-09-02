@@ -29,6 +29,7 @@ public class ProjectProgress {
     private JProgressBar summaryProgressBar;
 
     private DefaultListModel<String> itemLog;
+    private GUIUpdateHandlerImplementation updateHandler;
 
     /**
      * Launch the application.
@@ -55,7 +56,7 @@ public class ProjectProgress {
     public ProjectProgress(String projectName) {
         initialize();
 
-        GUIUpdateHandlerImplementation updateHandler = new GUIUpdateHandlerImplementation(projectName);
+        updateHandler = new GUIUpdateHandlerImplementation(projectName);
         updateHandler.run();
         EASTWebManager.RegisterGUIUpdateHandler(updateHandler);
     }
@@ -134,16 +135,26 @@ public class ProjectProgress {
 
         @Override
         public void run() {
-            SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
-
-            downloadProgressBar.setValue(GetAverageDownload(status.downloadProgressesByData).intValue());   // Truncates the double (so value always equates to double rounded down)
-            processProgressBar.setValue(GetAverage(status.processorProgresses).intValue());
-            indiciesProgressBar.setValue(GetAverage(status.indicesProgresses).intValue());
-            summaryProgressBar.setValue(GetAverageSummary(status.summaryProgresses).intValue());
-
-            for(String log : status.ReadAllRemainingLogEntries())
+            synchronized(frame)
             {
-                itemLog.addElement(log);
+                if(frame != null)
+                {
+                    SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
+
+                    downloadProgressBar.setValue(GetAverageDownload(status.downloadProgressesByData).intValue());   // Truncates the double (so value always equates to double rounded down)
+                    processProgressBar.setValue(GetAverage(status.processorProgresses).intValue());
+                    indiciesProgressBar.setValue(GetAverage(status.indicesProgresses).intValue());
+                    summaryProgressBar.setValue(GetAverageSummary(status.summaryProgresses).intValue());
+
+                    itemLog.clear();
+                    for(String log : status.ReadAllRemainingLogEntries())
+                    {
+                        itemLog.addElement(log);
+                    }
+                    frame.repaint();
+                } else {
+                    EASTWebManager.RemoveGUIUpdateHandler(updateHandler);
+                }
             }
         }
 

@@ -2,6 +2,8 @@ package version2.prototype.summary;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
@@ -28,8 +30,6 @@ import version2.prototype.util.IndicesFileMetaData;
  */
 public class SummaryWorker extends ProcessWorker {
     private Config configInstance;
-    private static Integer count = -1;
-    private int myCount;
 
     /**
      * @param configInstance
@@ -45,10 +45,6 @@ public class SummaryWorker extends ProcessWorker {
     {
         super(configInstance, "SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         this.configInstance = configInstance;
-        synchronized (count) {
-            count = count + 1;
-            myCount = count;
-        }
     }
 
     /* (non-Javadoc)
@@ -56,9 +52,17 @@ public class SummaryWorker extends ProcessWorker {
      */
     @Override
     public ProcessWorkerReturn call() throws Exception {
+        Map<Integer, ArrayList<DataFileMetaData>> summaryInputMap = new HashMap<Integer, ArrayList<DataFileMetaData>>();
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
-        ArrayList<DataFileMetaData> tempFiles = cachedFiles;
+        ArrayList<DataFileMetaData> tempFiles;
+        DataFileMetaData tempFile;
         IndicesFileMetaData cachedFileData;
+
+        // Setup initial input mappings
+        for(ProjectInfoSummary summary : projectInfoFile.GetSummaries())
+        {
+            summaryInputMap.put(summary.GetID(), cachedFiles);
+        }
 
         try{
             for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
@@ -66,55 +70,51 @@ public class SummaryWorker extends ProcessWorker {
                 // Check if doing temporal summarization
                 if(summary.GetTemporalFileStore() != null)
                 {
-                    for(DataFileMetaData cachedFile : cachedFiles)
+                    tempFiles = new ArrayList<DataFileMetaData>();
+                    for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
                     {
                         cachedFileData = cachedFile.ReadMetaDataForSummary();
                         TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
                                 configInstance,                         // configInstance
+                                process,                                // process
                                 projectInfoFile.GetWorkingDir(),        // workingDir
                                 projectInfoFile.GetProjectName(),       // projectName
                                 pluginInfo.GetName(),                   // pluginName
-                                cachedFileData.indexNm,                 // Index name
-                                new File(cachedFileData.dataFilePath),  // inRasterFile
-                                null,                                   // inDataDate
+                                cachedFileData,                         // inputFile
                                 pluginMetaData.DaysPerInputData,        // daysPerInputData
                                 summary.GetTemporalFileStore(),         // TemporalSummaryRasterFileStore
                                 null,                                   // InterpolateStrategy
                                 new AvgGdalRasterFileMerge()            // (Framework user defined)
                                 );
-                        tempFiles.add(temporalSummaryCal.calculate());
+                        tempFile = temporalSummaryCal.calculate();
+                        if(tempFile != null) {
+                            tempFiles.add(tempFile);
+                        }
                     }
+                    summaryInputMap.put(summary.GetID(), tempFiles);
                 }
             }
-            cachedFiles = tempFiles;
         }catch(Exception e)
         {
-            ErrorLog.add(projectInfoFile, process, "Problem during zonal summary calculation.", e);
+            ErrorLog.add(process, "Problem during temporal summary calculation.", e);
         }
 
         try{
             File outputFile;
-            int fileNum = -1;
-            for(DataFileMetaData cachedFile : cachedFiles)
+            for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
             {
-                fileNum++;
-                cachedFileData = cachedFile.ReadMetaDataForSummary();
-                for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
+                for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
                 {
+                    cachedFileData = cachedFile.ReadMetaDataForSummary();
                     outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
                             pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
                     ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
-                            fileNum,
-                            myCount,
                             process,
                             configInstance.getGlobalSchema(),
                             projectInfoFile.GetWorkingDir(),
                             projectInfoFile.GetProjectName(),       // projectName
                             pluginInfo.GetName(),                   // pluginName
-                            cachedFileData.indexNm,
-                            cachedFileData.year,
-                            cachedFileData.day,
-                            new File(cachedFileData.dataFilePath),  // inRasterFile
+                            cachedFileData,                         // inputFile
                             outputFile,                             // outTableFile
                             new SummariesCollection(Config.getInstance().getSummaryCalculations()),
                             summary,                               // summariesCollection
@@ -125,7 +125,7 @@ public class SummaryWorker extends ProcessWorker {
             }
         }catch(Exception e)
         {
-            ErrorLog.add(projectInfoFile, process, "Problem during zonal summary calculation.", e);
+            ErrorLog.add(process, "Problem during zonal summary calculation.", e);
         }
         return new ProcessWorkerReturn(outputFiles);
     }

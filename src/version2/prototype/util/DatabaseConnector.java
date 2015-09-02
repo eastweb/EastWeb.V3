@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
@@ -20,9 +22,13 @@ import version2.prototype.ErrorLog;
 public class DatabaseConnector {
     private static Integer connectionCount = 0;
     private static Config configInstance = null;
-    private static Boolean configLock = true;   // Value don't matter.
+    private static Boolean configLock = true;   // Value doesn't matter.
     private static Map<Integer, DatabaseConnection> connections = new HashMap<Integer, DatabaseConnection>();
+    private static Boolean DatabaseConnectorLock = true;  // Value doesn't matter.
     private static BitSet connectionIDs = null;
+    private static Boolean connectionIDsLock = true;    // Value doesn't matter.
+    private static ConcurrentLinkedQueue<Long> connectionRequests = new ConcurrentLinkedQueue<Long>();
+    private static long msTimeout = 120000;     // 120 seconds
 
     protected DatabaseConnector()
     {
@@ -103,9 +109,12 @@ public class DatabaseConnector {
         DatabaseConnection con = null;
         int currentTest = 0;
 
-        if(myConfigInstance == null)
-        {
+        if(myConfigInstance == null) {
             myConfigInstance = Config.getInstance();
+
+            if(myConfigInstance == null) {
+                return null;
+            }
         }
 
         if(configInstance == null)
@@ -118,33 +127,47 @@ public class DatabaseConnector {
             }
         }
 
-        if(myConfigInstance == null) {
-            return null;
-        }
-
         if(connectionIDs == null) {
-            connectionIDs = new BitSet(myConfigInstance.getMaxNumOfConnectionsPerInstance());
+            synchronized(connectionIDsLock) {
+                if(connectionIDs == null) {
+                    connectionIDs = new BitSet(myConfigInstance.getMaxNumOfConnectionsPerInstance());
+                }
+            }
         }
 
-        Integer id = null;
+        //        synchronized(connectionRequests) {
+        //            Long threadID = connectionRequests.poll();
+        //            if(threadID != null) {
+        //                threadID.notify();
+        //            }
+        //        }
+
+        Integer connectionID = null;
         do{
             currentTest++;
-            synchronized(connectionCount)
+            synchronized(DatabaseConnectorLock)
             {
                 if(connectionCount < myConfigInstance.getMaxNumOfConnectionsPerInstance())
                 {
                     try {
-                        id = getLowestAvailableConnectionID();
+                        connectionID = getLowestAvailableConnectionID();
                         con = new DatabaseConnection(new DatabaseConnector(),
                                 DriverManager.getConnection(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName(),
                                         myConfigInstance.getDatabaseUsername(), myConfigInstance.getDatabasePassword()),
-                                        id);
+                                        connectionID);
                     } catch (SQLException e) {
                         ErrorLog.add(myConfigInstance, "Problem creating DatbaseConnection object.", e);
                     }
                 }
+
+                if(con != null && connectionID != null) {
+                    ++connectionCount;
+                    connections.put(connectionID, con);
+                } else {
+                    releaseConnectionID(connectionID);
+                }
             }
-            if(con == null)
+            if(con == null || connectionID == null)
             {
                 if(!failFast && (maxAttemptCount == null || currentTest <= maxAttemptCount))
                 {
@@ -153,23 +176,19 @@ public class DatabaseConnector {
                     } catch (InterruptedException e) {
                         ErrorLog.add(myConfigInstance, "Problem sleeping thread until next connection available.", e);
                     }
-                }
-            } else {
-                synchronized(connectionCount)
-                {
-                    connectionCount++;
+                    //                    synchronized(connectionRequests) {
+                    //                        Long threadID = Thread.currentThread().getId();
+                    //                        connectionRequests.add(threadID);
+                    //                        try {
+                    //                            threadID.wait(msTimeout);
+                    //                        } catch (InterruptedException e) {
+                    //                            ErrorLog.add(myConfigInstance, "Problem setting thread to wait for connection.", e);
+                    //                        }
+                    //                    }
                 }
             }
         }while(con == null && !failFast && (maxAttemptCount == null || currentTest <= maxAttemptCount));
 
-        if(con != null && id != null) {
-            synchronized(connections)
-            {
-                connections.put(id, con);
-            }
-        } else {
-            releaseConnectionID(id);
-        }
         return con;
     }
 
@@ -179,7 +198,9 @@ public class DatabaseConnector {
      * @throws Exception
      */
     public static void closeAllConnections() throws SQLException, Exception{
-        synchronized(connections)
+        int connectionSize, count;
+
+        synchronized(DatabaseConnectorLock)
         {
             ArrayList<Integer> activeIDs = new ArrayList<Integer>();
             for(Integer id : connections.keySet())
@@ -192,14 +213,17 @@ public class DatabaseConnector {
                     connections.get(id).close();
                 }
             }
+
+            connectionSize = connections.size();
+            count = connectionCount;
         }
 
-        if(connections.size() != 0)
+        if(connectionSize != 0)
         {
             throw new Exception("Failed to update connections listing when closing all connections. Size of listing = " + connections.size() + ".");
         }
 
-        if(connectionCount != 0)
+        if(count != 0)
         {
             throw new Exception("Failed to correctly update connection count when closing all connections. Connection count = " + connectionCount + ".");
         }
@@ -210,7 +234,12 @@ public class DatabaseConnector {
      * @return  int - number of active database connections.
      */
     public static int getConnectionCount() {
-        return connectionCount;
+        int count;
+
+        synchronized(DatabaseConnectorLock) {
+            count = connectionCount;
+        }
+        return count;
     }
 
     /**
@@ -219,19 +248,25 @@ public class DatabaseConnector {
      */
     public void endConnection(Integer ID)
     {
-        synchronized(connectionCount)
-        {
-            synchronized(connections)
-            {
-                if(connections.remove(ID) != null) {
-                    connectionCount--;
-                    releaseConnectionID(ID);
-                }
-            }
+        int count;
 
-            if(connectionCount < 0) {
-                ErrorLog.add(configInstance, "Connection count became negative.", new Exception("Connection count became negative."));
+        synchronized(DatabaseConnectorLock)
+        {
+            if(connections.remove(ID) != null) {
+                --connectionCount;
+                releaseConnectionID(ID);
             }
+            count = connectionCount;
+        }
+        //        synchronized(connectionRequests) {
+        //            Long threadID = connectionRequests.poll();
+        //            if(threadID != null) {
+        //                threadID.notify();
+        //            }
+        //        }
+
+        if(count < 0) {
+            ErrorLog.add(configInstance, "Connection count became negative.", new Exception("Connection count became negative."));
         }
     }
 
@@ -239,18 +274,13 @@ public class DatabaseConnector {
     {
         int id = -1;
 
-        synchronized (connectionIDs)
-        {
-            id = connectionIDs.nextClearBit(0);
+        id = connectionIDs.nextClearBit(0);
 
-            if(IsIDValid(id, connectionIDs))
-            {
-                connectionIDs.set(id);
-            }
-            else
-            {
-                id = -1;
-            }
+        if(IsIDValid(id, connectionIDs)) {
+            connectionIDs.set(id);
+        }
+        else {
+            id = -1;
         }
 
         return id;
@@ -258,12 +288,8 @@ public class DatabaseConnector {
 
     protected static void releaseConnectionID(Integer id)
     {
-        synchronized (connectionIDs)
-        {
-            if(IsIDValid(id, connectionIDs))
-            {
-                connectionIDs.clear(id);
-            }
+        if(IsIDValid(id, connectionIDs)) {
+            connectionIDs.clear(id);
         }
     }
 

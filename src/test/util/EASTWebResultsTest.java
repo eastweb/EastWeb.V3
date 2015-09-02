@@ -90,6 +90,18 @@ public class EASTWebResultsTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        Statement stmt = con.createStatement();
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                globalSchema
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(projectName, pluginName)
+                );
+        stmt.execute(query);
+        stmt.close();
         con.close();
     }
 

@@ -29,7 +29,7 @@ public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
         DayOfWeek firstDay = DayOfWeek.MONDAY;
         if(currentDay != firstDay)
         {
-            outDate = sDate.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+            outDate = sDate.with(TemporalAdjusters.previous(DayOfWeek.MONDAY));
         }
         return outDate;
     }

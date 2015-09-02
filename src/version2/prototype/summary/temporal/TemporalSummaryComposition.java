@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import version2.prototype.ErrorLog;
+import version2.prototype.Process;
+
 
 /**
  * Represents a temporal summary composition either partial or complete. Allows for file to be added to it until full.
@@ -36,19 +39,20 @@ public class TemporalSummaryComposition {
      * Adds a file to this class's composite file listing.
      *
      * @param FDPair  - FileDatePair to add to file listing
-     * @return true if successfully added the FileDatePair, otherwise false
+     * @param process  - the owning/calling Process instance
      */
-    public boolean addFilePair(FileDatePair FDPair)
+    public void addFilePair(FileDatePair FDPair, Process process)
     {
-        boolean success = true;
         if((strategy.getDaysInThisComposite(startDate) > files.size()) && (FDPair.date.getLocalDate().compareTo(startDate) >= 0))
         {
             files.add(FDPair);
             Collections.sort(files, new AscComp());
         } else {
-            success = false;
+            ErrorLog.add(process, "Failed to add raster file to temporal composite. File Date=" + FDPair.date.getLocalDate() + ". Composite info: {Size=" + files.size() + ", Completion Size=" +
+                    strategy.getDaysInThisComposite(startDate) + ", Start Date=" + startDate + "}",
+                    new Exception("Failed to add raster file to temporal composite. File Date=" + FDPair.date.getLocalDate() + ". Composite info: {Size=" + files.size() + ", Completion Size=" +
+                            strategy.getDaysInThisComposite(startDate) + ", Start Date=" + startDate + "}"));
         }
-        return success;
     }
 
     /**

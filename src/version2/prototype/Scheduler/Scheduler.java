@@ -153,14 +153,14 @@ public class Scheduler {
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException e) {
-            ErrorLog.add(projectInfoFile, this, "Problem setting up Scheduler.", e);
+            ErrorLog.add(this, "Problem setting up Scheduler.", e);
         }
         finally {
             if(con != null) {
                 try {
                     con.close();
                 } catch (SQLException e) {
-                    ErrorLog.add(projectInfoFile, this, "Problem closing connection.", e);
+                    ErrorLog.add(this, "Problem closing connection.", e);
                 }
             }
         }

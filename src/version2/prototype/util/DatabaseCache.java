@@ -683,8 +683,7 @@ public class DatabaseCache extends Observable{
      * @param year
      * @param day
      * @param process
-     * @param count
-     * @param fileNum
+     * @param numOfAreaCodes
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      * @throws IOException
@@ -693,7 +692,7 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws SQLException
      */
-    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryID, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int count, int fileNum)
+    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryID, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int numOfAreaCodes)
             throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
@@ -765,16 +764,16 @@ public class DatabaseCache extends Observable{
                 rs.close();
 
                 if(compStrategy != null) {
-                    rs = stmt.executeQuery("SELECT Count(A.\"DateGroupID\") AS \"DateGroupIDCount\", Max(D.\"Year\") AS \"MaxYear\", Max(D.\"DayOfYear\") AS \"MaxDay\", Min(D.\"Year\") AS \"MinYear\", " +
+                    rs = stmt.executeQuery("SELECT Count(DISTINCT A.\"DateGroupID\") AS \"DateGroupIDCount\", Max(D.\"Year\") AS \"MaxYear\", Max(D.\"DayOfYear\") AS \"MaxDay\", Min(D.\"Year\") AS \"MinYear\", " +
                             "Min(D.\"DayOfYear\") AS \"MinDay\" FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + globalSchema + "\".\"DateGroup\" D ON A.\"DateGroupID\"=D.\"DateGroupID\";");
                     if(rs != null && rs.next()) {
-                        expectedCount = (int) ((rs.getInt("DateGroupIDCount") / compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
-                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), 1)) * pluginInfo.GetIndices().size());
+                        expectedCount = (int) (((rs.getInt("DateGroupIDCount") / compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
+                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), 1)) * pluginInfo.GetIndices().size()) * numOfAreaCodes);
                         rs.close();
                     }
                 }
                 else {
-                    expectedCount = scheduler.GetSchedulerStatus().indicesExpectedNumOfOutputs.get(pluginName);
+                    expectedCount = scheduler.GetSchedulerStatus().indicesExpectedNumOfOutputs.get(pluginName) * numOfAreaCodes;
                 }
             }
 

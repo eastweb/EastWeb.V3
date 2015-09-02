@@ -29,7 +29,7 @@ public class CDCWeeklyStrategy implements TemporalSummaryCompositionStrategy {
         DayOfWeek firstDay = DayOfWeek.SUNDAY;
         if(currentDay != firstDay)
         {
-            outDate = sDate.with(TemporalAdjusters.next(DayOfWeek.SUNDAY));
+            outDate = sDate.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
         }
         return outDate;
     }

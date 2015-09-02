@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import version2.prototype.DataDate;
+import version2.prototype.Process;
 
 /**
  * Storage object for temporal summary raster files. Used as shared storage between temporal summary calculations.
@@ -38,11 +39,12 @@ public class TemporalSummaryRasterFileStore {
      * @param d  - Datadate associated to the raster file
      * @param daysPerInputData - returns the composition made full by the new file if there is such a composition, otherwise null.
      * @param indexName  - index the file was calculated from
+     * @param process  - calling Process instance
      * @return if file store can create a complete composite with the newly added file a new TemporalSummaryComposition is returned of the newly completed composite
      * while removing used files from the storage.
      * @throws Exception
      */
-    public TemporalSummaryComposition addFile(File f, DataDate d, int daysPerInputData, String indexName) throws Exception
+    public synchronized TemporalSummaryComposition addFile(File f, DataDate d, int daysPerInputData, String indexName, Process process) throws Exception
     {
         ArrayList<TemporalSummaryComposition> compositions = getCompositionList(indexName);
         TemporalSummaryComposition modifiedComp = null;
@@ -53,13 +55,13 @@ public class TemporalSummaryRasterFileStore {
             if(compositions.get(i).startDate.compareTo(lDate) == 0)
             {
                 matched = true;
-                i = compositions.size();
+                break;
             }
         }
 
         if(matched)
         {
-            compositions.get(i).addFilePair(new FileDatePair(f, d));
+            compositions.get(i).addFilePair(new FileDatePair(f, d), process);
             if(compositions.get(i).compositeFull()) {
                 modifiedComp = compositions.remove(i);
             }
@@ -84,6 +86,7 @@ public class TemporalSummaryRasterFileStore {
         if(compositionList == null)
         {
             compositionList = new ArrayList<TemporalSummaryComposition>(0);
+            compositionsMap.put(indexName, compositionList);
         }
 
         return compositionList;

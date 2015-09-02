@@ -13,12 +13,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.text.NumberFormatter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
@@ -71,8 +73,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
     //    private static int filesPerDay = 322;
 
     // For testing with TRMM3B42RT plugin
-    private static int year = 2015;
-    private static int day = 182;
     private static int daysPerInputFile = -1;
     private static int numOfIndices = 3;
     private static int filesPerDay = 1;
@@ -90,7 +90,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         con = DatabaseConnector.getConnection();
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
-        startDate = LocalDate.ofYearDay(year, day);
+        startDate = LocalDate.now().minusDays(3);
 
         String className = null;
         String timeZone = null;
@@ -130,6 +130,12 @@ public class GenericLocalStorageGlobalDownloaderTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        Statement stmt = con.createStatement();
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testGlobalSchema
+                ));
+        stmt.close();
         con.close();
     }
 
@@ -146,7 +152,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         stmt.close();
 
         Schemas.CreateProjectPluginSchema(con, testGlobalSchema, testProjectName, testPluginName, null,
-                LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, null, true);
+                startDate, daysPerInputFile, filesPerDay, numOfIndices, null, true);
     }
 
     /**
@@ -221,9 +227,6 @@ public class GenericLocalStorageGlobalDownloaderTest {
      */
     @Test
     public final void testRunAndPerformUpdates() throws ParserConfigurationException, SAXException, IOException, Exception {
-        int testYear = 2015;
-        int testDay = 182;
-
         FileUtils.deleteDirectory(new File(testConfig.getDownloadDir() + testPluginName));
 
         // Setup
@@ -239,12 +242,14 @@ public class GenericLocalStorageGlobalDownloaderTest {
         // For testing with ModisNBAR plugin
         //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/h00v08";
         // For testing with TRMM3B42RT plugin
-        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
+        //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
+        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + startDate.getYear() + "/" + startDate.getDayOfYear() + "/3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue())
+                + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
         Statement stmt = con.createStatement();
         int gdlID = Schemas.getGlobalDownloaderID(testConfig.getGlobalSchema(), testPluginName, dData.name, stmt);
-        int dateGroupId = Schemas.getDateGroupID(testConfig.getGlobalSchema(), LocalDate.ofYearDay(testYear, testDay), stmt);
+        int dateGroupId = Schemas.getDateGroupID(testConfig.getGlobalSchema(), LocalDate.ofYearDay(startDate.getYear(), startDate.getDayOfYear()), stmt);
         int downloadId = Schemas.getDownloadID(testConfig.getGlobalSchema(), gdlID, dateGroupId, stmt);
         assertTrue("Download ID not found.", downloadId > -1);
         stmt.close();
@@ -346,7 +351,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         {
             dData = testResultsData1.get(i).ReadMetaDataForProcessor();
             // DateGroupID = 1
-            if(dData.day == day)
+            if(dData.day == startDate.getDayOfYear())
             {
                 assertTrue("testResultsData1[" + i + "] dataName is " + dData.dataName, dData.dataName.equals("Data"));
                 assertTrue("testResultsData1[" + i + "] dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(dateFilePath1));
@@ -375,7 +380,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
             {
                 dData = testResultsQC1.get(i).ReadMetaDataForProcessor();
                 // DateGroupID = 1
-                if(dData.day == day)
+                if(dData.day == startDate.getDayOfYear())
                 {
                     assertTrue("testResultsQC1[" + i + "] dataName is " + dData.dataName, dData.dataName.equals("QC"));
                     assertTrue("testResultsQC1[" + i + "] dataFilePath is " + dData.dataFilePath, dData.dataFilePath.equals(qcFilePath1));

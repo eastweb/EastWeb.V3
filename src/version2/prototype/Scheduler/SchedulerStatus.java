@@ -2,6 +2,7 @@ package version2.prototype.Scheduler;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -85,7 +86,7 @@ public class SchedulerStatus {
      */
     public final TreeMap<String, Integer> numOfFilesDownloaded;
 
-    private List<String> log;
+    private final List<String> log;
     private int logReaderPos;
 
     /**
@@ -134,6 +135,102 @@ public class SchedulerStatus {
         this.ProjectUpToDate = ProjectUpToDate;
         this.LastModifiedTime = LastModifiedTime;
         this.RetrievedTime = RetrievedTime;
+    }
+
+    /**
+     * Copy constructor.
+     * @param statusToCopy
+     */
+    public SchedulerStatus(SchedulerStatus statusToCopy)
+    {
+        SchedulerID = new Integer(statusToCopy.SchedulerID);
+        ProjectName = new String(statusToCopy.ProjectName);
+        PluginInfo = new ArrayList<ProjectInfoPlugin>(statusToCopy.PluginInfo);
+        Summaries = new ArrayList<ProjectInfoSummary>(statusToCopy.Summaries);
+        downloadProgressesByData = cloneTreeMapStringStringDouble(statusToCopy.downloadProgressesByData);
+        downloadExpectedDataFiles = statusToCopy.downloadExpectedDataFiles;
+        processorProgresses = statusToCopy.processorProgresses;
+        processorExpectedNumOfOutputs = statusToCopy.processorExpectedNumOfOutputs;
+        indicesProgresses = statusToCopy.indicesProgresses;
+        indicesExpectedNumOfOutputs = statusToCopy.indicesExpectedNumOfOutputs;
+        summaryProgresses = cloneTreeMapStringIntegerDouble(statusToCopy.summaryProgresses);
+        summaryExpectedNumOfOutputsTemp = cloneTreeMapStringIntegerInteger(statusToCopy.summaryExpectedNumOfOutputsTemp);
+        log = statusToCopy.log;
+        logReaderPos = 0;
+        State = statusToCopy.State;
+        numOfFilesDownloaded = statusToCopy.numOfFilesDownloaded;
+        ProjectUpToDate = statusToCopy.ProjectUpToDate;
+        LastModifiedTime = statusToCopy.LastModifiedTime;
+        RetrievedTime = statusToCopy.RetrievedTime;
+    }
+
+    private TreeMap<String, TreeMap<Integer, Integer>> cloneTreeMapStringIntegerInteger(TreeMap<String, TreeMap<Integer, Integer>> input)
+    {
+        TreeMap<String, TreeMap<Integer, Integer>> clone = new TreeMap<String, TreeMap<Integer, Integer>>();
+        Iterator<String> pluginsIt = input.keySet().iterator();
+        Iterator<Integer> summaryProgressesIt;
+        TreeMap<Integer, Integer> pluginResults;
+        String plugin;
+        Integer summaryID;
+        while(pluginsIt.hasNext())
+        {
+            plugin = pluginsIt.next();
+            summaryProgressesIt = input.get(plugin).keySet().iterator();
+            pluginResults = new TreeMap<Integer, Integer>();
+            while(summaryProgressesIt.hasNext())
+            {
+                summaryID = new Integer(summaryProgressesIt.next());
+                pluginResults.put(summaryID, new Integer(input.get(plugin).get(summaryID)));
+            }
+            clone.put(new String(plugin), pluginResults);
+        }
+        return clone;
+    }
+
+    private TreeMap<String, TreeMap<Integer, Double>> cloneTreeMapStringIntegerDouble(TreeMap<String, TreeMap<Integer, Double>> input)
+    {
+        TreeMap<String, TreeMap<Integer, Double>> clone = new TreeMap<String, TreeMap<Integer, Double>>();
+        Iterator<String> pluginsIt = input.keySet().iterator();
+        Iterator<Integer> summaryProgressesIt;
+        TreeMap<Integer, Double> pluginResults;
+        String plugin;
+        Integer summaryID;
+        while(pluginsIt.hasNext())
+        {
+            plugin = pluginsIt.next();
+            summaryProgressesIt = input.get(plugin).keySet().iterator();
+            pluginResults = new TreeMap<Integer, Double>();
+            while(summaryProgressesIt.hasNext())
+            {
+                summaryID = new Integer(summaryProgressesIt.next());
+                pluginResults.put(summaryID, input.get(plugin).get(new Integer(summaryID)));
+            }
+            clone.put(new String(plugin), pluginResults);
+        }
+        return clone;
+    }
+
+    private TreeMap<String, TreeMap<String, Double>> cloneTreeMapStringStringDouble(TreeMap<String, TreeMap<String, Double>> input)
+    {
+        TreeMap<String, TreeMap<String, Double>> clone = new TreeMap<String, TreeMap<String, Double>>();
+        Iterator<String> pluginsIt = input.keySet().iterator();
+        Iterator<String> downloadProgressesIt;
+        TreeMap<String, Double> downloadResults;
+        String plugin;
+        String dataName;
+        while(pluginsIt.hasNext())
+        {
+            plugin = pluginsIt.next();
+            downloadProgressesIt = input.get(plugin).keySet().iterator();
+            downloadResults = new TreeMap<String, Double>();
+            while(downloadProgressesIt.hasNext())
+            {
+                dataName = new String(downloadProgressesIt.next());
+                downloadResults.put(dataName, new Double(input.get(plugin).get(dataName)));
+            }
+            clone.put(new String(plugin), downloadResults);
+        }
+        return clone;
     }
 
     /**

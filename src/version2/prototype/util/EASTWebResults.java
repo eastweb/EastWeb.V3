@@ -199,7 +199,6 @@ public class EASTWebResults {
 
         // Run EASTWebQuery
         rs = stmt.executeQuery(query.GetSQL());
-        con.close();
         if(rs != null)
         {
             while(rs.next())
@@ -228,7 +227,10 @@ public class EASTWebResults {
                             Config.getInstance().getSummaryCalculations(), summaryCalculations, rs.getString("FilePath")));
                 }
             }
+            rs.close();
         }
+        stmt.close();
+        con.close();
 
         return results;
     }
@@ -246,7 +248,8 @@ public class EASTWebResults {
      */
     public static ArrayList<File> GetResultCSVFiles(EASTWebQuery query) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        Statement stmt = DatabaseConnector.getConnection().createStatement();
+        Connection con = DatabaseConnector.getConnection();
+        Statement stmt = con.createStatement();
         ResultSet rs;
         ArrayList<File> resultFiles = new ArrayList<File>(1);
 
@@ -258,7 +261,10 @@ public class EASTWebResults {
             {
                 resultFiles.add(new File(rs.getString("FilePath")));
             }
+            rs.close();
         }
+        stmt.close();
+        con.close();
 
         return resultFiles;
     }

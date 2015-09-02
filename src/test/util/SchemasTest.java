@@ -135,6 +135,16 @@ public class SchemasTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws SQLException {
+        Statement stmt = con.createStatement();
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testGlobalSchema
+                ));
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testSchemaName
+                ));
+        stmt.close();
         con.close();
     }
 

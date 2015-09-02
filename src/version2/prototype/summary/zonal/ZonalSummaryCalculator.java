@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,6 +34,8 @@ import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.DatabaseConnector;
+import version2.prototype.util.GeneralUIEventObject;
+import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.util.Schemas;
 
 /**
@@ -43,11 +45,9 @@ import version2.prototype.util.Schemas;
  *
  */
 public class ZonalSummaryCalculator {
-    private final int fileNum;
-    private final int count;
     private final Process process;
     private final String workingDir;
-    private final File mRasterFile;
+    private final IndicesFileMetaData inputFile;
     private final String shapeFilePath;
     private final File mTableFile;
     private final String areaCodeField;
@@ -56,11 +56,11 @@ public class ZonalSummaryCalculator {
     private final String globalSchema;
     private final String projectName;
     private final String pluginName;
-    private final String indexNm;
-    private final int year;
-    private final int day;
     private final ProjectInfoSummary summary;
     private final DatabaseCache outputCache;
+
+    private Map<Integer, Boolean> zoneReceivedValidData;
+    private static Integer invalidZoneCountTot = 0;
 
     /**
      * Creates a ZonalSummaryCalculator.
@@ -69,23 +69,18 @@ public class ZonalSummaryCalculator {
      * @param workingDir
      * @param projectName  - current project's name
      * @param pluginName
-     * @param indexNm
-     * @param year
-     * @param day
-     * @param inRasterFile  - input raster file
+     * @param inputFile
      * @param outTableFile  - where to write output to
      * @param summariesCollection  - collection of summary calculations to run on raster data
      * @param summary
      * @param outputCache
      */
-    public ZonalSummaryCalculator(int fileNum, int count, Process process, String globalSchema, String workingDir, String projectName, String pluginName, String indexNm, int year, int day, File inRasterFile,
-            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary, DatabaseCache outputCache)
+    public ZonalSummaryCalculator(Process process, String globalSchema, String workingDir, String projectName, String pluginName, IndicesFileMetaData inputFile, File outTableFile,
+            SummariesCollection summariesCollection, ProjectInfoSummary summary, DatabaseCache outputCache)
     {
-        this.fileNum = fileNum;
-        this.count = count;
         this.process = process;
         this.workingDir = workingDir;
-        mRasterFile = inRasterFile;
+        this.inputFile = inputFile;
         mTableFile = outTableFile;
         shapeFilePath = summary.GetZonalSummary().GetShapeFile();
         areaCodeField = summary.GetZonalSummary().GetAreaCodeField();
@@ -94,11 +89,10 @@ public class ZonalSummaryCalculator {
         this.globalSchema = globalSchema;
         this.projectName = projectName;
         this.pluginName = pluginName;
-        this.indexNm = indexNm;
-        this.year = year;
-        this.day = day;
         this.summary = summary;
         this.outputCache = outputCache;
+
+        zoneReceivedValidData = new HashMap<Integer, Boolean>();
     }
 
     /**
@@ -115,7 +109,7 @@ public class ZonalSummaryCalculator {
             Dataset zoneRaster = null;
             try {
                 // Open inputs
-                raster = gdal.Open(mRasterFile.getPath());
+                raster = gdal.Open(inputFile.dataFilePath);
                 GdalUtils.errorCheck();
                 layerSource = ogr.Open(shapeFilePath);
                 GdalUtils.errorCheck();
@@ -123,11 +117,11 @@ public class ZonalSummaryCalculator {
 
                 // Validate inputs
                 if (!isSameProjection(raster, layer)) {
-                    throw new IOException("\"" + mRasterFile.getPath() + "\" isn't in same projection as \"" + shapeFilePath + "\"");
+                    throw new IOException("\"" + inputFile.dataFilePath + "\" isn't in same projection as \"" + shapeFilePath + "\"");
                 }
 
                 if (!isLayerSubsetOfRaster(layer, raster)) {
-                    throw new IOException("\"" + shapeFilePath + "\" isn't a subset of \"" + mRasterFile.getPath() + "\".");
+                    throw new IOException("\"" + shapeFilePath + "\" isn't a subset of \"" + inputFile.dataFilePath + "\".");
                 }
 
                 // Create the zone raster
@@ -143,7 +137,7 @@ public class ZonalSummaryCalculator {
                 writeTable(layer, countMap);
 
                 // Write to database
-                uploadResultsToDb(mTableFile, layer, areaCodeField, areaNameField, indexNm, summary, summariesCollection, year, day, process, count, fileNum);
+                uploadResultsToDb(mTableFile, layer, areaCodeField, areaNameField, inputFile.indexNm, summary, summariesCollection, inputFile.year, inputFile.day, process);
             }
             catch (SQLException | IllegalArgumentException | UnsupportedOperationException | IOException | ClassNotFoundException | ParserConfigurationException | SAXException e)
             {
@@ -294,6 +288,10 @@ public class ZonalSummaryCalculator {
                 double value = rasterArray[i];
                 if (zone != 0 && value != NO_DATA) { // Neither are no data values
                     summariesCollection.add(zone, value);
+                    zoneReceivedValidData.put(zone, true);
+                }
+                else if(zone != 0 && zoneReceivedValidData.get(zone) == null) {
+                    zoneReceivedValidData.put(zone, false);
                 }
             }
         }
@@ -355,13 +353,14 @@ public class ZonalSummaryCalculator {
     }
 
     private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, SummariesCollection summariesCollection, int year,
-            int day, Process process, int count, int fileNum) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException,
-            SQLException {
-        ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
+            int day, Process process) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
+        ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
         Map<Integer, Double> countMap = null;
+        Map<Integer, String> zoneNameMap = new HashMap<Integer, String>();
+
         for(SummaryNameResultPair result : results)
         {
             if(result.getSimpleName().equals("Count"))
@@ -383,13 +382,20 @@ public class ZonalSummaryCalculator {
         SummaryNameResultPair pair;
         Map<Integer, Double> result;
         Map<String, Double> summaryAreaResult;
+        int numOfAreaCodes = 0;
         while (feature != null)
         {
+            ++numOfAreaCodes;
+
             summaryAreaResult = new HashMap<String, Double>();
             areaCode = feature.GetFieldAsInteger(areaCodeField);
             GdalUtils.errorCheck();
             areaName = feature.GetFieldAsString(areaNameField);
             GdalUtils.errorCheck();
+            if(zoneNameMap.get(areaCode) == null) {
+                zoneNameMap.put(areaCode, areaName);
+            }
+
             if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0)
             {
                 // Insert values
@@ -407,12 +413,28 @@ public class ZonalSummaryCalculator {
 
             feature = layer.GetNextFeature(); GdalUtils.errorCheck();
         }
+        stmt.close();
+        conn.close();
 
         TemporalSummaryCompositionStrategy compStrategy = null;
         if(summary.GetTemporalFileStore() != null) {
             compStrategy = summary.GetTemporalFileStore().compStrategy;
         }
-        outputCache.UploadResultsToDb(newResults, summary.GetID(), compStrategy, year, day, process, count, fileNum);
+
+        Set<Integer> zones = zoneReceivedValidData.keySet();
+        int invalidCount = 0;
+        for(Integer zone : zones)
+        {
+            if(!zoneReceivedValidData.get(zone)) {
+                ++invalidCount;
+                System.out.println("Invalid zone (" + zone + ":" + zoneNameMap.get(zone) +") for dateGroupID: " + inputFile.dateGroupID);
+            }
+        }
+        invalidZoneCountTot += invalidCount;
+        System.out.println("invalidZoneCountTot: " + invalidZoneCountTot);
+        process.NotifyUI(new GeneralUIEventObject(this, invalidCount + " zone" + ((invalidCount > 1) ? "s" : "") + " had no valid data read in for plugin='" + pluginName + "', index='" + indexNm
+                + "', Summary ID="+ summary.GetID() + ", date={year: " + year + ", day of year: " + day + "}"));
+        outputCache.UploadResultsToDb(newResults, summary.GetID(), compStrategy, year, day, process, numOfAreaCodes);
     }
 
 }

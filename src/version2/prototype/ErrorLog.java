@@ -78,15 +78,14 @@ public final class ErrorLog {
 
     /**
      * Reports an error to the error log for the specified project. Sends the custom message as a new log message to the UI.
-     * @param projectInfoFile
      * @param scheduler
      * @param message Error message, suitable for presentation to the user
      * @param e Cause of the error, may be null
      */
-    public static void add(ProjectInfoFile projectInfoFile, Scheduler scheduler, String message, Throwable e)
+    public static void add(Scheduler scheduler, String message, Throwable e)
     {
         String logFileName = getLogFileName();
-        String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+        String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
@@ -96,15 +95,14 @@ public final class ErrorLog {
 
     /**
      * Reports an error to the error log for the specified project. Sends the custom message as a new log message to the UI.
-     * @param projectInfoFile
      * @param process
      * @param message Error message, suitable for presentation to the user
      * @param e Cause of the error, may be null
      */
-    public static void add(ProjectInfoFile projectInfoFile, Process process, String message, Throwable e)
+    public static void add(Process process, String message, Throwable e)
     {
         String logFileName = getLogFileName();
-        String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+        String logPath = FileSystem.GetProjectDirectoryPath(process.projectInfoFile.GetWorkingDir(), process.projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);

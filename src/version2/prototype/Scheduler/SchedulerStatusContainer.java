@@ -128,7 +128,11 @@ public class SchedulerStatusContainer {
         this.schedulerID = schedulerID;
         this.projectName = projectName;
         this.pluginInfo = pluginInfo;
-        this.summaries = summaries;
+        ArrayList<ProjectInfoSummary> summariesTemp = new ArrayList<ProjectInfoSummary>();
+        for(ProjectInfoSummary pfs : summaries) {
+            summariesTemp.add(new ProjectInfoSummary(pfs.GetZonalSummary(), null, pfs.GetTemporalSummaryCompositionStrategyClassName(), pfs.GetID()));
+        }
+        this.summaries = summariesTemp;
         this.state = state;
         log = Collections.synchronizedList(new ArrayList<String>(1));
         projectUpToDate = false;
@@ -311,6 +315,7 @@ public class SchedulerStatusContainer {
             if(rs != null) {
                 rs.close();
             }
+            con.close();
             updateLastModifiedTime();
         }
     }
@@ -396,7 +401,6 @@ public class SchedulerStatusContainer {
         ArrayList<String> newLog;
         synchronized(log){
             newLog = new ArrayList<String>(log);
-            log = new ArrayList<String>();
         }
 
         return new SchedulerStatus(schedulerID, projectName, pluginInfo, summaries, downloadProgressesByDataTemp, downloadExpectedDataFiles, processorProgresses, processorExpectedNumOfOutputs,

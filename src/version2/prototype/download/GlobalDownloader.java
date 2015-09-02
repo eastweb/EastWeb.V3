@@ -170,11 +170,11 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             catch(SQLException e)
             {
                 stmt.execute("ROLLBACK");
-                if(stmt != null) {
-                    stmt.close();
-                }
                 if(rs != null) {
                     rs.close();
+                }
+                if(stmt != null) {
+                    stmt.close();
                 }
                 if(conn != null) {
                     conn.close();
@@ -186,11 +186,11 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             notifyObservers();
         }
 
-        if(stmt != null) {
-            stmt.close();
-        }
         if(rs != null) {
             rs.close();
+        }
+        if(stmt != null) {
+            stmt.close();
         }
         if(conn != null) {
             conn.close();
@@ -380,6 +380,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         boolean result = Schemas.registerGlobalDownloader(globalSchema, pluginName, metaData.name, stmt);
+        stmt.close();
         conn.close();
         return result;
     }

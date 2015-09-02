@@ -12,7 +12,6 @@ import version2.prototype.Config;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.summary.temporal.MergeStrategy;
 import version2.prototype.util.DataFileMetaData;
-import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
@@ -31,7 +30,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
      * @see version2.prototype.summary.temporal.MergeStrategy#Merge(java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.io.File[])
      */
     @Override
-    public DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, LocalDate firstDate, File[] rasterFiles) throws Exception {
+    public DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception {
         GdalUtils.register();
         DataFileMetaData mergedFile = null;
         String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, ProcessName.SUMMARY) +
@@ -84,7 +83,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
 
             DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
             Statement stmt = con.createStatement();
-            mergedFile = new DataFileMetaData("Data", newFilePath, Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt), firstDate.getYear(), firstDate.getDayOfYear());
+            mergedFile = new DataFileMetaData(newFilePath, Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt), firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
             stmt.close();
             con.close();
         }

@@ -164,7 +164,7 @@ public class IndicesWorker extends ProcessWorker{
             }
             catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e)
             {
-                ErrorLog.add(projectInfoFile, process, "Problem encountered while caching data for IndicesWorker.", e);
+                ErrorLog.add(process, "Problem encountered while caching data for IndicesWorker.", e);
             }
         }
 

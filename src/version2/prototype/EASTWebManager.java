@@ -2,14 +2,18 @@ package version2.prototype;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -55,7 +59,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static List<String> deleteExistingSchedulerRequestsNames;
     protected static List<Integer> startExistingSchedulerRequests;
     protected static List<String> startExistingSchedulerRequestsNames;
-    protected static List<GUIUpdateHandler> guiHandlers = Collections.synchronizedList(new ArrayList<GUIUpdateHandler>(0));
+    protected static HashMap<GUIUpdateHandler, Boolean> guiHandlers = new HashMap<GUIUpdateHandler, Boolean>(0);     // Boolean - TRUE if flagged for removal
 
     // EASTWebManager state
     protected static Integer numOfCreatedGDLs = 0;
@@ -414,7 +418,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             }
         }
 
-        return status;
+        if(status != null) {
+            return new SchedulerStatus(status);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -428,7 +436,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         synchronized (guiHandlers)
         {
-            guiHandlers.add(handler);
+            guiHandlers.put(handler, new Boolean(false));
         }
     }
 
@@ -441,8 +449,25 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         synchronized (guiHandlers)
         {
-            guiHandlers.remove(handler);
+            guiHandlers.put(handler, new Boolean(true));
         }
+    }
+
+    /**
+     * Checks if the specified GUIUpdateHandler instance is registered.
+     * @param handler  - instance to search for
+     * @return boolean - TRUE if registered, FALSE otherwise
+     */
+    public static boolean IsRegistered(GUIUpdateHandler handler)
+    {
+        boolean registered = false;
+        synchronized(guiHandlers)
+        {
+            if(guiHandlers.get(handler) != null) {
+                registered = true;
+            }
+        }
+        return registered;
     }
 
     /* (non-Javadoc)
@@ -648,7 +673,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     }
                 }
             }
-            catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+            catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException | ConcurrentModificationException e) {
                 ErrorLog.add(Config.getInstance(), "EASTWebManager.run error.", e);
             }
         }while((msBeetweenUpdates > 0) && !manualUpdate);
@@ -952,9 +977,19 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         synchronized (guiHandlers)
         {
-            for(GUIUpdateHandler handler : guiHandlers)
+            ArrayList<GUIUpdateHandler> flaggedForRemoval = new ArrayList<GUIUpdateHandler>();
+            Set<GUIUpdateHandler> handlers = guiHandlers.keySet();
+            for(GUIUpdateHandler handler : handlers)
             {
                 handler.run();
+                if(guiHandlers.get(handler)) {
+                    flaggedForRemoval.add(handler);
+                }
+            }
+
+            for(GUIUpdateHandler handler : flaggedForRemoval)
+            {
+                guiHandlers.remove(handler);
             }
         }
     }

@@ -141,6 +141,18 @@ public class DatabaseCacheTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        Statement stmt = con.createStatement();
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                testGlobalSchema
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(testProjectName, testPluginName)
+                );
+        stmt.execute(query);
+        stmt.close();
         con.close();
     }
 
@@ -473,7 +485,7 @@ public class DatabaseCacheTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.util.DatabaseCache#UploadResultsToDb(ArrayList, int, TemporalSummaryCompositionStrategy, int, int, Process, int, int)}.
+     * Test method for {@link version2.prototype.util.DatabaseCache#UploadResultsToDb(ArrayList, int, TemporalSummaryCompositionStrategy, int, int, Process, int)}.
      * Test Requirements:
      *  1) Capable of uploading zonal summary results to database.
      *  2) Capable of correctly computing the progress update.
@@ -517,8 +529,6 @@ public class DatabaseCacheTest {
         String areaName = "Area1";
         Process process = new MyProcess();
         int projectSummaryID = Schemas.getProjectSummaryID(testGlobalSchema, testProjectName, 1, stmt);
-        int count = 0;
-        int fileNum = 0;
         Map<String, Double> summaryResults = new HashMap<String, Double>();
         summaryResults.put("Count", 11.0);
         summaryResults.put("Max", 21.0);
@@ -531,7 +541,7 @@ public class DatabaseCacheTest {
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, startDateGroupID, indexID, filePath1, summaryResults));
 
         // Upload result 1
-        testSummaryCache.UploadResultsToDb(newResults, 1, new MyTemporalSummaryCompositionStrategy(), startDate.getYear(), startDate.getDayOfYear(), process, count, fileNum++);
+        testSummaryCache.UploadResultsToDb(newResults, 1, new MyTemporalSummaryCompositionStrategy(), startDate.getYear(), startDate.getDayOfYear(), process, 1);
 
         // Setup for upload 2
         scheduler.expectedSummaryProgress = 100.0;
@@ -539,7 +549,7 @@ public class DatabaseCacheTest {
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, earliestStartDateGroupID, indexID, filePath2, summaryResults));
 
         // Upload result 2
-        testSummaryCache.UploadResultsToDb(newResults, 1, new MyTemporalSummaryCompositionStrategy(), earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), process, count, fileNum++);
+        testSummaryCache.UploadResultsToDb(newResults, 1, new MyTemporalSummaryCompositionStrategy(), earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), process, 1);
 
         stmt.close();
     }

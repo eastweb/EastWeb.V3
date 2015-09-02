@@ -103,6 +103,16 @@ public class GenericLocalRetrievalLocalDownloaderTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        Statement stmt = con.createStatement();
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                testGlobalSchema
+                ));
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                Schemas.getSchemaName(testProjectName, testPluginName)
+                ));
+        stmt.close();
         con.close();
     }
 

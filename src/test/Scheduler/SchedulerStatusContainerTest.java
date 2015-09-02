@@ -98,6 +98,21 @@ public class SchedulerStatusContainerTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        String query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                globalSchema
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(projectName, pluginName1)
+                );
+        stmt.execute(query);
+        query = String.format(
+                "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
+                Schemas.getSchemaName(projectName, pluginName2)
+                );
+        stmt.execute(query);
         stmt.close();
         con.close();
     }
