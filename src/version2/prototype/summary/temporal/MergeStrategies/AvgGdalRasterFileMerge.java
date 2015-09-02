@@ -6,9 +6,10 @@ import java.time.LocalDate;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.summary.temporal.MergeStrategy;
 import version2.prototype.util.DataFileMetaData;
@@ -17,6 +18,7 @@ import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.Schemas;
+import version2.prototype.Process;
 
 /**
  * Concrete MergeStrategy. Represents a merging based on averages of values in raster files.
@@ -26,14 +28,12 @@ import version2.prototype.util.Schemas;
  */
 public class AvgGdalRasterFileMerge implements MergeStrategy {
 
-    /* (non-Javadoc)
-     * @see version2.prototype.summary.temporal.MergeStrategy#Merge(java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.io.File[])
-     */
     @Override
-    public DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception {
+    public DataFileMetaData Merge(Config configInstance, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception {
         GdalUtils.register();
+
         DataFileMetaData mergedFile = null;
-        String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(workingDir, projectName, pluginName, ProcessName.SUMMARY) +
+        String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(projectInfo.GetWorkingDir(), projectInfo.GetProjectName(), pluginName, ProcessName.SUMMARY) +
                 String.format("%04d%03d.tif",
                         firstDate.getYear(),
                         firstDate.getDayOfYear()
@@ -41,51 +41,77 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
 
         synchronized (GdalUtils.lockObject) {
             // Create output copy based on rasterFiles[0]
-            Dataset inputRasterDs = gdal.Open(rasterFiles[0].getPath(), gdalconst.GA_ReadOnly);
+            Dataset rasterDs = gdal.Open(rasterFiles[0].getPath());
             GdalUtils.errorCheck();
-            Dataset avgRasterDs = gdal.GetDriverByName("GTiff").CreateCopy(newFilePath, inputRasterDs);
-            //            Dataset outputRasterDs = originRasterDs.GetDriver().CreateCopy(newFilePath, inputRasterDs);
-            double[][] avgArray = new double[avgRasterDs.GetRasterYSize()][avgRasterDs.GetRasterXSize()];
+            Dataset avgRasterDs = gdal.GetDriverByName("GTiff").CreateCopy(newFilePath, rasterDs);
+            rasterDs.delete();
 
             // Populate avgArray with first file's data
-            for(int y=0; y < avgRasterDs.GetRasterYSize(); y++) {
-                avgRasterDs.GetRasterBand(1).ReadRaster(0, y, avgRasterDs.GetRasterXSize(), 1, avgArray[y]);
+            int xSize = avgRasterDs.GetRasterXSize();
+            int ySize = avgRasterDs.GetRasterYSize();
+            double[] avgArray = new double[ySize * xSize];
+            if(avgRasterDs.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, avgArray) != 0) {
+                ErrorLog.add(process, "Can't read the Raster band : " + rasterFiles[0].getPath(), new Exception("Can't read the Raster band : " + rasterFiles[0].getPath()));
+            }
+
+            // Handle no data (invalid data) cases
+            int index;
+            for(int y=0; y < ySize; y++)
+            {
+                for(int x=0; x < xSize; x++)
+                {
+                    index = y * xSize + x;
+                    if(avgArray[index] == -3.4028234663852886E38) {
+                        avgArray[index] = 0;
+                    }
+                }
             }
 
             // Sum up values from the rest of the files
-            double[] tempArray;
+            double[] tempArray = new double[ySize * xSize];
             for(int i=1; i < rasterFiles.length; i++)
             {
-                inputRasterDs = gdal.Open(rasterFiles[i].getPath(), gdalconst.GA_ReadOnly);
-                GdalUtils.errorCheck();
-                tempArray = new double[inputRasterDs.GetRasterXSize()];
-                for(int y=0; y < avgRasterDs.GetRasterYSize(); y++) {
-                    inputRasterDs.GetRasterBand(1).ReadRaster(0, y, inputRasterDs.GetRasterXSize(), 1, tempArray);
-                    for(int x=0; x < tempArray.length; x++) {
-                        avgArray[y][x] += tempArray[x];
+                rasterDs = gdal.Open(rasterFiles[i].getPath());
+                if(rasterDs.GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, tempArray) != 0) {
+                    ErrorLog.add(process, "Can't read the Raster band : " + rasterFiles[i].getPath(), new Exception("Can't read the Raster band : " + rasterFiles[i].getPath()));
+                }
+
+                for(int y=0; y < ySize; y++)
+                {
+                    for(int x=0; x < xSize; x++)
+                    {
+                        index = y * xSize + x;
+                        if(tempArray[index] != -3.4028234663852886E38) {
+                            avgArray[index] += tempArray[index];
+                        }
                     }
                 }
-                inputRasterDs.delete();
-                tempArray = null;
+                rasterDs.delete();
             }
 
             // Average values
-            for(int y=0; y < avgArray.length; y++) {
-                for(int x=0; x < avgArray[y].length; x++) {
-                    avgArray[y][x] = avgArray[y][x] / rasterFiles.length;
+            for(int y=0; y < ySize; y++) {
+                for(int x=0; x < xSize; x++) {
+                    index = y * xSize + x;
+                    avgArray[index] = avgArray[index] / rasterFiles.length;
                 }
-
-                // Write averaged array to raster file
-                avgRasterDs.GetRasterBand(1).WriteRaster(0, y, avgRasterDs.GetRasterXSize(), 1, avgArray[y]);
             }
+
+            // Write averaged array to raster file
+            synchronized (GdalUtils.lockObject) {
+                avgRasterDs.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, avgArray);
+            }
+
+            tempArray = null;
             avgArray = null;
             avgRasterDs.delete();
 
             DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
             Statement stmt = con.createStatement();
-            mergedFile = new DataFileMetaData(newFilePath, Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt), firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
+            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt);
             stmt.close();
             con.close();
+            mergedFile = new DataFileMetaData(newFilePath, dateGroupID, firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
         }
         return mergedFile;
     }

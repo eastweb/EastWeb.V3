@@ -4,6 +4,8 @@ import java.io.File;
 import java.time.LocalDate;
 
 import version2.prototype.Config;
+import version2.prototype.Process;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.util.DataFileMetaData;
 
 /**
@@ -17,8 +19,8 @@ public interface MergeStrategy {
      * Merge method. Returns metadata about created merged raster file.
      *
      * @param configInstance
-     * @param workingDir  - working directory of project
-     * @param projectName  - current project's name
+     * @param process
+     * @param projectInfo
      * @param pluginName  - current plugin's name
      * @param indexNm  - current index name
      * @param firstDate  - date of first data file in composite
@@ -26,5 +28,5 @@ public interface MergeStrategy {
      * @return metadata about single merged file created
      * @throws Exception
      */
-    DataFileMetaData Merge(Config configInstance, String workingDir, String projectName, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception;
+    DataFileMetaData Merge(Config configInstance, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception;
 }

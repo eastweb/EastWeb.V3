@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.util.FileSystem;
@@ -106,41 +105,21 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            process.NotifyUI(new GeneralUIEventObject(e.getCause(), message + " [Error Logged: " + logPath + "]"));
-        }
-    }
-
-    /**
-     * Reports an error to the error log for the specified project. Sends the custom message as a new log message to the UI.
-     * @param workingDirectory
-     * @param projectName
-     * @param process
-     * @param message Error message, suitable for presentation to the user
-     * @param e Cause of the error, may be null
-     */
-    public static void add(String workingDirectory, String projectName, Process process, String message, Throwable e)
-    {
-        String logFileName = getLogFileName();
-        String logPath = FileSystem.GetProjectDirectoryPath(workingDirectory, projectName);
-        synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
-            printToStderr(message, e);
             process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
         }
     }
 
     /**
      * Reports an error to the error log for the specified process and project. Sends the custom message as a new log message to the UI.
-     * @param projectInfoFile
-     * @param process
+     * @param processName
      * @param scheduler
      * @param message Error message, suitable for presentation to the user
      * @param e Cause of the error, may be null
      */
-    public static void add(ProjectInfoFile projectInfoFile, ProcessName process, Scheduler scheduler, String message, Throwable e)
+    public static void add(ProcessName processName, Scheduler scheduler, String message, Throwable e)
     {
-        String logFileName = process + "_" + getLogFileName();
-        String logPath = FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+        String logFileName = processName + "_" + getLogFileName();
+        String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);

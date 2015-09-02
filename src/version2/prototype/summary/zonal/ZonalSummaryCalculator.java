@@ -46,6 +46,7 @@ import version2.prototype.util.Schemas;
  */
 public class ZonalSummaryCalculator {
     private final Process process;
+    @SuppressWarnings("unused")
     private final String workingDir;
     private final IndicesFileMetaData inputFile;
     private final String shapeFilePath;
@@ -56,11 +57,13 @@ public class ZonalSummaryCalculator {
     private final String globalSchema;
     private final String projectName;
     private final String pluginName;
+    private final int daysPerInputData;
     private final ProjectInfoSummary summary;
     private final DatabaseCache outputCache;
 
     private Map<Integer, Boolean> zoneReceivedValidData;
     private static Integer invalidZoneCountTot = 0;
+    private static Integer oldInvalidZoneCountTot = 0;
 
     /**
      * Creates a ZonalSummaryCalculator.
@@ -69,13 +72,14 @@ public class ZonalSummaryCalculator {
      * @param workingDir
      * @param projectName  - current project's name
      * @param pluginName
+     * @param daysPerInputData
      * @param inputFile
      * @param outTableFile  - where to write output to
      * @param summariesCollection  - collection of summary calculations to run on raster data
      * @param summary
      * @param outputCache
      */
-    public ZonalSummaryCalculator(Process process, String globalSchema, String workingDir, String projectName, String pluginName, IndicesFileMetaData inputFile, File outTableFile,
+    public ZonalSummaryCalculator(Process process, String globalSchema, String workingDir, String projectName, String pluginName, int daysPerInputData, IndicesFileMetaData inputFile, File outTableFile,
             SummariesCollection summariesCollection, ProjectInfoSummary summary, DatabaseCache outputCache)
     {
         this.process = process;
@@ -89,6 +93,7 @@ public class ZonalSummaryCalculator {
         this.globalSchema = globalSchema;
         this.projectName = projectName;
         this.pluginName = pluginName;
+        this.daysPerInputData = daysPerInputData;
         this.summary = summary;
         this.outputCache = outputCache;
 
@@ -141,7 +146,7 @@ public class ZonalSummaryCalculator {
             }
             catch (SQLException | IllegalArgumentException | UnsupportedOperationException | IOException | ClassNotFoundException | ParserConfigurationException | SAXException e)
             {
-                ErrorLog.add(workingDir, projectName, process, "Problem with calculating zonal summaries.", e);
+                ErrorLog.add(process, "Problem with calculating zonal summaries.", e);
             }
             finally
             {
@@ -160,7 +165,7 @@ public class ZonalSummaryCalculator {
                         zoneRaster.delete(); GdalUtils.errorCheck();
                     }
                 } catch (IllegalArgumentException | UnsupportedOperationException | IOException e) {
-                    ErrorLog.add(workingDir, projectName, process, "Problem with deleting Gdal related resources.", e);
+                    ErrorLog.add(process, "Problem with deleting Gdal related resources.", e);
                 }
             }
         }
@@ -286,7 +291,7 @@ public class ZonalSummaryCalculator {
             for (int i=0; i<WIDTH; i++) {
                 int zone = zoneArray[i];
                 double value = rasterArray[i];
-                if (zone != 0 && value != NO_DATA) { // Neither are no data values
+                if (zone != 0 && value != NO_DATA && value != -3.4028234663852886E38) { // Neither are no data values
                     summariesCollection.add(zone, value);
                     zoneReceivedValidData.put(zone, true);
                 }
@@ -382,11 +387,8 @@ public class ZonalSummaryCalculator {
         SummaryNameResultPair pair;
         Map<Integer, Double> result;
         Map<String, Double> summaryAreaResult;
-        int numOfAreaCodes = 0;
         while (feature != null)
         {
-            ++numOfAreaCodes;
-
             summaryAreaResult = new HashMap<String, Double>();
             areaCode = feature.GetFieldAsInteger(areaCodeField);
             GdalUtils.errorCheck();
@@ -431,10 +433,16 @@ public class ZonalSummaryCalculator {
             }
         }
         invalidZoneCountTot += invalidCount;
-        System.out.println("invalidZoneCountTot: " + invalidZoneCountTot);
-        process.NotifyUI(new GeneralUIEventObject(this, invalidCount + " zone" + ((invalidCount > 1) ? "s" : "") + " had no valid data read in for plugin='" + pluginName + "', index='" + indexNm
-                + "', Summary ID="+ summary.GetID() + ", date={year: " + year + ", day of year: " + day + "}"));
-        outputCache.UploadResultsToDb(newResults, summary.GetID(), compStrategy, year, day, process, numOfAreaCodes);
+        if(invalidZoneCountTot > 0 && invalidZoneCountTot != oldInvalidZoneCountTot) {
+            System.out.println("invalidZoneCountTot: " + invalidZoneCountTot);
+            oldInvalidZoneCountTot = invalidZoneCountTot;
+        }
+        if(invalidCount > 0) {
+            process.NotifyUI(new GeneralUIEventObject(this, invalidCount + " zone" + ((invalidCount > 1) ? "s" : "") + " had no valid data read in for plugin='" + pluginName + "', index='" + indexNm
+                    + "', Summary ID="+ summary.GetID() + ", date={year: " + year + ", day of year: " + day + "}"));
+        }
+
+        outputCache.UploadResultsToDb(newResults, summary.GetID(), compStrategy, year, day, process, daysPerInputData);
     }
 
 }

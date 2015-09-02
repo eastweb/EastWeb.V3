@@ -77,8 +77,7 @@ public class SummaryWorker extends ProcessWorker {
                         TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
                                 configInstance,                         // configInstance
                                 process,                                // process
-                                projectInfoFile.GetWorkingDir(),        // workingDir
-                                projectInfoFile.GetProjectName(),       // projectName
+                                projectInfoFile,                        // projectInfoFile
                                 pluginInfo.GetName(),                   // pluginName
                                 cachedFileData,                         // inputFile
                                 pluginMetaData.DaysPerInputData,        // daysPerInputData
@@ -114,6 +113,7 @@ public class SummaryWorker extends ProcessWorker {
                             projectInfoFile.GetWorkingDir(),
                             projectInfoFile.GetProjectName(),       // projectName
                             pluginInfo.GetName(),                   // pluginName
+                            pluginMetaData.DaysPerInputData,        // daysPerInputData
                             cachedFileData,                         // inputFile
                             outputFile,                             // outTableFile
                             new SummariesCollection(Config.getInstance().getSummaryCalculations()),

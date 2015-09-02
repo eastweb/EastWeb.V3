@@ -72,7 +72,7 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
                 manager.StartNewProcessWorker((WorkerType) cstr.newInstance(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            ErrorLog.add(projectInfoFile, processName, scheduler, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);
+            ErrorLog.add(processName, scheduler, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);
         }
     }
 }

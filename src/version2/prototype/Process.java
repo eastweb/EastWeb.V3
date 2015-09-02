@@ -104,7 +104,7 @@ public abstract class Process implements Observer {
                     }
                 }
                 catch (ClassNotFoundException | SQLException | IOException | SAXException | ParserConfigurationException e) {
-                    ErrorLog.add(projectInfoFile, processName, scheduler, "Process.update error during processing of update notification from DatabaseCache.", e);
+                    ErrorLog.add(processName, scheduler, "Process.update error during processing of update notification from DatabaseCache.", e);
                 }
             }
             else if(o instanceof GlobalDownloader)

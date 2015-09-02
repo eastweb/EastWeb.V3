@@ -692,12 +692,16 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws SQLException
      */
-    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryID, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int numOfAreaCodes)
+    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryID, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int daysPerInputData)
             throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
         PreparedStatement pStmt = null;
         //        final boolean previousAutoCommit = conn.getAutoCommit();
+
+        if(newResults.size() == 0) {
+            return;
+        }
 
         try {
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -752,7 +756,7 @@ public class DatabaseCache extends Observable{
             //            conn.commit();
 
             // Update progress bar
-            String progressQuery = "SELECT Count(A.\"ZonalStatID\") AS \"ZonalStatIDCount\", B.\"SummaryIDNum\" FROM \"" + mSchemaName + "\".\"ZonalStat\" A INNER JOIN \""
+            String progressQuery = "SELECT Count(DISTINCT A.\"DateGroupID\") AS \"DateGroupIDCount\", B.\"SummaryIDNum\" FROM \"" + mSchemaName + "\".\"ZonalStat\" A INNER JOIN \""
                     + globalSchema + "\".\"ProjectSummary\" B ON A.\"ProjectSummaryID\" = B.\"ProjectSummaryID\" WHERE B.\"SummaryIDNum\"=" + summaryID + " GROUP BY B.\"SummaryIDNum\";";
             double progress = 0;
             int currentCount = 0;
@@ -760,20 +764,20 @@ public class DatabaseCache extends Observable{
             ResultSet rs = stmt.executeQuery(progressQuery);
             if(rs != null && rs.next())
             {
-                currentCount = rs.getInt("ZonalStatIDCount");
+                currentCount = rs.getInt("DateGroupIDCount");
                 rs.close();
 
                 if(compStrategy != null) {
                     rs = stmt.executeQuery("SELECT Count(DISTINCT A.\"DateGroupID\") AS \"DateGroupIDCount\", Max(D.\"Year\") AS \"MaxYear\", Max(D.\"DayOfYear\") AS \"MaxDay\", Min(D.\"Year\") AS \"MinYear\", " +
                             "Min(D.\"DayOfYear\") AS \"MinDay\" FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + globalSchema + "\".\"DateGroup\" D ON A.\"DateGroupID\"=D.\"DateGroupID\";");
                     if(rs != null && rs.next()) {
-                        expectedCount = (int) (((rs.getInt("DateGroupIDCount") / compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
-                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), 1)) * pluginInfo.GetIndices().size()) * numOfAreaCodes);
+                        expectedCount = (int) ((rs.getInt("DateGroupIDCount") / compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
+                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), daysPerInputData)) * pluginInfo.GetIndices().size());
                         rs.close();
                     }
                 }
                 else {
-                    expectedCount = scheduler.GetSchedulerStatus().indicesExpectedNumOfOutputs.get(pluginName) * numOfAreaCodes;
+                    expectedCount = scheduler.GetSchedulerStatus().indicesExpectedNumOfOutputs.get(pluginName);
                 }
             }
 
@@ -784,7 +788,7 @@ public class DatabaseCache extends Observable{
             scheduler.NotifyUI(new GeneralUIEventObject(this, null, progress, pluginName, summaryID, expectedCount));
         }
         catch (SQLException e) {
-            ErrorLog.add(workingDir, projectName, process, "Problem in ZonalSummaryCalculator.uploadResultsToDb executing zonal summaries results.", e);
+            ErrorLog.add(process, "Problem in ZonalSummaryCalculator.uploadResultsToDb executing zonal summaries results.", e);
             //            conn.rollback();
         }
         finally {
