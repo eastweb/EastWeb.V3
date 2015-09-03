@@ -12,9 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +45,7 @@ import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
+import version2.prototype.summary.temporal.CompositionStrategies.CDCWeeklyStrategy;
 import version2.prototype.summary.zonal.SummaryResult;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
@@ -72,10 +71,11 @@ public class DatabaseCacheTest {
     private static String testProjectSchema;
     private static String workingDir = "C:\\eastweb-data-test";
     private static Connection con;
-    private static int year = LocalDate.now().getYear();
-    private static int day = LocalDate.now().getDayOfYear();
-    private static LocalDate startDate = LocalDate.now();
-    private static LocalDate earlierStartDate = LocalDate.now().minusDays(8);
+    private static TemporalSummaryCompositionStrategy compStrategy = new CDCWeeklyStrategy();
+    private static LocalDate startDate;
+    private static int year;
+    private static int day;
+    private static LocalDate earlierStartDate;
     //    private static int daysPerInputFile = 1;
     //    private static int numOfIndices = 3;
     //    private static int filesPerDay = 1;
@@ -92,6 +92,11 @@ public class DatabaseCacheTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        startDate = compStrategy.getStartDate(LocalDate.now().minusDays(7));
+        year = startDate.getYear();
+        day = startDate.getDayOfYear();
+        earlierStartDate = startDate.minusDays(14);
+
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
 
@@ -131,7 +136,7 @@ public class DatabaseCacheTest {
         summaryNames.add("Sum");
 
         projectInfoSummary1 = new ProjectInfoSummary(new ZonalSummary("ShapeFile1", "AreaCodeField1", "AreaNameField1"),
-                new TemporalSummaryRasterFileStore(tester.new MyTemporalSummaryCompositionStrategy()), "MyTemporalSummaryCompositionStrategy", 1);
+                new TemporalSummaryRasterFileStore(compStrategy), "MyTemporalSummaryCompositionStrategy", 1);
 
         con = DatabaseConnector.getConnection();
     }
@@ -541,7 +546,7 @@ public class DatabaseCacheTest {
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, startDateGroupID, indexID, filePath1, summaryResults));
 
         // Upload result 1
-        testSummaryCache.UploadResultsToDb(newResults, 1, new MyTemporalSummaryCompositionStrategy(), startDate.getYear(), startDate.getDayOfYear(), process, 1);
+        testSummaryCache.UploadResultsToDb(newResults, 1, compStrategy, startDate.getYear(), startDate.getDayOfYear(), process, 1);
 
         // Setup for upload 2
         scheduler.expectedSummaryProgress = 100.0;
@@ -549,7 +554,7 @@ public class DatabaseCacheTest {
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, earliestStartDateGroupID, indexID, filePath2, summaryResults));
 
         // Upload result 2
-        testSummaryCache.UploadResultsToDb(newResults, 1, new MyTemporalSummaryCompositionStrategy(), earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), process, 1);
+        testSummaryCache.UploadResultsToDb(newResults, 1, compStrategy, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), process, 1);
 
         stmt.close();
     }
@@ -664,39 +669,5 @@ public class DatabaseCacheTest {
         protected Map<DataDate, ArrayList<String>> ListDatesFilesHTTP() {
             return null;
         }
-    }
-
-    private class MyTemporalSummaryCompositionStrategy implements TemporalSummaryCompositionStrategy
-    {
-
-        @Override
-        public LocalDate getStartDate(LocalDate sDate) throws Exception {
-            return null;
-        }
-
-        @Override
-        public int getDaysInThisComposite(LocalDate dateInComposite) {
-            return 0;
-        }
-
-        @Override
-        public long getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
-            return 0;
-        }
-
-        @Override
-        public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
-            DayOfWeek startDay = startDate.getDayOfWeek();
-
-            if(startDay != DayOfWeek.SUNDAY)
-            {
-                int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
-
-                startDate.plusDays(7 - value);
-            }
-
-            return ChronoUnit.WEEKS.between(startDate, endDate);
-        }
-
     }
 }

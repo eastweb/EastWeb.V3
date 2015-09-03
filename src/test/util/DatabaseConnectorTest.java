@@ -43,9 +43,7 @@ public class DatabaseConnectorTest {
                 5,     // MaxNumOfConnectionsPerInstance
                 null);   // SummaryCalculation
 
-        System.out.println("connection count = " + DatabaseConnector.getConnectionCount());
         DatabaseConnector.closeAllConnections();
-        System.out.println("connection count = " + DatabaseConnector.getConnectionCount());
     }
 
     /**
@@ -108,7 +106,6 @@ public class DatabaseConnectorTest {
         connections.add(con);
         for(int i=1; i < configInstance.getMaxNumOfConnectionsPerInstance(); i++)
         {
-            System.out.println("connection count = " + DatabaseConnector.getConnectionCount());
             // Test Case 3
             con = DatabaseConnector.getConnection(configInstance, false, 2);
             if(con == null) {
@@ -120,7 +117,6 @@ public class DatabaseConnectorTest {
 
         // Test Case 2
         con = DatabaseConnector.getConnection(configInstance, true);
-        System.out.println("connection count = " + DatabaseConnector.getConnectionCount());
         assertNull("Connection was made beyond limiter.", con);
 
         connections.remove(0).close();
