@@ -130,8 +130,12 @@ public class Scheduler {
         this.manager = manager;
 
         // Make sure directory layout is set up
-        new File(FileSystem.GetRootDirectoryPath(projectInfoFile)).mkdirs();
-        new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName())).mkdirs();
+        try{
+            new File(FileSystem.GetRootDirectoryPath(projectInfoFile)).mkdirs();
+            new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName())).mkdirs();
+        } catch(NullPointerException | SecurityException e) {
+            ErrorLog.add("Problem while setting up directories.", e);
+        }
 
         // Update status in EASTWebManager
         manager.NotifyUI(statusContainer.GetStatus());

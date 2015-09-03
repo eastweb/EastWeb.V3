@@ -2,6 +2,7 @@ package version2.prototype;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,7 +31,15 @@ public final class ErrorLog {
     public static void add(String message, Throwable e)
     {
         String logFileName = getLogFileName();
-        String logPath = ClassLoader.getSystemClassLoader().getResource(".").getPath();
+        String logPath = null;
+        try {
+            logPath = ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath();
+            while(logPath.startsWith("\\") || logPath.startsWith("/")) {
+                logPath = logPath.substring(1);
+            }
+        } catch (URISyntaxException e1) {
+            e1.printStackTrace();
+        }
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
