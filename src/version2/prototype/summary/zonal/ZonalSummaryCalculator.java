@@ -282,16 +282,18 @@ public class ZonalSummaryCalculator {
         Double[] noData = new Double[1];
         //FIXME: Can't get the no data value from NLDAS reprojected file, manually set it to 0. It will affect the zonal result.
         rasterBand.GetNoDataValue(noData);
-        //final float NO_DATA = noData[0].floatValue();
-        final float NO_DATA=0;
+        final ArrayList<Double> NO_DATA = new ArrayList<Double>(2);
+        NO_DATA.add(new Double(0));
+        NO_DATA.add(new Double(-3.4028234663852886E38));
+
         for (int y=0; y<HEIGHT; y++) {
             zoneBand.ReadRaster(0, y, WIDTH, 1, zoneArray); GdalUtils.errorCheck();
             rasterBand.ReadRaster(0, y, WIDTH, 1, rasterArray); GdalUtils.errorCheck();
 
             for (int i=0; i<WIDTH; i++) {
                 int zone = zoneArray[i];
-                double value = rasterArray[i];
-                if (zone != 0 && value != NO_DATA && value != -3.4028234663852886E38) { // Neither are no data values
+                Double value = rasterArray[i];
+                if (!NO_DATA.contains(Double.valueOf(zone)) && !NO_DATA.contains(value)) { // Neither are no data values
                     summariesCollection.add(zone, value);
                     zoneReceivedValidData.put(zone, true);
                 }

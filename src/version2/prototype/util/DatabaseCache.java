@@ -771,8 +771,9 @@ public class DatabaseCache extends Observable{
                     rs = stmt.executeQuery("SELECT Count(DISTINCT A.\"DateGroupID\") AS \"DateGroupIDCount\", Max(D.\"Year\") AS \"MaxYear\", Max(D.\"DayOfYear\") AS \"MaxDay\", Min(D.\"Year\") AS \"MinYear\", " +
                             "Min(D.\"DayOfYear\") AS \"MinDay\" FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + globalSchema + "\".\"DateGroup\" D ON A.\"DateGroupID\"=D.\"DateGroupID\";");
                     if(rs != null && rs.next()) {
-                        expectedCount = (int) ((rs.getInt("DateGroupIDCount") / compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
-                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), daysPerInputData)) * pluginInfo.GetIndices().size());
+                        long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay")),
+                                LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay")), daysPerInputData);
+                        expectedCount = (int) (completeCompositesInRange * pluginInfo.GetIndices().size());
                         rs.close();
                     }
                 }
