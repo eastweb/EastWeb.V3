@@ -304,6 +304,7 @@ public class Scheduler {
             statusContainer.AddToLog(e.getStatus());
         }
 
+        statusContainer.CheckIfProjectIsUpToDate();
         manager.NotifyUI(statusContainer.GetStatus());
     }
 

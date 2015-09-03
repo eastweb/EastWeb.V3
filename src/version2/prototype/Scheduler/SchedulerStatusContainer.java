@@ -322,13 +322,8 @@ public class SchedulerStatusContainer {
 
     /**
      * Checks if the whole project is up to date or if any summary for any of the plugins being processed still has work to accomplish with the current information in this container.
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
      */
-    public synchronized void CheckIfProjectIsUpToDate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public synchronized void CheckIfProjectIsUpToDate()
     {
         boolean isUpToDate = true;
         Iterator<String> pluginsIt = downloadProgressesByData.keySet().iterator();
@@ -340,7 +335,7 @@ public class SchedulerStatusContainer {
             // Check download progresses
             for(Double value : downloadProgressesByData.get(pluginName).values())
             {
-                if(value != 100)
+                if(value.intValue() != 100)
                 {
                     isUpToDate = false;
                 }
@@ -349,7 +344,7 @@ public class SchedulerStatusContainer {
             // Check Summary progresses
             for(Double value : summaryProgresses.get(pluginName).values())
             {
-                if(value != 100)
+                if(value.intValue() != 100)
                 {
                     isUpToDate = false;
                 }
@@ -359,7 +354,7 @@ public class SchedulerStatusContainer {
         // Check Processor progresses
         for(Double value : processorProgresses.values())
         {
-            if(value != 100){
+            if(value.intValue() != 100){
                 isUpToDate = false;
             }
         }
@@ -367,7 +362,7 @@ public class SchedulerStatusContainer {
         // Check Indices progresses
         for(Double value : indicesProgresses.values())
         {
-            if(value != 100){
+            if(value.intValue() != 100){
                 isUpToDate = false;
             }
         }
