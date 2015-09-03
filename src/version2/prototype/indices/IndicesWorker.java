@@ -131,7 +131,6 @@ public class IndicesWorker extends ProcessWorker{
                 Class<?> clazzIndicies;
                 try
                 {
-
                     clazzIndicies = Class.forName(String.format("version2.prototype.indices.%s.%s", pluginName, indices));
                     Constructor<?> ctorIndicies = clazzIndicies.getConstructor();
 
@@ -154,16 +153,15 @@ public class IndicesWorker extends ProcessWorker{
                     output.add(new DataFileMetaData(outFile, Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(), thisDay.getDayOfYear(), indices));
                     stmt.close();
                     con.close();
-                }catch(Exception e)
-                {
-                    throw new EmptyStackException(); // class not found
+                } catch(Exception e) {
+                    ErrorLog.add(process, "Problem setting up IndexCalculator object.", e);
                 }
             }
             try{
                 outputCache.CacheFiles(output);
-            }
-            catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e)
-            {
+            } catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(process, "Problem encountered while caching data for IndicesWorker.", e);
+            } catch (Exception e) {
                 ErrorLog.add(process, "Problem encountered while caching data for IndicesWorker.", e);
             }
         }

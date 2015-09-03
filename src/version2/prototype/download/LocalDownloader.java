@@ -80,6 +80,8 @@ public abstract class LocalDownloader extends Process {
                         pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
             } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
+            } catch (Exception e) {
+                ErrorLog.add(processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
             }
         }
         return newFiles;

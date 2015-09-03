@@ -114,6 +114,8 @@ public class Config {
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add("Problem getting Config instance", e);
+        } catch (Exception e) {
+            ErrorLog.add("Problem getting Config instance", e);
         }
 
         errorLogDir = errorLogDirTemp;

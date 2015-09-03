@@ -81,6 +81,8 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
             downloader = new GenericLocalStorageGlobalDownloader(myID, configInstance, pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, startDate, downloaderClassName);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | ParserConfigurationException | SAXException | IOException | SQLException e) {
             ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
+        } catch (Exception e) {
+            ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
         }
         return downloader;
     }

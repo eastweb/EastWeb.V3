@@ -70,7 +70,7 @@ public class ProcessorWorker extends ProcessWorker {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public ProcessWorkerReturn call()
+    public ProcessWorkerReturn call() throws Exception
     {
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
@@ -90,6 +90,8 @@ public class ProcessorWorker extends ProcessWorker {
                     classPrepareTask.getConstructor(ProjectInfoFile.class, ProjectInfoPlugin.class,
                             PluginMetaData.class, DataDate.class);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+            ErrorLog.add(process, "Problem with reflection in PrepareTask.", e);
+        } catch (Exception e) {
             ErrorLog.add(process, "Problem with reflection in PrepareTask.", e);
         }
 
@@ -128,6 +130,8 @@ public class ProcessorWorker extends ProcessWorker {
                 prepareTask = (PrepareProcessTask) cnstPrepareTask.newInstance(projectInfoFile, pluginInfo, pluginMetaData, thisDay);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 ErrorLog.add(process, "Problem with instantiation of PrepareProcessTask.", e);
+            } catch (Exception e) {
+                ErrorLog.add(process, "Problem with instantiation of PrepareProcessTask.", e);
             }
 
             String laststepOutputFolder = null;
@@ -143,12 +147,16 @@ public class ProcessorWorker extends ProcessWorker {
                     classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
                 } catch (ClassNotFoundException e) {
                     ErrorLog.add(process, "Problem with reflection of classProcess '" + "version2.prototype.processor." + pluginName + "." + step.getValue() + "'.", e);
+                } catch (Exception e) {
+                    ErrorLog.add(process, "Problem with reflection of classProcess '" + "version2.prototype.processor." + pluginName + "." + step.getValue() + "'.", e);
                 }
 
                 Constructor<?> cnstProcess = null;
                 try {
                     cnstProcess = classProcess.getConstructor(ProcessData.class);
                 } catch (NoSuchMethodException | SecurityException e) {
+                    ErrorLog.add(process, "Problem with reflection of classProcess.", e);
+                } catch (Exception e) {
                     ErrorLog.add(process, "Problem with reflection of classProcess.", e);
                 }
 
@@ -174,6 +182,8 @@ public class ProcessorWorker extends ProcessWorker {
                                 FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), dataInputFolder);
                             } catch (IOException e) {
                                 ErrorLog.add(process, "Problem with copying of downloaded data.", e);
+                            } catch (Exception e) {
+                                ErrorLog.add(process, "Problem with copying of downloaded data.", e);
                             }
                         }
 
@@ -182,6 +192,8 @@ public class ProcessorWorker extends ProcessWorker {
                             try {
                                 FileUtils.copyFileToDirectory(new File(dFile.dataFilePath), qcInputFolder);
                             } catch (IOException e) {
+                                ErrorLog.add(process, "Problem with copying of downloaded QC.", e);
+                            } catch (Exception e) {
                                 ErrorLog.add(process, "Problem with copying of downloaded QC.", e);
                             }
                         }
@@ -212,8 +224,9 @@ public class ProcessorWorker extends ProcessWorker {
                             prepareTask.getHeatingDegree()
                             )
                             );
-                } catch (InstantiationException | IllegalAccessException
-                        | IllegalArgumentException | InvocationTargetException e) {
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    ErrorLog.add(this.process, "Problem with cnstProcess instantion.", e);
+                } catch (Exception e) {
                     ErrorLog.add(this.process, "Problem with cnstProcess instantion.", e);
                 }
 
@@ -222,6 +235,8 @@ public class ProcessorWorker extends ProcessWorker {
                     methodProcess = process.getClass().getMethod("run");
                     methodProcess.invoke(process);
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    ErrorLog.add(this.process, "Problem with calling run.", e);
+                } catch (Exception e) {
                     ErrorLog.add(this.process, "Problem with calling run.", e);
                 }
             }
@@ -246,6 +261,8 @@ public class ProcessorWorker extends ProcessWorker {
                         try {
                             FileUtils.copyFileToDirectory(f, outputDir);
                         } catch (IOException e) {
+                            ErrorLog.add(process, "Copying data to different directory.", e);
+                        } catch (Exception e) {
                             ErrorLog.add(process, "Copying data to different directory.", e);
                         }
                     }
@@ -283,14 +300,16 @@ public class ProcessorWorker extends ProcessWorker {
                 con.close();
             } catch (SQLException e) {
                 ErrorLog.add(process, "Problem while creating list for output cache.", e);
+            } catch (Exception e) {
+                ErrorLog.add(process, "Problem while creating list for output cache.", e);
             }
 
             // cache to the database
             try{
                 outputCache.CacheFiles(toCache);
-            }
-            catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e)
-            {
+            } catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(process, "Problem encountered while caching data for ProcessorWorker.", e);
+            } catch (Exception e) {
                 ErrorLog.add(process, "Problem encountered while caching data for ProcessorWorker.", e);
             }
         }

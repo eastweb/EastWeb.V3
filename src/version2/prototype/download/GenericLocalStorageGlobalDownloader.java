@@ -148,6 +148,8 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
         } catch (ParserConfigurationException | SAXException | IOException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException | SQLException e) {
             ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
+        } catch (Exception e) {
+            ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
         }
     }
 }

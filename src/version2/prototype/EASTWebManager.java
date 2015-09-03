@@ -10,9 +10,7 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -194,9 +192,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
         }
+
         synchronized (newSchedulerRequests) {
             newSchedulerRequests.add(data);
         }
+
         if(manualUpdate)
         {
             if(instance != null) {
@@ -675,6 +675,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             }
             catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException | ConcurrentModificationException e) {
                 ErrorLog.add(Config.getInstance(), "EASTWebManager.run error.", e);
+            } catch (Exception e) {
+                ErrorLog.add(Config.getInstance(), "EASTWebManager.run error.", e);
             }
         }while((msBeetweenUpdates > 0) && !manualUpdate);
         manualUpdate = false;
@@ -721,6 +723,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 try {
                     factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
                 } catch (IOException e) {
+                    ErrorLog.add(Config.getInstance(), "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
+                } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
                 }
                 GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
@@ -910,12 +914,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             {
                 //                schedulerStatuses.add(new SchedulerStatus(id, data.projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), TaskState.STOPPED));
                 Scheduler scheduler = null;
-                try {
-                    scheduler = new Scheduler(data, id, this);
-                    schedulerStatuses.add(scheduler.GetSchedulerStatus());
-                } catch (IOException | ParserConfigurationException | SAXException e) {
-                    ErrorLog.add(Config.getInstance(), "EASTWebManager.handleNewSchedulerRequests error while creating Scheduler.", e);
-                }
+                scheduler = new Scheduler(data, id, this);
+                schedulerStatuses.add(scheduler.GetSchedulerStatus());
                 if(schedulers.size() == 0 || id >= schedulers.size() || schedulers.get(id) == null) {
                     schedulers.add(id, scheduler);
                 }

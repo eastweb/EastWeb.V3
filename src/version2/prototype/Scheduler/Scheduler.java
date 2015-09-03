@@ -1,6 +1,7 @@
 package version2.prototype.Scheduler;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -77,11 +78,8 @@ public class Scheduler {
      * @param data  - SchedulerData describing the project to setup for
      * @param myID  - a unique ID for this Scheduler instance
      * @param manager  - reference to the EASTWebManager creating this Scheduler
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
      */
-    public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager) throws IOException, ParserConfigurationException, SAXException
+    public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager)
     {
         this(data, myID, TaskState.STOPPED, manager, Config.getInstance());
     }
@@ -130,10 +128,21 @@ public class Scheduler {
         this.manager = manager;
 
         // Make sure directory layout is set up
+        File temp;
         try{
-            new File(FileSystem.GetRootDirectoryPath(projectInfoFile)).mkdirs();
-            new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName())).mkdirs();
-        } catch(NullPointerException | SecurityException e) {
+            temp = new File(FileSystem.GetRootDirectoryPath(projectInfoFile));
+            temp.mkdirs();
+            if(!temp.exists()) {
+                throw new FileNotFoundException("Directory structure \"" + temp.getCanonicalPath() + "\" doesn't exist");
+            }
+            temp = new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName()));
+            temp.mkdirs();
+            if(!temp.exists()) {
+                throw new FileNotFoundException("Directory structure \"" + temp.getCanonicalPath() + "\" doesn't exist");
+            }
+        } catch(NullPointerException | SecurityException | IOException e) {
+            ErrorLog.add("Problem while setting up directories.", e);
+        } catch(Exception e){
             ErrorLog.add("Problem while setting up directories.", e);
         }
 
@@ -157,6 +166,8 @@ public class Scheduler {
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException e) {
+            ErrorLog.add(this, "Problem setting up Scheduler.", e);
+        } catch (Exception e) {
             ErrorLog.add(this, "Problem setting up Scheduler.", e);
         }
         finally {
