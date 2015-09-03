@@ -58,6 +58,8 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add(processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
+        } catch (Exception e) {
+            ErrorLog.add(processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
         }
     }
 

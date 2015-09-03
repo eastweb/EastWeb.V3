@@ -57,7 +57,7 @@ public class ModisListDatesFiles extends ListDatesFiles
             DownloadUtils.downloadToStream(new URL(mHostURL), folderOutStream);
 
             Iterable<String> availableDates = Arrays.asList(folderOutStream.toString().split("[\\r\\n]+"));
-
+            //            for(String param : availableDates) {
             Parallel.ForEach(availableDates,
                     new Parallel.Operation<String>() {
                 @Override
@@ -121,6 +121,7 @@ public class ModisListDatesFiles extends ListDatesFiles
                             return;
                         }
                     }
+                    //                }
                 };
             });
         }
@@ -130,6 +131,7 @@ public class ModisListDatesFiles extends ListDatesFiles
             return null;
         }
 
+        System.out.println("Finished running ModisListDatesFiles.");
         return mapDatesFiles;
     }
 

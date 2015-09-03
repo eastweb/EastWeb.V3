@@ -6,20 +6,30 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 
 public class Parallel {
     private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService forPool = Executors.newFixedThreadPool(NUM_CORES * 2, new NamedThreadFactory("Parallel.For", false));
+    private static ThreadPoolExecutor forPool = new ThreadPoolExecutor(NUM_CORES * 2, Integer.MAX_VALUE, 1l, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(),
+            new NamedThreadFactory("Parallel.For", false));
+    //    private static final ExecutorService forPool = Executors.newFixedThreadPool(NUM_CORES * 2, new NamedThreadFactory("Parallel.For", false));
 
     public static <T> void ForEach(final Iterable<T> elements, final Operation<T> operation) {
+        // invokeAll blocks for us until all submitted tasks in the call complete
         try {
-            // invokeAll blocks for us until all submitted tasks in the call complete
-            forPool.invokeAll(createCallables(elements, operation));
+            //            forPool.invokeAll(createCallables(elements, operation));
+
+            Collection<Callable<Void>> runners = createCallables(elements, operation);
+            forPool.allowCoreThreadTimeOut(true);
+            forPool.invokeAll(runners);
+
         } catch (InterruptedException e) {
-            ErrorLog.add(Config.getInstance(), "Parallel.ForEach error during custom parllelized for each method.", e);
+            ErrorLog.add(Config.getInstance(), "Parallel.ForEach error during custom parallelized for each method.", e);
         }
     }
 
