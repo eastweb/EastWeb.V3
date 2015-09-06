@@ -1,6 +1,7 @@
 package version2.prototype.processor;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
@@ -85,6 +86,7 @@ public class Clip
                 DataSource featureDS = ogr.Open(shapeFile.getPath());
                 Layer featureLyr = featureDS.GetLayer(0);
                 // System.out.println("clip : " + rasterDS.GetGeoTransform());
+                // System.out.println("rasterDS: " + Arrays.toString(rasterDS.GetGeoTransform()));
                 final int pixelSize = (int) Math.abs(rasterDS.GetGeoTransform()[1]); // FIXME: getting pixel size won't work for some datasets
                 //System.out.println("PIXEL SIZE: " + pixelSize);
 

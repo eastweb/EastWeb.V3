@@ -39,6 +39,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.GenericLocalStorageGlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
@@ -63,6 +64,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
     private static PluginMetaData pluginMetaData;
     private static ListDatesFiles listDatesFiles;
     private static ListDatesFiles listDatesFilesQC;
+    private static ProjectInfoFile projectMetaData;
 
     // For testing with ModisNBAR plugin
     //    private static String testPluginName = "ModisNBAR";
@@ -116,13 +118,14 @@ public class GenericLocalStorageGlobalDownloaderTest {
 
         dData = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
 
-        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance("C:\\Users\\michael.devos\\Google Drive\\EASTWeb\\EASTWeb-Projects\\EastWeb.V2\\plugins\\Plugin_TRMM3B42RT.xml");
+        PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance("plugins/Plugin_TRMM3B42RT.xml");
         pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
         // For testing with ModisNBAR plugin
         //        listDatesFiles = new ModisNBARListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
         //        listDatesFilesQC = new ModisNBARQCListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
         // For testing with TRMM3B42RT plugin
         listDatesFiles = new TRMM3B42RTListDatesFiles(new DataDate(startDate), dData, null);
+        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, null, timeZone, null, null, null, null, null, null, null, null, null);
     }
 
     /**
@@ -134,6 +137,10 @@ public class GenericLocalStorageGlobalDownloaderTest {
         stmt.execute(String.format(
                 "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
                 testGlobalSchema
+                ));
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                Schemas.getSchemaName(testProjectName, testPluginName)
                 ));
         stmt.close();
         con.close();
@@ -149,10 +156,13 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
                 testGlobalSchema
                 ));
+        stmt.execute(String.format(
+                "DROP SCHEMA IF EXISTS \"%s\" CASCADE",
+                Schemas.getSchemaName(testProjectName, testPluginName)
+                ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, testProjectName, testPluginName, null,
-                startDate, daysPerInputFile, filesPerDay, numOfIndices, null, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, null, daysPerInputFile, filesPerDay, numOfIndices, true);
     }
 
     /**

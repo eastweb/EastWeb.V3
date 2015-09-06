@@ -51,9 +51,8 @@ public class Test_ProcessorWorker_TRMM3B42 {
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_TRMM3B42.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
-                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
-                pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
+                pluginMetaData.Indices.indicesNames.size(), false);
 
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();

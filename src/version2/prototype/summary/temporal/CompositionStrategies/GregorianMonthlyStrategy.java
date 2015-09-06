@@ -1,8 +1,15 @@
 package version2.prototype.summary.temporal.CompositionStrategies;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
+/**
+ * @author michael.devos
+ *
+ */
 public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrategy {
 
     @Override
@@ -24,9 +31,17 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
     }
 
     @Override
-    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
-        return daysPerInputData;
-        // TODO Auto-generated method stub
+    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
+        DayOfWeek startDay = startDate.getDayOfWeek();
+
+        if(startDay != DayOfWeek.SUNDAY)
+        {
+            int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
+
+            startDate.plusDays(7 - value);
+        }
+
+        return ChronoUnit.MONTHS.between(startDate, endDate);
     }
 
 }

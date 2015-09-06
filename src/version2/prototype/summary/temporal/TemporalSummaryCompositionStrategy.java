@@ -42,8 +42,7 @@ public interface TemporalSummaryCompositionStrategy {
      *
      * @param startDate  - the locale (zone) and time zone independent inclusive start date
      * @param endDate  - the locale (zone) and time zone independent exlusive end date
-     * @param daysPerInputData  - number of days a single raster data file represents
      * @return the number of complete composites that can be created within the given date range and input size
      */
-    long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData);
+    long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate);
 }

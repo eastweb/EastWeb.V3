@@ -5,13 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +17,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.DataDate;
 import version2.prototype.EASTWebManagerI;
 import version2.prototype.ErrorLog;
 import version2.prototype.GenericProcess;
@@ -31,14 +28,18 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
+import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.summary.Summary;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.DatabaseConnector;
+import version2.prototype.util.ProgressUpdater;
 import version2.prototype.util.Schemas;
 
 /**
@@ -78,24 +79,11 @@ public class Scheduler {
      * @param data  - SchedulerData describing the project to setup for
      * @param myID  - a unique ID for this Scheduler instance
      * @param manager  - reference to the EASTWebManager creating this Scheduler
-     */
-    public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager)
-    {
-        this(data, myID, TaskState.STOPPED, manager, Config.getInstance());
-    }
-
-    /**
-     * Creates and sets up a Scheduler instance with the given project data. Does not start the Scheduler and Processes.
-     * To start processing call start().
-     *
-     * @param data  - SchedulerData describing the project to setup for
-     * @param myID  - a unique ID for this Scheduler instance
-     * @param manager  - reference to the EASTWebManager creating this Scheduler
      * @param configInstance
      */
     public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager, Config configInstance)
     {
-        this(data, myID, TaskState.STOPPED, manager, configInstance);
+        this(data, myID, TaskState.STOPPED, manager, configInstance, new ProgressUpdater(configInstance, data.projectInfoFile, data.pluginMetaDataCollection));
     }
 
     /**
@@ -107,15 +95,15 @@ public class Scheduler {
      * @param initState  - Initial TaskState to set this Scheduler to.
      * @param manager  - reference to the EASTWebManager creating this Scheduler
      * @param configInstance
+     * @param progressUpdater
      */
-    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance)
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance, ProgressUpdater progressUpdater)
     {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
-        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(),
-                pluginMetaDataCollection, initState);
+        statusContainer = new SchedulerStatusContainer(configInstance, myID, progressUpdater, projectInfoFile, pluginMetaDataCollection, initState);
         localDownloaders = new ArrayList<LocalDownloader>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
@@ -146,23 +134,29 @@ public class Scheduler {
             ErrorLog.add("Problem while setting up directories.", e);
         }
 
-        // Update status in EASTWebManager
-        manager.NotifyUI(statusContainer.GetStatus());
-
         PluginMetaData pluginMetaData;
-        Connection con = null;
+        DatabaseConnection con = null;
         try {
+            // Setup project
             con = DatabaseConnector.getConnection();
             for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
                 new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName())).mkdirs();
 
-                // Total Input Units = (((#_of_days_since_start_date / #_of_days_in_a_single_input_unit) * #_of_days_to_interpolate_out) / #_of_days_in_temporal_composite)
-                Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), item.GetName(),
-                        configInstance.getSummaryCalculations(), projectInfoFile.GetStartDate(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(),
-                        projectInfoFile.GetSummaries(), true);
+                Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile, item.GetName(), configInstance.getSummaryCalculations(), pluginMetaData.DaysPerInputData,
+                        pluginMetaData.Download.filesPerDay, item.GetIndices().size(), true);
                 SetupProcesses(item, pluginMetaData);
+
+                // Update status in EASTWebManager
+                SchedulerStatus status = null;
+                synchronized (statusContainer)
+                {
+                    status = statusContainer.GetStatus();
+                }
+                if(status != null) {
+                    manager.NotifyUI(status);
+                }
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException e) {
@@ -172,11 +166,7 @@ public class Scheduler {
         }
         finally {
             if(con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    ErrorLog.add(this, "Problem closing connection.", e);
-                }
+                con.close();
             }
         }
     }
@@ -197,10 +187,16 @@ public class Scheduler {
      */
     public SchedulerStatus GetSchedulerStatus()
     {
+        SchedulerStatus status = null;
         synchronized (statusContainer)
         {
-            return statusContainer.GetStatus();
+            try {
+                status = statusContainer.GetStatus();
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+            }
         }
+        return status;
     }
 
     /**
@@ -250,77 +246,98 @@ public class Scheduler {
      */
     public TaskState GetState()
     {
-        return statusContainer.GetState();
+        synchronized (statusContainer)
+        {
+            return statusContainer.GetState();
+        }
     }
 
     /**
      * Used by the executed frameworks ({@link Process Process} objects) to send information up to the GUI.
      *
-     * @param e  - GUI update information
+     * @param event  - GUI update information
      */
-    public void NotifyUI(GeneralUIEventObject e)
+    public void NotifyUI(GeneralUIEventObject event)
     {
-        if((e.getSource() instanceof Process) && (e.getProgress() != null) && (e.getPluginName() != null) && (e.getExpectedNumOfOutputs() != null))
+        SchedulerStatus status = null;
+        synchronized (statusContainer)
         {
-            Process process = (Process)e.getSource();
+            if(event.getStatus() != null) {
+                statusContainer.AddToLog(event.getStatus());
+            }
 
-            synchronized (statusContainer)
-            {
-                switch(process.processName)
-                {
-                case DOWNLOAD:
-                    if(e.getDataName() != null) {
-                        statusContainer.UpdateDownloadProgressByData(e.getProgress(), e.getPluginName(), e.getDataName(), e.getExpectedNumOfOutputs());
-                    }
-                    break;
-                case PROCESSOR:
-                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
-                    break;
-                case INDICES:
-                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
-                    break;
-                default:    // SUMMARY
-                    if(e.getSummaryID() != null) {
-                        statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID(), e.getExpectedNumOfOutputs());
-                    }
-                    break;
-                }
+            try {
+                status = statusContainer.GetStatus();
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
             }
         }
-        else if((e.getSource() instanceof DatabaseCache) && (e.getProgress() != null) && (e.getPluginName() != null) && (e.getExpectedNumOfOutputs() != null))
+        if(status != null) {
+            manager.NotifyUI(status);
+        }
+    }
+
+    /**
+     * Updates the download progress for the given plugin and data name.
+     * @param dataName  - the name of the file type being downloaded (e.g. "Data" or "Qc")
+     * @param pluginName  - the plugin title gotten from the plugin metadata to calculate progress in relation to
+     * @param listDatesFiles  - reference to the ListDatesFiles object to use
+     * @param modisTileNames  - list of modis tiles included
+     * @param stmt  - Statement object to reuse
+     * @throws SQLException
+     */
+    public synchronized void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
+    {
+        synchronized (statusContainer)
         {
-            DatabaseCache cache = (DatabaseCache)e.getSource();
-
-            synchronized (statusContainer)
-            {
-                switch(cache.processCachingFor)
-                {
-                case DOWNLOAD:
-                    if(e.getDataName() != null) {
-                        statusContainer.UpdateDownloadProgressByData(e.getProgress(), e.getPluginName(), e.getDataName(), e.getExpectedNumOfOutputs());
-                    }
-                    break;
-                case PROCESSOR:
-                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
-                    break;
-                case INDICES:
-                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
-                    break;
-                default:    // SUMMARY
-                    if(e.getSummaryID() != null) {
-                        statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID(), e.getExpectedNumOfOutputs());
-                    }
-                    break;
-                }
-            }
+            statusContainer.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
         }
+    }
 
-        if(e.getStatus() != null) {
-            statusContainer.AddToLog(e.getStatus());
+    /**
+     * Updates the processor progress for the given plugin.
+     * @param pluginName  - name of plugin whose processor progress to change
+     * @param stmt  - Statement object to reuse
+     * @throws SQLException
+     */
+    public synchronized void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException
+    {
+        synchronized (statusContainer)
+        {
+            statusContainer.UpdateProcessorProgress(pluginName, stmt);
         }
+    }
 
-        statusContainer.CheckIfProjectIsUpToDate();
-        manager.NotifyUI(statusContainer.GetStatus());
+    /**
+     * Updates the indices progress for the given plugin.
+     * @param pluginName  - name of plugin whose processor progress to change
+     * @param stmt  - Statement object to reuse
+     * @throws SQLException
+     */
+    public synchronized void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException
+    {
+        synchronized (statusContainer)
+        {
+            statusContainer.UpdateIndicesProgress(pluginName, stmt);
+        }
+    }
+
+    /**
+     * Updates the summary progress for the summary attributed to the given ID for the named plugin.
+     * @param summaryIDNum  - ID attribute value to calculate progress for gotten from project metadata
+     * @param compStrategy  - TemporalSummaryCompositionStrategy object to use in calculating total expecting results in temporal summary cases
+     * @param daysPerInputData  - number of days each input file represents
+     * @param pluginInfo  - reference to a ProjectInfoPlugin object to use
+     * @param stmt  - Statement object to reuse
+     * @throws SQLException
+     */
+    public synchronized void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
+            throws SQLException
+    {
+        synchronized (statusContainer)
+        {
+            statusContainer.UpdateSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
+        }
     }
 
     /**
@@ -341,8 +358,16 @@ public class Scheduler {
             results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
         }
         Start();
-        statusContainer.CheckIfProjectIsUpToDate();
-        manager.NotifyUI(statusContainer.GetStatus());
+
+        SchedulerStatus status = null;
+        synchronized (statusContainer)
+        {
+            status = statusContainer.GetStatus();
+        }
+
+        if(status != null) {
+            manager.NotifyUI(status);
+        }
     }
 
     protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager)
@@ -514,140 +539,6 @@ public class Scheduler {
                 "version2.prototype.summary.SummaryWorker");
         //        inputCache.addObserver(process);
         return process;
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param plugin
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void RunDownloader(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
-    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
-    {
-        // uses reflection
-        Class<?> clazzDownloader = Class.forName("version2.prototype.download."
-                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
-                + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download.downloadFactoryClassName);
-        Constructor<?> ctorDownloader = clazzDownloader.getConstructor(DataDate.class, DownloadMetaData.class);
-        Object downloader =  ctorDownloader.newInstance(new Object[] {
-                data.projectInfoFile.GetStartDate(),
-                pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Download});
-        Method methodDownloader = downloader.getClass().getMethod("run");
-        methodDownloader.invoke(downloader);
-
-        //        DownloadProgress = 100;
-        //        log.add("Download Finish");
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param plugin
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void RunProcess(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
-    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
-    {
-        //        ProcessorMetaData temp = pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Projection;
-        // TODO: revise the "date"
-        //        PrepareProcessTask prepareProcessTask;
-        // TODO: initiate it with each plugin's implementation
-        //prepareProcessTask= new PrepareProcessTask(projectInfoFile, plugin.GetName(), projectInfoFile.startDate, new processListener());
-
-        /* will move to the Projection framework
-        for (int i = 1; i <= temp.processStep.size(); i++) {
-            if(temp.processStep.get(i) != null && !temp.processStep.get(i).isEmpty())
-            {
-                Class<?> clazzProcess = Class.forName("version2.prototype.projection."
-                        + pluginMetaDataCollection.pluginMetaDataMap.get(plugin.GetName()).Title
-                        + temp.processStep.get(i));
-                Constructor<?> ctorProcess = clazzProcess.getConstructor(ProcessData.class);
-                Object process =  ctorProcess.newInstance(new Object[] {new ProcessData(
-                        prepareProcessTask.getInputFolders(i),
-                        prepareProcessTask.getOutputFolder(i),
-                        prepareProcessTask.getQC(),
-                        prepareProcessTask.getShapeFile(),
-                        prepareProcessTask.getMaskFile(),
-                        prepareProcessTask.getDataBands(),
-                        prepareProcessTask.getQCBands(),
-                        prepareProcessTask.getProjection(),
-                        prepareProcessTask.getListener())});
-                Method methodProcess = process.getClass().getMethod("run");
-                methodProcess.invoke(process);
-            }
-        }
-         */
-        //        ProcessorProgress = 100;
-        //        log.add("Process Finish");
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param plugin
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void RunIndicies(ProjectInfoPlugin plugin) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
-    IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException
-    {
-        for(String indicie: plugin.GetIndices())
-        {
-            Class<?> clazzIndicies;
-            try{
-                clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S.%S", plugin.GetName(), indicie));
-            }catch(Exception e){
-                try{
-                    clazzIndicies = Class.forName(String.format("version2.prototype.indices.%S", indicie));
-                }catch(Exception ex){
-                    throw new EmptyStackException(); // class not found
-                }
-            }
-            Constructor<?> ctorIndicies = clazzIndicies.getConstructor(String.class, DataDate.class, String.class, String.class);
-            Object indexCalculator =  ctorIndicies.newInstance(
-                    new Object[] {
-                            plugin.GetName(),
-                            data.projectInfoFile.GetStartDate(),
-                            new File(indicie).getName().split("\\.")[0],
-                            indicie});
-            Method methodIndicies = indexCalculator.getClass().getMethod("calculate");
-            methodIndicies.invoke(indexCalculator);
-        }
-        //        IndiciesProgress = 100;
-        //        log.add("Indicies Finish");
     }
 }
 

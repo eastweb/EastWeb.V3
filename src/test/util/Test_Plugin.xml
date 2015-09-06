@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<PluginMetadata>
+	<Title>Test_Plugin</Title>
+	<DaysPerInputData>2</DaysPerInputData>
+	<Resolution>1000</Resolution>
+	<ExtraDownloadFiles>
+		<Name>QC</Name>
+	</ExtraDownloadFiles>
+	<Download Name="Data">
+		<DownloadFactoryClassName>DownloadFactory1</DownloadFactoryClassName>
+		<Mode>ftp</Mode>
+		<FTP>
+			<HostName>hydro1.sci.gsfc.nasa.gov</HostName>
+			<RootDir>/data/s4pa/NLDAS/NLDAS_FORA0125_H.002</RootDir>
+			<UserName>anonymous</UserName>
+			<PassWord>anonymous</PassWord>
+		</FTP>
+		<TimeZone>CST6CDT</TimeZone>
+		<FilesPerDay>2</FilesPerDay>
+		<DatePattern>\\d{4}</DatePattern>
+		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
+		<!-- <OriginDate>Wed Mar 01 00:00:01 CDT 2000</OriginDate> -->
+		<OriginDate>
+			<DayOfMonth>01</DayOfMonth>
+			<Month>March</Month>
+			<Year>2000</Year>
+		</OriginDate>
+	</Download>
+	<Download Name="QC">
+		<DownloadFactoryClassName>DownloadFactory2</DownloadFactoryClassName>
+		<Mode>ftp</Mode>
+		<FTP>
+			<HostName>other.sci.gsfc.nasa.gov</HostName>
+			<RootDir>/qc/s4pa/NLDAS/NLDAS_FORA0125_H.002</RootDir>
+			<UserName>anonymous</UserName>
+			<PassWord>anonymous</PassWord>
+		</FTP>
+		<DatePattern>\\d{4}</DatePattern>
+		<FileNamePattern>3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin</FileNamePattern>
+	</Download>
+	<Processor>
+		<ProcessStep>NldasProjection</ProcessStep>
+		<ProcessStep>NldasMozaic</ProcessStep>
+		<ProcessStep>NldasConvertor</ProcessStep>
+		<ProcessStep>NldasFilter</ProcessStep>
+		<NumberOfOutput>2</NumberOfOutput>
+	</Processor>
+	<Indices>
+		<ClassName>GdalNldasCalculator1</ClassName>
+		<ClassName>GdalNldasCalculator2</ClassName>
+	</Indices>
+	<Summary>
+		<Temporal>
+			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<InterpolateStrategyClass></InterpolateStrategyClass>
+		</Temporal>
+	</Summary>
+	<QualityControl>
+		<Level>None</Level>
+		<Level>Level 1</Level>
+		<Level>Level 2</Level>
+		<Level>Level 3</Level>
+	</QualityControl>
+	<ExtraInfo>
+		<Tiles>true</Tiles>
+	</ExtraInfo>
+</PluginMetadata>
+

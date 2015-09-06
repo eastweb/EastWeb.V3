@@ -3,12 +3,11 @@
  */
 package test.util;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,7 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import version2.prototype.ZonalSummary;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.util.EASTWebQuery;
 import version2.prototype.util.EASTWebResults;
 import version2.prototype.util.DatabaseConnector;
@@ -49,9 +48,10 @@ public class EASTWebResultsTest {
     private static int dayVal = 180;
     private static ArrayList<String> includedIndices = new ArrayList<String>();
     private static String[] indices = new String[5];
-    private static String shapeFile = "Settings\\shapeFile";
-    private static String areaValueField = "areaValueField";
-    private static String areaNameField = "areaNameField";
+    private static ProjectInfoFile projectMetaData;
+    //    private static String shapeFile = "Settings\\shapeFile";
+    //    private static String areaValueField = "areaValueField";
+    //    private static String areaNameField = "areaNameField";
 
     /**
      * @throws java.lang.Exception
@@ -83,6 +83,8 @@ public class EASTWebResultsTest {
         summaryNames.add("Min");
         summaryNames.add("StdDev");
         summaryNames.add("SqrSum");
+
+        projectMetaData = new ProjectInfoFile(null, LocalDate.now(), projectName, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     /**
@@ -123,7 +125,7 @@ public class EASTWebResultsTest {
         stmt.execute(query);
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, globalSchema, projectName, pluginName, summaryNames, null, null, null, null, null, true);
+        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, summaryNames, null, null, null, true);
     }
 
     /**
@@ -134,8 +136,7 @@ public class EASTWebResultsTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(java.lang.String, java.lang.String, java.lang.String, boolean, boolean, boolean, boolean, java.lang.String, int,
-     * java.lang.String, int, java.lang.String, int, java.util.ArrayList, version2.prototype.ZonalSummary)}.
+     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(String, String, String, Boolean, Boolean, Boolean, Boolean, String, Integer, String, Integer, String, Integer, ArrayList)}.
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException

@@ -914,7 +914,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             {
                 //                schedulerStatuses.add(new SchedulerStatus(id, data.projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), TaskState.STOPPED));
                 Scheduler scheduler = null;
-                scheduler = new Scheduler(data, id, this);
+                scheduler = new Scheduler(data, id, this, Config.getInstance());
                 schedulerStatuses.add(scheduler.GetSchedulerStatus());
                 if(schedulers.size() == 0 || id >= schedulers.size() || schedulers.get(id) == null) {
                     schedulers.add(id, scheduler);

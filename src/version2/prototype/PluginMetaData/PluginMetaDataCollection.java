@@ -459,11 +459,11 @@ public class PluginMetaDataCollection {
                 for(int i=0; i < nList.getLength(); i++)
                 {
                     temp = (Element) nList.item(i);
-                    if(temp.getNodeName().equals("Download") && temp.hasAttribute("Name") && temp.getAttribute("Name").equals("Data"))
+                    if(temp.getNodeName().equals("Download") && temp.hasAttribute("Name") && temp.getAttribute("Name").toLowerCase().equals("data"))
                     {
                         dataNode = nList.item(i);
                         dataNodeIdx = i;
-                        tempName = "Data";
+                        tempName = "data";
                         break;
                     }
                     else if(!temp.hasAttribute("Name"))
@@ -483,9 +483,9 @@ public class PluginMetaDataCollection {
             {
                 dataNode = nList.item(0);
                 temp = (Element) dataNode;
-                if((temp.hasAttribute("Name") && temp.getAttribute("Name").equals("Data")) || !temp.hasAttribute("Name"))
+                if((temp.hasAttribute("Name") && temp.getAttribute("Name").toLowerCase().equals("data")) || !temp.hasAttribute("Name"))
                 {
-                    name = "Data";
+                    name = "data";
                 } else {
                     throw new DOMException((short) 0, "Missing Download element with attribute Name=\"Date\".");
                 }
@@ -542,7 +542,7 @@ public class PluginMetaDataCollection {
                 String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
-            name = "Data";
+            name = "data";
             this.mode = mode;
             this.myFtp = myFtp;
             this.myHttp = myHttp;
@@ -568,7 +568,7 @@ public class PluginMetaDataCollection {
                         throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
-            name = "Data";
+            name = "data";
             this.mode = mode;
             this.myFtp = myFtp;
             this.myHttp = myHttp;
@@ -593,7 +593,7 @@ public class PluginMetaDataCollection {
                 HTTP myHttp, String downloadFactoryClassName, String timeZone, int filesPerDay, String datePatternStr, String fileNamePatternStr, LocalDate originDate) throws PatternSyntaxException
         {
             super(QualityControlMetaData, Title, DaysPerInputData, ExtraDownloadFiles);
-            this.name = name;
+            this.name = name.toLowerCase();
             this.mode = mode;
             this.myFtp = myFtp;
             this.myHttp = myHttp;
@@ -631,7 +631,7 @@ public class PluginMetaDataCollection {
 
             // Set properties
             if(((Element) extraDownloadNode).hasAttribute("Name")) {
-                name = FileSystem.StandardizeName(((Element) extraDownloadNode).getAttribute("Name"));
+                name = FileSystem.StandardizeName(((Element) extraDownloadNode).getAttribute("Name")).toLowerCase();
             } else {
                 throw new DOMException((short) 0, "A Download element is missing the attribute \"Name\".");
             }

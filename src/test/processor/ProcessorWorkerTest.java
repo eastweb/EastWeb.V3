@@ -81,11 +81,12 @@ public class ProcessorWorkerTest {
         Process process = null;
         ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\pluginMetaData\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\pluginMetaData\\Plugin_TRMM3B42RT.xml"))
+                .pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
-                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
+                pluginMetaData.Indices.indicesNames.size(), false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);

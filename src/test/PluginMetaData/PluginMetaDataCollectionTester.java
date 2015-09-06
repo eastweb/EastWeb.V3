@@ -67,7 +67,7 @@ public class PluginMetaDataCollectionTester {
 
         // Test getting DownloadMetaData
         DownloadMetaData downloadData = pluginMetaData.Download;
-        assertTrue("Name is " + downloadData.name, downloadData.name.equals("Data"));
+        assertTrue("Name is " + downloadData.name, downloadData.name.equals("data"));
         assertTrue("downloaderClassName is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("DownloadFactory"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("hydro1.sci.gsfc.nasa.gov"));
@@ -149,7 +149,7 @@ public class PluginMetaDataCollectionTester {
         downloadData = pluginMetaData.Download;
         assertTrue("ExtraDownloads list is null", downloadData.extraDownloads != null);
         assertTrue("ExtraDownloads list is " + downloadData.extraDownloads.toString(), downloadData.extraDownloads.size() == 1);
-        assertTrue("Name is " + downloadData.name, downloadData.name.equals("Data"));
+        assertTrue("Name is " + downloadData.name, downloadData.name.equals("data"));
         assertTrue("downloaderClassName is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("DownloadFactory1"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("hydro1.sci.gsfc.nasa.gov"));
@@ -164,7 +164,7 @@ public class PluginMetaDataCollectionTester {
 
         LocalDate dataOriginDate = downloadData.originDate;
         downloadData = downloadData.extraDownloads.get(0);
-        assertTrue("Name is " + downloadData.name, downloadData.name.equals("QC"));
+        assertTrue("Name is " + downloadData.name, downloadData.name.equals("qc"));
         assertTrue("downloaderClassName is " + downloadData.downloadFactoryClassName, downloadData.downloadFactoryClassName.equals("DownloadFactory2"));
         assertTrue("Mode is " + downloadData.mode, downloadData.mode.equalsIgnoreCase("ftp"));
         assertTrue("FTP hostname is " + downloadData.myFtp.hostName, downloadData.myFtp.hostName.equalsIgnoreCase("other.sci.gsfc.nasa.gov"));

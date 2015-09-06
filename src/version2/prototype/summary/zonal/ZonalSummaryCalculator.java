@@ -262,7 +262,7 @@ public class ZonalSummaryCalculator {
         Vector<String> options = new Vector<String>();
         options.add("ATTRIBUTE=" + areaCodeField);
 
-        gdal.RasterizeLayer(zoneRaster, new int[] {1}, layer, null, options); GdalUtils.errorCheck();
+        gdal.RasterizeLayer(zoneRaster, new int[] {1}, layer, new double[] {}, options); GdalUtils.errorCheck();
 
         return zoneRaster;
     }

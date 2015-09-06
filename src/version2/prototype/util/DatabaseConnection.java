@@ -22,23 +22,29 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
+
 /**
  * @author michael.devos
  *
  */
 public class DatabaseConnection implements AutoCloseable, Connection {
+    private final Config configInstance;
     private final DatabaseConnector connector;
     private final Connection connection;
     private final Integer ID;
 
     /**
      * Create a DatabaseConnection object; storing the reference to the monitoring DatabaseConnector object.
+     * @param configInstance
      * @param connector
      * @param connection
      * @param ID
      */
-    public DatabaseConnection(DatabaseConnector connector, Connection connection, Integer ID)
+    public DatabaseConnection(Config configInstance, DatabaseConnector connector, Connection connection, Integer ID)
     {
+        this.configInstance = configInstance;
         this.connector = connector;
         this.connection = connection;
         this.ID = ID;
@@ -51,14 +57,22 @@ public class DatabaseConnection implements AutoCloseable, Connection {
     }
 
     @Override
-    public void close() throws SQLException {
-        connection.close();
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            ErrorLog.add(configInstance, "Failed to close the database connection.", e);
+        }
         connector.endConnection(ID);
     }
 
     @Override
-    public void abort(Executor executor) throws SQLException {
-        connection.abort(executor);
+    public void abort(Executor executor) {
+        try {
+            connection.abort(executor);
+        } catch (SQLException | SecurityException e) {
+            ErrorLog.add(configInstance, "Failed to abort the database connection.", e);
+        }
         connector.endConnection(ID);
     }
 

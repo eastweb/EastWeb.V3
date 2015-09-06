@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.After;
@@ -80,8 +81,8 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         startDate = LocalDate.ofYearDay(year, day);
         ArrayList<String> indices  = new ArrayList<String>();
         indices.add("TRMM3B42RTCalculator");
-        pluginInfo = new ProjectInfoPlugin(testPluginName, indices, "Level 1");
         pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, 1, null, extraDownloadFiles, null, null, null, null, null, null);
+        pluginInfo = new ProjectInfoPlugin(testPluginName, indices, "Level 1");
         ArrayList<ProjectInfoPlugin> plugins = new ArrayList<ProjectInfoPlugin>();
         plugins.add(pluginInfo);
         summaries = new ArrayList<ProjectInfoSummary>();
@@ -129,8 +130,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, testProjectName, testPluginName, null,
-                LocalDate.ofYearDay(year, day), daysPerInputFile, filesPerDay, numOfIndices, summaries, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectInfoFile, testPluginName, null, daysPerInputFile, filesPerDay, numOfIndices, true);
     }
 
     /**
@@ -183,7 +183,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         GenericLocalRetrievalLocalDownloader ldl = new GenericLocalRetrievalLocalDownloader(null, testConfig,
                 new MyGlobalDownloader(1, testConfig, testPluginName,
                         PluginMetaDataCollection.CreateDownloadMetaData("Data", null, null, null, null, filesPerDay, "", "", null, null),
-                        null, startDate), projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, null);
+                        null, startDate), projectInfoFile, pluginInfo, pluginMetaData, null, outputCache, null);
 
         assertEquals("LDL start date not as expected.", startDate, ldl.GetStartDate());
         ldl.SetStartDate(startDate.plusDays(1));
@@ -195,8 +195,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
     private class MyScheduler extends Scheduler
     {
         public MyScheduler(int myID, Config configInstance) throws ParserConfigurationException, SAXException, IOException {
-            super(null, null, myID, configInstance, null, new SchedulerStatusContainer(null, 1, null, null, null, null, TaskState.RUNNING, null, null, null, null, null, null, null, null, false, null,
-                    null));
+            super(null, null, myID, configInstance, null, new SchedulerStatusContainer(configInstance, 1, null, null, null, null, TaskState.RUNNING, null, null, null, null, false, null));
         }
 
         @Override

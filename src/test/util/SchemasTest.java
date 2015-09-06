@@ -20,14 +20,12 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.ConfigReadException;
 import version2.prototype.ZonalSummary;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
-import version2.prototype.util.DataFileMetaData;
-import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
@@ -49,37 +47,7 @@ public class SchemasTest {
     private static int daysPerInputFile;
     private static int numOfIndices;
     private static int filesPerDay;
-
-    /**
-     * Defined for executable jar file to be used in setting up EASTWeb database for testing purposes. The config.xml file is needed for the database connection information but nothing else is used from
-     * in it. The summary calculation fields created are "Count", "Sum", "Mean", and "StdDev". The "extra download file" fields created are just "QC" which effects global Download table and the caches.
-     * Tables are created so that foreign key fields are not referencing their counterparts and foreign key rules are not required to be respected when using them.
-     *
-     * @param args  - 1. Global schema name, 2. Project name, 3. Plugin name, 4. True/False if foreign keys should reference their associated tables. Two schemas are created:
-     * 1. The global schema and 2. A schema named by combining project name and plugin name separated by an '_'.
-     * @throws ConfigReadException
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    public static void main(String[] args) throws ConfigReadException, ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
-    {
-        setUpBeforeClass();
-        boolean createTablesWithForeignKeyReferences = false;
-        if(args.length > 3) {
-            createTablesWithForeignKeyReferences = Boolean.parseBoolean(args[3]);
-        }
-        System.out.println("Setting up PostgreSQL Schema...");
-        System.out.println("Global schema to use or create: " + args[0]);
-        System.out.println("Project name to use: " + args[1]);
-        System.out.println("Plugin name to use: " + args[2]);
-        System.out.println("Project schema to create or recreate: " + Schemas.getSchemaName(args[1], args[2]));
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), args[0], args[1], args[2], summaryNames, LocalDate.now().minusDays(8), 8, 3, 1, null,
-                createTablesWithForeignKeyReferences);
-        System.out.println("DONE");
-    }
+    private static ProjectInfoFile projectMetaData;
 
     @BeforeClass
     public static void setUpBeforeClass() throws SQLException, ParserConfigurationException, SAXException, IOException, ClassNotFoundException {
@@ -108,6 +76,8 @@ public class SchemasTest {
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
+
+        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, shapeFile, null, null, null, null, null, null, null, null, null, summaries);
     }
 
     @Before
@@ -124,8 +94,7 @@ public class SchemasTest {
                 ));
 
         // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, startDate, daysPerInputFile, numOfIndices,
-                filesPerDay, summaries, true);
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, projectMetaData, testPluginName, summaryNames, daysPerInputFile, filesPerDay, numOfIndices, true);
         stmt.close();
     }
 
@@ -190,7 +159,7 @@ public class SchemasTest {
         if(rs != null)
         {
             rs.next();
-            assertEquals("Not expected number of tables in the created Global Schema.", 9, rs.getInt("RowCount"));
+            assertEquals("Not expected number of tables in the created Global Schema.", 13, rs.getInt("RowCount"));
 
             // Check global schema table names
             do{
@@ -205,6 +174,10 @@ public class SchemasTest {
                 case "DownloadExtra": break;
                 case "TemporalSummaryCompositionStrategy": break;
                 case "ProjectSummary": break;
+                case "DownloadExpectedTotalOutput": break;
+                case "ProcessorExpectedTotalOutput": break;
+                case "IndicesExpectedTotalOutput": break;
+                case "SummaryExpectedTotalOutput": break;
                 default: fail("Unknown table in test global schema: " + rs.getString("Name"));
                 }
             } while(rs.next());

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import version2.prototype.TaskState;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
@@ -54,37 +55,17 @@ public class SchedulerStatus {
      */
     public final TreeMap<String, TreeMap<String, Double>> downloadProgressesByData;
     /**
-     * A map of plugin names to their expected number of data files.
-     */
-    public final TreeMap<String, Integer> downloadExpectedDataFiles;
-    /**
      * A map of plugin names to their indices progress at the time specified by lastModifiedTime.
      */
     public final TreeMap<String, Double> processorProgresses;
-    /**
-     * A map of plugin names to their expected number of outputs from the Processor step.
-     */
-    public final TreeMap<String, Integer> processorExpectedNumOfOutputs;
     /**
      * A map of plugin names to their indices progress at the time specified by lastModifiedTime.
      */
     public final TreeMap<String, Double> indicesProgresses;
     /**
-     * A map of plugin names to their expected number of outputs from the Indices step.
-     */
-    public final TreeMap<String, Integer> indicesExpectedNumOfOutputs;
-    /**
      * A map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime.
      */
     public final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
-    /**
-     * A map of plugin names to their maps of summary IDs to their expected number of outputs from the Summary step.
-     */
-    public final TreeMap<String, TreeMap<Integer, Integer>> summaryExpectedNumOfOutputsTemp;
-    /**
-     * A map of plugin names to their total number of files downloaded.
-     */
-    public final TreeMap<String, Integer> numOfFilesDownloaded;
 
     private final List<String> log;
     private int logReaderPos;
@@ -92,46 +73,32 @@ public class SchedulerStatus {
     /**
      *
      * @param SchedulerID
-     * @param ProjectName
-     * @param PluginInfo
-     * @param Summaries
+     * @param projectMetaData
      * @param downloadProgressesByData
-     * @param downloadExpectedDataFiles
      * @param processorProgresses
-     * @param processorExpectedNumOfOutputs
      * @param indicesProgresses
-     * @param indicesExpectedNumOfOutputs
      * @param summaryProgresses
-     * @param summaryExpectedNumOfOutputsTemp
      * @param log
      * @param State
-     * @param numOfFilesDownloaded
      * @param ProjectUpToDate
      * @param LastModifiedTime
      * @param RetrievedTime
      */
-    public SchedulerStatus(int SchedulerID, String ProjectName, ArrayList<ProjectInfoPlugin> PluginInfo, ArrayList<ProjectInfoSummary> Summaries,
-            TreeMap<String, TreeMap<String, Double>> downloadProgressesByData, TreeMap<String, Integer> downloadExpectedDataFiles, TreeMap<String, Double> processorProgresses,
-            TreeMap<String, Integer> processorExpectedNumOfOutputs, TreeMap<String, Double> indicesProgresses, TreeMap<String, Integer> indicesExpectedNumOfOutputs,
-            TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, TreeMap<String, TreeMap<Integer, Integer>> summaryExpectedNumOfOutputsTemp, List<String> log, TaskState State,
-            TreeMap<String, Integer> numOfFilesDownloaded, boolean ProjectUpToDate, LocalDateTime LastModifiedTime, LocalDateTime RetrievedTime)
+    public SchedulerStatus(int SchedulerID, ProjectInfoFile projectMetaData, TreeMap<String, TreeMap<String, Double>> downloadProgressesByData, TreeMap<String, Double> processorProgresses,
+            TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, List<String> log, TaskState State, boolean ProjectUpToDate, LocalDateTime LastModifiedTime,
+            LocalDateTime RetrievedTime)
     {
         this.SchedulerID = SchedulerID;
-        this.ProjectName = ProjectName;
-        this.PluginInfo = PluginInfo;
-        this.Summaries = Summaries;
+        ProjectName = projectMetaData.GetProjectName();
+        PluginInfo = projectMetaData.GetPlugins();
+        Summaries = projectMetaData.GetSummaries();
         this.downloadProgressesByData = downloadProgressesByData;
-        this.downloadExpectedDataFiles = downloadExpectedDataFiles;
         this.processorProgresses = processorProgresses;
-        this.processorExpectedNumOfOutputs = processorExpectedNumOfOutputs;
         this.indicesProgresses = indicesProgresses;
-        this.indicesExpectedNumOfOutputs = indicesExpectedNumOfOutputs;
         this.summaryProgresses = summaryProgresses;
-        this.summaryExpectedNumOfOutputsTemp = summaryExpectedNumOfOutputsTemp;
         this.log = log;
         logReaderPos = 0;
         this.State = State;
-        this.numOfFilesDownloaded = numOfFilesDownloaded;
         this.ProjectUpToDate = ProjectUpToDate;
         this.LastModifiedTime = LastModifiedTime;
         this.RetrievedTime = RetrievedTime;
@@ -148,43 +115,15 @@ public class SchedulerStatus {
         PluginInfo = new ArrayList<ProjectInfoPlugin>(statusToCopy.PluginInfo);
         Summaries = new ArrayList<ProjectInfoSummary>(statusToCopy.Summaries);
         downloadProgressesByData = cloneTreeMapStringStringDouble(statusToCopy.downloadProgressesByData);
-        downloadExpectedDataFiles = statusToCopy.downloadExpectedDataFiles;
         processorProgresses = statusToCopy.processorProgresses;
-        processorExpectedNumOfOutputs = statusToCopy.processorExpectedNumOfOutputs;
         indicesProgresses = statusToCopy.indicesProgresses;
-        indicesExpectedNumOfOutputs = statusToCopy.indicesExpectedNumOfOutputs;
         summaryProgresses = cloneTreeMapStringIntegerDouble(statusToCopy.summaryProgresses);
-        summaryExpectedNumOfOutputsTemp = cloneTreeMapStringIntegerInteger(statusToCopy.summaryExpectedNumOfOutputsTemp);
         log = statusToCopy.log;
         logReaderPos = 0;
         State = statusToCopy.State;
-        numOfFilesDownloaded = statusToCopy.numOfFilesDownloaded;
         ProjectUpToDate = statusToCopy.ProjectUpToDate;
         LastModifiedTime = statusToCopy.LastModifiedTime;
         RetrievedTime = statusToCopy.RetrievedTime;
-    }
-
-    private TreeMap<String, TreeMap<Integer, Integer>> cloneTreeMapStringIntegerInteger(TreeMap<String, TreeMap<Integer, Integer>> input)
-    {
-        TreeMap<String, TreeMap<Integer, Integer>> clone = new TreeMap<String, TreeMap<Integer, Integer>>();
-        Iterator<String> pluginsIt = input.keySet().iterator();
-        Iterator<Integer> summaryProgressesIt;
-        TreeMap<Integer, Integer> pluginResults;
-        String plugin;
-        Integer summaryID;
-        while(pluginsIt.hasNext())
-        {
-            plugin = pluginsIt.next();
-            summaryProgressesIt = input.get(plugin).keySet().iterator();
-            pluginResults = new TreeMap<Integer, Integer>();
-            while(summaryProgressesIt.hasNext())
-            {
-                summaryID = new Integer(summaryProgressesIt.next());
-                pluginResults.put(summaryID, new Integer(input.get(plugin).get(summaryID)));
-            }
-            clone.put(new String(plugin), pluginResults);
-        }
-        return clone;
     }
 
     private TreeMap<String, TreeMap<Integer, Double>> cloneTreeMapStringIntegerDouble(TreeMap<String, TreeMap<Integer, Double>> input)

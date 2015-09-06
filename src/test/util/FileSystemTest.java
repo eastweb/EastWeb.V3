@@ -29,6 +29,9 @@ public class FileSystemTest {
     private static String testProjectName;
     private static ArrayList<ProcessName> testProcessNames;
 
+    /**
+     *
+     */
     @BeforeClass
     public static void setUpBeforeClass() {
         testConfigInstance = Config.getAnInstance("C:\\EASTWeb", "C:\\EASTWeb\\Downloads", null, null, null, null, null, null, null, null);
@@ -47,6 +50,9 @@ public class FileSystemTest {
         testProcessNames.add(ProcessName.SUMMARY);
     }
 
+    /**
+     *
+     */
     @AfterClass
     public static void tearDownAfterClass() {
         testProjectInfo = null;

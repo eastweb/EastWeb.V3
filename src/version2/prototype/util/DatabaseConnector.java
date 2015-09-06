@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import version2.prototype.Config;
@@ -151,7 +150,8 @@ public class DatabaseConnector {
                 {
                     try {
                         connectionID = getLowestAvailableConnectionID();
-                        con = new DatabaseConnection(new DatabaseConnector(),
+                        con = new DatabaseConnection(configInstance,
+                                new DatabaseConnector(),
                                 DriverManager.getConnection(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName(),
                                         myConfigInstance.getDatabaseUsername(), myConfigInstance.getDatabasePassword()),
                                         connectionID);

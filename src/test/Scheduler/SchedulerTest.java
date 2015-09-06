@@ -8,8 +8,8 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
@@ -33,6 +33,7 @@ import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -48,6 +49,7 @@ import version2.prototype.download.LocalDownloader;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.DatabaseConnector;
+import version2.prototype.util.ProgressUpdater;
 import version2.prototype.util.Schemas;
 
 /**
@@ -145,15 +147,15 @@ public class SchedulerTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.Scheduler.Scheduler#Scheduler(version2.prototype.Scheduler.SchedulerData, int, version2.prototype.TaskState, version2.prototype.EASTWebManager,
-     * version2.prototype.Config)}.
+     * Test method for {@link version2.prototype.Scheduler.Scheduler#Scheduler(SchedulerData, int, TaskState, EASTWebManagerI, Config, ProgressUpdater)}.
      * @throws Exception
      */
     @Test
     public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() throws Exception {
         FileUtils.deleteDirectory(new File(configInstance.getDownloadDir() + testPluginName));
         SchedulerData sData = new SchedulerData(projectInfoFile);
-        MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, configInstance);
+        MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, configInstance, new MyProgressUpdater(configInstance, projectInfoFile,
+                PluginMetaDataCollection.getInstance("src/test/Scheduler/" + testPluginName + ".xml")));
 
         scheduler.Start();
         assertEquals("Scheduler state is STOPPED.", TaskState.RUNNING, scheduler.GetState());
@@ -177,15 +179,60 @@ public class SchedulerTest {
         assertEquals("SchedulerStatus state is RUNNING.", TaskState.STOPPED, scheduler.GetSchedulerStatus().State);
     }
 
-    private class MyScheduler extends Scheduler
+    private class MyProgressUpdater extends ProgressUpdater
     {
-        public MyScheduler(SchedulerData data, int myID, EASTWebManagerI manager) throws ParserConfigurationException, SAXException, IOException {
-            super(data, myID, manager);
+
+        public MyProgressUpdater(Config configInstance, ProjectInfoFile projectMetaData, PluginMetaDataCollection pluginMetaDataCollection) {
+            super(configInstance, projectMetaData, pluginMetaDataCollection);
         }
 
-        public MyScheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance) throws ParserConfigurationException, SAXException, IOException
+        @Override
+        public double GetCurrentDownloadProgress(String dataName, String pluginName, Statement stmt) throws SQLException {
+            return 0.0;
+        }
+
+        @Override
+        public double GetCurrentProcessorProgress(String pluginName, Statement stmt) throws SQLException {
+            return 0.0;
+        }
+
+        @Override
+        public double GetCurrentIndicesProgress(String pluginName, Statement stmt) throws SQLException {
+            return 0.0;
+        }
+
+        @Override
+        public double GetCurrentSummaryProgress(int summaryIDNum, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException {
+            return 0.0;
+        }
+
+        @Override
+        protected int getStoredDownloadExpectedTotalOutput(String projectName, String pluginName, String dataName, Statement stmt) throws SQLException {
+            return 0;
+        }
+
+        @Override
+        protected int getStoredProcessorExpectedTotalOutput(String projectName, String pluginName, Statement stmt) throws SQLException {
+            return 0;
+        }
+
+        @Override
+        protected int getStoredIndicesExpectedTotalOutput(String projectName, String pluginName, Statement stmt) throws SQLException {
+            return 0;
+        }
+
+        @Override
+        protected int getStoredSummaryExpectedTotalOutput(String projectName, String pluginName, int summaryIDNum, Statement stmt) throws SQLException {
+            return 0;
+        }
+    }
+
+    private class MyScheduler extends Scheduler
+    {
+        public MyScheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance, ProgressUpdater progressUpdater) throws ParserConfigurationException, SAXException,
+        IOException
         {
-            super(data, myID, initState, manager, configInstance);
+            super(data, myID, initState, manager, configInstance, progressUpdater);
         }
 
         @Override protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {

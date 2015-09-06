@@ -37,6 +37,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaDa
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.IndicesMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaData;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
@@ -71,6 +72,7 @@ public class DatabaseCacheTest {
     private static String testProjectSchema;
     private static String workingDir = "C:\\eastweb-data-test";
     private static Connection con;
+    private static Statement stmt;
     private static TemporalSummaryCompositionStrategy compStrategy = new CDCWeeklyStrategy();
     private static LocalDate startDate;
     private static int year;
@@ -86,6 +88,7 @@ public class DatabaseCacheTest {
     private static MyScheduler scheduler;
     private static ArrayList<String> summaryNames;
     private static ProjectInfoSummary projectInfoSummary1;
+    private static ProjectInfoFile projectMetaData;
 
     /**
      * @throws java.lang.Exception
@@ -112,8 +115,7 @@ public class DatabaseCacheTest {
         TreeMap<String, Integer> processorExpectedNumOfOutputs = new TreeMap<String, Integer>();
         processorExpectedNumOfOutputs.put(testPluginName, 2);
         SchedulerStatusContainer statusContainer = new SchedulerStatusContainer(null, 1, null, null, null, new ArrayList<String>(), TaskState.RUNNING, new TreeMap<String, TreeMap<String, Double>>(),
-                downloadExpectedDataFiles, new TreeMap<String, Double>(), processorExpectedNumOfOutputs, new TreeMap<String, Double>(), new TreeMap<String, Integer>(), new TreeMap<String,
-                TreeMap<Integer, Double>>(), new TreeMap<String, TreeMap<Integer, Integer>>(), false, new TreeMap<String, Integer>(), null);
+                new TreeMap<String, Double>(), new TreeMap<String, Double>(), new TreeMap<String, TreeMap<Integer, Double>>(), false, null);
         scheduler = tester.new MyScheduler(1, statusContainer);
         ArrayList<String> extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
@@ -137,8 +139,12 @@ public class DatabaseCacheTest {
 
         projectInfoSummary1 = new ProjectInfoSummary(new ZonalSummary("ShapeFile1", "AreaCodeField1", "AreaNameField1"),
                 new TemporalSummaryRasterFileStore(compStrategy), "MyTemporalSummaryCompositionStrategy", 1);
+        ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
+        summaries.add(projectInfoSummary1);
+        projectMetaData = new ProjectInfoFile(plugins, startDate, testProjectName, null, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
 
         con = DatabaseConnector.getConnection();
+        stmt = con.createStatement();
     }
 
     /**
@@ -146,7 +152,6 @@ public class DatabaseCacheTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        Statement stmt = con.createStatement();
         String query = String.format(
                 "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
                 testGlobalSchema
@@ -166,7 +171,6 @@ public class DatabaseCacheTest {
      */
     @Before
     public void setUp() throws Exception {
-        Statement stmt = con.createStatement();
         String query = String.format(
                 "DROP SCHEMA IF EXISTS \"%1$s\" CASCADE",
                 testGlobalSchema
@@ -177,12 +181,9 @@ public class DatabaseCacheTest {
                 Schemas.getSchemaName(testProjectName, testPluginName)
                 );
         stmt.execute(query);
-        stmt.close();
 
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
-        summaries.add(projectInfoSummary1);
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, testProjectName, testPluginName, summaryNames, LocalDate.ofYearDay(year, day), daysPerInputFile,
-                filesPerDay, numOfIndices, summaries, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, summaryNames, daysPerInputFile, filesPerDay, numOfIndices, true);
     }
 
     /**
@@ -210,18 +211,13 @@ public class DatabaseCacheTest {
     public final void testCachingFilesAndRetrievingCachedFiles() throws ClassNotFoundException, SQLException, ParseException, ParserConfigurationException, SAXException, IOException {
         // Setup input
         String data1FilePath = "Data file path1";
-        String data2FilePath = "Data file path2";
         ArrayList<DataFileMetaData> filesForASingleComposite = new ArrayList<DataFileMetaData>();
         filesForASingleComposite.add(new DataFileMetaData(data1FilePath, 2, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), "Index"));
 
         // Cache to ProcessorCache
-        scheduler.expectedNumOfProcessorOutputs = 2;
-        scheduler.expectedProcessorProgress = 50.0;
         testProcessorCache.CacheFiles(filesForASingleComposite);
 
         // Cache to IndicesCache
-        scheduler.expectedNumOfIndicesOutputs = 2;
-        scheduler.expectedIndicesProgress = 50.0;
         testIndicesCache.CacheFiles(filesForASingleComposite);
 
         // Test getting from ProcessorCache
@@ -243,17 +239,6 @@ public class DatabaseCacheTest {
         assertEquals("First result day is incorrect.", earlierStartDate.getDayOfYear(), iData1.day);
         result = testIndicesCache.GetUnprocessedCacheFiles();
         assertEquals("Number of results returned is incorrect.", 0, result.size());
-
-        filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData(data2FilePath, 1, startDate.getYear(), startDate.getDayOfYear(), "Index"));
-
-        // Cache to ProcessorCache
-        scheduler.expectedProcessorProgress = 100.0;
-        testProcessorCache.CacheFiles(filesForASingleComposite);
-
-        // Cache to IndicesCache
-        scheduler.expectedIndicesProgress = 100.0;
-        testIndicesCache.CacheFiles(filesForASingleComposite);
     }
 
     /**
@@ -272,7 +257,6 @@ public class DatabaseCacheTest {
      */
     @Test
     public final void testLoadUnprocessedGlobalDownloadsToLocalDownloader() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        Statement stmt = con.createStatement();
         ResultSet rs = null;
         String schemaName = Schemas.getSchemaName(testProjectName, testPluginName);
         ArrayList<String> modisTileNames = new ArrayList<String>();
@@ -312,18 +296,10 @@ public class DatabaseCacheTest {
         stmt.execute(query);
 
         ListDatesFiles ldf = new MyListDatesFiles(startDate);
-        scheduler.expectedDownloadProgress = 100.0;
-        scheduler.expectedNumOfDownloadOutputs = 1;
         testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "Data", startDate, extraDownloadFiles, modisTileNames, ldf);
-        scheduler.expectedNumOfDownloadOutputs = null;
-        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "QC", startDate, extraDownloadFiles, modisTileNames, ldf);
 
         ldf = new MyListDatesFiles(earlierStartDate);
-        scheduler.expectedDownloadProgress = 2.0/3.0 * 100;
-        scheduler.expectedNumOfDownloadOutputs = 3;
         testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "Data", earlierStartDate, extraDownloadFiles, modisTileNames, ldf);
-        scheduler.expectedNumOfDownloadOutputs = null;
-        testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "QC", earlierStartDate, extraDownloadFiles, modisTileNames, ldf);
 
         query = String.format("INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\", \"Complete\") VALUES " +
                 "(1, " + insertDateGroupID2 + ", '" + dataFilePath4 + "', TRUE);",
@@ -335,10 +311,7 @@ public class DatabaseCacheTest {
                 testGlobalSchema);
         stmt.execute(query);
 
-        scheduler.expectedDownloadProgress = 100.0;
-        scheduler.expectedNumOfDownloadOutputs = 3;
         testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "Data", earlierStartDate, extraDownloadFiles, modisTileNames, ldf);
-        scheduler.expectedNumOfDownloadOutputs = null;
         testDownloadCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(testGlobalSchema, testProjectName, testPluginName, "QC", earlierStartDate, extraDownloadFiles, modisTileNames, ldf);
 
         query = "SELECT * FROM \"" + schemaName + "\".\"DownloadCache\" ORDER BY \"DownloadCacheID\" ASC;";
@@ -486,7 +459,6 @@ public class DatabaseCacheTest {
             }
         }
         rs.close();
-        stmt.close();
     }
 
     /**
@@ -512,51 +484,59 @@ public class DatabaseCacheTest {
     public final void testUploadResultsToDb() throws SQLException, IllegalArgumentException, UnsupportedOperationException, ClassNotFoundException, IOException, ParserConfigurationException, SAXException,
     NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException
     {
-        Statement stmt = con.createStatement();
         int startDateGroupID = Schemas.getDateGroupID(testGlobalSchema, startDate, stmt);
-        int earliestStartDateGroupID = Schemas.getDateGroupID(testGlobalSchema, earlierStartDate, stmt);
         String indexNm = "ModisNBARNDVI";
         int indexID = Schemas.getIndexID(testGlobalSchema, indexNm, stmt);
         String filePath1 = "Result File 1";
-        String filePath2 = "Result File 2";
-
-        // Insert into IndicesCache for temporal expectedCount calculation
-        String query = String.format("INSERT INTO \"%1$s\".\"IndicesCache\" (\"DataFilePath\", \"DateGroupID\", \"IndexID\") VALUES " +
-                "('" + filePath1 + "', " + startDateGroupID + ", " + indexID + "), " +
-                "('" + filePath2 + "', " + earliestStartDateGroupID + ", " + indexID + ");",
-                testProjectSchema);
-        stmt.execute(query);
 
         // Setup for upload 1
-        scheduler.expectedNumOfSummaryOutputs = 2;
-        scheduler.expectedSummaryProgress = 50.0;
         int areaCode = 11;
         String areaName = "Area1";
+        double count = 11.0;
+        double max = 21.0;
+        double min = 1.0;
+        double mean = 7.0;
+        double sqrSum = 6.0;
+        double stdDev = 3.43;
+        double sum = 72.0;
         Process process = new MyProcess();
         int projectSummaryID = Schemas.getProjectSummaryID(testGlobalSchema, testProjectName, 1, stmt);
         Map<String, Double> summaryResults = new HashMap<String, Double>();
-        summaryResults.put("Count", 11.0);
-        summaryResults.put("Max", 21.0);
-        summaryResults.put("Min", 1.0);
-        summaryResults.put("Mean", 7.0);
-        summaryResults.put("SqrSum", 6.0);
-        summaryResults.put("StdDev", 3.43);
-        summaryResults.put("Sum", 72.0);
+        summaryResults.put("Count", count);
+        summaryResults.put("Max", max);
+        summaryResults.put("Min", min);
+        summaryResults.put("Mean", mean);
+        summaryResults.put("SqrSum", sqrSum);
+        summaryResults.put("StdDev", stdDev);
+        summaryResults.put("Sum", sum);
         ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, startDateGroupID, indexID, filePath1, summaryResults));
 
-        // Upload result 1
+        // Upload result
         testSummaryCache.UploadResultsToDb(newResults, 1, compStrategy, startDate.getYear(), startDate.getDayOfYear(), process, 1);
 
-        // Setup for upload 2
-        scheduler.expectedSummaryProgress = 100.0;
-        newResults = new ArrayList<SummaryResult>();
-        newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, earliestStartDateGroupID, indexID, filePath2, summaryResults));
+        // Test upload
+        String progressQuery = "SELECT \"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"AreaCode\", \"AreaName\", \"FilePath\", " +
+                "\"Count\", \"Max\", \"Min\", \"Mean\", \"SqrSum\", \"StdDev\", \"Sum\" FROM \"" + testProjectSchema + "\".\"ZonalStat\";";
+        ResultSet rs = stmt.executeQuery(progressQuery);
+        if(rs != null && rs.next())
+        {
+            assertEquals("ProjectSummaryID incorrect.", projectSummaryID, rs.getInt("ProjectSummaryID"));
+            assertEquals("DateGroupID incorrect.", startDateGroupID, rs.getInt("DateGroupID"));
+            assertEquals("IndexID incorrect.", indexID, rs.getInt("IndexID"));
+            assertEquals("AreaCode incorrect.", areaCode, rs.getInt("AreaCode"));
+            assertEquals("AreaName incorrect.", areaName, rs.getString("AreaName"));
+            assertEquals("Count incorrect.", count, rs.getDouble("Count"), 0.0);
+            assertEquals("Max incorrect.", max, rs.getDouble("Max"), 0.0);
+            assertEquals("Min incorrect.", min, rs.getDouble("Min"), 0.0);
+            assertEquals("Mean incorrect.", mean, rs.getDouble("Mean"), 0.0);
+            assertEquals("SqrSum incorrect.", sqrSum, rs.getDouble("SqrSum"), 0.0);
+            assertEquals("StdDev incorrect.", stdDev, rs.getDouble("StdDev"), 0.0);
+            assertEquals("Sum incorrect.", sum, rs.getDouble("Sum"), 0.0);
 
-        // Upload result 2
-        testSummaryCache.UploadResultsToDb(newResults, 1, compStrategy, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), process, 1);
-
-        stmt.close();
+            assertFalse("More than one record added to ZonalStat.", rs.next());
+            rs.close();
+        }
     }
 
     private class MyProcess extends Process
@@ -578,54 +558,33 @@ public class DatabaseCacheTest {
 
     private class MyScheduler extends Scheduler
     {
-        public Integer expectedNumOfDownloadOutputs;
-        public Integer expectedNumOfProcessorOutputs;
-        public Integer expectedNumOfIndicesOutputs;
-        public Integer expectedNumOfSummaryOutputs;
-        public Double expectedDownloadProgress;
-        public Double expectedProcessorProgress;
-        public Double expectedIndicesProgress;
-        public Double expectedSummaryProgress;
-
         public MyScheduler(int myID, SchedulerStatusContainer statusContainer) throws ParserConfigurationException, SAXException, IOException {
             super(null, null, myID, null, null, statusContainer);
         }
 
         @Override
-        public void NotifyUI(GeneralUIEventObject e)
-        {
-            DatabaseCache cache = (DatabaseCache)e.getSource();
+        public void NotifyUI(GeneralUIEventObject e) {
+            // Do nothing
+        }
 
-            synchronized (statusContainer)
-            {
-                switch(cache.processCachingFor)
-                {
-                case DOWNLOAD:
-                    if(e.getDataName() != null) {
-                        //                        statusContainer.UpdateDownloadProgressByData(e.getProgress(), e.getPluginName(), e.getDataName(), e.getExpectedNumOfOutputs());
-                        assertEquals("Download expectedNumOfOutputs incorrect.", expectedNumOfDownloadOutputs, e.getExpectedNumOfOutputs());
-                        assertEquals("Download progress incorrect.", expectedDownloadProgress, e.getProgress());
-                    }
-                    break;
-                case PROCESSOR:
-                    //                    statusContainer.UpdateProcessorProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
-                    assertEquals("Processor expectedNumOfOutputs incorrect.", expectedNumOfProcessorOutputs, e.getExpectedNumOfOutputs());
-                    assertEquals("Processor progress incorrect.", expectedProcessorProgress, e.getProgress());
-                    break;
-                case INDICES:
-                    //                    statusContainer.UpdateIndicesProgress(e.getProgress(), e.getPluginName(), e.getExpectedNumOfOutputs());
-                    assertEquals("Indices expectedNumOfOutputs incorrect.", expectedNumOfIndicesOutputs, e.getExpectedNumOfOutputs());
-                    assertEquals("Indices progress incorrect.", expectedIndicesProgress, e.getProgress());
-                    break;
-                default:    // SUMMARY
-                    if(e.getSummaryID() != null) {
-                        //                        statusContainer.UpdateSummaryProgress(e.getProgress(), e.getPluginName(), e.getSummaryID(), e.getExpectedNumOfOutputs());
-                        assertEquals("Summary expectedNumOfOutputs incorrect.", expectedNumOfSummaryOutputs, e.getExpectedNumOfOutputs());
-                        assertEquals("Summary progress incorrect.", expectedSummaryProgress, e.getProgress());
-                    }
-                    break;
-                }
-            }
+        @Override
+        public synchronized void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException {
+            // Do Nothing
+        }
+
+        @Override
+        public synchronized void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException {
+            // Do nothing
+        }
+
+        @Override
+        public synchronized void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException {
+            // Do nothing
+        }
+
+        @Override
+        public synchronized void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException {
+            // Do nothing
         }
     }
 

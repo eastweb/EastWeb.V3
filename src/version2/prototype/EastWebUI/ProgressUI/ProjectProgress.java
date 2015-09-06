@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.JList;
 
@@ -122,7 +123,9 @@ public class ProjectProgress {
 
         logList = new JList<String>(itemLog);
         logList.setBounds(10, 22, 344, 269);
-        panel_1.add(logList);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(logList);
+        panel_1.add(scrollPane);
     }
 
     class GUIUpdateHandlerImplementation implements GUIUpdateHandler{

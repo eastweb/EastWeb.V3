@@ -7,6 +7,10 @@ import java.time.temporal.TemporalAdjusters;
 
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
+/**
+ * @author michael.devos
+ *
+ */
 public class CDCWeeklyStrategy implements TemporalSummaryCompositionStrategy {
 
     @Override
@@ -46,7 +50,7 @@ public class CDCWeeklyStrategy implements TemporalSummaryCompositionStrategy {
     }
 
     @Override
-    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate, int daysPerInputData) {
+    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
         DayOfWeek startDay = startDate.getDayOfWeek();
 
         if(startDay != DayOfWeek.SUNDAY)

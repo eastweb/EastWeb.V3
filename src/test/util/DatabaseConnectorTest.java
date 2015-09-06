@@ -132,6 +132,10 @@ public class DatabaseConnectorTest {
         }
     }
 
+    /**
+     * @throws SQLException
+     * @throws Exception
+     */
     @Test
     public final void testCloseAllConnections() throws SQLException, Exception
     {

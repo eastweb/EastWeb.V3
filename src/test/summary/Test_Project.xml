@@ -10,10 +10,10 @@
 	<ProjectName>Test_Project</ProjectName>
 	<WorkingDir>C:\Users\michael.devos\Desktop\EASTWeb</WorkingDir>
 	<Masking>
-		<File>C:\Users\michael.devos\Desktop\EASTWeb\Files\watermask\Water_M.tif</File>
+		<File>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
 		<Resolution>1000</Resolution>
 	</Masking>
-	<MasterShapeFile>C:\Users\michael.devos\Desktop\EASTWeb\Files\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
+	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
 	<TotalModisTiles>120</TotalModisTiles>
 	<ModisTiles/>
@@ -33,6 +33,6 @@
 	<HeatingDate>Sat Aug 01 00:00:00 CDT 2015</HeatingDate>
 	<HeatingDegree>100.1</HeatingDegree>
 	<Summaries>
-        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Desktop\EASTWeb\Files\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaIDField: N_ID2</Summary>
+        <Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaIDField: W_CODE</Summary>
 	</Summaries>
 </ProjectInfo>

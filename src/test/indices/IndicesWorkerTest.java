@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -91,16 +92,15 @@ public class IndicesWorkerTest {
     public final void testCall() throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserConfigurationException, SAXException, IOException, SQLException, ParseException {
         // Set up parameters
         String globalSchema = "";
-        String xmlLocation = "";
         String pluginMetaDataFile = "";
         int day = 0;
         int year = 0;
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile(xmlLocation);
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile(null, LocalDate.now(), "Test_Project", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null,
-                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, pluginMetaData.Indices.indicesNames.size(), projectInfoFile.GetSummaries(), false);
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
+                pluginMetaData.Indices.indicesNames.size(), false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);
