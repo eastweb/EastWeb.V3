@@ -289,9 +289,13 @@ public class Schemas {
         return getID(selectQuery, "ProjectID", stmt);
     }
 
-    public static Integer getTemporalSummaryCompositionStrategyID(final String globalEASTWebSchema, final String temporalSummaryCompositionStrategyClassName, final Statement stmt) throws SQLException {
-        if(globalEASTWebSchema == null || temporalSummaryCompositionStrategyClassName == null) {
+    public static Integer getTemporalSummaryCompositionStrategyID(final String globalEASTWebSchema, String temporalSummaryCompositionStrategyClassName, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null) {
             return null;
+        }
+
+        if(temporalSummaryCompositionStrategyClassName == null) {
+            temporalSummaryCompositionStrategyClassName = "";
         }
 
         String selectQuery = String.format("SELECT \"TemporalSummaryCompositionStrategyID\" FROM \"%1$s\".\"TemporalSummaryCompositionStrategy\" " +
