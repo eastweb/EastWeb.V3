@@ -4,12 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 
-
-
-
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 
 
 public class ConnectionContext {

@@ -17,7 +17,7 @@ public interface DownloaderFactory {
     public LocalDownloader CreateLocalDownloader(GlobalDownloader gdl);
 
     /**
-     * Creates a GlobaldDownloader instance determined by subclasses.
+     * Creates a GlobaldDownloader instance determined by subclasses if it registers correctly. Otherwise returns null on failure.
      *
      * @param myID  - an unique number to use as the ID for this GlobalDownloader instance (only has to be unique in comparison to currently surviving GlobalDownloader instances).
      * @return a GlobalDownloader instance

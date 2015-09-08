@@ -16,10 +16,11 @@ import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.download.ModisNBAR.ModisNBARDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
@@ -32,7 +33,7 @@ import version2.prototype.util.FileSystem;
 public class ModisNBARGlobalDownloader extends GlobalDownloader
 {
     public ModisNBARGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
-    IOException, SQLException {
+    IOException, SQLException, RegistrationException {
         super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
         // TODO Auto-generated constructor stub
     }
@@ -55,7 +56,7 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
         try {
             cachedD = GetAllDownloadedFiles();
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARGlobalDownloader.run problem while setting up current list of missing download files.", e);
+            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while setting up current list of missing download files.", e);
         }
 
         // Step 3: Remove already downloaded files from ListDatesFiles
@@ -93,7 +94,7 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
 
                 DataDate dd = entry.getKey();
 
@@ -107,21 +108,21 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
                         try{
                             downloader.download();
                         } catch (DownloadFailedException e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARGlobalDownloader.run problem while running ModisNBARDownloader.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while running ModisNBARDownloader.", e);
                         } catch (Exception e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARGlobalDownloader.run problem while running ModisNBARDownloader.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while running ModisNBARDownloader.", e);
                         }
 
                         try {
                             AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARGlobalDownloader.run problem while attempting to add download file.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while attempting to add download file.", e);
                         }
                     }
 
                 }
             } catch (IOException e) {
-                ErrorLog.add(Config.getInstance(), pluginName, "ModisNBARGlobalDownloader.run problem while attempting to handle download.", e);
+                ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while attempting to handle download.", e);
             }
 
         }

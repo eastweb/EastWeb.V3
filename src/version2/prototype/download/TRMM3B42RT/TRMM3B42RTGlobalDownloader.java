@@ -19,10 +19,11 @@ import version2.prototype.Config;
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
@@ -34,8 +35,8 @@ import version2.prototype.util.FileSystem;
  */
 public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
 
-    public TRMM3B42RTGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
-    IOException, SQLException {
+    public TRMM3B42RTGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException,
+    ParserConfigurationException, SAXException, IOException, SQLException, RegistrationException {
         super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
     }
 
@@ -93,7 +94,7 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
 
                 DataDate dd = entry.getKey();
 
@@ -107,16 +108,16 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
                         try{
                             downloader.download();
                         } catch (IOException | DownloadFailedException | SAXException e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "TRMM3B42RTGlobalDownloader.run problem while attempting to download file.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "TRMM3B42RTGlobalDownloader.run problem while attempting to download file.", e);
                         } catch (Exception e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "TRMM3B42RTGlobalDownloader.run problem while attempting to download file.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "TRMM3B42RTGlobalDownloader.run problem while attempting to download file.", e);
                         }
 
 
                         try {
                             AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "TRMM3B42RTGlobalDownloader.run problem while attempting to add download file.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "TRMM3B42RTGlobalDownloader.run problem while attempting to add download file.", e);
                         }
                     }
                 }

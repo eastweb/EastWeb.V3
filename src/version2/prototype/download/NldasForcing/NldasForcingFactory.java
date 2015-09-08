@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.EASTWebManagerI;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -23,19 +23,18 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class NldasForcingFactory extends DownloadFactory {
 
-    public NldasForcingFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
-        super(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache,  startDate, dData);
+    public NldasForcingFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
+            Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {
+        super(manager, configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache,  startDate);
     }
 
     @Override
-    public DownloaderFactory CreateDownloadFactory(ListDatesFiles listDatesFiles) {
-        return new LocalStorageDownloadFactory(manager, configInstance, "NldasForcingDownloader", projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles,
-                startDate);
+    public DownloaderFactory CreateDownloaderFactory(ListDatesFiles listDatesFiles) {
+        return new LocalStorageDownloadFactory(manager, configInstance, "NldasForcingDownloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles, startDate);
     }
 
     @Override
     public ListDatesFiles CreateListDatesFiles() throws IOException {
-        return new NldasForcingListDatesFiles(new DataDate(startDate), dData, projectInfoFile);
+        return new NldasForcingListDatesFiles(new DataDate(startDate), downloadMetaData, projectInfoFile);
     }
 }

@@ -300,7 +300,7 @@ public class SchedulerTest {
             {
                 DownloaderFactory factory = null;
                 try {
-                    factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
+                    factory = dlFactory.CreateDownloaderFactory(dlFactory.CreateListDatesFiles());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -308,7 +308,7 @@ public class SchedulerTest {
                 int currentGDLIdx = -1;
                 for(int i=0; i < globalDLs.size(); i++)
                 {
-                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
+                    if(globalDLs.get(i).pluginName.equals(gdl.pluginName))
                     {
                         currentGDLIdx = i;
                         break;

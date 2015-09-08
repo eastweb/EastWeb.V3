@@ -24,7 +24,7 @@ import version2.prototype.Process;
 import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
@@ -142,7 +142,7 @@ public class Scheduler {
             for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
-                new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName())).mkdirs();
+                new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName(), pluginMetaData.Download.name)).mkdirs();
 
                 Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile, item.GetName(), configInstance.getSummaryCalculations(), pluginMetaData.DaysPerInputData,
                         pluginMetaData.Download.filesPerDay, item.GetIndices().size(), true);
@@ -457,10 +457,10 @@ public class Scheduler {
 
         // Create "data" DownloadFactory
         Class<?> downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + pluginMetaData.Download.downloadFactoryClassName);
-        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
-                DatabaseCache.class, LocalDate.class, DownloadMetaData.class);
-        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
-                projectInfoFile.GetStartDate(), pluginMetaData.Download);
+        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, DownloadMetaData.class, PluginMetaData.class,
+                Scheduler.class, DatabaseCache.class, LocalDate.class);
+        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData.Download, pluginMetaData, this, outputCache,
+                projectInfoFile.GetStartDate());
 
         // Create "data" GenericGlobalDownloader
         lDownloders.add(manager.StartGlobalDownloader(downloadFactory));
@@ -469,10 +469,9 @@ public class Scheduler {
         {
             // Create extra ListDatesFiles instance
             downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + dlMetaData.downloadFactoryClassName);
-            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, PluginMetaData.class, Scheduler.class,
-                    DatabaseCache.class, LocalDate.class, DownloadMetaData.class);
-            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, outputCache,
-                    projectInfoFile.GetStartDate(), dlMetaData);
+            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, DownloadMetaData.class, PluginMetaData.class,
+                    Scheduler.class, DatabaseCache.class, LocalDate.class);
+            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, dlMetaData, pluginMetaData, this, outputCache, projectInfoFile.GetStartDate());
 
             // Create extra GenericGlobalDownloader
             lDownloders.add(manager.StartGlobalDownloader(downloadFactory));

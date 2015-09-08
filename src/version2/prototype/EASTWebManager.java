@@ -621,7 +621,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                                         {
                                             for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
                                             {
-                                                if(pluginInfo.GetName().equals(gdl.GetPluginName()))
+                                                if(pluginInfo.GetName().equals(gdl.pluginName))
                                                 {
                                                     noneExisting = false;
                                                     if(scheduler.GetState() == TaskState.RUNNING) {
@@ -639,9 +639,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                                         if(noneExisting)
                                         {
                                             gdl.Stop();
-                                            globalDLs.remove(gdl.GetID());
-                                            releaseGlobalDLID(gdl.GetID());
-                                            globalDLFutures.get(gdl.GetID()).cancel(false);
+                                            globalDLs.remove(gdl.ID);
+                                            releaseGlobalDLID(gdl.ID);
+                                            globalDLFutures.get(gdl.ID).cancel(false);
                                         }
                                     }
                                 }
@@ -651,9 +651,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                                 for(GlobalDownloader gdl : globalDLs)
                                 {
                                     gdl.Stop();
-                                    globalDLs.remove(gdl.GetID());
-                                    releaseGlobalDLID(gdl.GetID());
-                                    globalDLFutures.get(gdl.GetID()).cancel(false);
+                                    globalDLs.remove(gdl.ID);
+                                    releaseGlobalDLID(gdl.ID);
+                                    globalDLFutures.get(gdl.ID).cancel(false);
                                 }
                             }
 
@@ -721,17 +721,22 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             {
                 DownloaderFactory factory = null;
                 try {
-                    factory = dlFactory.CreateDownloadFactory(dlFactory.CreateListDatesFiles());
+                    factory = dlFactory.CreateDownloaderFactory(dlFactory.CreateListDatesFiles());
                 } catch (IOException e) {
                     ErrorLog.add(Config.getInstance(), "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
                 } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
                 }
                 GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
+                if(gdl == null) {
+                    return null;
+                }
                 int currentGDLIdx = -1;
+                String tempDownloadFactoryClassName;
                 for(int i=0; i < globalDLs.size(); i++)
                 {
-                    if(globalDLs.get(i).GetPluginName().equals(gdl.GetPluginName()))
+                    tempDownloadFactoryClassName = globalDLs.get(i).metaData.downloadFactoryClassName;
+                    if(tempDownloadFactoryClassName.equals(gdl.metaData.downloadFactoryClassName))
                     {
                         currentGDLIdx = i;
                         break;
@@ -744,7 +749,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     gdl = globalDLs.get(currentGDLIdx);
                 }
                 else {
-                    if(globalDLs.size() == 0)
+                    if(globalDLs.size() <= id)
                     {
                         globalDLs.add(id, gdl);
                         globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));

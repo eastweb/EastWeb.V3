@@ -17,11 +17,12 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.PluginMetaData.DownloadMetaData;
+import version2.prototype.PluginMetaData.FTP;
+import version2.prototype.PluginMetaData.HTTP;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.download.ModisNBAR.ModisNBARGlobalDownloader;
 import version2.prototype.download.ModisNBAR.ModisNBARListDatesFiles;
 
@@ -34,7 +35,7 @@ public class TestModisNBARGlobalDownloader {
     {
         String mode = "HTTP";// the protocol type: ftp or http
         FTP myFtp = null;
-        HTTP myHttp = PluginMetaDataCollection.CreateHTTP("http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/");;
+        HTTP myHttp = new HTTP("http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/");;
         String className = null;
         String timeZone = null;
         int filesPerDay = -1;
@@ -45,7 +46,7 @@ public class TestModisNBARGlobalDownloader {
         // Just for test
         LocalDate ld = LocalDate.parse("Sun Mar 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
-        data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
         p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
     }
 
@@ -55,7 +56,7 @@ public class TestModisNBARGlobalDownloader {
     }
 
     @Test
-    public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
+    public void testRun() throws IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException, RegistrationException {
         ListDatesFiles ldf= new ModisNBARListDatesFiles(new DataDate(data.originDate), data, p);
         LocalDate startDate = LocalDate.now().minusDays(14);
 

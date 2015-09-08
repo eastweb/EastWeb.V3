@@ -22,10 +22,10 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.SummaryMetaData;
+import version2.prototype.PluginMetaData.ProcessorMetaData;
+import version2.prototype.PluginMetaData.SummaryMetaData;
 
 /**
  * @author michael.devos

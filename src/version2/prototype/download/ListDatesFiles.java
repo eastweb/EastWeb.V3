@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import version2.prototype.DataDate;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
 public abstract class ListDatesFiles

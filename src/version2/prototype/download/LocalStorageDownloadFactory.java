@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
 import version2.prototype.ErrorLog;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -30,6 +31,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
     private final String downloaderClassName;
     private final ProjectInfoFile projectInfoFile;
     private final ProjectInfoPlugin pluginInfo;
+    private final DownloadMetaData downloadMetaData;
     private final PluginMetaData pluginMetaData;
     private final Scheduler scheduler;
     private final DatabaseCache outputCache;
@@ -42,13 +44,14 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
      * @param downloaderClassName
      * @param projectInfoFile
      * @param pluginInfo
+     * @param downloadMetaData
      * @param pluginMetaData
      * @param scheduler
      * @param outputCache
      * @param listDatesFiles
      * @param startDate
      */
-    public LocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public LocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles, LocalDate startDate)
     {
         this.manager = manager;
@@ -56,6 +59,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
         this.downloaderClassName = downloaderClassName;
         this.projectInfoFile = projectInfoFile;
         this.pluginInfo = pluginInfo;
+        this.downloadMetaData = downloadMetaData;
         this.pluginMetaData = pluginMetaData;
         this.scheduler = scheduler;
         this.outputCache = outputCache;
@@ -78,11 +82,13 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
     public GlobalDownloader CreateGlobalDownloader(int myID) {
         GlobalDownloader downloader = null;
         try {
-            downloader = new GenericLocalStorageGlobalDownloader(myID, configInstance, pluginInfo.GetName(), pluginMetaData.Download, listDatesFiles, startDate, downloaderClassName);
+            downloader = new GenericLocalStorageGlobalDownloader(myID, configInstance, pluginInfo.GetName(), downloadMetaData, listDatesFiles, startDate, downloaderClassName);
+        } catch (RegistrationException e) {
+            return null;
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | ParserConfigurationException | SAXException | IOException | SQLException e) {
-            ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
+            ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), downloadMetaData.name, "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
         } catch (Exception e) {
-            ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
+            ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), downloadMetaData.name, "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
         }
         return downloader;
     }

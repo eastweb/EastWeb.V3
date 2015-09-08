@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.ListDatesFiles;
@@ -28,8 +28,7 @@ import version2.prototype.util.ParallelUtils.Parallel;
 
 public class ModisListDatesFiles extends ListDatesFiles
 {
-    public ModisListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project)
-            throws IOException
+    public ModisListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException
     {
         super(startDate, data, project);
     }
@@ -117,7 +116,7 @@ public class ModisListDatesFiles extends ListDatesFiles
                         }
                         catch(Exception e)
                         {
-                            ErrorLog.add(Config.getInstance(), "Modis", "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
+                            ErrorLog.add(Config.getInstance(), "Modis", mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
                             return;
                         }
                     }
@@ -127,7 +126,7 @@ public class ModisListDatesFiles extends ListDatesFiles
         }
         catch (Exception e)
         {
-            ErrorLog.add(Config.getInstance(), "Modis", "ModisListDatesFiles.ListDatesFilesHTTP problem while setting up download stream or ParallelForEach.", e);
+            ErrorLog.add(Config.getInstance(), "Modis", mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while setting up download stream or ParallelForEach.", e);
             return null;
         }
 

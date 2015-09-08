@@ -3,8 +3,6 @@
  */
 package test.download.TRMM3B42RT;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -19,14 +17,11 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.ConfigReadException;
 import version2.prototype.DataDate;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.PluginMetaData.DownloadMetaData;
+import version2.prototype.PluginMetaData.FTP;
+import version2.prototype.PluginMetaData.HTTP;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTDownloader;
-import version2.prototype.util.DatabaseConnector;
-import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
@@ -40,7 +35,7 @@ public class TRMM3B42RTDownloaderTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         String mode = "FTP";// the protocol type: ftp or http
-        FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
+        FTP myFtp = new FTP("disc2.nascom.nasa.gov",
                 "/data/TRMM/Gridded/Derived_Products/3B42RT/Daily/", "anonymous", "anonymous");
         HTTP myHttp = null;
         String className = null;
@@ -50,7 +45,7 @@ public class TRMM3B42RTDownloaderTest {
         String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
         LocalDate ld = LocalDate.parse("Wed Jul 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
-        data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
     }
 
     /**

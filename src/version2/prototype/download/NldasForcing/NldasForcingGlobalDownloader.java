@@ -14,9 +14,10 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
@@ -24,7 +25,7 @@ import version2.prototype.util.FileSystem;
 public class NldasForcingGlobalDownloader extends GlobalDownloader {
 
     public NldasForcingGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
-    IOException, SQLException {
+    IOException, SQLException, RegistrationException {
         super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
     }
 
@@ -56,7 +57,7 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
             }
         }
         catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-            ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while setting up current list of missing download files.", e);
+            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasForcingGlobalDownloader.run problem while setting up current list of missing download files.", e);
         }
 
         for(Map.Entry<DataDate, ArrayList<String>> entry : mapDatesToFiles.entrySet())
@@ -64,7 +65,7 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
 
                 DataDate dd = entry.getKey();
 
@@ -76,19 +77,19 @@ public class NldasForcingGlobalDownloader extends GlobalDownloader {
                         downloader.download();
                     }
                     catch (Exception e) {
-                        ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while running NldasForcingDownloader.", e);
+                        ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasForcingGlobalDownloader.run problem while running NldasForcingDownloader.", e);
                     }
 
                     try {
                         AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                     }
                     catch (ClassNotFoundException | SQLException e) {
-                        ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while attempting to add download file.", e);
+                        ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasForcingGlobalDownloader.run problem while attempting to add download file.", e);
                     }
                 }
 
             } catch (ParserConfigurationException | SAXException | IOException e) {
-                ErrorLog.add(Config.getInstance(), pluginName, "NldasForcingGlobalDownloader.run problem while attempting to handle download.", e);
+                ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasForcingGlobalDownloader.run problem while attempting to handle download.", e);
             }
         }
     }

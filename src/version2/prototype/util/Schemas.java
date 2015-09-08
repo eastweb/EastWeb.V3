@@ -834,7 +834,7 @@ public class Schemas {
      * @param selectQuery
      * @param insertQuery
      * @param stmt
-     * @return TRUE if the row exists now or before, FALSE if insertion failed
+     * @return TRUE if a new row is added or pre-existing, otherwise FALSE if failure.
      * @throws SQLException
      */
     private static boolean addRowIFNotExistent(final String selectQuery, final String insertQuery, final Statement stmt) throws SQLException

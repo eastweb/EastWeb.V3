@@ -169,7 +169,8 @@ public class FileSystemTest {
          * Expected Result Form:
          *  testConfigInstance.getDownloadDir() + "/" + FileSystem.StandardizeName(testPluginName) + "/"
          */
-        assertEquals("GlobalDownloadDirectory is incorrect.", testConfigInstance.getDownloadDir() + FileSystem.StandardizeName(testPluginName) + "\\", FileSystem.GetGlobalDownloadDirectory(testConfigInstance, testPluginName));
+        assertEquals("GlobalDownloadDirectory is incorrect.", testConfigInstance.getDownloadDir() + FileSystem.StandardizeName(testPluginName) + "\\Data\\",
+                FileSystem.GetGlobalDownloadDirectory(testConfigInstance, testPluginName, "Data"));
     }
 
 }

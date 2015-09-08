@@ -8,8 +8,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.xml.sax.SAXException;
 
 import version2.prototype.DataDate;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
+import version2.prototype.PluginMetaData.DownloadMetaData;
+import version2.prototype.PluginMetaData.FTP;
 import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.DownloadUtils;

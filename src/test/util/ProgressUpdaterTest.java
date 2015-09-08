@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ZonalSummary;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -623,7 +624,7 @@ public class ProgressUpdaterTest {
     private class MyListDatesFiles extends ListDatesFiles
     {
         public MyListDatesFiles() throws IOException, PatternSyntaxException, ParserConfigurationException, SAXException {
-            super(null, PluginMetaDataCollection.CreateDownloadMetaData("ftp", null, null, null, null, 1, null, null, null), null);
+            super(null, new DownloadMetaData(null, null, null, null, null, "FTP", null, null, null, null, 1, null, null, null), null);
         }
 
         @SuppressWarnings("unchecked")

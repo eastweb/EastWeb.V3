@@ -66,15 +66,16 @@ public final class ErrorLog {
      * Reports an error to the error log for the specified GlobalDownloader.
      * @param configInstance
      * @param pluginName
+     * @param dataName  - name of the data files
      * @param message Error message, suitable for presentation to the user
      * @param e Cause of the error, may be null
      */
-    public static void add(Config configInstance, String pluginName, String message, Throwable e)
+    public static void add(Config configInstance, String pluginName, String dataName, String message, Throwable e)
     {
         String logFileName = getLogFileName();
         String logPath = configInstance.getErrorLogDir();
         try {
-            logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+            logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, dataName);
         } catch (ConfigReadException cause) {
             add(configInstance, "Problem logging error.", cause);
         }
@@ -97,7 +98,7 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message + " [Error Logged: " + logPath + "]"));
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
         }
     }
 
@@ -132,7 +133,7 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             printToLogFile(logPath + logFileName, message, e);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause(), message + " [Error Logged: " + logPath + "]"));
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
         }
     }
 

@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -28,7 +29,7 @@ import version2.prototype.Config;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -39,6 +40,7 @@ import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.download.GenericLocalRetrievalLocalDownloader;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.DatabaseConnector;
@@ -149,11 +151,13 @@ public class GenericLocalRetrievalLocalDownloaderTest {
      * @throws ClassNotFoundException
      * @throws SecurityException
      * @throws NoSuchMethodException
+     * @throws RegistrationException
+     * @throws PatternSyntaxException
      */
     @Test
-    public final void testAttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, NoSuchMethodException, SecurityException {
+    public final void testAttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, NoSuchMethodException, SecurityException, PatternSyntaxException, RegistrationException {
         LocalDate startDate2 = LocalDate.ofYearDay(year, day).minusDays(8);
-        MyGlobalDownloader gdl = new MyGlobalDownloader(1, testConfig, testPluginName, PluginMetaDataCollection.CreateDownloadMetaData("Data", null, null, null, null, filesPerDay, "", "", null, null),
+        MyGlobalDownloader gdl = new MyGlobalDownloader(1, testConfig, testPluginName, new DownloadMetaData(null, null, null, null, null, "Data", null, null, null, null, filesPerDay, "", "", null, null),
                 null, startDate);
         GenericLocalRetrievalLocalDownloader ldlData = new GenericLocalRetrievalLocalDownloader(null, testConfig, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, null);
 
@@ -182,7 +186,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
     public final void testSetStartDate() throws ParserConfigurationException, SAXException, IOException, Exception {
         GenericLocalRetrievalLocalDownloader ldl = new GenericLocalRetrievalLocalDownloader(null, testConfig,
                 new MyGlobalDownloader(1, testConfig, testPluginName,
-                        PluginMetaDataCollection.CreateDownloadMetaData("Data", null, null, null, null, filesPerDay, "", "", null, null),
+                        new DownloadMetaData(null, null, null, null, null, "Data", null, null, null, null, filesPerDay, "", "", null, null),
                         null, startDate), projectInfoFile, pluginInfo, pluginMetaData, null, outputCache, null);
 
         assertEquals("LDL start date not as expected.", startDate, ldl.GetStartDate());
@@ -215,7 +219,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         public boolean performedUpdates;
 
         public MyGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException,
-        ParserConfigurationException, SAXException, IOException, SQLException {
+        ParserConfigurationException, SAXException, IOException, SQLException, RegistrationException {
             super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
             performedUpdates = false;
         }
@@ -226,9 +230,8 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         }
 
         @Override
-        protected boolean RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
+        protected void RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
             // do nothing
-            return true;
         }
 
         @Override

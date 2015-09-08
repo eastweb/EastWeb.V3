@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManagerI;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -24,25 +24,36 @@ public abstract class DownloadFactory {
     protected final Config configInstance;
     protected final ProjectInfoFile projectInfoFile;
     protected final ProjectInfoPlugin pluginInfo;
+    protected final DownloadMetaData downloadMetaData;
     protected final PluginMetaData pluginMetaData;
     protected final Scheduler scheduler;
     protected final DatabaseCache outputCache;
     protected final LocalDate startDate;
-    protected final DownloadMetaData dData;
 
-    protected DownloadFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
-            DatabaseCache outputCache, LocalDate startDate, DownloadMetaData dData) {
+    protected DownloadFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
+            Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {
         this.manager = manager;
         this.configInstance = configInstance;
         this.projectInfoFile = projectInfoFile;
         this.pluginInfo = pluginInfo;
+        this.downloadMetaData = downloadMetaData;
         this.pluginMetaData = pluginMetaData;
         this.scheduler = scheduler;
         this.outputCache = outputCache;
         this.startDate = startDate;
-        this.dData = dData;
     }
 
-    public abstract DownloaderFactory CreateDownloadFactory(ListDatesFiles listDatesFiles);
+    /**
+     * Creates the ListDatesFiles object to be used within the DownloaderFactory.
+     * @return custom ListDatesFiles object
+     * @throws IOException
+     */
     public abstract ListDatesFiles CreateListDatesFiles() throws IOException;
+
+    /**
+     * Creates the DownloaderFactory to use for creating the LocalDownloader and GlobalDownloader for the plugin.
+     * @param listDatesFiles
+     * @return custom DownloaderFactory object
+     */
+    public abstract DownloaderFactory CreateDownloaderFactory(ListDatesFiles listDatesFiles);
 }

@@ -32,11 +32,11 @@ import version2.prototype.DataDate;
 import version2.prototype.Process;
 import version2.prototype.TaskState;
 import version2.prototype.ZonalSummary;
+import version2.prototype.PluginMetaData.IndicesMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.IndicesMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.ProcessorMetaData;
+import version2.prototype.PluginMetaData.ProcessorMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
@@ -119,9 +119,9 @@ public class DatabaseCacheTest {
         scheduler = tester.new MyScheduler(1, statusContainer);
         ArrayList<String> extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
-        DownloadMetaData downloadMD = PluginMetaDataCollection.CreateDownloadMetaData(null, null, null, null, null, filesPerDay, null, null, null, null);
-        ProcessorMetaData processorMD = PluginMetaDataCollection.CreateProcessorMetaData(null, 1);
-        IndicesMetaData indicesMD = PluginMetaDataCollection.CreateIndicesMetaData(indicesNames);
+        DownloadMetaData downloadMD = new DownloadMetaData(null, null, null, null, null, null, null, null, null, null, filesPerDay, null, null, null);
+        ProcessorMetaData processorMD = new ProcessorMetaData(null, null, null, null, null, null, 1);
+        IndicesMetaData indicesMD = new IndicesMetaData(null, null, null, null, null, indicesNames);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, null, null, extraDownloadFiles, downloadMD, processorMD, indicesMD, null, null, null);
         testDownloadCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.DOWNLOAD);
         testProcessorCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.PROCESSOR);
@@ -593,7 +593,7 @@ public class DatabaseCacheTest {
         public LocalDate myStartDate;
 
         public MyListDatesFiles(LocalDate myStartDate) throws IOException, PatternSyntaxException, ParserConfigurationException, SAXException {
-            super(new DataDate(myStartDate), PluginMetaDataCollection.CreateDownloadMetaData("FTP", null, null, null, null, 0, null, null, null), null);
+            super(new DataDate(myStartDate), new DownloadMetaData(null, null, null, null, null, "FTP", null, null, null, null, filesPerDay, null, null, null), null);
             this.myStartDate = myStartDate;
         }
 

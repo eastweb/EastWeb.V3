@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.TaskState;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
@@ -29,13 +29,27 @@ import version2.prototype.util.Schemas;
  *
  */
 public abstract class GlobalDownloader extends Observable implements Runnable{
+    /**
+     * This GlobalDownloader's assigned unique ID. Only expected to be unique when compared to other currently existing GlobalDownloaders.
+     */
+    public final int ID;
+    /**
+     * The loaded config data.
+     */
+    public final Config configInstance;
+    /**
+     * The plugin name of the associated plugin metadata this GlobalDownloader uses.
+     */
+    public final String pluginName;
+    /**
+     * The associated download metadata element loaded.
+     */
+    public final DownloadMetaData metaData;
+    /**
+     * The ListDatesFiles object used for getting the list of server files to download.
+     */
+    public final ListDatesFiles listDatesFiles;
     protected TaskState state;
-    protected final int ID;
-    protected final Config configInstance;
-    protected final String globalSchema;
-    protected final String pluginName;
-    protected final DownloadMetaData metaData;
-    protected final ListDatesFiles listDatesFiles;
     protected LocalDate currentStartDate;
 
     /**
@@ -50,21 +64,20 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws SAXException
      * @throws ParserConfigurationException
      * @throws ClassNotFoundException
+     * @throws RegistrationException
      */
     protected GlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException,
-    ParserConfigurationException, SAXException, IOException, SQLException
+    ParserConfigurationException, SAXException, IOException, SQLException, RegistrationException
     {
         state = TaskState.STOPPED;
         ID = myID;
         this.configInstance = configInstance;
-        globalSchema = configInstance.getGlobalSchema();
         this.pluginName = pluginName;
         this.metaData = metaData;
         this.listDatesFiles = listDatesFiles;
         currentStartDate = startDate;
         RegisterGlobalDownloader();
     }
-
 
     /**
      * Sets this GlobalDownloader instance running state to STOPPED.
@@ -106,7 +119,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     {
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
-        final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, metaData.name, stmt);
+        final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         int filesPerDay = metaData.filesPerDay;
         ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
         Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
@@ -114,7 +127,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         StringBuilder update;
 
         // Check if all files downloaded for any additional days
-        rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalSchema + "\".\"Download\" " +
+        rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + configInstance.getGlobalSchema() + "\".\"Download\" " +
                 "WHERE \"GlobalDownloaderID\" = " + gdlID + " AND \"Complete\" = FALSE " +
                 "GROUP BY \"DateGroupID\";");
         if(rs != null)
@@ -125,7 +138,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             }
         }
         rs.close();
-        rs = stmt.executeQuery("SELECT A.\"DateGroupID\", COUNT(A.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + globalSchema + "\".\"DownloadExtra\" A " +
+        rs = stmt.executeQuery("SELECT A.\"DateGroupID\", COUNT(A.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + configInstance.getGlobalSchema() + "\".\"DownloadExtra\" A " +
                 "WHERE A.\"GlobalDownloaderID\" = " + gdlID + " AND A.\"Complete\" = FALSE " +
                 "GROUP BY \"DateGroupID\";");
         if(rs != null)
@@ -159,10 +172,10 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             try{
                 stmt.execute("BEGIN");
 
-                update = new StringBuilder("UPDATE \"" + globalSchema + "\".\"Download\" SET \"Complete\" = TRUE WHERE " + dateGroups.toString() + ";");
+                update = new StringBuilder("UPDATE \"" + configInstance.getGlobalSchema() + "\".\"Download\" SET \"Complete\" = TRUE WHERE " + dateGroups.toString() + ";");
                 stmt.executeUpdate(update.toString());
 
-                update = new StringBuilder("UPDATE \"" + globalSchema + "\".\"DownloadExtra\" SET \"Complete\" = TRUE WHERE " + dateGroups.toString() + ";");
+                update = new StringBuilder("UPDATE \"" + configInstance.getGlobalSchema() + "\".\"DownloadExtra\" SET \"Complete\" = TRUE WHERE " + dateGroups.toString() + ";");
                 stmt.executeUpdate(update.toString());
 
                 stmt.execute("COMMIT");
@@ -219,20 +232,6 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     }
 
     /**
-     * Gets this GlobalDownloader's assigned unique ID. Only expected to be unique when compared to other currently existing GlobalDownloaders.
-     *
-     * @return  integer representing unique identifier of this GlobalDownloader
-     */
-    public final int GetID() { return ID; }
-
-    /**
-     * Gets the plugin name of the associated plugin metadata this GlobalDownloader uses.
-     *
-     * @return String of plugin name gotten from plugin metadata
-     */
-    public final String GetPluginName() { return pluginName; }
-
-    /**
      * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all projects.
      *
      * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
@@ -262,7 +261,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     {
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
-        final int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, metaData.name, stmt);
+        final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         ArrayList<DataFileMetaData> downloadsList = new ArrayList<DataFileMetaData>();
         ResultSet rs;
 
@@ -270,7 +269,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
                 "SELECT A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" " +
                         "FROM \"%1$s\".\"Download\" A INNER JOIN \"%1$s\".\"DateGroup\" B ON A.\"DateGroupID\"=B.\"DateGroupID\" " +
                         "WHERE A.\"GlobalDownloaderID\"=" + gdlID,
-                        globalSchema
+                        configInstance.getGlobalSchema()
                 ));
         if(startDate != null)
         {
@@ -298,7 +297,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
                 "SELECT A.\"DataName\", A.\"FilePath\", A.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
                         "FROM \"%1$s\".\"DownloadExtra\" A INNER JOIN \"%1$s\".\"DateGroup\" B ON A.\"DateGroupID\"=B.\"DateGroupID\" " +
                         "WHERE A.\"GlobalDownloaderID\"=" + gdlID,
-                        globalSchema));
+                        configInstance.getGlobalSchema()));
         if(startDate != null)
         {
             int year = startDate.getYear();
@@ -345,28 +344,28 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         // If inserting a "Data" labeled file then insert its record into the 'Download' table
         if(metaData.name.toLowerCase().equals("data"))
         {
-            int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, metaData.name, stmt);
-            int dateGroupID = Schemas.getDateGroupID(globalSchema, lDate, stmt);
+            int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), lDate, stmt);
 
             // Insert new download
             String query = String.format(
                     "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
                             "(" + gdlID + ", " + dateGroupID + ", '" + filePath + "');",
-                            globalSchema
+                            configInstance.getGlobalSchema()
                     );
             stmt.executeUpdate(query);
         }
         // Else, insert the record into the 'ExtraDownload' table
         else
         {
-            int gdlID = Schemas.getGlobalDownloaderID(globalSchema, pluginName, metaData.name, stmt);
-            int dateGroupID = Schemas.getDateGroupID(globalSchema, lDate, stmt);
+            int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), lDate, stmt);
             //            int downloadID = Schemas.getDownloadID(globalSchema, gdlID, dateGroupID, stmt);
 
             String query = String.format(
                     "INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\") VALUES\n" +
                             "(" + gdlID + ", " + dateGroupID + ", '" + metaData.name + "', '" + filePath + "');",
-                            globalSchema
+                            configInstance.getGlobalSchema()
                     );
             stmt.executeUpdate(query);
         }
@@ -375,13 +374,15 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         conn.close();
     }
 
-    protected boolean RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException
+    protected void RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, RegistrationException
     {
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
-        boolean result = Schemas.registerGlobalDownloader(globalSchema, pluginName, metaData.name, stmt);
+        boolean registered = Schemas.registerGlobalDownloader(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         stmt.close();
         conn.close();
-        return result;
+        if(!registered) {
+            throw new RegistrationException();
+        }
     }
 }

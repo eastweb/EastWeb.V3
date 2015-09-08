@@ -22,7 +22,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
@@ -51,10 +51,10 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
+     * @throws RegistrationException
      */
-    public GenericLocalStorageGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate,
-            String downloaderClassName) throws ClassNotFoundException, NoSuchMethodException, SecurityException, ParserConfigurationException, SAXException,
-            IOException, SQLException
+    public GenericLocalStorageGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate, String downloaderClassName)
+            throws ClassNotFoundException, NoSuchMethodException, SecurityException, ParserConfigurationException, SAXException, IOException, SQLException, RegistrationException
     {
         super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
         Class<?> downloaderClass = Class.forName("version2.prototype.download." + pluginName + "." + downloaderClassName);
@@ -71,6 +71,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
     public void run() {
         try {
             System.out.println("currentStartDate: " + currentStartDate);
+            System.out.println("Running: " + downloadCtr.getName().substring((downloadCtr.getName().lastIndexOf(".") > -1 ? downloadCtr.getName().lastIndexOf(".") + 1 : 0)));
 
             // Step 1: Get all downloads from ListDatesFiles
             Map<DataDate, ArrayList<String>> filesTemp = listDatesFiles.CloneListDatesFiles();
@@ -128,7 +129,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
             // Step 4: Create downloader and run downloader for all that's left
             for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
             {
-                String outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+                String outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
                 DataDate dd = entry.getKey();
 
                 for (String f : entry.getValue())
@@ -140,16 +141,16 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
                             downloader.download();
                             AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (Exception e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running running DownloaderFramework or AddDownloadFile.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "GenericLocalStorageGlobalDownloader.run problem with running running DownloaderFramework or AddDownloadFile.", e);
                         }
                     }
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException | SQLException e) {
-            ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
+            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
         } catch (Exception e) {
-            ErrorLog.add(Config.getInstance(), pluginName, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
+            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);
         }
     }
 }

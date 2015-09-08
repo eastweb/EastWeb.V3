@@ -150,13 +150,14 @@ public final class FileSystem {
      * Gets the global download directory path for the given type of data downloaded.
      * @param configInstance
      *
-     * @param pluginName  - name of the data type as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
+     * @param pluginName  - name of the plugin as defined by global downloaders (e.g. MODIS, NLDAS, etc.)
+     * @param dataName  - name of the data files
      * @return path to the download directory for the data
      * @throws ConfigReadException
      */
-    public static String GetGlobalDownloadDirectory(Config configInstance, String pluginName) throws ConfigReadException
+    public static String GetGlobalDownloadDirectory(Config configInstance, String pluginName, String dataName) throws ConfigReadException
     {
-        String path = CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "\\");
+        String path = CheckDirPath(CheckDirPath(configInstance.getDownloadDir()) + StandardizeName(pluginName) + "\\" + StandardizeName(dataName) + "\\");
         new File(path).mkdirs();
         return path;
     }
@@ -183,6 +184,11 @@ public final class FileSystem {
         return dirName;
     }
 
+    /**
+     * Cleans up the directory path string. Handles adding a slash at the end if there is none to conform to expectations within program.
+     * @param dirPath  - directory path string
+     * @return  directory path after modifications
+     */
     public static String CheckDirPath(String dirPath)
     {
         if(!dirPath.endsWith("/") && !dirPath.endsWith("\\")) {

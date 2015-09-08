@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.PluginMetaData.DownloadMetaData;
+import version2.prototype.PluginMetaData.FTP;
+import version2.prototype.PluginMetaData.HTTP;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 
@@ -52,7 +52,7 @@ public class TRMM3B42RTListDatesFilesTest {
         writer = new FileWriter(outputFile);
 
         String mode = "FTP";// the protocol type: ftp or http
-        FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
+        FTP myFtp = new FTP("disc2.nascom.nasa.gov",
                 "/data/TRMM/Gridded/Derived_Products/3B42RT/Daily/", "anonymous", "anonymous");
         HTTP myHttp = null;
         String className = null;
@@ -63,7 +63,7 @@ public class TRMM3B42RTListDatesFilesTest {
         String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
         LocalDate ld = LocalDate.parse("Wed Mar 01 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
         writer.write("OriginDate: " + ld.toString() + "\n");
-        data = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, downloadFactoryClassName, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
         p = null;
 
     }

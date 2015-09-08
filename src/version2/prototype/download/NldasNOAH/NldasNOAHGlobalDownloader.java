@@ -15,10 +15,11 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
@@ -26,7 +27,7 @@ import version2.prototype.util.FileSystem;
 public class NldasNOAHGlobalDownloader extends GlobalDownloader{
 
     public NldasNOAHGlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException, ParserConfigurationException, SAXException,
-    IOException, SQLException {
+    IOException, SQLException, RegistrationException {
         super(myID, configInstance, pluginName, metaData, listDatesFiles, startDate);
     }
 
@@ -82,7 +83,7 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
             String outFolder;
 
             try {
-                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName);
+                outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
 
                 DataDate dd = entry.getKey();
 
@@ -95,15 +96,15 @@ public class NldasNOAHGlobalDownloader extends GlobalDownloader{
                         try {
                             downloader.download();
                         } catch (DownloadFailedException e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "NldasNOAHGlobalDownloader.run problem while running NldasNOAHDownloader.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasNOAHGlobalDownloader.run problem while running NldasNOAHDownloader.", e);
                         } catch (Exception e) {
-                            ErrorLog.add(Config.getInstance(), pluginName, "NldasNOAHGlobalDownloader.run problem while running NldasNOAHDownloader.", e);
+                            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasNOAHGlobalDownloader.run problem while running NldasNOAHDownloader.", e);
                         }
                     }
 
                 }
             } catch (IOException e) {
-                ErrorLog.add(Config.getInstance(), pluginName, "NldasNOAHGlobalDownloader.run problem while attempting to handle downloading.", e);
+                ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "NldasNOAHGlobalDownloader.run problem while attempting to handle downloading.", e);
             }
 
         }

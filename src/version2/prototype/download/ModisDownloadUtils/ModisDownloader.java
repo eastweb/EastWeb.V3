@@ -2,7 +2,6 @@ package version2.prototype.download.ModisDownloadUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,8 +12,8 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.PluginMetaData.DownloadMetaData;
+import version2.prototype.PluginMetaData.HTTP;
 import version2.prototype.download.DownloadFailedException;
 import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.DownloaderFramework;
@@ -104,7 +103,7 @@ public class ModisDownloader extends DownloaderFramework
             }
             catch (IOException e)
             {
-                ErrorLog.add(Config.getInstance(), "Modis", "ModisDownloader.download problem while attempting to download to file.", e);
+                ErrorLog.add(Config.getInstance(), "Modis", mData.name, "ModisDownloader.download problem while attempting to download to file.", e);
                 return;
             }
         }

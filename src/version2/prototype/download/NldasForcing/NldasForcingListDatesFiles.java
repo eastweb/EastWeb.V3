@@ -13,7 +13,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.ListDatesFiles;
 
@@ -212,7 +212,7 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
             }
         }
         catch (Exception e) {
-            ErrorLog.add(Config.getInstance(), "NldasForcing", "NldasForcingListDatesFiles.Actual_ListDatesFilesFTP problem while creating list using FTP.", e);
+            ErrorLog.add(Config.getInstance(), "NldasForcing", mData.name, "NldasForcingListDatesFiles.Actual_ListDatesFilesFTP problem while creating list using FTP.", e);
         }
         finally
         {
@@ -225,7 +225,7 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
                 }
             }
             catch (IOException e) {
-                ErrorLog.add(Config.getInstance(), "NldasForcing", "NldasForcingListDatesFiles.Actual_ListDatesFilesFTP problem while logging out and disconnecting FTP connection.", e);
+                ErrorLog.add(Config.getInstance(), "NldasForcing", mData.name, "NldasForcingListDatesFiles.Actual_ListDatesFilesFTP problem while logging out and disconnecting FTP connection.", e);
             }
         }
 

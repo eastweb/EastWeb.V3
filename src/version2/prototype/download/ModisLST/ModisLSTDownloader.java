@@ -1,7 +1,7 @@
 package version2.prototype.download.ModisLST;
 
 import version2.prototype.DataDate;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
+import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.download.ModisDownloadUtils.ModisDownloader;
 
 public class ModisLSTDownloader extends ModisDownloader

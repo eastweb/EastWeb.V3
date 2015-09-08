@@ -13,14 +13,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.text.NumberFormatter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
@@ -34,14 +32,15 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.TaskState;
+import version2.prototype.PluginMetaData.FTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.FTP;
-import version2.prototype.PluginMetaData.PluginMetaDataCollection.HTTP;
+import version2.prototype.PluginMetaData.DownloadMetaData;
+import version2.prototype.PluginMetaData.HTTP;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.GenericLocalStorageGlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
@@ -101,7 +100,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         // For testing with ModisNBAR plugin
         //        hasQC = true;
         //        String mode = "HTTP";// the protocol type: ftp or http
-        //        HTTP myHttp = PluginMetaDataCollection.CreateHTTP("http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/");
+        //        HTTP myHttp = new HTTP("http://e4ftl01.cr.usgs.gov/MOTA/MCD43B4.005/");
         //        FTP myFtp = null;
         //        String fileNamePatternStr = "MCD43B4.A(\\d{7}).h(\\d{2})v(\\d{2}).005.(\\d{13}).hdf";
         //        LocalDate ld = LocalDate.parse("Feb 18 00:00:01 CDT 2000", DateTimeFormatter.ofPattern("MMM dd HH:mm:ss zzz uuuu"));
@@ -109,14 +108,14 @@ public class GenericLocalStorageGlobalDownloaderTest {
         // For testing with TRMM3B42RT plugin
         hasQC = false;
         String mode = "FTP";// the protocol type: ftp or http
-        FTP myFtp = PluginMetaDataCollection.CreateFTP("disc2.nascom.nasa.gov",
+        FTP myFtp = new FTP("disc2.nascom.nasa.gov",
                 "/data/TRMM/Gridded/Derived_Products/3B42RT/Daily/", "anonymous", "anonymous");
         HTTP myHttp = null;
         int filesPerDay = 1;
         String fileNamePatternStr = "3B42RT_daily\\.(\\d{4})\\.(\\d{2})\\.(\\d{2})\\.bin";
         LocalDate ld = LocalDate.parse("Jul 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("MMM dd HH:mm:ss zzz uuuu"));
 
-        dData = PluginMetaDataCollection.CreateDownloadMetaData(mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
+        dData = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
 
         PluginMetaDataCollection pluginMetaDataCol = PluginMetaDataCollection.getInstance("plugins/Plugin_TRMM3B42RT.xml");
         pluginMetaData = pluginMetaDataCol.pluginMetaDataMap.get(testPluginName);
@@ -196,7 +195,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
 
     /**
      * Test method for {@link version2.prototype.download.GenericLocalStorageGlobalDownloader#GenericLocalStorageGlobalDownloader(int, version2.prototype.Config, java.lang.String,
-     * version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData, version2.prototype.download.ListDatesFiles, java.time.LocalDate, java.lang.String)}.
+     * version2.prototype.PluginMetaData.DownloadMetaData, version2.prototype.download.ListDatesFiles, java.time.LocalDate, java.lang.String)}.
      * @throws Exception
      */
     @Test
@@ -220,12 +219,26 @@ public class GenericLocalStorageGlobalDownloaderTest {
             rs.next();
             assertTrue("More than one GlobalDownloader with the same plugin '" + testPluginName + "'", rs.next() == false);
         }
-        rs.close();
-        stmt.close();
 
         // Test GlobalDownloader inits
         assertEquals("GDL running state incorrect.",TaskState.STOPPED, gdl.GetRunningState());
         assertEquals("GDL start date not as expected.", startDate, gdl.GetStartDate());
+
+        // Test for creating duplicate GDL
+        new GenericLocalStorageGlobalDownloader(1, testConfig, testPluginName, dData, listDatesFiles, startDate, downloaderClassName);
+        query = String.format(
+                "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \"PluginID\"=" + pluginID + ";",
+                testGlobalSchema
+                );
+        rs = stmt.executeQuery(query);
+        assertNotNull("ResultSet returned null.", rs);
+        if(rs != null)
+        {
+            rs.next();
+            assertTrue("More than one GlobalDownloader with the same plugin '" + testPluginName + "'", rs.next() == false);
+            rs.close();
+        }
+        stmt.close();
     }
 
     /**
@@ -253,7 +266,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/h00v08";
         // For testing with TRMM3B42RT plugin
         //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
-        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + startDate.getYear() + "/" + startDate.getDayOfYear() + "/3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue())
+        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/data/" + startDate.getYear() + "/" + startDate.getDayOfYear() + "/3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue())
                 + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
