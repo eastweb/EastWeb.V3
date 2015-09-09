@@ -957,6 +957,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             if(schedulers.size() > schedulerID)
             {
+                schedulers.get(schedulerID).Delete();
                 schedulers.remove(schedulerID);
                 releaseSchedulerID(schedulerID);
 

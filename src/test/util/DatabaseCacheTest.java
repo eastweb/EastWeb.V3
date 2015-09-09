@@ -210,15 +210,12 @@ public class DatabaseCacheTest {
     @Test
     public final void testCachingFilesAndRetrievingCachedFiles() throws ClassNotFoundException, SQLException, ParseException, ParserConfigurationException, SAXException, IOException {
         // Setup input
-        String data1FilePath = "Data file path1";
+        String data1FilePath = "Data file path2";
         ArrayList<DataFileMetaData> filesForASingleComposite = new ArrayList<DataFileMetaData>();
-        filesForASingleComposite.add(new DataFileMetaData(data1FilePath, 2, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), "Index"));
+        filesForASingleComposite.add(new DataFileMetaData(data1FilePath, 2, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), "Index2"));
 
         // Cache to ProcessorCache
         testProcessorCache.CacheFiles(filesForASingleComposite);
-
-        // Cache to IndicesCache
-        testIndicesCache.CacheFiles(filesForASingleComposite);
 
         // Test getting from ProcessorCache
         ArrayList<DataFileMetaData> result = testProcessorCache.GetUnprocessedCacheFiles();
@@ -230,6 +227,9 @@ public class DatabaseCacheTest {
         result = testProcessorCache.GetUnprocessedCacheFiles();
         assertEquals("Number of results returned is incorrect.", 0, result.size());
 
+        // Cache to IndicesCache
+        testIndicesCache.CacheFiles(filesForASingleComposite);
+
         // Test getting from IndicesCache
         result = testIndicesCache.GetUnprocessedCacheFiles();
         assertTrue("Number of results returned is " + result.size(), result.size() == 1);
@@ -239,6 +239,19 @@ public class DatabaseCacheTest {
         assertEquals("First result day is incorrect.", earlierStartDate.getDayOfYear(), iData1.day);
         result = testIndicesCache.GetUnprocessedCacheFiles();
         assertEquals("Number of results returned is incorrect.", 0, result.size());
+
+        // Test processed setting
+        String data2FilePath = "Data file path1";
+        filesForASingleComposite = new ArrayList<DataFileMetaData>();
+        filesForASingleComposite.add(new DataFileMetaData(data2FilePath, 1, startDate.getYear(), startDate.getDayOfYear(), "Index1"));
+
+        // Cache to ProcessorCache
+        testProcessorCache.CacheFiles(filesForASingleComposite);
+        testIndicesCache.CacheFiles(filesForASingleComposite);
+
+        // Test getting from ProcessorCache
+        result = testProcessorCache.GetUnprocessedCacheFiles();
+        assertTrue("Number of results returned is " + result.size(), result.size() == 0);
     }
 
     /**

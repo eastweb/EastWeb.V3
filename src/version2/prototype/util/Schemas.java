@@ -2,15 +2,11 @@ package version2.prototype.util;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.TreeMap;
-
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -138,6 +134,12 @@ public class Schemas {
         {
             ErrorLog.add(Config.getInstance(), "SQL Exception in Schemas.", e);
         }
+    }
+
+    public static void setProcessed(final String projectSchema, final String cacheTable, final int dateGroupID, final Statement stmt) throws SQLException
+    {
+        String updateQuery = "UPDATE \"" + projectSchema + "\".\"" + cacheTable + "\" SET \"Processed\" = TRUE WHERE \"DateGroupID\"=" + dateGroupID + ";";
+        stmt.execute(updateQuery);
     }
 
     public static boolean registerGlobalDownloader(final String globalEASTWebSchema, final String pluginName, final String dataName, final Statement stmt) throws SQLException

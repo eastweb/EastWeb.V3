@@ -1,15 +1,16 @@
 package version2.prototype.processor.TRMM3B42RT;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 
 import org.apache.commons.io.FilenameUtils;
-
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
+import version2.prototype.ErrorLog;
 import version2.prototype.processor.Convert;
 import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
@@ -47,13 +48,18 @@ public class TRMM3B42RTConvert extends Convert {
                         );
 
                 double[] array = new double[xSize];
-                for (int row=0; row<ySize; row++)
-                {
-                    for (int col=0; col<xSize; col++)
+                int row = 0, col = 0;
+                try {
+                    for (row=0; row<ySize; row++)
                     {
-                        array[col] = dis.readFloat();
+                        for (col=0; col<xSize; col++)
+                        {
+                            array[col] = dis.readFloat();
+                        }
+                        outputDS.GetRasterBand(1).WriteRaster(0, row, xSize, 1, array);
                     }
-                    outputDS.GetRasterBand(1).WriteRaster(0, row, xSize, 1, array);
+                } catch (EOFException e) {
+                    ErrorLog.add("Problem while reading from data input stream to convert TRMM3B42RT file. [row=" + row + ", RowMax=" + ySize + ", col=" + col + ", ColMax=" + xSize + "]", e);
                 }
 
                 dis.close();

@@ -76,8 +76,7 @@ public abstract class LocalDownloader extends Process {
             try {
                 gdl.PerformUpdates();
 
-                //                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, currentStartDate,
-                //                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
+                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, currentStartDate, pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
             } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
             } catch (Exception e) {

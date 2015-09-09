@@ -19,7 +19,7 @@
 	<classpathentry kind="lib" path="forms-1.3.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/gdal/gdal.jar" sourcepath="sources/gdal-1.11.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/gdal/gdal.jar"/>
 	<classpathentry kind="lib" path="lib/HDF/fits.jar"/>
 	<classpathentry kind="lib" path="lib/HDF/jarfitsobj.jar"/>
 	<classpathentry kind="lib" path="lib/HDF/jarh4obj.jar"/>

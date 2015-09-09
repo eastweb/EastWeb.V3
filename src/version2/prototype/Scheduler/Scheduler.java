@@ -206,6 +206,29 @@ public class Scheduler {
      */
     public void Start()
     {
+        String projectSchema;
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        Statement stmt = null;
+        String updateQueryFormat;
+        try {
+            stmt = con.createStatement();
+            updateQueryFormat = "UPDATE \"%1$s\".\"%2$s\" SET \"Retrieved\" = FALSE WHERE \"Processed\" = FALSE;";
+            for(ProjectInfoPlugin item: projectInfoFile.GetPlugins())
+            {
+                projectSchema = Schemas.getSchemaName(projectInfoFile.GetProjectName(), item.GetName());
+                stmt.addBatch(String.format(updateQueryFormat, projectSchema, "DownloadCache"));
+                stmt.addBatch(String.format(updateQueryFormat, projectSchema, "ProcessorCache"));
+                stmt.addBatch(String.format(updateQueryFormat, projectSchema, "IndicesCache"));
+            }
+            stmt.executeBatch();
+            stmt.close();
+        } catch(SQLException e) {
+            ErrorLog.add(this, "Problem while updating caches to prepare for start or restart.", e);
+        } finally {
+            stmt = null;
+            con.close();
+        }
+
         synchronized (statusContainer)
         {
             statusContainer.UpdateSchedulerTaskState(TaskState.RUNNING);
@@ -235,6 +258,35 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateSchedulerTaskState(TaskState.STOPPED);
+        }
+    }
+
+    /**
+     * Deletes the project schemas and working directory.
+     */
+    public void Delete()
+    {
+        Stop();
+        String projectSchema;
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        Statement stmt = null;
+        String dropSchemaQueryFormat;
+        try {
+            stmt = con.createStatement();
+            dropSchemaQueryFormat = "DROP SCHEMA \"%1$s\" CASCADE;";
+            for(ProjectInfoPlugin item: projectInfoFile.GetPlugins())
+            {
+                projectSchema = Schemas.getSchemaName(projectInfoFile.GetProjectName(), item.GetName());
+                stmt.addBatch(String.format(dropSchemaQueryFormat, projectSchema));
+                FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+            }
+            stmt.executeBatch();
+            stmt.close();
+        } catch(SQLException e) {
+            ErrorLog.add(this, "Problem while deleting project, \"" + projectInfoFile.GetProjectName() + "\".", e);
+        } finally {
+            stmt = null;
+            con.close();
         }
     }
 
@@ -352,12 +404,28 @@ public class Scheduler {
      */
     public void AttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
+        synchronized (statusContainer)
+        {
+            statusContainer.UpdateSchedulerTaskState(TaskState.RUNNING);
+        }
+        for(DatabaseCache cache : downloadCaches)
+        {
+            cache.NotifyObserversToCheckForPastUpdates();
+        }
+        for(DatabaseCache cache : processorCaches)
+        {
+            cache.NotifyObserversToCheckForPastUpdates();
+        }
+        for(DatabaseCache cache : indicesCaches)
+        {
+            cache.NotifyObserversToCheckForPastUpdates();
+        }
+
         TreeMap<String, TreeMap<Integer, Integer>> results = new TreeMap<String, TreeMap<Integer, Integer>>();
         for(LocalDownloader dl : localDownloaders)
         {
             results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
         }
-        Start();
 
         SchedulerStatus status = null;
         synchronized (statusContainer)

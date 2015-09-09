@@ -53,8 +53,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
         try {
             if(scheduler.GetState() == TaskState.RUNNING)
             {
-                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, projectInfoFile.GetStartDate(),
-                        pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
+                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, projectInfoFile.GetStartDate(), pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add(processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
