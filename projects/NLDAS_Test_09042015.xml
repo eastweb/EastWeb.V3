@@ -7,11 +7,11 @@
 		</Plugin>
 	</Plugins>
 	<StartDate>Wed Jul 01 00:00:00 CDT 2015</StartDate>
-	<ProjectName>NLDAS_Test_09042015_D</ProjectName>
+	<ProjectName>NLDAS_Test_09042015</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\Georgia_shp_wmask\watermask\w0010011.tif</MaskingFile>
 	<Resolution>250, 250</Resolution>
-	<MasterShapeFile>C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
+	<MasterShapeFile>\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
 	<TimeZone>(GMT-5:00) America/Detroit</TimeZone>
 	<Clipping>true</Clipping>
 	<FreezingDate>Mon Oct 05 14:04:18 CDT 1970</FreezingDate>
@@ -33,6 +33,6 @@
 	<FalseNothing>0</FalseNothing>
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; AreaCodeField: COUNTYFP10; Temporal Summary: CDCWeeklyStrategy</Summary>
+		<Summary ID="1">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; AreaCodeField: COUNTYFP10; Temporal Summary: CDCWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>

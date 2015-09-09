@@ -1,6 +1,7 @@
 package version2.prototype.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
@@ -13,6 +14,7 @@ import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
 
+import version2.prototype.ErrorLog;
 import version2.prototype.util.GdalUtils;
 
 public class Clip
@@ -88,7 +90,7 @@ public class Clip
                 // System.out.println("clip : " + rasterDS.GetGeoTransform());
                 // System.out.println("rasterDS: " + Arrays.toString(rasterDS.GetGeoTransform()));
                 final int pixelSize = (int) Math.abs(rasterDS.GetGeoTransform()[1]); // FIXME: getting pixel size won't work for some datasets
-                //System.out.println("PIXEL SIZE: " + pixelSize);
+                System.out.println("PIXEL SIZE: " + pixelSize);
 
                 double[] featureExtent = featureLyr.GetExtent();
                 //System.out.println(Arrays.toString(featureExtent));
@@ -101,13 +103,19 @@ public class Clip
                         gdalconst.GDT_Int16
                         );
 
+                try{
+                    GdalUtils.errorCheck();
+                } catch (IOException | IllegalArgumentException | UnsupportedOperationException e) {
+                    ErrorLog.add("GDAL problem while running clipping.", e);
+                }
+
                 outputDS.SetProjection(featureLyr.GetSpatialRef().ExportToWkt());
                 outputDS.SetGeoTransform(new double[] {
                         featureExtent[0], pixelSize, 0,
                         featureExtent[2] + outputDS.GetRasterYSize()*pixelSize, 0, -pixelSize
                 });
 
-                //System.out.println(Arrays.toString(outputDS.GetGeoTransform()));
+                System.out.println(Arrays.toString(outputDS.GetGeoTransform()));
 
                 // Get pixel coordinate in output raster of corner of zone raster
                 Transformer transformer = new Transformer(outputDS, rasterDS, null);
@@ -124,6 +132,12 @@ public class Clip
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
                         gdalconst.GDT_Int16);
+
+                try{
+                    GdalUtils.errorCheck();
+                } catch (IOException | IllegalArgumentException | UnsupportedOperationException e) {
+                    ErrorLog.add("GDAL problem while running clipping.", e);
+                }
 
                 maskDS.SetProjection(featureLyr.GetSpatialRef().ExportToWkt());
                 //zoneDS.SetProjection(rasterDS.GetProjection());
