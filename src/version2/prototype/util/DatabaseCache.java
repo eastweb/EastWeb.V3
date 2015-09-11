@@ -370,12 +370,15 @@ public class DatabaseCache extends Observable{
                             " AND C.\"DownloadID\" IS NULL",
                             mSchemaName,
                             globalEASTWebSchema));
-            if(modisTileNames != null)
+            if((modisTileNames != null) && (modisTileNames.size() > 0))
             {
-                for(String tile : modisTileNames)
+                insertQuery.append(" AND (");
+                insertQuery.append("D.\"DataFilePath\" LIKE '%" + modisTileNames.get(0) + "%'");
+                for(int i=1; i < modisTileNames.size(); i++)
                 {
-                    insertQuery.append(" AND D.\"DataFilePath\" LIKE '%" + tile + "%'");
+                    insertQuery.append(" OR D.\"DataFilePath\" LIKE '%" + modisTileNames.get(i) + "%'");
                 }
+                insertQuery.append(")");
             }
         }
         else{

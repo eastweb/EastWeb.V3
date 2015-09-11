@@ -6,7 +6,7 @@
 			<QC> HIGHEST</QC>
 		</Plugin>
 	</Plugins>
-	<StartDate>Wed Apr 01 16:10:22 CDT 2015</StartDate>
+	<StartDate>Sat Aug 01 00:00:00 CDT 2015</StartDate>
 	<ProjectName>ModisLST_Test</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
