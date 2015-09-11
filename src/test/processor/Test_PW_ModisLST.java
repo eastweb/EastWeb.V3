@@ -25,7 +25,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 
 public class Test_PW_ModisLST {
-    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
+    //private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public Test_PW_ModisLST() {
     }
@@ -41,9 +41,9 @@ public class Test_PW_ModisLST {
     @Test
     public void testCall() throws Exception {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW2.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\projects\\Project_TW3.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_ModisLST.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\plugins\\Plugin_ModisLST.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
         //        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
@@ -56,7 +56,7 @@ public class Test_PW_ModisLST {
         //"Blah", "Project_TW", "TRMM3B42", ProcessName.Processor, null
 
         // DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
-        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        ProcessorWorker worker = new ProcessorWorker(null, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
