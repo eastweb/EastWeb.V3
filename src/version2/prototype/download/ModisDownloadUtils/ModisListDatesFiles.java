@@ -95,15 +95,15 @@ public class ModisListDatesFiles extends ListDatesFiles
                                     if(line.contains(".hdf") && !line.contains(".xml") && (m.find()))
                                     {
                                         // limit to the targeted MODIS tiles only
-                                        for (String tile : modisTiles)
-                                        {
-                                            if (line.contains(tile))
-                                            {
-                                                lock.lock();
-                                                fileList.add(m.group(0));
-                                                lock.unlock();
-                                            }
-                                        }
+                                        //                                        for (String tile : modisTiles)
+                                        //                                        {
+                                        //                                            if (line.contains(tile))
+                                        //                                            {
+                                        lock.lock();
+                                        fileList.add(m.group(0));
+                                        lock.unlock();
+                                        //                                            }
+                                        //                                        }
 
                                     }
                                 }
