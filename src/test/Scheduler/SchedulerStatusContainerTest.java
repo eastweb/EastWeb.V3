@@ -75,7 +75,7 @@ public class SchedulerStatusContainerTest {
         plugins = new ArrayList<ProjectInfoPlugin>();
         ArrayList<String> indices = new ArrayList<String>();
         indices.add("TRMM3B42RTIndex");
-        plugins.add(new ProjectInfoPlugin(pluginName, indices, null));
+        plugins.add(new ProjectInfoPlugin(pluginName, indices, null, null));
         summaries = new ArrayList<ProjectInfoSummary>();
         String temporalSummaryCompositionStrategyClassName = "GregorianWeeklyStrategy";
         TemporalSummaryCompositionStrategy compStrategy = new GregorianWeeklyStrategy();

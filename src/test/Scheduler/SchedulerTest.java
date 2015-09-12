@@ -74,7 +74,7 @@ public class SchedulerTest {
         ArrayList<ProjectInfoPlugin> plugins = new ArrayList<ProjectInfoPlugin>();
         ArrayList<String> indices = new ArrayList<String>();
         indices.add("TRMM3B42RTCalculator");
-        plugins.add(new ProjectInfoPlugin(testPluginName, indices, null));
+        plugins.add(new ProjectInfoPlugin(testPluginName, indices, null, null));
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(new ProjectInfoSummary(new ZonalSummary(null, null, null), null, null, 1));
         projectInfoFile = new ProjectInfoFile(

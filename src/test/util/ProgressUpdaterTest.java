@@ -90,7 +90,7 @@ public class ProgressUpdaterTest {
         ArrayList<String> indices = new ArrayList<String>(2);
         indices.add("Index1");
         indices.add("Index2");
-        pluginInfo = new ProjectInfoPlugin(pluginName, indices, null);
+        pluginInfo = new ProjectInfoPlugin(pluginName, indices, null, null);
         plugins = new ArrayList<ProjectInfoPlugin>();
         plugins.add(pluginInfo);
         summaries = new ArrayList<ProjectInfoSummary>();

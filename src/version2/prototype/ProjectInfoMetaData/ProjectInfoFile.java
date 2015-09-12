@@ -285,6 +285,7 @@ public class ProjectInfoFile {
         String name;
         String qc;
         ArrayList<String> inidicies = null;
+        ArrayList<String> modisTiles = null;
 
         NodeList pluginList = GetUpperLevelNodeList("Plugin", "Missing plugins.", "Plugins");
         if(pluginList != null)
@@ -303,15 +304,21 @@ public class ProjectInfoFile {
                     qc = null;
                 }
 
-                values = GetNodeListValues(plugin.getElementsByTagName("Indicies"), "Missing indicies for plugin '"
-                        + name + "'.");
+                values = GetNodeListValues(plugin.getElementsByTagName("Indicies"), "Missing indicies for plugin '" + name + "'.");
                 if(values.size() > 0) {
                     inidicies = values;
                 } else {
                     inidicies = null;
                 }
 
-                plugins.add(new ProjectInfoPlugin(name, inidicies, qc));
+                values = GetNodeListValues(plugin.getElementsByTagName("ModisTiles"), "Missing indicies for plugin '" + name + "'.");
+                if(values.size() > 0) {
+                    modisTiles = values;
+                } else {
+                    inidicies = null;
+                }
+
+                plugins.add(new ProjectInfoPlugin(name, inidicies, qc, modisTiles));
             }
         }
 

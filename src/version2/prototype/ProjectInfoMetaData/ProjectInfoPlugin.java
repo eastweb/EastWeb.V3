@@ -10,6 +10,7 @@ public class ProjectInfoPlugin {
     private String Name;
     private ArrayList<String> Indices;
     private String QC;
+    private ArrayList<String> ModisTiles;
 
     /**
      * Create a ProjectInfoPlugin object that contains the plugin name, list of index names to calculate, and the QC level to use. This information is generally gotten from a parsed project metadata file
@@ -19,11 +20,12 @@ public class ProjectInfoPlugin {
      * @param indices  - list of indices to calculate by their names
      * @param qc  - QC level
      */
-    public ProjectInfoPlugin(String name, ArrayList<String> indices, String qc)
+    public ProjectInfoPlugin(String name, ArrayList<String> indices, String qc, ArrayList<String> modisTiles)
     {
         Name = name;
         Indices = indices;
         QC = qc;
+        ModisTiles = modisTiles;
     }
 
     /**
@@ -51,5 +53,10 @@ public class ProjectInfoPlugin {
     public String GetQC()
     {
         return QC;
+    }
+
+    public ArrayList<String> GetModisTiles()
+    {
+        return ModisTiles;
     }
 }
