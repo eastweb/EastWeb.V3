@@ -61,7 +61,6 @@ public abstract class Reproject {
         if (!outputDir.exists())
         {   FileUtils.forceMkdir(outputDir); }
 
-        setInputWKT();
 
         if (NoProj)    // no projection
         {
@@ -78,8 +77,6 @@ public abstract class Reproject {
         // WRITE BACK after fixing the issue
         //FileUtils.deleteDirectory(inputFolder);
     }
-
-    public abstract void setInputWKT();
 
     // reproject all the input Files and save them to the outputFolder
     private void reprojectFiles()  {
