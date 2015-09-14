@@ -88,8 +88,7 @@ public class ProjectInformationPage {
     private JComboBox<String> datumComboBox;
     private JComboBox<String> projectCollectionComboBox;
     private JTextField masterShapeTextField;
-    private JButton addNewModisButton;
-    private JButton deleteSelectedModisButton;
+
     private  JCheckBox isClippingCheckBox;
     private JDateChooser freezingDateChooser;
     private JTextField coolingTextField;
@@ -147,7 +146,7 @@ public class ProjectInformationPage {
      */
     private void initialize() throws IOException, ParserConfigurationException, SAXException, ParseException {
         frame = new JFrame();
-        frame.setBounds(100, 100, 1207, 850);
+        frame.setBounds(100, 100, 955, 850);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
@@ -241,10 +240,6 @@ public class ProjectInformationPage {
         masterShapeTextField.setEditable(false);
         masterShapeTextField.setText("");
 
-        addNewModisButton.setEnabled(false);
-        deleteSelectedModisButton.setEnabled(false);
-        modisListModel.clear();
-
         timeZoneComboBox.setEnabled(false);
         isClippingCheckBox.setEnabled(false);
         coolingTextField.setEnabled(false);
@@ -292,10 +287,12 @@ public class ProjectInformationPage {
 
         // set the plugin info
         for(ProjectInfoPlugin plugin: project.GetPlugins()){
-            String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>Quality: %s;</span></html>",
+            String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>%s</span> <br>Quality: %s;</span></html>",
                     String.valueOf(plugin.GetName()),
                     getIndiciesFormat(plugin.GetIndices()),
-                    String.valueOf(plugin.GetQC()));
+                    getModisTilesFormat(plugin.GetModisTiles()),
+                    String.valueOf(plugin.GetQC())
+                    );
             listOfAddedPluginModel.addElement(formatString);
         }
 
@@ -312,14 +309,6 @@ public class ProjectInformationPage {
         coolingTextField.setText(project.GetCoolingDegree().toString());
         heatingDateChooser.setDate(Date.from(project.GetHeatingDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         heatingTextField.setText(project.GetHeatingDegree().toString());
-
-        // set modis info
-        if(project.GetModisTiles() != null)
-        {
-            for(String modis: project.GetModisTiles()){
-                modisListModel.addElement(modis);
-            }
-        }
 
         // set projection info
         coordinateSystemComboBox.setSelectedItem(project.GetProjection().getProjectionType());
@@ -338,6 +327,21 @@ public class ProjectInformationPage {
         // set summary info
         for(ProjectInfoSummary summary: project.GetSummaries()){
             summaryListModel.addElement(summary.toString());
+        }
+    }
+
+    private String getModisTilesFormat(ArrayList<String> m) {
+        if(modisListModel.isEmpty()) {
+            return "";
+        } else
+        {
+            String formatString = "Modis Tiles: ";
+
+            for(Object tile : modisListModel.toArray()) {
+                formatString += tile.toString() + "; ";
+            }
+
+            return formatString;
         }
     }
 
@@ -368,7 +372,7 @@ public class ProjectInformationPage {
             }
         });
 
-        createButton.setBounds(1017, 11, 175, 25);
+        createButton.setBounds(764, 10, 175, 25);
         frame.getContentPane().add(createButton);
     }
 
@@ -412,13 +416,12 @@ public class ProjectInformationPage {
         frame.getContentPane().add(deletePluginButton);
 
         JScrollPane scrollPane = new JScrollPane(listOfAddedPlugin);
-        scrollPane.setBounds(10, 40, 1182, 369);
+        scrollPane.setBounds(10, 40, 929, 369);
         frame.getContentPane().add(scrollPane);
     }
 
     private void RenderInformationGrid() {
         BasicProjectInformation();
-        ModisInformation();
         ProjectInformation();
         SummaryInformation();
     }
@@ -619,81 +622,13 @@ public class ProjectInformationPage {
         resolutionTextField.setColumns(10);
     }
 
-    @SuppressWarnings("rawtypes")
-    private void ModisInformation() {
-        JPanel modisInformationPanel = new JPanel();
-        modisInformationPanel.setLayout(null);
-        modisInformationPanel.setBorder(new TitledBorder(null, "Modis Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        modisInformationPanel.setBounds(359, 420, 275, 390);
-        frame.getContentPane().add(modisInformationPanel);
 
-        modisListModel = new DefaultListModel<String>();
-
-        addNewModisButton = new JButton("");
-        addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
-        addNewModisButton.setToolTipText("Add modis");
-        addNewModisButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                String tile = JOptionPane.showInputDialog(frame,"Enter Modis Tile", null);
-
-                if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V' || tile.length() > 6) {
-                    JOptionPane.showMessageDialog(null, "Modis format: hddvdd  d=> digit");
-                    return;
-                } else{
-                    int horizontal = Integer.parseInt(String.format("%s%s", tile.toUpperCase().charAt(1), tile.toUpperCase().charAt(2)));
-                    int vertical = Integer.parseInt(String.format("%c%c", tile.toUpperCase().charAt(4), tile.toUpperCase().charAt(5)));
-
-                    if(horizontal < ModisTile.HORZ_MIN || horizontal > ModisTile.HORZ_MAX || vertical < ModisTile.VERT_MIN || vertical > ModisTile.VERT_MAX){
-                        JOptionPane.showMessageDialog(null, String.format("Horizontal has be to within %d-%d and Vertical has to be within %d-%d",
-                                ModisTile.HORZ_MIN , ModisTile.HORZ_MAX , ModisTile.VERT_MIN, ModisTile.VERT_MAX ));
-                        return;
-                    }
-
-                }
-
-                for(Object item:modisListModel.toArray()){
-                    if(tile.contentEquals(item.toString())) {
-                        JOptionPane.showMessageDialog(null, "Modis tile already exist");
-                        return;
-                    }
-                }
-
-                modisListModel.addElement(tile);
-            }
-        });
-        addNewModisButton.setBounds(15, 349, 75, 30);
-        modisInformationPanel.add(addNewModisButton);
-
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(15, 25, 245, 313);
-        modisInformationPanel.add(scrollPane);
-
-        final JList<String> modisList = new JList<String>(modisListModel);
-        scrollPane.setViewportView(modisList);
-
-        deleteSelectedModisButton = new JButton("");
-        deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
-        deleteSelectedModisButton.setToolTipText("Delete Selected Modis");
-        deleteSelectedModisButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                DefaultListModel model = (DefaultListModel) modisList.getModel();
-                int selectedIndex = modisList.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    model.remove(selectedIndex);
-                }
-            }
-        });
-        deleteSelectedModisButton.setBounds(185, 349, 75, 30);
-        modisInformationPanel.add(deleteSelectedModisButton);
-    }
 
     private void ProjectInformation() {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
         panel_2.setBorder(new TitledBorder(null, "Projection Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_2.setBounds(631, 420, 297, 390);
+        panel_2.setBounds(365, 420, 297, 390);
         frame.getContentPane().add(panel_2);
 
         JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
@@ -798,7 +733,7 @@ public class ProjectInformationPage {
         JPanel summaryPanel = new JPanel();
         summaryPanel.setLayout(null);
         summaryPanel.setBorder(new TitledBorder(null, "Summary Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        summaryPanel.setBounds(920, 420, 281, 390);
+        summaryPanel.setBounds(658, 420, 281, 390);
         frame.getContentPane().add(summaryPanel);
 
         summaryListModel = new DefaultListModel();
@@ -887,6 +822,7 @@ public class ProjectInformationPage {
                 String noFormat = item.toString().replaceAll("<html>Plugin: ","");
                 noFormat = noFormat.replaceAll("<br>Indices: ", "");
                 noFormat = noFormat.replaceAll("<br>Quality: ","");
+                noFormat = noFormat.replaceAll("<br>Modis Tiles: ","");
                 noFormat = noFormat.replaceAll("</html>", "");
                 noFormat = noFormat.replaceAll("</span>", "");
                 noFormat = noFormat.replaceAll("<span>", "");
@@ -904,14 +840,28 @@ public class ProjectInformationPage {
                 }
                 else{
                     for(int i = 1; i < array.length -1; i++){
-                        Element indicies = doc.createElement("Indicies");
-                        indicies.appendChild(doc.createTextNode(array[i].toString()));
-                        plugin.appendChild(indicies);
+
+                        if(isValueAModisTile(array, i))
+                        {
+                            Element modisTile = doc.createElement("ModisTiles");
+                            modisTile.appendChild(doc.createTextNode(array[i].toString()));
+                            plugin.appendChild(modisTile);
+                        }
+                        else
+                        {
+                            Element indicies = doc.createElement("Indicies");
+                            indicies.appendChild(doc.createTextNode(array[i].toString()));
+                            plugin.appendChild(indicies);
+                        }
                     }
 
                     Element qc = doc.createElement("QC");
                     qc.appendChild(doc.createTextNode(array[array.length - 1].toString()));
                     plugin.appendChild(qc);
+
+                    for(int i = 1; i < array.length -1; i++){
+
+                    }
                 }
 
                 // add a new node for plugin element
@@ -973,16 +923,6 @@ public class ProjectInformationPage {
             Element heatingDegree = doc.createElement("HeatingDegree");
             heatingDegree.appendChild(doc.createTextNode(heatingTextField.getText()));
             projectInfo.appendChild(heatingDegree);
-
-            //list of modis tiles
-            Element modisTiles = doc.createElement("ModisTiles");
-            projectInfo.appendChild(modisTiles);
-
-            for(Object item:modisListModel.toArray()){
-                Element element = doc.createElement("Modis");
-                element.appendChild(doc.createTextNode(item.toString()));
-                modisTiles.appendChild(element);
-            }
 
             // Coordinate System
             Element coordinateSystem = doc.createElement("CoordinateSystem");
@@ -1070,6 +1010,22 @@ public class ProjectInformationPage {
 
         } catch (ParserConfigurationException | TransformerException e) {
             ErrorLog.add(Config.getInstance(), "ProjectInformationPage.CreateNewProject problem with creating new project.", e);
+        }
+    }
+
+    private boolean isValueAModisTile(String[] array, int i) {
+        String tile = array[i].toString();
+
+        if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V' || tile.length() > 6) {
+            return false;
+        } else{
+            try {
+                Integer.parseInt(String.format("%s%s", tile.toUpperCase().charAt(1), tile.toUpperCase().charAt(2)));
+                Integer.parseInt(String.format("%c%c", tile.toUpperCase().charAt(4), tile.toUpperCase().charAt(5)));
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
         }
     }
 

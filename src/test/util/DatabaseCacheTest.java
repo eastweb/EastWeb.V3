@@ -109,7 +109,7 @@ public class DatabaseCacheTest {
         ArrayList<String> indicesNames = new ArrayList<String>();
         indicesNames.add("ModisNBARNDVI");
         ArrayList<ProjectInfoPlugin> plugins = new ArrayList<ProjectInfoPlugin>();
-        plugins.add(new ProjectInfoPlugin(testPluginName, indicesNames, null));
+        plugins.add(new ProjectInfoPlugin(testPluginName, indicesNames, null, null));
         TreeMap<String, Integer> downloadExpectedDataFiles = new TreeMap<String, Integer>();
         downloadExpectedDataFiles.put(testPluginName, 2);
         TreeMap<String, Integer> processorExpectedNumOfOutputs = new TreeMap<String, Integer>();
