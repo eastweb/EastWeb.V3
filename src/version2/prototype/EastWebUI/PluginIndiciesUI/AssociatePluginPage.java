@@ -22,6 +22,7 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
@@ -37,6 +38,7 @@ public class AssociatePluginPage {
     private JButton addNewModisButton;
     private JButton deleteSelectedModisButton;
 
+    private ArrayList<String> globalModisTiles;
     private DefaultListModel<String> modisListModel;
 
     @SuppressWarnings("rawtypes")
@@ -50,7 +52,7 @@ public class AssociatePluginPage {
             @Override
             public void run() {
                 try {
-                    AssociatePluginPage window = new AssociatePluginPage(null);
+                    AssociatePluginPage window = new AssociatePluginPage(null, new ArrayList<String>());
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "AssociatePluginPage.main problem with running a AssociatePluginPage window.", e);
@@ -63,7 +65,8 @@ public class AssociatePluginPage {
      * Create the application.
      * @throws Exception
      */
-    public AssociatePluginPage(IndiciesListener l) throws Exception {
+    public AssociatePluginPage(IndiciesListener l, ArrayList<String> globalModisTiles) throws Exception {
+        this.globalModisTiles = globalModisTiles;
         indiciesEvent = new IndiciesEvent();
         indiciesEvent.addListener(l);
         initialize();
@@ -132,14 +135,37 @@ public class AssociatePluginPage {
         btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> <br>%s</span> <br>Quality: %s;</span></html>",
+                String formatString = String.format("<html>Plugin: %s;<br>Indices: %s</span> %s <br>Quality: %s;</span></html>",
                         String.valueOf(pluginComboBox.getSelectedItem()),
                         getIndicesFormat(listOfInndicies.getModel()),
                         getModisTilesFormat(modisListModel),
                         String.valueOf(qcComboBox.getSelectedItem())
                         );
 
-                indiciesEvent.fire(formatString);
+                PluginObject obj = new PluginObject();
+                obj.PluginName = String.valueOf(pluginComboBox.getSelectedItem());
+
+                obj.Indices = new ArrayList<String>();
+                String formatStringIndies = "";
+                ListModel model = listOfInndicies.getModel();
+
+                for(int i=0; i < model.getSize(); i++){
+                    formatStringIndies = String.format("%s",   model.getElementAt(i).toString());
+                    obj.Indices.add(formatStringIndies);
+                }
+
+                if(!modisListModel.isEmpty() && String.valueOf(pluginComboBox.getSelectedItem()).toUpperCase().contains("MODIS")) {
+                    globalModisTiles.clear();
+                    obj.ModisTiles = new ArrayList<String>();
+                    for(Object tile : modisListModel.toArray()) {
+                        obj.ModisTiles.add(tile.toString());
+                        globalModisTiles.add(tile.toString());
+                    }
+                }
+
+                obj.QC = String.valueOf(qcComboBox.getSelectedItem());
+
+                indiciesEvent.fire(formatString, globalModisTiles);
                 frame.dispose();
             }
 
@@ -201,7 +227,7 @@ public class AssociatePluginPage {
     }
 
     private String getModisTilesFormat(DefaultListModel<String> modisListModel) {
-        if(modisListModel.isEmpty()) {
+        if(modisListModel.isEmpty() || !String.valueOf(pluginComboBox.getSelectedItem()).toUpperCase().contains("MODIS")) {
             return "";
         } else
         {
@@ -211,7 +237,7 @@ public class AssociatePluginPage {
                 formatString += tile.toString() + "; ";
             }
 
-            return formatString;
+            return String.format("<br>%s</span>",formatString);
         }
     }
 
@@ -325,6 +351,10 @@ public class AssociatePluginPage {
         });
         deleteSelectedModisButton.setBounds(490, 340, 25, 20);
         modisInformationPanel.add(deleteSelectedModisButton);
+
+        for(String tiles : globalModisTiles) {
+            modisListModel.addElement(tiles);
+        }
     }
 
     /**

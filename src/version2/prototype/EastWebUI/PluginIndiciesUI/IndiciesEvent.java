@@ -1,6 +1,7 @@
 package version2.prototype.EastWebUI.PluginIndiciesUI;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -29,11 +30,11 @@ public class IndiciesEvent implements Serializable {
 
     /** Fire a SunEvent to all registered listeners */
     @SuppressWarnings("rawtypes")
-    protected void fire(String p) {
+    protected void fire(String p, ArrayList<String> globalModisTiles) {
         // if we have no listeners, do nothing...
         if (listeners != null && !listeners.isEmpty()) {
             // create the event object to send
-            IndiciesEventObject event = new IndiciesEventObject(this, p);
+            IndiciesEventObject event = new IndiciesEventObject(this, p, globalModisTiles);
 
             // make a copy of the listener list in case
             //   anyone adds/removes listeners
