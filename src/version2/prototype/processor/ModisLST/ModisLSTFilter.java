@@ -78,6 +78,10 @@ public class ModisLSTFilter extends Filter{
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "day.tif",
                             xSize, ySize, 1);
 
+            outputDS.SetGeoTransform(inputDS.GetGeoTransform());
+            outputDS.SetProjection(inputDS.GetProjection());
+            outputDS.SetMetadata(inputDS.GetMetadata_Dict());
+
             // filter day band, and write to the day.tif file
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
@@ -87,6 +91,9 @@ public class ModisLSTFilter extends Filter{
             outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "night.tif",
                             xSize, ySize, 1);
+            outputDS.SetGeoTransform(inputDS.GetGeoTransform());
+            outputDS.SetProjection(inputDS.GetProjection());
+            outputDS.SetMetadata(inputDS.GetMetadata_Dict());
 
             // filter night band, and write to the night.tif file
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
