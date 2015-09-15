@@ -94,6 +94,7 @@ public class ProjectInformationPage {
     private JTextField coolingTextField;
     private JDateChooser heatingDateChooser;
     private JTextField heatingTextField;
+    private ArrayList<String> globalModisTiles;
 
     private boolean isEditable;
 
@@ -150,6 +151,8 @@ public class ProjectInformationPage {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
+
+        globalModisTiles = new ArrayList<String>();
 
         PopulatePluginList();
         CreateNewProjectButton();
@@ -389,7 +392,7 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    new AssociatePluginPage(new indiciesListenerImplementation());
+                    new AssociatePluginPage(new indiciesListenerImplementation(), globalModisTiles);
                 } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "ProjectInformationPage.PopulatePluginList problem with creating new AssociatePluginPage.", e);
                 }
@@ -1034,6 +1037,10 @@ public class ProjectInformationPage {
         @Override
         public void AddPlugin(IndiciesEventObject e) {
             listOfAddedPluginModel.addElement(e.getPlugin());
+            globalModisTiles.clear();
+            for(String tile : e.getTiles()) {
+                globalModisTiles.add(tile);
+            }
         }
     }
 
