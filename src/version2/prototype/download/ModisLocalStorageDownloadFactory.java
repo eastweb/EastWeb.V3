@@ -25,7 +25,7 @@ import version2.prototype.util.DatabaseCache;
  * @author michael.devos
  *
  */
-public final class LocalStorageDownloadFactory implements DownloaderFactory {
+public final class ModisLocalStorageDownloadFactory implements DownloaderFactory {
     private final EASTWebManagerI manager;
     private final Config configInstance;
     private final String downloaderClassName;
@@ -51,8 +51,8 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
      * @param listDatesFiles
      * @param startDate
      */
-    public LocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData,
-            PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles, LocalDate startDate)
+    public ModisLocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+            DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles, LocalDate startDate)
     {
         this.manager = manager;
         this.configInstance = configInstance;
@@ -68,8 +68,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.download.DownloaderFactory#CreateLocalDownloader(int, version2.prototype.ProjectInfoMetaData.ProjectInfoFile, version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin,
-     * version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData, version2.prototype.Scheduler.Scheduler, version2.prototype.util.DatabaseCache)
+     * @see version2.prototype.download.DownloaderFactory#CreateLocalDownloader(version2.prototype.download.GlobalDownloader)
      */
     @Override
     public LocalDownloader CreateLocalDownloader(GlobalDownloader gdl) {
@@ -77,14 +76,13 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.download.DownloaderFactory#CreateGlobalDownloader(int, java.lang.String, version2.prototype.PluginMetaData.PluginMetaDataCollection.DownloadMetaData,
-     * version2.prototype.download.ListDatesFiles)
+     * @see version2.prototype.download.DownloaderFactory#CreateGlobalDownloader(int)
      */
     @Override
     public GlobalDownloader CreateGlobalDownloader(int myID) {
         GlobalDownloader downloader = null;
         try {
-            downloader = new GenericLocalStorageGlobalDownloader(myID, configInstance, pluginInfo.GetName(), downloadMetaData, listDatesFiles, startDate, downloaderClassName);
+            downloader = new ModisLocalStorageGlobalDownloader(myID, configInstance, projectInfoFile, pluginInfo.GetName(), downloadMetaData, listDatesFiles, startDate, downloaderClassName);
         } catch (RegistrationException e) {
             return null;
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | ParserConfigurationException | SAXException | IOException | SQLException e) {
