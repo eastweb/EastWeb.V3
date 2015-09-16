@@ -243,7 +243,7 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             // check if the laststepOutputFolder is the  final outputFolder for the processor
-            String outputPath = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+            String outputPath = String.format("%s"+ "%04d" + File.separator+"%03d",
                     outputFolder, thisDay.getYear(), thisDay.getDayOfYear());
 
             // if not match, copy the files from the last step to the final outputfolder for  processor
