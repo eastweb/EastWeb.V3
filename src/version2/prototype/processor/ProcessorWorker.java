@@ -145,6 +145,7 @@ public class ProcessorWorker extends ProcessWorker {
                 Class<?> classProcess = null;
                 try {
                     classProcess = Class.forName("version2.prototype.processor." + pluginName + "." + step.getValue());
+                    System.out.println(step.getValue());
                 } catch (ClassNotFoundException e) {
                     ErrorLog.add(process, "Problem with reflection of classProcess '" + "version2.prototype.processor." + pluginName + "." + step.getValue() + "'.", e);
                 } catch (Exception e) {

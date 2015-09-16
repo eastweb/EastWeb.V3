@@ -49,7 +49,7 @@ public class Test_PW_ModisLST {
         //        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
         //                pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
         //                pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
-
+        //
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h28v06.hdf", 1, 2014, 81)));
         cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\MODISLST\\2014\\081\\h29v06.hdf", 1, 2014, 81)));

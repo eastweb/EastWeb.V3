@@ -31,12 +31,12 @@ public class TestReprojection
             Projection p = new Projection(ProjectionType.TRANSVERSE_MERCATOR, ResamplingType.BILINEAR,
                     Datum.WGS84, 1000, 0.0, 0.0, 0.9996, 39.0, 500000.0, 0.0, 0.0);
 
-            GdalUtils.project(new File("D:\\project\\day.tif"),
+            GdalUtils.project(new File("D:\\test_data\\trmm-test.tif"),
                     //"D:\\project\\day.tif",
                     "D:\\testProjects\\TW\\settings\\shapefiles\\TW_DIS_F_P_Dis_REGION\\TW_DIS_F_P_Dis_REGION.shp",
                     //"D:\\testProjects\\Amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp",
                     //"D:\\testProjects\\GA\\shapefiles\\GA_Counties\\GA_Counties.shp",
-                    p, new File("D:\\project\\day_pP.tif"));
+                    p, new File("D:\\test_data\\trmm_p.tif"));
 
             //extract NOAH
             //            String noah = "D:\\project\\download\\NOAH\\noah_2015_0604.grb";

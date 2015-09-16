@@ -32,7 +32,7 @@ import version2.prototype.util.Schemas;
 import version2.prototype.processor.TRMM3B42.*;
 
 public class TestPW_TRMM3B42 {
-    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
+    // private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public TestPW_TRMM3B42() {
     }
@@ -49,9 +49,10 @@ public class TestPW_TRMM3B42 {
     public void testCall() throws Exception
     {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW2.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\projects\\Project_TW.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_TRMM3B42.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\plugins\\Plugin_TRMM3B42.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
+
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
         //        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", "Test_Project", "Test_Plugin", null, null, null,
@@ -59,12 +60,12 @@ public class TestPW_TRMM3B42 {
         //                pluginMetaData.IndicesMetaData.size(), projectInfoFile.GetSummaries(), false);
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();
-        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\TRMM2\\2015\\118\\3B42_daily.2015.04.29.7", 1, 2015, 118)));
+        cachedFiles.add(new DataFileMetaData(new DownloadFileMetaData("Data", "D:\\project\\download\\TRMM2\\2015\\118\\3B42_daily.2015.04.29.7.bin", 1, 2015, 118)));
 
         //"Blah", "Project_TW", "TRMM3B42", ProcessName.Processor, null
 
         // DatabaseCache outputCache = new MyDatabaseCache("project_tw_trmm3b42.ProcessorCache", projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR, null);
-        ProcessorWorker worker = new ProcessorWorker(configInstance, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        ProcessorWorker worker = new ProcessorWorker(null, process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
 
         // Verify results
         //ArrayList<DataFileMetaData> result = outputCache.GetUnprocessedCacheFiles();
