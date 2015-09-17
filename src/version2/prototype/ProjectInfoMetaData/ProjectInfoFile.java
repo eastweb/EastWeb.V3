@@ -57,7 +57,7 @@ public class ProjectInfoFile {
     private final String timeZone;
     private final Boolean clipping;
     private final Integer totModisTiles;
-    private final ArrayList<String> modisTiles;
+    //    private final ArrayList<String> modisTiles;
     private final Projection projection;
     private final LocalDate heatingDate;
     private final Double heatingDegree;
@@ -104,7 +104,7 @@ public class ProjectInfoFile {
         timeZone = ReadTimeZone();
         clipping = ReadClipping();
         totModisTiles = ReadTotalModisTiles();
-        modisTiles = ReadModisTiles();
+        //        modisTiles = ReadModisTiles();
         projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
                 ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
                 ReadLatitudeOfOrigin());
@@ -151,7 +151,7 @@ public class ProjectInfoFile {
         this.timeZone = timeZone;
         this.clipping = clipping;
         this.totModisTiles = totModisTiles;
-        this.modisTiles = modisTiles;
+        //        this.modisTiles = modisTiles;
         this.projection = projection;
         this.freezingDate = freezingDate;
         this.coolingDegree = coolingDegree;
@@ -235,7 +235,7 @@ public class ProjectInfoFile {
      *
      * @return modis tile names gotten from the xml's data.
      */
-    public ArrayList<String> GetModisTiles() { return modisTiles; }
+    //    public ArrayList<String> GetModisTiles() { return modisTiles; }
 
     /**
      * Gets the list of summaries gotten from the once parsed xml file.
@@ -311,11 +311,11 @@ public class ProjectInfoFile {
                     inidicies = null;
                 }
 
-                values = GetNodeListValues(plugin.getElementsByTagName("ModisTiles"), "Missing indicies for plugin '" + name + "'.");
+                values = GetNodeListValues(plugin.getElementsByTagName("ModisTile"), "Missing modis tile(s) for plugin '" + name + "'.");
                 if(values.size() > 0) {
                     modisTiles = values;
                 } else {
-                    inidicies = null;
+                    modisTiles = null;
                 }
 
                 plugins.add(new ProjectInfoPlugin(name, inidicies, qc, modisTiles));

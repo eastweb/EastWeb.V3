@@ -2,8 +2,9 @@
 <ProjectInfo>
 	<Plugins>
 		<Plugin name="TRMM3B42RT">
-		<Indicies>TRMM3B42RTIndex</Indicies>
-		<QC> null</QC>
+			<Indicies>TRMM3B42RTIndex</Indicies>
+			<QC> null</QC>
+			<ModisTile/>
 		</Plugin>
 	</Plugins>
 	<StartDate>Sun Aug 23 00:00:00 CDT 2015</StartDate>
@@ -18,10 +19,6 @@
 	<CoolingDegree>10.0</CoolingDegree>
 	<HeatingDate>Thu Jan 01 00:00:00 CST 1970</HeatingDate>
 	<HeatingDegree>25.0</HeatingDegree>
-	<ModisTiles>
-		<Modis>h21v07</Modis>
-		<Modis>h21v08</Modis>
-	</ModisTiles>
 	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
 	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
 	<Datum>NAD83</Datum>

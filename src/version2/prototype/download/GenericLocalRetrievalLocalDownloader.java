@@ -43,8 +43,8 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
      * @param outputCache
      * @param listDatesFiles
      */
-    public GenericLocalRetrievalLocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
-            Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
+    public GenericLocalRetrievalLocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+            PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
         super(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
@@ -53,7 +53,8 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
         try {
             if(scheduler.GetState() == TaskState.RUNNING)
             {
-                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName, projectInfoFile.GetStartDate(), pluginMetaData.ExtraDownloadFiles, projectInfoFile.GetModisTiles(), listDatesFiles);
+                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName,
+                        projectInfoFile.GetStartDate(), pluginMetaData.ExtraDownloadFiles, pluginInfo.GetModisTiles(), listDatesFiles);
             }
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add(processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);

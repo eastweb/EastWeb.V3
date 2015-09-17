@@ -4,6 +4,7 @@
 		<Plugin name="ModisNBAR">
 			<Indicies>ModisNBARNDVI</Indicies>
 			<QC> NoScreening</QC>
+			<ModisTile>h21v07</ModisTile>
 		</Plugin>
 	</Plugins>
 	<StartDate>Mon Jun 01 00:00:00 CDT 2015</StartDate>
@@ -18,9 +19,6 @@
 	<CoolingDegree>0</CoolingDegree>
 	<HeatingDate>Sat Aug 01 00:00:00 CDT 1970</HeatingDate>
 	<HeatingDegree>0</HeatingDegree>
-	<ModisTiles>
-		<Modis>h21v07</Modis>
-	</ModisTiles>
 	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
 	<ReSampling>BILINEAR</ReSampling>
 	<Datum>NAD83</Datum>

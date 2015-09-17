@@ -3,12 +3,14 @@
 	<Plugins>
 		<Plugin name="ModisLST">
 			<Indicies>ModisLSTDay</Indicies>
-			<QC> HIGHEST</QC>
+			<QC>HIGHEST</QC>
+			<ModisTile>h21v07</ModisTile>
+			<ModisTile>h21v08</ModisTile>
 		</Plugin>
 	</Plugins>
 	<StartDate>Sat Aug 01 00:00:00 CDT 2015</StartDate>
 	<ProjectName>ModisLST_Test</ProjectName>
-	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<WorkingDir>D:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
 	<Resolution/>
 	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
@@ -18,10 +20,6 @@
 	<CoolingDegree>5</CoolingDegree>
 	<HeatingDate>Thu Jan 01 00:00:00 CST 1970</HeatingDate>
 	<HeatingDegree>30</HeatingDegree>
-	<ModisTiles>
-		<Modis>h21v07</Modis>
-		<Modis>h21v08</Modis>
-	</ModisTiles>
 	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
 	<ReSampling>BILINEAR</ReSampling>
 	<Datum>WGS84</Datum>
