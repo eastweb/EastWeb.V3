@@ -10,7 +10,7 @@
 	</Plugins>
 	<StartDate>Sat Aug 01 00:00:00 CDT 2015</StartDate>
 	<ProjectName>ModisLST_Test</ProjectName>
-	<WorkingDir>D:\EASTWeb</WorkingDir>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
 	<Resolution/>
 	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
