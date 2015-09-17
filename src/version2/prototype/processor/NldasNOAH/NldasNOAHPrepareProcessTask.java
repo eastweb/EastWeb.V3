@@ -93,7 +93,7 @@ public class NldasNOAHPrepareProcessTask extends PrepareProcessTask {
                     "Mask", date.getYear(), date.getDayOfYear());
             break;
         default:
-            outputFolder = String.format("%s"+ File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%04d" + File.separator+"%03d",
                     FileSystem.GetProcessOutputDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     date.getYear(), date.getDayOfYear());
             break;
