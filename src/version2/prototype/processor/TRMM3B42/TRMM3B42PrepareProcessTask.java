@@ -27,22 +27,22 @@ public class TRMM3B42PrepareProcessTask extends PrepareProcessTask{
 
         switch (stepId){
         case 1:
-            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            inputFolders[0] = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "download", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            inputFolders[0] = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "convert", date.getYear(), date.getDayOfYear());
             break;
         case 3:
-            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            inputFolders[0] = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "reproject", date.getYear(), date.getDayOfYear());
             break;
         case 4:
-            inputFolders[0] = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            inputFolders[0] = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "clip", date.getYear(), date.getDayOfYear());
             break;
@@ -58,17 +58,17 @@ public class TRMM3B42PrepareProcessTask extends PrepareProcessTask{
 
         switch (stepId){
         case 1:
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "convert", date.getYear(), date.getDayOfYear());
             break;
         case 2:
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "reproject", date.getYear(), date.getDayOfYear());
             break;
         case 3:
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "clip", date.getYear(), date.getDayOfYear());
             break;

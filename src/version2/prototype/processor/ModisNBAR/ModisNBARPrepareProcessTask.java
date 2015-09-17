@@ -27,28 +27,28 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download -> FilterMosaic
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Download", date.getYear(), date.getDayOfYear()));
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "QCDownload", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
             // FilterMosaic -> Reproject
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "FilterMosaic", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Reproject -> Mask
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Reproject", date.getYear(), date.getDayOfYear()));
             break;
         case 4:
             // Mask -> Clip
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Mask", date.getYear(), date.getDayOfYear()));
         default:
@@ -67,19 +67,19 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download/QCDownload -> Mozaic
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "FilterMosaic", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // Mozaic -> Reproject
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Reproject", date.getYear(), date.getDayOfYear());
             break;
         case 3:
             // Reproject -> Mask
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Mask", date.getYear(), date.getDayOfYear());
         case 4:

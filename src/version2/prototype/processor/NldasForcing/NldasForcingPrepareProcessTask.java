@@ -27,25 +27,25 @@ public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download -> Composite
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Download", date.getYear(), date.getDayOfYear()));
             break;
         case 2:
             // Composite -> Reproject
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Composite", date.getYear(), date.getDayOfYear()));
             break;
         case 3:
             // Reproject -> Mask
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Reproject", date.getYear(), date.getDayOfYear()));
             break;
         case 4:
             // Mask -> Clip
-            folders.add(String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Mask", date.getYear(), date.getDayOfYear()));
             break;
@@ -65,19 +65,19 @@ public class NldasForcingPrepareProcessTask extends PrepareProcessTask {
         {
         case 1:
             // Download -> Composite
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Composite", date.getYear(), date.getDayOfYear());
             break;
         case 2:
             // Composite -> Reproject
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Reproject", date.getYear(), date.getDayOfYear());
             break;
         case 3:
             // Reproject -> Mask
-            outputFolder = String.format("%s"+ File.separator + "%s" + File.separator + "%04d" + File.separator+"%03d",
+            outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Mask", date.getYear(), date.getDayOfYear());
             break;
