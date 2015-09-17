@@ -99,7 +99,23 @@ public class IndicesWorker extends ProcessWorker{
         }
 
         IndicesMetaData iMetaData = pluginMetaData.Indices;
-        ArrayList<String> indicesNames  = iMetaData.indicesNames;
+        //        ArrayList<String> indicesNames  = iMetaData.indicesNames;
+        ArrayList<String> indicesNames  = pluginInfo.GetIndices();
+        boolean exists;
+        for(String index : indicesNames)
+        {
+            exists = false;
+            for(String knownIdx : iMetaData.indicesNames)
+            {
+                if(index.equals(knownIdx)) {
+                    exists = true;
+                }
+            }
+            if(!exists) {
+                ErrorLog.add(process, "Problem encountered while caching data for IndicesWorker.", new Exception("Specified index, " + index + " is not part of plugin indices list."));
+            }
+        }
+
         ArrayList<DataFileMetaData> output;
 
         for (Map.Entry<DataDate, ArrayList<ProcessorFileMetaData>> entry : map.entrySet())
@@ -125,6 +141,15 @@ public class IndicesWorker extends ProcessWorker{
                 FileUtils.forceMkdir(new File(outputPath));
             }
 
+            String tempStr;
+            System.out.print("inputFiles = ");
+            for(int idx=0; idx < inputFiles.length; idx++) {
+                tempStr = inputFiles[idx].getPath();
+                System.out.print(tempStr + ", ");
+            }
+            System.out.println();
+
+
             for(String indices: indicesNames)
             {
                 Class<?> clazzIndicies;
@@ -138,7 +163,6 @@ public class IndicesWorker extends ProcessWorker{
                     //set input files
                     Method method = indexCalculator.getClass().getMethod("setInputFiles", new Class[]{File[].class});
                     method.invoke(indexCalculator, new Object[]{inputFiles});
-
                     // set output file
                     String outFile = outputPath + File.separator + indices + ".tif";
                     method = indexCalculator.getClass().getMethod("setOutputFile", File.class);
