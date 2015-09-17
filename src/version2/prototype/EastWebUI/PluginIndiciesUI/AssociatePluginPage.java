@@ -66,7 +66,12 @@ public class AssociatePluginPage {
      * @throws Exception
      */
     public AssociatePluginPage(IndiciesListener l, ArrayList<String> globalModisTiles) throws Exception {
-        this.globalModisTiles = globalModisTiles;
+        this.globalModisTiles = new ArrayList<String>();
+
+        for(String tile :globalModisTiles) {
+            this.globalModisTiles.add(tile);
+        }
+
         indiciesEvent = new IndiciesEvent();
         indiciesEvent.addListener(l);
         initialize();
@@ -142,34 +147,16 @@ public class AssociatePluginPage {
                         String.valueOf(qcComboBox.getSelectedItem())
                         );
 
-                PluginObject obj = new PluginObject();
-                obj.PluginName = String.valueOf(pluginComboBox.getSelectedItem());
-
-                obj.Indices = new ArrayList<String>();
-                String formatStringIndies = "";
-                ListModel model = listOfInndicies.getModel();
-
-                for(int i=0; i < model.getSize(); i++){
-                    formatStringIndies = String.format("%s",   model.getElementAt(i).toString());
-                    obj.Indices.add(formatStringIndies);
-                }
-
                 if(!modisListModel.isEmpty() && String.valueOf(pluginComboBox.getSelectedItem()).toUpperCase().contains("MODIS")) {
                     globalModisTiles.clear();
-                    obj.ModisTiles = new ArrayList<String>();
                     for(Object tile : modisListModel.toArray()) {
-                        obj.ModisTiles.add(tile.toString());
                         globalModisTiles.add(tile.toString());
                     }
                 }
 
-                obj.QC = String.valueOf(qcComboBox.getSelectedItem());
-
                 indiciesEvent.fire(formatString, globalModisTiles);
                 frame.dispose();
             }
-
-
         });
         btnSave.setBounds(10, 340, 89, 23);
         pluginPanel.add(btnSave);

@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -102,7 +103,6 @@ public class ProjectInformationPage {
 
     private DefaultListModel<String> listOfAddedPluginModel;
     private DefaultListModel<String> summaryListModel;
-    private DefaultListModel<String> modisListModel;
     private JTextField scalingTextField;
     private JTextField resolutionTextField;
 
@@ -334,14 +334,15 @@ public class ProjectInformationPage {
     }
 
     private String getModisTilesFormat(ArrayList<String> m) {
-        if(modisListModel.isEmpty()) {
+        if(m.isEmpty()) {
             return "";
         } else
         {
             String formatString = "Modis Tiles: ";
 
-            for(Object tile : modisListModel.toArray()) {
+            for(Object tile : m) {
                 formatString += tile.toString() + "; ";
+                globalModisTiles.add(tile.toString());
             }
 
             return formatString;
@@ -1032,15 +1033,72 @@ public class ProjectInformationPage {
         }
     }
 
+    public  boolean equalLists(List<String> one, List<String> two){
+        if (one == null && two == null){
+            return true;
+        }
+
+        if((one == null && two != null)
+                || one != null && two == null
+                || one.size() != two.size()){
+            return false;
+        }
+
+        //to avoid messing the order of the lists we will use a copy
+        //as noted in comments by A. R. S.
+        one = new ArrayList<String>(one);
+        two = new ArrayList<String>(two);
+
+        Collections.sort(one);
+        Collections.sort(two);
+        return one.equals(two);
+    }
+
     class indiciesListenerImplementation implements IndiciesListener{
 
         @Override
         public void AddPlugin(IndiciesEventObject e) {
             listOfAddedPluginModel.addElement(e.getPlugin());
-            globalModisTiles.clear();
-            for(String tile : e.getTiles()) {
-                globalModisTiles.add(tile);
+
+            // check if the tiles was change
+            if(equalLists(globalModisTiles, e.getTiles())) {
+                return ;
+            } else
+            {
+                //modis change so you have to format all modis to format the same
+                globalModisTiles.clear();
+                for(String tile : e.getTiles()) {
+                    globalModisTiles.add(tile);
+                }
+
+                DefaultListModel<String> temp = new DefaultListModel<String>();
+                for(Object item:listOfAddedPluginModel.toArray()){
+                    if(item.toString().toUpperCase().contains("MODIS")){
+                        temp.addElement(item.toString());
+                        listOfAddedPluginModel.removeElement(item);
+                    }
+                }
+
+                //<br>Modis Tiles: h01v01; </span>
+                for(Object item:temp.toArray()){
+                    String pluginFormat = item.toString();
+                    String [] section1 = pluginFormat.split("<br>Modis Tiles: ");
+                    String [] section2 = pluginFormat.split("<br>Quality:");
+                    String newPluginFormat = String.format("%s%s<br>Quality:%s", section1[0], newModisFormat(globalModisTiles), section2[1]);
+                    listOfAddedPluginModel.addElement(newPluginFormat);
+                }
+
             }
+        }
+
+        private String newModisFormat(ArrayList<String> globalModisTiles) {
+            String formatString = "Modis Tiles: ";
+
+            for(Object tile : globalModisTiles.toArray()) {
+                formatString += tile.toString() + "; ";
+            }
+
+            return String.format("<br>%s</span>",formatString);
         }
     }
 
