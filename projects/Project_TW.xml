@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ProjectInfo>
-<Plugins>
-<Plugin name="TRMM3B42">
-<Indicies>TRMM3B42Index</Indicies>
-<QC> null</QC>
-</Plugin>
-</Plugins>
-<StartDate>Tue Jul 01 10:04:13 CDT 2014</StartDate>
-<ProjectName>Project_TW</ProjectName>
-<WorkingDir>C:\EASTWeb</WorkingDir>
-<MaskingFile/>
-<Resolution/>
-<MasterShapeFile>\Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
-<TimeZone>(GMT+8:00) Asia/Chongqing</TimeZone>
-<Clipping>true</Clipping>
-<FreezingDate>Tue Sep 01 10:08:11 CDT 1970</FreezingDate>
-<CoolingDegree>10</CoolingDegree>
-<HeatingDate>Thu Jan 01 10:08:21 CST 1970</HeatingDate>
-<HeatingDegree>25</HeatingDegree>
-<ModisTiles>
-<Modis>h29v06</Modis>
-<Modis>h28v06</Modis>
-</ModisTiles>
-<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
-<ReSampling>BILINEAR</ReSampling>
-<Datum>WGS84</Datum>
-<PixelSize>1000</PixelSize>
-<StandardParallel1>0.0</StandardParallel1>
-<CentalMeridian>123.0</CentalMeridian>
-<FalseEasting>500000.0</FalseEasting>
-<StandardParallel2>0.0</StandardParallel2>
-<LatitudeOfOrigin>0.0</LatitudeOfOrigin>
-<FalseNothing>0.0</FalseNothing>
-<ScalingFactor>0.9996</ScalingFactor>
-<Summaries>
-	<Summary ID="1">AreaNameField: N_ID2; Shape File Path: \Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaCodeField: N_ID2;</Summary>
-</Summaries>
+	<Plugins>
+		<Plugin name="TRMM3B42">
+			<Indicies>TRMM3B42Index</Indicies>
+			<QC> null</QC>
+			<ModisTile/>
+		</Plugin>
+	</Plugins>
+	<StartDate>Tue Jul 01 10:04:13 CDT 2014</StartDate>
+	<ProjectName>Project_TW</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<MaskingFile/>
+	<Resolution/>
+	<MasterShapeFile>\Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
+	<TimeZone>(GMT+8:00) Asia/Chongqing</TimeZone>
+	<Clipping>true</Clipping>
+	<FreezingDate>Tue Sep 01 10:08:11 CDT 1970</FreezingDate>
+	<CoolingDegree>10</CoolingDegree>
+	<HeatingDate>Thu Jan 01 10:08:21 CST 1970</HeatingDate>
+	<HeatingDegree>25</HeatingDegree>
+	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
+	<ReSampling>BILINEAR</ReSampling>
+	<Datum>WGS84</Datum>
+	<PixelSize>1000</PixelSize>
+	<StandardParallel1>0.0</StandardParallel1>
+	<CentalMeridian>123.0</CentalMeridian>
+	<FalseEasting>500000.0</FalseEasting>
+	<StandardParallel2>0.0</StandardParallel2>
+	<LatitudeOfOrigin>0.0</LatitudeOfOrigin>
+	<FalseNothing>0.0</FalseNothing>
+	<ScalingFactor>0.9996</ScalingFactor>
+	<Summaries>
+		<Summary ID="1">AreaNameField: N_ID2; Shape File Path: \Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp; AreaCodeField: N_ID2;</Summary>
+	</Summaries>
 </ProjectInfo>

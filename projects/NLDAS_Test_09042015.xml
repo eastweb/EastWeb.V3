@@ -4,6 +4,7 @@
 		<Plugin name="NldasForcing">
 			<Indicies>NldasForcingMeanAirTemperature</Indicies>
 			<QC> null</QC>
+			<ModisTile>h21v09</ModisTile>
 		</Plugin>
 	</Plugins>
 	<StartDate>Wed Jul 01 00:00:00 CDT 2015</StartDate>
@@ -18,9 +19,6 @@
 	<CoolingDegree>0</CoolingDegree>
 	<HeatingDate>Sun Apr 12 00:00:00 CST 1970</HeatingDate>
 	<HeatingDegree>14.3</HeatingDegree>
-	<ModisTiles>
-		<Modis>h21v09</Modis>
-	</ModisTiles>
 	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
 	<ReSampling>BILINEAR</ReSampling>
 	<Datum>NAD83</Datum>

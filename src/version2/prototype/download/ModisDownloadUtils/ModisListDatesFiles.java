@@ -17,6 +17,7 @@ import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.util.ParallelUtils.Parallel;
@@ -43,7 +44,16 @@ public class ModisListDatesFiles extends ListDatesFiles
     {
         mapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
 
-        final ArrayList<String> modisTiles = mProject.GetModisTiles();
+        ArrayList<String> modisTiles = new ArrayList<String>();
+        for(ProjectInfoPlugin pluginInfo : mProject.GetPlugins())
+        {
+            if(pluginInfo.GetName().equals(mData.Title))
+            {
+                modisTiles = pluginInfo.GetModisTiles();
+                break;
+            }
+        }
+
 
         final String mHostURL = mData.myHttp.url;
 

@@ -7,9 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -24,9 +28,12 @@ import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
+import version2.prototype.util.Schemas;
 
 /**
  * @author michael.devos
@@ -34,7 +41,7 @@ import version2.prototype.util.FileSystem;
  */
 public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
     private Constructor<?> downloadCtr;
-    private static final ArrayList<String> modisTiles = new ArrayList<String>();
+    private static ArrayList<String> modisTiles = new ArrayList<String>();
 
     /**
      * @param myID
@@ -61,12 +68,118 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
         Class<?> downloaderClass = Class.forName("version2.prototype.download." + pluginName + "." + downloaderClassName);
         downloadCtr = downloaderClass.getConstructor(DataDate.class, String.class, DownloadMetaData.class, String.class);
 
-        for(String tile : projectMetaData.GetModisTiles())
+        ArrayList<String> tempTiles = new ArrayList<String>();
+        for(ProjectInfoPlugin pluginInfo : projectMetaData.GetPlugins())
+        {
+            if(pluginInfo.GetName().equals(pluginName))
+            {
+                tempTiles = pluginInfo.GetModisTiles();
+                break;
+            }
+        }
+        for(String tile : tempTiles)
         {
             if(!modisTiles.contains(tile))
             {
                 modisTiles.add(tile);
             }
+        }
+    }
+
+    @Override
+    public void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    {
+        final Connection conn = DatabaseConnector.getConnection();
+        final Statement stmt = conn.createStatement();
+        final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+        //        int filesPerDay = metaData.filesPerDay;
+        int filesPerDay = modisTiles.size();
+        ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
+        Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
+        ResultSet rs = null;
+        StringBuilder update;
+
+        // Check if all files downloaded for any additional days
+        rs = stmt.executeQuery("SELECT \"DateGroupID\", COUNT(\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + configInstance.getGlobalSchema() + "\".\"Download\" " +
+                "WHERE \"GlobalDownloaderID\" = " + gdlID + " AND \"Complete\" = FALSE " +
+                "GROUP BY \"DateGroupID\";");
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                countOfDates.put(rs.getInt("DateGroupID"), rs.getInt("DateGroupIDCount"));
+            }
+        }
+        rs.close();
+        rs = stmt.executeQuery("SELECT A.\"DateGroupID\", COUNT(A.\"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + configInstance.getGlobalSchema() + "\".\"DownloadExtra\" A " +
+                "WHERE A.\"GlobalDownloaderID\" = " + gdlID + " AND A.\"Complete\" = FALSE " +
+                "GROUP BY \"DateGroupID\";");
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                countOfDates.put(rs.getInt("DateGroupID"), countOfDates.get(rs.getInt("DateGroupID")) + rs.getInt("DateGroupIDCount"));
+            }
+        }
+        rs.close();
+
+        Iterator<Integer> iterator = countOfDates.keySet().iterator();
+        int idx;
+        while(iterator.hasNext())
+        {
+            idx = iterator.next();
+            if(countOfDates.get(idx) == filesPerDay)
+            {
+                datesCompleted.add(idx);
+            }
+        }
+
+        if(datesCompleted.size() > 0)
+        {
+            StringBuilder dateGroups = new StringBuilder("\"DateGroupID\" = " + datesCompleted.get(0));
+            for(int i=1; i < datesCompleted.size(); i++)
+            {
+                dateGroups.append(" OR \"DateGroupID\" = " + datesCompleted.get(i));
+            }
+
+            try{
+                stmt.execute("BEGIN");
+
+                update = new StringBuilder("UPDATE \"" + configInstance.getGlobalSchema() + "\".\"Download\" SET \"Complete\" = TRUE WHERE " + dateGroups.toString() + ";");
+                stmt.executeUpdate(update.toString());
+
+                update = new StringBuilder("UPDATE \"" + configInstance.getGlobalSchema() + "\".\"DownloadExtra\" SET \"Complete\" = TRUE WHERE " + dateGroups.toString() + ";");
+                stmt.executeUpdate(update.toString());
+
+                stmt.execute("COMMIT");
+            }
+            catch(SQLException e)
+            {
+                stmt.execute("ROLLBACK");
+                if(rs != null) {
+                    rs.close();
+                }
+                if(stmt != null) {
+                    stmt.close();
+                }
+                if(conn != null) {
+                    conn.close();
+                }
+                throw e;
+            }
+
+            setChanged();
+            notifyObservers();
+        }
+
+        if(rs != null) {
+            rs.close();
+        }
+        if(stmt != null) {
+            stmt.close();
+        }
+        if(conn != null) {
+            conn.close();
         }
     }
 
@@ -80,26 +193,37 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
             System.out.println("Running: " + downloadCtr.getName().substring((downloadCtr.getName().lastIndexOf(".") > -1 ? downloadCtr.getName().lastIndexOf(".") + 1 : 0)));
 
             // Step 1: Get all downloads from ListDatesFiles and remove unneeded modis tile files
-            Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.CloneListDatesFiles();
-            Iterator<DataDate> keysIt = datesFiles.keySet().iterator();
+            Map<DataDate, ArrayList<String>> originalDatesFiles = listDatesFiles.CloneListDatesFiles();
+            Iterator<DataDate> keysIt = originalDatesFiles.keySet().iterator();
+            ArrayList<String> daysTemp;
+            Map<DataDate, ArrayList<String>> datesFiles = new HashMap<DataDate, ArrayList<String>>();
             DataDate tempKey;
             String tempFilePath;
             while(keysIt.hasNext())
             {
                 tempKey = keysIt.next();
-                for(int i=0; i < datesFiles.size(); i++)
+                daysTemp = originalDatesFiles.get(tempKey);
+                for(int i=0; i < daysTemp.size(); i++)
                 {
-                    tempFilePath = datesFiles.get(tempKey).get(i);
+                    tempFilePath = daysTemp.get(i);
                     for(String tile : modisTiles)
                     {
                         if(tempFilePath.contains(tile))
                         {
-                            datesFiles.get(tempKey).remove(i);
+                            if(datesFiles.get(tempKey) != null) {
+                                datesFiles.get(tempKey).add(tempFilePath);
+                            } else {
+                                ArrayList<String> newDatesFilesList = new ArrayList<String>();
+                                newDatesFilesList.add(tempFilePath);
+                                datesFiles.put(tempKey, newDatesFilesList);
+                            }
                             break;
                         }
                     }
                 }
             }
+            originalDatesFiles.clear();
+            originalDatesFiles = null;
 
             //            Map<DataDate, ArrayList<String>> datesFiles = new TreeMap<DataDate, ArrayList<String>>(filesTemp);
 

@@ -13,6 +13,7 @@
 			<Indicies>NldasNOAHMeanDailySoilTemp40_100Calculator</Indicies>
 			<Indicies>NldasNOAHMeanDailySoilTemp100_200Calculator</Indicies>
 			<QC> null</QC>
+			<ModisTile/>
 		</Plugin>
 	</Plugins>
 	<StartDate>Sun Jan 18 12:56:49 CST 2015</StartDate>
@@ -27,7 +28,6 @@
 	<CoolingDegree>5</CoolingDegree>
 	<HeatingDate>Thu Jan 01 12:58:42 CST 1970</HeatingDate>
 	<HeatingDegree>20</HeatingDegree>
-	<ModisTiles/>
 	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
 	<ReSampling>BILINEAR</ReSampling>
 	<Datum>WGS84</Datum>
