@@ -154,7 +154,7 @@ public class DatabaseConnector {
                                 new DatabaseConnector(),
                                 DriverManager.getConnection(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName(),
                                         myConfigInstance.getDatabaseUsername(), myConfigInstance.getDatabasePassword()),
-                                        connectionID);
+                                connectionID);
                     } catch (SQLException e) {
                         ErrorLog.add(myConfigInstance, "Problem creating DatbaseConnection object.", e);
                     }
@@ -189,6 +189,7 @@ public class DatabaseConnector {
             }
         }while(con == null && !failFast && (maxAttemptCount == null || currentTest <= maxAttemptCount));
 
+        System.out.println("Current connectionCount: " + connectionCount);
         return con;
     }
 

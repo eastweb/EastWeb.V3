@@ -141,15 +141,6 @@ public class IndicesWorker extends ProcessWorker{
                 FileUtils.forceMkdir(new File(outputPath));
             }
 
-            String tempStr;
-            System.out.print("inputFiles = ");
-            for(int idx=0; idx < inputFiles.length; idx++) {
-                tempStr = inputFiles[idx].getPath();
-                System.out.print(tempStr + ", ");
-            }
-            System.out.println();
-
-
             for(String indices: indicesNames)
             {
                 Class<?> clazzIndicies;

@@ -362,7 +362,14 @@ public class ProgressUpdater {
         {
             processorExpectedNumOfOutputs.put(pluginName, getStoredProcessorExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, stmt));
         }
-        return pluginMetaData.Indices.indicesNames.size() * processorExpectedNumOfOutputs.get(pluginName);
+        int indicesCount = 0;
+        for(ProjectInfoPlugin pluginInfo : projectMetaData.GetPlugins()) {
+            if(pluginInfo.GetName().equalsIgnoreCase(pluginName)) {
+                indicesCount = pluginInfo.GetIndices().size();
+                break;
+            }
+        }
+        return indicesCount * processorExpectedNumOfOutputs.get(pluginName);
     }
 
     protected int calculateSummaryCurrentCount(int projectSummaryID, String mSchemaName, Statement stmt) throws SQLException
