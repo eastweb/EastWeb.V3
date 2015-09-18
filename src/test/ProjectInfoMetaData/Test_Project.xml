@@ -6,22 +6,20 @@
 			<Indicies>GdalModisLST_DAYCalculator</Indicies>
 			<Indicies>GdalModisLST_MEANCalculator</Indicies>
 			<Indicies>GdalModisLST_NIGHTCalculator</Indicies>
+			<ModisTile>v12H42</ModisTile>
+			<ModisTile>V11H11</ModisTile>
 		</Plugin>
 	</Plugins>
 	<StartDate>Tue Jun 02 23:17:37 CDT 2015</StartDate>
-	<ProjectName>sufi_Project</ProjectName>
-	<WorkingDir>C:\Users\sufi</WorkingDir>
+	<ProjectName>Test_Project</ProjectName>
+	<WorkingDir>C:\EASTWeb_Test</WorkingDir>
 	<Masking>
-		<File>C:\Users\Public\Desktop\3D Vision Photo Viewer.lnk</File>
+		<File>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
 		<Resolution>1000</Resolution>
 	</Masking>
-	<MasterShapeFile>C:\Users\sufi\Desktop\shapefile\shapefile.shp</MasterShapeFile>
+	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
 	<TotalModisTiles>120</TotalModisTiles>
-	<ModisTiles>
-		<Modis>v12H42</Modis>
-		<Modis>V11H11</Modis>
-	</ModisTiles>
 	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
 	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
 	<Datum>NAD83</Datum>
@@ -46,9 +44,9 @@
 	</HeatingDate> -->
 	<HeatingDegree>100.1</HeatingDegree>
 	<Summaries>
-        <Summary ID="1">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
-        <Summary ID="2">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
-        <Summary ID="3">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10</Summary>
-        <Summary ID="4">AreaNameField: NAME10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: COUNTYNS10;</Summary>
+        <Summary ID="1">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy</Summary>
+        <Summary ID="2">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy;</Summary>
+        <Summary ID="3">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: COUNTYNS10</Summary>
+        <Summary ID="4">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: COUNTYNS10;</Summary>
 	</Summaries>
 </ProjectInfo>

@@ -57,15 +57,16 @@ public class ConfigTest {
      */
     @Test
     public final void testGetInstance() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
-        Config config = Config.getAnInstance("config.xml");     // Works no different than Config.getInstance()
+        Config config = Config.getAnInstance("src\\test\\config.xml");     // Works no different than Config.getInstance()
 
-        assertTrue("Config downloadDir is " + config.getDownloadDir(), config.getDownloadDir().equals("C:\\EASTWeb\\Downloads\\"));
+        assertEquals("Config ErrorLogDir is incorrect.", "C:\\EASTWeb_Test\\", config.getErrorLogDir());
+        assertEquals("Config DownloadDir is incorrect.", "C:\\EASTWeb_Test\\Downloads\\", config.getDownloadDir());
 
-        assertTrue("Config Database hostName is " + config.getDatabaseHost(), config.getDatabaseHost().equals("jdbc:postgresql://" + "localhost"));
-        assertEquals("Config Database port incorrect.", 5432, config.getPort().intValue());
-        assertEquals("Config Database databaseName incorrect.", "postgres", config.getDatabaseName());
-        assertTrue("Config Database userName is " + config.getDatabaseUsername(), config.getDatabaseUsername().equals("postgres"));
-        assertTrue("Config Database passWord is " + config.getDatabasePassword(), config.getDatabasePassword().equals("eastweb"));
+        assertEquals("Config Database HostName is incorrect.", "jdbc:postgresql://" + "localhost", config.getDatabaseHost());
+        assertEquals("Config Database Port incorrect.", 5432, config.getPort().intValue());
+        assertEquals("Config Database DatabaseName incorrect.", "postgres", config.getDatabaseName());
+        assertEquals("Config Database UserName is incorrect.", "postgres", config.getDatabaseUsername());
+        assertEquals("Config Database PassWord is incorrect.", "eastweb", config.getDatabasePassword());
         Connection con = DatabaseConnector.getConnection();
         assertNotNull("Database connection failed.", con.createStatement().executeQuery("select 1"));
 

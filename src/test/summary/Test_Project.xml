@@ -8,7 +8,7 @@
 	</Plugins>
 	<StartDate>Mon Jun 01 00:00:00 CDT 2015</StartDate>
 	<ProjectName>Test_Project</ProjectName>
-	<WorkingDir>C:\Users\michael.devos\Desktop\EASTWeb</WorkingDir>
+	<WorkingDir>C:\EASTWeb_Test</WorkingDir>
 	<Masking>
 		<File>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
 		<Resolution>1000</Resolution>
@@ -16,7 +16,6 @@
 	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+1:00) Africa/Bangui</TimeZone>
 	<TotalModisTiles>120</TotalModisTiles>
-	<ModisTiles/>
 	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
 	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
 	<Datum>NAD83</Datum>

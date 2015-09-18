@@ -41,12 +41,14 @@ public class ProjectInfoFileTester {
         assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndices().get(0), projectInfo.GetPlugins().get(0).GetIndices().get(0).equals("GdalModisLST_DAYCalculator"));
         assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndices().get(1), projectInfo.GetPlugins().get(0).GetIndices().get(1).equals("GdalModisLST_MEANCalculator"));
         assertTrue("Plugin 1 indices are " + projectInfo.GetPlugins().get(0).GetIndices().get(2), projectInfo.GetPlugins().get(0).GetIndices().get(2).equals("GdalModisLST_NIGHTCalculator"));
+        assertTrue("Plugin 1 Modis Tile 1 is " + projectInfo.GetPlugins().get(0).GetModisTiles().get(0), projectInfo.GetPlugins().get(0).GetModisTiles().get(0).equals("v12H42"));
+        assertTrue("Plugin 1 Modis Tile 2 is " + projectInfo.GetPlugins().get(0).GetModisTiles().get(1), projectInfo.GetPlugins().get(0).GetModisTiles().get(1).equals("V11H11"));
         assertTrue("StartDate is " + projectInfo.GetStartDate().toString(), projectInfo.GetStartDate().toString().equals("2015-06-02"));
-        assertTrue("ProjectName is " + projectInfo.GetProjectName(), projectInfo.GetProjectName().equals("sufi_Project"));
-        assertTrue("WorkingDir is " + projectInfo.GetWorkingDir(), projectInfo.GetWorkingDir().equals("C:\\Users\\sufi\\"));
-        assertTrue("Masking File is " + projectInfo.GetMaskingFile(), projectInfo.GetMaskingFile().equals("C:\\Users\\Public\\Desktop\\3D Vision Photo Viewer.lnk"));
+        assertTrue("ProjectName is " + projectInfo.GetProjectName(), projectInfo.GetProjectName().equals("Test_Project"));
+        assertTrue("WorkingDir is " + projectInfo.GetWorkingDir(), projectInfo.GetWorkingDir().equals("C:\\EASTWeb_Test\\"));
+        assertEquals("Masking File is incorrect.", System.getProperty("user.dir") + "\\Documentation\\TestCases\\ethiopia_amhara\\settings\\watermask\\Ethiopia_watermask.tif", projectInfo.GetMaskingFile());
         assertTrue("Masking Resolution is " + projectInfo.GetMaskingResolution(), projectInfo.GetMaskingResolution() == 1000);
-        assertTrue("MasterShapeFile is " + projectInfo.GetMasterShapeFile(), projectInfo.GetMasterShapeFile().equals("C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp"));
+        assertEquals("MasterShapeFile is incorrect.", System.getProperty("user.dir") + "\\Documentation\\TestCases\\ethiopia_amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp", projectInfo.GetMasterShapeFile());
         assertTrue("TimeZone is " + projectInfo.GetTimeZone(), projectInfo.GetTimeZone().equals("Africa/Bangui"));
         ZoneId zid = ZoneId.of(projectInfo.GetTimeZone());
         assertTrue("TimeZone is " + zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH), zid.getDisplayName(TextStyle.FULL, Locale.ENGLISH).equals("Western African Time"));
@@ -58,8 +60,6 @@ public class ProjectInfoFileTester {
         //        System.out.println(zid.getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH));
 
         assertTrue("TotalModisTiles is " + projectInfo.GetTotModisTiles(), projectInfo.GetTotModisTiles() == 120);
-        assertTrue("Modis Tile 1 is " + projectInfo.GetModisTiles().get(0), projectInfo.GetModisTiles().get(0).equals("v12H42"));
-        assertTrue("Modis Tile 2 is " + projectInfo.GetModisTiles().get(1), projectInfo.GetModisTiles().get(1).equals("V11H11"));
         assertTrue("CoordinateSystem is " + projectInfo.GetProjection().getProjectionType().name(), projectInfo.GetProjection().getProjectionType().name().equals("ALBERS_EQUAL_AREA"));
         assertTrue("ReSampling is " + projectInfo.GetProjection().getResamplingType().name(), projectInfo.GetProjection().getResamplingType().name().equals("NEAREST_NEIGHBOR"));
         assertTrue("Datum is " + projectInfo.GetProjection().getDatum().name(), projectInfo.GetProjection().getDatum().name().equals("NAD83"));
@@ -78,12 +78,12 @@ public class ProjectInfoFileTester {
         //        assertTrue("HeatingDate is " + projectInfo.GetHeatingDate().toString(), projectInfo.GetHeatingDate().toString().equals("--06-02"));
         assertTrue("HeatingDegree is " + projectInfo.GetHeatingDegree(), projectInfo.GetHeatingDegree() == 100.1);
         assertTrue("Summary " + projectInfo.GetSummaries().get(0).GetID() + " is " + projectInfo.GetSummaries().get(0).toString(), projectInfo.GetSummaries().get(0).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+                .equals("AreaNameField: NAME10; Shape File Path: " + System.getProperty("user.dir") + "\\Documentation\\TestCases\\ethiopia_amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary " + projectInfo.GetSummaries().get(1).GetID() + " is " + projectInfo.GetSummaries().get(1).toString(), projectInfo.GetSummaries().get(1).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
+                .equals("AreaNameField: NAME10; Shape File Path: " + System.getProperty("user.dir") + "\\Documentation\\TestCases\\ethiopia_amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaCodeField: COUNTYNS10; Temporal Summary: GregorianWeeklyStrategy"));
         assertTrue("Summary " + projectInfo.GetSummaries().get(2).GetID() + " is " + projectInfo.GetSummaries().get(2).toString(), projectInfo.GetSummaries().get(2).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10"));
+                .equals("AreaNameField: NAME10; Shape File Path: " + System.getProperty("user.dir") + "\\Documentation\\TestCases\\ethiopia_amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaCodeField: COUNTYNS10"));
         assertTrue("Summary " + projectInfo.GetSummaries().get(3).GetID() + " is " + projectInfo.GetSummaries().get(3).toString(), projectInfo.GetSummaries().get(3).toString()
-                .equals("AreaNameField: NAME10; Shape File Path: C:\\Users\\sufi\\Desktop\\shapefile\\shapefile.shp; AreaCodeField: COUNTYNS10"));
+                .equals("AreaNameField: NAME10; Shape File Path: " + System.getProperty("user.dir") + "\\Documentation\\TestCases\\ethiopia_amhara\\settings\\shapefiles\\Woreda_new\\Woreda_new.shp; AreaCodeField: COUNTYNS10"));
     }
 }

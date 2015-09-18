@@ -9,7 +9,7 @@
 	</Plugins>
 	<StartDate>Wed Jul 01 00:00:00 CDT 2015</StartDate>
 	<ProjectName>NLDAS_Test_09042015</ProjectName>
-	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<WorkingDir>D:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\Georgia_shp_wmask\watermask\w0010011.tif</MaskingFile>
 	<Resolution>250, 250</Resolution>
 	<MasterShapeFile>\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
