@@ -847,7 +847,7 @@ public class ProjectInformationPage {
 
                         if(isValueAModisTile(array, i))
                         {
-                            Element modisTile = doc.createElement("ModisTiles");
+                            Element modisTile = doc.createElement("ModisTile");
                             modisTile.appendChild(doc.createTextNode(array[i].toString()));
                             plugin.appendChild(modisTile);
                         }
@@ -1018,14 +1018,14 @@ public class ProjectInformationPage {
     }
 
     private boolean isValueAModisTile(String[] array, int i) {
-        String tile = array[i].toString();
+        String tile = array[i].toString().toUpperCase();
 
-        if(tile.toUpperCase().charAt(0) != 'H' || tile.toUpperCase().charAt(3) != 'V' || tile.length() > 6) {
+        if(tile.charAt(1) != 'H' || tile.charAt(4) != 'V' || tile.length() > 7) {
             return false;
         } else{
             try {
-                Integer.parseInt(String.format("%s%s", tile.toUpperCase().charAt(1), tile.toUpperCase().charAt(2)));
-                Integer.parseInt(String.format("%c%c", tile.toUpperCase().charAt(4), tile.toUpperCase().charAt(5)));
+                Integer.parseInt(String.format("%s%s", tile.toUpperCase().charAt(2), tile.toUpperCase().charAt(3)));
+                Integer.parseInt(String.format("%c%c", tile.toUpperCase().charAt(5), tile.toUpperCase().charAt(6)));
                 return true;
             } catch (NumberFormatException e) {
                 return false;
