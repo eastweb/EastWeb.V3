@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config>
-	<ErrorLogDir>C:\Users\michael.devos\Desktop\EASTWeb</ErrorLogDir>
-	<DownloadDir>C:\Users\michael.devos\Desktop\EASTWeb\Downloads</DownloadDir>
+	<ErrorLogDir>C:\EASTWeb_Test</ErrorLogDir>
+	<DownloadDir>C:\EASTWeb_Test\Downloads</DownloadDir>
 	<Database>
 		<GlobalSchema>Scheduler_Test_EASTWeb</GlobalSchema>
 		<HostName>localhost</HostName>

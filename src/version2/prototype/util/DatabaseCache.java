@@ -261,9 +261,13 @@ public class DatabaseCache extends Observable{
                         }
 
                         if(processCachingFor == ProcessName.INDICES) {
-                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData(rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear, rs.getString("IndexName"))));
+                            if(!temp.add(new Record(dateGroupID, "Data", new DataFileMetaData(rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear, rs.getString("IndexName"))))) {
+                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element not added."));
+                            }
                         } else {
-                            temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)));
+                            if(!temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
+                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element not added."));
+                            }
                         }
                         rows.add(rs.getInt(getFromTableName + "ID"));
                     }
@@ -727,8 +731,14 @@ public class DatabaseCache extends Observable{
 
         @Override
         public int compareTo(Record o) {
+            if(dateGroupID < o.dateGroupID) {
+                return -1;
+            } else if(dateGroupID > o.dateGroupID) {
+                return 1;
+            }
+
             if(dataName.equals(o.dataName)) {
-                return 0;
+                return data.ReadMetaDataForProcessor().dataFilePath.compareTo(o.data.ReadMetaDataForProcessor().dataFilePath);
             } else if(dataName.equalsIgnoreCase("Data")) {
                 return -1;
             } else {

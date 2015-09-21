@@ -43,7 +43,7 @@ public class TestModisLSTListDatesFiles {
         data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
         projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
 
-        ArrayList <String> modisTiles = projectInfoFile.GetModisTiles();
+        ArrayList <String> modisTiles = projectInfoFile.GetPlugins().get(0).GetModisTiles();
         for (String tile : modisTiles)
         {System.out.println(tile);}
 
