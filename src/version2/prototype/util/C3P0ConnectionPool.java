@@ -83,42 +83,52 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
      * @see version2.prototype.util.DatabaseConnectionPoolA#getConnection(boolean, java.lang.Integer)
      */
     @Override
-    public DatabaseConnection getConnection(boolean failFast, Integer maxAttemptCount) {
+    public DatabaseConnection getConnection() {
         DatabaseConnection dbCon = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+        //        Statement stmt = null;
+        //        ResultSet rs = null;
         Integer connectionID = null;
 
         synchronized(super.DatabaseConnectorLock) {
-            try {
-                stmt = testCon.createStatement();
-                rs = stmt.executeQuery("SELECT sum(numbackends) as row_count FROM pg_stat_database;");
-                if(rs != null && rs.next()) {
-                    postgresqlConnectionCount = rs.getInt("row_count");
-                }
-                stmt.close();
-                rs.close();
-            } catch(SQLException e) {
-                ErrorLog.add(configInstance, "Problem while checking actve database connection count.", e);
-            }
+            //            try {
+            //                stmt = testCon.createStatement();
+            //                rs = stmt.executeQuery("SELECT sum(numbackends) as row_count FROM pg_stat_database;");
+            //                if(rs != null && rs.next()) {
+            //                    postgresqlConnectionCount = rs.getInt("row_count");
+            //                }
+            //                stmt.close();
+            //                rs.close();
+            //            } catch(SQLException e) {
+            //                ErrorLog.add(configInstance, "Problem while checking actve database connection count.", e);
+            //            }
 
-            if(postgresqlConnectionCount < configInstance.getMaxNumOfConnectionsPerInstance()) {
-                connectionID = getLowestAvailableConnectionID();
-                Connection con = null;
-                try {
-                    con = cpds.getPooledConnection().getConnection();
-                } catch (SQLException e) {
-                    ErrorLog.add(configInstance, "Problem getting new connection from connection pool.", e);
-                }
-                if(connectionID > -1 && con != null) {
-                    dbCon = new DatabaseConnection(configInstance, this, con, connectionID);
-                } else {
-                    System.err.println("Problem setting up new connection (connection ID: " + connectionID + ", connection: " + (con == null ? "is null)." : "is not null)."));
-                    if(connectionID > -1) {
-                        releaseConnectionID(connectionID);
-                    }
+            //            if(postgresqlConnectionCount < configInstance.getMaxNumOfConnectionsPerInstance()) {
+            connectionID = getLowestAvailableConnectionID();
+            Connection con = null;
+            try {
+                System.out.println("\nBefore getting connection: " +
+                        "\n  num_connections: " + comboPDS.getNumConnections() +
+                        "\n  num_busy_connections: " + comboPDS.getNumBusyConnections() +
+                        "\n  num_idle_connections: " + comboPDS.getNumIdleConnections());
+
+                con = cpds.getPooledConnection().getConnection();
+
+                System.out.println("\nAfter getting connection: " +
+                        "\n  num_connections: " + comboPDS.getNumConnections() +
+                        "\n  num_busy_connections: " + comboPDS.getNumBusyConnections() +
+                        "\n  num_idle_connections: " + comboPDS.getNumIdleConnections());
+            } catch (SQLException e) {
+                ErrorLog.add(configInstance, "Problem getting new connection from connection pool.", e);
+            }
+            if(connectionID > -1 && con != null) {
+                dbCon = new DatabaseConnection(configInstance, this, con, connectionID);
+            } else {
+                System.err.println("Problem setting up new connection (connection ID: " + connectionID + ", connection: " + (con == null ? "is null)." : "is not null)."));
+                if(connectionID > -1) {
+                    releaseConnectionID(connectionID);
                 }
             }
+            //            }
         }
 
         return dbCon;
@@ -135,14 +145,15 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
 
         synchronized(super.DatabaseConnectorLock) {
             try {
-                stmt = testCon.createStatement();
-                rs = stmt.executeQuery("SELECT sum(numbackends) as row_count FROM pg_stat_database;");
-                if(rs != null && rs.next()) {
-                    postgresqlConnectionCount = rs.getInt("row_count");
-                    count = postgresqlConnectionCount;
-                }
-                stmt.close();
-                rs.close();
+                //                stmt = testCon.createStatement();
+                //                rs = stmt.executeQuery("SELECT sum(numbackends) as row_count FROM pg_stat_database;");
+                //                if(rs != null && rs.next()) {
+                //                    postgresqlConnectionCount = rs.getInt("row_count");
+                //                    count = postgresqlConnectionCount;
+                //                }
+                //                stmt.close();
+                //                rs.close();
+                count = comboPDS.getNumConnections();
             } catch(SQLException e) {
                 ErrorLog.add(configInstance, "Problem while checking actve database connection count.", e);
             }

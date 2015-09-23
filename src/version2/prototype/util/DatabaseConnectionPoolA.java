@@ -34,13 +34,9 @@ public abstract class DatabaseConnectionPoolA {
 
     /**
      * Creates a valid Connection object if a connection could be established with the PostgreSQL database using information from config.xml.
-     * @param failFast  - TRUE if this method is to return after failing on the first attempt with a null, FALSE if it is to loop continuously or attempt connecting the number of times specified if specified.
-     * Each connection establish retry is done after putting the thread to sleep for 2 seconds.
-     * @param maxAttemptCount  - The maximum number of times to attempt connecting. Leave this blank or null if infinite is desired.
-     *
      * @return valid Connection object if successfully connected, otherwise null
      */
-    public abstract DatabaseConnection getConnection(boolean failFast, Integer maxAttemptCount);
+    public abstract DatabaseConnection getConnection();
 
     /**
      * Gets the current number of active database connections.

@@ -33,9 +33,9 @@ import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.util.C3P0ConnectionPool;
+import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnectionPoolA;
 import version2.prototype.util.DatabaseConnector;
-import version2.prototype.util.HikariConnectionPool;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -101,7 +101,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                         numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
                         ((Runtime.getRuntime().availableProcessors() < 4) ?
                                 1 : (Runtime.getRuntime().availableProcessors() - 3)), // Number of ProcessWorkers allowed to be simultaneously active
-                                msBeetweenUpdates
+                        msBeetweenUpdates
                         );
 
                 // If passive updating desired
@@ -857,6 +857,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         return processWorkerExecutor.submit(worker);
     }
 
+    @Override
+    public DatabaseConnection GetConnection() {
+        return connectionPool.getConnection();
+    }
+
     /**
      * Empty instance just to allow usage of private classes.
      */
@@ -894,7 +899,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         justCreateNewSchedulers = false;
         this.msBeetweenUpdates = msBeetweenUpdates;
         configInstance = Config.getInstance();
-        connectionPool = new C3P0ConnectionPool(configInstance);
+        //        connectionPool = new C3P0ConnectionPool(configInstance);
+        connectionPool = null;
 
         ThreadFactory gDLFactory = new ThreadFactory() {
             @Override
