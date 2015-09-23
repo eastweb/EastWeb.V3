@@ -3,13 +3,20 @@
  */
 package version2.prototype.util;
 
+import java.beans.PropertyVetoException;
+import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.sql.ConnectionPoolDataSource;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
@@ -19,6 +26,9 @@ import version2.prototype.ErrorLog;
  *
  */
 public class DatabaseConnector {
+    private static DatabaseConnector connector = null;
+    private static ComboPooledDataSource comboPDS = null;
+    private static ConnectionPoolDataSource cpds = null;
     private static Integer connectionCount = 0;
     private static Config configInstance = null;
     private static Boolean configLock = true;   // Value doesn't matter.
@@ -29,9 +39,21 @@ public class DatabaseConnector {
     private static ConcurrentLinkedQueue<Long> connectionRequests = new ConcurrentLinkedQueue<Long>();
     private static long msTimeout = 120000;     // 120 seconds
 
+    private static Integer postgresqlConnectionCount = 0;
+
     protected DatabaseConnector()
     {
+        // avoid public instantiation
+    }
 
+    /**
+     * Safely closes the connection pool and open resources if it has been instantiated.
+     */
+    public static void Close()
+    {
+        if(comboPDS != null) {
+            comboPDS.close();
+        }
     }
 
     /**
@@ -134,6 +156,29 @@ public class DatabaseConnector {
             }
         }
 
+        //        if(cpds == null)
+        //        {
+        //            connector = new DatabaseConnector();
+        //
+        //            // Setup connection pool
+        //            comboPDS = new ComboPooledDataSource("test");
+        //            try {
+        //                comboPDS.setDriverClass("org.postgresql.Driver");
+        //            } catch (PropertyVetoException e) {
+        //                ErrorLog.add(Config.getInstance(), "Failed to find the PostgreSQL JDBC driver.", e);
+        //            }
+        //
+        //            comboPDS.setJdbcUrl(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName());
+        //            comboPDS.setUser(myConfigInstance.getDatabaseUsername());
+        //            comboPDS.setPassword(myConfigInstance.getDatabasePassword());
+        //            cpds = comboPDS.getConnectionPoolDataSource();
+        //
+        //            // Set properties
+        //            //            cpds.setMinPoolSize(4);
+        //            //            cpds.setAcquireIncrement(5);
+        //            //            cpds.setMaxPoolSize(myConfigInstance.getMaxNumOfConnectionsPerInstance());
+        //        }
+
         //        synchronized(connectionRequests) {
         //            Long threadID = connectionRequests.poll();
         //            if(threadID != null) {
@@ -146,24 +191,51 @@ public class DatabaseConnector {
             currentTest++;
             synchronized(DatabaseConnectorLock)
             {
-                if(connectionCount < myConfigInstance.getMaxNumOfConnectionsPerInstance())
+                if((connectionCount + 1) < myConfigInstance.getMaxNumOfConnectionsPerInstance())
                 {
                     try {
-                        connectionID = getLowestAvailableConnectionID();
-                        con = new DatabaseConnection(configInstance,
-                                new DatabaseConnector(),
-                                DriverManager.getConnection(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName(),
-                                        myConfigInstance.getDatabaseUsername(), myConfigInstance.getDatabasePassword()),
-                                connectionID);
+                        // Test PostgreSQL connection count
+                        Connection testCon = DriverManager.getConnection(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName(),
+                                myConfigInstance.getDatabaseUsername(), myConfigInstance.getDatabasePassword());
+                        ResultSet rs = testCon.createStatement().executeQuery("SELECT sum(numbackends) as row_count FROM pg_stat_database;");
+                        if(rs != null && rs.next()) {
+                            postgresqlConnectionCount = rs.getInt("row_count");
+                        }
+                        rs.close();
+                        testCon.close();
+
+                        if(postgresqlConnectionCount < myConfigInstance.getMaxNumOfConnectionsPerInstance())
+                        {
+                            System.out.println("\nBefore making connection: " +
+                                    "\n  num_connections: " + connectionCount);
+                            connectionID = getLowestAvailableConnectionID();
+                            if(connectionID != -1)
+                            {
+                                //                                con = new DatabaseConnection(configInstance,
+                                //                                        new DatabaseConnector(),
+                                //                                        DriverManager.getConnection(myConfigInstance.getDatabaseHost() + ":" + myConfigInstance.getPort() + "/" + myConfigInstance.getDatabaseName(),
+                                //                                                myConfigInstance.getDatabaseUsername(), myConfigInstance.getDatabasePassword()),
+                                //                                                connectionID);
+                                System.out.println("\nAfter making connection: " +
+                                        "\n  postgresqlConnectionCount: " + postgresqlConnectionCount +
+                                        "\n  num_connections: " + connectionCount);
+                            } else {
+                                System.out.println("Connection ID was -1");
+                            }
+                        }
                     } catch (SQLException e) {
                         ErrorLog.add(myConfigInstance, "Problem creating DatbaseConnection object.", e);
                     }
                 }
 
+                if(postgresqlConnectionCount >= (myConfigInstance.getMaxNumOfConnectionsPerInstance() / 2)) {
+                    System.gc();
+                }
+
                 if(con != null && connectionID != null) {
                     ++connectionCount;
                     connections.put(connectionID, con);
-                } else {
+                } else if(connectionID != null){
                     releaseConnectionID(connectionID);
                 }
             }
@@ -190,11 +262,35 @@ public class DatabaseConnector {
         }while(con == null && !failFast && (maxAttemptCount == null || currentTest <= maxAttemptCount));
 
         System.out.println("Current connectionCount: " + connectionCount);
+
+        //        try {
+        //            System.out.println("\nBefore making connection: " + descriptor +
+        //                    "\n  num_connections: " + comboPDS.getNumConnectionsDefaultUser() +
+        //                    "\n  num_busy_connections: " + comboPDS.getNumBusyConnectionsDefaultUser() +
+        //                    "\n  num_idle_connections: " + comboPDS.getNumIdleConnectionsDefaultUser());
+        //            Connection tempCon = cpds.getPooledConnection().getConnection();
+        //            ResultSet rs = tempCon.createStatement().executeQuery("SELECT sum(numbackends) as row_count FROM pg_stat_database;");
+        //            if(rs != null && rs.next()) {
+        //                postgresqlConnectionCount = rs.getInt("row_count");
+        //            }
+        //            rs.close();
+        //            Integer ID = getLowestAvailableConnectionID();
+        //            con = new DatabaseConnection(descriptor, myConfigInstance, connector, tempCon, ID);
+        //            ++connectionCount;
+        //            connections.put(ID, con);
+        //            System.out.println("\nAfter making connection: "  + descriptor +
+        //                    "\n  postgresqlConnectionCount: " + postgresqlConnectionCount +
+        //                    "\n  num_connections: " + comboPDS.getNumConnectionsDefaultUser() +
+        //                    "\n  num_busy_connections: " + comboPDS.getNumBusyConnectionsDefaultUser() +
+        //                    "\n  num_idle_connections: " + comboPDS.getNumIdleConnectionsDefaultUser());
+        //        } catch (SQLException e) {
+        //            ErrorLog.add(myConfigInstance, "Problem creating Connection object.", e);
+        //        }
         return con;
     }
 
     /**
-     * Closes all currently opened connections and resets connection count. Mainly used for testing purposes.
+     * Closes all currently opened connections and resets connection count.
      * @throws SQLException
      * @throws Exception
      */
@@ -234,14 +330,14 @@ public class DatabaseConnector {
      * Gets the current number of active database connections.
      * @return  int - number of active database connections.
      */
-    public static int getConnectionCount() {
-        int count;
-
-        synchronized(DatabaseConnectorLock) {
-            count = connectionCount;
-        }
-        return count;
-    }
+    //    public static int getConnectionCount() {
+    //        int count;
+    //
+    //        synchronized(DatabaseConnectorLock) {
+    //            count = connectionCount;
+    //        }
+    //        return count;
+    //    }
 
     /**
      * Ends the connection and updates the state of the DatabaseConnector.
@@ -259,12 +355,6 @@ public class DatabaseConnector {
             }
             count = connectionCount;
         }
-        //        synchronized(connectionRequests) {
-        //            Long threadID = connectionRequests.poll();
-        //            if(threadID != null) {
-        //                threadID.notify();
-        //            }
-        //        }
 
         if(count < 0) {
             ErrorLog.add(configInstance, "Connection count became negative.", new Exception("Connection count became negative."));
@@ -275,13 +365,16 @@ public class DatabaseConnector {
     {
         int id = -1;
 
-        id = connectionIDs.nextClearBit(0);
+        synchronized(DatabaseConnectorLock)
+        {
+            id = connectionIDs.nextClearBit(0);
 
-        if(IsIDValid(id, connectionIDs)) {
-            connectionIDs.set(id);
-        }
-        else {
-            id = -1;
+            if(IsIDValid(id, connectionIDs)) {
+                connectionIDs.set(id);
+            }
+            else {
+                id = -1;
+            }
         }
 
         return id;
@@ -289,9 +382,12 @@ public class DatabaseConnector {
 
     protected static void releaseConnectionID(Integer id)
     {
+        System.out.println("connectionIDs: " + connectionIDs);
+        System.out.println("Releasing connection: " + id);
         if(IsIDValid(id, connectionIDs)) {
             connectionIDs.clear(id);
         }
+        System.out.println("connectionIDs: " + connectionIDs);
     }
 
     protected static boolean IsIDValid(Integer id, BitSet set)

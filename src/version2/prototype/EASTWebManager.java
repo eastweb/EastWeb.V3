@@ -32,6 +32,10 @@ import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
+import version2.prototype.util.C3P0ConnectionPool;
+import version2.prototype.util.DatabaseConnectionPoolA;
+import version2.prototype.util.DatabaseConnector;
+import version2.prototype.util.HikariConnectionPool;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -60,6 +64,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static HashMap<GUIUpdateHandler, Boolean> guiHandlers = new HashMap<GUIUpdateHandler, Boolean>(0);     // Boolean - TRUE if flagged for removal
 
     // EASTWebManager state
+    public final Config configInstance;
     protected static Integer numOfCreatedGDLs = 0;
     protected static Integer numOfCreatedSchedulers = 0;
     protected static List<SchedulerStatus> schedulerStatuses = new ArrayList<SchedulerStatus>(1);
@@ -69,6 +74,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected boolean manualUpdate;
     protected boolean justCreateNewSchedulers;
     protected final int msBeetweenUpdates;
+    protected final DatabaseConnectionPoolA connectionPool;
 
     // Object references of EASTWeb components
     protected List<GlobalDownloader> globalDLs;
@@ -120,16 +126,44 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             }
         } catch(Exception e)
         {
-            ErrorLog.add(Config.getInstance(), "Problem while starting EASTWebManager.", e);
+            ErrorLog.add(instance.configInstance, "Problem while starting EASTWebManager.", e);
         }
+    }
+
+    /**
+     * Safely handles the closing of EASTWeb and all obtained resources before returning.
+     */
+    public static void Close()
+    {
+        ArrayList<Integer> runningSchedulerIDs = new ArrayList<Integer>();
+
+        for (int i = schedulerIDs.nextSetBit(0); i >= 0; i = schedulerIDs.nextSetBit(i+1)) {
+            runningSchedulerIDs.add(i);
+            if (i == Integer.MAX_VALUE) {
+                break; // or (i+1) would overflow
+            }
+        }
+
+        for(Integer ID : runningSchedulerIDs)
+        {
+            StopExistingScheduler(ID);
+        }
+
+        UpdateState();
+        DatabaseConnector.Close();
+
+        //TODO: close executor services
     }
 
     public static ArrayList<String> GetRegisteredTemporalSummaryCompositionStrategies()
     {
         ArrayList<String> strategyNames = new ArrayList<String>();
-        String selectQuery = "SELECT \"Name\" FROM \"" + Config.getInstance().getGlobalSchema() + "\".\"TemporalSummaryCompositionStrategy\"";
-        ResultSet rs;
-        Statement stmt;
+        if(instance != null)
+        {
+            String selectQuery = "SELECT \"Name\" FROM \"" + instance.configInstance.getGlobalSchema() + "\".\"TemporalSummaryCompositionStrategy\"";
+            ResultSet rs;
+            Statement stmt;
+        }
 
         // Add missing TemporalCompositionStrategies
         // TODO: Need to set this up to look in a predefined directory for these java files at runtime, compile them, and then load them before adding them to this list. Should also remove newly missing ones.
@@ -674,9 +708,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 }
             }
             catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException | ConcurrentModificationException e) {
-                ErrorLog.add(Config.getInstance(), "EASTWebManager.run error.", e);
+                ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
             } catch (Exception e) {
-                ErrorLog.add(Config.getInstance(), "EASTWebManager.run error.", e);
+                ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
             }
         }while((msBeetweenUpdates > 0) && !manualUpdate);
         manualUpdate = false;
@@ -723,9 +757,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 try {
                     factory = dlFactory.CreateDownloaderFactory(dlFactory.CreateListDatesFiles());
                 } catch (IOException e) {
-                    ErrorLog.add(Config.getInstance(), "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
+                    ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
                 } catch (Exception e) {
-                    ErrorLog.add(Config.getInstance(), "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
+                    ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
                 }
                 GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
                 if(gdl == null) {
@@ -859,6 +893,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         manualUpdate = false;
         justCreateNewSchedulers = false;
         this.msBeetweenUpdates = msBeetweenUpdates;
+        configInstance = Config.getInstance();
+        connectionPool = new C3P0ConnectionPool(configInstance);
 
         ThreadFactory gDLFactory = new ThreadFactory() {
             @Override
@@ -919,7 +955,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             {
                 //                schedulerStatuses.add(new SchedulerStatus(id, data.projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), TaskState.STOPPED));
                 Scheduler scheduler = null;
-                scheduler = new Scheduler(data, id, this, Config.getInstance());
+                scheduler = new Scheduler(data, id, this, configInstance);
                 schedulerStatuses.add(scheduler.GetSchedulerStatus());
                 if(schedulers.size() == 0 || id >= schedulers.size() || schedulers.get(id) == null) {
                     schedulers.add(id, scheduler);

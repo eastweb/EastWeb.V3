@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="config"/>
 	<classpathentry kind="lib" path="lib/commons-compress/commons-compress-1.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress/commons-compress-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io/commons-io-2.0.1-javadoc.jar"/>
@@ -30,5 +31,16 @@
 	<classpathentry kind="lib" path="lib/HDF/jarnc2obj.jar"/>
 	<classpathentry kind="lib" path="lib/HDF/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="lib/HDF/slf4j-nop-1.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/c3p0/mchange-commons-java-0.2.10.jar"/>
+	<classpathentry kind="lib" path="lib/c3p0/c3p0-0.9.5.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/michael.devos/Google%20Drive/EASTWeb/EASTWeb-Projects/EastWeb.V2/doc/c3p0/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/hikaricp/HikariCP-2.4.1.jar" sourcepath="lib/hikaricp/HikariCP-2.4.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/EastWeb.V2/lib/hikaricp/HikariCP-2.4.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
