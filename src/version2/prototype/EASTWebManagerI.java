@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import version2.prototype.Scheduler.SchedulerStatus;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.LocalDownloader;
+import version2.prototype.util.DatabaseConnection;
 
 /**
  * @author michael.devos
@@ -34,8 +35,7 @@ public interface EASTWebManagerI {
      * @return LocalDownloader if specified to create one, otherwise NULL
      * @throws IOException
      */
-    public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
-            throws IOException;
+    public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException;
 
     /**
      * Requests that a {@link version2.prototype.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
@@ -60,7 +60,12 @@ public interface EASTWebManagerI {
      * @param worker  - {@link version2#ProcesWorker ProcesWorker} to execute on a separate available thread
      * @return Future object representing the return object of the submitted ProcessWorker which is of type ProcessWorkerReturn
      */
-    public Future<ProcessWorkerReturn> StartNewProcessWorker(
-            ProcessWorker worker);
+    public Future<ProcessWorkerReturn> StartNewProcessWorker( ProcessWorker worker);
+
+    /**
+     * Gets a database connection from the connection pool.
+     * @return DatabseConnection instance to use
+     */
+    public DatabaseConnection GetConnection();
 
 }

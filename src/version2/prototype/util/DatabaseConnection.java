@@ -31,7 +31,7 @@ import version2.prototype.ErrorLog;
  */
 public class DatabaseConnection implements AutoCloseable, Connection {
     private final Config configInstance;
-    private final DatabaseConnector connector;
+    private final DatabaseConnectionPoolA connector;
     private final Connection connection;
     private final Integer ID;
 
@@ -42,7 +42,7 @@ public class DatabaseConnection implements AutoCloseable, Connection {
      * @param connection
      * @param ID
      */
-    public DatabaseConnection(Config configInstance, DatabaseConnector connector, Connection connection, Integer ID)
+    public DatabaseConnection(Config configInstance, DatabaseConnectionPoolA connector, Connection connection, Integer ID)
     {
         this.configInstance = configInstance;
         this.connector = connector;
