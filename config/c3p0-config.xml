@@ -2,14 +2,14 @@
 <c3p0-config>
 	<default-config>
 		<property name="preferredTestQuery">SELECT 1;</property>
-		<property name="minPoolSize">4</property>
-		<property name="initialPoolSize">10</property>
-		<property name="acquireIncrement">2</property>
+		<property name="minPoolSize">2</property>
+		<property name="initialPoolSize">4</property>
+		<property name="acquireIncrement">1</property>
 		<property name="maxIdleTime">600</property>
 		<property name="idleConnectionTestPeriod">60</property>
 		<property name="testConnectionOnCheckout">true</property>
 		<property name="forceSynchronousCheckins">true</property>
-		<property name="checkoutTimeout">0</property>
-		<property name="numHelperThreads">4</property>
+		<property name="checkoutTimeout">120000</property>
+		<property name="numHelperThreads">3</property>
 	</default-config>
 </c3p0-config>

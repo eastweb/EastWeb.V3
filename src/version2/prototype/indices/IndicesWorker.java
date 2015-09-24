@@ -71,7 +71,9 @@ public class IndicesWorker extends ProcessWorker{
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
                 FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(),
-                        projectInfoFile.GetProjectName(), pluginName, ProcessName.INDICES) ;
+                        projectInfoFile.GetProjectName(), pluginName, ProcessName.INDICES);
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        Statement stmt = con.createStatement();
 
         // Use a map to group CachedFiles based on the dates
         HashMap<DataDate, ArrayList<ProcessorFileMetaData>> map =
@@ -162,15 +164,12 @@ public class IndicesWorker extends ProcessWorker{
                     method = indexCalculator.getClass().getMethod("calculate");
                     method.invoke(indexCalculator);
 
-                    DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
-                    Statement stmt = con.createStatement();
                     output.add(new DataFileMetaData(outFile, Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(), thisDay.getDayOfYear(), indices));
-                    stmt.close();
-                    con.close();
                 } catch(Exception e) {
                     ErrorLog.add(process, "Problem setting up IndexCalculator object.", e);
                 }
             }
+
             try{
                 outputCache.CacheFiles(output);
             } catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e) {
@@ -178,6 +177,17 @@ public class IndicesWorker extends ProcessWorker{
             } catch (Exception e) {
                 ErrorLog.add(process, "Problem encountered while caching data for IndicesWorker.", e);
             }
+        }
+
+        try{
+            if(stmt != null) {
+                stmt.close();
+            }
+            if(con != null) {
+                con.close();
+            }
+        } catch(SQLException e) {
+            ErrorLog.add(process, "Problem closing connection.", e);
         }
 
         return null;

@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import javax.sql.PooledConnection;
+
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 
@@ -52,6 +54,9 @@ public class DatabaseConnection implements AutoCloseable, Connection {
 
     @Override
     protected void finalize() throws Throwable {
+        if(!connection.isClosed()) {
+            connection.close();
+        }
         connector.endConnection(ID);
         super.finalize();
     }

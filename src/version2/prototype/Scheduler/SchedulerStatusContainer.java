@@ -284,6 +284,8 @@ public class SchedulerStatusContainer {
                 summaryProgresses.get(pluginName).put(summary.GetID(), progress);
             }
         }
+        stmt.close();
+        con.close();
 
         // Clone progresses if necessary
         TreeMap<String, TreeMap<String, Double>> downloadProgressesByDataTemp;
@@ -302,6 +304,7 @@ public class SchedulerStatusContainer {
         }
 
         CheckIfProjectIsUpToDate();
+
 
         return new SchedulerStatus(SchedulerID, projectMetaData, downloadProgressesByDataTemp, processorProgresses, indicesProgresses, summaryProgressesTemp, newLog, state, projectUpToDate, lastModifiedTime,
                 LocalDateTime.now());

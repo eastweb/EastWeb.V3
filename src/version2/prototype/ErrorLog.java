@@ -176,6 +176,7 @@ public final class ErrorLog {
 
     private static String getLogFileName() {
         LocalDateTime temp = LocalDateTime.now();
-        return "Error_Log_" + LocalDate.now().getYear() + "_" + LocalDate.now().getMonthValue() + "_" + LocalDate.now().getDayOfMonth() + "_" + temp.getHour() + temp.getMinute() + temp.getSecond() + ".log";
+        return "Error_Log_" + LocalDate.now().getYear() + "_" + LocalDate.now().getMonthValue() + "_" + LocalDate.now().getDayOfMonth() + "_" + String.format("%02d", temp.getHour())
+        + String.format("%02d", temp.getMinute()) + String.format("%02d", temp.getSecond()) + ".log";
     }
 }
