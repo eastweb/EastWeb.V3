@@ -108,10 +108,13 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
 
             DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
             Statement stmt = con.createStatement();
-            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt);
-            stmt.close();
-            con.close();
-            mergedFile = new DataFileMetaData(newFilePath, dateGroupID, firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
+            try{
+                int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt);
+                mergedFile = new DataFileMetaData(newFilePath, dateGroupID, firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
+            } finally {
+                stmt.close();
+                con.close();
+            }
         }
         return mergedFile;
     }

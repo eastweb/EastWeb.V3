@@ -389,36 +389,39 @@ public class ZonalSummaryCalculator {
         SummaryNameResultPair pair;
         Map<Integer, Double> result;
         Map<String, Double> summaryAreaResult;
-        while (feature != null)
-        {
-            summaryAreaResult = new HashMap<String, Double>();
-            areaCode = feature.GetFieldAsInteger(areaCodeField);
-            GdalUtils.errorCheck();
-            areaName = feature.GetFieldAsString(areaNameField);
-            GdalUtils.errorCheck();
-            if(zoneNameMap.get(areaCode) == null) {
-                zoneNameMap.put(areaCode, areaName);
-            }
-
-            if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0)
+        try{
+            while (feature != null)
             {
-                // Insert values
-                projectSummaryID = Schemas.getProjectSummaryID(globalSchema, projectName, summary.GetID(), stmt);
-                dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt);
-                for(int i=0; i < results.size(); i++)
-                {
-                    pair = results.get(i);
-                    result = pair.getResult();
-                    value = result.get(areaCode);
-                    summaryAreaResult.put(pair.getSimpleName(), value);
+                summaryAreaResult = new HashMap<String, Double>();
+                areaCode = feature.GetFieldAsInteger(areaCodeField);
+                GdalUtils.errorCheck();
+                areaName = feature.GetFieldAsString(areaNameField);
+                GdalUtils.errorCheck();
+                if(zoneNameMap.get(areaCode) == null) {
+                    zoneNameMap.put(areaCode, areaName);
                 }
-                newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, dateGroupID, indexID, filePath, summaryAreaResult));
-            }
 
-            feature = layer.GetNextFeature(); GdalUtils.errorCheck();
+                if (countMap.get(areaCode) != null && countMap.get(areaCode) != 0)
+                {
+                    // Insert values
+                    projectSummaryID = Schemas.getProjectSummaryID(globalSchema, projectName, summary.GetID(), stmt);
+                    dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt);
+                    for(int i=0; i < results.size(); i++)
+                    {
+                        pair = results.get(i);
+                        result = pair.getResult();
+                        value = result.get(areaCode);
+                        summaryAreaResult.put(pair.getSimpleName(), value);
+                    }
+                    newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, dateGroupID, indexID, filePath, summaryAreaResult));
+                }
+
+                feature = layer.GetNextFeature(); GdalUtils.errorCheck();
+            }
+        } finally {
+            stmt.close();
+            conn.close();
         }
-        stmt.close();
-        conn.close();
 
         TemporalSummaryCompositionStrategy compStrategy = null;
         if(summary.GetTemporalFileStore() != null) {

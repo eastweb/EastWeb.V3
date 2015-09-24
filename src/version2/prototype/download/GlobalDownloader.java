@@ -66,8 +66,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws ClassNotFoundException
      * @throws RegistrationException
      */
-    protected GlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws ClassNotFoundException,
-    ParserConfigurationException, SAXException, IOException, SQLException, RegistrationException
+    protected GlobalDownloader(int myID, Config configInstance, String pluginName, DownloadMetaData metaData, ListDatesFiles listDatesFiles, LocalDate startDate) throws
+    ClassNotFoundException, ParserConfigurationException, SAXException, IOException, SQLException, RegistrationException
     {
         state = TaskState.STOPPED;
         ID = myID;
@@ -76,7 +76,15 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         this.metaData = metaData;
         this.listDatesFiles = listDatesFiles;
         currentStartDate = startDate;
-        RegisterGlobalDownloader();
+
+        final Connection con = DatabaseConnector.getConnection();
+        final Statement stmt = con.createStatement();
+        try {
+            RegisterGlobalDownloader(stmt);
+        } finally {
+            stmt.close();
+            con.close();
+        }
     }
 
     /**
@@ -219,8 +227,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
 
     /**
      * Changes the start date for this GlobalDownloader and causes it to start downloading from the given date. Does not cause the GlobalDownloader to redownload anything already
-     * downloaded but if the date is earlier than the current start date then it will start downloading from that date onward with the next set of downloads until caught up, or if it's
-     * later than the current start date then it is simply ignored and the original start date is kept.
+     * downloaded but if the date is earlier than the current start date then it will start downloading from that date onward with the next set of downloads until caught up, or if
+     * it's later than the current start date then it is simply ignored and the original start date is kept.
      *
      * @param newStartDate  - new date to state downloading from
      */
@@ -232,7 +240,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     }
 
     /**
-     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all projects.
+     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all
+     * projects.
      *
      * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
      * @throws IOException
@@ -247,7 +256,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     }
 
     /**
-     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all projects.
+     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all
+     * projects.
      *
      * @param startDate  - the earliest date from which to start getting files
      * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
@@ -257,7 +267,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
+    public ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException,
+    IOException
     {
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
@@ -287,7 +298,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
                 {
                     downloadsList.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
                 } else {
-                    downloadsList.add(rs.getInt("DateGroupID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                    downloadsList.add(rs.getInt("DateGroupID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"),
+                            rs.getInt("DayOfYear")));
                 }
             }
         }
@@ -314,7 +326,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
                 {
                     downloadsList.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
                 } else {
-                    downloadsList.add(rs.getInt("DateGroupID") + 1, new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
+                    downloadsList.add(rs.getInt("DateGroupID") + 1, new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"),
+                            rs.getInt("Year"), rs.getInt("DayOfYear")));
                 }
             }
         }
@@ -374,13 +387,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         conn.close();
     }
 
-    protected void RegisterGlobalDownloader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, RegistrationException
+    protected void RegisterGlobalDownloader(Statement stmt) throws SQLException, RegistrationException
     {
-        final Connection conn = DatabaseConnector.getConnection();
-        final Statement stmt = conn.createStatement();
         boolean registered = Schemas.registerGlobalDownloader(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
-        stmt.close();
-        conn.close();
         if(!registered) {
             throw new RegistrationException();
         }
