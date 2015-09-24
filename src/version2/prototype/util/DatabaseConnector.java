@@ -3,20 +3,11 @@
  */
 package version2.prototype.util;
 
-import java.beans.PropertyVetoException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.sql.ConnectionPoolDataSource;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
@@ -26,7 +17,6 @@ import version2.prototype.ErrorLog;
  *
  */
 public class DatabaseConnector {
-    private static DatabaseConnector connector = null;
     private static Integer connectionCount = 0;
     private static Config configInstance = null;
     private static Boolean configLock = true;   // Value doesn't matter.
@@ -34,10 +24,6 @@ public class DatabaseConnector {
     private static Boolean DatabaseConnectorLock = true;  // Value doesn't matter.
     private static BitSet connectionIDs = null;
     private static Boolean connectionIDsLock = true;    // Value doesn't matter.
-    private static ConcurrentLinkedQueue<Long> connectionRequests = new ConcurrentLinkedQueue<Long>();
-    private static long msTimeout = 120000;     // 120 seconds
-
-    private static Integer postgresqlConnectionCount = 0;
     private static DatabaseConnectionPoolA connectionPool = null;
 
     protected DatabaseConnector()
@@ -127,7 +113,6 @@ public class DatabaseConnector {
     public static DatabaseConnection getConnection(Config myConfigInstance, boolean failFast, Integer maxAttemptCount)
     {
         DatabaseConnection con = null;
-        int currentTest = 0;
 
         if(myConfigInstance == null) {
             myConfigInstance = Config.getInstance();
