@@ -94,6 +94,7 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
         final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         //        int filesPerDay = metaData.filesPerDay;
         int filesPerDay = modisTiles.size();
+        int dateGroupID;
         ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
         Map<Integer, Integer> countOfDates = new TreeMap<Integer, Integer>();
         ResultSet rs = null;
@@ -118,7 +119,8 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
         {
             while(rs.next())
             {
-                countOfDates.put(rs.getInt("DateGroupID"), countOfDates.get(rs.getInt("DateGroupID")) + rs.getInt("DateGroupIDCount"));
+                dateGroupID = rs.getInt("DateGroupID");
+                countOfDates.put(dateGroupID, (countOfDates.get(dateGroupID) != null ? countOfDates.get(dateGroupID) : 0) + rs.getInt("DateGroupIDCount"));
             }
         }
         rs.close();
