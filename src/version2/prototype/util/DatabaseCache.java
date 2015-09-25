@@ -115,19 +115,18 @@ public class DatabaseCache extends Observable{
      */
     public ArrayList<DataFileMetaData> GetUnprocessedCacheFiles() throws SQLException, ClassNotFoundException, IOException, SAXException, ParserConfigurationException
     {
-        Connection conn = null;
+        Connection con = null;
         Statement stmt = null;
-        TreeMap<Integer, TreeSet<Record>> files = new TreeMap<Integer, TreeSet<Record>>();
         ArrayList<Integer> rows = new ArrayList<Integer>();
         int dateGroupID, tempDayOfYear, tempYear;
         String tempDataName;
         ResultSet rs = null;
-        TreeSet<Record> temp;
+        TreeSet<Record> temp = new TreeSet<Record>();
 
 
         try {
-            conn = DatabaseConnector.getConnection();
-            stmt = conn.createStatement();
+            con = DatabaseConnector.getConnection();
+            stmt = con.createStatement();
 
             if(processCachingFor == ProcessName.DOWNLOAD)
             {
@@ -146,15 +145,8 @@ public class DatabaseCache extends Observable{
                             tempDayOfYear = rs.getInt("DayOfYear");
                             tempYear = rs.getInt("Year");
                             dateGroupID = rs.getInt("DateGroupID");
-
-                            if(files.isEmpty() || files.get(dateGroupID) == null) {
-                                temp = new TreeSet<Record>();
-                                temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)));
-                                files.put(dateGroupID, temp);
-                            }
-                            else
-                            {
-                                files.get(dateGroupID).add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"),dateGroupID, tempYear, tempDayOfYear)));
+                            if(!temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
+                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element could not be added."));
                             }
                             rows.add(rs.getInt("DownloadCacheID"));
                         }
@@ -163,7 +155,7 @@ public class DatabaseCache extends Observable{
 
                     for(int row : rows)
                     {
-                        conn.createStatement().execute(String.format(
+                        stmt.execute(String.format(
                                 "UPDATE \"%1$s\".\"%2$s\"\n" +
                                         "SET \"Retrieved\" = TRUE\n" +
                                         "WHERE \"%2$sID\" = %3$d",
@@ -189,15 +181,8 @@ public class DatabaseCache extends Observable{
                                 tempYear = rs.getInt("Year");
                                 dateGroupID = rs.getInt("DateGroupID");
                                 tempDataName = rs.getString("DataName");
-
-                                if(files.isEmpty() || files.get(dateGroupID) == null) {
-                                    temp = new TreeSet<Record>();
-                                    temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), dateGroupID, tempYear, tempDayOfYear)));
-                                    files.put(dateGroupID, temp);
-                                }
-                                else
-                                {
-                                    files.get(dateGroupID).add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), dateGroupID, tempYear, tempDayOfYear)));
+                                if(!temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
+                                    ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element could not be added."));
                                 }
                                 rows.add(rs.getInt("DownloadCacheExtraID"));
                             }
@@ -206,7 +191,7 @@ public class DatabaseCache extends Observable{
 
                         for(int row : rows)
                         {
-                            conn.createStatement().execute(String.format(
+                            stmt.execute(String.format(
                                     "UPDATE \"%1$s\".\"%2$s\"\n" +
                                             "SET \"Retrieved\" = TRUE\n" +
                                             "WHERE \"%2$sID\" = %3$d",
@@ -216,7 +201,7 @@ public class DatabaseCache extends Observable{
                                     ));
                         }
                     }
-                    conn.createStatement().execute("COMMIT");
+                    stmt.execute("COMMIT");
                     filesAvailable = false;
                 }
             }
@@ -237,14 +222,13 @@ public class DatabaseCache extends Observable{
                     }
 
                     String query = String.format(
-                            "SELECT A.\"%1$sID\", A.\"DataFilePath\", A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\"" + indexSelectString + "\n" +
-                                    "FROM \"%2$s\".\"%1$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\")" + indexJoinString + "\n" +
+                            "SELECT A.\"%1$sID\", A.\"DataFilePath\", A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\"" + indexSelectString + " \n" +
+                                    "FROM \"%2$s\".\"%1$s\" A INNER JOIN \"%3$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\")" + indexJoinString + " \n" +
                                     "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
                                     getFromTableName,
                                     mSchemaName,
                                     globalSchema
                             );
-
                     rs = stmt.executeQuery(query);
 
                     while(rs.next()) {
@@ -252,21 +236,13 @@ public class DatabaseCache extends Observable{
                         tempYear = rs.getInt("Year");
                         dateGroupID = rs.getInt("DateGroupID");
 
-                        if(files.isEmpty() || files.get(dateGroupID) == null) {
-                            temp = new TreeSet<Record>();
-                            files.put(dateGroupID, temp);
-                        }
-                        else {
-                            temp = files.get(dateGroupID);
-                        }
-
                         if(processCachingFor == ProcessName.INDICES) {
                             if(!temp.add(new Record(dateGroupID, "Data", new DataFileMetaData(rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear, rs.getString("IndexName"))))) {
-                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element not added."));
+                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element could not be added."));
                             }
                         } else {
                             if(!temp.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
-                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element not added."));
+                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element could not be added."));
                             }
                         }
                         rows.add(rs.getInt(getFromTableName + "ID"));
@@ -275,7 +251,7 @@ public class DatabaseCache extends Observable{
 
                     for(int row : rows)
                     {
-                        conn.createStatement().execute(String.format(
+                        stmt.execute(String.format(
                                 "UPDATE \"%1$s\".\"%2$s\"\n" +
                                         "SET \"Retrieved\" = TRUE\n" +
                                         "WHERE \"%2$sID\" = %3$d",
@@ -284,7 +260,46 @@ public class DatabaseCache extends Observable{
                                         row
                                 ));
                     }
-                    conn.createStatement().execute("COMMIT");
+
+                    if(processCachingFor == ProcessName.PROCESSOR)
+                    {
+                        rows = new ArrayList<Integer>();
+                        query = String.format(
+                                "SELECT A.\"DownloadCacheExtraID\", A.\"DataName\", A.\"FilePath\", A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\" \n" +
+                                        "FROM \"%1$s\".\"DownloadCacheExtra\" A INNER JOIN \"%2$s\".\"DateGroup\" D ON (A.\"DateGroupID\" = D.\"DateGroupID\") \n" +
+                                        "WHERE \"Retrieved\" = FALSE AND \"Processed\" = FALSE FOR UPDATE;",
+                                        mSchemaName,
+                                        globalSchema
+                                );
+                        rs = stmt.executeQuery(query);
+
+                        while(rs.next()) {
+                            tempDayOfYear = rs.getInt("DayOfYear");
+                            tempYear = rs.getInt("Year");
+                            dateGroupID = rs.getInt("DateGroupID");
+                            tempDataName = rs.getString("DataName");
+
+                            if(!temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
+                                ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element could not be added."));
+                            }
+                            rows.add(rs.getInt("DownloadCacheExtraID"));
+                        }
+                        rs.close();
+
+                        for(int row : rows)
+                        {
+                            stmt.execute(String.format(
+                                    "UPDATE \"%1$s\".\"%2$s\"\n" +
+                                            "SET \"Retrieved\" = TRUE\n" +
+                                            "WHERE \"%2$sID\" = %3$d",
+                                            mSchemaName,
+                                            "DownloadCacheExtra",
+                                            row
+                                    ));
+                        }
+                    }
+
+                    stmt.execute("COMMIT");
                     filesAvailable = false;
                 }
             }
@@ -296,32 +311,28 @@ public class DatabaseCache extends Observable{
                 rs.close();
                 rs = null;
             }
-            if(conn != null) {
-                conn.close();
-                conn = null;
+            if(con != null) {
+                con.close();
+                con = null;
             }
         } catch(SQLException e) {
-            conn.createStatement().execute("ROLLBACK");
+            con.createStatement().execute("ROLLBACK");
             if(stmt != null) {
                 stmt.close();
             }
             if(rs != null) {
                 rs.close();
             }
-            if(conn != null) {
-                conn.close();
+            if(con != null) {
+                con.close();
             }
             throw e;
         }
 
         ArrayList<DataFileMetaData> output = new ArrayList<DataFileMetaData>();
-        Collection<TreeSet<Record>> recsCol = files.values();
-        for(TreeSet<Record> recs : recsCol)
+        for(Record rec : temp)
         {
-            for(Record rec : recs)
-            {
-                output.add(rec.data);
-            }
+            output.add(rec.data);
         }
         return output;
     }

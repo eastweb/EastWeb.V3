@@ -83,6 +83,7 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
             outputFolder = String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Mask", date.getYear(), date.getDayOfYear());
+            break;
         case 4:
             // Mask -> Output (Clip)
             outputFolder = String.format("%s%04d" + File.separator+"%03d",

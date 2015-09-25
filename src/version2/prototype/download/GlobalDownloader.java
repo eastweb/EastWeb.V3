@@ -18,6 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
@@ -297,7 +298,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
             while(rs.next())
             {
                 dateGroupID = rs.getInt("DateGroupID");
-                downloadsSet.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))));
+                if(!downloadsSet.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))))) {
+                    ErrorLog.add(configInstance, pluginName, "Data", "Problem adding download file to download file return list.", new Exception("Element could not be added."));
+                }
             }
         }
         rs.close();
@@ -317,10 +320,14 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         rs = stmt.executeQuery(query.toString());
         if(rs != null)
         {
+            String dataName;
             while(rs.next())
             {
+                dataName = rs.getString("DataName");
                 dateGroupID = rs.getInt("DateGroupID");
-                downloadsSet.add(new Record(dateGroupID, rs.getString("DataName"), new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))));
+                if(!downloadsSet.add(new Record(dateGroupID, dataName, new DataFileMetaData(dataName, rs.getString("FilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))))) {
+                    ErrorLog.add(configInstance, pluginName, dataName, "Problem adding download file to download file return list.", new Exception("Element could not be added."));
+                }
             }
         }
         rs.close();
