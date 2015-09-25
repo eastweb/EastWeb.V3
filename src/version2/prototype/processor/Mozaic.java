@@ -56,6 +56,7 @@ public abstract class Mozaic {
         inputFiles = listOfFiles;
 
         outputFolder = new File(data.getOutputFolder());
+        outputFolder.mkdirs();
 
         bands = getBands();
         outputFiles = new ArrayList<File>();

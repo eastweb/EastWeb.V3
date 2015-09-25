@@ -57,7 +57,7 @@ public class Mask {
         if (!outputDir.exists())
         {   FileUtils.forceMkdir(outputDir);   }
 
-        if ((maskFile != null) && (maskRes == dataRes))
+        if ((maskFile != null) && maskRes.compareTo(dataRes) == 0)
         {
             // do masking only when a mask file exist
             // and the mask resolution equals to the data resolution

@@ -365,7 +365,7 @@ public class ProjectInfoFile {
 
     private String ReadMaskingFile()
     {
-        NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.", "Masking");
+        NodeList nodes = GetUpperLevelNodeList("MaskingFile", "Missing masking file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
         if(values.size() > 0) {
             String temp = values.get(0);
@@ -380,7 +380,7 @@ public class ProjectInfoFile {
 
     private Integer ReadMaskingResolution()
     {
-        NodeList nodes = GetUpperLevelNodeList("Resolution", "Missing masking file.", "Masking");
+        NodeList nodes = GetUpperLevelNodeList("Resolution", "Missing masking resolution.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking resolution.");
         if(values.size() > 0) {
             return Integer.parseInt(values.get(0));

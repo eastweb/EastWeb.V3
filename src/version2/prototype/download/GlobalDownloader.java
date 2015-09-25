@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -273,7 +274,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
-        ArrayList<DataFileMetaData> downloadsList = new ArrayList<DataFileMetaData>();
+        TreeSet<Record> downloadsSet = new TreeSet<Record>();
+        int dateGroupID;
         ResultSet rs;
 
         StringBuilder query = new StringBuilder(String.format(
@@ -294,13 +296,8 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         {
             while(rs.next())
             {
-                if(downloadsList.size() < rs.getInt("DateGroupID"))
-                {
-                    downloadsList.add(new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
-                } else {
-                    downloadsList.add(rs.getInt("DateGroupID"), new DataFileMetaData("Data", rs.getString("DataFilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"),
-                            rs.getInt("DayOfYear")));
-                }
+                dateGroupID = rs.getInt("DateGroupID");
+                downloadsSet.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))));
             }
         }
         rs.close();
@@ -322,20 +319,20 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         {
             while(rs.next())
             {
-                if(downloadsList.size() < rs.getInt("DateGroupID"))
-                {
-                    downloadsList.add(new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"), rs.getInt("Year"), rs.getInt("DayOfYear")));
-                } else {
-                    downloadsList.add(rs.getInt("DateGroupID") + 1, new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), rs.getInt("DateGroupID"),
-                            rs.getInt("Year"), rs.getInt("DayOfYear")));
-                }
+                dateGroupID = rs.getInt("DateGroupID");
+                downloadsSet.add(new Record(dateGroupID, rs.getString("DataName"), new DataFileMetaData(rs.getString("DataName"), rs.getString("FilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))));
             }
         }
         rs.close();
         stmt.close();
         conn.close();
 
-        return downloadsList;
+        ArrayList<DataFileMetaData> output = new ArrayList<DataFileMetaData>();
+        for(Record rec : downloadsSet)
+        {
+            output.add(rec.data);
+        }
+        return output;
     }
 
     /**
@@ -392,6 +389,37 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         boolean registered = Schemas.registerGlobalDownloader(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         if(!registered) {
             throw new RegistrationException();
+        }
+    }
+
+    protected class Record implements Comparable<Record>
+    {
+        public final int dateGroupID;
+        public final String dataName;
+        public final DataFileMetaData data;
+
+        public Record(int dateGroupID, String dataName, DataFileMetaData data)
+        {
+            this.dateGroupID = dateGroupID;
+            this.dataName = dataName;
+            this.data = data;
+        }
+
+        @Override
+        public int compareTo(Record o) {
+            if(dateGroupID < o.dateGroupID) {
+                return -1;
+            } else if(dateGroupID > o.dateGroupID) {
+                return 1;
+            }
+
+            if(dataName.equals(o.dataName)) {
+                return data.ReadMetaDataForProcessor().dataFilePath.compareTo(o.data.ReadMetaDataForProcessor().dataFilePath);
+            } else if(dataName.equalsIgnoreCase("Data")) {
+                return -1;
+            } else {
+                return dataName.compareTo(o.dataName);
+            }
         }
     }
 }

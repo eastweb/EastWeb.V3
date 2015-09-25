@@ -20,7 +20,7 @@
 	<ProjectName>Project_EA</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
-	<Resolution >1000</Resolution>
+	<Resolution>1000</Resolution>
 	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>true</Clipping>

@@ -51,6 +51,7 @@ public class ModisNBARPrepareProcessTask extends PrepareProcessTask {
             folders.add(String.format("%s%s" + File.separator + "%04d" + File.separator+"%03d",
                     FileSystem.GetProcessWorkerTempDirectoryPath(project.GetWorkingDir(), project.GetProjectName(), pPlugin.GetName(), ProcessName.PROCESSOR),
                     "Mask", date.getYear(), date.getDayOfYear()));
+            break;
         default:
             folders = null;
             break;

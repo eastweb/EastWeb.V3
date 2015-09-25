@@ -47,20 +47,17 @@ public class DatabaseConnector {
      */
     public static DatabaseConnection getConnection()
     {
-        if(configInstance == null)
+        synchronized(configLock)
         {
-            synchronized(configLock)
+            if(configInstance == null)
             {
-                if(configInstance == null)
-                {
-                    configInstance = Config.getInstance();
+                configInstance = Config.getInstance();
 
-                    // Driver Connection Check
-                    try {
-                        Class.forName("org.postgresql.Driver");
-                    } catch (ClassNotFoundException e) {
-                        ErrorLog.add(Config.getInstance(), "Failed to find the PostgreSQL JDBC driver.", e);
-                    }
+                // Driver Connection Check
+                try {
+                    Class.forName("org.postgresql.Driver");
+                } catch (ClassNotFoundException e) {
+                    ErrorLog.add(Config.getInstance(), "Failed to find the PostgreSQL JDBC driver.", e);
                 }
             }
         }

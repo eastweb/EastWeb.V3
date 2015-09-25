@@ -459,7 +459,7 @@ public class DatabaseCache extends Observable{
                         // Step 2b
                         if(extraDownloadFiles != null && extraDownloadFiles.size() > 0)
                         {
-                            pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" WHERE \"Complete\" = FALSE AND \"DateGroupID\" = ? AND \"DataName\" = ?;");
+                            pstmt = conn.prepareStatement("SELECT * FROM \"" + mSchemaName + "\".\"DownloadCacheExtra\" WHERE \"Complete\" = FALSE AND \"DateGroupID\" = ? AND \"DataName\" ilike ?;");
                             for(String name : extraDownloadFiles)
                             {
                                 it = dates.iterator();
@@ -716,6 +716,13 @@ public class DatabaseCache extends Observable{
         notifyObservers();
     }
 
+    /**
+     * Used to set up custom sort order:
+     *  1. DateGroupID ascending order
+     *  2. Data Name = "Data"
+     *  3. Data Name ascending order
+     * @author Michael DeVos
+     */
     protected class Record implements Comparable<Record>
     {
         public final int dateGroupID;

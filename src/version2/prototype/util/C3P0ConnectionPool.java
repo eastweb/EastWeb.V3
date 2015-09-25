@@ -5,14 +5,9 @@ package version2.prototype.util;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.PooledConnection;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -25,7 +20,6 @@ import version2.prototype.ErrorLog;
  */
 public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
     private final ComboPooledDataSource comboPDS;
-    private Integer postgresqlConnectionCount;
     private HashMap<Integer, String> connectionDescriptions;
     private HashMap<Integer, String> pastConnectionDescriptions;
     private HashMap<Integer, LocalDateTime> connectionPullTimes;
@@ -53,8 +47,6 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
         comboPDS.setUser(configInstance.getDatabaseUsername());
         comboPDS.setPassword(configInstance.getDatabasePassword());
         comboPDS.setMaxPoolSize(configInstance.getMaxNumOfConnectionsPerInstance());
-
-        postgresqlConnectionCount = 0;
 
         connectionDescriptions = new HashMap<Integer, String>();
         pastConnectionDescriptions = new HashMap<Integer, String>();
@@ -134,8 +126,6 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
      */
     @Override
     public int getConnectionCount() {
-        Statement stmt = null;
-        ResultSet rs = null;
         int count = -1;
 
         synchronized(super.DatabaseConnectorLock) {

@@ -7,11 +7,11 @@
 			<ModisTile>h21v09</ModisTile>
 		</Plugin>
 	</Plugins>
-	<StartDate>Wed Jul 01 00:00:00 CDT 2015</StartDate>
+	<StartDate>Mon Sep 14 00:00:00 CDT 2015</StartDate>
 	<ProjectName>NLDAS_Test_09042015</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<MaskingFile>\Documentation\TestCases\Georgia_shp_wmask\watermask\w0010011.tif</MaskingFile>
-	<Resolution>250, 250</Resolution>
+	<Resolution>62500</Resolution>
 	<MasterShapeFile>\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
 	<TimeZone>(GMT-5:00) America/Detroit</TimeZone>
 	<Clipping>true</Clipping>

@@ -206,7 +206,7 @@ public class ProcessorWorker extends ProcessWorker {
 
                 Object process = null;
                 try {
-                    process = cnstProcess.newInstance(new ProcessData(
+                    ProcessData pData = new ProcessData(
                             prepareTask.getInputFolders(key),
                             prepareTask.getOutputFolder(key),
                             prepareTask.getDataDate(),
@@ -223,8 +223,8 @@ public class ProcessorWorker extends ProcessWorker {
                             prepareTask.getHeatingDate(),
                             prepareTask.getFreezingDegree(),
                             prepareTask.getHeatingDegree()
-                            )
                             );
+                    process = cnstProcess.newInstance(pData);
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     ErrorLog.add(this.process, "Problem with cnstProcess instantion.", e);
                 } catch (Exception e) {
