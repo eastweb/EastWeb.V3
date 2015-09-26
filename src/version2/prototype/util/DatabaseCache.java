@@ -364,6 +364,8 @@ public class DatabaseCache extends Observable{
         StringBuilder insertQuery;
         StringBuilder selectQuery;
 
+        System.out.println("Checking for unprocessed downloads for plugin '" + pluginName + "' in project '" + projectName + "'.");
+
         // Only use modisTileNames if the plugin uses Modis data
         if(!modisPattern.matcher(pluginName.toLowerCase()).matches())
         {
@@ -525,6 +527,7 @@ public class DatabaseCache extends Observable{
             // Signal to observers that changes occurred
             if(dates.size() > 0)
             {
+                System.out.println("Files for " + dates.size() + " days loaded for plugin '" + pluginName + "' in project '" + projectName + "'. Notifying project Processor of the additional work.");
                 filesAvailable = true;
                 setChanged();
                 notifyObservers();
@@ -556,8 +559,19 @@ public class DatabaseCache extends Observable{
         Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
 
-        if(processCachingFor == ProcessName.PROCESSOR) {
-            System.out.println("Caching for Processor files for Year: " + filesForASingleComposite.get(0).ReadMetaDataForSummary().year + ", Day: " + filesForASingleComposite.get(0).ReadMetaDataForSummary().day);
+        String processCachingForName;
+        String processNotifyingName;
+        switch(processCachingFor)
+        {
+        case PROCESSOR: processCachingForName = "Processor"; processNotifyingName = "Indices"; break;
+        case INDICES: processCachingForName = "Indices"; processNotifyingName = "Summary"; break;
+        case SUMMARY: processCachingForName = "Summary"; processNotifyingName = null; break;
+        default: processCachingForName = null; processNotifyingName = null;
+        }
+
+        if(processCachingForName != null) {
+            System.out.println("Caching files for " + processCachingForName + " in project '" + projectName + "' for plugin '" + pluginName + "' (Year: " + filesForASingleComposite.get(0).ReadMetaDataForSummary().year +
+                    ", Day: " + filesForASingleComposite.get(0).ReadMetaDataForSummary().day + ").");
         }
 
         IndicesFileMetaData temp = filesForASingleComposite.get(0).ReadMetaDataForSummary();
@@ -605,14 +619,19 @@ public class DatabaseCache extends Observable{
         }
 
         Schemas.setProcessed(mSchemaName, setProcessedForTableName, dateGroupID, stmt);
+        if(processCachingFor == ProcessName.PROCESSOR) {
+            Schemas.setProcessed(mSchemaName, "DownloadCacheExtra", dateGroupID, stmt);
+        }
         scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
         stmt.close();
         conn.close();
 
-        synchronized(this)
-        {
+        synchronized(this) {
             filesAvailable = true;
+        }
+        if(processNotifyingName != null) {
+            System.out.println("Notifying " + processNotifyingName + " calculator in project '" + projectName + "' of the additional work.");
         }
         setChanged();
         notifyObservers();
@@ -646,6 +665,8 @@ public class DatabaseCache extends Observable{
         if(newResults.size() == 0) {
             return;
         }
+
+        System.out.println("Uploading results in project '" + projectName + "' for plugin '" + pluginName + "' (Year: " + year + ", Day: " + day + ").");
 
         try {
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);

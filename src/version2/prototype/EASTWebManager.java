@@ -32,7 +32,6 @@ import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
-import version2.prototype.util.C3P0ConnectionPool;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnectionPoolA;
 import version2.prototype.util.DatabaseConnector;
@@ -51,7 +50,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static ExecutorService executor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
-    protected static int defaultMSBeetweenUpdates = 5000;       // 5 seconds
+    protected static int defaultMSBeetweenUpdates = 30000;       // 30 seconds
 
     // Logged requests from other threads
     protected static List<SchedulerData> newSchedulerRequests;
@@ -144,9 +143,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             }
         }
 
-        for(Integer ID : runningSchedulerIDs)
-        {
-            StopExistingScheduler(ID);
+        for(Integer ID : runningSchedulerIDs) {
+            StopExistingScheduler(ID, false);
         }
 
         UpdateState();
@@ -200,7 +198,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * If {@link Start Start(int, int)} has been previously called then forces EASTWebManager to process any and all currently logged requests and
+     * If {@link #Start Start(int, int)} has been previously called then forces EASTWebManager to process any and all currently logged requests and
      * update state information. Note, that if Start(int, int) was called with value of 0 or less for msBeetweenUpdates then this method MUST be called
      * in order to process any of the requests made to EASTWebManager via its public methods and in order for it to show updated state information.
      */
@@ -213,14 +211,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Requests for a new {@link version2.Scheduler#Scheduler Scheduler} to be started and keeps its reference for later status retrieval and stopping.
-     * The created Scheduler can be identified via its {@link version2.Scheduler#SchedulerStatus SchedulerStatus} object gotten from calling
-     * {@link GetSchedulerStatus GetSchedulerStatus()}.
+     * Requests for a new {@link version2.prototype.Scheduler#Scheduler Scheduler} to be started and keeps its reference for later status retrieval and stopping.
+     * The created Scheduler can be identified via its {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} object gotten from calling
+     * {@link #GetSchedulerStatus GetSchedulerStatus()}.
      *
-     * @param data - {@link version2.Scheduler#SchedulerData SchedulerData} to create the Scheduler instance from
-     * @param manualUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @param data - {@link version2.prototype.Scheduler#SchedulerData SchedulerData} to create the Scheduler instance from
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void StartNewScheduler(SchedulerData data, boolean manualUpdate)
+    public static void StartNewScheduler(SchedulerData data, boolean forceUpdate)
     {
         if(instance == null)
         {
@@ -231,7 +229,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             newSchedulerRequests.add(data);
         }
 
-        if(manualUpdate)
+        if(forceUpdate)
         {
             if(instance != null) {
                 instance.justCreateNewSchedulers = true;
@@ -241,106 +239,142 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be stopped. Sets the
+     * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be stopped. Sets the
      * {@link version2#TaskState TaskState} value for that Scheduler to STOPPED effectively stopping all associated Process objects. Causes a graceful
      * shutdown of a project since it only keeps Processes from spawning more ProcessWorkers.
      *
      * @param schedulerID  - targeted Scheduler's ID
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void StopExistingScheduler(int schedulerID)
+    public static void StopExistingScheduler(int schedulerID, boolean forceUpdate)
     {
         if(schedulerIDs.get(schedulerID))
         {
             synchronized (stopExistingSchedulerRequests) {
                 stopExistingSchedulerRequests.add(schedulerID);
             }
+
+            if(forceUpdate)
+            {
+                UpdateState();
+            }
         }
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be stopped. Sets the
-     * {@link version2#TaskState TaskState} value for that Scheduler to STOPPED effectively stopping all associated Process objects. Causes a graceful
+     * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be stopped. Sets the
+     * {@link version2.prototype.TaskState#TaskState TaskState} value for that Scheduler to STOPPED effectively stopping all associated Process objects. Causes a graceful
      * shutdown of a project since it only keeps Processes from spawning more ProcessWorkers.
      *
      * @param projectName  - targeted Scheduler's project name
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void StopExistingScheduler(String projectName)
+    public static void StopExistingScheduler(String projectName, boolean forceUpdate)
     {
         synchronized (stopExistingSchedulerRequestsNames) {
             stopExistingSchedulerRequestsNames.add(projectName);
+
+            if(forceUpdate)
+            {
+                UpdateState();
+            }
         }
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be deleted from the EASTWebManager's list
-     * and stopped. This does what {@link StopScheduler StopScheduler(int)} does with the added effect of removing it all references to the Scheduler
+     * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to be deleted from the EASTWebManager's list
+     * and stopped. This does what {@link #StopExistingScheduler StopScheStopExistingSchedulerduler(int)} does with the added effect of removing it all references to the Scheduler
      * from this manager. This may or may not remove any GlobalDownloaders currently existing. A
-     * {@link version2.download#GlobalDownloader GlobalDownloader} is only removed when it no longer has any projects currently using it
+     * {@link version2.prototype.download#GlobalDownloader GlobalDownloader} is only removed when it no longer has any projects currently using it
      * (GlobalDownloader objects are shared amongst Schedulers).
      *
      * @param schedulerID  - targeted Scheduler's ID
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void DeleteScheduler(int schedulerID)
+    public static void DeleteScheduler(int schedulerID, boolean forceUpdate)
     {
         if(schedulerIDs.get(schedulerID))
         {
             synchronized (deleteExistingSchedulerRequests) {
                 deleteExistingSchedulerRequests.add(schedulerID);
+
+                if(forceUpdate)
+                {
+                    UpdateState();
+                }
             }
         }
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified project name to be deleted from the EASTWebManager's list
-     * and stopped. This does what {@link StopScheduler StopScheduler(int)} does with the added effect of removing it all references to the Scheduler
+     * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified project name to be deleted from the EASTWebManager's list
+     * and stopped. This does what {@link #StopExistingScheduler StopExistingScheduler(int)} does with the added effect of removing it all references to the Scheduler
      * from this manager. This may or may not remove any GlobalDownloaders currently existing. A
-     * {@link version2.download#GlobalDownloader GlobalDownloader} is only removed when it no longer has any projects currently using it
+     * {@link version2.prototype.download#GlobalDownloader GlobalDownloader} is only removed when it no longer has any projects currently using it
      * (GlobalDownloader objects are shared amongst Schedulers).
      *
      * @param projectName  - targeted Scheduler's project name
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void DeleteScheduler(String projectName)
+    public static void DeleteScheduler(String projectName, boolean forceUpdate)
     {
         synchronized (deleteExistingSchedulerRequestsNames) {
             deleteExistingSchedulerRequestsNames.add(projectName);
+
+            if(forceUpdate)
+            {
+                UpdateState();
+            }
         }
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to have its
+     * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to have its
      * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
      * cache information in the database.
      *
      * @param schedulerID  - targeted Scheduler's ID
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void StartExistingScheduler(int schedulerID)
+    public static void StartExistingScheduler(int schedulerID, boolean forceUpdate)
     {
         if(schedulerIDs.get(schedulerID))
         {
             synchronized (startExistingSchedulerRequests) {
                 startExistingSchedulerRequests.add(schedulerID);
+
+                if(forceUpdate)
+                {
+                    UpdateState();
+                }
             }
         }
     }
 
     /**
-     * Requests for the {@link version2.Scheduler#Scheduler Scheduler} with the specified specified project name to have its
+     * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified specified project name to have its
      * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
      * cache information in the database.
      *
      * @param projectName  - targeted Scheduler's project name
+     * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
      */
-    public static void StartExistingScheduler(String projectName)
+    public static void StartExistingScheduler(String projectName, boolean forceUpdate)
     {
         synchronized (startExistingSchedulerRequestsNames) {
             startExistingSchedulerRequestsNames.add(projectName);
+
+            if(forceUpdate)
+            {
+                UpdateState();
+            }
         }
     }
 
     /**
-     * Gets the number of {@link version2.download#GlobalDownloader GlobalDownloader} objects currently created.
+     * Gets the number of {@link version2.prototype.download#GlobalDownloader GlobalDownloader} objects currently created.
      *
-     * @return number of {@link version2.download#GlobalDownloader GlobalDownloader} instances stored
+     * @return number of {@link version2.prototype.download#GlobalDownloader GlobalDownloader} instances stored
      */
     public static int GetNumberOfGlobalDownloaders()
     {
@@ -356,9 +390,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Gets the number of {@link version2.Scheduler#Scheduler Scheduler} objects currently created.
+     * Gets the number of {@link version2.prototype.Scheduler#Scheduler Scheduler} objects currently created.
      *
-     * @return number of {@link version2.Scheduler#Scheduler Scheduler} instances stored
+     * @return number of {@link version2.prototype.Scheduler#Scheduler Scheduler} instances stored
      */
     public static int GetNumberOfSchedulerResources()
     {
@@ -374,10 +408,10 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Returns the list of {@link version2.Scheduler#SchedulerStatus SchedulerStatus} objects relevant to all currently known active
-     * {@link version2.Scheduler#Scheduler Scheduler} instances. This information is updated passively by EASTWebManager's background thread if
-     * {@link Start Start(int, int)} was called with a value greater than 0 for msBeetweenUpdates, otherwise it is updated actively by calling
-     * {@link UpdateStatus UpdateStatus()}.
+     * Returns the list of {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} objects relevant to all currently known active
+     * {@link version2.prototype.Scheduler#Scheduler Scheduler} instances. This information is updated passively by EASTWebManager's background thread if
+     * {@link #Start Start(int, int)} was called with a value greater than 0 for msBeetweenUpdates, otherwise it is updated actively by calling
+     * {@link #UpdateState UpdateState()}.
      *
      * @return list of SchedulerStatus objects for the currently created Scheduler instances
      */
@@ -398,11 +432,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Gets the {@link version2.Scheduler#SchedulerStatus SchedulerStatus} currently known for a {@link version2.Scheduler#Scheduler Scheduler} with the
+     * Gets the {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} currently known for a {@link version2.prototype.Scheduler#Scheduler Scheduler} with the
      * given unique ID, if it exists. If not, then returns null.
      *
-     * @param schedulerID  - unique ID of the target {@link version2.Scheduler#Scheduler Scheduler} instance
-     * @return the currently known {@link version2.Scheduler#SchedulerStatus SchedulerStatus} for the target Scheduler if found, otherwise null returned.
+     * @param schedulerID  - unique ID of the target {@link version2.prototype.Scheduler#Scheduler Scheduler} instance
+     * @return the currently known {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} for the target Scheduler if found, otherwise null returned.
      */
     public static SchedulerStatus GetSchedulerStatus(int schedulerID)
     {
@@ -427,11 +461,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Gets the {@link version2.Scheduler#SchedulerStatus SchedulerStatus} currently known for a {@link version2.Scheduler#Scheduler Scheduler} with the
+     * Gets the {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} currently known for a {@link version2.prototype.Scheduler#Scheduler Scheduler} with the
      * given unique ID, if it exists. If not, then returns null.
      *
-     * @param schedulerID  - unique ID of the target {@link version2.Scheduler#Scheduler Scheduler} instance
-     * @return the currently known {@link version2.Scheduler#SchedulerStatus SchedulerStatus} for the target Scheduler if found, otherwise null returned.
+     * @param projectName  - targeted Scheduler's project name
+     * @return the currently known {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} for the target Scheduler if found, otherwise null returned.
      */
     public static SchedulerStatus GetSchedulerStatus(String projectName)
     {
@@ -461,10 +495,10 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     /**
      * Adds a {@link version2#GUIUpdateHandler GUIUpdateHandler} object to the list of registered GUIUpdateHandlers that the EASTWebManager's background
-     * thread will run once an update is detected to one of the {@link version2.Scheduler#SchedulerStatus SchedulerStatus} objects. The thread runs as
-     * often as specified when calling the {@link Start Start(int, int)} method.
+     * thread will run once an update is detected to one of the {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} objects. The thread runs as
+     * often as specified when calling the {@link #Start Start(int, int)} method.
      *
-     * @param handler
+     * @param handler  - GUIUpdateHandler object execute when updates to the UI are triggered.
      */
     public static void RegisterGUIUpdateHandler(GUIUpdateHandler handler)
     {
@@ -549,9 +583,12 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     if(stopExistingSchedulerRequestsNames.size() > 0)
                     {
                         synchronized (stopExistingSchedulerRequestsNames) {
-                            int schedulerId = -1;
-                            for(String projectName : stopExistingSchedulerRequestsNames)
+                            int schedulerId;
+                            String projectName;
+                            while(stopExistingSchedulerRequestsNames.size() > 0)
                             {
+                                projectName = stopExistingSchedulerRequestsNames.remove(0);
+                                schedulerId = -1;
                                 for(Scheduler scheduler : schedulers)
                                 {
                                     if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
@@ -561,7 +598,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                                     }
                                 }
                                 if(schedulerId != -1) {
-                                    stopExistingSchedulerRequestsNames.remove(projectName);
                                     handleStopSchedulerRequests(schedulerId);
                                 }
                             }
@@ -581,20 +617,24 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     if(deleteExistingSchedulerRequestsNames.size() > 0)
                     {
                         synchronized (deleteExistingSchedulerRequestsNames) {
-                            int schedulerId = -1;
-                            for(String projectName : deleteExistingSchedulerRequestsNames)
-                            {
-                                for(Scheduler scheduler : schedulers)
+                            synchronized (schedulers) {
+                                int schedulerId;
+                                String projectName;
+                                while(deleteExistingSchedulerRequestsNames.size() > 0)
                                 {
-                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    projectName = deleteExistingSchedulerRequestsNames.remove(0);
+                                    schedulerId = -1;
+                                    for(Scheduler scheduler : schedulers)
                                     {
-                                        schedulerId = scheduler.GetID();
-                                        break;
+                                        if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                        {
+                                            schedulerId = scheduler.GetID();
+                                            break;
+                                        }
                                     }
-                                }
-                                if(schedulerId != -1) {
-                                    deleteExistingSchedulerRequestsNames.remove(projectName);
-                                    handleDeleteSchedulerRequests(schedulerId);
+                                    if(schedulerId != -1) {
+                                        handleDeleteSchedulerRequests(schedulerId);
+                                    }
                                 }
                             }
                         }
@@ -613,22 +653,25 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     if(startExistingSchedulerRequestsNames.size() > 0)
                     {
                         synchronized (startExistingSchedulerRequestsNames) {
-                            int schedulerId = -1;
-                            for(String projectName : startExistingSchedulerRequestsNames)
-                            {
-                                for(Scheduler scheduler : schedulers)
+                            synchronized (schedulers) {
+                                int schedulerId;
+                                String projectName;
+                                while(startExistingSchedulerRequestsNames.size() > 0)
                                 {
-                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                    projectName = startExistingSchedulerRequestsNames.remove(0);
+                                    schedulerId = -1;
+                                    for(Scheduler scheduler : schedulers)
                                     {
-                                        schedulerId = scheduler.GetID();
-                                        break;
+                                        if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
+                                        {
+                                            schedulerId = scheduler.GetID();
+                                            break;
+                                        }
+                                    }
+                                    if(schedulerId != -1) {
+                                        handleStartExistingSchedulerRequests(schedulerId);
                                     }
                                 }
-                                if(schedulerId != -1) {
-                                    startExistingSchedulerRequestsNames.remove(projectName);
-                                    handleStartExistingSchedulerRequests(schedulerId);
-                                }
-                                schedulerId = -1;
                             }
                         }
                     }

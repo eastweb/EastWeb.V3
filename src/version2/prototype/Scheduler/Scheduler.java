@@ -217,6 +217,7 @@ public class Scheduler {
             {
                 projectSchema = Schemas.getSchemaName(projectInfoFile.GetProjectName(), item.GetName());
                 stmt.addBatch(String.format(updateQueryFormat, projectSchema, "DownloadCache"));
+                stmt.addBatch(String.format(updateQueryFormat, projectSchema, "DownloadCacheExtra"));
                 stmt.addBatch(String.format(updateQueryFormat, projectSchema, "ProcessorCache"));
                 stmt.addBatch(String.format(updateQueryFormat, projectSchema, "IndicesCache"));
             }
@@ -232,6 +233,15 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateSchedulerTaskState(TaskState.RUNNING);
+            SchedulerStatus status;
+            try {
+                status = statusContainer.GetStatus();
+                if(status != null) {
+                    manager.NotifyUI(status);
+                }
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+            }
         }
         for(DatabaseCache cache : downloadCaches)
         {
@@ -258,6 +268,15 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateSchedulerTaskState(TaskState.STOPPED);
+            SchedulerStatus status;
+            try {
+                status = statusContainer.GetStatus();
+                if(status != null) {
+                    manager.NotifyUI(status);
+                }
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+            }
         }
     }
 
@@ -404,10 +423,6 @@ public class Scheduler {
      */
     public void AttemptUpdate() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        synchronized (statusContainer)
-        {
-            statusContainer.UpdateSchedulerTaskState(TaskState.RUNNING);
-        }
         for(DatabaseCache cache : downloadCaches)
         {
             cache.NotifyObserversToCheckForPastUpdates();

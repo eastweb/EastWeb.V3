@@ -617,13 +617,14 @@ public class MainWindow {
                 String projectName = label.toString();
 
                 if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
-                    EASTWebManager.StartExistingScheduler(projectName);
+                    EASTWebManager.StopExistingScheduler(projectName, true);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 
                 } else {
-                    EASTWebManager.StopExistingScheduler(projectName);
+                    EASTWebManager.StartExistingScheduler(projectName, true);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
                 }
+                frame.repaint();
             }
 
             isPushed = false;
@@ -724,7 +725,7 @@ public class MainWindow {
                     }
                 }
                 if(removeProject != -1) {
-                    EASTWebManager.DeleteScheduler(projectName);
+                    EASTWebManager.DeleteScheduler(projectName, true);
                     defaultTableModel.removeRow(removeProject);
                 }
             }
