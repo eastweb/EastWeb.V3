@@ -453,9 +453,10 @@ public class Scheduler {
         }
     }
 
-    protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager)
+    protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, boolean clearIntermediateFiles, int myID, Config configInstance,
+            EASTWebManagerI manager)
     {
-        data = new SchedulerData(projectInfoFile, pluginMetaDataCollection);
+        data = new SchedulerData(projectInfoFile, pluginMetaDataCollection, clearIntermediateFiles);
         this.projectInfoFile = projectInfoFile;
         this.pluginMetaDataCollection = pluginMetaDataCollection;
         ID = myID;
@@ -463,9 +464,10 @@ public class Scheduler {
         this.manager = manager;
     }
 
-    protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, int myID, Config configInstance, EASTWebManagerI manager, SchedulerStatusContainer statusContainer)
+    protected Scheduler(ProjectInfoFile projectInfoFile, PluginMetaDataCollection pluginMetaDataCollection, boolean clearIntermediateFiles, int myID, Config configInstance,
+            EASTWebManagerI manager, SchedulerStatusContainer statusContainer)
     {
-        data = new SchedulerData(projectInfoFile, pluginMetaDataCollection);
+        data = new SchedulerData(projectInfoFile, pluginMetaDataCollection, clearIntermediateFiles);
         this.projectInfoFile = projectInfoFile;
         this.pluginMetaDataCollection = pluginMetaDataCollection;
         ID = myID;

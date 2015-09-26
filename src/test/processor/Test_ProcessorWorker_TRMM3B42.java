@@ -89,7 +89,7 @@ public class Test_ProcessorWorker_TRMM3B42 {
     private class MyScheduler extends Scheduler
     {
         public MyScheduler() {
-            super(null, null, 0, null, null);
+            super(null, null, false, 0, null, null);
         }
 
         @Override

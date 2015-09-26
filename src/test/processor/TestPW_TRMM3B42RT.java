@@ -92,7 +92,7 @@ public class TestPW_TRMM3B42RT {
     private class MyScheduler extends Scheduler
     {
         public MyScheduler() {
-            super(null, null, 0, null, null);
+            super(null, null, false, 0, null, null);
         }
 
         @Override

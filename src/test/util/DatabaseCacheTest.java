@@ -572,7 +572,7 @@ public class DatabaseCacheTest {
     private class MyScheduler extends Scheduler
     {
         public MyScheduler(int myID, SchedulerStatusContainer statusContainer) throws ParserConfigurationException, SAXException, IOException {
-            super(null, null, myID, null, null, statusContainer);
+            super(null, null, false, myID, null, null, statusContainer);
         }
 
         @Override
