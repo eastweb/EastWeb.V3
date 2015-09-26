@@ -122,9 +122,10 @@ public class ProjectProgress {
         itemLog = new DefaultListModel<String>();
 
         logList = new JList<String>(itemLog);
-        logList.setBounds(10, 22, 344, 269);
+        //        logList.setBounds(10, 22, 344, 269);
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(logList);
+        scrollPane.setBounds(10, 22, 344, 269);
         panel_1.add(scrollPane);
     }
 
@@ -154,7 +155,7 @@ public class ProjectProgress {
                     {
                         itemLog.addElement(log);
                     }
-                    frame.repaint();
+                    //                    frame.repaint();
                 } else {
                     EASTWebManager.RemoveGUIUpdateHandler(updateHandler);
                 }
