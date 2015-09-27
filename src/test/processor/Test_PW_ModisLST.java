@@ -25,7 +25,7 @@ import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
 
 public class Test_PW_ModisLST {
-    //private static Config configInstance = Config.getAnInstance("src/test/config.xml");
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public Test_PW_ModisLST() {
     }
@@ -41,7 +41,7 @@ public class Test_PW_ModisLST {
     @Test
     public void testCall() throws Exception {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\projects\\Project_TW3.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu\\git\\EastWeb.V2\\projects\\Project_TW3.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\plugins\\Plugin_ModisLST.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;

@@ -55,7 +55,7 @@ public class SummaryWorkerTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         configInstance = Config.getAnInstance("src\\test\\config.xml");
-        projectInfoFile = new ProjectInfoFile("src\\test\\summary\\Test_Project.xml");
+        projectInfoFile = new ProjectInfoFile(configInstance, "src\\test\\summary\\Test_Project.xml");
         startDate = projectInfoFile.GetStartDate();
         pluginInfo = projectInfoFile.GetPlugins().get(0);
         pluginMetaData = PluginMetaDataCollection.getInstance(new File("plugins\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
@@ -117,7 +117,7 @@ public class SummaryWorkerTest {
         cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm6.tif", 1, startDate.getYear(), startDate.minusDays(1).getDayOfYear(), "TRMM3B42RTIndex")));
         cachedFiles.add(new DataFileMetaData(new IndicesFileMetaData("src\\test\\summary\\trmm7.tif", 1, startDate.getYear(), startDate.getDayOfYear(), "TRMM3B42RTIndex")));
 
-        SummaryWorker worker = new SummaryWorker(configInstance, new MyProcess(projectInfoFile), projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null);
+        SummaryWorker worker = new SummaryWorker(configInstance, new MyProcess(projectInfoFile), projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, null, null);
         worker.call();
 
         // Verify results

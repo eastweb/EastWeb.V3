@@ -131,9 +131,7 @@ public class DatabaseConnector {
 
         synchronized(connectionIDsLock) {
             if(connectionIDs == null) {
-                if(connectionIDs == null) {
-                    connectionIDs = new BitSet(myConfigInstance.getMaxNumOfConnectionsPerInstance());
-                }
+                connectionIDs = new BitSet(myConfigInstance.getMaxNumOfConnectionsPerInstance());
             }
         }
 

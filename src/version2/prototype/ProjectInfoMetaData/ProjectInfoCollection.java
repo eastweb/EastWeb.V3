@@ -11,6 +11,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
+
 public class ProjectInfoCollection {
     private ArrayList<ProjectInfoFile> files = null;
 
@@ -25,11 +27,12 @@ public class ProjectInfoCollection {
     {
         File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
         File[] fl = getXMLFiles(fileDir);
+        Config configInstance = Config.getInstance();
         if(fl.length > 0)
         {
             for(File fi : fl)
             {
-                files.add(new ProjectInfoFile(fi.getCanonicalPath()));
+                files.add(new ProjectInfoFile(configInstance, fi.getCanonicalPath()));
             }
         }
         return files;

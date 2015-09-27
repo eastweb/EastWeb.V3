@@ -27,6 +27,7 @@ import version2.prototype.download.ModisLST.ModisLSTListDatesFiles;
 import version2.prototype.download.ModisLST.ModisLSTGlobalDownloader;
 
 public class TestModisLSTGlobalDownloader {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     private static DownloadMetaData data;
     private static ProjectInfoFile p;
@@ -48,7 +49,7 @@ public class TestModisLSTGlobalDownloader {
 
         data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
 
-        p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
+        p = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
 
     }
 

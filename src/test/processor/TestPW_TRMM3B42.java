@@ -32,7 +32,7 @@ import version2.prototype.util.Schemas;
 import version2.prototype.processor.TRMM3B42.*;
 
 public class TestPW_TRMM3B42 {
-    // private static Config configInstance = Config.getAnInstance("src/test/config.xml");
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     public TestPW_TRMM3B42() {
     }
@@ -49,7 +49,7 @@ public class TestPW_TRMM3B42 {
     public void testCall() throws Exception
     {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\projects\\Project_TW.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu\\git\\EastWeb.V2\\projects\\Project_TW.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\plugins\\Plugin_TRMM3B42.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
 

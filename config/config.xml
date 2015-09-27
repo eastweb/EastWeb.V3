@@ -20,6 +20,11 @@
 		<passWord>dPpKa2Q8NW</passWord>
 	</DataBase> -->
 	<Output>
+		<TemporalSummaryCompositionStrategy>GregorianWeeklyStrategy</TemporalSummaryCompositionStrategy>
+		<TemporalSummaryCompositionStrategy>GregorianMonthlyStrategy</TemporalSummaryCompositionStrategy>
+		<TemporalSummaryCompositionStrategy>CDCWeeklyStrategy</TemporalSummaryCompositionStrategy>
+		<TemporalSummaryCompositionStrategy>WHOWeeklyStrategy</TemporalSummaryCompositionStrategy>
+		<TemporalSummaryCompositionStrategy>CompositeOf8Days</TemporalSummaryCompositionStrategy>
 		<SummaryCalculation>Max</SummaryCalculation>
 		<SummaryCalculation>Mean</SummaryCalculation>
 		<SummaryCalculation>Min</SummaryCalculation>
