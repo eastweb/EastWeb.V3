@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
 @SuppressWarnings("javadoc")
@@ -33,7 +34,8 @@ public class ProjectInfoFileTester {
     @Test
     public final void testProjectInfoFile() throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
     InvocationTargetException, ParserConfigurationException, SAXException, IOException {
-        ProjectInfoFile projectInfo = new ProjectInfoFile(System.getProperty("user.dir") + "\\src\\test\\ProjectInfoMetaData\\Test_Project.xml");
+        Config configInstance = Config.getAnInstance("src\\test\\config.xml");
+        ProjectInfoFile projectInfo = new ProjectInfoFile(configInstance, System.getProperty("user.dir") + "\\src\\test\\ProjectInfoMetaData\\Test_Project.xml");
 
         assertTrue("Plugins loaded: " + projectInfo.GetPlugins().size(), projectInfo.GetPlugins().size() == 1);
         assertTrue("Plugin 1 name is " + projectInfo.GetPlugins().get(0).GetName(), projectInfo.GetPlugins().get(0).GetName().equals("Test Plugin"));

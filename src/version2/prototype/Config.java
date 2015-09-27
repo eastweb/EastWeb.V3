@@ -20,7 +20,7 @@ import version2.prototype.util.FileSystem;
  *
  */
 public class Config {
-    private static final String CONFIG_FILENAME = ".//config.xml";
+    private static final String CONFIG_FILENAME = ".//config//config.xml";
     private static final String ERROR_LOG_DIR_KEY = "ErrorLogDir";
     // Download section
     private static final String DOWNLOAD_DIR_KEY = "DownloadDir";
@@ -35,6 +35,8 @@ public class Config {
     private static final String MAX_NUM_OF_CONNECTIONS_PER_INSTANCE_KEY = "MaxNumOfConnectionsPerInstance";
     // Output section
     private static final String OUTPUT_KEY = "Output";
+    private static final String TEMPORAL_SUMMARY_COMPOSITION_STRATEGY_KEY = "TemporalSummaryCompositionStrategy";
+    private static final String SUMMARY_CALCULATION_KEY = "SummaryCalculation";
     // Instance
     private static Config instance = null;
     //    private static final LazyCachedReference<Config, ConfigReadException> instance =
@@ -60,6 +62,7 @@ public class Config {
     private final String databaseUsername;
     private final String databasePassword;
     private final Integer maxNumOfConnectionsPerInstance;
+    private final ArrayList<String> summaryTempCompStrategies;
     private final ArrayList<String> summaryCalculations;
 
     private Config(String xmlPath)
@@ -69,6 +72,7 @@ public class Config {
         Element database = null;
         Node outputNode = null;
         NodeList summaryList = null;
+        NodeList tempCompStrategyList = null;
 
         String errorLogDirTemp = null;
         String downloadDirTemp = null;
@@ -79,6 +83,7 @@ public class Config {
         String databaseUsernameTemp = null;
         String databasePasswordTemp = null;
         Integer maxNumOfConnectionsPerInstanceTemp = null;
+        ArrayList<String> tempSummaryCompStrategiesTemp = null;
         ArrayList<String> summaryCalculationsTemp = null;
 
         File fXmlFile = new File(xmlPath);
@@ -105,9 +110,17 @@ public class Config {
 
             // Node: Output
             outputNode = doc.getElementsByTagName(OUTPUT_KEY).item(0);
+
+            // Node(s): TemporalSummaryCompositionStrategy
+            tempSummaryCompStrategiesTemp = new ArrayList<String>(1);
+            tempCompStrategyList = ((Element) outputNode).getElementsByTagName(TEMPORAL_SUMMARY_COMPOSITION_STRATEGY_KEY);
+            for(int i=0; i < tempCompStrategyList.getLength(); i++) {
+                tempSummaryCompStrategiesTemp.add(tempCompStrategyList.item(i).getTextContent());
+            }
+
             // Node(s): SummaryCalculation
             summaryCalculationsTemp = new ArrayList<String>(1);
-            summaryList = ((Element) outputNode).getElementsByTagName("SummaryCalculation");
+            summaryList = ((Element) outputNode).getElementsByTagName(SUMMARY_CALCULATION_KEY);
             summaryCalculationsTemp.add("Count");
             for(int i=0; i < summaryList.getLength(); i++) {
                 summaryCalculationsTemp.add(summaryList.item(i).getTextContent());
@@ -126,12 +139,13 @@ public class Config {
         databaseName = databaseNameTemp;
         databaseUsername = databaseUsernameTemp;
         databasePassword = databasePasswordTemp;
+        summaryTempCompStrategies = tempSummaryCompStrategiesTemp;
         summaryCalculations = summaryCalculationsTemp;
         maxNumOfConnectionsPerInstance = maxNumOfConnectionsPerInstanceTemp;
     }
 
     private Config(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername, String databasePassword,
-            Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryCalculations)
+            Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryTempCompStrategies, ArrayList<String> summaryCalculations)
     {
         this.errorLogDir = errorLogDir;
         this.downloadDir = downloadDir;
@@ -141,6 +155,7 @@ public class Config {
         this.databaseName = databaseName;
         this.databaseUsername = databaseUsername;
         this.databasePassword = databasePassword;
+        this.summaryTempCompStrategies = summaryTempCompStrategies;
         this.summaryCalculations = summaryCalculations;
         this.maxNumOfConnectionsPerInstance = maxNumOfConnectionsPerInstance;
     }
@@ -185,8 +200,9 @@ public class Config {
      * @return a new Config object
      */
     public static Config getAnInstance(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername,
-            String databasePassword, Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryCalculations) {
-        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, port, databaseName, databaseUsername, databasePassword, maxNumOfConnectionsPerInstance, summaryCalculations);
+            String databasePassword, Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryTempCompStrategies, ArrayList<String> summaryCalculations) {
+        return new Config(errorLogDir, downloadDir, globalSchema, databaseHost, port, databaseName, databaseUsername, databasePassword, maxNumOfConnectionsPerInstance,
+                summaryTempCompStrategies, summaryCalculations);
     }
 
     public String getErrorLogDir() {
@@ -223,6 +239,10 @@ public class Config {
 
     public Integer getMaxNumOfConnectionsPerInstance() {
         return maxNumOfConnectionsPerInstance;
+    }
+
+    public ArrayList<String> getSummaryTempCompStrategies() {
+        return summaryTempCompStrategies;
     }
 
     public ArrayList<String> getSummaryCalculations() {

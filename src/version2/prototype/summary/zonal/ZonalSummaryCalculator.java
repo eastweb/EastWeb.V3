@@ -31,6 +31,7 @@ import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.DatabaseConnector;
@@ -59,6 +60,7 @@ public class ZonalSummaryCalculator {
     private final String pluginName;
     private final int daysPerInputData;
     private final ProjectInfoSummary summary;
+    private final TemporalSummaryRasterFileStore fileStore;
     private final DatabaseCache outputCache;
 
     private Map<Integer, Boolean> zoneReceivedValidData;
@@ -77,10 +79,11 @@ public class ZonalSummaryCalculator {
      * @param outTableFile  - where to write output to
      * @param summariesCollection  - collection of summary calculations to run on raster data
      * @param summary
+     * @param fileStore
      * @param outputCache
      */
     public ZonalSummaryCalculator(Process process, String globalSchema, String workingDir, String projectName, String pluginName, int daysPerInputData, IndicesFileMetaData inputFile, File outTableFile,
-            SummariesCollection summariesCollection, ProjectInfoSummary summary, DatabaseCache outputCache)
+            SummariesCollection summariesCollection, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore, DatabaseCache outputCache)
     {
         this.process = process;
         this.workingDir = workingDir;
@@ -95,6 +98,7 @@ public class ZonalSummaryCalculator {
         this.pluginName = pluginName;
         this.daysPerInputData = daysPerInputData;
         this.summary = summary;
+        this.fileStore = fileStore;
         this.outputCache = outputCache;
 
         zoneReceivedValidData = new HashMap<Integer, Boolean>();
@@ -142,7 +146,7 @@ public class ZonalSummaryCalculator {
                 writeTable(layer, countMap);
 
                 // Write to database
-                uploadResultsToDb(mTableFile, layer, areaCodeField, areaNameField, inputFile.indexNm, summary, summariesCollection, inputFile.year, inputFile.day, process);
+                uploadResultsToDb(mTableFile, layer, areaCodeField, areaNameField, inputFile.indexNm, summary, fileStore, summariesCollection, inputFile.year, inputFile.day, process);
             }
             catch (SQLException | IllegalArgumentException | UnsupportedOperationException | IOException | ClassNotFoundException | ParserConfigurationException | SAXException e)
             {
@@ -359,8 +363,9 @@ public class ZonalSummaryCalculator {
         writer.close();
     }
 
-    private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, SummariesCollection summariesCollection, int year,
-            int day, Process process) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
+    private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore,
+            SummariesCollection summariesCollection, int year, int day, Process process) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException,
+    ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
         ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
@@ -424,8 +429,8 @@ public class ZonalSummaryCalculator {
         }
 
         TemporalSummaryCompositionStrategy compStrategy = null;
-        if(summary.GetTemporalFileStore() != null) {
-            compStrategy = summary.GetTemporalFileStore().compStrategy;
+        if(fileStore != null) {
+            compStrategy = fileStore.compStrategy;
         }
 
         Set<Integer> zones = zoneReceivedValidData.keySet();

@@ -3,6 +3,8 @@ package version2.prototype.ProjectInfoMetaData;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,13 +15,18 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.Projection;
 import version2.prototype.Projection.Datum;
 import version2.prototype.Projection.ProjectionType;
 import version2.prototype.Projection.ResamplingType;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
+import version2.prototype.util.Schemas;
 import version2.prototype.ZonalSummary;
 
 /**
@@ -29,6 +36,7 @@ import version2.prototype.ZonalSummary;
  *
  */
 public class ProjectInfoFile {
+    private final Config configInstance;
     private static DateTimeFormatter datesFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu");
     private DocumentBuilderFactory domFactory;
     private DocumentBuilder builder;
@@ -69,6 +77,7 @@ public class ProjectInfoFile {
      * Creates a ProjectInfoFile object from parsing the given xml file. Doesn't allow its data to be changed and doesn't dynamically update its
      * data if the file changes.
      *
+     * @param configInstance
      * @param xmlLocation  - file path of xml to parse
      * @throws ParserConfigurationException
      * @throws SAXException
@@ -81,9 +90,10 @@ public class ProjectInfoFile {
      * @throws NoSuchMethodException
      * @throws ClassNotFoundException
      */
-    public ProjectInfoFile(String xmlLocation) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException,
+    public ProjectInfoFile(Config configInstance, String xmlLocation) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException,
     NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
+        this.configInstance = configInstance;
         error = false;
         errorMsg = new ArrayList<String>();
         this.xmlLocation = xmlLocation;
@@ -140,6 +150,7 @@ public class ProjectInfoFile {
             String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate,
             Double heatingDegree, ArrayList<ProjectInfoSummary> summaries)
     {
+        configInstance = null;
         xmlLocation = null;
         this.plugins = plugins;
         this.startDate = startDate;
@@ -692,9 +703,6 @@ public class ProjectInfoFile {
             String areaValueField;
             String areaNameField;
             String temporalSummaryCompositionStrategyClassName;
-            TemporalSummaryRasterFileStore fileStore;
-            Class<?> strategyClass;
-            Constructor<?> ctorStrategy;
 
             String summary;
             for(int i=0; i < summaryStrings.size(); i++)
@@ -719,7 +727,6 @@ public class ProjectInfoFile {
                         areaValueField = areaValueField.substring(0, areaValueField.length() - 1);
                     }
                     temporalSummaryCompositionStrategyClassName = null;
-                    fileStore = null;
                 }
                 else
                 {
@@ -730,11 +737,19 @@ public class ProjectInfoFile {
                     if(temporalSummaryCompositionStrategyClassName.endsWith(";")) {
                         temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName.substring(0, temporalSummaryCompositionStrategyClassName.length() - 1);
                     }
-                    strategyClass = Class.forName("version2.prototype.summary.temporal.CompositionStrategies." + temporalSummaryCompositionStrategyClassName);
-                    ctorStrategy = strategyClass.getConstructor();
-                    fileStore = new TemporalSummaryRasterFileStore((TemporalSummaryCompositionStrategy)ctorStrategy.newInstance());
+
+                    boolean valid = false;
+                    for(String strategyName : configInstance.getSummaryTempCompStrategies())
+                    {
+                        if(temporalSummaryCompositionStrategyClassName.equals(strategyName)) {
+                            valid = true;
+                        }
+                    }
+                    if(!valid) {
+                        temporalSummaryCompositionStrategyClassName = null;
+                    }
                 }
-                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, areaValueField, areaNameField), fileStore, temporalSummaryCompositionStrategyClassName, ID));
+                summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, areaValueField, areaNameField), temporalSummaryCompositionStrategyClassName, ID));
             }
             return summaries;
         }

@@ -42,7 +42,7 @@ public class TestInd_TRMM3B42RT {
     public void testCall() throws Exception {
         // Set up parameters
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\PluginMetaData\\Plugin_TRMM3B42RT.xml")).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
 

@@ -107,7 +107,7 @@ public class SchedulerStatusContainer {
         this.pluginMetaDataCollection = pluginMetaDataCollection;
         ArrayList<ProjectInfoSummary> summariesTemp = new ArrayList<ProjectInfoSummary>();
         for(ProjectInfoSummary pfs : projectMetaData.GetSummaries()) {
-            summariesTemp.add(new ProjectInfoSummary(pfs.GetZonalSummary(), null, pfs.GetTemporalSummaryCompositionStrategyClassName(), pfs.GetID()));
+            summariesTemp.add(new ProjectInfoSummary(pfs.GetZonalSummary(), pfs.GetTemporalSummaryCompositionStrategyClassName(), pfs.GetID()));
         }
         this.state = state;
         log = Collections.synchronizedList(new ArrayList<String>(1));
