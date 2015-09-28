@@ -15,6 +15,7 @@ public class ReadShapefile {
 
     private DataSource shapefile;
     private ArrayList<String []> featureNameList = new ArrayList<String[]>();
+    private ArrayList<String []> numericFeatureList = new ArrayList<String[]>();
 
     /* filename:  the input shapefile name
      * throws exception ShapefileException if a shapefile does not exist or cannot be open
@@ -35,40 +36,63 @@ public class ReadShapefile {
         else{
             throw new ShapefileException("The shape file " + filename + " does not exist");
         }
+
+        ProcessFeatures();
     }
 
-
     /* precondition: none
-     * postcondition: feature(field) names in each layer are stored in each ArrayList element
+     * postcondition: get the feature(field) names in each layer
+     *              store all of them in each featureNameList element
+     *              Store the numeric ones in each numericFeatureList element
      */
-    public ArrayList<String []> getFeatureList()
+    private void ProcessFeatures()
     {
         synchronized (GdalUtils.lockObject) {
-            System.out.println("ShapeFile count: " + shapefile.GetLayerCount());
+            // System.out.println("ShapeFile count: " + shapefile.GetLayerCount());
             for (int iLayer=0; iLayer<shapefile.GetLayerCount(); iLayer++) {
-                System.out.println("Test_Layer: " + iLayer);
+                // System.out.println("Test_Layer: " + iLayer);
                 Layer layer = shapefile.GetLayer(iLayer);
                 FeatureDefn layerDefn = layer.GetLayerDefn();
 
                 int count = layerDefn.GetFieldCount();
 
                 String [] featureNames = new String[count];
+                ArrayList <String> numericFeatures =  new ArrayList<String>();
 
                 for (int iFeature=0; iFeature<count; iFeature++) {
                     FieldDefn fieldDefn = layerDefn.GetFieldDefn(iFeature);
                     String type = fieldDefn.GetFieldTypeName(fieldDefn.GetFieldType()).toLowerCase();
-                    if (type.equals("string") || type.equals("integer")) {
-                        featureNames[iFeature] = layerDefn.GetFieldDefn(iFeature).GetName();
+                    //System.out.println(type);
+                    featureNames[iFeature] = layerDefn.GetFieldDefn(iFeature).GetName();
+                    if (type.equals("real") || type.equals("integer"))
+                    {
+                        numericFeatures.add(featureNames[iFeature]);
                     }
                 }
 
                 featureNameList.add(featureNames);
+
+                numericFeatureList.add(numericFeatures.toArray(new String[numericFeatures.size()]));
             }
         }
+    }
 
+    /* precondition: none
+     * postcondition: ALL the feature(field) names in each layer are stored in each ArrayList element
+     */
+
+    public ArrayList<String []> getFeatureList()
+    {
         return featureNameList;
     }
 
+    /* precondition: none
+     * postcondition: the features with numeric values in each layer are stored in each ArrayList element
+     */
+    public ArrayList<String []> getNumericFeatureList()
+    {
+        return numericFeatureList;
+    }
 
 
 }
