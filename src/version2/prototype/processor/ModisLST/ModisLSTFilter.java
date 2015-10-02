@@ -151,10 +151,10 @@ public class ModisLSTFilter extends Filter{
                 bitMask = 0XC1F;
                 int r = bitMask ^ qBand[i];
                 String rStr = String.format(bPattern, Integer.toBinaryString(r)).replace(' ', '0');
-                bits1 = rStr.substring(0, 1);
-                bits2 = rStr.substring(6, 7);
+                bits1 = rStr.substring(0, 2);
+                bits2 = rStr.substring(6);
 
-                String bits3 = qBandStr.substring(6, 7);
+                String bits3 = qBandStr.substring(6);
                 if (   (!(bits3.equals("00"))) &&
                         ( (bits1.equals("00")) && (bits2.equals("00")) ) )
                 {
@@ -164,8 +164,8 @@ public class ModisLSTFilter extends Filter{
             case "MODERATE":
                 // last two bits are 01, first two are 00  or 01
                 // last two are "00"
-                bits1 = qBandStr.substring(0, 1);
-                bits2 = qBandStr.substring(6, 7);
+                bits1 = qBandStr.substring(0, 2);
+                bits2 = qBandStr.substring(6);
 
                 if (  (!(bits2.equals("00"))) &&
                         ( (bits2.equals("01")) && (!((bits1.equals("01")) || (bits1.equals("00")))) ))
@@ -176,7 +176,8 @@ public class ModisLSTFilter extends Filter{
 
             case "HIGHEST":
                 // last two should be "00"
-                bits2 = qBandStr.substring(6, 7);
+                bits2 = qBandStr.substring(6);
+
                 if  (!bits2.equals("00"))
                 {
                     dBand[i] = GdalUtils.NoValue;
