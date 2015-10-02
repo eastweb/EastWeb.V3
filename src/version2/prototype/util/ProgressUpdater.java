@@ -12,11 +12,13 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
@@ -119,9 +121,20 @@ public class ProgressUpdater {
     {
         double progress = 0;
         PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
+        ProjectInfoPlugin pluginInfo = null;
+        for(ProjectInfoPlugin plugin : projectMetaData.GetPlugins()) {
+            if(plugin.GetName().equals(pluginName)) {
+                pluginInfo = plugin;
+                break;
+            }
+        }
+        if(pluginInfo == null) {
+            ErrorLog.add(configInstance, "Mising project plugin info for plugin '" + pluginName + "'.", new Exception("Plugin '" + pluginName + "' info could not be found in project "
+                    + "metadata."));
+        }
         String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginName);
         int currentCount = calculateProcessorCurrentCount(mSchemaName, stmt);
-        int expectedCount = calculateProcessorExpectedCount(pluginMetaData, pluginName, stmt);
+        int expectedCount = calculateProcessorExpectedCount(pluginMetaData, pluginInfo, stmt);
 
         if(expectedCount > 0 && currentCount > 0)
         {
@@ -211,8 +224,19 @@ public class ProgressUpdater {
      */
     public void UpdateDBProcessorExpectedCount(String pluginName, Statement stmt) throws SQLException
     {
+        ProjectInfoPlugin pluginInfo = null;
+        for(ProjectInfoPlugin plugin : projectMetaData.GetPlugins()) {
+            if(plugin.GetName().equals(pluginName)) {
+                pluginInfo = plugin;
+                break;
+            }
+        }
+        if(pluginInfo == null) {
+            ErrorLog.add(configInstance, "Mising project plugin info for plugin '" + pluginName + "'.", new Exception("Plugin '" + pluginName + "' info could not be found in project "
+                    + "metadata."));
+        }
         int storedExpectedCount = getStoredProcessorExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, stmt);
-        int calculatedExpectedCount = calculateProcessorExpectedCount(pluginMetaDataCollection.pluginMetaDataMap.get(pluginName), pluginName, stmt);
+        int calculatedExpectedCount = calculateProcessorExpectedCount(pluginMetaDataCollection.pluginMetaDataMap.get(pluginName), pluginInfo, stmt);
         if(storedExpectedCount != calculatedExpectedCount)
         {
             String updateQuery = "UPDATE \"" + configInstance.getGlobalSchema() + "\".\"ProcessorExpectedTotalOutput\" SET \"ExpectedNumOfOutputs\" = " + calculatedExpectedCount + " WHERE " +
@@ -334,13 +358,17 @@ public class ProgressUpdater {
         return currentCount;
     }
 
-    protected int calculateProcessorExpectedCount(PluginMetaData pluginMetaData, String pluginName, Statement stmt) throws SQLException
+    protected int calculateProcessorExpectedCount(PluginMetaData pluginMetaData, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException
     {
-        if(downloadExpectedFiles.get(pluginName).get("data") == null)
+        if(downloadExpectedFiles.get(pluginInfo.GetName()).get("data") == null)
         {
-            downloadExpectedFiles.get(pluginName).put("data", getStoredDownloadExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, "data", stmt));
+            downloadExpectedFiles.get(pluginInfo.GetName()).put("data", getStoredDownloadExpectedTotalOutput(projectMetaData.GetProjectName(), pluginInfo.GetName(), "data", stmt));
         }
-        return pluginMetaData.Processor.numOfOutput * downloadExpectedFiles.get(pluginName).get("data");
+        if(pluginMetaData.ExtraInfo.Tiles) {
+            return pluginMetaData.Processor.numOfOutput * (downloadExpectedFiles.get(pluginInfo.GetName()).get("data") / pluginInfo.GetModisTiles().size());
+        } else {
+            return pluginMetaData.Processor.numOfOutput * downloadExpectedFiles.get(pluginInfo.GetName()).get("data");
+        }
     }
 
     protected int calculateIndicesCurrentCount(String mSchemaName, Statement stmt) throws SQLException
