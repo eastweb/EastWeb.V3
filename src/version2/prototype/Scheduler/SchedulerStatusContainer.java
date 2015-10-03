@@ -3,6 +3,8 @@
  */
 package version2.prototype.Scheduler;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -13,13 +15,16 @@ import java.util.List;
 import java.util.TreeMap;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
+import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.ProgressUpdater;
@@ -258,6 +263,7 @@ public class SchedulerStatusContainer {
         for(ProjectInfoPlugin pluginInfo : projectMetaData.GetPlugins())
         {
             pluginName = pluginInfo.GetName();
+            PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
 
             // Setup Download progresses
             progress = progressUpdater.GetCurrentDownloadProgress("data", pluginName, stmt);
@@ -280,7 +286,18 @@ public class SchedulerStatusContainer {
             // Setup Summary progresses
             for(ProjectInfoSummary summary : projectMetaData.GetSummaries())
             {
-                progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), pluginInfo, stmt);
+                if(summary.GetTemporalSummaryCompositionStrategyClassName() != null && !summary.GetTemporalSummaryCompositionStrategyClassName().isEmpty()) {
+                    try {
+                        Class<?> strategyClass = Class.forName("version2.prototype.summary.temporal.CompositionStrategies." + summary.GetTemporalSummaryCompositionStrategyClassName());
+                        Constructor<?> ctorStrategy = strategyClass.getConstructor();
+                        progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), (TemporalSummaryCompositionStrategy)ctorStrategy.newInstance(),
+                                pluginMetaData.DaysPerInputData, pluginInfo, stmt);
+                    } catch(ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        ErrorLog.add(configInstance, "Problem creating Temporal Summary Composition Strategy specified.", e);
+                    }
+                } else {
+                    progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), null, pluginMetaData.DaysPerInputData, pluginInfo, stmt);
+                }
                 summaryProgresses.get(pluginName).put(summary.GetID(), progress);
             }
         }

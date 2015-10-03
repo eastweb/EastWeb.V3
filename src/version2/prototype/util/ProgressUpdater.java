@@ -176,13 +176,14 @@ public class ProgressUpdater {
      * @return double  - progress percentage of the summary process for the specified pluginInfo and project defined summary identified by summaryID
      * @throws SQLException
      */
-    public double GetCurrentSummaryProgress(int summaryIDNum, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException
+    public double GetCurrentSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo,
+            Statement stmt) throws SQLException
     {
         double progress = 0;
         int projectSummaryID = Schemas.getProjectSummaryID(configInstance.getGlobalSchema(), projectMetaData.GetProjectName(), summaryIDNum, stmt);
         String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginInfo.GetName());
         int currentCount = calculateSummaryCurrentCount(projectSummaryID, mSchemaName, stmt);
-        int expectedCount = getStoredSummaryExpectedTotalOutput(projectMetaData.GetProjectName(), pluginInfo.GetName(), summaryIDNum, stmt);
+        int expectedCount = calculateSummaryExpectedCount(mSchemaName, compStrategy, daysPerInputData, pluginInfo, stmt);
 
         if(expectedCount > 0 && currentCount > 0)
         {
