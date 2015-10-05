@@ -95,6 +95,7 @@ public class AssociateSummaryPage {
 
         // combo box populated by the selected shapefile
         final JComboBox<String> areaCodeFieldComboBox = new JComboBox<String>();
+        areaCodeFieldComboBox.setToolTipText("Area Code is a numeric value");
         areaCodeFieldComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {

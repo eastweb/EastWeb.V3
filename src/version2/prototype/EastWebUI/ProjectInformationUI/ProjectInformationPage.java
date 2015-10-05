@@ -616,7 +616,7 @@ public class ProjectInformationPage {
         label.setBounds(260, 343, 88, 14);
         panel.add(label);
 
-        JLabel lblResolution = new JLabel("Resolution:");
+        JLabel lblResolution = new JLabel("Masking File Resolution:");
         lblResolution.setBounds(6, 150, 132, 14);
         panel.add(lblResolution);
 
@@ -888,13 +888,16 @@ public class ProjectInformationPage {
             projectInfo.appendChild(workingDirectory);
 
             // masking file
-            Element maskingFile = doc.createElement("MaskingFile");
+            Element masking = doc.createElement("Masking");
+            projectInfo.appendChild(masking);
+
+            Element maskingFile = doc.createElement("File");
             maskingFile.appendChild(doc.createTextNode(maskFile.getText()));
-            projectInfo.appendChild(maskingFile);
+            masking.appendChild(maskingFile);
 
             Element resolution = doc.createElement("Resolution");
             resolution.appendChild(doc.createTextNode(resolutionTextField.getText()));
-            projectInfo.appendChild(resolution);
+            masking.appendChild(resolution);
 
             Element masterShapeFile = doc.createElement("MasterShapeFile");
             masterShapeFile.appendChild(doc.createTextNode(masterShapeTextField.getText()));

@@ -31,6 +31,7 @@ public class ProjectProgress {
 
     private DefaultListModel<String> itemLog;
     private GUIUpdateHandlerImplementation updateHandler;
+    private String projectName;
 
     /**
      * Launch the application.
@@ -57,6 +58,7 @@ public class ProjectProgress {
     public ProjectProgress(String projectName) {
         initialize();
 
+        this.projectName = projectName;
         updateHandler = new GUIUpdateHandlerImplementation(projectName);
         updateHandler.run();
         EASTWebManager.RegisterGUIUpdateHandler(updateHandler);
@@ -79,7 +81,7 @@ public class ProjectProgress {
     private void CreateProgressView() {
         JPanel panel = new JPanel();
         panel.setBounds(10, 11, 364, 125);
-        panel.setBorder(new TitledBorder(null, "Progress Summary", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel.setBorder(new TitledBorder(null, String.format("{0} Progress Summary", projectName), TitledBorder.LEADING, TitledBorder.TOP, null, null));
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 

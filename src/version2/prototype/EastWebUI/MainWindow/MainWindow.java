@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
@@ -35,12 +36,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
+
+import com.sun.glass.events.WindowEvent;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
@@ -54,6 +58,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
+import java.awt.event.WindowStateListener;
 
 public class MainWindow {
 
@@ -98,10 +103,18 @@ public class MainWindow {
      */
     private void initialize() {
         frame = new JFrame();
+
         frame.setBounds(100, 100, 1207, 730);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
+        frame.addWindowListener((new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent evt){
+                EASTWebManager.Close();
+            }
+        }));
+
 
         FileMenu();
         PopulateUIControl();
@@ -366,7 +379,7 @@ public class MainWindow {
                 String selectedProject = String.valueOf(projectList.getSelectedItem());
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
-                    SchedulerData data = new SchedulerData(project);
+                    SchedulerData data = new SchedulerData(project, !chckbxIntermidiateFiles.isSelected());
                     EASTWebManager.StartNewScheduler(data, true);
 
                     defaultTableModel.addRow(new Object[] {
@@ -408,37 +421,6 @@ public class MainWindow {
                 | InvocationTargetException | IOException
                 | ParserConfigurationException | SAXException | ParseException e) {
             ErrorLog.add(Config.getInstance(), "MainWindow.populateProjectList problem with reading in all project xml files from projects folder.", e);
-        }
-    }
-
-    /**
-     * get all files in a folder
-     * @param folder
-     * @return
-     */
-    private File[] getXMLFiles(File folder) {
-        List<File> aList = new ArrayList<File>();
-        File[] files = folder.listFiles();
-
-        for (File pf : files) {
-
-            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
-                aList.add(pf);
-            }
-        }
-        return aList.toArray(new File[aList.size()]);
-    }
-
-    /**
-     * get file extension
-     * @param f
-     * @return
-     */
-    private String getFileExtensionName(File f) {
-        if (f.getName().indexOf(".") == -1) {
-            return "";
-        } else {
-            return f.getName().substring(f.getName().length() - 3, f.getName().length());
         }
     }
 
@@ -555,7 +537,7 @@ public class MainWindow {
             String projectName = value.toString();
 
             if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
-                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+                setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
 
             } else {
                 setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
@@ -602,7 +584,7 @@ public class MainWindow {
             String projectName = label.toString();
 
             if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
-                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+                button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
             } else {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
             }
@@ -622,7 +604,7 @@ public class MainWindow {
 
                 } else {
                     EASTWebManager.StartExistingScheduler(projectName, true);
-                    button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+                    button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
                 }
                 frame.repaint();
             }
@@ -664,7 +646,7 @@ public class MainWindow {
                 setForeground(table.getForeground());
                 setBackground(UIManager.getColor("Button.background"));
             }
-            setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
             return this;
         }
     }
@@ -703,7 +685,7 @@ public class MainWindow {
                 button.setBackground(table.getBackground());
             }
             label = (value == null) ? "" : value.toString();
-            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+            button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
             isPushed = true;
             return button;
         }

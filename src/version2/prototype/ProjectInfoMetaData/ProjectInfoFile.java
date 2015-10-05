@@ -365,7 +365,7 @@ public class ProjectInfoFile {
 
     private String ReadMaskingFile()
     {
-        NodeList nodes = GetUpperLevelNodeList("MaskingFile", "Missing masking file.");
+        NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
         if(values.size() > 0) {
             String temp = values.get(0);
