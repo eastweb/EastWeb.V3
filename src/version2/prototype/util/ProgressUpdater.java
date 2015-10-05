@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -18,7 +19,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
-import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
@@ -158,7 +158,7 @@ public class ProgressUpdater {
         PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
         String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginName);
         int currentCount = calculateIndicesCurrentCount(mSchemaName, stmt);
-        int expectedCount = calculateIndicesExpectedCount(pluginMetaData, pluginName, stmt);
+        int expectedCount = calculateIndicesExpectedCount(Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginName), pluginMetaData, pluginName, stmt);
 
         if(expectedCount > 0 && currentCount > 0)
         {
@@ -257,7 +257,7 @@ public class ProgressUpdater {
     public void UpdateDBIndicesExpectedCount(String pluginName, Statement stmt) throws SQLException
     {
         int storedExpectedCount = getStoredIndicesExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, stmt);
-        int calculatedExpectedCount = calculateIndicesExpectedCount(pluginMetaDataCollection.pluginMetaDataMap.get(pluginName), pluginName, stmt);
+        int calculatedExpectedCount = calculateIndicesExpectedCount(Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginName), pluginMetaDataCollection.pluginMetaDataMap.get(pluginName), pluginName, stmt);
         if(storedExpectedCount != calculatedExpectedCount)
         {
             String updateQuery = "UPDATE \"" + configInstance.getGlobalSchema() + "\".\"IndicesExpectedTotalOutput\" SET \"ExpectedNumOfOutputs\" = " + calculatedExpectedCount + " WHERE " +
@@ -385,7 +385,7 @@ public class ProgressUpdater {
         return currentCount;
     }
 
-    protected int calculateIndicesExpectedCount(PluginMetaData pluginMetaData, String pluginName, Statement stmt) throws SQLException
+    protected int calculateIndicesExpectedCount(String mSchemaName, PluginMetaData pluginMetaData, String pluginName, Statement stmt) throws SQLException
     {
         if(processorExpectedNumOfOutputs.get(pluginName) == null)
         {
@@ -398,19 +398,30 @@ public class ProgressUpdater {
                 break;
             }
         }
-        return indicesCount * processorExpectedNumOfOutputs.get(pluginName);
+        int dateGroups = 0;
+        ResultSet rs = stmt.executeQuery("SELECT Count(Distinct \"DateGroupID\") \"DateGroupIDCount\"" +
+                "FROM \"" + mSchemaName + "\".\"ProcessorCache\";");
+        if(rs != null && rs.next()) {
+            dateGroups = rs.getInt("DateGroupIDCount");
+            rs.close();
+        }
+
+        return (indicesCount * dateGroups);
     }
 
     protected int calculateSummaryCurrentCount(int projectSummaryID, String mSchemaName, Statement stmt) throws SQLException
     {
         int currentCount = 0;
 
-        String progressQuery = "SELECT Count(DISTINCT \"DateGroupID\") AS \"DateGroupIDCount\" FROM \"" + mSchemaName + "\".\"ZonalStat\" "
-                + "WHERE \"ProjectSummaryID\"=" + projectSummaryID + " GROUP BY \"ProjectSummaryID\";";
+        String progressQuery = "SELECT \"IndexID\", Count(DISTINCT \"DateGroupID\") AS \"DateGroupIDCount\" " +
+                "FROM \"" + mSchemaName + "\".\"ZonalStat\" " +
+                "WHERE \"ProjectSummaryID\"=" + projectSummaryID + " GROUP BY \"IndexID\", \"ProjectSummaryID\";";
         ResultSet rs = stmt.executeQuery(progressQuery);
-        if(rs != null && rs.next())
+        if(rs != null)
         {
-            currentCount = rs.getInt("DateGroupIDCount");
+            while(rs.next()) {
+                currentCount += rs.getInt("DateGroupIDCount");
+            }
             rs.close();
         }
 
@@ -423,12 +434,15 @@ public class ProgressUpdater {
 
         if(compStrategy != null)
         {
-            ResultSet rs = stmt.executeQuery("SELECT Count(DISTINCT A.\"DateGroupID\") AS \"DateGroupIDCount\", Max(D.\"Year\") AS \"MaxYear\", Max(D.\"DayOfYear\") AS \"MaxDay\", Min(D.\"Year\") AS \"MinYear\", " +
-                    "Min(D.\"DayOfYear\") AS \"MinDay\" FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + configInstance.getGlobalSchema() + "\".\"DateGroup\" D ON A.\"DateGroupID\"=D.\"DateGroupID\";");
+            ResultSet rs = stmt.executeQuery("SELECT A.\"DateGroupID\", D.\"Year\", D.\"DayOfYear\" " +
+                    "FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + configInstance.getGlobalSchema() + "\".\"DateGroup\" D " +
+                    "ON D.\"DateGroupID\"=A.\"DateGroupID\" " +
+                    "ORDER BY D.\"Year\" ASC, D.\"DayOfYear\" ASC;");
             if(rs != null && rs.next()) {
-                LocalDate startDate = LocalDate.ofYearDay(rs.getInt("MinYear"), rs.getInt("MinDay"));
-                LocalDate endDate = LocalDate.ofYearDay(rs.getInt("MaxYear"), rs.getInt("MaxDay"));
-                long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(startDate, endDate);
+                LocalDate startDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
+                while(!rs.isLast()) { rs.next(); }
+                LocalDate endDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
+                long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(startDate, endDate.plusDays(compStrategy.getDaysInThisComposite(endDate) - 1));
                 expectedCount = (int) (completeCompositesInRange * pluginInfo.GetIndices().size());
                 rs.close();
             }
