@@ -2,9 +2,7 @@ package version2.prototype;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -50,7 +48,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static ExecutorService executor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
-    protected static int defaultMSBeetweenUpdates = 15000;       // 15 seconds
+    protected static int defaultMSBeetweenUpdates = 10000;       // 10 seconds
 
     // Logged requests from other threads
     protected static List<SchedulerData> newSchedulerRequests;
@@ -100,7 +98,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                         numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
                         ((Runtime.getRuntime().availableProcessors() < 4) ?
                                 1 : (Runtime.getRuntime().availableProcessors() - 3)), // Number of ProcessWorkers allowed to be simultaneously active
-                        msBeetweenUpdates
+                                msBeetweenUpdates
                         );
 
                 // If passive updating desired
