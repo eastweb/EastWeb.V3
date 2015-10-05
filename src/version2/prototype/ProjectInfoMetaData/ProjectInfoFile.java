@@ -1,10 +1,7 @@
 package version2.prototype.ProjectInfoMetaData;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -16,17 +13,11 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.ErrorLog;
 import version2.prototype.Projection;
 import version2.prototype.Projection.Datum;
 import version2.prototype.Projection.ProjectionType;
 import version2.prototype.Projection.ResamplingType;
-import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
-import version2.prototype.util.DatabaseConnection;
-import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
-import version2.prototype.util.Schemas;
 import version2.prototype.ZonalSummary;
 
 /**
@@ -376,7 +367,7 @@ public class ProjectInfoFile {
 
     private String ReadMaskingFile()
     {
-        NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.");
+        NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.", "Masking");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
         if(values.size() > 0) {
             String temp = values.get(0);
@@ -391,7 +382,7 @@ public class ProjectInfoFile {
 
     private Integer ReadMaskingResolution()
     {
-        NodeList nodes = GetUpperLevelNodeList("Resolution", "Missing masking resolution.");
+        NodeList nodes = GetUpperLevelNodeList("Resolution", "Missing masking resolution.", "Masking");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing masking resolution.");
         if(values.size() > 0) {
             return Integer.parseInt(values.get(0));

@@ -13,8 +13,10 @@
 <StartDate>Wed Jul 15 18:43:14 CDT 2015</StartDate>
 <ProjectName>Project_A1</ProjectName>
 <WorkingDir>C:\eastweb</WorkingDir>
-<MaskingFile>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
-<Resolution>1000</Resolution>
+<Masking>
+	<File>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
+	<Resolution>1000</Resolution>
+</Masking>
 <MasterShapeFile>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 <TimeZone>(GMT+2:00) Africa/Tripoli</TimeZone>
 <Clipping>true</Clipping>

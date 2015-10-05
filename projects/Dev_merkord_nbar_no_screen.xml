@@ -10,8 +10,10 @@
 	<StartDate>Mon Jun 01 00:00:00 CDT 2015</StartDate>
 	<ProjectName>dev_merkord_nbar_no_screen</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
-	<MaskingFile>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
-	<Resolution>1000</Resolution>
+	<Masking>
+		<File>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
 	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+3:00) Africa/Addis_Ababa</TimeZone>
 	<Clipping>false</Clipping>

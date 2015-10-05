@@ -9,8 +9,10 @@
 	<StartDate>Tue Sep 08 02:36:17 CDT 2015</StartDate>
 	<ProjectName>Another_Blah</ProjectName>
 	<WorkingDir>D:\EASTWeb</WorkingDir>
-	<MaskingFile>C:\Users\Michael DeVos\git\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</MaskingFile>
-	<Resolution>1</Resolution>
+	<Masking>
+		<File>C:\Users\Michael DeVos\git\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
+		<Resolution>1</Resolution>
+	</Masking>
 	<MasterShapeFile>C:\Users\Michael DeVos\git\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>false</Clipping>
