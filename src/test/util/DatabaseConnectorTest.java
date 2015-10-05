@@ -34,14 +34,15 @@ public class DatabaseConnectorTest {
         configInstance = Config.getAnInstance(
                 "C:\\Users\\michael.devos\\Desktop\\EASTWeb",    // ErrorLogDir
                 "C:\\Users\\michael.devos\\Desktop\\EASTWeb\\Downloads",    // DownloadDir
-                "Test_EASTWeb1",   // GlobalSchema
-                "localhost",        // HostName
-                5432,               // Port
-                "postgres",       // DatabaseName
-                "postgres",   // UserName
-                "eastweb",   // PassWord
-                5,     // MaxNumOfConnectionsPerInstance
-                null);   // SummaryCalculation
+                "Test_EASTWeb1",    // GlobalSchema
+                "localhost",    // HostName
+                5432,       // Port
+                "postgres", // DatabaseName
+                "postgres", // UserName
+                "eastweb",  // PassWord
+                5,      // MaxNumOfConnectionsPerInstance
+                null,   // TemporalSummaryCompositionStrategies
+                null);  // SummaryCalculation
 
         DatabaseConnector.closeAllConnections();
     }

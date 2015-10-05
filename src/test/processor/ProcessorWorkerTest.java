@@ -79,7 +79,7 @@ public class ProcessorWorkerTest {
     @Test
     public final void testCall() throws Exception {
         Process process = null;
-        ProjectInfoFile projectInfoFile = new ProjectInfoFile("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
+        ProjectInfoFile projectInfoFile = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_Amhara.xml");
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File("C:\\Users\\yi.liu.JACKS\\git\\EastWeb.V2\\src\\version2\\prototype\\pluginMetaData\\Plugin_TRMM3B42RT.xml"))
                 .pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());

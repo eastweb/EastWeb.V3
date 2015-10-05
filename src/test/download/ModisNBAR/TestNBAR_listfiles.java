@@ -12,6 +12,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.DownloadMetaData;
@@ -22,6 +23,7 @@ import version2.prototype.download.ModisLST.ModisLSTListDatesFiles;
 import version2.prototype.download.ModisNBAR.ModisNBARListDatesFiles;
 
 public class TestNBAR_listfiles {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     private static DownloadMetaData data;
     private static ProjectInfoFile p;
@@ -41,7 +43,7 @@ public class TestNBAR_listfiles {
         LocalDate ld = LocalDate.parse("Sun Mar 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
         data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
-        p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
+        p = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
 
     }
 

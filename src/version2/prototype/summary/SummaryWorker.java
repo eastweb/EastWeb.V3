@@ -16,6 +16,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
+import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.MergeStrategies.AvgGdalRasterFileMerge;
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
@@ -29,7 +30,8 @@ import version2.prototype.util.IndicesFileMetaData;
  *
  */
 public class SummaryWorker extends ProcessWorker {
-    private Config configInstance;
+    private final Config configInstance;
+    private final Map<Integer, TemporalSummaryRasterFileStore> fileStores;
 
     /**
      * @param configInstance
@@ -39,12 +41,14 @@ public class SummaryWorker extends ProcessWorker {
      * @param pluginMetaData
      * @param cachedFiles
      * @param outputCache
+     * @param fileStores
      */
     public SummaryWorker(Config configInstance, Process process, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles,
-            DatabaseCache outputCache)
+            DatabaseCache outputCache, Map<Integer, TemporalSummaryRasterFileStore> fileStores)
     {
         super(configInstance, "SummaryWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
         this.configInstance = configInstance;
+        this.fileStores = fileStores;
     }
 
     /* (non-Javadoc)
@@ -68,7 +72,7 @@ public class SummaryWorker extends ProcessWorker {
             for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
             {
                 // Check if doing temporal summarization
-                if(summary.GetTemporalFileStore() != null)
+                if(fileStores.get(summary.GetID()) != null)
                 {
                     tempFiles = new ArrayList<DataFileMetaData>();
                     for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
@@ -81,7 +85,7 @@ public class SummaryWorker extends ProcessWorker {
                                 pluginInfo.GetName(),                   // pluginName
                                 cachedFileData,                         // inputFile
                                 pluginMetaData.DaysPerInputData,        // daysPerInputData
-                                summary.GetTemporalFileStore(),         // TemporalSummaryRasterFileStore
+                                fileStores.get(summary.GetID()),                              // TemporalSummaryRasterFileStore
                                 null,                                   // InterpolateStrategy
                                 new AvgGdalRasterFileMerge()            // (Framework user defined)
                                 );
@@ -117,7 +121,8 @@ public class SummaryWorker extends ProcessWorker {
                             cachedFileData,                         // inputFile
                             outputFile,                             // outTableFile
                             new SummariesCollection(Config.getInstance().getSummaryCalculations()),
-                            summary,                               // summariesCollection
+                            summary,                                // summariesCollection
+                            fileStores.get(summary.GetID()),        // fileStore
                             outputCache);
                     zonalSummaryCal.calculate();
                     outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.dateGroupID, cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));

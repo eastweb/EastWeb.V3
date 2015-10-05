@@ -32,6 +32,7 @@ public class Schemas {
      * @param projectMetaData  - the loaded project metadata from xml to use
      * @param pluginName  - name of plugin to create schema for
      * @param summaryNames  - used to define ZonalStat table
+     * @param tempSummaryCompStrategyNames
      * @param daysPerInputFile  - relevant to plugin entry creation and calculating the number of expected results to be found in ZonalStat
      * @param filesPerDay  - relevant to plugin entry creation and calculating when downloads are ready to be loaded by the LocalDownloader
      * @param numOfIndices  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
@@ -39,7 +40,7 @@ public class Schemas {
      * to enforce foreign key rules
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, ProjectInfoFile projectMetaData, String pluginName, ArrayList<String> summaryNames,
-            Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices, boolean createTablesWithForeignKeyReferences)
+            ArrayList<String> tempSummaryCompStrategyNames, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices, boolean createTablesWithForeignKeyReferences)
     {
         final Connection conn;
         final Statement stmt;
@@ -86,11 +87,9 @@ public class Schemas {
             createIndexTableIfNotExists(globalEASTWebSchema, stmt);
 
             // Add temporal summary composition strategies
-            addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "", stmt);
-            addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "GregorianWeeklyStrategy", stmt);
-            addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "GregorianMonthlyStrategy", stmt);
-            addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "CDCWeeklyStrategy", stmt);
-            addTemporalSummaryCompositionStrategy(globalEASTWebSchema, "WHOWeeklyStrategy", stmt);
+            for(String strategyClassName : tempSummaryCompStrategyNames) {
+                addTemporalSummaryCompositionStrategy(globalEASTWebSchema, strategyClassName, stmt);
+            }
 
             // Get DateGroupID
             int dateGroupID = getDateGroupID(globalEASTWebSchema, projectMetaData.GetStartDate(), stmt);
@@ -297,7 +296,8 @@ public class Schemas {
         }
 
         if(temporalSummaryCompositionStrategyClassName == null) {
-            temporalSummaryCompositionStrategyClassName = "";
+            return null;
+            //            temporalSummaryCompositionStrategyClassName = "";
         }
 
         String selectQuery = String.format("SELECT \"TemporalSummaryCompositionStrategyID\" FROM \"%1$s\".\"TemporalSummaryCompositionStrategy\" " +

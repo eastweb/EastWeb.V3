@@ -50,7 +50,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static ExecutorService executor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
-    protected static int defaultMSBeetweenUpdates = 30000;       // 30 seconds
+    protected static int defaultMSBeetweenUpdates = 15000;       // 15 seconds
 
     // Logged requests from other threads
     protected static List<SchedulerData> newSchedulerRequests;
@@ -158,42 +158,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         ArrayList<String> strategyNames = new ArrayList<String>();
         if(instance != null)
         {
-            String selectQuery = "SELECT \"Name\" FROM \"" + instance.configInstance.getGlobalSchema() + "\".\"TemporalSummaryCompositionStrategy\"";
-            ResultSet rs;
-            Statement stmt;
+            strategyNames = instance.configInstance.getSummaryTempCompStrategies();
         }
+        else
+        {
+            strategyNames = Config.getInstance().getSummaryTempCompStrategies();
+        }
+        strategyNames.add(0,"(No Selection)");
 
-        // Add missing TemporalCompositionStrategies
-        // TODO: Need to set this up to look in a predefined directory for these java files at runtime, compile them, and then load them before adding them to this list. Should also remove newly missing ones.
-        // SEE PluginMetaDataCollection.getXMLFiles for possibility.
-        // SEE: http://stackoverflow.com/questions/21544446/how-do-you-dynamically-compile-and-load-external-java-classes
-        // SEE: http://stackoverflow.com/questions/2946338/how-do-i-programmatically-compile-and-instantiate-a-java-class
-        // SEE: http://docs.oracle.com/javase/7/docs/api/javax/tools/JavaCompiler.html
-
-        //        try {
-        //            stmt = DatabaseConnector.getConnection().createStatement();
-        //
-        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "GregorianWeeklyStrategy", stmt);
-        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "GregorianMonthlyStrategy", stmt);
-        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "CDCWeeklyStrategy", stmt);
-        //            Schemas.addTemporalSummaryCompositionStrategy(Config.getInstance().getGlobalSchema(), "WHOWeeklyStrategy", stmt);
-        //
-        //            rs = stmt.executeQuery(selectQuery);
-        //            if(rs != null)
-        //            {
-        //                while(rs.next())
-        //                {
-        //                    strategyNames.add(rs.getString("Name"));
-        //                }
-        //            }
-        //        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-        //            ErrorLog.add(Config.getInstance(), "Problem while getting list of registered TemporalSummaryCompositionStragies.", e);
-        //        }
-        strategyNames.add("");
-        strategyNames.add("GregorianWeeklyStrategy");
-        strategyNames.add("GregorianMonthlyStrategy");
-        strategyNames.add("CDCWeeklyStrategy");
-        strategyNames.add("WHOWeeklyStrategy");
         return strategyNames;
     }
 

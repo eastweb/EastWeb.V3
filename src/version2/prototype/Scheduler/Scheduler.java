@@ -144,8 +144,8 @@ public class Scheduler {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
                 new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName(), pluginMetaData.Download.name)).mkdirs();
 
-                Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile, item.GetName(), configInstance.getSummaryCalculations(), pluginMetaData.DaysPerInputData,
-                        pluginMetaData.Download.filesPerDay, item.GetIndices().size(), true);
+                Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile, item.GetName(), configInstance.getSummaryCalculations(),
+                        configInstance.getSummaryTempCompStrategies(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(), true);
                 SetupProcesses(item, pluginMetaData);
 
                 // Update status in EASTWebManager
@@ -618,9 +618,9 @@ public class Scheduler {
      */
     protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException
     {
-        //        Summary process = new Summary(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
-        Process process = new GenericProcess<IndicesWorker>(manager, configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
-                "version2.prototype.summary.SummaryWorker");
+        Summary process = new Summary(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        //        Process process = new GenericProcess<IndicesWorker>(manager, configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
+        //                "version2.prototype.summary.SummaryWorker");
         //        inputCache.addObserver(process);
         return process;
     }

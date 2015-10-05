@@ -27,6 +27,7 @@ import version2.prototype.download.ModisNBAR.ModisNBARQCGlobalDownloader;
 import version2.prototype.download.ModisNBAR.ModisNBARQCListDatesFiles;
 
 public class TestModisNBARQCGlobalDownloader {
+    private static Config configInstance = Config.getAnInstance("src/test/config.xml");
 
     private static DownloadMetaData data;
     private static ProjectInfoFile p;
@@ -46,7 +47,7 @@ public class TestModisNBARQCGlobalDownloader {
         LocalDate ld = LocalDate.parse("Sun Mar 01 00:00:01 CDT 2015", DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu"));
 
         data = new DownloadMetaData(null, null, null, null, null, mode, myFtp, myHttp, className, timeZone, filesPerDay, datePatternStr, fileNamePatternStr, ld);
-        p = new ProjectInfoFile("C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
+        p = new ProjectInfoFile(configInstance, "C:\\Users\\yi.liu\\git\\EastWeb.V2\\src\\version2\\prototype\\ProjectInfoMetaData\\Project_TW_TRMMrt.xml");
     }
 
     @AfterClass

@@ -11,7 +11,8 @@ public class ModisLSTNight extends IndicesFramework {
 
     @Override
     protected double calculatePixelValue(double[] values) {
-        if (values[INPUT] < 7500 || values[INPUT] > 65535||values[INPUT] == GdalUtils.NoValue) {
+        //        if (values[INPUT] < 7500 || values[INPUT] > 65535 || values[INPUT] == GdalUtils.NoValue) {
+        if(values[INPUT] == GdalUtils.NoValue) {
             return -3.4028234663852886E38;
         } else {
             return values[INPUT];
