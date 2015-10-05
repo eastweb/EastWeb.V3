@@ -208,7 +208,7 @@ public class AssociateSummaryPage {
      */
     private void populateShapeFiles(JComboBox<String> shapeFileComboBox, String filePath) throws ShapefileException{
         ReadShapefile shapfile = new ReadShapefile(filePath);
-        ArrayList<String[]> featureList = shapfile.getFeatureList();
+        ArrayList<String[]> featureList = shapfile.getNumericFeatureList();
 
         for (int i = 0; i < featureList.size(); i++) {
             for(String feature: featureList.get(i)){
