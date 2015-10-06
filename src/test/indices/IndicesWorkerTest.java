@@ -99,7 +99,7 @@ public class IndicesWorkerTest {
         ProjectInfoFile projectInfoFile = new ProjectInfoFile(null, LocalDate.now(), "Test_Project", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         ProjectInfoPlugin pluginInfo = projectInfoFile.GetPlugins().get(0);
         PluginMetaData pluginMetaData = PluginMetaDataCollection.getInstance(new File(pluginMetaDataFile)).pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
                 pluginMetaData.Indices.indicesNames.size(), false);
 
         // Setup test files

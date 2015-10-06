@@ -233,27 +233,11 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateSchedulerTaskState(TaskState.RUNNING);
-            SchedulerStatus status;
             try {
-                status = statusContainer.GetStatus();
-                if(status != null) {
-                    manager.NotifyUI(status);
-                }
-            } catch (SQLException e) {
-                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+                AttemptUpdate();
+            } catch (SQLException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e) {
+                ErrorLog.add(this, "Problem while attempting update of Scheduler for project '" + projectInfoFile.GetProjectName() + "'.", e);
             }
-        }
-        for(DatabaseCache cache : downloadCaches)
-        {
-            cache.NotifyObserversToCheckForPastUpdates();
-        }
-        for(DatabaseCache cache : processorCaches)
-        {
-            cache.NotifyObserversToCheckForPastUpdates();
-        }
-        for(DatabaseCache cache : indicesCaches)
-        {
-            cache.NotifyObserversToCheckForPastUpdates();
         }
     }
 
@@ -362,6 +346,7 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
+            UpdateStatus();
         }
     }
 
@@ -376,6 +361,7 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateProcessorProgress(pluginName, stmt);
+            UpdateStatus();
         }
     }
 
@@ -390,6 +376,7 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateIndicesProgress(pluginName, stmt);
+            UpdateStatus();
         }
     }
 
@@ -408,6 +395,7 @@ public class Scheduler {
         synchronized (statusContainer)
         {
             statusContainer.UpdateSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
+            UpdateStatus();
         }
     }
 
@@ -442,6 +430,11 @@ public class Scheduler {
             results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
         }
 
+        UpdateStatus();
+    }
+
+    protected void UpdateStatus() throws SQLException
+    {
         SchedulerStatus status = null;
         synchronized (statusContainer)
         {

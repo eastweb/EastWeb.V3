@@ -2,7 +2,6 @@ package version2.prototype;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -17,10 +16,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
@@ -48,7 +43,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static ExecutorService executor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
-    protected static int defaultMSBeetweenUpdates = 10000;       // 10 seconds
+    protected static int defaultMSBeetweenUpdates = 5000;       // 5 seconds
 
     // Logged requests from other threads
     protected static List<SchedulerData> newSchedulerRequests;
@@ -151,6 +146,10 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         //TODO: close executor services
     }
 
+    /**
+     * Retrieves the names of the registered TemporalSummaryCompositionStrategy implementing classes available for use in temporal summaries.
+     * @return ArrayList of class name strings of the TemporalSummaryCompositionStrategy implementing classes usable for temporal summary calculation
+     */
     public static ArrayList<String> GetRegisteredTemporalSummaryCompositionStrategies()
     {
         ArrayList<String> strategyNames = new ArrayList<String>();
@@ -521,12 +520,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     Thread.sleep(msBeetweenUpdates);
                 }
 
-                // Tell Schedulers to attempt updating their projects
-                for(Scheduler scheduler : schedulers)
-                {
-                    scheduler.AttemptUpdate();
-                }
-
                 // Handle new Scheduler requests
                 if(newSchedulerRequests.size() > 0)
                 {
@@ -720,7 +713,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     }
                 }
             }
-            catch (InterruptedException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException | ConcurrentModificationException e) {
+            catch (InterruptedException | ConcurrentModificationException e) {
                 ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
             } catch (Exception e) {
                 ErrorLog.add(configInstance, "EASTWebManager.run error.", e);

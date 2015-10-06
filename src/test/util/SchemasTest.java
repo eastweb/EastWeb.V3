@@ -72,7 +72,7 @@ public class SchemasTest {
         summaryNames.add("StdDev");
 
         summaries = new ArrayList<ProjectInfoSummary>(0);
-        summaries.add(new ProjectInfoSummary(new ZonalSummary(shapeFile, areaValueField, areaNameField), new TemporalSummaryRasterFileStore(compStrategy), compStrategy.getClass().getCanonicalName(), 1));
+        summaries.add(new ProjectInfoSummary(new ZonalSummary(shapeFile, areaValueField, areaNameField), compStrategy.getClass().getCanonicalName(), 1));
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
@@ -94,7 +94,10 @@ public class SchemasTest {
                 ));
 
         // Run method under test - defined for MODIS plugin
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, projectMetaData, testPluginName, summaryNames, daysPerInputFile, filesPerDay, numOfIndices, true);
+        ArrayList<String> tempCompNames = new ArrayList<String>(1);
+        tempCompNames.add(compStrategy.getClass().getCanonicalName());
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, projectMetaData, testPluginName, summaryNames, tempCompNames, daysPerInputFile, filesPerDay,
+                numOfIndices, true);
         stmt.close();
     }
 
@@ -189,7 +192,7 @@ public class SchemasTest {
         query = "SELECT c.relname as \"Name\", count(*) over() as \"RowCount\" " +
                 "FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace " +
                 "WHERE c.relkind = 'r' AND n.nspname = '" + testSchemaName.toLowerCase() + "' " +
-                "AND pg_catalog.pg_get_userbyid(c.relowner) = '" + Config.getAnInstance("Config.xml").getDatabaseUsername() + "' " +
+                "AND pg_catalog.pg_get_userbyid(c.relowner) = '" + Config.getAnInstance("src/test/config.xml").getDatabaseUsername() + "' " +
                 "ORDER BY \"RowCount\" desc;";
         rs = stmt.executeQuery(query);
         if(rs != null)

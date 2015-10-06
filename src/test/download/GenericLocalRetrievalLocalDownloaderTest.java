@@ -92,7 +92,6 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(new ProjectInfoSummary(new ZonalSummary("", "", ""),
                 null,
-                null,
                 1));
 
         projectInfoFile = new ProjectInfoFile(plugins, startDate, testProjectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null,
@@ -134,7 +133,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectInfoFile, testPluginName, null, daysPerInputFile, filesPerDay, numOfIndices, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectInfoFile, testPluginName, null, null, daysPerInputFile, filesPerDay, numOfIndices, true);
     }
 
     /**
@@ -254,7 +253,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         @Override
         public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate,
                 ArrayList<String> extraDownloadFiles, ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-        IOException {
+                IOException {
             assertEquals("StartDate incorrect.", expectedStartDate, startDate);
             return 1;
         }

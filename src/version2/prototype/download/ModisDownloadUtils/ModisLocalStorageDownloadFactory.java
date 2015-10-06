@@ -1,7 +1,7 @@
 /**
  *
  */
-package version2.prototype.download;
+package version2.prototype.download.ModisDownloadUtils;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -19,6 +19,12 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
+import version2.prototype.download.DownloaderFactory;
+import version2.prototype.download.GenericLocalRetrievalLocalDownloader;
+import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.LocalDownloader;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DatabaseCache;
 
 /**

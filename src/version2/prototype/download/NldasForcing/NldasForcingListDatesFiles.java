@@ -1,6 +1,7 @@
 package version2.prototype.download.NldasForcing;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,35 +16,25 @@ import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.download.ConnectionContext;
 import version2.prototype.download.ListDatesFiles;
 
 public class NldasForcingListDatesFiles extends ListDatesFiles {
-    private String mHostName;
-    private String mUsername;
-    private String mPassword;
-    private String mRootDir;
 
     public NldasForcingListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException {
         super(startDate, data, project);
-
-        mHostName = data.myFtp.hostName;
-        mUsername = data.myFtp.userName;
-        mPassword = data.myFtp.password;
-        mRootDir = data.myFtp.rootDir;
     }
 
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
     {
         Map<DataDate, ArrayList<String>>  mapDatesToFiles = new HashMap<DataDate, ArrayList<String>>();
-        FTPClient ftpClient = new FTPClient();
+        FTPClient ftpClient = null;
+        String mRootDir = mData.myFtp.rootDir;
 
         try
         {
-            ftpClient.connect(mHostName);
-            if(!ftpClient.login(mUsername, mPassword)){
-                throw new IOException("Wasn't able to login to remote host with provided credentials.");
-            }
+            ftpClient = (FTPClient) ConnectionContext.getConnection(mData);
 
             ftpClient.enterLocalPassiveMode();
 
@@ -57,7 +48,7 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
             for(FTPFile yearDir : yearDirs)
             {
                 // There is another file named "doc" in the host's file system
-                if(yearDir.getName() == "doc" || !yearDir.isDirectory()) {
+                if(yearDir.getName().equalsIgnoreCase("doc") || !yearDir.isDirectory()) {
                     continue;
                 }
 

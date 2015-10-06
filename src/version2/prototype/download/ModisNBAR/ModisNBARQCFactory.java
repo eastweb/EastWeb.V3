@@ -18,7 +18,7 @@ import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalStorageDownloadFactory;
-import version2.prototype.download.ModisLocalStorageDownloadFactory;
+import version2.prototype.download.ModisDownloadUtils.ModisLocalStorageDownloadFactory;
 import version2.prototype.util.DatabaseCache;
 
 /**

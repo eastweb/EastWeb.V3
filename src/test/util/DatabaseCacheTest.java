@@ -137,8 +137,7 @@ public class DatabaseCacheTest {
         summaryNames.add("StdDev");
         summaryNames.add("Sum");
 
-        projectInfoSummary1 = new ProjectInfoSummary(new ZonalSummary("ShapeFile1", "AreaCodeField1", "AreaNameField1"),
-                new TemporalSummaryRasterFileStore(compStrategy), "MyTemporalSummaryCompositionStrategy", 1);
+        projectInfoSummary1 = new ProjectInfoSummary(new ZonalSummary("ShapeFile1", "AreaCodeField1", "AreaNameField1"), "MyTemporalSummaryCompositionStrategy", 1);
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(projectInfoSummary1);
         projectMetaData = new ProjectInfoFile(plugins, startDate, testProjectName, null, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
@@ -183,7 +182,9 @@ public class DatabaseCacheTest {
         stmt.execute(query);
 
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, summaryNames, daysPerInputFile, filesPerDay, numOfIndices, true);
+        ArrayList<String> tempCompNames = new ArrayList<String>(1);
+        tempCompNames.add("MyTemporalSummaryCompositionStrategy");
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, summaryNames, tempCompNames, daysPerInputFile, filesPerDay, numOfIndices, true);
     }
 
     /**
