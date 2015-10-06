@@ -626,8 +626,6 @@ public class ProjectInformationPage {
         resolutionTextField.setColumns(10);
     }
 
-
-
     private void ProjectInformation() {
         JPanel panel_2 = new JPanel();
         panel_2.setLayout(null);
