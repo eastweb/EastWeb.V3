@@ -22,7 +22,7 @@ public final class DownloadUtils {
 
     public static final void download(FTPClient ftp, String remoteFilename, File localFile) throws IOException
     {
-        System.out.println(remoteFilename);
+        //        System.out.println(remoteFilename);
         final OutputStream outStream = new FileOutputStream(localFile);
 
         try {

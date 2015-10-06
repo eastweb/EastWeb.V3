@@ -1,7 +1,7 @@
 /**
  *
  */
-package version2.prototype.download;
+package version2.prototype.download.ModisDownloadUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,10 @@ import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.download.DownloaderFramework;
+import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
