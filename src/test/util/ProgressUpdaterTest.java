@@ -96,7 +96,6 @@ public class ProgressUpdaterTest {
         summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(new ProjectInfoSummary(new ZonalSummary("shape file", "area code field", "area name field"),
                 null,
-                null,
                 1));
         projectMetaData = new ProjectInfoFile(plugins, day1, projectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null,
                 0, null, null, null, null, null, null, summaries);
@@ -139,8 +138,8 @@ public class ProgressUpdaterTest {
                 Schemas.getSchemaName(projectName, pluginName)
                 );
         stmt.execute(query);
-        Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectMetaData, pluginName, configInstance.getSummaryCalculations(), daysPerInputData, pluginData.Download.filesPerDay,
-                pluginData.Indices.indicesNames.size(), false);
+        Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectMetaData, pluginName, configInstance.getSummaryCalculations(), null, daysPerInputData,
+                pluginData.Download.filesPerDay, pluginData.Indices.indicesNames.size(), false);
         progressUpdater = new ProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection);
     }
 
@@ -467,7 +466,7 @@ public class ProgressUpdaterTest {
         progressUpdater.UpdateDBSummaryExpectedCount(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
 
         // Start testing temporal summary progress calculations
-        assertEquals("Initial Summary, with temporal summary, progress incorrect.", 0.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, pluginInfo, stmt), 0.0);
+        assertEquals("Initial Summary, with temporal summary, progress incorrect.", 0.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt), 0.0);
 
         // Insert values
         insertUpdate = "INSERT INTO \"%s\".\"ZonalStat\" (\"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"AreaCode\", \"AreaName\", \"FilePath\", " +
@@ -518,7 +517,7 @@ public class ProgressUpdaterTest {
         insertPStmt.executeBatch();
 
         // Project has two indices. So expecting 2 composites * 2 indices = 4 expected total results
-        assertEquals("Partial Summary, with temporal summary, progress incorrect.", 50.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, pluginInfo, stmt), 0.0);
+        assertEquals("Partial Summary, with temporal summary, progress incorrect.", 50.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt), 0.0);
 
         insertPStmt.setInt(1, projectSummaryID);
         insertPStmt.setInt(2, 3);
@@ -550,11 +549,11 @@ public class ProgressUpdaterTest {
         insertPStmt.addBatch();
         insertPStmt.executeBatch();
 
-        assertEquals("Completed Summary, with temporal summary, progress incorrect.", 100.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, pluginInfo, stmt), 0.0);
+        assertEquals("Completed Summary, with temporal summary, progress incorrect.", 100.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt), 0.0);
 
         // Start testing progress calculations without temporal summary (expected total results = number of indices results
         progressUpdater.UpdateDBSummaryExpectedCount(summaryIDNum, null, daysPerInputData, pluginInfo, stmt);
-        assertEquals("Partial Summary, without temporal summary, progress incorrect.", 50.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, pluginInfo, stmt), 0.0);
+        assertEquals("Partial Summary, without temporal summary, progress incorrect.", 50.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, null, daysPerInputData, pluginInfo, stmt), 0.0);
 
         insertPStmt.setInt(1, projectSummaryID);
         insertPStmt.setInt(2, 5);
@@ -614,11 +613,11 @@ public class ProgressUpdaterTest {
         insertPStmt.addBatch();
         insertPStmt.executeBatch();
 
-        assertEquals("Completed Summary, without temporal summary, progress incorrect.", 100.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, pluginInfo, stmt), 0.0);
+        assertEquals("Completed Summary, without temporal summary, progress incorrect.", 100.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, null, daysPerInputData, pluginInfo, stmt), 0.0);
 
         // Test persistence
         progressUpdater = new ProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection);
-        assertEquals("Completed Summary, without temporal summary, progress incorrect.", 100.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, pluginInfo, stmt), 0.0);
+        assertEquals("Completed Summary, without temporal summary, progress incorrect.", 100.0, progressUpdater.GetCurrentSummaryProgress(summaryIDNum, null, daysPerInputData, pluginInfo, stmt), 0.0);
     }
 
     private class MyListDatesFiles extends ListDatesFiles

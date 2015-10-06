@@ -46,6 +46,7 @@ import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.LocalDownloader;
+import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.DatabaseConnector;
@@ -76,7 +77,7 @@ public class SchedulerTest {
         indices.add("TRMM3B42RTCalculator");
         plugins.add(new ProjectInfoPlugin(testPluginName, indices, null, null));
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
-        summaries.add(new ProjectInfoSummary(new ZonalSummary(null, null, null), null, null, 1));
+        summaries.add(new ProjectInfoSummary(new ZonalSummary(null, null, null), null, 1));
         projectInfoFile = new ProjectInfoFile(
                 plugins,
                 startDate,
@@ -202,7 +203,7 @@ public class SchedulerTest {
         }
 
         @Override
-        public double GetCurrentSummaryProgress(int summaryIDNum, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException {
+        public double GetCurrentSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException {
             return 0.0;
         }
 

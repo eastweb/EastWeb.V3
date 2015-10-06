@@ -161,7 +161,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, null, daysPerInputFile, filesPerDay, numOfIndices, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, null, null, daysPerInputFile, filesPerDay, numOfIndices, true);
     }
 
     /**

@@ -85,7 +85,7 @@ public class ProcessorWorkerTest {
                 .pluginMetaDataMap.get(projectInfoFile.GetPlugins().get(0).GetName());
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
-        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
+        Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
                 pluginMetaData.Indices.indicesNames.size(), false);
 
         // Setup test files

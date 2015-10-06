@@ -62,7 +62,7 @@
 		<Level>Level 3</Level>
 	</QualityControl>
 	<ExtraInfo>
-		<Tiles>true</Tiles>
+		<Tiles>false</Tiles>
 	</ExtraInfo>
 </PluginMetadata>
 
