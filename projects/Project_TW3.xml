@@ -11,8 +11,10 @@
 	<StartDate>Tue Jul 01 10:04:13 CDT 2014</StartDate>
 	<ProjectName>Project_TW3</ProjectName>
 	<WorkingDir>D:\testProjects\TW3</WorkingDir>
-	<MaskingFile/>
-	<Resolution/>
+	<Masking>
+		<File/>
+		<Resolution/>
+	</Masking>
 	<MasterShapeFile>D:\testProjects\TW3\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
 	<TimeZone>(GMT+8:00) Asia/Chongqing</TimeZone>
 	<Clipping>true</Clipping>

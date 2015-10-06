@@ -9,8 +9,10 @@
 <StartDate>Mon Jun 01 00:00:00 CDT 2015</StartDate>
 <ProjectName>TRMM3B42 Test</ProjectName>
 <WorkingDir>C:\EASTWeb</WorkingDir>
-<MaskingFile/>
-<Resolution/>
+<Masking>
+	<File/>
+	<Resolution/>
+</Masking>
 <MasterShapeFile>C:\Users\michael.devos\Google Drive\EASTWeb\EASTWeb-Projects\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 <TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 <Clipping>true</Clipping>

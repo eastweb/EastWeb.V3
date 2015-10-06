@@ -56,9 +56,7 @@ public class ProjectProgress {
      * Create the application.
      */
     public ProjectProgress(String projectName) {
-        initialize();
-
-        this.projectName = projectName;
+        initialize(projectName);
         updateHandler = new GUIUpdateHandlerImplementation(projectName);
         updateHandler.run();
         EASTWebManager.RegisterGUIUpdateHandler(updateHandler);
@@ -67,7 +65,9 @@ public class ProjectProgress {
     /**
      * Initialize the contents of the frame.
      */
-    private void initialize() {
+    private void initialize(String projectName) {
+        this.projectName = projectName;
+
         frame = new JFrame();
         frame.setBounds(100, 100, 400, 500);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -81,7 +81,7 @@ public class ProjectProgress {
     private void CreateProgressView() {
         JPanel panel = new JPanel();
         panel.setBounds(10, 11, 364, 125);
-        panel.setBorder(new TitledBorder(null, String.format("{0} Progress Summary", projectName), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel.setBorder(new TitledBorder(null, String.format("%1$s Progress Summary", projectName), TitledBorder.LEADING, TitledBorder.TOP, null, null));
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 

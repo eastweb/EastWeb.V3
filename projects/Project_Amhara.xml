@@ -10,8 +10,10 @@
 	<StartDate>Sun Aug 23 00:00:00 CDT 2015</StartDate>
 	<ProjectName>Project_Amhara</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
-	<MaskingFile/>
-	<Resolution/>
+	<Masking>
+		<File/>
+		<Resolution/>
+	</Masking>
 	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>true</Clipping>

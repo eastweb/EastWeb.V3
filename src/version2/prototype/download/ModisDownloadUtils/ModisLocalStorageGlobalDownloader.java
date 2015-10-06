@@ -1,7 +1,7 @@
 /**
  *
  */
-package version2.prototype.download;
+package version2.prototype.download.ModisDownloadUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,10 @@ import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.download.DownloaderFramework;
+import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.ListDatesFiles;
+import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
@@ -259,23 +263,26 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
                 // get the files associated with the date in the ListDatesFiles
                 files = datesFiles.get(thisDate);
 
-                fIter = files.iterator();
-
-                String fileTemp;
-                while (fIter.hasNext())
+                if(files != null)
                 {
-                    String strPath = downloaded.dataFilePath;
-                    System.out.println(strPath);
-                    strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.lastIndexOf("."));
-                    // remove the file if it is found in the downloaded list
-                    fileTemp = fIter.next();
-                    if ((fileTemp.toLowerCase()).contains((strPath.toLowerCase())))
-                    {
-                        fIter.remove();
-                    }
-                }
+                    fIter = files.iterator();
 
-                datesFiles.put(thisDate, files);
+                    String fileTemp;
+                    while (fIter.hasNext())
+                    {
+                        String strPath = downloaded.dataFilePath;
+                        System.out.println(strPath);
+                        strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.lastIndexOf("."));
+                        // remove the file if it is found in the downloaded list
+                        fileTemp = fIter.next();
+                        if ((fileTemp.toLowerCase()).contains((strPath.toLowerCase())))
+                        {
+                            fIter.remove();
+                        }
+                    }
+
+                    datesFiles.put(thisDate, files);
+                }
             }
 
             // Step 4: Create downloader and run downloader for all that's left

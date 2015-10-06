@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -19,7 +18,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
-import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
@@ -172,13 +170,15 @@ public class ProgressUpdater {
      * Calculates the current progress percentage for the Summary process.
      *
      * @param summaryIDNum  - ID attribute value to calculate progress for gotten from project metadata
+     * @param compStrategy
+     * @param daysPerInputData
      * @param pluginInfo  - reference to a ProjectInfoPlugin object to use
      * @param stmt  - Statement object to reuse
      * @return double  - progress percentage of the summary process for the specified pluginInfo and project defined summary identified by summaryID
      * @throws SQLException
      */
-    public double GetCurrentSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo,
-            Statement stmt) throws SQLException
+    public double GetCurrentSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
+            throws SQLException
     {
         double progress = 0;
         int projectSummaryID = Schemas.getProjectSummaryID(configInstance.getGlobalSchema(), projectMetaData.GetProjectName(), summaryIDNum, stmt);

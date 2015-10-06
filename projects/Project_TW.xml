@@ -10,8 +10,10 @@
 	<StartDate>Tue Jul 01 10:04:13 CDT 2014</StartDate>
 	<ProjectName>Project_TW</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
-	<MaskingFile/>
-	<Resolution/>
+	<Masking>
+		<File/>
+		<Resolution/>
+	</Masking>
 	<MasterShapeFile>\Documentation\TestCases\taiwan\settings\shapefiles\TW_DIS_F_P_Dis_REGION\TW_DIS_F_P_Dis_REGION.shp</MasterShapeFile>
 	<TimeZone>(GMT+8:00) Asia/Chongqing</TimeZone>
 	<Clipping>true</Clipping>

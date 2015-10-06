@@ -57,6 +57,7 @@ public class SchedulerStatusContainerTest {
     private static double currentProcessorProgress;
     private static double currentIndicesProgress;
     private static double currentSummaryProgress;
+    private static String temporalSummaryCompositionStrategyClassName = "GregorianWeeklyStrategy";
     //    private static double currentExpectedDownloadCount;
     //    private static double currentExpectedProcessorCount;
     //    private static double currentExpectedIndicesCount;
@@ -77,10 +78,7 @@ public class SchedulerStatusContainerTest {
         indices.add("TRMM3B42RTIndex");
         plugins.add(new ProjectInfoPlugin(pluginName, indices, null, null));
         summaries = new ArrayList<ProjectInfoSummary>();
-        String temporalSummaryCompositionStrategyClassName = "GregorianWeeklyStrategy";
-        TemporalSummaryCompositionStrategy compStrategy = new GregorianWeeklyStrategy();
-        TemporalSummaryRasterFileStore fileStore = new TemporalSummaryRasterFileStore(compStrategy);
-        summaries.add(new ProjectInfoSummary(new ZonalSummary("a shape file path", "areaValueField", "areaNameField"), fileStore, temporalSummaryCompositionStrategyClassName, 1));
+        summaries.add(new ProjectInfoSummary(new ZonalSummary("a shape file path", "areaValueField", "areaNameField"), temporalSummaryCompositionStrategyClassName, 1));
         projectMetaData = new ProjectInfoFile(plugins, startDate, projectName, null, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance("src/test/Scheduler/" + pluginName + ".xml");
     }
@@ -119,7 +117,9 @@ public class SchedulerStatusContainerTest {
                 Schemas.getSchemaName(projectName, pluginName)
                 );
         stmt.execute(query);
-        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, configInstance.getSummaryCalculations(), 1, 1, 1, false);
+        ArrayList<String> tempCompNames = new ArrayList<String>(1);
+        tempCompNames.add(temporalSummaryCompositionStrategyClassName);
+        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, configInstance.getSummaryCalculations(), tempCompNames, 1, 1, 1, false);
         SchedulerStatusContainerTest tester = new SchedulerStatusContainerTest();
         container = new SchedulerStatusContainer(configInstance, 1, tester.new MyProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection), projectMetaData, pluginMetaDataCollection,
                 TaskState.STOPPED);
@@ -315,7 +315,7 @@ public class SchedulerStatusContainerTest {
         }
 
         @Override
-        public double GetCurrentSummaryProgress(int summaryIDNum, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException {
+        public double GetCurrentSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException {
             return currentSummaryProgress;
         }
 

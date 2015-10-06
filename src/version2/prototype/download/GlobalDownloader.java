@@ -358,6 +358,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
         final LocalDate lDate = LocalDate.ofYearDay(year, dayOfYear);
+        final String fileName = filePath.substring((filePath.lastIndexOf("/") > -1 ? filePath.lastIndexOf("/") + 1 : filePath.lastIndexOf("\\") + 1));
+
+        System.out.println("Adding download file '" + fileName + "' for day " + dayOfYear + " of " + year + " for plugin '" + pluginName + "'.");
         // If inserting a "Data" labeled file then insert its record into the 'Download' table
         if(metaData.name.toLowerCase().equals("data"))
         {
@@ -389,6 +392,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
 
         stmt.close();
         conn.close();
+
+        setChanged();
+        notifyObservers();
     }
 
     protected void RegisterGlobalDownloader(Statement stmt) throws SQLException, RegistrationException

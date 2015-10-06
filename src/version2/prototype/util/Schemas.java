@@ -87,8 +87,10 @@ public class Schemas {
             createIndexTableIfNotExists(globalEASTWebSchema, stmt);
 
             // Add temporal summary composition strategies
-            for(String strategyClassName : tempSummaryCompStrategyNames) {
-                addTemporalSummaryCompositionStrategy(globalEASTWebSchema, strategyClassName, stmt);
+            if(tempSummaryCompStrategyNames != null && !tempSummaryCompStrategyNames.isEmpty()) {
+                for(String strategyClassName : tempSummaryCompStrategyNames) {
+                    addTemporalSummaryCompositionStrategy(globalEASTWebSchema, strategyClassName, stmt);
+                }
             }
 
             // Get DateGroupID

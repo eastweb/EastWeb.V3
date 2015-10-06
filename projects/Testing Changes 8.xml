@@ -9,8 +9,10 @@
 <StartDate>Tue Sep 01 15:22:42 CDT 2015</StartDate>
 <ProjectName>Testing Changes 8</ProjectName>
 <WorkingDir>C:\EASTWeb</WorkingDir>
-<MaskingFile/>
-<Resolution/>
+<Masking>
+	<File/>
+	<Resolution/>
+</Masking>
 <MasterShapeFile>C:\Users\Michael DeVos\git\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 <TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 <Clipping>true</Clipping>
