@@ -22,8 +22,8 @@ public class ReadTifFile
             // String tifFile = "D:\\testProjects\\TW_trmmRT\\Projects\\Project_TW\\TRMM3B42RT\\Indices\\Output\\2014\\077\\TRMM3B42RTIndex.tif";
             //String tifFile = "C:\\Users\\yi.liu\\Desktop\\tw_618\\indices\\trmmrt\\2014\\077\\TW_DIS_F_P_Dis_REGION\\trmmrt.tif";
 
-            String tifFile = "D:\\project\\AirTemp_Max.tif";
-            //String tifFile = "D:\\testProjects\\Projects\\Project_EA\\NldasNOAH\\Processor\\Temp\\clip\\2015\\155\\Band20.tif";
+            //String tifFile = "D:\\testProjects\\TW3\\Projects\\Project_TW3\\ModisLST\\Processor\\Temp\\Reproject\\2014\\081\\day.tif";
+            String tifFile = "D:\\testProjects\\TW3\\Projects\\Project_TW3\\ModisLST\\Processor\\Output\\2014\\081\\day.tif";
 
             Dataset baseDS= gdal.Open(tifFile);
 
@@ -36,9 +36,9 @@ public class ReadTifFile
             baseBand.ReadRaster(0, 0, xSize, ySize, baseArr);
 
             int count = 0;
-            for (int i = 0; i < xSize*ySize; i++)
+            for (int i = 0; i < 10000; i++)
             {
-                if (baseArr[i] > 0.0)
+                if ((baseArr[i] !=0 ) && (baseArr[i] != -9999) )
                 {System.out.println(baseArr[i]);
                 count++;
                 }
