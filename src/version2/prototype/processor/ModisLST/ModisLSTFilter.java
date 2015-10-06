@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.processor.Filter;
 import version2.prototype.processor.ProcessData;
@@ -76,7 +77,7 @@ public class ModisLSTFilter extends Filter{
             // name the output file as the same as the input's plus "day"
             Dataset outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "day.tif",
-                            xSize, ySize, 1);
+                            xSize, ySize, 1, gdalconst.GDT_Int32);
 
             outputDS.SetGeoTransform(inputDS.GetGeoTransform());
             outputDS.SetProjection(inputDS.GetProjection());
@@ -86,11 +87,21 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
 
+            //            Band b = outputDS.GetRasterBand(1);
+            //            int [] testarray = new int[totalSize];
+            //            //testarray = filterWithFlags(arrays.get(0), arrays.get(2), qcLevel);
+            //
+            //            b.ReadRaster(0, 0, xSize, ySize, testarray);
+            //            for (int i = 0; i<100 ;i ++)
+            //            {
+            //                System.out.println(testarray[i]);
+            //            }
+
             outputDS.delete();
             // name the output file as the same as the input's plus "night"
             outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "night.tif",
-                            xSize, ySize, 1);
+                            xSize, ySize, 1,gdalconst.GDT_Int32);
             outputDS.SetGeoTransform(inputDS.GetGeoTransform());
             outputDS.SetProjection(inputDS.GetProjection());
             outputDS.SetMetadata(inputDS.GetMetadata_Dict());
@@ -184,6 +195,7 @@ public class ModisLSTFilter extends Filter{
                 }
                 break;
             }
+
         }
 
         return dBand;

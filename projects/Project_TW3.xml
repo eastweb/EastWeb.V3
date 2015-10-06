@@ -3,7 +3,7 @@
 	<Plugins>
 		<Plugin name="ModisLST">
 			<Indicies>ModisLSTDay</Indicies>
-			<QC>MODERATE</QC>
+			<QC>HIGHEST</QC>
 			<ModisTile>h29v06</ModisTile>
 			<ModisTile>h28v06</ModisTile>
 		</Plugin>
