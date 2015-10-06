@@ -389,6 +389,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
 
         stmt.close();
         conn.close();
+
+        setChanged();
+        notifyObservers();
     }
 
     protected void RegisterGlobalDownloader(Statement stmt) throws SQLException, RegistrationException
