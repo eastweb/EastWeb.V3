@@ -141,8 +141,9 @@ public class AssociateSummaryPage {
                     System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
                     filePathText.setText(chooser.getSelectedFile().toString());
                     try {
-                        populateShapeFiles(areaNameFieldComboBox, filePathText.getText());
-                        populateShapeFiles(areaCodeFieldComboBox, filePathText.getText());
+                        ReadShapefile shapfile = new ReadShapefile(filePathText.getText());
+                        populateShapeFiles(areaNameFieldComboBox, shapfile.getNumericFeatureList());
+                        populateShapeFiles(areaCodeFieldComboBox, shapfile.getFeatureList());
                     } catch (ShapefileException e) {
                         ErrorLog.add(Config.getInstance(), "AssociateSummaryPage.initialize problem with populating shape files.", e);
                     }
@@ -206,10 +207,7 @@ public class AssociateSummaryPage {
      * @param filePath
      * @throws ShapefileException
      */
-    private void populateShapeFiles(JComboBox<String> shapeFileComboBox, String filePath) throws ShapefileException{
-        ReadShapefile shapfile = new ReadShapefile(filePath);
-        ArrayList<String[]> featureList = shapfile.getNumericFeatureList();
-
+    private void populateShapeFiles(JComboBox<String> shapeFileComboBox, ArrayList<String[]> featureList) throws ShapefileException{
         for (int i = 0; i < featureList.size(); i++) {
             for(String feature: featureList.get(i)){
                 shapeFileComboBox.addItem(feature);
