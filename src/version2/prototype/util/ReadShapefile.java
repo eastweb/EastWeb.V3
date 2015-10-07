@@ -16,6 +16,7 @@ public class ReadShapefile {
     private DataSource shapefile;
     private ArrayList<String []> featureNameList = new ArrayList<String[]>();
     private ArrayList<String []> numericFeatureList = new ArrayList<String[]>();
+    private ArrayList<String []> stringFeatureList = new ArrayList<String[]>();
 
     /* filename:  the input shapefile name
      * throws exception ShapefileException if a shapefile does not exist or cannot be open
@@ -58,6 +59,7 @@ public class ReadShapefile {
 
                 String [] featureNames = new String[count];
                 ArrayList <String> numericFeatures =  new ArrayList<String>();
+                ArrayList <String> stringFeatures =  new ArrayList<String>();
 
                 for (int iFeature=0; iFeature<count; iFeature++) {
                     FieldDefn fieldDefn = layerDefn.GetFieldDefn(iFeature);
@@ -68,11 +70,18 @@ public class ReadShapefile {
                     {
                         numericFeatures.add(featureNames[iFeature]);
                     }
+                    if (type.equals("string"))
+                    {
+                        stringFeatures.add(featureNames[iFeature]);
+                    }
+
                 }
 
                 featureNameList.add(featureNames);
 
                 numericFeatureList.add(numericFeatures.toArray(new String[numericFeatures.size()]));
+
+                stringFeatureList.add(stringFeatures.toArray(new String[stringFeatures.size()]));
             }
         }
     }
@@ -92,6 +101,14 @@ public class ReadShapefile {
     public ArrayList<String []> getNumericFeatureList()
     {
         return numericFeatureList;
+    }
+
+    /* precondition: none
+     * postcondition: the features with string values in each layer are stored in each ArrayList element
+     */
+    public ArrayList<String []> getNameFeatureList()
+    {
+        return stringFeatureList;
     }
 
 
