@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 
@@ -25,9 +26,10 @@ public class NldasForcingMinAirTemperature extends IndicesFramework {
             if(input.getName().contains("AirTemp_Min"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
-                if(!input.renameTo(mOutputFile)) {
-                    MoveFile(input, mOutputFile);
-                }
+                Files.copy(input.toPath(), mOutputFile.toPath());
+                //                if(!input.renameTo(mOutputFile)) {
+                //                    CopyFile(input, mOutputFile);
+                //                }
                 break;
             }
         }
@@ -62,7 +64,7 @@ public class NldasForcingMinAirTemperature extends IndicesFramework {
         return getClass().getName();
     }
 
-    public static void MoveFile(File src, File dest)
+    public static void CopyFile(File src, File dest)
     {
 
         InputStream inStream = null;
@@ -86,12 +88,12 @@ public class NldasForcingMinAirTemperature extends IndicesFramework {
             outStream.close();
 
             //delete the original file
-            src.delete();
+            //            src.delete();
 
             System.out.println("File is copied successful!");
 
         }catch(IOException e){
-            ErrorLog.add(Config.getInstance(), "NldasForcingMinAirTemperature.MoveFile problem with file stream opperations.", e);
+            ErrorLog.add(Config.getInstance(), "NldasForcingMinAirTemperature.CopyFile problem with file stream opperations.", e);
         }
     }
 }
