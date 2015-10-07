@@ -138,7 +138,7 @@ public class AssociateSummaryPage {
 
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     System.out.println("getCurrentDirectory(): "+ chooser.getCurrentDirectory());
-                    System.out.println("getSelectedFile() : "+ chooser.getSelectedFile());
+                    System.out.println("getSelectedFile() : "+ chooser.getSelectedFiles());
                     filePathText.setText(chooser.getSelectedFile().toString());
                     try {
                         ReadShapefile shapfile = new ReadShapefile(filePathText.getText());
