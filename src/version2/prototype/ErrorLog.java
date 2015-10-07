@@ -1,5 +1,6 @@
 package version2.prototype;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
@@ -30,18 +31,19 @@ public final class ErrorLog {
      */
     public static void add(String message, Throwable e)
     {
-        String logFileName = getLogFileName();
         String logPath = null;
-        try {
-            logPath = ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath();
-            while(logPath.startsWith("\\") || logPath.startsWith("/")) {
-                logPath = logPath.substring(1);
-            }
-        } catch (URISyntaxException e1) {
-            e1.printStackTrace();
-        }
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
+            String logFileName = getLogFileName();
+            try {
+                logPath = ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath();
+                while(logPath.startsWith("\\") || logPath.startsWith("/")) {
+                    logPath = logPath.substring(1);
+                }
+            } catch (URISyntaxException e1) {
+                e1.printStackTrace();
+            }
+            String finalPath = handleLogFileExtensions(logFileName, logPath);
+            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
         }
     }
@@ -54,10 +56,11 @@ public final class ErrorLog {
      */
     public static void add(Config configInstance, String message, Throwable e)
     {
-        String logFileName = getLogFileName();
         String logPath = configInstance.getErrorLogDir();
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
+            String logFileName = getLogFileName();
+            String finalPath = handleLogFileExtensions(logFileName, logPath);
+            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
         }
     }
@@ -72,15 +75,16 @@ public final class ErrorLog {
      */
     public static void add(Config configInstance, String pluginName, String dataName, String message, Throwable e)
     {
-        String logFileName = getLogFileName();
         String logPath = configInstance.getErrorLogDir();
-        try {
-            logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, dataName);
-        } catch (ConfigReadException cause) {
-            add(configInstance, "Problem logging error.", cause);
-        }
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
+            String logFileName = getLogFileName();
+            try {
+                logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, dataName);
+            } catch (ConfigReadException cause) {
+                add(configInstance, "Problem logging error.", cause);
+            }
+            String finalPath = handleLogFileExtensions(logFileName, logPath);
+            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
         }
     }
@@ -93,12 +97,13 @@ public final class ErrorLog {
      */
     public static void add(Scheduler scheduler, String message, Throwable e)
     {
-        String logFileName = getLogFileName();
         String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
+            String logFileName = getLogFileName();
+            String finalPath = handleLogFileExtensions(logFileName, logPath);
+            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
         }
     }
 
@@ -110,12 +115,13 @@ public final class ErrorLog {
      */
     public static void add(Process process, String message, Throwable e)
     {
-        String logFileName = getLogFileName();
         String logPath = FileSystem.GetProjectDirectoryPath(process.projectInfoFile.GetWorkingDir(), process.projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
+            String logFileName = getLogFileName();
+            String finalPath = handleLogFileExtensions(logFileName, logPath);
+            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
-            process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
+            process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
         }
     }
 
@@ -128,18 +134,20 @@ public final class ErrorLog {
      */
     public static void add(ProcessName processName, Scheduler scheduler, String message, Throwable e)
     {
-        String logFileName = processName + "_" + getLogFileName();
         String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
         synchronized (sErrorLogLock) {
-            printToLogFile(logPath + logFileName, message, e);
+            String logFileName = processName + "_" + getLogFileName();
+            String finalPath = handleLogFileExtensions(logFileName, logPath);
+            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + logPath + "]"));
+            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
         }
     }
 
     private static void printToLogFile(String logPath, String message, Throwable e)
     {
         try {
+            System.out.println(logPath);
             final FileOutputStream fos = new FileOutputStream(logPath);
             PrintStream sErrorLogPrintStream = new PrintStream(fos);
 
@@ -177,6 +185,22 @@ public final class ErrorLog {
     private static String getLogFileName() {
         LocalDateTime temp = LocalDateTime.now();
         return "Error_Log_" + LocalDate.now().getYear() + "_" + LocalDate.now().getMonthValue() + "_" + LocalDate.now().getDayOfMonth() + "_" + String.format("%02d", temp.getHour())
-        + String.format("%02d", temp.getMinute()) + String.format("%02d", temp.getSecond()) + ".log";
+        + String.format("%02d", temp.getMinute()) + String.format("%02d", temp.getSecond());
+    }
+
+    private static String handleLogFileExtensions(String logFileName, String logPath) {
+        final String ext =  ".log";
+        String finalPath = logPath + logFileName;
+        File tempFile = new File(finalPath + ext);
+        if(tempFile.exists())
+        {
+            Integer id = 0;
+            do {
+                id++;
+                finalPath = logPath + logFileName + "_" + id.toString();
+                tempFile = new File(finalPath + ext);
+            } while(tempFile.exists());
+        }
+        return finalPath + ext;
     }
 }

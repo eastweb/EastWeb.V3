@@ -126,7 +126,7 @@ public class ModisListDatesFiles extends ListDatesFiles
                         }
                         catch(Exception e)
                         {
-                            ErrorLog.add(Config.getInstance(), "Modis", mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
+                            ErrorLog.add(Config.getInstance(), mData.Title, mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
                             return;
                         }
                     }
@@ -136,7 +136,7 @@ public class ModisListDatesFiles extends ListDatesFiles
         }
         catch (Exception e)
         {
-            ErrorLog.add(Config.getInstance(), "Modis", mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while setting up download stream or ParallelForEach.", e);
+            ErrorLog.add(Config.getInstance(), mData.Title, mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while setting up download stream or ParallelForEach.", e);
             return null;
         }
 
