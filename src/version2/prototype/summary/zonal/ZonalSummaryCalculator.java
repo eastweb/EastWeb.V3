@@ -152,10 +152,6 @@ public class ZonalSummaryCalculator {
             {
                 ErrorLog.add(process, "Problem with calculating zonal summaries.", e);
             }
-            catch (Exception e)
-            {
-                ErrorLog.add(process, "Problem with calculating zonal summaries.", e);
-            }
             finally
             {
                 try {
