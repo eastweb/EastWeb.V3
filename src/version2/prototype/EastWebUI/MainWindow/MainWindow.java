@@ -380,7 +380,7 @@ public class MainWindow {
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
                     SchedulerData data = new SchedulerData(project, !chckbxIntermidiateFiles.isSelected());
-                    EASTWebManager.StartNewScheduler(data, true);
+                    EASTWebManager.StartNewScheduler(data, false);
 
                     defaultTableModel.addRow(new Object[] {
                             String.valueOf(projectList.getSelectedItem()),
@@ -536,7 +536,11 @@ public class MainWindow {
 
             String projectName = value.toString();
 
-            if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
+            SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
+
+            if(status == null) {
+                // Do nothing
+            } else if(status.State == TaskState.RUNNING) {
                 setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
 
             } else {
@@ -583,7 +587,11 @@ public class MainWindow {
 
             String projectName = label.toString();
 
-            if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
+            SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
+
+            if(status == null) {
+                // Do nothing
+            } else if(status.State == TaskState.RUNNING) {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
             } else {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
@@ -598,7 +606,11 @@ public class MainWindow {
             if (isPushed) {
                 String projectName = label.toString();
 
-                if(EASTWebManager.GetSchedulerStatus(projectName).State == TaskState.RUNNING) {
+                SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
+
+                if(status == null) {
+                    // Do nothing
+                } else if(status.State == TaskState.RUNNING) {
                     EASTWebManager.StopExistingScheduler(projectName, true);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 
@@ -751,15 +763,17 @@ public class MainWindow {
 
             String projectName = (value == null) ? "" : value.toString();
             SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
-            if(status.State == TaskState.RUNNING) {
-                if(status.ProjectUpToDate)
-                {
+
+            if(status == null) {
+                setBackground(Color.GRAY);
+                setForeground(Color.GRAY);
+                setToolTipText("Project is not running.");
+            } else if(status.State == TaskState.RUNNING) {
+                if(status.ProjectUpToDate) {
                     setBackground(Color.GREEN);
                     setForeground(Color.GREEN);
                     setToolTipText("Project is up to date.");
-                }
-                else
-                {
+                } else {
                     setBackground(Color.YELLOW);
                     setForeground(Color.YELLOW);
                     setToolTipText("Project is processing.");
@@ -787,15 +801,17 @@ public class MainWindow {
             public void run() {
                 SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
 
-                if(status.State == TaskState.RUNNING) {
-                    if(status.ProjectUpToDate)
-                    {
+
+                if(status == null) {
+                    button.setBackground(Color.GRAY);
+                    button.setForeground(Color.GRAY);
+                    button.setToolTipText("Project is not running.");
+                } else if(status.State == TaskState.RUNNING) {
+                    if(status.ProjectUpToDate) {
                         button.setBackground(Color.GREEN);
                         button.setForeground(Color.GREEN);
                         button.setToolTipText("Project is up to date.");
-                    }
-                    else
-                    {
+                    } else {
                         button.setBackground(Color.YELLOW);
                         button.setForeground(Color.YELLOW);
                         button.setToolTipText("Project is processing.");
@@ -849,15 +865,17 @@ public class MainWindow {
 
             String projectName = (value == null) ? "" : value.toString();
             SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
-            if(status.State == TaskState.RUNNING) {
-                if(status.ProjectUpToDate)
-                {
+
+            if(status == null) {
+                button.setBackground(Color.GRAY);
+                button.setForeground(Color.GRAY);
+                button.setToolTipText("Project is not running.");
+            } else if(status.State == TaskState.RUNNING) {
+                if(status.ProjectUpToDate) {
                     button.setBackground(Color.GREEN);
                     button.setForeground(Color.GREEN);
                     button.setToolTipText("Project is up to date.");
-                }
-                else
-                {
+                } else {
                     button.setBackground(Color.YELLOW);
                     button.setForeground(Color.YELLOW);
                     button.setToolTipText("Project is processing.");
@@ -905,15 +923,16 @@ public class MainWindow {
             public void run() {
                 SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
 
-                if(status.State == TaskState.RUNNING) {
-                    if(status.ProjectUpToDate)
-                    {
+                if(status == null) {
+                    button.setBackground(Color.GRAY);
+                    button.setForeground(Color.GRAY);
+                    button.setToolTipText("Project is not running.");
+                } else if(status.State == TaskState.RUNNING) {
+                    if(status.ProjectUpToDate) {
                         button.setBackground(Color.GREEN);
                         button.setForeground(Color.GREEN);
                         button.setToolTipText("Project is up to date.");
-                    }
-                    else
-                    {
+                    } else {
                         button.setBackground(Color.YELLOW);
                         button.setForeground(Color.YELLOW);
                         button.setToolTipText("Project is processing.");

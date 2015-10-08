@@ -147,15 +147,23 @@ public class ProjectProgress {
                 {
                     SchedulerStatus status = EASTWebManager.GetSchedulerStatus(projectName);
 
-                    downloadProgressBar.setValue(GetAverageDownload(status.downloadProgressesByData).intValue());   // Truncates the double (so value always equates to double rounded down)
-                    processProgressBar.setValue(GetAverage(status.processorProgresses).intValue());
-                    indiciesProgressBar.setValue(GetAverage(status.indicesProgresses).intValue());
-                    summaryProgressBar.setValue(GetAverageSummary(status.summaryProgresses).intValue());
+                    if(status == null) {
+                        downloadProgressBar.setValue(0);
+                        processProgressBar.setValue(0);
+                        indiciesProgressBar.setValue(0);
+                        summaryProgressBar.setValue(0);
+                        itemLog.clear();
+                    } else {
+                        downloadProgressBar.setValue(GetAverageDownload(status.downloadProgressesByData).intValue());   // Truncates the double (so value always equates to double rounded down)
+                        processProgressBar.setValue(GetAverage(status.processorProgresses).intValue());
+                        indiciesProgressBar.setValue(GetAverage(status.indicesProgresses).intValue());
+                        summaryProgressBar.setValue(GetAverageSummary(status.summaryProgresses).intValue());
 
-                    itemLog.clear();
-                    for(String log : status.ReadAllRemainingLogEntries())
-                    {
-                        itemLog.addElement(log);
+                        itemLog.clear();
+                        for(String log : status.ReadAllRemainingLogEntries())
+                        {
+                            itemLog.addElement(log);
+                        }
                     }
                     //                    frame.repaint();
                 } else {
