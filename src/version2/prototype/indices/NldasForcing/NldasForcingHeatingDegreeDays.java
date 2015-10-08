@@ -26,7 +26,9 @@ public class NldasForcingHeatingDegreeDays extends IndicesFramework {
             if(input.getName().contains("HeatingDegreeDays"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
-                Files.copy(input.toPath(), mOutputFile.toPath());
+                if(!mOutputFile.exists()) {
+                    Files.copy(input.toPath(), mOutputFile.toPath());
+                }
                 //                if(!input.renameTo(mOutputFile)) {
                 //                    CopyFile(input, mOutputFile);
                 //                }

@@ -26,7 +26,9 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
             if(input.getName().contains("Precip_Total"))
             {
                 FileUtils.forceMkdir(mOutputFile.getParentFile());
-                Files.copy(input.toPath(), mOutputFile.toPath());
+                if(!mOutputFile.exists()) {
+                    Files.copy(input.toPath(), mOutputFile.toPath());
+                }
                 //                if(!input.renameTo(mOutputFile)) {
                 //                    CopyFile(input, mOutputFile);
                 //                }

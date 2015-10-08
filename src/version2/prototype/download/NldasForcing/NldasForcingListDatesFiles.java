@@ -82,7 +82,9 @@ public class NldasForcingListDatesFiles extends ListDatesFiles {
                                 files.add(hourlyFile.getName());
                             }
                         }
-                        mapDatesToFiles.put(new DataDate(Integer.parseInt(dayOfYearDir.getName()), Integer.parseInt(yearDir.getName())), files);
+                        if(files.size() >= mData.filesPerDay) {
+                            mapDatesToFiles.put(new DataDate(Integer.parseInt(dayOfYearDir.getName()), Integer.parseInt(yearDir.getName())), files);
+                        }
                     }
                 }
             }

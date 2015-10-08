@@ -105,6 +105,11 @@ public class ProgressUpdater {
             progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
         }
 
+        if(progress > 100 || progress < 0) {
+            ErrorLog.add(configInstance, "Invalid Download progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
+                    new Exception("Invalid Download progress."));
+        }
+
         return progress;
     }
 
@@ -133,11 +138,16 @@ public class ProgressUpdater {
         }
         String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginName);
         int currentCount = calculateProcessorCurrentCount(mSchemaName, stmt);
-        int expectedCount = calculateProcessorExpectedCount(pluginMetaData, pluginInfo, stmt);
+        int expectedCount = calculateProcessorExpectedCount(pluginMetaData, pluginInfo, mSchemaName, stmt);
 
         if(expectedCount > 0 && currentCount > 0)
         {
             progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
+        }
+
+        if(progress > 100 || progress < 0) {
+            ErrorLog.add(configInstance, "Invalid Processor progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
+                    new Exception("Invalid Processor progress."));
         }
 
         return progress;
@@ -163,6 +173,12 @@ public class ProgressUpdater {
         {
             progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
         }
+
+        if(progress > 100 || progress < 0) {
+            ErrorLog.add(configInstance, "Invalid Indices progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
+                    new Exception("Invalid Indices progress."));
+        }
+
         return progress;
     }
 
@@ -189,6 +205,11 @@ public class ProgressUpdater {
         if(expectedCount > 0 && currentCount > 0)
         {
             progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
+        }
+
+        if(progress > 100 || progress < 0) {
+            ErrorLog.add(configInstance, "Invalid Summary progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
+                    new Exception("Invalid Summary progress."));
         }
 
         return progress;
@@ -237,8 +258,9 @@ public class ProgressUpdater {
             ErrorLog.add(configInstance, "Mising project plugin info for plugin '" + pluginName + "'.", new Exception("Plugin '" + pluginName + "' info could not be found in project "
                     + "metadata."));
         }
+        String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginInfo.GetName());
         int storedExpectedCount = getStoredProcessorExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, stmt);
-        int calculatedExpectedCount = calculateProcessorExpectedCount(pluginMetaDataCollection.pluginMetaDataMap.get(pluginName), pluginInfo, stmt);
+        int calculatedExpectedCount = calculateProcessorExpectedCount(pluginMetaDataCollection.pluginMetaDataMap.get(pluginName), pluginInfo, mSchemaName, stmt);
         if(storedExpectedCount != calculatedExpectedCount)
         {
             String updateQuery = "UPDATE \"" + configInstance.getGlobalSchema() + "\".\"ProcessorExpectedTotalOutput\" SET \"ExpectedNumOfOutputs\" = " + calculatedExpectedCount + " WHERE " +
@@ -360,17 +382,27 @@ public class ProgressUpdater {
         return currentCount;
     }
 
-    protected int calculateProcessorExpectedCount(PluginMetaData pluginMetaData, ProjectInfoPlugin pluginInfo, Statement stmt) throws SQLException
+    protected int calculateProcessorExpectedCount(PluginMetaData pluginMetaData, ProjectInfoPlugin pluginInfo, String mSchemaName, Statement stmt) throws SQLException
     {
-        if(downloadExpectedFiles.get(pluginInfo.GetName()).get("data") == null)
+        //        if(downloadExpectedFiles.get(pluginInfo.GetName()).get("data") == null)
+        //        {
+        //            downloadExpectedFiles.get(pluginInfo.GetName()).put("data", getStoredDownloadExpectedTotalOutput(projectMetaData.GetProjectName(), pluginInfo.GetName(), "data", stmt));
+        //        }
+        //        if(pluginMetaData.ExtraInfo.Tiles) {
+        //            return pluginMetaData.Processor.numOfOutput * (downloadExpectedFiles.get(pluginInfo.GetName()).get("data") / pluginInfo.GetModisTiles().size());
+        //        } else {
+        //            return pluginMetaData.Processor.numOfOutput * downloadExpectedFiles.get(pluginInfo.GetName()).get("data");
+        //        }
+
+        String progressQuery = "SELECT Count(Distinct \"DateGroupID\") \"DateGroupIDCount\" FROM \"" + mSchemaName + "\".\"DownloadCache\";";
+        int daysDownloadFor = 0;
+        ResultSet rs = stmt.executeQuery(progressQuery);
+        if(rs != null && rs.next())
         {
-            downloadExpectedFiles.get(pluginInfo.GetName()).put("data", getStoredDownloadExpectedTotalOutput(projectMetaData.GetProjectName(), pluginInfo.GetName(), "data", stmt));
+            daysDownloadFor = rs.getInt("DateGroupIDCount");
+            rs.close();
         }
-        if(pluginMetaData.ExtraInfo.Tiles) {
-            return pluginMetaData.Processor.numOfOutput * (downloadExpectedFiles.get(pluginInfo.GetName()).get("data") / pluginInfo.GetModisTiles().size());
-        } else {
-            return pluginMetaData.Processor.numOfOutput * downloadExpectedFiles.get(pluginInfo.GetName()).get("data");
-        }
+        return pluginMetaData.Processor.numOfOutput * daysDownloadFor;
     }
 
     protected int calculateIndicesCurrentCount(String mSchemaName, Statement stmt) throws SQLException
@@ -453,6 +485,7 @@ public class ProgressUpdater {
             {
                 indicesExpectedNumOfOutputs.put(pluginInfo.GetName(), getStoredIndicesExpectedTotalOutput(projectMetaData.GetProjectName(), pluginInfo.GetName(), stmt));
             }
+
             expectedCount = indicesExpectedNumOfOutputs.get(pluginInfo.GetName());
         }
 

@@ -527,7 +527,8 @@ public class DatabaseCache extends Observable{
             // Signal to observers that changes occurred
             if(dates.size() > 0)
             {
-                System.out.println("Files for " + dates.size() + " days loaded for plugin '" + pluginName + "' in project '" + projectName + "'. Notifying project Processor of the additional work.");
+                System.out.println("Files for " + dates.size() + " day" + (dates.size() > 1 ? "s" : "") + " loaded for plugin '" + pluginName + "' in project '" + projectName
+                        + "'. Notifying project Processor of the additional work.");
                 filesAvailable = true;
                 setChanged();
                 notifyObservers();

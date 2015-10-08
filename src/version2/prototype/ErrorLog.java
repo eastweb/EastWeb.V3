@@ -43,8 +43,8 @@ public final class ErrorLog {
                 e1.printStackTrace();
             }
             String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
+            printToLogFile(finalPath, message, e);
         }
     }
 
@@ -60,8 +60,8 @@ public final class ErrorLog {
         synchronized (sErrorLogLock) {
             String logFileName = getLogFileName();
             String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
+            printToLogFile(finalPath, message, e);
         }
     }
 
@@ -84,8 +84,8 @@ public final class ErrorLog {
                 add(configInstance, "Problem logging error.", cause);
             }
             String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToLogFile(finalPath, message, e);
             printToStderr(message, e);
+            printToLogFile(finalPath, message, e);
         }
     }
 
@@ -98,13 +98,14 @@ public final class ErrorLog {
     public static void add(Scheduler scheduler, String message, Throwable e)
     {
         String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
+        String finalPath;
         synchronized (sErrorLogLock) {
             String logFileName = getLogFileName();
-            String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToLogFile(finalPath, message, e);
+            finalPath = handleLogFileExtensions(logFileName, logPath);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
+            printToLogFile(finalPath, message, e);
         }
+        scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
     }
 
     /**
@@ -116,13 +117,14 @@ public final class ErrorLog {
     public static void add(Process process, String message, Throwable e)
     {
         String logPath = FileSystem.GetProjectDirectoryPath(process.projectInfoFile.GetWorkingDir(), process.projectInfoFile.GetProjectName());
+        String finalPath;
         synchronized (sErrorLogLock) {
             String logFileName = getLogFileName();
-            String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToLogFile(finalPath, message, e);
+            finalPath = handleLogFileExtensions(logFileName, logPath);
             printToStderr(message, e);
-            process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
+            printToLogFile(finalPath, message, e);
         }
+        process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
     }
 
     /**
@@ -135,13 +137,14 @@ public final class ErrorLog {
     public static void add(ProcessName processName, Scheduler scheduler, String message, Throwable e)
     {
         String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
+        String finalPath;
         synchronized (sErrorLogLock) {
             String logFileName = processName + "_" + getLogFileName();
-            String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToLogFile(finalPath, message, e);
+            finalPath = handleLogFileExtensions(logFileName, logPath);
             printToStderr(message, e);
-            scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
+            printToLogFile(finalPath, message, e);
         }
+        scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
     }
 
     private static void printToLogFile(String logPath, String message, Throwable e)

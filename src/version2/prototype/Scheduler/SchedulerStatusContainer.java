@@ -165,13 +165,13 @@ public class SchedulerStatusContainer {
      * Get last modified time of this container.
      * @return LocalDateTime object representing the last time something in this container was modified
      */
-    public LocalDateTime GetLastModifiedTime() { return lastModifiedTime; }
+    public synchronized LocalDateTime GetLastModifiedTime() { return lastModifiedTime; }
 
     /**
      * Gets the stored state of the Scheduler.
      * @return current TaskState of Scheduler
      */
-    public TaskState GetState() { return state; }
+    public synchronized TaskState GetState() { return state; }
 
     /**
      * Updates the download progress for the given plugin and data name.
@@ -253,7 +253,7 @@ public class SchedulerStatusContainer {
      * @return SchedulerStatus representation of this object
      * @throws SQLException
      */
-    public SchedulerStatus GetStatus() throws SQLException
+    public synchronized SchedulerStatus GetStatus() throws SQLException
     {
         // Update progresses
         String pluginName;
@@ -306,19 +306,19 @@ public class SchedulerStatusContainer {
 
         // Clone progresses if necessary
         TreeMap<String, TreeMap<String, Double>> downloadProgressesByDataTemp;
-        synchronized(downloadProgressesByData){
-            downloadProgressesByDataTemp = cloneTreeMapStringStringDouble(downloadProgressesByData);
-        }
+        //        synchronized(downloadProgressesByData){
+        downloadProgressesByDataTemp = cloneTreeMapStringStringDouble(downloadProgressesByData);
+        //        }
 
         TreeMap<String, TreeMap<Integer, Double>> summaryProgressesTemp;
-        synchronized(summaryProgresses){
-            summaryProgressesTemp = cloneTreeMapStringIntegerDouble(summaryProgresses);
-        }
+        //        synchronized(summaryProgresses){
+        summaryProgressesTemp = cloneTreeMapStringIntegerDouble(summaryProgresses);
+        //        }
 
         ArrayList<String> newLog;
-        synchronized(log){
-            newLog = new ArrayList<String>(log);
-        }
+        //        synchronized(log){
+        newLog = new ArrayList<String>(log);
+        //        }
 
         CheckIfProjectIsUpToDate();
 
