@@ -519,7 +519,7 @@ public class DatabaseCache extends Observable{
 
             // Update progress bar
             scheduler.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
-            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
+            //            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
             stmt.close();
             conn.close();
@@ -623,7 +623,7 @@ public class DatabaseCache extends Observable{
         if(processCachingFor == ProcessName.PROCESSOR) {
             Schemas.setProcessed(mSchemaName, "DownloadCacheExtra", dateGroupID, stmt);
         }
-        scheduler.NotifyUI(new GeneralUIEventObject(this, null));
+        //        scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
         stmt.close();
         conn.close();
@@ -719,13 +719,24 @@ public class DatabaseCache extends Observable{
             }
 
             //            conn.setAutoCommit(false);
-            pStmt.executeBatch();
+            int[] changesMade = pStmt.executeBatch();
+            boolean updateSuccessful = true;
+            for(i=0; i < changesMade.length; i++) {
+                if(changesMade[i] <= 0) {
+                    updateSuccessful = false;
+                    break;
+                }
+            }
+            if(!updateSuccessful) {
+                ErrorLog.add(processCachingFor, scheduler, "Summary db insert failed for date: Year=" + year + ", DayOfYear=" + day + ". Warnings=\"" + pStmt.getWarnings().toString(),
+                        new Exception("Summary db insert failed for date: Year=" + year + ", DayOfYear=" + day + "."));
+            }
             //            conn.commit();
 
             // Update progress bar
             scheduler.UpdateSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
             Schemas.setProcessed(mSchemaName, setProcessedForTableName, newResults.get(0).dateGroupID, stmt);
-            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
+            //            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
         }
         catch (SQLException e) {
             ErrorLog.add(process, "Problem in ZonalSummaryCalculator.uploadResultsToDb executing zonal summaries results.", e);
