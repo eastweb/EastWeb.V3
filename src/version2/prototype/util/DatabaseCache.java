@@ -643,6 +643,7 @@ public class DatabaseCache extends Observable{
      * expected to produce result files which the mTableFile refers to.
      * @param newResults
      * @param summaryIDNum
+     * @param indexNm
      * @param compStrategy
      * @param year
      * @param day
@@ -656,7 +657,7 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws SQLException
      */
-    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int daysPerInputData)
+    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryIDNum, String indexNm, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int daysPerInputData)
             throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
@@ -667,7 +668,7 @@ public class DatabaseCache extends Observable{
             return;
         }
 
-        System.out.println("Uploading results in project '" + projectName + "' for plugin '" + pluginName + "' (Year: " + year + ", Day: " + day + ").");
+        System.out.println("Uploading summary results in project '" + projectName + "' for plugin '" + pluginName + "' of index '" + indexNm + "' (Year: " + year + ", Day: " + day + ").");
 
         try {
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);

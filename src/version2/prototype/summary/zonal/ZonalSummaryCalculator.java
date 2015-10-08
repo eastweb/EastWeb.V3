@@ -365,7 +365,7 @@ public class ZonalSummaryCalculator {
 
     private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore,
             SummariesCollection summariesCollection, int year, int day, Process process) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException,
-    ParserConfigurationException, SAXException, SQLException {
+            ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
         ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
@@ -452,7 +452,7 @@ public class ZonalSummaryCalculator {
                     + "', Summary ID="+ summary.GetID() + ", date={year: " + year + ", day of year: " + day + "}"));
         }
 
-        outputCache.UploadResultsToDb(newResults, summary.GetID(), compStrategy, year, day, process, daysPerInputData);
+        outputCache.UploadResultsToDb(newResults, summary.GetID(), indexNm, compStrategy, year, day, process, daysPerInputData);
     }
 
 }

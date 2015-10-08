@@ -89,11 +89,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         try{
             if(instance == null)
             {
+                int numOfWorkerThreads = Runtime.getRuntime().availableProcessors() < 4 ?
+                        1 : ((Runtime.getRuntime().availableProcessors() - 2 - numOfSimultaneousGlobalDLs) < 0 ?
+                                1 : Runtime.getRuntime().availableProcessors() - 2 - numOfSimultaneousGlobalDLs);
                 instance = new EASTWebManager(
                         numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
-                        ((Runtime.getRuntime().availableProcessors() < 4) ?
-                                1 : (Runtime.getRuntime().availableProcessors() - 3)), // Number of ProcessWorkers allowed to be simultaneously active
-                                msBeetweenUpdates
+                        numOfWorkerThreads, // Number of ProcessWorkers allowed to be simultaneously active
+                        msBeetweenUpdates
                         );
 
                 // If passive updating desired
@@ -114,6 +116,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                         }
                     });
                     executor.execute(instance);
+                }
+                if(instance != null) {
+                    System.out.println("EASTWeb started. Threads being used: " + (2 + numOfSimultaneousGlobalDLs + numOfWorkerThreads)
+                            + " {GUI threads: 1 reserved, EASTWebManagement threads: 1, "
+                            + "GlobalDownload threads: " + numOfSimultaneousGlobalDLs
+                            + ", ProcessWorker threads: " + numOfWorkerThreads
+                            + ", " + (msBeetweenUpdates > 0 ? "ms between updates: " + msBeetweenUpdates : "no automatic GUI updating") + "}");
                 }
             }
         } catch(Exception e)
