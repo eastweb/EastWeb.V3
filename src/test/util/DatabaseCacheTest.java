@@ -527,7 +527,7 @@ public class DatabaseCacheTest {
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, startDateGroupID, indexID, filePath1, summaryResults));
 
         // Upload result
-        testSummaryCache.UploadResultsToDb(newResults, 1, compStrategy, startDate.getYear(), startDate.getDayOfYear(), process, 1);
+        testSummaryCache.UploadResultsToDb(newResults, 1, indexNm, compStrategy, startDate.getYear(), startDate.getDayOfYear(), process, 1);
 
         // Test upload
         String progressQuery = "SELECT \"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"AreaCode\", \"AreaName\", \"FilePath\", " +
