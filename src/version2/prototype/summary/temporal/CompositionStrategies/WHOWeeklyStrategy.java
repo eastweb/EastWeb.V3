@@ -53,15 +53,16 @@ public class WHOWeeklyStrategy implements TemporalSummaryCompositionStrategy {
     @Override
     public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
         DayOfWeek startDay = startDate.getDayOfWeek();
+        LocalDate adjStartDay = startDate;
 
         if(startDay != DayOfWeek.MONDAY)
         {
             int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
 
-            startDate.plusDays(8 - value);
+            adjStartDay = startDate.plusDays(8 - value);
         }
 
-        return ChronoUnit.WEEKS.between(startDate, endDate);
+        return ChronoUnit.WEEKS.between(adjStartDay, endDate);
     }
 
 }

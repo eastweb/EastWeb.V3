@@ -33,15 +33,16 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
     @Override
     public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
         DayOfWeek startDay = startDate.getDayOfWeek();
+        LocalDate adjStartDay = startDate;
 
         if(startDay != DayOfWeek.SUNDAY)
         {
             int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
 
-            startDate.plusDays(7 - value);
+            adjStartDay = startDate.plusDays(7 - value);
         }
 
-        return ChronoUnit.MONTHS.between(startDate, endDate);
+        return ChronoUnit.MONTHS.between(adjStartDay, endDate);
     }
 
 }

@@ -85,7 +85,7 @@ public class SummaryWorker extends ProcessWorker {
                                 pluginInfo.GetName(),                   // pluginName
                                 cachedFileData,                         // inputFile
                                 pluginMetaData.DaysPerInputData,        // daysPerInputData
-                                fileStores.get(summary.GetID()),                              // TemporalSummaryRasterFileStore
+                                fileStores.get(summary.GetID()),        // TemporalSummaryRasterFileStore
                                 null,                                   // InterpolateStrategy
                                 new AvgGdalRasterFileMerge()            // (Framework user defined)
                                 );

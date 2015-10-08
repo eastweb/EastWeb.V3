@@ -52,15 +52,16 @@ public class GregorianWeeklyStrategy implements TemporalSummaryCompositionStrate
     @Override
     public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
         DayOfWeek startDay = startDate.getDayOfWeek();
+        LocalDate adjStartDay = startDate;
 
         if(startDay != DayOfWeek.SUNDAY)
         {
             int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
 
-            startDate.plusDays(7 - value);
+            adjStartDay = startDate.plusDays(7 - value);
         }
 
-        return ChronoUnit.WEEKS.between(startDate, endDate);
+        return ChronoUnit.WEEKS.between(adjStartDay, endDate);
     }
 
 }

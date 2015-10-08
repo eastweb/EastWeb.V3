@@ -13,6 +13,7 @@ import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
@@ -52,10 +53,10 @@ public class Summary extends Process {
         TemporalSummaryRasterFileStore fileStore;
         Class<?> strategyClass;
         Constructor<?> ctorStrategy = null;
-        for(int i=0; i < projectMetaData.GetSummaries().size(); i++)
+        for(ProjectInfoSummary summary : projectMetaData.GetSummaries())
         {
             fileStore = null;
-            temporalSummaryCompositionStrategyClassName = projectMetaData.GetSummaries().get(i).GetTemporalSummaryCompositionStrategyClassName();
+            temporalSummaryCompositionStrategyClassName = summary.GetTemporalSummaryCompositionStrategyClassName();
             if(temporalSummaryCompositionStrategyClassName != null && !temporalSummaryCompositionStrategyClassName.isEmpty())
             {
                 try {
@@ -66,7 +67,7 @@ public class Summary extends Process {
                     ErrorLog.add(processName, scheduler, "Problem instantiating temporal filestore.", e);
                 }
             }
-            fileStores.put(i, fileStore);
+            fileStores.put(summary.GetID(), fileStore);
         }
     }
 

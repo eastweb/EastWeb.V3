@@ -62,15 +62,15 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
     public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
         LocalDate sDate = LocalDate.ofYearDay(startDate.getYear(), 1);
         while(ChronoUnit.DAYS.between(sDate, startDate) >= 8) {
-            sDate.plusDays(8);
+            sDate = sDate.plusDays(8);
         }
         if(ChronoUnit.DAYS.between(sDate, startDate) != 0) {
-            sDate.plusDays(8);
+            sDate = sDate.plusDays(8);
         }
 
         int count = 0;
         while(ChronoUnit.DAYS.between(sDate, endDate) >= 8) {
-            sDate.plusDays(8);
+            sDate = sDate.plusDays(8);
             count += 8;
         }
         return count;
