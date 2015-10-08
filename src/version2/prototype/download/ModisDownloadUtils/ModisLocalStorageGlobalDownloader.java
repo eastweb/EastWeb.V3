@@ -271,7 +271,7 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
                     while (fIter.hasNext())
                     {
                         String strPath = downloaded.dataFilePath;
-                        System.out.println(strPath);
+                        //                        System.out.println(strPath);
                         strPath = strPath.substring(strPath.lastIndexOf(File.separator)+1, strPath.lastIndexOf("."));
                         // remove the file if it is found in the downloaded list
                         fileTemp = fIter.next();
