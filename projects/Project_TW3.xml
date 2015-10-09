@@ -23,7 +23,7 @@
 	<HeatingDate>Thu Jan 01 10:08:21 CST 1970</HeatingDate>
 	<HeatingDegree>25</HeatingDegree>
 	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
-	<ReSampling>BILINEAR</ReSampling>
+	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
 	<Datum>WGS84</Datum>
 	<PixelSize>1000</PixelSize>
 	<StandardParallel1>0.0</StandardParallel1>

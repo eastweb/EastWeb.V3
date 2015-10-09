@@ -88,6 +88,7 @@ public class ModisLSTFilter extends Filter{
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
 
             outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+            outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
 
             // name the output file as the same as the input's plus "night"
@@ -103,6 +104,7 @@ public class ModisLSTFilter extends Filter{
                     filterWithFlags(arrays.get(1), arrays.get(3), qcLevel));
 
             outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+            outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
             inputDS.delete();
 

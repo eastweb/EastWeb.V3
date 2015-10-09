@@ -100,7 +100,7 @@ public class Clip
                         (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
-                        gdalconst.GDT_Int16
+                        gdalconst.GDT_Int32
                         );
 
                 try{
@@ -131,7 +131,7 @@ public class Clip
                         (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
-                        gdalconst.GDT_Int16);
+                        gdalconst.GDT_Int32);
 
                 try{
                     GdalUtils.errorCheck();
