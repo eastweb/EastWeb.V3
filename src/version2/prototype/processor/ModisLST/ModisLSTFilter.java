@@ -87,17 +87,9 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
 
-            //            Band b = outputDS.GetRasterBand(1);
-            //            int [] testarray = new int[totalSize];
-            //            //testarray = filterWithFlags(arrays.get(0), arrays.get(2), qcLevel);
-            //
-            //            b.ReadRaster(0, 0, xSize, ySize, testarray);
-            //            for (int i = 0; i<100 ;i ++)
-            //            {
-            //                System.out.println(testarray[i]);
-            //            }
-
+            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
             outputDS.delete();
+
             // name the output file as the same as the input's plus "night"
             outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "night.tif",
@@ -110,6 +102,7 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(1), arrays.get(3), qcLevel));
 
+            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
             outputDS.delete();
             inputDS.delete();
 

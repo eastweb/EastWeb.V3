@@ -142,8 +142,8 @@ public class AssociateSummaryPage {
                     filePathText.setText(chooser.getSelectedFile().toString());
                     try {
                         ReadShapefile shapfile = new ReadShapefile(filePathText.getText());
-                        populateShapeFiles(areaNameFieldComboBox, shapfile.getNumericFeatureList());
-                        populateShapeFiles(areaCodeFieldComboBox, shapfile.getNameFeatureList());
+                        populateShapeFiles(areaNameFieldComboBox, shapfile.getNameFeatureList());
+                        populateShapeFiles(areaCodeFieldComboBox, shapfile.getNumericFeatureList());
                     } catch (ShapefileException e) {
                         ErrorLog.add(Config.getInstance(), "AssociateSummaryPage.initialize problem with populating shape files.", e);
                     }
