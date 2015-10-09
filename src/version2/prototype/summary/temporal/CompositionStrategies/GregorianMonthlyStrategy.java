@@ -25,12 +25,6 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
     }
 
     @Override
-    public long getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
-        return 0;
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
         DayOfWeek startDay = startDate.getDayOfWeek();
         LocalDate adjStartDay = startDate;
@@ -43,6 +37,11 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
         }
 
         return ChronoUnit.MONTHS.between(adjStartDay, endDate);
+    }
+
+    @Override
+    public int maxNumberOfDaysInComposite() {
+        return 31;
     }
 
 }

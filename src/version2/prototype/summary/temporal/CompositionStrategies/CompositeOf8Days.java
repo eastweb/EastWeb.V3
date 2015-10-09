@@ -9,6 +9,8 @@ import java.time.temporal.ChronoUnit;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 
 /**
+ * 8 day temporal composite strategy based on Gregorian calendar.
+ *
  * @author Michael DeVos
  *
  */
@@ -47,15 +49,6 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy#getCompositeIndex(java.time.LocalDate, java.time.LocalDate)
-     */
-    @Override
-    public long getCompositeIndex(LocalDate startDate, LocalDate dateInComposite) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /* (non-Javadoc)
      * @see version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy#getNumberOfCompleteCompositesInRange(java.time.LocalDate, java.time.LocalDate)
      */
     @Override
@@ -69,11 +62,23 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
         }
 
         int count = 0;
+        LocalDate nextYearDay1 = LocalDate.ofYearDay(sDate.getYear() + 1, 1);
         while(ChronoUnit.DAYS.between(sDate, endDate) >= 8) {
-            sDate = sDate.plusDays(8);
-            count += 8;
+            if(sDate.getDayOfYear() >= 359) {
+                sDate = nextYearDay1;
+                nextYearDay1 = nextYearDay1.plusYears(1);
+            }
+            else {
+                sDate = sDate.plusDays(8);
+            }
+            count += 1;
         }
         return count;
+    }
+
+    @Override
+    public int maxNumberOfDaysInComposite() {
+        return 8;
     }
 
 }

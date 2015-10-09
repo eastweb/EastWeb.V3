@@ -72,7 +72,7 @@ public class SummaryWorker extends ProcessWorker {
             for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
             {
                 // Check if doing temporal summarization
-                if(fileStores.get(summary.GetID()) != null)
+                if(fileStores.get(summary.GetID()) != null && fileStores.get(summary.GetID()).compStrategy.maxNumberOfDaysInComposite() != pluginMetaData.DaysPerInputData)
                 {
                     tempFiles = new ArrayList<DataFileMetaData>();
                     for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))

@@ -13,7 +13,7 @@
 	<File/>
 	<Resolution/>
 </Masking>
-<MasterShapeFile>C:\Users\Michael DeVos\git\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
+<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
 <TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 <Clipping>true</Clipping>
 <FreezingDate>Tue Sep 01 15:23:46 CDT 1970</FreezingDate>
@@ -32,6 +32,6 @@
 <FalseNothing>0.0</FalseNothing>
 <ScalingFactor>0.9996</ScalingFactor>
 <Summaries>
-<Summary ID="1">AreaNameField: W_NAME; Shape File Path: C:\Users\Michael DeVos\git\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: W_CODE; Temporal Summary: (No Selection)</Summary>
+<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: W_CODE; Temporal Summary: (No Selection)</Summary>
 </Summaries>
 </ProjectInfo>
