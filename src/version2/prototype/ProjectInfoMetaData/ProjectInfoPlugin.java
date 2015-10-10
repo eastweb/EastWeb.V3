@@ -7,14 +7,14 @@ import java.util.ArrayList;
  *
  */
 public class ProjectInfoPlugin {
-    private String Name;
-    private ArrayList<String> Indices;
-    private String QC;
-    private ArrayList<String> ModisTiles;
+    private final String Name;
+    private final ArrayList<String> Indices;
+    private final String QC;
+    private final ArrayList<String> ModisTiles;
 
     /**
-     * Create a ProjectInfoPlugin object that contains the plugin name, list of index names to calculate, and the QC level to use. This information is generally gotten from a parsed project metadata file
-     * in a "Plugin" node child of a "Plugins" node.
+     * Create an immutable ProjectInfoPlugin object that contains the plugin name, list of index names to calculate, and the QC level to use. This information is generally gotten from a
+     * parsed project metadata file in a "Plugin" node child of a "Plugins" node.
      *
      * @param name  - plugin name
      * @param indices  - list of indices to calculate by their names
@@ -23,9 +23,17 @@ public class ProjectInfoPlugin {
     public ProjectInfoPlugin(String name, ArrayList<String> indices, String qc, ArrayList<String> modisTiles)
     {
         Name = name;
-        Indices = indices;
+        ArrayList<String> temp = new ArrayList<String>();
+        for(String str : indices) {
+            temp.add(str);
+        }
+        Indices = temp;
         QC = qc;
-        ModisTiles = modisTiles;
+        temp = new ArrayList<String>();
+        for(String str : modisTiles) {
+            temp.add(str);
+        }
+        ModisTiles = temp;
     }
 
     /**

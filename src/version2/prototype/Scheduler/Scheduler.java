@@ -341,7 +341,7 @@ public class Scheduler {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
+    public void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
     {
         synchronized (statusContainer)
         {
@@ -356,7 +356,7 @@ public class Scheduler {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException
+    public void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException
     {
         synchronized (statusContainer)
         {
@@ -371,7 +371,7 @@ public class Scheduler {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException
+    public void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException
     {
         synchronized (statusContainer)
         {
@@ -389,7 +389,7 @@ public class Scheduler {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
+    public void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
             throws SQLException
     {
         synchronized (statusContainer)

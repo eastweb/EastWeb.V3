@@ -4,7 +4,7 @@ import version2.prototype.ZonalSummary;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 
 /**
- * Represents a summary element from the project meta data.
+ * Represents a summary element from the project meta data. Object is immutable.
  *
  * @author michael.devos
  *

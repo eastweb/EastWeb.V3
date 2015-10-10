@@ -12,7 +12,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
 /**
- * Records the status of a Scheduler instance at a single point in time.
+ * Records the status of a Scheduler instance at a single point in time. Object is immutable.
  *
  * @author michael.devos
  *
@@ -92,11 +92,11 @@ public class SchedulerStatus {
         ProjectName = projectMetaData.GetProjectName();
         PluginInfo = projectMetaData.GetPlugins();
         Summaries = projectMetaData.GetSummaries();
-        this.downloadProgressesByData = downloadProgressesByData;
-        this.processorProgresses = processorProgresses;
-        this.indicesProgresses = indicesProgresses;
-        this.summaryProgresses = summaryProgresses;
-        this.log = log;
+        this.downloadProgressesByData = cloneTreeMapStringStringDouble(downloadProgressesByData);
+        this.processorProgresses = cloneTreeMapStringDouble(processorProgresses);
+        this.indicesProgresses = cloneTreeMapStringDouble(indicesProgresses);
+        this.summaryProgresses = cloneTreeMapStringIntegerDouble(summaryProgresses);
+        this.log = new ArrayList<String>(log);
         logReaderPos = 0;
         this.State = State;
         this.ProjectUpToDate = ProjectUpToDate;
@@ -115,10 +115,10 @@ public class SchedulerStatus {
         PluginInfo = new ArrayList<ProjectInfoPlugin>(statusToCopy.PluginInfo);
         Summaries = new ArrayList<ProjectInfoSummary>(statusToCopy.Summaries);
         downloadProgressesByData = cloneTreeMapStringStringDouble(statusToCopy.downloadProgressesByData);
-        processorProgresses = statusToCopy.processorProgresses;
-        indicesProgresses = statusToCopy.indicesProgresses;
+        processorProgresses = cloneTreeMapStringDouble(statusToCopy.processorProgresses);
+        indicesProgresses = cloneTreeMapStringDouble(statusToCopy.indicesProgresses);
         summaryProgresses = cloneTreeMapStringIntegerDouble(statusToCopy.summaryProgresses);
-        log = statusToCopy.log;
+        log = new ArrayList<String>(statusToCopy.log);
         logReaderPos = 0;
         State = statusToCopy.State;
         ProjectUpToDate = statusToCopy.ProjectUpToDate;
@@ -141,10 +141,10 @@ public class SchedulerStatus {
             pluginResults = new TreeMap<Integer, Double>();
             while(summaryProgressesIt.hasNext())
             {
-                summaryID = new Integer(summaryProgressesIt.next());
-                pluginResults.put(summaryID, input.get(plugin).get(new Integer(summaryID)));
+                summaryID = summaryProgressesIt.next();
+                pluginResults.put(summaryID, input.get(plugin).get(summaryID));
             }
-            clone.put(new String(plugin), pluginResults);
+            clone.put(plugin, pluginResults);
         }
         return clone;
     }
@@ -164,10 +164,23 @@ public class SchedulerStatus {
             downloadResults = new TreeMap<String, Double>();
             while(downloadProgressesIt.hasNext())
             {
-                dataName = new String(downloadProgressesIt.next());
-                downloadResults.put(dataName, new Double(input.get(plugin).get(dataName)));
+                dataName = downloadProgressesIt.next();
+                downloadResults.put(dataName, input.get(plugin).get(dataName));
             }
-            clone.put(new String(plugin), downloadResults);
+            clone.put(plugin, downloadResults);
+        }
+        return clone;
+    }
+
+    private TreeMap<String, Double> cloneTreeMapStringDouble(TreeMap<String, Double> input)
+    {
+        TreeMap<String, Double> clone = new TreeMap<String, Double>();
+        Iterator<String> keysIt = input.keySet().iterator();
+        String key;
+        while(keysIt.hasNext())
+        {
+            key = keysIt.next();
+            clone.put(key, input.get(key));
         }
         return clone;
     }

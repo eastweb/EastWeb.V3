@@ -3,7 +3,7 @@ package version2.prototype;
 import java.io.Serializable;
 
 /**
- * Represents metadata for a single zonal summary. Paring of shape file and zone field.
+ * Represents metadata for a single zonal summary. Paring of shape file and zone field. Object is immutable.
  *
  * @author michael.devos
  *

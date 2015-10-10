@@ -320,7 +320,7 @@ public class SchedulerStatusContainer {
         newLog = new ArrayList<String>(log);
         //        }
 
-        CheckIfProjectIsUpToDate();
+        UpdateProjectIsUpToDate();
 
 
         return new SchedulerStatus(SchedulerID, projectMetaData, downloadProgressesByDataTemp, processorProgresses, indicesProgresses, summaryProgressesTemp, newLog, state, projectUpToDate, lastModifiedTime,
@@ -330,7 +330,7 @@ public class SchedulerStatusContainer {
     /**
      * Checks if the whole project is up to date or if any summary for any of the plugins being processed still has work to accomplish with the current information in this container.
      */
-    private synchronized void CheckIfProjectIsUpToDate()
+    private synchronized void UpdateProjectIsUpToDate()
     {
         boolean isUpToDate = true;
         Iterator<String> pluginsIt = downloadProgressesByData.keySet().iterator();
