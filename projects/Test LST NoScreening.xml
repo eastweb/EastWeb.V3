@@ -13,8 +13,10 @@
 	<StartDate>Tue Sep 30 00:00:00 CDT 2014</StartDate>
 	<ProjectName>Test LST NoScreening</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
-	<MaskingFile>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</MaskingFile>
-	<Resolution>1000</Resolution>
+	<Masking>
+		<File>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
 	<MasterShapeFile>\Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>false</Clipping>

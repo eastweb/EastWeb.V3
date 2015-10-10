@@ -24,14 +24,18 @@ public class ProjectInfoPlugin {
     {
         Name = name;
         ArrayList<String> temp = new ArrayList<String>();
-        for(String str : indices) {
-            temp.add(str);
+        if(indices != null){
+            for(String str : indices) {
+                temp.add(str);
+            }
         }
         Indices = temp;
         QC = qc;
         temp = new ArrayList<String>();
-        for(String str : modisTiles) {
-            temp.add(str);
+        if(modisTiles != null) {
+            for(String str : modisTiles) {
+                temp.add(str);
+            }
         }
         ModisTiles = temp;
     }

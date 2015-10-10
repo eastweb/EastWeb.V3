@@ -58,7 +58,7 @@ public class ModisListDatesFiles extends ListDatesFiles
         final String mHostURL = mData.myHttp.url;
 
         //final List<DataDate> desiredDates = new ArrayList<DataDate>();
-        final Lock lock = new ReentrantLock();
+        //        final ReentrantLock lock = new ReentrantLock();
 
         try
         {
@@ -109,9 +109,9 @@ public class ModisListDatesFiles extends ListDatesFiles
                                         //                                        {
                                         //                                            if (line.contains(tile))
                                         //                                            {
-                                        lock.lock();
+                                        //                                        lock.lock();
                                         fileList.add(m.group(0));
-                                        lock.unlock();
+                                        //                                        lock.unlock();
                                         //                                            }
                                         //                                        }
 
@@ -119,15 +119,21 @@ public class ModisListDatesFiles extends ListDatesFiles
                                 }
 
                                 // add the date and fileList pair to the map
-                                lock.lock();
-                                mapDatesFiles.put(new DataDate(day, month, year), fileList);
-                                lock.unlock();
+                                //                                lock.lock();
+                                synchronized(mapDatesFiles) {
+                                    mapDatesFiles.put(new DataDate(day, month, year), fileList);
+                                }
                             }
                         }
                         catch(Exception e)
                         {
                             ErrorLog.add(Config.getInstance(), mData.Title, mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
                             return;
+                        }
+                        finally {
+                            //                            if(lock.isHeldByCurrentThread()) {
+                            //                                lock.unlock();
+                            //                            }
                         }
                     }
                     //                }

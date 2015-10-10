@@ -10,29 +10,31 @@
 			<QC> HIGHEST</QC>
 		</Plugin>
 	</Plugins>
-	<StartDate>Tue Sep 30 00:00:00 CDT 2014</StartDate>
+	<StartDate>Wed Oct 01 15:52:33 CDT 2014</StartDate>
 	<ProjectName>Testing ModisLST Highest 8DayComposite</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
-	<MaskingFile>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</MaskingFile>
-	<Resolution>1000</Resolution>
+	<Masking>
+		<File>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
 	<MasterShapeFile>\Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>false</Clipping>
-	<FreezingDate>Tue Sep 01 00:00:00 CDT 1970</FreezingDate>
-	<CoolingDegree>0</CoolingDegree>
-	<HeatingDate>Thu Jan 01 00:00:00 CST 1970</HeatingDate>
-	<HeatingDegree>14.3</HeatingDegree>
-	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
-	<ReSampling>BILINEAR</ReSampling>
-	<Datum>WGS84</Datum>
+	<FreezingDate>Thu Oct 01 15:55:08 CDT 1970</FreezingDate>
+	<CoolingDegree>1</CoolingDegree>
+	<HeatingDate>Thu Oct 01 15:55:10 CDT 1970</HeatingDate>
+	<HeatingDegree>1</HeatingDegree>
+	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
+	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+	<Datum>NAD83</Datum>
 	<PixelSize>1000</PixelSize>
-	<StandardParallel1>0</StandardParallel1>
-	<CentalMeridian>39</CentalMeridian>
-	<FalseEasting>500000</FalseEasting>
-	<StandardParallel2>0</StandardParallel2>
-	<LatitudeOfOrigin>0</LatitudeOfOrigin>
-	<FalseNothing>0</FalseNothing>
-	<ScalingFactor>0.9996</ScalingFactor>
+	<StandardParallel1>1</StandardParallel1>
+	<CentalMeridian>1</CentalMeridian>
+	<FalseEasting>1</FalseEasting>
+	<StandardParallel2>1</StandardParallel2>
+	<LatitudeOfOrigin>1</LatitudeOfOrigin>
+	<FalseNothing>1</FalseNothing>
+	<ScalingFactor>1</ScalingFactor>
 	<Summaries>
 		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: CompositeOf8Days</Summary>
 	</Summaries>
