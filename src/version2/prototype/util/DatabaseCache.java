@@ -389,11 +389,10 @@ public class DatabaseCache extends Observable{
                             globalEASTWebSchema));
             if((modisTileNames != null) && (modisTileNames.size() > 0))
             {
-                insertQuery.append(" AND (");
-                insertQuery.append("D.\"DataFilePath\" LIKE '%" + modisTileNames.get(0) + "%'");
+                insertQuery.append(" AND (D.\"DataFilePath\" ilike '%" + modisTileNames.get(0) + "%'");
                 for(int i=1; i < modisTileNames.size(); i++)
                 {
-                    insertQuery.append(" OR D.\"DataFilePath\" LIKE '%" + modisTileNames.get(i) + "%'");
+                    insertQuery.append(" OR D.\"DataFilePath\" ilike '%" + modisTileNames.get(i) + "%'");
                 }
                 insertQuery.append(")");
             }
@@ -415,12 +414,14 @@ public class DatabaseCache extends Observable{
                     " AND C.\"DownloadExtraID\" IS NULL",
                     globalEASTWebSchema,
                     mSchemaName));
-            if(modisTileNames != null)
+            if((modisTileNames != null) && (modisTileNames.size() > 0))
             {
-                for(String tile : modisTileNames)
+                insertQuery.append(" AND (D.\"FilePath\" ilike '%" + modisTileNames.get(0) + "%'");
+                for(int i=1; i < modisTileNames.size(); i++)
                 {
-                    insertQuery.append(" AND D.\"FilePath\" LIKE '%" + tile + "%'");
+                    insertQuery.append(" OR D.\"FilePath\" ilike '%" + modisTileNames.get(i) + "%'");
                 }
+                insertQuery.append(")");
             }
 
         }
