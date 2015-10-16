@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="TRMM3B42">
+			<Indicies>TRMM3B42Index</Indicies>
+			<QC>  null</QC>
+		</Plugin>
+		<Plugin name="TRMM3B42RT">
+			<Indicies>TRMM3B42RTIndex</Indicies>
+			<QC>  null</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Mon Sep 01 13:33:11 CDT 2014</StartDate>
+	<ProjectName>Test Both TRMM 101615</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>\Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp</MasterShapeFile>
+	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
+	<Clipping>false</Clipping>
+	<FreezingDate>Thu Oct 01 00:00:00 CDT 1970</FreezingDate>
+	<CoolingDegree>1</CoolingDegree>
+	<HeatingDate>Thu Oct 01 13:35:06 CDT 1970</HeatingDate>
+	<HeatingDegree>1</HeatingDegree>
+	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
+	<ReSampling>BILINEAR</ReSampling>
+	<Datum>NAD83</Datum>
+	<PixelSize>1000</PixelSize>
+	<StandardParallel1>1</StandardParallel1>
+	<CentalMeridian>1</CentalMeridian>
+	<FalseEasting>1</FalseEasting>
+	<StandardParallel2>1</StandardParallel2>
+	<LatitudeOfOrigin>1</LatitudeOfOrigin>
+	<FalseNothing>1</FalseNothing>
+	<ScalingFactor>1</ScalingFactor>
+	<Summaries>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: WHOWeeklyStrategy</Summary>
+	</Summaries>
+</ProjectInfo>

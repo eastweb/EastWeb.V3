@@ -147,16 +147,6 @@ public class Scheduler {
                 Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile, item.GetName(), configInstance.getSummaryCalculations(),
                         configInstance.getSummaryTempCompStrategies(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(), true);
                 SetupProcesses(item, pluginMetaData);
-
-                // Update status in EASTWebManager
-                SchedulerStatus status = null;
-                synchronized (statusContainer)
-                {
-                    status = statusContainer.GetStatus();
-                }
-                if(status != null) {
-                    manager.NotifyUI(status);
-                }
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ParseException | ParserConfigurationException | SAXException | IOException e) {
@@ -168,6 +158,20 @@ public class Scheduler {
             if(con != null) {
                 con.close();
             }
+        }
+
+        // Update status in EASTWebManager
+        SchedulerStatus status = null;
+        synchronized (statusContainer)
+        {
+            try {
+                status = statusContainer.GetStatus();
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem setting up Scheduler.", e);
+            }
+        }
+        if(status != null) {
+            manager.NotifyUI(status);
         }
     }
 

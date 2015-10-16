@@ -7,25 +7,35 @@
 			<Indicies>ModisLSTMean</Indicies>
 			<ModisTile> h21v07</ModisTile>
 			<ModisTile> h21v08</ModisTile>
-			<QC> HIGHEST</QC>
+			<QC> LOW</QC>
+		</Plugin>
+		<Plugin name="ModisNBAR">
+			<Indicies>ModisNBARNDVI</Indicies>
+			<Indicies>ModisNBAREVI</Indicies>
+			<Indicies>ModisNBARNDWI5</Indicies>
+			<Indicies>ModisNBARNDWI6</Indicies>
+			<Indicies>ModisNBARSAVI</Indicies>
+			<ModisTile> h21v07</ModisTile>
+			<ModisTile> h21v08</ModisTile>
+			<QC>  Low</QC>
 		</Plugin>
 	</Plugins>
-	<StartDate>Wed Oct 01 16:04:50 CDT 2014</StartDate>
-	<ProjectName>Mike LST Highest NoTemp</ProjectName>
+	<StartDate>Wed Oct 01 11:40:22 CDT 2014</StartDate>
+	<ProjectName>Try Both MODIS 101515</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<Masking>
-		<File>\Documentation\TestCases\Mike LST Highest NoTemp\Ethiopia_watermask.tif</File>
+		<File>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</File>
 		<Resolution>1000</Resolution>
 	</Masking>
-	<MasterShapeFile>\Documentation\TestCases\Mike LST Highest NoTemp\Woreda_hacked.shp</MasterShapeFile>
+	<MasterShapeFile>\Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>false</Clipping>
-	<FreezingDate>Thu Oct 01 16:06:43 CDT 1970</FreezingDate>
+	<FreezingDate>Thu Oct 01 11:41:57 CDT 1970</FreezingDate>
 	<CoolingDegree>1</CoolingDegree>
-	<HeatingDate>Thu Oct 01 16:06:48 CDT 1970</HeatingDate>
+	<HeatingDate>Thu Oct 01 11:42:00 CDT 1970</HeatingDate>
 	<HeatingDegree>1</HeatingDegree>
 	<CoordinateSystem>ALBERS_EQUAL_AREA</CoordinateSystem>
-	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+	<ReSampling>BILINEAR</ReSampling>
 	<Datum>NAD83</Datum>
 	<PixelSize>1000</PixelSize>
 	<StandardParallel1>1</StandardParallel1>
@@ -36,6 +46,6 @@
 	<FalseNothing>1</FalseNothing>
 	<ScalingFactor>1</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Mike LST Highest NoTemp\Woreda_hacked.shp; AreaCodeField: WID; Temporal Summary: (No Selection)</Summary>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: CompositeOf8Days</Summary>
 	</Summaries>
 </ProjectInfo>
