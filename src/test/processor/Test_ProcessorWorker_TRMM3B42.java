@@ -52,7 +52,7 @@ public class Test_ProcessorWorker_TRMM3B42 {
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
         Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
-                pluginMetaData.Indices.indicesNames.size(), false);
+                false);
 
 
         ArrayList<DataFileMetaData> cachedFiles = new ArrayList<DataFileMetaData>();

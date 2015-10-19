@@ -119,7 +119,7 @@ public class SchedulerStatusContainerTest {
         stmt.execute(query);
         ArrayList<String> tempCompNames = new ArrayList<String>(1);
         tempCompNames.add(temporalSummaryCompositionStrategyClassName);
-        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, configInstance.getSummaryCalculations(), tempCompNames, 1, 1, 1, false);
+        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, configInstance.getSummaryCalculations(), tempCompNames, 1, 1, false);
         SchedulerStatusContainerTest tester = new SchedulerStatusContainerTest();
         container = new SchedulerStatusContainer(configInstance, 1, tester.new MyProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection), projectMetaData, pluginMetaDataCollection,
                 TaskState.STOPPED);

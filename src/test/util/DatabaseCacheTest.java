@@ -184,7 +184,7 @@ public class DatabaseCacheTest {
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
         ArrayList<String> tempCompNames = new ArrayList<String>(1);
         tempCompNames.add("MyTemporalSummaryCompositionStrategy");
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, summaryNames, tempCompNames, daysPerInputFile, filesPerDay, numOfIndices, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, summaryNames, tempCompNames, daysPerInputFile, filesPerDay, true);
     }
 
     /**

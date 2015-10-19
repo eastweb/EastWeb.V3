@@ -133,7 +133,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectInfoFile, testPluginName, null, null, daysPerInputFile, filesPerDay, numOfIndices, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectInfoFile, testPluginName, null, null, daysPerInputFile, filesPerDay, true);
     }
 
     /**
@@ -253,7 +253,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         @Override
         public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate,
                 ArrayList<String> extraDownloadFiles, ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-                IOException {
+        IOException {
             assertEquals("StartDate incorrect.", expectedStartDate, startDate);
             return 1;
         }

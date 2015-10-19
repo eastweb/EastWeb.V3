@@ -86,7 +86,7 @@ public class ProcessorWorkerTest {
         //ArrayList<String> extraDownloadFiles;
         //extraDownloadFiles.add("QC");
         Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), "Test_EASTWeb", projectInfoFile, "Test_Plugin", null, null, pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay,
-                pluginMetaData.Indices.indicesNames.size(), false);
+                false);
 
         // Setup test files
         ArrayList<DownloadFileMetaData> extraDownloads = new ArrayList<DownloadFileMetaData>(1);

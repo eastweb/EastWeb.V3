@@ -35,12 +35,11 @@ public class Schemas {
      * @param tempSummaryCompStrategyNames
      * @param daysPerInputFile  - relevant to plugin entry creation and calculating the number of expected results to be found in ZonalStat
      * @param filesPerDay  - relevant to plugin entry creation and calculating when downloads are ready to be loaded by the LocalDownloader
-     * @param numOfIndices  - relevant to project entry creation and calculating the number of expected results to be found in ZonalStat
      * @param createTablesWithForeignKeyReferences  - TRUE if tables should be created so that their foreign keys are referencing their corresponding primary keys, FALSE if tables shouldn't be created
      * to enforce foreign key rules
      */
     public static void CreateProjectPluginSchema(Connection postgreSQLConnection, String globalEASTWebSchema, ProjectInfoFile projectMetaData, String pluginName, ArrayList<String> summaryNames,
-            ArrayList<String> tempSummaryCompStrategyNames, Integer daysPerInputFile, Integer filesPerDay, Integer numOfIndices, boolean createTablesWithForeignKeyReferences)
+            ArrayList<String> tempSummaryCompStrategyNames, Integer daysPerInputFile, Integer filesPerDay, boolean createTablesWithForeignKeyReferences)
     {
         final Connection conn;
         final Statement stmt;
@@ -97,7 +96,7 @@ public class Schemas {
             int dateGroupID = getDateGroupID(globalEASTWebSchema, projectMetaData.GetStartDate(), stmt);
 
             // Add entry to Project table
-            addProject(globalEASTWebSchema, projectMetaData.GetProjectName(), numOfIndices, dateGroupID, stmt);
+            addProject(globalEASTWebSchema, projectMetaData.GetProjectName(), dateGroupID, stmt);
 
             // Add entry to Plugin table if not already existing
             addPlugin(globalEASTWebSchema, pluginName, daysPerInputFile, filesPerDay, stmt);
@@ -394,18 +393,18 @@ public class Schemas {
         return getOrInsertIfMissingID(selectQuery, "PluginID", insertQuery, stmt);
     }
 
-    private static int addProject(final String globalEASTWebSchema, final String projectName, final Integer numOfIndices, final Integer dateGroupID, final Statement stmt) throws SQLException {
-        if(globalEASTWebSchema == null || numOfIndices == null || dateGroupID == null || dateGroupID == -1) {
+    private static int addProject(final String globalEASTWebSchema, final String projectName, final Integer dateGroupID, final Statement stmt) throws SQLException {
+        if(globalEASTWebSchema == null || dateGroupID == null || dateGroupID == -1) {
             return -1;
         }
 
         String selectQuery = String.format("SELECT \"ProjectID\" FROM \"%1$s\".\"Project\" " +
-                "WHERE \"Name\"='" + projectName + "' AND \"StartDate_DateGroupID\"=" + dateGroupID + " AND \"IndicesCount\"=" + numOfIndices + ";",
+                "WHERE \"Name\"='" + projectName + "' AND \"StartDate_DateGroupID\"=" + dateGroupID + ";",
                 globalEASTWebSchema
                 );
         String insertQuery = String.format(
-                "INSERT INTO \"%1$s\".\"Project\" (\"Name\", \"StartDate_DateGroupID\", \"IndicesCount\")\n" +
-                        "VALUES ('" + projectName + "', " + dateGroupID + ", " + numOfIndices + ");",
+                "INSERT INTO \"%1$s\".\"Project\" (\"Name\", \"StartDate_DateGroupID\")\n" +
+                        "VALUES ('" + projectName + "', " + dateGroupID + ");",
                         globalEASTWebSchema
                 );
         return getOrInsertIfMissingID(selectQuery, "ProjectID", insertQuery, stmt);
@@ -728,8 +727,7 @@ public class Schemas {
                         "  \"ProjectID\" serial PRIMARY KEY,\n" +
                         "  \"Name\" varchar(255) UNIQUE NOT NULL,\n" +
                         // Represents the project's start date
-                        "  \"StartDate_DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL,\n" +
-                        "  \"IndicesCount\" integer NOT NULL\n" +
+                        "  \"StartDate_DateGroupID\" integer " + (createTablesWithForeignKeyReferences ? "REFERENCES \"%1$s\".\"DateGroup\" (\"DateGroupID\") " : "") + "NOT NULL\n" +
                         ")",
                         globalEASTWebSchema
                 );

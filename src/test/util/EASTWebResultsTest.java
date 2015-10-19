@@ -125,7 +125,7 @@ public class EASTWebResultsTest {
         stmt.execute(query);
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, summaryNames, null, null, null, null, true);
+        Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, summaryNames, null, null, null, true);
     }
 
     /**

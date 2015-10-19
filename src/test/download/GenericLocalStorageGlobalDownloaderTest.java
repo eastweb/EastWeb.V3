@@ -161,7 +161,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
                 ));
         stmt.close();
 
-        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, null, null, daysPerInputFile, filesPerDay, numOfIndices, true);
+        Schemas.CreateProjectPluginSchema(con, testGlobalSchema, projectMetaData, testPluginName, null, null, daysPerInputFile, filesPerDay, true);
     }
 
     /**
@@ -267,7 +267,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         // For testing with TRMM3B42RT plugin
         //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
         String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/data/" + startDate.getYear() + "/" + startDate.getDayOfYear() + "/3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue())
-                + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
+        + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
         Statement stmt = con.createStatement();

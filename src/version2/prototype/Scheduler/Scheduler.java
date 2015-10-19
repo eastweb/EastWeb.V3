@@ -145,7 +145,7 @@ public class Scheduler {
                 new File(FileSystem.GetGlobalDownloadDirectory(configInstance, item.GetName(), pluginMetaData.Download.name)).mkdirs();
 
                 Schemas.CreateProjectPluginSchema(con, configInstance.getGlobalSchema(), projectInfoFile, item.GetName(), configInstance.getSummaryCalculations(),
-                        configInstance.getSummaryTempCompStrategies(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, item.GetIndices().size(), true);
+                        configInstance.getSummaryTempCompStrategies(), pluginMetaData.DaysPerInputData, pluginMetaData.Download.filesPerDay, true);
                 SetupProcesses(item, pluginMetaData);
             }
         } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException

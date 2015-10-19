@@ -97,7 +97,7 @@ public class SchemasTest {
         ArrayList<String> tempCompNames = new ArrayList<String>(1);
         tempCompNames.add(compStrategy.getClass().getCanonicalName());
         Schemas.CreateProjectPluginSchema(DatabaseConnector.getConnection(), testGlobalSchema, projectMetaData, testPluginName, summaryNames, tempCompNames, daysPerInputFile, filesPerDay,
-                numOfIndices, true);
+                true);
         stmt.close();
     }
 
