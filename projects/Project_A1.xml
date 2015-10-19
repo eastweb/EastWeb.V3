@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ProjectInfo>
-<Plugins>
-<Plugin name="ModisLST">
-<Indicies>ModisLSTDay</Indicies>
-<Indicies>ModisLSTNight</Indicies>
-<Indicies>ModisLSTMean</Indicies>
-<ModisTile> h28v06</ModisTile>
-<ModisTile> h29v06</ModisTile>
-<QC> HIGHEST</QC>
-</Plugin>
-</Plugins>
-<StartDate>Wed Jul 15 18:43:14 CDT 2015</StartDate>
-<ProjectName>Project_A1</ProjectName>
-<WorkingDir>C:\eastweb</WorkingDir>
-<Masking>
-	<File>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
-	<Resolution>1000</Resolution>
-</Masking>
-<MasterShapeFile>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
-<TimeZone>(GMT+2:00) Africa/Tripoli</TimeZone>
-<Clipping>true</Clipping>
-<FreezingDate>Tue Sep 01 00:00:00 CDT 1970</FreezingDate>
-<CoolingDegree>5</CoolingDegree>
-<HeatingDate>Fri Feb 20 18:44:32 CST 1970</HeatingDate>
-<HeatingDegree>25</HeatingDegree>
-<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
-<ReSampling>BILINEAR</ReSampling>
-<Datum>WGS84</Datum>
-<PixelSize>1000</PixelSize>
-<StandardParallel1>0.0</StandardParallel1>
-<CentalMeridian>123.0</CentalMeridian>
-<FalseEasting>500000.0</FalseEasting>
-<StandardParallel2>0.0</StandardParallel2>
-<LatitudeOfOrigin>0.0</LatitudeOfOrigin>
-<FalseNothing>0.0</FalseNothing>
-<ScalingFactor>0.9996</ScalingFactor>
-<Summaries>
-<Summary ID="1">AreaNameField: WID; Shape File Path: C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: WID; Temporal Summary: GregorianMonthlyStrategy</Summary>
-</Summaries>
+	<Plugins>
+		<Plugin name="ModisLST">
+			<Indicies>ModisLSTDay</Indicies>
+			<Indicies>ModisLSTNight</Indicies>
+			<Indicies>ModisLSTMean</Indicies>
+			<ModisTile> h28v06</ModisTile>
+			<ModisTile> h29v06</ModisTile>
+			<QC> HIGHEST</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Wed Jul 15 18:43:14 CDT 2015</StartDate>
+	<ProjectName>Project_A1</ProjectName>
+	<WorkingDir>C:\eastweb</WorkingDir>
+	<Masking>
+		<File>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
+	<TimeZone>(GMT+2:00) Africa/Tripoli</TimeZone>
+	<Clipping>true</Clipping>
+	<FreezingDate>Tue Sep 01 00:00:00 CDT 1970</FreezingDate>
+	<CoolingDegree>5</CoolingDegree>
+	<HeatingDate>Fri Feb 20 18:44:32 CST 1970</HeatingDate>
+	<HeatingDegree>25</HeatingDegree>
+	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
+	<ReSampling>BILINEAR</ReSampling>
+	<Datum>WGS84</Datum>
+	<PixelSize>1000</PixelSize>
+	<StandardParallel1>0.0</StandardParallel1>
+	<CentalMeridian>123.0</CentalMeridian>
+	<FalseEasting>500000.0</FalseEasting>
+	<StandardParallel2>0.0</StandardParallel2>
+	<LatitudeOfOrigin>0.0</LatitudeOfOrigin>
+	<FalseNothing>0.0</FalseNothing>
+	<ScalingFactor>0.9996</ScalingFactor>
+	<Summaries>
+		<Summary ID="1">AreaNameField: WID; Shape File Path: C:\Users\veronica\Documents\32-bit\EastWeb.V2\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: WID; Temporal Summary: GregorianMonthlyStrategy</Summary>
+	</Summaries>
 </ProjectInfo>
