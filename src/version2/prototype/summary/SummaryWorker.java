@@ -60,7 +60,7 @@ public class SummaryWorker extends ProcessWorker {
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
         ArrayList<DataFileMetaData> tempFiles;
         DataFileMetaData tempFile;
-        IndicesFileMetaData cachedFileData;
+        IndicesFileMetaData cachedFileData = null;
 
         // Setup initial input mappings
         for(ProjectInfoSummary summary : projectInfoFile.GetSummaries())
@@ -68,9 +68,9 @@ public class SummaryWorker extends ProcessWorker {
             summaryInputMap.put(summary.GetID(), cachedFiles);
         }
 
-        try{
-            for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
-            {
+        for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
+        {
+            try{
                 // Check if doing temporal summarization
                 if(fileStores.get(summary.GetID()) != null && fileStores.get(summary.GetID()).compStrategy.maxNumberOfDaysInComposite() != pluginMetaData.DaysPerInputData)
                 {
@@ -96,19 +96,22 @@ public class SummaryWorker extends ProcessWorker {
                     }
                     summaryInputMap.put(summary.GetID(), tempFiles);
                 }
+            }catch(Exception e) {
+                if(cachedFileData != null) {
+                    ErrorLog.add(process, "Problem during temporal summary calculation for summary " + summary.toString() + ", date {day of year=" + cachedFileData.day + ", year=" + cachedFileData.year + "}.", e);
+                } else {
+                    ErrorLog.add(process, "Problem during temporal summary calculation for summary " + summary.toString() + ".", e);
+                }
             }
-        }catch(Exception e)
-        {
-            ErrorLog.add(process, "Problem during temporal summary calculation.", e);
         }
 
-        try{
-            File outputFile;
-            for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
+        File outputFile;
+        for(ProjectInfoSummary summary: projectInfoFile.GetSummaries())
+        {
+            for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
             {
-                for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
-                {
-                    cachedFileData = cachedFile.ReadMetaDataForSummary();
+                cachedFileData = cachedFile.ReadMetaDataForSummary();
+                try{
                     outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
                             pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%04d/%03d.csv", cachedFileData.indexNm, cachedFileData.year, cachedFileData.day));
                     ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
@@ -126,11 +129,14 @@ public class SummaryWorker extends ProcessWorker {
                             outputCache);
                     zonalSummaryCal.calculate();
                     outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.dateGroupID, cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
+                }catch(Exception e) {
+                    if(cachedFileData != null) {
+                        ErrorLog.add(process, "Problem during zonal summary calculation for summary " + summary.toString() + ", date {day of year=" + cachedFileData.day + ", year=" + cachedFileData.year + "}.", e);
+                    } else {
+                        ErrorLog.add(process, "Problem during zonal summary calculation for summary " + summary.toString() + ".", e);
+                    }
                 }
             }
-        }catch(Exception e)
-        {
-            ErrorLog.add(process, "Problem during zonal summary calculation.", e);
         }
         return new ProcessWorkerReturn(outputFiles);
     }

@@ -166,7 +166,7 @@ public class IndicesWorker extends ProcessWorker{
 
                     output.add(new DataFileMetaData(outFile, Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(), thisDay.getDayOfYear(), indices));
                 } catch(Exception e) {
-                    ErrorLog.add(process, "Problem setting up IndexCalculator object.", e);
+                    ErrorLog.add(process, "Problem setting up IndexCalculator object for day " + thisDay.toString() + ". Number of input files " + inputFiles.length + ". Output file " + outputPath + File.separator + indices + ".tif.", e);
                 }
             }
 

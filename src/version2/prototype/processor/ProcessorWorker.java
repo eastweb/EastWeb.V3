@@ -236,9 +236,9 @@ public class ProcessorWorker extends ProcessWorker {
                     methodProcess = process.getClass().getMethod("run");
                     methodProcess.invoke(process);
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    ErrorLog.add(this.process, "Problem with calling run.", e);
+                    ErrorLog.add(this.process, "Problem with calling run on Processor step '" + step.getValue() + "' for day " + thisDay + ".", e);
                 } catch (Exception e) {
-                    ErrorLog.add(this.process, "Problem with calling run.", e);
+                    ErrorLog.add(this.process, "Problem with calling run on Processor step '" + step.getValue() + "' for day " + thisDay + ".", e);
                 }
             }
 
