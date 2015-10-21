@@ -132,6 +132,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
             }
 
             output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
+            output.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
             output.GetRasterBand(1).ComputeStatistics(true);
             output.delete();
 
