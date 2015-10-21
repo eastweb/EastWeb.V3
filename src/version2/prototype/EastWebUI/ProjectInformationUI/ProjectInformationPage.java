@@ -78,9 +78,7 @@ public class ProjectInformationPage {
     private JTextField maskFile;
     private JTextField pixelSize;
     private JComboBox<String> timeZoneComboBox;
-    private JComboBox<String> coordinateSystemComboBox;
     private JComboBox<String> reSamplingComboBox;
-    private JComboBox<String> datumComboBox;
     private JComboBox<String> projectCollectionComboBox;
     private JTextField masterShapeTextField;
 
@@ -247,33 +245,9 @@ public class ProjectInformationPage {
         heatingDateChooser.setEnabled(false);
         heatingDateChooser.setDate(null);
 
-        coordinateSystemComboBox.setEnabled(false);
         reSamplingComboBox.setEnabled(false);
-        datumComboBox.setEnabled(false);
-
         pixelSize.setEditable(false);
         pixelSize.setText("");
-
-        /*standardParallel1.setEditable(false);
-        standardParallel1.setText("");
-
-        centalMeridian.setEditable(false);
-        centalMeridian.setText("");
-
-        falseEasting.setEditable(false);
-        falseEasting.setText("");
-
-        standardParallel2.setEditable(false);
-        standardParallel2.setText("");
-
-        latitudeOfOrigin.setEditable(false);
-        latitudeOfOrigin.setText("");
-
-        falseNothing.setEditable(false);
-        falseNothing.setText("");
-
-        scalingTextField.setEditable(false);
-        scalingTextField.setText("");*/
 
         summaryListModel.clear();
 
@@ -307,18 +281,8 @@ public class ProjectInformationPage {
         heatingTextField.setText(project.GetHeatingDegree().toString());
 
         // set projection info
-        coordinateSystemComboBox.setSelectedItem(project.GetProjection().getProjectionType());
         reSamplingComboBox.setSelectedItem(project.GetProjection().getResamplingType());
-
-        datumComboBox.setSelectedItem(project.GetProjection().getDatum());
         pixelSize.setText(String.valueOf(project.GetProjection().getPixelSize()));
-        /*standardParallel1.setText(String.valueOf(project.GetProjection().getStandardParallel1()));
-        centalMeridian.setText(String.valueOf(project.GetProjection().getCentralMeridian()));
-        falseEasting.setText(String.valueOf(project.GetProjection().getFalseEasting()));
-        standardParallel2.setText(String.valueOf(project.GetProjection().getStandardParallel2()));
-        latitudeOfOrigin.setText(String.valueOf(project.GetProjection().getLatitudeOfOrigin()));
-        falseNothing.setText(String.valueOf(project.GetProjection().getFalseNorthing()));
-        scalingTextField.setText(String.valueOf(project.GetProjection().getScalingFactor()));*/
 
         // set summary info
         for(ProjectInfoSummary summary: project.GetSummaries()){
@@ -626,43 +590,22 @@ public class ProjectInformationPage {
         panel_2.setBounds(365, 420, 297, 390);
         frame.getContentPane().add(panel_2);
 
-        JLabel coordinateSystemLabel = new JLabel("Coordinate System:");
-        coordinateSystemLabel.setBounds(6, 16, 134, 14);
-        panel_2.add(coordinateSystemLabel);
-        coordinateSystemComboBox = new JComboBox<String>();
-        coordinateSystemComboBox.setBounds(146, 13, 140, 20);
-        coordinateSystemComboBox.addItem("ALBERS_EQUAL_AREA");
-        coordinateSystemComboBox.addItem("LAMBERT_CONFORMAL_CONIC");
-        coordinateSystemComboBox.addItem("TRANSVERSE_MERCATOR");
-        panel_2.add(coordinateSystemComboBox);
-
         JLabel reSamplingLabel = new JLabel("Re-sampling Type:");
-        reSamplingLabel.setBounds(6, 41, 109, 14);
+        reSamplingLabel.setBounds(6, 23, 109, 14);
         panel_2.add(reSamplingLabel);
         reSamplingComboBox = new JComboBox<String>();
-        reSamplingComboBox.setBounds(146, 38, 140, 20);
+        reSamplingComboBox.setBounds(146, 20, 140, 20);
         reSamplingComboBox.addItem("NEAREST_NEIGHBOR");
         reSamplingComboBox.addItem("BILINEAR");
         reSamplingComboBox.addItem("CUBIC_CONVOLUTION");
         panel_2.add(reSamplingComboBox);
 
-        JLabel datumLabel = new JLabel("Datum:");
-        datumLabel.setBounds(6, 66, 109, 14);
-        panel_2.add(datumLabel);
-        datumComboBox = new JComboBox<String>();
-        datumComboBox.setBounds(146, 63, 140, 20);
-        datumComboBox.addItem("NAD83");
-        datumComboBox.addItem("NAD27");
-        datumComboBox.addItem("WGS84");
-        datumComboBox.addItem("WGS72");
-        panel_2.add(datumComboBox);
-
         JLabel pixelSizeLabel = new JLabel("Pixel size meters:");
-        pixelSizeLabel.setBounds(6, 91, 109, 14);
+        pixelSizeLabel.setBounds(6, 48, 109, 14);
         panel_2.add(pixelSizeLabel);
         pixelSize = new JTextField();
         pixelSize.setColumns(10);
-        pixelSize.setBounds(146, 90, 140, 16);
+        pixelSize.setBounds(146, 51, 140, 16);
         panel_2.add(pixelSize);
     }
 
@@ -865,61 +808,15 @@ public class ProjectInformationPage {
             heatingDegree.appendChild(doc.createTextNode(heatingTextField.getText()));
             projectInfo.appendChild(heatingDegree);
 
-            // Coordinate System
-            Element coordinateSystem = doc.createElement("CoordinateSystem");
-            coordinateSystem.appendChild(doc.createTextNode(String.valueOf(coordinateSystemComboBox.getSelectedItem())));
-            projectInfo.appendChild(coordinateSystem);
-
             // resampling
             Element reSampling = doc.createElement("ReSampling");
             reSampling.appendChild(doc.createTextNode(String.valueOf(reSamplingComboBox.getSelectedItem())));
             projectInfo.appendChild(reSampling);
 
             //datum
-            Element datum = doc.createElement("Datum");
-            datum.appendChild(doc.createTextNode(String.valueOf(datumComboBox.getSelectedItem())));
-            projectInfo.appendChild(datum);
-
-            //datum
             Element pixelSize = doc.createElement("PixelSize");
             pixelSize.appendChild(doc.createTextNode(String.valueOf(this.pixelSize.getText())));
             projectInfo.appendChild(pixelSize);
-
-            /*
-            //Standard Parallel1
-            Element standardParallel1 = doc.createElement("StandardParallel1");
-            standardParallel1.appendChild(doc.createTextNode(String.valueOf(this.standardParallel1.getText())));
-            projectInfo.appendChild(standardParallel1);
-
-
-            //cental Meridian
-            Element centalMeridian = doc.createElement("CentalMeridian");
-            centalMeridian.appendChild(doc.createTextNode(String.valueOf(this.centalMeridian.getText())));
-            projectInfo.appendChild(centalMeridian);
-
-            //false Easting
-            Element falseEasting = doc.createElement("FalseEasting");
-            falseEasting.appendChild(doc.createTextNode(String.valueOf(this.falseEasting.getText())));
-            projectInfo.appendChild(falseEasting);
-
-            //standard Parallel2
-            Element standardParallel2 = doc.createElement("StandardParallel2");
-            standardParallel2.appendChild(doc.createTextNode(String.valueOf(this.standardParallel2.getText())));
-            projectInfo.appendChild(standardParallel2);
-
-            //latitude Of Origin
-            Element latitudeOfOrigin = doc.createElement("LatitudeOfOrigin");
-            latitudeOfOrigin.appendChild(doc.createTextNode(String.valueOf(this.latitudeOfOrigin.getText())));
-            projectInfo.appendChild(latitudeOfOrigin);
-
-            //false Nothing
-            Element falseNothing = doc.createElement("FalseNothing");
-            falseNothing.appendChild(doc.createTextNode(String.valueOf(this.falseNothing.getText())));
-            projectInfo.appendChild(falseNothing);
-
-            Element scalingFactor = doc.createElement("ScalingFactor");
-            scalingFactor.appendChild(doc.createTextNode(String.valueOf(scalingTextField.getText())));
-            projectInfo.appendChild(scalingFactor);*/
 
             //list of summary tiles
             Element summaries = doc.createElement("Summaries");
