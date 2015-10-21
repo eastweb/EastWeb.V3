@@ -77,12 +77,6 @@ public class ProjectInformationPage {
     private JTextField workingDirectory;
     private JTextField maskFile;
     private JTextField pixelSize;
-    private JTextField standardParallel1;
-    private JTextField centalMeridian;
-    private JTextField falseEasting;
-    private JTextField standardParallel2;
-    private JTextField latitudeOfOrigin;
-    private JTextField falseNothing;
     private JComboBox<String> timeZoneComboBox;
     private JComboBox<String> coordinateSystemComboBox;
     private JComboBox<String> reSamplingComboBox;
@@ -103,7 +97,6 @@ public class ProjectInformationPage {
 
     private DefaultListModel<String> listOfAddedPluginModel;
     private DefaultListModel<String> summaryListModel;
-    private JTextField scalingTextField;
     private JTextField resolutionTextField;
 
     /**
@@ -261,7 +254,7 @@ public class ProjectInformationPage {
         pixelSize.setEditable(false);
         pixelSize.setText("");
 
-        standardParallel1.setEditable(false);
+        /*standardParallel1.setEditable(false);
         standardParallel1.setText("");
 
         centalMeridian.setEditable(false);
@@ -280,7 +273,7 @@ public class ProjectInformationPage {
         falseNothing.setText("");
 
         scalingTextField.setEditable(false);
-        scalingTextField.setText("");
+        scalingTextField.setText("");*/
 
         summaryListModel.clear();
 
@@ -319,13 +312,13 @@ public class ProjectInformationPage {
 
         datumComboBox.setSelectedItem(project.GetProjection().getDatum());
         pixelSize.setText(String.valueOf(project.GetProjection().getPixelSize()));
-        standardParallel1.setText(String.valueOf(project.GetProjection().getStandardParallel1()));
+        /*standardParallel1.setText(String.valueOf(project.GetProjection().getStandardParallel1()));
         centalMeridian.setText(String.valueOf(project.GetProjection().getCentralMeridian()));
         falseEasting.setText(String.valueOf(project.GetProjection().getFalseEasting()));
         standardParallel2.setText(String.valueOf(project.GetProjection().getStandardParallel2()));
         latitudeOfOrigin.setText(String.valueOf(project.GetProjection().getLatitudeOfOrigin()));
         falseNothing.setText(String.valueOf(project.GetProjection().getFalseNorthing()));
-        scalingTextField.setText(String.valueOf(project.GetProjection().getScalingFactor()));
+        scalingTextField.setText(String.valueOf(project.GetProjection().getScalingFactor()));*/
 
         // set summary info
         for(ProjectInfoSummary summary: project.GetSummaries()){
@@ -671,63 +664,6 @@ public class ProjectInformationPage {
         pixelSize.setColumns(10);
         pixelSize.setBounds(146, 90, 140, 16);
         panel_2.add(pixelSize);
-
-        JLabel standardParallel1label = new JLabel("Standard parallel 1");
-        standardParallel1label.setBounds(6, 116, 109, 14);
-        panel_2.add(standardParallel1label);
-        standardParallel1 = new JTextField();
-        standardParallel1.setColumns(10);
-        standardParallel1.setBounds(146, 115, 140, 16);
-        panel_2.add(standardParallel1);
-
-        JLabel centalMeridianLabel = new JLabel("Cental meridian");
-        centalMeridianLabel.setBounds(6, 141, 109, 14);
-        panel_2.add(centalMeridianLabel);
-        centalMeridian = new JTextField();
-        centalMeridian.setColumns(10);
-        centalMeridian.setBounds(146, 140, 140, 16);
-        panel_2.add(centalMeridian);
-
-        JLabel falseEastingLabel = new JLabel("False easting");
-        falseEastingLabel.setBounds(6, 166, 109, 14);
-        panel_2.add(falseEastingLabel);
-        falseEasting = new JTextField();
-        falseEasting.setColumns(10);
-        falseEasting.setBounds(146, 165, 140, 16);
-        panel_2.add(falseEasting);
-
-        JLabel standardParallel2Label = new JLabel("Standard parallel 2");
-        standardParallel2Label.setBounds(6, 191, 109, 14);
-        panel_2.add(standardParallel2Label);
-        standardParallel2 = new JTextField();
-        standardParallel2.setColumns(10);
-        standardParallel2.setBounds(146, 192, 140, 16);
-        panel_2.add(standardParallel2);
-
-        JLabel latitudeOfOriginLabel = new JLabel("Latitude of origin");
-        latitudeOfOriginLabel.setBounds(6, 216, 109, 14);
-        panel_2.add(latitudeOfOriginLabel);
-        latitudeOfOrigin = new JTextField();
-        latitudeOfOrigin.setColumns(10);
-        latitudeOfOrigin.setBounds(146, 215, 140, 16);
-        panel_2.add(latitudeOfOrigin);
-
-        JLabel falseNothingLabel = new JLabel("False northing");
-        falseNothingLabel.setBounds(6, 241, 109, 14);
-        panel_2.add(falseNothingLabel);
-        falseNothing = new JTextField();
-        falseNothing.setColumns(10);
-        falseNothing.setBounds(146, 240, 140, 16);
-        panel_2.add(falseNothing);
-
-        JLabel lblScaling = new JLabel("Scaling Factor");
-        lblScaling.setBounds(6, 266, 134, 14);
-        panel_2.add(lblScaling);
-
-        scalingTextField = new JTextField();
-        scalingTextField.setBounds(146, 263, 140, 20);
-        panel_2.add(scalingTextField);
-        scalingTextField.setColumns(10);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -949,7 +885,7 @@ public class ProjectInformationPage {
             pixelSize.appendChild(doc.createTextNode(String.valueOf(this.pixelSize.getText())));
             projectInfo.appendChild(pixelSize);
 
-
+            /*
             //Standard Parallel1
             Element standardParallel1 = doc.createElement("StandardParallel1");
             standardParallel1.appendChild(doc.createTextNode(String.valueOf(this.standardParallel1.getText())));
@@ -983,7 +919,7 @@ public class ProjectInformationPage {
 
             Element scalingFactor = doc.createElement("ScalingFactor");
             scalingFactor.appendChild(doc.createTextNode(String.valueOf(scalingTextField.getText())));
-            projectInfo.appendChild(scalingFactor);
+            projectInfo.appendChild(scalingFactor);*/
 
             //list of summary tiles
             Element summaries = doc.createElement("Summaries");
