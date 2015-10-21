@@ -22,9 +22,9 @@ public class ReadTifFile
             // String tifFile = "D:\\testProjects\\TW_trmmRT\\Projects\\Project_TW\\TRMM3B42RT\\Indices\\Output\\2014\\077\\TRMM3B42RTIndex.tif";
             //String tifFile = "C:\\Users\\yi.liu\\Desktop\\tw_618\\indices\\trmmrt\\2014\\077\\TW_DIS_F_P_Dis_REGION\\trmmrt.tif";
 
-            String tifFile = "D:\\testProjects\\TW3\\Projects\\Project_TW3\\ModisLST\\Processor\\Temp\\Mask\\2014\\081\\day.tif";
+            //String tifFile = "D:\\testProjects\\TW3\\Projects\\Project_TW3\\ModisLST\\Processor\\Temp\\Mask\\2014\\081\\day.tif";
 
-            // String tifFile = "D:\\testProjects\\TW3\\Projects\\Project_TW3\\ModisLST\\Processor\\Output\\2014\\081\\day.tif";
+            String tifFile = "D:\\testProjects\\TW3\\Projects\\Project_TW3\\ModisLST\\Processor\\Output\\2014\\081\\day.tif";
 
             Dataset baseDS= gdal.Open(tifFile);
 
