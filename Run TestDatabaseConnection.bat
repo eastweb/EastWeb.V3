@@ -1,3 +1,3 @@
 @ECHO off
-java -jar .\TestDatabaseConnection.jar config.xml
+java -jar .\TestDatabaseConnection.jar .\config\config.xml
 PAUSE
