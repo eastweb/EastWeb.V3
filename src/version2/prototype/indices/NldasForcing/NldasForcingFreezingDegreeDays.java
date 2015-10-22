@@ -56,7 +56,7 @@ public class NldasForcingFreezingDegreeDays extends IndicesFramework {
 
         if(cdd == -9999){
             //            return -3.4028234663852886E38;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         }
 
         return cdd;

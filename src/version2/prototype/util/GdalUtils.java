@@ -21,7 +21,8 @@ public class GdalUtils {
     private GdalUtils() {
     }
 
-    public static final int NoValue = -9999;
+    public static final int NO_VALUE = -9999;
+    public static final float NO_DATA = Float.intBitsToFloat(0xff7fffff);
     /**
      * All GDAL operations should be done while holding a lock on this object.
      * GDAL is "not completely thread-safe", so this may be critical.

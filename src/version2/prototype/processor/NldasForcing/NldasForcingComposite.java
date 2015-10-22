@@ -95,6 +95,7 @@ public class NldasForcingComposite extends Composite
 
                         outputDS.SetGeoTransform(inputDSs.get(0).GetGeoTransform());
                         outputDS.SetProjection(inputDSs.get(0).GetProjection());
+                        outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
 
                         outputDS.GetRasterBand(1).WriteRaster(0, 0, rasterX, rasterY, GetOutputArray(band, output, inputDSs, rasterX, rasterY, prefix));
 

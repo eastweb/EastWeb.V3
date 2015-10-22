@@ -26,9 +26,9 @@ public class ModisNBAREVI extends IndicesFramework
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] == 32767 || values[RED] == 32767 || values[BLUE] == 32767) {
+        if (values[NIR] == 32767 || values[RED] == 32767 || values[BLUE] == 32767 || values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE || values[BLUE] == GdalUtils.NO_VALUE) {
             //            return -3.40282346639e+038;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         } else {
             return G * (values[NIR] - values[RED])
                     / (values[NIR] + C1 * values[RED] - C2 * values[BLUE] + L);

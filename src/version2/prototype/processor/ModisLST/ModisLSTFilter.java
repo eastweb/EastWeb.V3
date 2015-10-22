@@ -87,7 +87,7 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
 
-            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
 
@@ -103,7 +103,7 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(1), arrays.get(3), qcLevel));
 
-            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
             inputDS.delete();
@@ -164,7 +164,7 @@ public class ModisLSTFilter extends Filter{
                 if (   (!(bits3.equals("00"))) &&
                         ( (bits1.equals("00")) && (bits2.equals("00")) ) )
                 {
-                    dBand[i] = GdalUtils.NoValue;
+                    dBand[i] = GdalUtils.NO_VALUE;
                 };
                 break;
             case "MODERATE":
@@ -176,7 +176,7 @@ public class ModisLSTFilter extends Filter{
                 if (  (!(bits2.equals("00"))) &&
                         ( (bits2.equals("01")) && (!((bits1.equals("01")) || (bits1.equals("00")))) ))
                 {
-                    dBand[i] = GdalUtils.NoValue;
+                    dBand[i] = GdalUtils.NO_VALUE;
                 };
                 break;
 
@@ -186,7 +186,7 @@ public class ModisLSTFilter extends Filter{
 
                 if  (!bits2.equals("00"))
                 {
-                    dBand[i] = GdalUtils.NoValue;
+                    dBand[i] = GdalUtils.NO_VALUE;
                 }
                 break;
             }

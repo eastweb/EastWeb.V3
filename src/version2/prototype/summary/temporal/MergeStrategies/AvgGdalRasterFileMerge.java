@@ -81,7 +81,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
                     for(int x=0; x < xSize; x++)
                     {
                         index = y * xSize + x;
-                        if(tempArray[index] != -3.4028234663852886E38 && tempArray[index] != GdalUtils.NoValue) {
+                        if(tempArray[index] != -3.4028234663852886E38 && tempArray[index] != GdalUtils.NO_DATA) {
                             avgArray[index] += tempArray[index];
                             pixelsPerPos[index] += 1;
                         }
@@ -97,7 +97,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
                     if(pixelsPerPos[index] != 0) {
                         avgArray[index] = avgArray[index] / pixelsPerPos[index];
                     } else {
-                        avgArray[index] = GdalUtils.NoValue;
+                        avgArray[index] = GdalUtils.NO_DATA;
                     }
                 }
             }
@@ -105,7 +105,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
             // Write averaged array to raster file
             synchronized (GdalUtils.lockObject) {
                 avgRasterDs.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, avgArray);
-                avgRasterDs.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+                avgRasterDs.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_DATA);
             }
 
             tempArray = null;

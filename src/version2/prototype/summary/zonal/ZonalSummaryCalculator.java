@@ -287,9 +287,7 @@ public class ZonalSummaryCalculator {
         //FIXME: Can't get the no data value from NLDAS reprojected file, manually set it to 0. It will affect the zonal result.
         rasterBand.GetNoDataValue(noData);
         final ArrayList<Double> NO_DATA = new ArrayList<Double>(2);
-        NO_DATA.add(new Double(0));
-        NO_DATA.add(new Double(-3.4028234663852886E38));
-        NO_DATA.add(new Double(GdalUtils.NoValue));
+        NO_DATA.add(new Double(GdalUtils.NO_DATA));
 
         for (int y=0; y<HEIGHT; y++) {
             zoneBand.ReadRaster(0, y, WIDTH, 1, zoneArray); GdalUtils.errorCheck();
@@ -366,7 +364,7 @@ public class ZonalSummaryCalculator {
 
     private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore,
             SummariesCollection summariesCollection, int year, int day, Process process) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException,
-    ParserConfigurationException, SAXException, SQLException {
+            ParserConfigurationException, SAXException, SQLException {
         final Connection conn = DatabaseConnector.getConnection();
         Statement stmt = conn.createStatement();
         ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();

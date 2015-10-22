@@ -168,7 +168,7 @@ public class Clip
                     for (int i=0; i<maskArray.length; i++) {
                         if (maskArray[i] == 0)
                         {
-                            rasterArray[i] = GdalUtils.NoValue;
+                            rasterArray[i] = GdalUtils.NO_VALUE;
                         }
                     }
 
@@ -179,7 +179,7 @@ public class Clip
                 for (int i=1; i<=outputDS.GetRasterCount(); i++) {
                     Band band = outputDS.GetRasterBand(i);
 
-                    band.SetNoDataValue(GdalUtils.NoValue); // FIXME
+                    band.SetNoDataValue(GdalUtils.NO_VALUE); // FIXME
                     band.ComputeStatistics(false);
                 }
 

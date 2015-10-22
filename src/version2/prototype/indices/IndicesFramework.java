@@ -98,7 +98,7 @@ public abstract class IndicesFramework implements IndexCalculator {
             // Calculate statistics
             Band band = outputDS.GetRasterBand(1);
             //            band.SetNoDataValue(OUTPUT_NODATA);
-            band.SetNoDataValue(GdalUtils.NoValue);
+            band.SetNoDataValue(GdalUtils.NO_DATA);
             band.ComputeStatistics(false);
 
             // Close and flush output and inputs
@@ -114,25 +114,28 @@ public abstract class IndicesFramework implements IndexCalculator {
     protected void process(Dataset[] inputs, Dataset output) throws Exception {
         int xSize = inputs[0].GetRasterXSize();
         int ySize = inputs[0].GetRasterYSize();
-        double[][] inputsArray = new double[inputs.length][xSize];
-        double[] outputArray = new double[xSize];
+        double[][] inputsArray = new double[inputs.length][xSize * ySize];
+        double[] outputArray = new double[xSize * ySize];
 
-        for (int y = 0; y < ySize; y++) {
+        // Read in all of the data for each input
+        for (int i = 0; i < inputs.length; i++) {
+            inputs[i].GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, inputsArray[i]);
+        }
+
+        // For all of the data in each array, calculate the pixel value
+        for (int x = 0; x < (xSize*ySize); x++) {
+            double[] values = new double[inputs.length];
+
             for (int i = 0; i < inputs.length; i++) {
-                inputs[i].GetRasterBand(1).ReadRaster(0, y, xSize, 1, inputsArray[i]);
+                values[i] = inputsArray[i][x];
             }
 
-            for (int x = 0; x < xSize; x++) {
-                double[] values = new double[inputs.length];
+            outputArray[x] = calculatePixelValue(values);
+        }
 
-                for (int i = 0; i < inputs.length; i++) {
-                    values[i] = inputsArray[i][x];
-                }
-
-                outputArray[x] = calculatePixelValue(values);
-            }
-
-            output.GetRasterBand(1).WriteRaster(0, y, xSize, 1, outputArray);
+        // Write the whole array to the output
+        if(output.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, outputArray) == 3) {
+            throw new Exception("Error when writing raster during IndicesFramework process.");
         }
     }
 

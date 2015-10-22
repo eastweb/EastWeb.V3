@@ -58,7 +58,7 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
 
         if(total == -9999) {
             //            return -3.4028234663852886E38;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         }
 
         return total;

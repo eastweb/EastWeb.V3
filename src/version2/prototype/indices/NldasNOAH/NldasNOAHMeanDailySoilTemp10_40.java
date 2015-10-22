@@ -60,10 +60,10 @@ public class NldasNOAHMeanDailySoilTemp10_40 extends IndicesFramework{
     protected double calculatePixelValue(double[] values) throws Exception {
         // TODO Auto-generated method stub
 
-        if(values[INPUT] == GdalUtils.NoValue)
+        if(values[INPUT] == GdalUtils.NO_VALUE)
         {
             //            return -3.4028234663852886E38;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         }
         else
         {

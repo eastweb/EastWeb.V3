@@ -129,14 +129,14 @@ public class Mask {
 
                         for (int x=0; x<intersectWidth; x++) {
                             if (mask[x] == 0) {
-                                output[x] = GdalUtils.NoValue;
+                                output[x] = GdalUtils.NO_VALUE;
                             }
                         }
 
                         mOutputDS.GetRasterBand(1).WriteRaster(intersectX, intersectY + y, intersectWidth, 1, output);
                     }
 
-                    mOutputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+                    mOutputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
                     mOutputDS.GetRasterBand(1).ComputeStatistics(false);
                     mInputDS.delete();
                     mMaskDS.delete();

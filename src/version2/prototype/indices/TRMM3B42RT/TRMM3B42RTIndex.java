@@ -11,10 +11,10 @@ public class TRMM3B42RTIndex extends IndicesFramework
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[INPUT] == GdalUtils.NoValue) {
+        if (values[INPUT] == GdalUtils.NO_VALUE) {
             //   System.out.println("novalue : " + values[INPUT]);
             //            return -3.4028234663852886E38;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         } else {
             return values[INPUT];
         }

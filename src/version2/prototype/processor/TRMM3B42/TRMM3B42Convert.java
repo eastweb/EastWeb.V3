@@ -57,7 +57,7 @@ public class TRMM3B42Convert extends Convert{
 
                 dis.close();
 
-                outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NoValue);
+                outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
                 //TRMM 3B42
                 outputDS.SetGeoTransform(new double[] {
                         0.125, 0.25, 0,

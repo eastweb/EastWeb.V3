@@ -15,9 +15,9 @@ public class TRMM3B42Index extends IndicesFramework
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[INPUT] == 32767) {
+        if (values[INPUT] == 32767 || values[INPUT] == GdalUtils.NO_VALUE) {
             //            return -3.4028234663852886E38;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         } else {
             return values[INPUT];
         }

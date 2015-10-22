@@ -18,9 +18,9 @@ public class ModisNBARNDWI5 extends IndicesFramework {
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] == 32767 || values[SWIR] == 32767) {
+        if (values[NIR] == 32767 || values[SWIR] == 32767 || values[NIR] == GdalUtils.NO_VALUE || values[SWIR] == GdalUtils.NO_VALUE) {
             //            return -3.40282346639e+038;
-            return GdalUtils.NoValue;
+            return GdalUtils.NO_DATA;
         } else {
             return (values[NIR] - values[SWIR]) / (values[SWIR] + values[NIR]);
         }
