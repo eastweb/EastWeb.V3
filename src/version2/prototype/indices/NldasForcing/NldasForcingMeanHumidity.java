@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GdalUtils;
 
 public class NldasForcingMeanHumidity extends IndicesFramework {
 
@@ -50,7 +51,8 @@ public class NldasForcingMeanHumidity extends IndicesFramework {
         }
 
         if(mean == -9999) {
-            return -3.4028234663852886E38;
+            //            return -3.4028234663852886E38;
+            return GdalUtils.NoValue;
         }
 
         return mean;

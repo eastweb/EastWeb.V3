@@ -1,6 +1,7 @@
 package version2.prototype.indices.ModisNBAR;
 
 import version2.prototype.indices.IndicesFramework;
+import version2.prototype.util.GdalUtils;
 
 public class ModisNBARNDVI extends IndicesFramework {
     private static final int RED = 0;
@@ -11,7 +12,8 @@ public class ModisNBARNDVI extends IndicesFramework {
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
         if (values[NIR] == 32767 || values[RED] == 32767) {
-            return -3.40282346639e+038;
+            //            return -3.40282346639e+038;
+            return GdalUtils.NoValue;
         } else {
             return (values[NIR] - values[RED]) / (values[RED] + values[NIR]);
         }

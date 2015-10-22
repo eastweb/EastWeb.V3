@@ -58,7 +58,8 @@ public class NldasNOAHMeanDailySnowCover extends IndicesFramework{
 
         if(values[INPUT] == GdalUtils.NoValue)
         {
-            return -3.4028234663852886E38;
+            //            return -3.4028234663852886E38;
+            return GdalUtils.NoValue;
         }
         else
         {

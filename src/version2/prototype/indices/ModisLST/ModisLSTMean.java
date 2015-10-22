@@ -16,7 +16,8 @@ public class ModisLSTMean extends IndicesFramework{
         if (values[DAY_LST] == GdalUtils.NoValue || values[NIGHT_LST] == GdalUtils.NoValue
                 || values[DAY_LST] < 7500 || values[DAY_LST] > 65535
                 || values[NIGHT_LST] < 7500 || values[NIGHT_LST] > 65535) {
-            return -3.4028234663852886E38;
+            //            return -3.4028234663852886E38;
+            return GdalUtils.NoValue;
         } else {
             double day_lst = (values[DAY_LST] * 0.02) - 273.16;
             double night_lst = (values[NIGHT_LST] * 0.02) - 273.16;
