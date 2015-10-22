@@ -93,7 +93,8 @@ public abstract class IndicesFramework implements IndexCalculator {
 
             // Calculate statistics
             Band band = outputDS.GetRasterBand(1);
-            band.SetNoDataValue(OUTPUT_NODATA);
+            //            band.SetNoDataValue(OUTPUT_NODATA);
+            band.SetNoDataValue(GdalUtils.NoValue);
             band.ComputeStatistics(false);
 
             // Close and flush output and inputs
@@ -129,9 +130,10 @@ public abstract class IndicesFramework implements IndexCalculator {
         }
 
         // Write the whole array to the output
-        if(output.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 1, outputArray) == 3) {
-            throw new Exception("Error when writing raster during IndicesFramework process.");
-        }
+        output.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 1, outputArray);
+        //        if(output.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 1, outputArray) == 3) {
+        //            throw new Exception("Error when writing raster during IndicesFramework process.");
+        //        }
     }
 
     protected abstract double calculatePixelValue(double[] values) throws Exception;
