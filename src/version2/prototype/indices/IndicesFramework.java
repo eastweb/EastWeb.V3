@@ -20,7 +20,7 @@ import version2.prototype.util.GdalUtils;
 public abstract class IndicesFramework implements IndexCalculator {
     protected static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
-    protected static File[] mInputFiles;
+    protected File[] mInputFiles;
     protected File mOutputFile;
 
     // constructor which takes the listener to talk back to the UI
@@ -29,7 +29,7 @@ public abstract class IndicesFramework implements IndexCalculator {
     { }
 
     // set input file property
-    public static void setInputFiles(File[] inputFiles) {
+    public void setInputFiles(File[] inputFiles) {
         assert (inputFiles.length > 0);
         mInputFiles = new File[inputFiles.length];
         for(int i=0; i < inputFiles.length; i++) {
@@ -73,11 +73,7 @@ public abstract class IndicesFramework implements IndexCalculator {
             // Setup the output and inputs
             Dataset[] inputs = new Dataset[mInputFiles.length];
 
-            final int origNumOfFiles = mInputFiles.length;
             for (int i = 0; i < mInputFiles.length; i++) {
-                if(origNumOfFiles != mInputFiles.length) {
-                    throw new Exception("mInputFiles modified during for loop. [origNumOfFiles=" + origNumOfFiles + ", mInputFiles.length=" + mInputFiles.length + "]");
-                }
                 Dataset temp = gdal.Open(mInputFiles[i].getPath());
                 inputs[i] = temp;
             }
