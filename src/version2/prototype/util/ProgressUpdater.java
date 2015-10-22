@@ -146,8 +146,7 @@ public class ProgressUpdater {
         }
 
         if(progress > 100 || progress < 0) {
-            ErrorLog.add(configInstance, "Invalid Processor progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
-                    new Exception("Invalid Processor progress."));
+            ErrorLog.add(configInstance, "Invalid Processor progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress, new Exception("Invalid Processor progress."));
         }
 
         return progress;
