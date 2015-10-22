@@ -155,7 +155,7 @@ public class IndicesWorker extends ProcessWorker{
 
                     //set input files
                     Method method = indexCalculator.getClass().getMethod("setInputFiles", new Class[]{File[].class});
-                    method.invoke(indexCalculator, new Object[]{inputFiles});
+                    method.invoke(indexCalculator, new Object[]{inputFiles.clone()});
                     // set output file
                     String outFile = outputPath + File.separator + indices + ".tif";
                     method = indexCalculator.getClass().getMethod("setOutputFile", File.class);

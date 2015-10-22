@@ -31,7 +31,10 @@ public abstract class IndicesFramework implements IndexCalculator {
     // set input file property
     public static void setInputFiles(File[] inputFiles) {
         assert (inputFiles.length > 0);
-        mInputFiles = inputFiles;
+        mInputFiles = new File[inputFiles.length];
+        for(int i=0; i < inputFiles.length; i++) {
+            mInputFiles[i] = new File(inputFiles[i].getPath());
+        }
     }
 
     // set output file property
@@ -70,8 +73,13 @@ public abstract class IndicesFramework implements IndexCalculator {
             // Setup the output and inputs
             Dataset[] inputs = new Dataset[mInputFiles.length];
 
+            final int origNumOfFiles = mInputFiles.length;
             for (int i = 0; i < mInputFiles.length; i++) {
-                inputs[i] = gdal.Open(mInputFiles[i].getPath());
+                if(origNumOfFiles != mInputFiles.length) {
+                    throw new Exception("mInputFiles modified during for loop. [origNumOfFiles=" + origNumOfFiles + ", mInputFiles.length=" + mInputFiles.length + "]");
+                }
+                Dataset temp = gdal.Open(mInputFiles[i].getPath());
+                inputs[i] = temp;
             }
 
             /*   System.out.println("ind:  calculate(): " + mInputFiles[0].getPath());
@@ -110,30 +118,26 @@ public abstract class IndicesFramework implements IndexCalculator {
     protected void process(Dataset[] inputs, Dataset output) throws Exception {
         int xSize = inputs[0].GetRasterXSize();
         int ySize = inputs[0].GetRasterYSize();
-        double[][] inputsArray = new double[inputs.length][xSize * ySize];
-        double[] outputArray = new double[xSize * ySize];
+        double[][] inputsArray = new double[inputs.length][xSize];
+        double[] outputArray = new double[xSize];
 
-        // Read in all of the data for each input
-        for (int i = 0; i < inputs.length; i++) {
-            inputs[i].GetRasterBand(1).ReadRaster(0, 0, xSize, ySize, 1, inputsArray[i]);
-        }
-
-        // For all of the data in each array, calculate the pixel value
-        for (int x = 0; x < (xSize*ySize); x++) {
-            double[] values = new double[inputs.length];
-
+        for (int y = 0; y < ySize; y++) {
             for (int i = 0; i < inputs.length; i++) {
-                values[i] = inputsArray[i][x];
+                inputs[i].GetRasterBand(1).ReadRaster(0, y, xSize, 1, inputsArray[i]);
             }
 
-            outputArray[x] = calculatePixelValue(values);
-        }
+            for (int x = 0; x < xSize; x++) {
+                double[] values = new double[inputs.length];
 
-        // Write the whole array to the output
-        output.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 1, outputArray);
-        //        if(output.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, 1, outputArray) == 3) {
-        //            throw new Exception("Error when writing raster during IndicesFramework process.");
-        //        }
+                for (int i = 0; i < inputs.length; i++) {
+                    values[i] = inputsArray[i][x];
+                }
+
+                outputArray[x] = calculatePixelValue(values);
+            }
+
+            output.GetRasterBand(1).WriteRaster(0, y, xSize, 1, outputArray);
+        }
     }
 
     protected abstract double calculatePixelValue(double[] values) throws Exception;
