@@ -6,8 +6,7 @@ import version2.prototype.download.ModisDownloadUtils.ModisDownloader;
 
 public class ModisNBARQCDownloader extends ModisDownloader
 {
-    public ModisNBARQCDownloader(DataDate date, String outFolder,
-            DownloadMetaData data, String fileToDownload)
+    public ModisNBARQCDownloader(DataDate date, String outFolder, DownloadMetaData data, String fileToDownload)
     {
         super(date, outFolder, data, fileToDownload);
     }

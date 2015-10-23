@@ -9,8 +9,7 @@ import version2.prototype.download.ModisDownloadUtils.ModisListDatesFiles;
 
 public class ModisLSTListDatesFiles extends ModisListDatesFiles
 {
-    public ModisLSTListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project)
-            throws IOException
+    public ModisLSTListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException
     {
         super(startDate, data, project);
     }

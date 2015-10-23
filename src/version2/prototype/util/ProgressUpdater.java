@@ -106,8 +106,8 @@ public class ProgressUpdater {
         }
 
         if(progress > 100 || progress < 0) {
-            ErrorLog.add(configInstance, "Invalid Download progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
-                    new Exception("Invalid Download progress."));
+            ErrorLog.add(configInstance, "Invalid Download progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress
+                    + " for plugin '" + pluginName + "' and data '" + dataName + "'.", new Exception("Invalid Download progress."));
         }
 
         return progress;
@@ -146,7 +146,8 @@ public class ProgressUpdater {
         }
 
         if(progress > 100 || progress < 0) {
-            ErrorLog.add(configInstance, "Invalid Processor progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress, new Exception("Invalid Processor progress."));
+            ErrorLog.add(configInstance, "Invalid Processor progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress
+                    + " for plugin " + pluginName + ".", new Exception("Invalid Processor progress."));
         }
 
         return progress;
@@ -174,8 +175,8 @@ public class ProgressUpdater {
         }
 
         if(progress > 100 || progress < 0) {
-            ErrorLog.add(configInstance, "Invalid Indices progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
-                    new Exception("Invalid Indices progress."));
+            ErrorLog.add(configInstance, "Invalid Indices progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress
+                    + " for plugin " + pluginName + ".", new Exception("Invalid Indices progress."));
         }
 
         return progress;
@@ -207,8 +208,8 @@ public class ProgressUpdater {
         }
 
         if(progress > 100 || progress < 0) {
-            ErrorLog.add(configInstance, "Invalid Summary progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress,
-                    new Exception("Invalid Summary progress."));
+            ErrorLog.add(configInstance, "Invalid Summary progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress
+                    + " for plugin " + pluginInfo.GetName() + " and summary with ID " + summaryIDNum + ".", new Exception("Invalid Summary progress."));
         }
 
         return progress;

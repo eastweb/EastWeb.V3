@@ -66,10 +66,6 @@ public class ProjectInfoCollection {
             if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase(projectName)) {
                 return file;
             }
-            else{
-                System.out.println(file.GetProjectName());
-                System.out.println(projectName);
-            }
         }
 
         return null;

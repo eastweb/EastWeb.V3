@@ -20,11 +20,15 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public abstract class DownloadFactory {
+    /**
+     * Description of the data to be handled by the created GlobalDownloader and LocalDownloaders.
+     */
+    public final DownloadMetaData downloadMetaData;
+
     protected final EASTWebManagerI manager;
     protected final Config configInstance;
     protected final ProjectInfoFile projectInfoFile;
     protected final ProjectInfoPlugin pluginInfo;
-    protected final DownloadMetaData downloadMetaData;
     protected final PluginMetaData pluginMetaData;
     protected final Scheduler scheduler;
     protected final DatabaseCache outputCache;

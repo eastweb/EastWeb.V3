@@ -70,7 +70,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      */
     public void run() {
         try {
-            System.out.println("currentStartDate: " + currentStartDate);
+            System.out.println("GlobalDownloader of '" + metaData.name + "' files for plugin '" + pluginName + "' starting from " + currentStartDate + ".");
             System.out.println("Running: " + downloadCtr.getName().substring((downloadCtr.getName().lastIndexOf(".") > -1 ? downloadCtr.getName().lastIndexOf(".") + 1 : 0)));
 
             // Step 1: Get all downloads from ListDatesFiles

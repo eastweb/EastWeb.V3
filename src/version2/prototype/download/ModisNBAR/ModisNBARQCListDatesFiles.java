@@ -9,8 +9,7 @@ import version2.prototype.download.ModisDownloadUtils.ModisListDatesFiles;
 
 public class ModisNBARQCListDatesFiles extends ModisListDatesFiles
 {
-    public ModisNBARQCListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project)
-            throws IOException
+    public ModisNBARQCListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException
     {
         super(startDate, data, project);
     }
