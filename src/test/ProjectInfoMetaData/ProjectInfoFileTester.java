@@ -62,17 +62,8 @@ public class ProjectInfoFileTester {
         //        System.out.println(zid.getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH));
 
         assertTrue("TotalModisTiles is " + projectInfo.GetTotModisTiles(), projectInfo.GetTotModisTiles() == 120);
-        assertTrue("CoordinateSystem is " + projectInfo.GetProjection().getProjectionType().name(), projectInfo.GetProjection().getProjectionType().name().equals("ALBERS_EQUAL_AREA"));
         assertTrue("ReSampling is " + projectInfo.GetProjection().getResamplingType().name(), projectInfo.GetProjection().getResamplingType().name().equals("NEAREST_NEIGHBOR"));
-        assertTrue("Datum is " + projectInfo.GetProjection().getDatum().name(), projectInfo.GetProjection().getDatum().name().equals("NAD83"));
         assertTrue("PixelSize is " + projectInfo.GetProjection().getPixelSize(), projectInfo.GetProjection().getPixelSize() == 12);
-        assertTrue("StandardParallel1 is " + projectInfo.GetProjection().getStandardParallel1(), projectInfo.GetProjection().getStandardParallel1() == 112.1);
-        assertTrue("StandardParallel2 is " + projectInfo.GetProjection().getStandardParallel2(), projectInfo.GetProjection().getStandardParallel2() == 122.2);
-        assertTrue("ScalingFactor is " + projectInfo.GetProjection().getScalingFactor(), projectInfo.GetProjection().getScalingFactor() == 0);
-        assertTrue("CentalMeridian is " + projectInfo.GetProjection().getCentralMeridian(), projectInfo.GetProjection().getCentralMeridian() == 121);
-        assertTrue("FalseEasting is " + projectInfo.GetProjection().getFalseEasting(), projectInfo.GetProjection().getFalseEasting() == 151);
-        assertTrue("FalseNorthing is " + projectInfo.GetProjection().getFalseNorthing(), projectInfo.GetProjection().getFalseNorthing() == 33);
-        assertTrue("LatitudeOfOrigin is " + projectInfo.GetProjection().getLatitudeOfOrigin(), projectInfo.GetProjection().getLatitudeOfOrigin() == 111);
         assertTrue("FreezingDate is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("2015-06-02"));
         //        assertTrue("FreezingDate is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("--06-02"));
         assertTrue("CoolingDegree is " + projectInfo.GetCoolingDegree(), projectInfo.GetCoolingDegree() == 0);

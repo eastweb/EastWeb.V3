@@ -16,8 +16,8 @@ public class ModisNBARSAVI extends IndicesFramework {
             //            return -3.40282346639e+038;
             return GdalUtils.NO_DATA;
         } else {
-            return (values[NIR] - values[RED] * (1 + L))
-                    / (values[NIR] + values[RED] + L);
+            return ((values[NIR] - values[RED])
+                    / (values[NIR] + values[RED] + L)) * (1 + L);
         }
     }
 

@@ -20,6 +20,7 @@ import version2.prototype.processor.ImageArray;
 import version2.prototype.processor.ModisTileData;
 import version2.prototype.processor.Mozaic;
 import version2.prototype.processor.ProcessData;
+import version2.prototype.util.FileSystem;
 import version2.prototype.util.GdalUtils;
 
 public class ModisNBARFilterMozaic extends Mozaic {
@@ -60,14 +61,15 @@ public class ModisNBARFilterMozaic extends Mozaic {
         // loop for each band needed be reprojected
         for (int i = 0; i < bands.length; i++) {
             int currentBand = bands[i];
-            File temp = File.createTempFile("band" + currentBand, ".tif", outputFolder);
+            String bandFilePath = new String(FileSystem.CheckDirPath(outputFolder.getPath()) + "band" + currentBand + ".tif");
 
-            System.out.println("create temp: " + temp.toString());
-            temp.deleteOnExit();
+            System.out.println("create temp: " + bandFilePath.toString());
+            //            bandFilePath.deleteOnExit();
 
             String[] option = { "INTERLEAVE=PIXEL" };
             Dataset output = gdal.GetDriverByName("GTiff").Create(
-                    temp.getAbsolutePath(),
+                    //                    temp.getAbsolutePath(),
+                    bandFilePath,
                     outputXSize,
                     outputYSize,
                     1, // band number
@@ -137,7 +139,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
             output.delete();
 
             // add this band mozaic product into outputFile arraylist
-            outputFiles.add(temp);
+            outputFiles.add(new File(bandFilePath));
         }
 
     }

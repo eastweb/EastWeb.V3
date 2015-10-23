@@ -15,8 +15,6 @@ import org.xml.sax.SAXException;
 import jdk.nashorn.internal.ir.annotations.Immutable;
 import version2.prototype.Config;
 import version2.prototype.Projection;
-import version2.prototype.Projection.Datum;
-import version2.prototype.Projection.ProjectionType;
 import version2.prototype.Projection.ResamplingType;
 import version2.prototype.util.FileSystem;
 import version2.prototype.ZonalSummary;
@@ -104,9 +102,7 @@ import version2.prototype.ZonalSummary;
         timeZone = ReadTimeZone();
         clipping = ReadClipping();
         totModisTiles = ReadTotalModisTiles();
-        projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
-                ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
-                ReadLatitudeOfOrigin());
+        projection = new Projection(ReadResamplingType(), ReadPixelSize());
         freezingDate = ReadFreezingDate();
         coolingDegree = ReadCoolingDegree();
         heatingDate = ReadHeatingDate();
@@ -439,29 +435,6 @@ import version2.prototype.ZonalSummary;
         return 0;
     }
 
-    private ProjectionType ReadProjectionType()
-    {
-        NodeList nodes = GetUpperLevelNodeList("CoordinateSystem", "Missing coordinate system.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing coordinate system.");
-        if(values.size() > 0) {
-            ProjectionType pType = null;
-            switch(values.get(0))
-            {
-            case "ALBERS_EQUAL_AREA":
-                pType = ProjectionType.ALBERS_EQUAL_AREA;
-                break;
-            case "LAMBERT_CONFORMAL_CONIC":
-                pType = ProjectionType.LAMBERT_CONFORMAL_CONIC;
-                break;
-            case "TRANSVERSE_MERCATOR":
-                pType = ProjectionType.TRANSVERSE_MERCATOR;
-                break;
-            }
-            return pType;
-        }
-        return null;
-    }
-
     private ResamplingType ReadResamplingType()
     {
         NodeList nodes = GetUpperLevelNodeList("ReSampling", "Missing resampling.");
@@ -485,110 +458,12 @@ import version2.prototype.ZonalSummary;
         return null;
     }
 
-    private Datum ReadDatum()
-    {
-        NodeList nodes = GetUpperLevelNodeList("Datum", "Missing datums.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing datums.");
-        if(values.size() > 0) {
-            Datum d = null;
-            switch(values.get(0))
-            {
-            case "NAD27":
-                d = Datum.NAD27;
-                break;
-            case "NAD83":
-                d = Datum.NAD83;
-                break;
-            case "WGS66":
-                d = Datum.WGS66;
-                break;
-            case "WGS72":
-                d = Datum.WGS72;
-                break;
-            case "WGS84":
-                d = Datum.WGS84;
-                break;
-            }
-            return d;
-        }
-        return null;
-    }
-
     private int ReadPixelSize()
     {
         NodeList nodes = GetUpperLevelNodeList("PixelSize", "Missing PixelSize.");
         ArrayList<String> values = GetNodeListValues(nodes, "Missing PixelSize.");
         if(values.size() > 0) {
             return Integer.parseInt(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadStandardParallel1()
-    {
-        NodeList nodes = GetUpperLevelNodeList("StandardParallel1", "Missing standard parallel 1.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 1.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadStandardParallel2()
-    {
-        NodeList nodes = GetUpperLevelNodeList("StandardParallel2", "Missing standard parallel 2.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing standard parallel 2.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadScalingFactor() {
-        NodeList nodes = GetUpperLevelNodeList("ScalingFactor", "Missing scaling factor.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing scaling factor.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadCentralMeridian()
-    {
-        NodeList nodes = GetUpperLevelNodeList("CentralMeridian", "Missing central meridian.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing central meridian.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadFalseEasting()
-    {
-        NodeList nodes = GetUpperLevelNodeList("FalseEasting", "Missing false easting.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing false easting.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadFalseNorthing()
-    {
-        NodeList nodes = GetUpperLevelNodeList("FalseNorthing", "Missing false nothing.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing false nothing.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
-        }
-        return 0;
-    }
-
-    private double ReadLatitudeOfOrigin()
-    {
-        NodeList nodes = GetUpperLevelNodeList("LatitudeOfOrigin", "Missing latitude of origin.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing latitude of origin.");
-        if(values.size() > 0) {
-            return Double.parseDouble(values.get(0));
         }
         return 0;
     }
