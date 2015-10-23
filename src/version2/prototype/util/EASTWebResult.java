@@ -2,12 +2,14 @@ package version2.prototype.util;
 
 import java.util.ArrayList;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
+
 /**
  *
  * @author michael.devos
  *
  */
-public class EASTWebResult {
+@Immutable public class EASTWebResult {
     public final String indexName;
     public final int year;
     public final int day;
@@ -18,8 +20,11 @@ public class EASTWebResult {
     public final String shapeFilePath;
     public final String temporalSummaryCompositionStrategyClassName;
     public final ArrayList<String> summaryNames;
-    private final ArrayList<Double> summaryCalculations;
-    private final String filePath;
+    /**
+     * List of summary calculation results. The order and name of the summary calculations contained can be found in the summaryNames property of this class.
+     */
+    public final ArrayList<Double> summaryCalculations;
+    public final String filePath;
 
     /**
      * Creates an immutable EASTWebResult initialized with the given values.
@@ -37,7 +42,8 @@ public class EASTWebResult {
      * @param summaryCalculations  - the summary result calculations in the order defined by summaryNames
      * @param filePath  - file path of resulting csv file
      */
-    public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath,
+    @SuppressWarnings("unchecked")
+    @Immutable public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath,
             String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations, String filePath)
     {
         indexName = indexNm;
@@ -49,18 +55,8 @@ public class EASTWebResult {
         this.areaCode = areaCode;
         this.shapeFilePath = shapeFilePath;
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
-        this.summaryNames = summaryNames;
-        this.summaryCalculations = summaryCalculations;
+        this.summaryNames = (ArrayList<String>) summaryNames.clone();
+        this.summaryCalculations = (ArrayList<Double>) summaryCalculations.clone();
         this.filePath = filePath;
-    }
-
-    /**
-     * Gets the list of summary calculation results. The order and name of the summary calculations contained can be found in the summaryNames property of this class.
-     *
-     * @return the resulting summary calculations
-     */
-    public ArrayList<Double> GetSummaryCalculations()
-    {
-        return summaryCalculations;
     }
 }

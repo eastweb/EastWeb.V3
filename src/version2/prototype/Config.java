@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import version2.prototype.util.FileSystem;
 
 //import version2.prototype.util.LazyCachedReference;
@@ -19,7 +20,7 @@ import version2.prototype.util.FileSystem;
  * @author michael.devos
  *
  */
-public class Config {
+@Immutable public class Config {
     private static final String CONFIG_FILENAME = ".//config//config.xml";
     private static final String ERROR_LOG_DIR_KEY = "ErrorLogDir";
     // Download section
@@ -144,6 +145,7 @@ public class Config {
         maxNumOfConnectionsPerInstance = maxNumOfConnectionsPerInstanceTemp;
     }
 
+    @SuppressWarnings("unchecked")
     private Config(String errorLogDir, String downloadDir, String globalSchema, String databaseHost, Integer port, String databaseName, String databaseUsername, String databasePassword,
             Integer maxNumOfConnectionsPerInstance, ArrayList<String> summaryTempCompStrategies, ArrayList<String> summaryCalculations)
     {
@@ -155,9 +157,9 @@ public class Config {
         this.databaseName = databaseName;
         this.databaseUsername = databaseUsername;
         this.databasePassword = databasePassword;
-        this.summaryTempCompStrategies = summaryTempCompStrategies;
-        this.summaryCalculations = summaryCalculations;
         this.maxNumOfConnectionsPerInstance = maxNumOfConnectionsPerInstance;
+        this.summaryTempCompStrategies = (ArrayList<String>) summaryTempCompStrategies.clone();
+        this.summaryCalculations = (ArrayList<String>) summaryCalculations.clone();
     }
 
     /**
@@ -196,6 +198,7 @@ public class Config {
      * @param databaseUsername
      * @param databasePassword
      * @param maxNumOfConnectionsPerInstance
+     * @param summaryTempCompStrategies
      * @param summaryCalculations
      * @return a new Config object
      */
@@ -241,11 +244,13 @@ public class Config {
         return maxNumOfConnectionsPerInstance;
     }
 
+    @SuppressWarnings("unchecked")
     public ArrayList<String> getSummaryTempCompStrategies() {
-        return summaryTempCompStrategies;
+        return (ArrayList<String>) summaryTempCompStrategies.clone();
     }
 
+    @SuppressWarnings("unchecked")
     public ArrayList<String> getSummaryCalculations() {
-        return summaryCalculations;
+        return (ArrayList<String>) summaryCalculations.clone();
     }
 }

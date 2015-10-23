@@ -79,7 +79,7 @@ public class SchedulerStatusContainerTest {
         plugins.add(new ProjectInfoPlugin(pluginName, indices, null, null));
         summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(new ProjectInfoSummary(new ZonalSummary("a shape file path", "areaValueField", "areaNameField"), temporalSummaryCompositionStrategyClassName, 1));
-        projectMetaData = new ProjectInfoFile(plugins, startDate, projectName, null, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
+        projectMetaData = new ProjectInfoFile(plugins, startDate, projectName, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance("src/test/Scheduler/" + pluginName + ".xml");
     }
 
@@ -150,8 +150,8 @@ public class SchedulerStatusContainerTest {
 
         // Test
         status = container.GetStatus();
-        assertEquals("Current Data Download progress incorrect.", currentDataDownloadProgress, status.downloadProgressesByData.get(pluginName).get("data"), 0.0);
-        assertEquals("Current QC Download progress incorrect.", currentQCDownloadProgress, status.downloadProgressesByData.get(pluginName).get("qc"), 0.0);
+        assertEquals("Current Data Download progress incorrect.", currentDataDownloadProgress, status.GetDownloadProgressesByData().get(pluginName).get("data"), 0.0);
+        assertEquals("Current QC Download progress incorrect.", currentQCDownloadProgress, status.GetDownloadProgressesByData().get(pluginName).get("qc"), 0.0);
         assertNotEquals("LastModifiedTime has not changed.", originalLastModifiedTime, status.LastModifiedTime);
     }
 
@@ -171,7 +171,7 @@ public class SchedulerStatusContainerTest {
 
         // Test
         status = container.GetStatus();
-        assertEquals("Current Processor progress incorrect.", currentProcessorProgress, status.processorProgresses.get(pluginName), 0.0);
+        assertEquals("Current Processor progress incorrect.", currentProcessorProgress, status.GetProcessorProgresses().get(pluginName), 0.0);
         assertNotEquals("LastModifiedTime has not changed.", originalLastModifiedTime, status.LastModifiedTime);
     }
 
@@ -191,7 +191,7 @@ public class SchedulerStatusContainerTest {
 
         // Test
         status = container.GetStatus();
-        assertEquals("Current Indices progress incorrect.", currentIndicesProgress, status.indicesProgresses.get(pluginName), 0.0);
+        assertEquals("Current Indices progress incorrect.", currentIndicesProgress, status.GetIndicesProgresses().get(pluginName), 0.0);
         assertNotEquals("LastModifiedTime has not changed.", originalLastModifiedTime, status.LastModifiedTime);
     }
 
@@ -212,7 +212,7 @@ public class SchedulerStatusContainerTest {
 
         // Test
         status = container.GetStatus();
-        assertEquals("Current Summary progress incorrect.", currentSummaryProgress, status.summaryProgresses.get(pluginName).get(summaryID), 0.0);
+        assertEquals("Current Summary progress incorrect.", currentSummaryProgress, status.GetSummaryProgresses().get(pluginName).get(summaryID), 0.0);
         assertNotEquals("LastModifiedTime has not changed.", originalLastModifiedTime, status.LastModifiedTime);
     }
 

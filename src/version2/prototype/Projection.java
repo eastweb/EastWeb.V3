@@ -196,18 +196,18 @@ public class Projection implements Serializable {
     @Override
     public String toString() {
         return new StringBuilder()
-        .append("{projection type: ").append(projectionType)
-        .append(", resampling type: ").append(resamplingType)
-        .append(", datum: ").append(datum)
-        .append(", pixel size: ").append(Integer.toString(pixelSize))
-        .append(", standard parallel 1: ").append(Double.toString(standardParallel1))
-        .append(", standard parallel 2: ").append(Double.toString(standardParallel2))
-        .append(", scaling factor: ").append(Double.toString(scalingFactor))
-        .append(", central meridian: ").append(Double.toString(centralMeridian))
-        .append(", false northing: ").append(Double.toString(falseEasting))
-        .append(", false easting: ").append(Double.toString(falseNorthing))
-        .append(", latitude of origin: ").append(Double.toString(latitudeOfOrigin))
-        .append("}").toString();
+                .append("{projection type: ").append(projectionType)
+                .append(", resampling type: ").append(resamplingType)
+                .append(", datum: ").append(datum)
+                .append(", pixel size: ").append(Integer.toString(pixelSize))
+                .append(", standard parallel 1: ").append(Double.toString(standardParallel1))
+                .append(", standard parallel 2: ").append(Double.toString(standardParallel2))
+                .append(", scaling factor: ").append(Double.toString(scalingFactor))
+                .append(", central meridian: ").append(Double.toString(centralMeridian))
+                .append(", false northing: ").append(Double.toString(falseEasting))
+                .append(", false easting: ").append(Double.toString(falseNorthing))
+                .append(", latitude of origin: ").append(Double.toString(latitudeOfOrigin))
+                .append("}").toString();
     }
 
 }

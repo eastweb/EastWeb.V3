@@ -35,7 +35,7 @@ public class FileSystemTest {
     @BeforeClass
     public static void setUpBeforeClass() {
         testConfigInstance = Config.getAnInstance("C:\\EASTWeb", "C:\\EASTWeb\\Downloads", null, null, null, null, null, null, null, null, null);
-        testProjectInfo = new ProjectInfoFile(null, null, null, "C:\\Users\\sufi", null, null, null, null, null, null, null, null, null, null, null, null, null);
+        testProjectInfo = new ProjectInfoFile(null, null, null, "C:\\Users\\sufi", null, null, null, null, null, null, null, null, null, null, null, null);
         testNames = new ArrayList<String>(4);
         testNames.add("A_Product");
         testNames.add("1A_Product");

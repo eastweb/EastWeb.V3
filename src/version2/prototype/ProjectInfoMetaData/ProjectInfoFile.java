@@ -12,6 +12,7 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import version2.prototype.Config;
 import version2.prototype.Projection;
 import version2.prototype.Projection.Datum;
@@ -26,7 +27,7 @@ import version2.prototype.ZonalSummary;
  * @author michael.devos
  *
  */
-public class ProjectInfoFile {
+@Immutable public class ProjectInfoFile {
     private final Config configInstance;
     private static DateTimeFormatter datesFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz uuuu");
     private DocumentBuilderFactory domFactory;
@@ -41,10 +42,7 @@ public class ProjectInfoFile {
      * True if there has been an error during parsing.
      */
     public boolean error;
-    /**
-     * List of error messages if any. Empty if no errors.
-     */
-    public ArrayList<String> errorMsg;
+
     //    private final String rootElement = "ProjectInfo";
     private final ArrayList<ProjectInfoPlugin> plugins;
     private final LocalDate startDate;
@@ -56,13 +54,14 @@ public class ProjectInfoFile {
     private final String timeZone;
     private final Boolean clipping;
     private final Integer totModisTiles;
-    //    private final ArrayList<String> modisTiles;
     private final Projection projection;
     private final LocalDate heatingDate;
     private final Double heatingDegree;
     private final LocalDate freezingDate;
     private final Double coolingDegree;
     private final ArrayList<ProjectInfoSummary> summaries;
+
+    private ArrayList<String> errorMsg;
 
     /**
      * Creates a ProjectInfoFile object from parsing the given xml file. Doesn't allow its data to be changed and doesn't dynamically update its
@@ -105,7 +104,6 @@ public class ProjectInfoFile {
         timeZone = ReadTimeZone();
         clipping = ReadClipping();
         totModisTiles = ReadTotalModisTiles();
-        //        modisTiles = ReadModisTiles();
         projection = new Projection(ReadProjectionType(), ReadResamplingType(), ReadDatum(), ReadPixelSize(), ReadStandardParallel1(),
                 ReadStandardParallel2(), ReadScalingFactor(), ReadCentralMeridian(), ReadFalseEasting(), ReadFalseNorthing(),
                 ReadLatitudeOfOrigin());
@@ -129,7 +127,6 @@ public class ProjectInfoFile {
      * @param timeZone
      * @param clipping
      * @param totModisTiles
-     * @param modisTiles
      * @param projection
      * @param freezingDate
      * @param coolingDegree
@@ -137,13 +134,14 @@ public class ProjectInfoFile {
      * @param heatingDegree
      * @param summaries
      */
+    @SuppressWarnings("unchecked")
     public ProjectInfoFile(ArrayList<ProjectInfoPlugin> plugins, LocalDate startDate, String projectName, String workingDir, String maskingFile, Integer maskingResolution, String masterShapeFile,
-            String timeZone, Boolean clipping, Integer totModisTiles, ArrayList<String> modisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate,
-            Double heatingDegree, ArrayList<ProjectInfoSummary> summaries)
+            String timeZone, Boolean clipping, Integer totModisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate, Double heatingDegree,
+            ArrayList<ProjectInfoSummary> summaries)
     {
         configInstance = null;
         xmlLocation = null;
-        this.plugins = plugins;
+        this.plugins = (ArrayList<ProjectInfoPlugin>) plugins.clone();
         this.startDate = startDate;
         this.projectName = projectName;
         this.workingDir = workingDir;
@@ -153,13 +151,12 @@ public class ProjectInfoFile {
         this.timeZone = timeZone;
         this.clipping = clipping;
         this.totModisTiles = totModisTiles;
-        //        this.modisTiles = modisTiles;
-        this.projection = projection;
+        this.projection = new Projection(projection);
         this.freezingDate = freezingDate;
         this.coolingDegree = coolingDegree;
         this.heatingDate = heatingDate;
         this.heatingDegree = heatingDegree;
-        this.summaries = summaries;
+        this.summaries = (ArrayList<ProjectInfoSummary>) summaries.clone();
     }
 
     /**
@@ -167,7 +164,8 @@ public class ProjectInfoFile {
      *
      * @return list of ProjectInfoPlugin objects that could be created from the xml's data.
      */
-    public ArrayList<ProjectInfoPlugin> GetPlugins() { return plugins; }
+    @SuppressWarnings("unchecked")
+    public ArrayList<ProjectInfoPlugin> GetPlugins() { return (ArrayList<ProjectInfoPlugin>) plugins.clone(); }
 
     /**
      * Gets the start date gotten from the once parsed xml file.
@@ -233,25 +231,19 @@ public class ProjectInfoFile {
     public int GetTotModisTiles() { return totModisTiles; }
 
     /**
-     * Gets the modis tiles gotten from the once parsed xml file.
-     *
-     * @return modis tile names gotten from the xml's data.
-     */
-    //    public ArrayList<String> GetModisTiles() { return modisTiles; }
-
-    /**
      * Gets the list of summaries gotten from the once parsed xml file.
      *
      * @return list of ProjectInfoSummary objects created from the xml's data.
      */
-    public ArrayList<ProjectInfoSummary> GetSummaries() { return summaries; }
+    @SuppressWarnings("unchecked")
+    public ArrayList<ProjectInfoSummary> GetSummaries() { return (ArrayList<ProjectInfoSummary>) summaries.clone(); }
 
     /**
      * Gets the projection information gotten from the once parsed xml file.
      *
      * @return Projection object created from the xml's data.
      */
-    public Projection GetProjection() { return projection; }
+    public Projection GetProjection() { return new Projection(projection); }
 
     /**
      * Gets the freezing date gotten from the once parsed xml file.
@@ -280,6 +272,14 @@ public class ProjectInfoFile {
      * @return Double - the heating degree read from the xml's data.
      */
     public Double GetHeatingDegree() { return heatingDegree; }
+
+    /**
+     * List of error messages if any. Empty if no errors.
+     *
+     * @return list of error message strings if any
+     */
+    @SuppressWarnings("unchecked")
+    public ArrayList<String> GetErrorMessages() { return (ArrayList<String>) errorMsg.clone(); }
 
     private ArrayList<ProjectInfoPlugin> ReadPlugins()
     {
@@ -437,16 +437,6 @@ public class ProjectInfoFile {
             return Integer.parseInt(values.get(0));
         }
         return 0;
-    }
-
-    private ArrayList<String> ReadModisTiles()
-    {
-        NodeList nodes = GetUpperLevelNodeList("Modis", "Missing modis tiles.", "ModisTiles");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing modis tiles.");
-        if(values.size() > 0) {
-            return values;
-        }
-        return null;
     }
 
     private ProjectionType ReadProjectionType()

@@ -154,10 +154,10 @@ public class ProjectProgress {
                         summaryProgressBar.setValue(0);
                         itemLog.clear();
                     } else {
-                        downloadProgressBar.setValue(GetAverageDownload(status.downloadProgressesByData).intValue());   // Truncates the double (so value always equates to double rounded down)
-                        processProgressBar.setValue(GetAverage(status.processorProgresses).intValue());
-                        indiciesProgressBar.setValue(GetAverage(status.indicesProgresses).intValue());
-                        summaryProgressBar.setValue(GetAverageSummary(status.summaryProgresses).intValue());
+                        downloadProgressBar.setValue(GetAverageDownload(status.GetDownloadProgressesByData()).intValue());   // Truncates the double (so value always equates to double rounded down)
+                        processProgressBar.setValue(GetAverage(status.GetProcessorProgresses()).intValue());
+                        indiciesProgressBar.setValue(GetAverage(status.GetIndicesProgresses()).intValue());
+                        summaryProgressBar.setValue(GetAverageSummary(status.GetSummaryProgresses()).intValue());
 
                         itemLog.clear();
                         for(String log : status.ReadAllRemainingLogEntries())

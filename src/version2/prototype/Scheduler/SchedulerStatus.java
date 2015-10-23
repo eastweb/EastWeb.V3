@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -17,7 +18,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
  * @author michael.devos
  *
  */
-public class SchedulerStatus {
+@Immutable public class SchedulerStatus {
     /**
      * Scheduler instance assigned unique identifier.
      */
@@ -50,24 +51,13 @@ public class SchedulerStatus {
      * A timestamp depicting the time this SchedulerStatus object was created/retrieved.
      */
     public final LocalDateTime RetrievedTime;
-    /**
-     * A map of plugin names to their named data to their download progress at the time specified by lastModifiedTime.
-     */
-    public final TreeMap<String, TreeMap<String, Double>> downloadProgressesByData;
-    /**
-     * A map of plugin names to their indices progress at the time specified by lastModifiedTime.
-     */
-    public final TreeMap<String, Double> processorProgresses;
-    /**
-     * A map of plugin names to their indices progress at the time specified by lastModifiedTime.
-     */
-    public final TreeMap<String, Double> indicesProgresses;
-    /**
-     * A map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime.
-     */
-    public final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
 
+    private final TreeMap<String, TreeMap<String, Double>> downloadProgressesByData;
+    private final TreeMap<String, Double> processorProgresses;
+    private final TreeMap<String, Double> indicesProgresses;
+    private final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
     private final List<String> log;
+
     private int logReaderPos;
 
     /**
@@ -125,6 +115,81 @@ public class SchedulerStatus {
         LastModifiedTime = statusToCopy.LastModifiedTime;
         RetrievedTime = statusToCopy.RetrievedTime;
     }
+
+    /**
+     * Gets status of new log entries list.
+     * @return boolean - TRUE if new log entries are within this status, FALSE otherwise is list is null or empty
+     */
+    public boolean HasLogEntries() {
+        if(log != null && log.size() > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Reads the next log entry. Incrementing position counter.
+     * @return String - next log entry if there is one, otherwise null if empty or all log entries read.
+     */
+    public String ReadNextLogEntry()
+    {
+        if(logReaderPos < log.size()) {
+            return log.get(logReaderPos++);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns a String list of log entries either as a subset of the total list of the whole list depending on the current reader position in the list. After calling the reader will return null until
+     * it is reset.
+     * @return list of log entries strings from the current reader position. If reader hasn't been used or has been reset immediately prior to this call then this list will contain the entire list of new
+     * log entries.
+     */
+    public List<String> ReadAllRemainingLogEntries()
+    {
+        if(logReaderPos < log.size())
+        {
+            ArrayList<String> logEntries = new ArrayList<String>();
+            for(;logReaderPos < log.size(); logReaderPos++)
+            {
+                logEntries.add(log.get(logReaderPos));
+            }
+            return logEntries;
+        } else {
+            return new ArrayList<String>(0);
+        }
+    }
+
+    /**
+     * Resets the log reader to start position.
+     */
+    public void ResetLogReader()
+    {
+        logReaderPos = 0;
+    }
+
+    /**
+     * Gets a map of plugin names to their named data to their download progress at the time specified by lastModifiedTime.
+     * @return map of plugin names to their named data to their download progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, TreeMap<String, Double>> GetDownloadProgressesByData() { return cloneTreeMapStringStringDouble(downloadProgressesByData); }
+    /**
+     * Gets a map of plugin names to their indices progress at the time specified by lastModifiedTime.
+     * @return map of plugin names to their indices progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, Double> GetProcessorProgresses() { return cloneTreeMapStringDouble(processorProgresses); }
+    /**
+     * Gets a map of plugin names to their indices progress at the time specified by lastModifiedTime.
+     * @return map of plugin names to their indices progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, Double> GetIndicesProgresses() { return cloneTreeMapStringDouble(indicesProgresses); }
+    /**
+     * Gets a map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime.
+     * @return map of plugin names to their maps of summary IDs to their summary progress at the time specified by lastModifiedTime
+     */
+    public TreeMap<String, TreeMap<Integer, Double>> GetSummaryProgresses() { return cloneTreeMapStringIntegerDouble(summaryProgresses); }
 
     private TreeMap<String, TreeMap<Integer, Double>> cloneTreeMapStringIntegerDouble(TreeMap<String, TreeMap<Integer, Double>> input)
     {
@@ -185,58 +250,5 @@ public class SchedulerStatus {
         return clone;
     }
 
-    /**
-     * Gets status of new log entries list.
-     * @return boolean - TRUE if new log entries are within this status, FALSE otherwise is list is null or empty
-     */
-    public boolean HasLogEntries() {
-        if(log != null && log.size() > 0){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Reads the next log entry. Incrementing position counter.
-     * @return String - next log entry if there is one, otherwise null if empty or all log entries read.
-     */
-    public String ReadNextLogEntry()
-    {
-        if(logReaderPos < log.size()) {
-            return log.get(logReaderPos++);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns a String list of log entries either as a subset of the total list of the whole list depending on the current reader position in the list. After calling the reader will return null until
-     * it is reset.
-     * @return list of log entries strings from the current reader position. If reader hasn't been used or has been reset immediately prior to this call then this list will contain the entire list of new
-     * log entries.
-     */
-    public List<String> ReadAllRemainingLogEntries()
-    {
-        if(logReaderPos < log.size())
-        {
-            ArrayList<String> logEntries = new ArrayList<String>();
-            for(;logReaderPos < log.size(); logReaderPos++)
-            {
-                logEntries.add(log.get(logReaderPos));
-            }
-            return logEntries;
-        } else {
-            return new ArrayList<String>(0);
-        }
-    }
-
-    /**
-     * Resets the log reader to start position.
-     */
-    public void ResetLogReader()
-    {
-        logReaderPos = 0;
-    }
 
 }

@@ -124,7 +124,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         //        listDatesFilesQC = new ModisNBARQCListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
         // For testing with TRMM3B42RT plugin
         listDatesFiles = new TRMM3B42RTListDatesFiles(new DataDate(startDate), dData, null);
-        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, null, timeZone, null, null, null, null, null, null, null, null, null);
+        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, timeZone, null, null, null, null, null, null, null, null, null);
     }
 
     /**

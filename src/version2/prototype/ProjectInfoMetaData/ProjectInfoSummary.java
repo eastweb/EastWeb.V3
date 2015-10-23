@@ -1,5 +1,6 @@
 package version2.prototype.ProjectInfoMetaData;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import version2.prototype.ZonalSummary;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 
@@ -9,7 +10,7 @@ import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
  * @author michael.devos
  *
  */
-public class ProjectInfoSummary {
+@Immutable public class ProjectInfoSummary {
     public static final String AREA_NAME_FIELD_TAG = "AreaNameField";
     public static final String SHAPE_FILE_TAG = "Shape File Path";
     public static final String AREA_CODE_FIELD_TAG = "AreaCodeField";

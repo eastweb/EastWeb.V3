@@ -94,7 +94,6 @@ public class SchedulerTest {
                 null,
                 null,
                 null,
-                null,
                 summaries);
     }
 

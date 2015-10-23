@@ -98,7 +98,7 @@ public class ProgressUpdaterTest {
                 null,
                 1));
         projectMetaData = new ProjectInfoFile(plugins, day1, projectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null,
-                0, null, null, null, null, null, null, summaries);
+                0, null, null, null, null, null, summaries);
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance("src/test/util/" + pluginName + ".xml");
         pluginData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
         daysPerInputData = pluginData.DaysPerInputData;

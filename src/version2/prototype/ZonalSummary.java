@@ -2,13 +2,15 @@ package version2.prototype;
 
 import java.io.Serializable;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
+
 /**
  * Represents metadata for a single zonal summary. Paring of shape file and zone field. Object is immutable.
  *
  * @author michael.devos
  *
  */
-public class ZonalSummary implements Serializable {
+@Immutable public class ZonalSummary implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String shapeFile;
     private final String areaIDField;

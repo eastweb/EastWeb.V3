@@ -95,7 +95,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
                 1));
 
         projectInfoFile = new ProjectInfoFile(plugins, startDate, testProjectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null,
-                0, null, null, null, null, null, null, summaries);
+                0, null, null, null, null, null, summaries);
 
         GenericLocalRetrievalLocalDownloaderTest tester = new GenericLocalRetrievalLocalDownloaderTest();
         scheduler = tester.new MyScheduler(1, testConfig);

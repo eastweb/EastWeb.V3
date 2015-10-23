@@ -2,11 +2,13 @@ package version2.prototype.ProjectInfoMetaData;
 
 import java.util.ArrayList;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
+
 /**
  * @author michael.devos
  *
  */
-public class ProjectInfoPlugin {
+@Immutable public class ProjectInfoPlugin {
     private final String Name;
     private final ArrayList<String> Indices;
     private final String QC;
@@ -26,7 +28,7 @@ public class ProjectInfoPlugin {
         ArrayList<String> temp = new ArrayList<String>();
         if(indices != null){
             for(String str : indices) {
-                temp.add(str);
+                temp.add(str.trim());
             }
         }
         Indices = temp;
@@ -34,7 +36,7 @@ public class ProjectInfoPlugin {
         temp = new ArrayList<String>();
         if(modisTiles != null) {
             for(String str : modisTiles) {
-                temp.add(str);
+                temp.add(str.trim());
             }
         }
         ModisTiles = temp;

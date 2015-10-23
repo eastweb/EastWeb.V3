@@ -84,7 +84,7 @@ public class EASTWebResultsTest {
         summaryNames.add("StdDev");
         summaryNames.add("SqrSum");
 
-        projectMetaData = new ProjectInfoFile(null, LocalDate.now(), projectName, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        projectMetaData = new ProjectInfoFile(null, LocalDate.now(), projectName, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     /**
