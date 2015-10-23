@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -42,14 +40,11 @@ public class Parallel {
 
             Collection<Callable<Void>> runners = createCallables(elements, operation);
             forPool.allowCoreThreadTimeOut(true);
-            List<Future<Void>> futures = forPool.invokeAll(runners);
+            forPool.invokeAll(runners);
             forPool.shutdown();
             forPool.awaitTermination(30, TimeUnit.MINUTES);
-            for(Future<Void> aFuture : futures) {
-                aFuture.get();
-            }
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             ErrorLog.add(Config.getInstance(), "Parallel.ForEach error during custom parallelized for each method.", e);
         }
     }
