@@ -9,9 +9,13 @@ public class ModisNBARNDVI extends IndicesFramework {
 
     public ModisNBARNDVI(){}
 
+    /**
+     * Valid input value range: 0 to 32766
+     * Valid output value range: -1 to 1
+     */
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] == 32767 || values[RED] == 32767 || values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE) {
+        if (values[NIR] > 32766 || values[NIR] < 0 || values[RED] > 32766 || values[RED] < 0 || values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE) {
             //            return -3.40282346639e+038;
             return GdalUtils.NO_DATA;
         } else {

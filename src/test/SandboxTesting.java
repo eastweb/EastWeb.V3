@@ -5,15 +5,212 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class SandboxTesting {
     private static ArrayList<String> myList;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         //        testPersistance();
         //        Test3();
         //        test4();
-        test5();
+        //        test5();
+        SandboxTesting tester = new SandboxTesting();
+        //        tester.MinMax_NDWI();
+        tester.MinMax_EVI();
+    }
+
+    // NDWI6 = (NIR-SWIR)/(NIR+SWIR)
+    public void MinMax_NDWI() throws InterruptedException, ExecutionException
+    {
+        final int MAX = 32766;
+        int NIR, SWIR;
+        double ndwi;
+        double currentMax = -999999999;
+        double currentMin = Double.MAX_VALUE;
+        int numOfCores = Runtime.getRuntime().availableProcessors();
+        ExecutorService processWorkerExecutor = Executors.newFixedThreadPool(numOfCores);
+        int idxsPerThread = Math.floorDiv(MAX, numOfCores);
+
+        ArrayList<Future<ArrayList<Double>>> results = new ArrayList<Future<ArrayList<Double>>>();
+        for(int i=0; i < numOfCores; i++)
+        {
+            results.add(processWorkerExecutor.submit(new MyCallable1(i * idxsPerThread, idxsPerThread)));
+        }
+        processWorkerExecutor.shutdown();
+
+        for(Future<ArrayList<Double>> result : results)
+        {
+            ArrayList<Double> resultValues = result.get();
+            if(resultValues.get(0) < currentMin)
+            {
+                currentMin = resultValues.get(0);
+            }
+            if(resultValues.get(1) > currentMax)
+            {
+                currentMax = resultValues.get(1);
+            }
+        }
+
+        System.out.println("ModisNBARNDWI6 Max Value: " + currentMax);
+        System.out.println("ModisNBARNDWI6 Min Value: " + currentMin);
+
+
+    }
+
+    private class MyCallable1 implements Callable<ArrayList<Double>>
+    {
+        private final int startIdx;
+        private final int numOfIdxsToProcess;
+
+        public MyCallable1(int startIdx, int numOfIdxsToProcess)
+        {
+            this.startIdx = startIdx;
+            this.numOfIdxsToProcess = numOfIdxsToProcess;
+        }
+
+        @Override
+        public ArrayList<Double> call() throws Exception {
+            int NIR, SWIR;
+            double ndwi;
+            double currentMax = -999999999;
+            double currentMin = Double.MAX_VALUE;
+            final int MAX = 32766;
+
+            for(NIR=startIdx; (NIR < startIdx + numOfIdxsToProcess) && NIR <= MAX; NIR++)
+            {
+                for(SWIR=0; SWIR < MAX; SWIR++)
+                {
+                    if((NIR + SWIR) != 0) {
+                        ndwi = (NIR - SWIR) / (NIR + SWIR);
+                        if(ndwi > currentMax)
+                        {
+                            currentMax = ndwi;
+                        }
+                        if(ndwi < currentMin)
+                        {
+                            currentMin = ndwi;
+                        }
+                    }
+                }
+                System.out.println("Done with NIR=" + NIR);
+            }
+            ArrayList<Double> output = new ArrayList<Double>(2);
+            output.add(currentMin);
+            output.add(currentMax);
+            return output;
+        }
+    }
+
+    // EVI = G * (NIR - RED)/(NIR + C1*RED - C2*BLUE + L) where L=1, C1=6, C2=7.5, and G=2.5
+    public void MinMax_EVI() throws InterruptedException, ExecutionException
+    {
+        final int MAX = 32766;
+        double currentMax = -999999999;
+        double currentMin = Double.MAX_VALUE;
+        int numOfCores = Runtime.getRuntime().availableProcessors() - Math.floorDiv(Runtime.getRuntime().availableProcessors(), 4);
+        ExecutorService processWorkerExecutor = Executors.newFixedThreadPool(numOfCores);
+        int idxsPerThread = Math.floorDiv(MAX, numOfCores);
+
+        System.out.println("Threads being made: " + numOfCores);
+        ArrayList<Future<ArrayList<Double>>> results = new ArrayList<Future<ArrayList<Double>>>();
+        for(int i=0; i < numOfCores; i++)
+        {
+            results.add(processWorkerExecutor.submit(new MyCallable2(i * idxsPerThread, idxsPerThread, i)));
+        }
+        processWorkerExecutor.shutdown();
+
+        for(Future<ArrayList<Double>> result : results)
+        {
+            ArrayList<Double> resultValues = result.get();
+            if(resultValues.get(0) < currentMin)
+            {
+                currentMin = resultValues.get(0);
+            }
+            if(resultValues.get(1) > currentMax)
+            {
+                currentMax = resultValues.get(1);
+            }
+        }
+
+        System.out.println("ModisNBAREVI Max Value: " + currentMax);
+        System.out.println("ModisNBAREVI Min Value: " + currentMin);
+    }
+
+    private class MyCallable2 implements Callable<ArrayList<Double>>
+    {
+        private final int startIdx;
+        private final int numOfIdxsToProcess;
+        private final int myID;
+
+        public MyCallable2(int startIdx, int numOfIdxsToProcess, int id)
+        {
+            this.startIdx = startIdx;
+            this.numOfIdxsToProcess = numOfIdxsToProcess;
+            myID = id;
+        }
+
+        @Override
+        public ArrayList<Double> call() throws Exception {
+            final double G=2.5;
+            final int L = 1;
+            final int C1 = 6;
+            final double C2 = 7.5;
+            int NIR, RED, BLUE;
+            double evi;
+            double currentMax = -999999999;
+            double currentMin = Double.MAX_VALUE;
+            final int MAX = 32766;
+            final int lastIdx = (numOfIdxsToProcess < (MAX - startIdx)) ? (startIdx + numOfIdxsToProcess) : MAX;
+
+            for(NIR=startIdx; (NIR < startIdx + numOfIdxsToProcess) && NIR <= MAX; NIR++)
+            {
+                //                if(((NIR - startIdx) + myID) % 4 == 1)
+                //                {
+                //                    Thread.sleep(9000);
+                //                }
+                //                else if(((NIR - startIdx) + myID) % 4 == 2)
+                //                {
+                //                    Thread.sleep(6000);
+                //                }
+                //                else if(((NIR - startIdx) + myID) % 4 == 3)
+                //                {
+                //                    Thread.sleep(3000);
+                //                }
+
+                for(RED=0; RED < MAX; RED++)
+                {
+                    for(BLUE=0; BLUE < MAX; BLUE++)
+                    {
+                        if((NIR + C1*RED - C2*BLUE + L) > 0)
+                        {
+                            evi = G * (NIR - RED)/(NIR + C1*RED - C2*BLUE + L);
+                            if(evi > currentMax)
+                            {
+                                currentMax = evi;
+                            }
+                            else if(evi < currentMin)
+                            {
+                                currentMin = evi;
+                            }
+                        }
+                    }
+                    if(RED % 10 == 1) {
+                        Thread.sleep(1);
+                    }
+                }
+                float temp = ((float)(NIR - startIdx) / (float)(lastIdx - startIdx)) * 100;
+                System.out.println("Finshed NIR=" + NIR + ". Thread " + myID + " " + Math.round(temp) + "% Complete. Min=" + String.format("%.2f", currentMin) + ". Max=" + String.format("%.2f", currentMax) + ".");
+            }
+            ArrayList<Double> output = new ArrayList<Double>(2);
+            output.add(currentMin);
+            output.add(currentMax);
+            return output;
+        }
     }
 
     private static void test5()

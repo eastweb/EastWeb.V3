@@ -7,9 +7,12 @@ public class ModisLSTMean extends IndicesFramework{
     final int DAY_LST = 0;
     final int NIGHT_LST = 1;
 
-    // valid range for data value are from 7500 to 65535
     public ModisLSTMean(){}
 
+    /**
+     * Valid input value range: 7500 to 65535
+     * Valid output value range: all values
+     */
     @Override
     protected double calculatePixelValue(double[] values) {
         //        if (values[DAY_LST] == GdalUtils.NoValue || values[NIGHT_LST] == GdalUtils.NoValue) {

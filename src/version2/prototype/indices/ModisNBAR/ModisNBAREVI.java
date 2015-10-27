@@ -4,8 +4,7 @@ import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
 /**
- * EVI = G * (NIR - RED)/(NIR + C1*RED - C2*BLUE + L) where L=1, C1=6, C2=7.5,
- * and G=2.5
+ * EVI = G * (NIR - RED)/(NIR + C1*RED - C2*BLUE + L) where L=1, C1=6, C2=7.5, and G=2.5
  *
  *@author Isaiah Snell-Feikema
  */
@@ -24,9 +23,14 @@ public class ModisNBAREVI extends IndicesFramework
     private static final int NIR = 1;
     private static final int BLUE = 2;
 
+    /**
+     * Valid input value range: 0 to 32766
+     * Valid output value range:
+     */
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] == 32767 || values[RED] == 32767 || values[BLUE] == 32767 || values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE || values[BLUE] == GdalUtils.NO_VALUE) {
+        if (values[NIR] > 32766 || values[NIR] < 0 || values[RED] > 32766 || values[RED] < 0 || values[BLUE] > 32766 || values[BLUE] < 0 ||
+                values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE || values[BLUE] == GdalUtils.NO_VALUE) {
             //            return -3.40282346639e+038;
             return GdalUtils.NO_DATA;
         } else {

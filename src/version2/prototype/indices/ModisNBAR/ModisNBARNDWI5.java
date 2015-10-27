@@ -16,9 +16,13 @@ public class ModisNBARNDWI5 extends IndicesFramework {
 
     public ModisNBARNDWI5(){}
 
+    /**
+     * Valid input value range: 0 to 32766
+     * Valid output value range: -1 to 1
+     */
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] == 32767 || values[SWIR] == 32767 || values[NIR] == GdalUtils.NO_VALUE || values[SWIR] == GdalUtils.NO_VALUE) {
+        if (values[NIR] > 32766 || values[NIR] < 0 || values[SWIR] > 32766 || values[SWIR] < 0 || values[NIR] == GdalUtils.NO_VALUE || values[SWIR] == GdalUtils.NO_VALUE) {
             //            return -3.40282346639e+038;
             return GdalUtils.NO_DATA;
         } else {

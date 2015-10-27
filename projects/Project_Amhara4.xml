@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="TRMM3B42">
+			<Indicies>TRMM3B42Index</Indicies>
+			<QC> null</QC>
+			<ModisTile/>
+		</Plugin>
+	</Plugins>
+	<StartDate>Mon Jun 01 00:00:00 CDT 2015</StartDate>
+	<ProjectName>Project_Amhara4</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File/>
+		<Resolution/>
+	</Masking>
+	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
+	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
+	<Clipping>true</Clipping>
+	<FreezingDate>Tue Sep 01 00:00:00 CDT 1970</FreezingDate>
+	<CoolingDegree>10.0</CoolingDegree>
+	<HeatingDate>Thu Jan 01 00:00:00 CST 1970</HeatingDate>
+	<HeatingDegree>25.0</HeatingDegree>
+	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+	<PixelSize>1000</PixelSize>
+	<Summaries>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: W_CODE;</Summary>
+	</Summaries>
+</ProjectInfo>

@@ -54,6 +54,6 @@
 	<FalseNothing>1</FalseNothing>
 	<ScalingFactor>1</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: WHOWeeklyStrategy</Summary>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: CompositeOf8Days</Summary>
 	</Summaries>
 </ProjectInfo>

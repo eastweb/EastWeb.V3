@@ -367,10 +367,10 @@ public class DatabaseCache extends Observable{
         System.out.println("Checking for unprocessed downloads for plugin '" + pluginName + "' in project '" + projectName + "'.");
 
         // Only use modisTileNames if the plugin uses Modis data
-        if(!modisPattern.matcher(pluginName.toLowerCase()).matches())
-        {
-            modisTileNames = null;
-        }
+        //        if(!modisPattern.matcher(pluginName.toLowerCase()).matches())
+        //        {
+        //            modisTileNames = null;
+        //        }
 
         // Set up for Download to DownloadCache insert
         if(dataName.toLowerCase().equals("data"))
