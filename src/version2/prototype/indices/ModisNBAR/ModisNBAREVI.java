@@ -25,6 +25,7 @@ public class ModisNBAREVI extends IndicesFramework
 
     /**
      * Valid input value range: 0 to 32766
+     * Possible output value range: -163800.0 to 163770.0
      * Valid output value range:
      */
     @Override
