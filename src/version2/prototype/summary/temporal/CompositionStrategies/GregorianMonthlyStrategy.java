@@ -13,9 +13,15 @@ import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrategy {
 
     @Override
-    public LocalDate getStartDate(LocalDate sDate) throws Exception {
-        //        return new GregorianCalendar(sDate.getYear(), Calendar.MONTH, Calendar.DAY_OF_MONTH);
-        return LocalDate.of(sDate.getYear(), sDate.getMonthValue(), 1);
+    public LocalDate getStartDate(LocalDate iDate) throws Exception {
+        LocalDate startDate = iDate;
+
+        if(!startDate.equals(LocalDate.of(iDate.getYear(), iDate.getMonthValue(), 1)))
+        {
+            startDate = (startDate.getMonthValue() < 12 ? LocalDate.of(startDate.getYear(), startDate.getMonthValue() + 1, 1)
+                    : LocalDate.of(startDate.getYear() + 1, 1, 1));
+        }
+        return startDate;
     }
 
     @Override
@@ -25,18 +31,15 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
     }
 
     @Override
-    public long getNumberOfCompleteCompositesInRange(LocalDate startDate, LocalDate endDate) {
-        DayOfWeek startDay = startDate.getDayOfWeek();
-        LocalDate adjStartDay = startDate;
+    public long getNumberOfCompleteCompositesInRange(LocalDate iDate, LocalDate endDate) {
+        LocalDate startDate = iDate;
 
-        if(startDay != DayOfWeek.SUNDAY)
+        if(!startDate.equals(LocalDate.of(iDate.getYear(), iDate.getMonthValue(), 1)))
         {
-            int value = startDay.getValue();     // 1 - Monday, 7 - Sunday
-
-            adjStartDay = startDate.plusDays(7 - value);
+            startDate = (startDate.getMonthValue() < 12 ? LocalDate.of(startDate.getYear(), startDate.getMonthValue() + 1, 1)
+                    : LocalDate.of(startDate.getYear() + 1, 1, 1));
         }
-
-        return ChronoUnit.MONTHS.between(adjStartDay, endDate);
+        return ChronoUnit.MONTHS.between(startDate, endDate);
     }
 
     @Override

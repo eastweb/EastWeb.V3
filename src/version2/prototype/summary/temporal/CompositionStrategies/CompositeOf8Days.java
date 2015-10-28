@@ -23,7 +23,7 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
     public LocalDate getStartDate(LocalDate iDate) throws Exception {
         LocalDate sDate = LocalDate.ofYearDay(iDate.getYear(), 1);
         while(ChronoUnit.DAYS.between(sDate, iDate) >= 8) {
-            sDate.plusDays(8);
+            sDate = sDate.plusDays(8);
         }
         return sDate;
     }
@@ -41,7 +41,7 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
             } else {
                 LocalDate sDate = LocalDate.ofYearDay(dateInComposite.getYear(), 1);
                 while(ChronoUnit.DAYS.between(sDate, dateInComposite) >= 8) {
-                    sDate.plusDays(8);
+                    sDate = sDate.plusDays(8);
                 }
                 return (int) ChronoUnit.DAYS.between(sDate, LocalDate.ofYearDay(dateInComposite.getYear() + 1, 1));
             }
