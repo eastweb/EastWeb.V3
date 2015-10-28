@@ -8,6 +8,7 @@ import org.gdal.gdal.gdal;
 
 //import java.io.File;
 
+
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
@@ -63,6 +64,9 @@ public class NldasNOAHMeanDailyVolumetric10_40 extends IndicesFramework{
         if(values[INPUT] == GdalUtils.NO_VALUE)
         {
             //            return -3.4028234663852886E38;
+            return GdalUtils.NO_DATA;
+        }
+        else if(values[INPUT] < 0) {
             return GdalUtils.NO_DATA;
         }
         else

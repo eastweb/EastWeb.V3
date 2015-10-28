@@ -60,6 +60,9 @@ public class NldasForcingTotalPrecipitation extends IndicesFramework {
             //            return -3.4028234663852886E38;
             return GdalUtils.NO_DATA;
         }
+        else if(total < 0) {
+            return GdalUtils.NO_DATA;
+        }
 
         return total;
     }
