@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="NldasForcing">
+			<Indicies>NldasForcingMeanAirTemperature</Indicies>
+			<QC> null</QC>
+			<ModisTile/>
+		</Plugin>
+		<Plugin name="NldasNOAH">
+			<Indicies>NldasNOAHMeanDailySnowDepth</Indicies>
+			<Indicies>NldasNOAHMeanDailySnowCover</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric0_10</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric10_40</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric40_100</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric100_200</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp0_10</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp10_40</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp40_100</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp100_200</Indicies>
+			<QC> null</QC>
+			<ModisTile/>
+		</Plugin>
+	</Plugins>
+	<StartDate>Mon Sep 14 00:00:00 CDT 2015</StartDate>
+	<ProjectName>Custom Try Both Nldas</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File>\Documentation\TestCases\Georgia_shp_wmask\watermask\w0010011.tif</File>
+		<Resolution>62500</Resolution>
+	</Masking>
+	<MasterShapeFile>\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
+	<TimeZone>(GMT-5:00) America/Detroit</TimeZone>
+	<Clipping>true</Clipping>
+	<FreezingDate>Mon Oct 05 14:04:18 CDT 1970</FreezingDate>
+	<CoolingDegree>0</CoolingDegree>
+	<HeatingDate>Sun Apr 12 00:00:00 CST 1970</HeatingDate>
+	<HeatingDegree>14.3</HeatingDegree>
+	<ReSampling>BILINEAR</ReSampling>
+	<PixelSize>1000</PixelSize>
+	<Summaries>
+		<Summary ID="1">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; AreaCodeField: COUNTYFP10; Temporal Summary: CDCWeeklyStrategy</Summary>
+	</Summaries>
+</ProjectInfo>
