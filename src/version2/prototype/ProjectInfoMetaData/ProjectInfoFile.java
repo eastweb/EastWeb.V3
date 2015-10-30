@@ -446,37 +446,19 @@ import version2.prototype.ZonalSummary;
 
     private LocalDate ReadFreezingDate() throws DateTimeParseException
     {
-        NodeList nodes = GetUpperLevelNodeList("FreezingDate", "Missing freezing date.");
+        NodeList nodes = GetUpperLevelNodeListIgnoreIfEmpty("FreezingDate", "Missing freezing date.");
         // e.g. "Wed May 20 21:21:36 CDT 2015"
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing freezing date.");
+        ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(nodes, "Missing freezing date.");
         if(values.size() > 0) {
             return LocalDate.parse(values.get(0), datesFormatter);
         }
         return null;
-
-        //        Integer dayOfMonth;
-        //        Month month;
-        //        NodeList dayNodes = GetUpperLevelNodeList("Day", "Missing heating date.", "HeatingDate");
-        //        NodeList monthNodes = GetUpperLevelNodeList("Month", "Missing heating date.", "HeatingDate");
-        //
-        //        ArrayList<String> values = GetNodeListValues(dayNodes, "Missing HeatingDate day.");
-        //        if(values.size() > 0) {
-        //            dayOfMonth = Integer.parseInt(values.get(0));
-        //
-        //            values = GetNodeListValues(monthNodes, "Missing HeatingDate month.");
-        //            if(values.size() > 0) {
-        //                month = Month.valueOf(values.get(0).toUpperCase());
-        //
-        //                return MonthDay.of(month, dayOfMonth);
-        //            }
-        //        }
-        //        return null;
     }
 
     private Double ReadCoolingDegree()
     {
-        NodeList nodes = GetUpperLevelNodeList("CoolingDegree", "Missing cooling degree.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing cooling degree.");
+        NodeList nodes = GetUpperLevelNodeListIgnoreIfEmpty("CoolingDegree", "Missing cooling degree.");
+        ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(nodes, "Missing cooling degree.");
         if(values.size() > 0) {
             return Double.parseDouble(values.get(0));
         }
@@ -485,37 +467,19 @@ import version2.prototype.ZonalSummary;
 
     private LocalDate ReadHeatingDate() throws DateTimeParseException
     {
-        NodeList nodes = GetUpperLevelNodeList("HeatingDate", "Missing heating date.");
+        NodeList nodes = GetUpperLevelNodeListIgnoreIfEmpty("HeatingDate", "Missing heating date.");
         // e.g. "Wed May 20 21:21:36 CDT 2015"
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
+        ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(nodes, "Missing start date.");
         if(values.size() > 0) {
             return LocalDate.parse(values.get(0), datesFormatter);
         }
         return null;
-
-        //        Integer dayOfMonth;
-        //        Month month;
-        //        NodeList dayNodes = GetUpperLevelNodeList("Day", "Missing heating date.", "HeatingDate");
-        //        NodeList monthNodes = GetUpperLevelNodeList("Month", "Missing heating date.", "HeatingDate");
-        //
-        //        ArrayList<String> values = GetNodeListValues(dayNodes, "Missing HeatingDate day.");
-        //        if(values.size() > 0) {
-        //            dayOfMonth = Integer.parseInt(values.get(0));
-        //
-        //            values = GetNodeListValues(monthNodes, "Missing HeatingDate month.");
-        //            if(values.size() > 0) {
-        //                month = Month.valueOf(values.get(0).toUpperCase());
-        //
-        //                return MonthDay.of(month, dayOfMonth);
-        //            }
-        //        }
-        //        return null;
     }
 
     private Double ReadHeatingDegree()
     {
-        NodeList nodes = GetUpperLevelNodeList("HeatingDegree", "Missing heating degree.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing heating degree.");
+        NodeList nodes = GetUpperLevelNodeListIgnoreIfEmpty("HeatingDegree", "Missing heating degree.");
+        ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(nodes, "Missing heating degree.");
         if(values.size() > 0) {
             return Double.parseDouble(values.get(0));
         }
