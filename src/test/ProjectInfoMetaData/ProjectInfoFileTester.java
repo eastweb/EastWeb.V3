@@ -61,7 +61,6 @@ public class ProjectInfoFileTester {
         //        zid = ZoneId.of("GMT+1");
         //        System.out.println(zid.getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH));
 
-        assertTrue("TotalModisTiles is " + projectInfo.GetTotModisTiles(), projectInfo.GetTotModisTiles() == 120);
         assertTrue("ReSampling is " + projectInfo.GetProjection().getResamplingType().name(), projectInfo.GetProjection().getResamplingType().name().equals("NEAREST_NEIGHBOR"));
         assertTrue("PixelSize is " + projectInfo.GetProjection().getPixelSize(), projectInfo.GetProjection().getPixelSize() == 12);
         assertTrue("FreezingDate is " + projectInfo.GetFreezingDate().toString(), projectInfo.GetFreezingDate().toString().equals("2015-06-02"));

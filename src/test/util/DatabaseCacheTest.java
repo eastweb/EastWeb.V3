@@ -140,7 +140,7 @@ public class DatabaseCacheTest {
         projectInfoSummary1 = new ProjectInfoSummary(new ZonalSummary("ShapeFile1", "AreaCodeField1", "AreaNameField1"), "MyTemporalSummaryCompositionStrategy", 1);
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(projectInfoSummary1);
-        projectMetaData = new ProjectInfoFile(plugins, startDate, testProjectName, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
+        projectMetaData = new ProjectInfoFile(plugins, startDate, testProjectName, null, null, null, null, null, null, null, null, null, null, null, summaries);
 
         con = DatabaseConnector.getConnection();
         stmt = con.createStatement();

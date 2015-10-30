@@ -77,7 +77,7 @@ public class SchemasTest {
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
 
-        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, shapeFile, null, null, null, null, null, null, null, null, summaries);
+        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, shapeFile, null, null, null, null, null, null, null, summaries);
     }
 
     @Before

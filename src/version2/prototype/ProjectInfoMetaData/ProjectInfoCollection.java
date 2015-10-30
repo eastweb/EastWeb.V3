@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 
 public class ProjectInfoCollection {
     private ArrayList<ProjectInfoFile> files = null;
@@ -30,9 +31,21 @@ public class ProjectInfoCollection {
         Config configInstance = Config.getInstance();
         if(fl.length > 0)
         {
+            ProjectInfoFile metaData;
             for(File fi : fl)
             {
-                files.add(new ProjectInfoFile(configInstance, fi.getCanonicalPath()));
+                try{
+                    metaData = new ProjectInfoFile(configInstance, fi.getCanonicalPath());
+                    if(metaData.error) {
+                        ErrorLog.add(Config.getInstance(), "Parsing failure" + (metaData.GetErrorMessages().size() > 1 ? "s" : "") + " for file project meta data file '" + fi.getName() + "'. "
+                                + metaData.GetErrorMessages().toString(),
+                                new Exception("Parsing failure" + (metaData.GetErrorMessages().size() > 1 ? "s" : "") + " for file project meta data file '" + fi.getName() + "'."));
+                    } else {
+                        files.add(metaData);
+                    }
+                } catch(Exception e) {
+                    ErrorLog.add(Config.getInstance(), "Project meta data file, " + fi.getName() + " has an error in it.", e);
+                }
             }
         }
         return files;

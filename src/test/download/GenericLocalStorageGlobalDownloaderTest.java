@@ -124,7 +124,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         //        listDatesFilesQC = new ModisNBARQCListDatesFiles(new DataDate(startDate), pluginMetaData.Download);
         // For testing with TRMM3B42RT plugin
         listDatesFiles = new TRMM3B42RTListDatesFiles(new DataDate(startDate), dData, null);
-        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, timeZone, null, null, null, null, null, null, null, null, null);
+        projectMetaData = new ProjectInfoFile(null, startDate, testProjectName, null, null, null, timeZone, null, null, null, null, null, null, null, null);
     }
 
     /**
@@ -267,7 +267,7 @@ public class GenericLocalStorageGlobalDownloaderTest {
         // For testing with TRMM3B42RT plugin
         //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
         String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/data/" + startDate.getYear() + "/" + startDate.getDayOfYear() + "/3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue())
-        + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
+                + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
         File temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
         Statement stmt = con.createStatement();

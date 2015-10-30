@@ -88,7 +88,6 @@ public class SchedulerTest {
                 null,
                 "(GMT+1:00) Africa/Bangui",
                 false,
-                120,
                 null,
                 null,
                 null,

@@ -97,8 +97,7 @@ public class ProgressUpdaterTest {
         summaries.add(new ProjectInfoSummary(new ZonalSummary("shape file", "area code field", "area name field"),
                 null,
                 1));
-        projectMetaData = new ProjectInfoFile(plugins, day1, projectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null,
-                0, null, null, null, null, null, summaries);
+        projectMetaData = new ProjectInfoFile(plugins, day1, projectName, "C:/Users/michael.devos/Desktop/EASTWeb", "", null, "", ZoneId.systemDefault().getId(), null, null, null, null, null, null, summaries);
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance("src/test/util/" + pluginName + ".xml");
         pluginData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
         daysPerInputData = pluginData.DaysPerInputData;

@@ -79,7 +79,7 @@ public class SchedulerStatusContainerTest {
         plugins.add(new ProjectInfoPlugin(pluginName, indices, null, null));
         summaries = new ArrayList<ProjectInfoSummary>();
         summaries.add(new ProjectInfoSummary(new ZonalSummary("a shape file path", "areaValueField", "areaNameField"), temporalSummaryCompositionStrategyClassName, 1));
-        projectMetaData = new ProjectInfoFile(plugins, startDate, projectName, null, null, null, null, null, null, null, null, null, null, null, null, summaries);
+        projectMetaData = new ProjectInfoFile(plugins, startDate, projectName, null, null, null, null, null, null, null, null, null, null, null, summaries);
         pluginMetaDataCollection = PluginMetaDataCollection.getInstance("src/test/Scheduler/" + pluginName + ".xml");
     }
 

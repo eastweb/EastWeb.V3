@@ -51,7 +51,6 @@ import version2.prototype.ZonalSummary;
     private final String masterShapeFile;
     private final String timeZone;
     private final Boolean clipping;
-    private final Integer totModisTiles;
     private final Projection projection;
     private final LocalDate heatingDate;
     private final Double heatingDegree;
@@ -101,7 +100,6 @@ import version2.prototype.ZonalSummary;
         masterShapeFile = ReadMasterShapeFile();
         timeZone = ReadTimeZone();
         clipping = ReadClipping();
-        totModisTiles = ReadTotalModisTiles();
         projection = new Projection(ReadResamplingType(), ReadPixelSize());
         freezingDate = ReadFreezingDate();
         coolingDegree = ReadCoolingDegree();
@@ -122,7 +120,6 @@ import version2.prototype.ZonalSummary;
      * @param masterShapeFile
      * @param timeZone
      * @param clipping
-     * @param totModisTiles
      * @param projection
      * @param freezingDate
      * @param coolingDegree
@@ -132,7 +129,7 @@ import version2.prototype.ZonalSummary;
      */
     @SuppressWarnings("unchecked")
     public ProjectInfoFile(ArrayList<ProjectInfoPlugin> plugins, LocalDate startDate, String projectName, String workingDir, String maskingFile, Integer maskingResolution, String masterShapeFile,
-            String timeZone, Boolean clipping, Integer totModisTiles, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate, Double heatingDegree,
+            String timeZone, Boolean clipping, Projection projection, LocalDate freezingDate, Double coolingDegree, LocalDate heatingDate, Double heatingDegree,
             ArrayList<ProjectInfoSummary> summaries)
     {
         configInstance = null;
@@ -146,7 +143,6 @@ import version2.prototype.ZonalSummary;
         this.masterShapeFile = masterShapeFile;
         this.timeZone = timeZone;
         this.clipping = clipping;
-        this.totModisTiles = totModisTiles;
         this.projection = new Projection(projection);
         this.freezingDate = freezingDate;
         this.coolingDegree = coolingDegree;
@@ -220,13 +216,6 @@ import version2.prototype.ZonalSummary;
     public boolean GetClipping() { return clipping; }
 
     /**
-     * Gets the total number of modies tiles expected per input data downloaded.
-     *
-     * @return number of modies tiles associated with a single downloaded data unit.
-     */
-    public int GetTotModisTiles() { return totModisTiles; }
-
-    /**
      * Gets the list of summaries gotten from the once parsed xml file.
      *
      * @return list of ProjectInfoSummary objects created from the xml's data.
@@ -285,7 +274,7 @@ import version2.prototype.ZonalSummary;
         ArrayList<String> inidicies = null;
         ArrayList<String> modisTiles = null;
 
-        NodeList pluginList = GetUpperLevelNodeList("Plugin", "Missing plugins.", "Plugins");
+        NodeList pluginList = GetUpperLevelNodeListIgnoreIfEmpty("Plugin", "Missing plugins.", "Plugins");
         if(pluginList != null)
         {
             for(int i=0; i < pluginList.getLength(); i++)
@@ -294,7 +283,7 @@ import version2.prototype.ZonalSummary;
 
                 name = plugin.getAttribute("name");
 
-                ArrayList<String> values = GetNodeListValues(plugin.getElementsByTagName("QC"),
+                ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(plugin.getElementsByTagName("QC"),
                         "Missing QC for plugin '" + name + "'.");
                 if(values.size() > 0) {
                     qc = values.get(0);
@@ -302,14 +291,14 @@ import version2.prototype.ZonalSummary;
                     qc = null;
                 }
 
-                values = GetNodeListValues(plugin.getElementsByTagName("Indicies"), "Missing indicies for plugin '" + name + "'.");
+                values = GetNodeListValuesIgnoreIfEmpty(plugin.getElementsByTagName("Indicies"), "Missing indicies for plugin '" + name + "'.");
                 if(values.size() > 0) {
                     inidicies = values;
                 } else {
                     inidicies = null;
                 }
 
-                values = GetNodeListValues(plugin.getElementsByTagName("ModisTile"), "Missing modis tile(s) for plugin '" + name + "'.");
+                values = GetNodeListValuesIgnoreIfEmpty(plugin.getElementsByTagName("ModisTile"), "Missing modis tile(s) for plugin '" + name + "'.");
                 if(values.size() > 0) {
                     modisTiles = values;
                 } else {
@@ -326,12 +315,9 @@ import version2.prototype.ZonalSummary;
     private LocalDate ReadStartDate() throws DateTimeParseException
     {
         NodeList nodes = GetUpperLevelNodeList("StartDate", "Missing start date.");
-        //        try {
-        // e.g. "Wed May 20 21:21:36 CDT 2015"
         ArrayList<String> values = GetNodeListValues(nodes, "Missing start date.");
         if(values.size() > 0) {
             return LocalDate.parse(values.get(0), datesFormatter);
-            //                return new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse(values.get(0));
         }
         return null;
         //        } catch (DateTimeParseException e) {
@@ -363,8 +349,8 @@ import version2.prototype.ZonalSummary;
 
     private String ReadMaskingFile()
     {
-        NodeList nodes = GetUpperLevelNodeList("File", "Missing masking file.", "Masking");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing masking file.");
+        NodeList nodes = GetUpperLevelNodeListIgnoreIfEmpty("File", "Missing masking file.", "Masking");
+        ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(nodes, "Missing masking file.");
         if(values.size() > 0) {
             String temp = values.get(0);
             if(temp.startsWith("\\") || temp.startsWith("/"))
@@ -378,8 +364,8 @@ import version2.prototype.ZonalSummary;
 
     private Integer ReadMaskingResolution()
     {
-        NodeList nodes = GetUpperLevelNodeList("Resolution", "Missing masking resolution.", "Masking");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing masking resolution.");
+        NodeList nodes = GetUpperLevelNodeListIgnoreIfEmpty("Resolution", "Missing masking resolution.", "Masking");
+        ArrayList<String> values = GetNodeListValuesIgnoreIfEmpty(nodes, "Missing masking resolution.");
         if(values.size() > 0) {
             return Integer.parseInt(values.get(0));
         }
@@ -423,16 +409,6 @@ import version2.prototype.ZonalSummary;
             return Boolean.valueOf(values.get(0));
         }
         return false;   // Default to false when element is missing.
-    }
-
-    private int ReadTotalModisTiles()
-    {
-        NodeList nodes = GetUpperLevelNodeList("TotalModisTiles", "Missing total number of modis tiles per input data.");
-        ArrayList<String> values = GetNodeListValues(nodes, "Missing total number of modis tiles per input data.");
-        if(values.size() > 0) {
-            return Integer.parseInt(values.get(0));
-        }
-        return 0;
     }
 
     private ResamplingType ReadResamplingType()
@@ -551,8 +527,8 @@ import version2.prototype.ZonalSummary;
     {
         ArrayList<ProjectInfoSummary> summaries = new ArrayList<ProjectInfoSummary>();
 
-        NodeList summaryList = GetUpperLevelNodeList("Summary", "Missing zonal summaries.", "Summaries");
-        ArrayList<String> summaryStrings = GetNodeListValues(summaryList, "Missing zonal summaries.");
+        NodeList summaryList = GetUpperLevelNodeListIgnoreIfEmpty("Summary", "Missing zonal summaries.", "Summaries");
+        ArrayList<String> summaryStrings = GetNodeListValuesIgnoreIfEmpty(summaryList, "Missing zonal summaries.");
         if(summaryStrings.size() > 0) {
             int ID;
             String shapefile;
@@ -607,10 +583,8 @@ import version2.prototype.ZonalSummary;
                 }
                 summaries.add(new ProjectInfoSummary(new ZonalSummary(shapefile, areaValueField, areaNameField), temporalSummaryCompositionStrategyClassName, ID));
             }
-            return summaries;
         }
-        return null;
-
+        return summaries;
     }
 
     /**
@@ -653,6 +627,45 @@ import version2.prototype.ZonalSummary;
     }
 
     /**
+     * Used to get the NodeList object pertaining to an element containing the list of elements desired. Used even if desired element does not
+     * contain a list of elements but only the value desired. Send the returned NodeList object into {@link #GetNodeListValues(NodeList, String)
+     * GetNodeListValues(NodeList, String)} to get its value(s).
+     *
+     * @param element
+     * @param errorMsg
+     * @param parents
+     * @return
+     */
+    private NodeList GetUpperLevelNodeListIgnoreIfEmpty(String element, String errorMsg, String...parents)
+    {
+        NodeList nodes = null;
+
+        for(String parent : parents)
+        {
+            if(nodes == null) {
+                nodes = doc.getElementsByTagName(parent);
+            } else {
+                nodes = ((Element)nodes.item(0)).getElementsByTagName(parent);
+            }
+        }
+
+        // Failed to find specified parent
+        if(((nodes == null) && (parents.length > 0)) || ((nodes != null) && (nodes.getLength() <= 0)))
+        {
+            //            error = true;
+            //            this.errorMsg.add(errorMsg);
+            return null;
+        }
+        else if(nodes == null) {
+            nodes = doc.getElementsByTagName(element);
+        } else {
+            nodes = ((Element)nodes.item(0)).getElementsByTagName(element);
+        }
+
+        return nodes;
+    }
+
+    /**
      * Used to get the values of the NodeList that's passed in. Used for both single value and multiple value cases where there is no lower
      * hierarchy of elements (i.e. the passed in NodeList must be the lowest elements in the list).
      *
@@ -681,6 +694,34 @@ import version2.prototype.ZonalSummary;
         {
             error = true;
             this.errorMsg.add(errorMsg);
+        }
+        return values;
+    }
+
+    /**
+     * Used to get the values of the NodeList that's passed in. Used for both single value and multiple value cases where there is no lower
+     * hierarchy of elements (i.e. the passed in NodeList must be the lowest elements in the list).
+     *
+     * @param nList
+     * @param errorMsg
+     * @return
+     */
+    private ArrayList<String> GetNodeListValuesIgnoreIfEmpty(NodeList nList, String errorMsg)
+    {
+        ArrayList<String> values = new ArrayList<String>();
+        if(nList != null && nList.getLength() > 0)
+        {
+            for(int i=0; i < nList.getLength(); i++)
+            {
+                Element e = (Element)nList.item(i);
+                NodeList list = e.getChildNodes();
+                Node n = list.item(0);
+                if(n != null)
+                {
+                    n.normalize();
+                    values.add(n.getNodeValue().trim());
+                }
+            }
         }
         return values;
     }
