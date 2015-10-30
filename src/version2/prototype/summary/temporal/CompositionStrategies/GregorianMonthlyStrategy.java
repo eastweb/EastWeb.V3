@@ -1,6 +1,5 @@
 package version2.prototype.summary.temporal.CompositionStrategies;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -16,12 +15,12 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
     public LocalDate getStartDate(LocalDate iDate) throws Exception {
         LocalDate startDate = iDate;
 
-        if(!startDate.equals(LocalDate.of(iDate.getYear(), iDate.getMonthValue(), 1)))
-        {
-            startDate = (startDate.getMonthValue() < 12 ? LocalDate.of(startDate.getYear(), startDate.getMonthValue() + 1, 1)
-                    : LocalDate.of(startDate.getYear() + 1, 1, 1));
-        }
-        return startDate;
+        //        if(!startDate.equals(LocalDate.of(iDate.getYear(), iDate.getMonthValue(), 1)))
+        //        {
+        //            startDate = (startDate.getMonthValue() < 12 ? LocalDate.of(startDate.getYear(), startDate.getMonthValue() + 1, 1)
+        //                    : LocalDate.of(startDate.getYear() + 1, 1, 1));
+        //        }
+        return LocalDate.of(iDate.getYear(), iDate.getMonthValue(), 1);
     }
 
     @Override
