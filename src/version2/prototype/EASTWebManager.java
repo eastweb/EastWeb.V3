@@ -768,31 +768,27 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             int id = getLowestAvailableGlobalDLID();
             if(IsIDValid(id, globalDLIDs))
             {
-                System.out.println("Setting up new DownloaderFactory for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
-                DownloaderFactory factory = null;
-                try {
-                    factory = dlFactory.CreateDownloaderFactory(dlFactory.CreateListDatesFiles());
-                } catch (IOException e) {
-                    ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
-                } catch (Exception e) {
-                    ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error whlie creating DownloadFactory or ListDatesFiles.", e);
-                }
-
-                System.out.println("Creating new GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
-                GlobalDownloader gdl = factory.CreateGlobalDownloader(id);
-                if(gdl == null) {
-                    return null;
-                }
+                GlobalDownloader gdl;
+                LocalDownloader localDl;
                 int currentGDLIdx = -1;
                 String tempDownloadFactoryClassName;
                 for(int i=0; i < globalDLs.size(); i++)
                 {
                     tempDownloadFactoryClassName = globalDLs.get(i).metaData.downloadFactoryClassName;
-                    if(tempDownloadFactoryClassName.equals(gdl.metaData.downloadFactoryClassName))
+                    if(tempDownloadFactoryClassName.equals(dlFactory.downloadMetaData.downloadFactoryClassName))
                     {
                         currentGDLIdx = i;
                         break;
                     }
+                }
+
+                DownloaderFactory factory = null;
+                try {
+                    factory = dlFactory.CreateDownloaderFactory(dlFactory.CreateListDatesFiles());
+                } catch (IOException e) {
+                    ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error while creating DownloadFactory or ListDatesFiles.", e);
+                } catch (Exception e) {
+                    ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error while creating DownloadFactory or ListDatesFiles.", e);
                 }
 
                 if(currentGDLIdx >= 0)
@@ -801,6 +797,12 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     gdl = globalDLs.get(currentGDLIdx);
                 }
                 else {
+                    System.out.println("Creating new GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
+                    gdl = factory.CreateGlobalDownloader(id);
+                    if(gdl == null) {
+                        return null;
+                    }
+
                     if(globalDLs.size() <= id)
                     {
                         globalDLs.add(id, gdl);
@@ -825,11 +827,18 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     numOfCreatedGDLs = globalDLs.size();
                 }
 
-                System.out.println("Starting GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
-                gdl.Start();
+                if(gdl.GetRunningState() == TaskState.RUNNING) {
+                    System.out.println("GlobalDownloader already running for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
+                } else if(currentGDLIdx >= 0) {
+                    System.out.println("Restarting GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
+                    gdl.Start();
+                } else {
+                    System.out.println("Starting GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
+                    gdl.Start();
+                }
 
                 System.out.println("Creating new LocalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
-                LocalDownloader localDl = factory.CreateLocalDownloader(gdl);
+                localDl = factory.CreateLocalDownloader(gdl);
                 return localDl;
             }
             else

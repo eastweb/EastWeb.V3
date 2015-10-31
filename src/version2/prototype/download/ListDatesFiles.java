@@ -10,6 +10,11 @@ import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 
+/**
+ * Abstract map object container containing the list of available downloads for a specific plugin file type.
+ * This map utilizes lazy initialization to avoid slowing down project creation due to the list creation time.
+ *
+ */
 public abstract class ListDatesFiles
 {
     protected List<DataDate> lDates;
@@ -25,16 +30,7 @@ public abstract class ListDatesFiles
         lDates = null;
         mapDatesFiles =  null;
         mProject =  project;
-
-        if ((mData.mode).equalsIgnoreCase("FTP"))
-        {
-            mapDatesFiles = ListDatesFilesFTP();
-        };
-
-        if ((mData.mode).equalsIgnoreCase("HTTP"))
-        {
-            mapDatesFiles = ListDatesFilesHTTP();
-        };
+        mapDatesFiles = null;
     }
 
     // gets a map of each day and its associated files
@@ -42,6 +38,19 @@ public abstract class ListDatesFiles
     {
         Map<DataDate, ArrayList<String>> filesMap = new HashMap<DataDate, ArrayList<String>>();
         ArrayList<String> files;
+
+        if(mapDatesFiles == null) {
+            if ((mData.mode).equalsIgnoreCase("FTP"))
+            {
+                mapDatesFiles = ListDatesFilesFTP();
+            };
+
+            if ((mData.mode).equalsIgnoreCase("HTTP"))
+            {
+                mapDatesFiles = ListDatesFilesHTTP();
+            };
+        }
+
         for(DataDate dd : mapDatesFiles.keySet())
         {
             files = new ArrayList<String>();
