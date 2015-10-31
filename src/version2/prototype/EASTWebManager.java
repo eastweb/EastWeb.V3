@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -532,11 +533,18 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 // Handle new Scheduler requests
                 if(newSchedulerRequests.size() > 0)
                 {
-                    synchronized (newSchedulerRequests) {
+                    List<SchedulerData> tempRequestsList = new ArrayList<SchedulerData>();
+                    synchronized (newSchedulerRequests)
+                    {
                         while(newSchedulerRequests.size() > 0)
                         {
-                            handleNewSchedulerRequests(newSchedulerRequests.remove(0));
+                            tempRequestsList.add(newSchedulerRequests.remove(0));
                         }
+                    }
+
+                    while(tempRequestsList.size() > 0)
+                    {
+                        handleNewSchedulerRequests(tempRequestsList.remove(0));
                     }
                 }
 
@@ -545,33 +553,42 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     // Handle stop scheduler requests
                     if(stopExistingSchedulerRequests.size() > 0)
                     {
-                        synchronized (stopExistingSchedulerRequests) {
+                        List<Integer> tempRequestsList = new ArrayList<Integer>();
+                        synchronized (stopExistingSchedulerRequests)
+                        {
                             while(stopExistingSchedulerRequests.size() > 0)
                             {
-                                handleStopSchedulerRequests(stopExistingSchedulerRequests.remove(0));
+                                tempRequestsList.add(stopExistingSchedulerRequests.remove(0));
                             }
                         }
+
+                        while(tempRequestsList.size() > 0)
+                        {
+                            handleStopSchedulerRequests(tempRequestsList.remove(0));
+                        }
                     }
+
                     if(stopExistingSchedulerRequestsNames.size() > 0)
                     {
-                        synchronized (stopExistingSchedulerRequestsNames) {
-                            int schedulerId;
-                            String projectName;
+                        List<String> tempRequestsList = new ArrayList<String>();
+                        synchronized (stopExistingSchedulerRequestsNames)
+                        {
                             while(stopExistingSchedulerRequestsNames.size() > 0)
                             {
-                                projectName = stopExistingSchedulerRequestsNames.remove(0);
-                                schedulerId = -1;
-                                for(Scheduler scheduler : schedulers)
-                                {
-                                    if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                    {
-                                        schedulerId = scheduler.GetID();
-                                        break;
-                                    }
-                                }
-                                if(schedulerId != -1) {
-                                    handleStopSchedulerRequests(schedulerId);
-                                }
+                                tempRequestsList.add(stopExistingSchedulerRequestsNames.remove(0));
+                            }
+                        }
+
+                        Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
+
+                        int schedulerId;
+                        String projectName;
+                        while(tempRequestsList.size() > 0)
+                        {
+                            projectName = tempRequestsList.remove(0);
+                            schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
+                            if(schedulerId != -1) {
+                                handleStopSchedulerRequests(schedulerId);
                             }
                         }
                     }
@@ -579,35 +596,42 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     // Handle delete scheduler requests
                     if(deleteExistingSchedulerRequests.size() > 0)
                     {
-                        synchronized (deleteExistingSchedulerRequests) {
+                        List<Integer> tempRequestsList = new ArrayList<Integer>();
+                        synchronized (deleteExistingSchedulerRequests)
+                        {
                             while(deleteExistingSchedulerRequests.size() > 0)
                             {
-                                handleDeleteSchedulerRequests(deleteExistingSchedulerRequests.remove(0));
+                                tempRequestsList.add(deleteExistingSchedulerRequests.remove(0));
                             }
                         }
+
+                        while(tempRequestsList.size() > 0)
+                        {
+                            handleDeleteSchedulerRequests(tempRequestsList.remove(0));
+                        }
                     }
+
                     if(deleteExistingSchedulerRequestsNames.size() > 0)
                     {
-                        synchronized (deleteExistingSchedulerRequestsNames) {
-                            synchronized (schedulers) {
-                                int schedulerId;
-                                String projectName;
-                                while(deleteExistingSchedulerRequestsNames.size() > 0)
-                                {
-                                    projectName = deleteExistingSchedulerRequestsNames.remove(0);
-                                    schedulerId = -1;
-                                    for(Scheduler scheduler : schedulers)
-                                    {
-                                        if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                        {
-                                            schedulerId = scheduler.GetID();
-                                            break;
-                                        }
-                                    }
-                                    if(schedulerId != -1) {
-                                        handleDeleteSchedulerRequests(schedulerId);
-                                    }
-                                }
+                        List<String> tempRequestsList = new ArrayList<String>();
+                        synchronized (deleteExistingSchedulerRequestsNames)
+                        {
+                            while(deleteExistingSchedulerRequestsNames.size() > 0)
+                            {
+                                tempRequestsList.add(deleteExistingSchedulerRequestsNames.remove(0));
+                            }
+                        }
+
+                        Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
+
+                        int schedulerId;
+                        String projectName;
+                        while(tempRequestsList.size() > 0)
+                        {
+                            projectName = tempRequestsList.remove(0);
+                            schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
+                            if(schedulerId != -1) {
+                                handleDeleteSchedulerRequests(schedulerId);
                             }
                         }
                     }
@@ -615,35 +639,42 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     // Handle start back up existing Scheduler requests
                     if(startExistingSchedulerRequests.size() > 0)
                     {
-                        synchronized (startExistingSchedulerRequests) {
+                        List<Integer> tempRequestsList = new ArrayList<Integer>();
+                        synchronized (startExistingSchedulerRequests)
+                        {
                             while(startExistingSchedulerRequests.size() > 0)
                             {
-                                handleStartExistingSchedulerRequests(startExistingSchedulerRequests.remove(0));
+                                tempRequestsList.add(startExistingSchedulerRequests.remove(0));
                             }
                         }
+
+                        while(tempRequestsList.size() > 0)
+                        {
+                            handleStartExistingSchedulerRequests(tempRequestsList.remove(0));
+                        }
                     }
+
                     if(startExistingSchedulerRequestsNames.size() > 0)
                     {
-                        synchronized (startExistingSchedulerRequestsNames) {
-                            synchronized (schedulers) {
-                                int schedulerId;
-                                String projectName;
-                                while(startExistingSchedulerRequestsNames.size() > 0)
-                                {
-                                    projectName = startExistingSchedulerRequestsNames.remove(0);
-                                    schedulerId = -1;
-                                    for(Scheduler scheduler : schedulers)
-                                    {
-                                        if(scheduler.projectInfoFile.GetProjectName().equals(projectName))
-                                        {
-                                            schedulerId = scheduler.GetID();
-                                            break;
-                                        }
-                                    }
-                                    if(schedulerId != -1) {
-                                        handleStartExistingSchedulerRequests(schedulerId);
-                                    }
-                                }
+                        List<String> tempRequestsList = new ArrayList<String>();
+                        synchronized (startExistingSchedulerRequestsNames)
+                        {
+                            while(startExistingSchedulerRequestsNames.size() > 0)
+                            {
+                                tempRequestsList.add(startExistingSchedulerRequestsNames.remove(0));
+                            }
+                        }
+
+                        Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
+
+                        int schedulerId;
+                        String projectName;
+                        while(tempRequestsList.size() > 0)
+                        {
+                            projectName = tempRequestsList.remove(0);
+                            schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
+                            if(schedulerId != -1) {
+                                handleStartExistingSchedulerRequests(schedulerId);
                             }
                         }
                     }
@@ -654,44 +685,22 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     {
                         synchronized (globalDLs)
                         {
-                            boolean allStopped;
-                            boolean noneExisting;
-
                             if(schedulers.size() > 0)
                             {
-                                synchronized (schedulers)
+                                Map<String,TaskState> pluginNamesAndRunningState = getRunningStateForProjectPluginsList();
+
+                                for(GlobalDownloader gdl : globalDLs)
                                 {
-                                    for(GlobalDownloader gdl : globalDLs)
+                                    if(!pluginNamesAndRunningState.containsKey(gdl.pluginName))
                                     {
-                                        allStopped = true;
-                                        noneExisting = true;
-
-                                        for(Scheduler scheduler : schedulers)
-                                        {
-                                            for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
-                                            {
-                                                if(pluginInfo.GetName().equals(gdl.pluginName))
-                                                {
-                                                    noneExisting = false;
-                                                    if(scheduler.GetState() == TaskState.RUNNING) {
-                                                        allStopped = false;
-                                                    }
-                                                    break;
-                                                }
-                                            }
-
-                                            if(!noneExisting && !allStopped) {
-                                                break;
-                                            }
-                                        }
-
-                                        if(noneExisting)
-                                        {
-                                            gdl.Stop();
-                                            globalDLs.remove(gdl.ID);
-                                            releaseGlobalDLID(gdl.ID);
-                                            globalDLFutures.get(gdl.ID).cancel(false);
-                                        }
+                                        gdl.Stop();
+                                        globalDLs.remove(gdl.ID);
+                                        releaseGlobalDLID(gdl.ID);
+                                        globalDLFutures.get(gdl.ID).cancel(false);
+                                    }
+                                    else if(pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPED)
+                                    {
+                                        gdl.Stop();
                                     }
                                 }
                             }
@@ -1143,5 +1152,58 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         } else {
             return false;
         }
+    }
+
+    protected Map<String,Integer> getClonedSchedulersIDList() {
+        Map<String,Integer> schedulerNameAndID = new HashMap<String,Integer>(0);
+        synchronized(schedulers)
+        {
+            for(Scheduler scheduler : schedulers)
+            {
+                schedulerNameAndID.put(scheduler.projectInfoFile.GetProjectName(), scheduler.GetID());
+            }
+        }
+        return schedulerNameAndID;
+    }
+
+    protected Map<String,TaskState> getRunningStateForProjectPluginsList() {
+        Map<String,TaskState> pluginNamesAndRunningState = new HashMap<String,TaskState>(0);
+        synchronized(schedulers)
+        {
+            for(Scheduler scheduler : schedulers)
+            {
+                for(ProjectInfoPlugin pluginInfo : scheduler.projectInfoFile.GetPlugins())
+                {
+                    if(pluginNamesAndRunningState.containsKey(pluginInfo.GetName()))
+                    {
+                        if(pluginNamesAndRunningState.get(pluginInfo.GetName()) == TaskState.STOPPED)
+                        {
+                            pluginNamesAndRunningState.put(pluginInfo.GetName(), scheduler.GetState());
+                        }
+                    }
+                    else
+                    {
+                        pluginNamesAndRunningState.put(pluginInfo.GetName(), scheduler.GetState());
+                    }
+                }
+            }
+        }
+        return pluginNamesAndRunningState;
+    }
+
+    protected int getSchedulerIDFromClonedList(
+            Map<String, Integer> schedulerNamesAndIDs, String projectName) {
+        int schedulerId;
+        schedulerId = -1;
+        Set<String> projectNames = schedulerNamesAndIDs.keySet();
+        for(String name : projectNames)
+        {
+            if(name.equals(projectName))
+            {
+                schedulerId = schedulerNamesAndIDs.get(name);
+                break;
+            }
+        }
+        return schedulerId;
     }
 }
