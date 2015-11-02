@@ -27,10 +27,10 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public abstract class LocalDownloader extends Process {
-    protected final GlobalDownloader gdl;
-    protected final String dataName;
+    public final String dataName;
+    public final ListDatesFiles listDatesFiles;
+    protected GlobalDownloader gdl;
     protected LocalDate currentStartDate;
-    protected final ListDatesFiles listDatesFiles;
 
     protected LocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
@@ -66,24 +66,9 @@ public abstract class LocalDownloader extends Process {
     /**
      * Checks for new work from associated GlobalDownloader in the Download table, calculates the available files to process, and updates the local cache to start processing them.
      *
-     * @return number of new files to process per the ordered Summaries defined by the project metadata Summaries section
      */
-    public TreeMap<Integer, Integer> AttemptUpdate()
+    public void AttemptUpdate()
     {
-        TreeMap<Integer, Integer> newFiles = new TreeMap<Integer, Integer>();
-        if(scheduler.GetState() == TaskState.RUNNING)
-        {
-            try {
-                gdl.PerformUpdates();
-
-                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName,
-                        currentStartDate, pluginMetaData.ExtraDownloadFiles, pluginInfo.GetModisTiles(), listDatesFiles);
-            } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-                ErrorLog.add(processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
-            } catch (Exception e) {
-                ErrorLog.add(processName, scheduler, "LocalDownloader.AttemptUpdate error", e);
-            }
-        }
-        return newFiles;
+        manager.StartNewProcessWorker(new DownloadWorker(gdl, configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, null, outputCache));
     }
 }

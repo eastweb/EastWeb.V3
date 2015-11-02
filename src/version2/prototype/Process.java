@@ -19,6 +19,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.download.GlobalDownloader;
+import version2.prototype.download.LocalDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;

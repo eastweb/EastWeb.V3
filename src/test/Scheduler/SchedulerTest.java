@@ -323,24 +323,15 @@ public class SchedulerTest {
                     localDl = factory.CreateLocalDownloader(gdl);
                     if(globalDLs.size() == 0)
                     {
-                        globalDLs.add(id, gdl);
+                        globalDLs.put(id, gdl);
                         //                        globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
                         gdl.run();
                     }
                     else
                     {
-                        GlobalDownloader temp = globalDLs.get(id);
-                        if(temp == null)
-                        {
-                            globalDLs.add(id, gdl);
-                            //                            globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
-                            gdl.run();
-                        }
-                        else{
-                            globalDLs.set(id, gdl);
-                            //                            globalDLFutures.set(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
-                            gdl.run();
-                        }
+                        globalDLs.put(id, gdl);
+                        //                            globalDLFutures.add(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                        gdl.run();
                     }
                 }
 

@@ -165,13 +165,13 @@ public class SchedulerStatusContainer {
      * Get last modified time of this container.
      * @return LocalDateTime object representing the last time something in this container was modified
      */
-    public synchronized LocalDateTime GetLastModifiedTime() { return lastModifiedTime; }
+    public LocalDateTime GetLastModifiedTime() { return lastModifiedTime; }
 
     /**
      * Gets the stored state of the Scheduler.
      * @return current TaskState of Scheduler
      */
-    public synchronized TaskState GetState() { return state; }
+    public TaskState GetState() { return state; }
 
     /**
      * Updates the download progress for the given plugin and data name.
@@ -182,7 +182,7 @@ public class SchedulerStatusContainer {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
+    public void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
     {
         progressUpdater.UpdateDBDownloadExpectedCount(pluginName, dataName, listDatesFiles, modisTileNames, stmt);
         updateLastModifiedTime();
@@ -194,7 +194,7 @@ public class SchedulerStatusContainer {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException
+    public void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException
     {
         progressUpdater.UpdateDBProcessorExpectedCount(pluginName, stmt);
         updateLastModifiedTime();
@@ -206,7 +206,7 @@ public class SchedulerStatusContainer {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException
+    public void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException
     {
         progressUpdater.UpdateDBIndicesExpectedCount(pluginName, stmt);
         updateLastModifiedTime();
@@ -221,7 +221,7 @@ public class SchedulerStatusContainer {
      * @param stmt  - Statement object to reuse
      * @throws SQLException
      */
-    public synchronized void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
+    public void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
             throws SQLException
     {
         progressUpdater.UpdateDBSummaryExpectedCount(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
@@ -232,7 +232,7 @@ public class SchedulerStatusContainer {
      * Updates the stored state of the Scheduler.
      * @param state  - TaskState to assign to the SchedulerStatueContainer
      */
-    public synchronized void UpdateSchedulerTaskState(TaskState state)
+    public void UpdateSchedulerTaskState(TaskState state)
     {
         this.state = state;
         updateLastModifiedTime();
@@ -242,7 +242,7 @@ public class SchedulerStatusContainer {
      * Adds a string to the log.
      * @param logText  - the string to add to the log
      */
-    public synchronized void AddToLog(String logText)
+    public void AddToLog(String logText)
     {
         log.add(logText);
         updateLastModifiedTime();
@@ -253,7 +253,7 @@ public class SchedulerStatusContainer {
      * @return SchedulerStatus representation of this object
      * @throws SQLException
      */
-    public synchronized SchedulerStatus GetStatus() throws SQLException
+    public SchedulerStatus GetStatus() throws SQLException
     {
         // Update progresses
         String pluginName;
@@ -330,7 +330,7 @@ public class SchedulerStatusContainer {
     /**
      * Checks if the whole project is up to date or if any summary for any of the plugins being processed still has work to accomplish with the current information in this container.
      */
-    private synchronized void UpdateProjectIsUpToDate()
+    private void UpdateProjectIsUpToDate()
     {
         boolean isUpToDate = true;
         Iterator<String> pluginsIt = downloadProgressesByData.keySet().iterator();
@@ -424,7 +424,7 @@ public class SchedulerStatusContainer {
         return clone;
     }
 
-    private synchronized void updateLastModifiedTime() {
+    private void updateLastModifiedTime() {
         lastModifiedTime = LocalDateTime.now();
     }
 }

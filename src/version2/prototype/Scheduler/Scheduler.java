@@ -28,6 +28,7 @@ import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
+import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.indices.IndicesWorker;
@@ -84,6 +85,21 @@ public class Scheduler {
     public Scheduler(SchedulerData data, int myID, EASTWebManagerI manager, Config configInstance)
     {
         this(data, myID, TaskState.STOPPED, manager, configInstance, new ProgressUpdater(configInstance, data.projectInfoFile, data.pluginMetaDataCollection));
+    }
+
+    /**
+     * Creates and sets up a Scheduler instance with the given project data. Does not start the Scheduler and Processes.
+     * To start processing call start().
+     *
+     * @param data  - SchedulerData describing the project to setup for
+     * @param myID  - a unique ID for this Scheduler instance
+     * @param initState  - Initial TaskState to set this Scheduler to.
+     * @param manager  - reference to the EASTWebManager creating this Scheduler
+     * @param configInstance
+     */
+    public Scheduler(SchedulerData data, int myID, TaskState initState, EASTWebManagerI manager, Config configInstance)
+    {
+        this(data, myID, initState, manager, configInstance, new ProgressUpdater(configInstance, data.projectInfoFile, data.pluginMetaDataCollection));
     }
 
     /**
@@ -428,10 +444,9 @@ public class Scheduler {
             cache.NotifyObserversToCheckForPastUpdates();
         }
 
-        TreeMap<String, TreeMap<Integer, Integer>> results = new TreeMap<String, TreeMap<Integer, Integer>>();
         for(LocalDownloader dl : localDownloaders)
         {
-            results.put(dl.pluginInfo.GetName(), dl.AttemptUpdate());
+            dl.AttemptUpdate();
         }
 
         UpdateStatus();

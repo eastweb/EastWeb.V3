@@ -236,7 +236,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         }
 
         @Override
-        public void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
+        public void SetCompleted() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
             performedUpdates = true;
         }
     }
@@ -253,7 +253,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         @Override
         public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate,
                 ArrayList<String> extraDownloadFiles, ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-                IOException {
+        IOException {
             assertEquals("StartDate incorrect.", expectedStartDate, startDate);
             return 1;
         }

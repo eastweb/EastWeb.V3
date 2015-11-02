@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ErrorLog;
+import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -91,7 +92,7 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
     }
 
     @Override
-    public void PerformUpdates() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public void SetCompleted() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
         final Connection conn = DatabaseConnector.getConnection();
         final Statement stmt = conn.createStatement();
@@ -195,7 +196,8 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
     @Override
     public void run() {
         try {
-            System.out.println("GlobalDownloader of '" + metaData.name + "' files for plugin '" + pluginName + "' starting from " + currentStartDate + ".");
+            System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] GlobalDownloader of '" + metaData.name + "' files for plugin '"
+                    + pluginName + "' starting from " + currentStartDate + ".");
             System.out.println("Running: " + downloadCtr.getName().substring((downloadCtr.getName().lastIndexOf(".") > -1 ? downloadCtr.getName().lastIndexOf(".") + 1 : 0)));
 
             // Step 1: Get all downloads from ListDatesFiles and remove unneeded modis tile files
@@ -286,13 +288,17 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
             }
 
             // Step 4: Create downloader and run downloader for all that's left
-            for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
+            downloadloop: for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
             {
                 String outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
                 DataDate dd = entry.getKey();
 
                 for (String f : entry.getValue())
                 {
+                    if(state == TaskState.STOPPED) {
+                        System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] Breaking out of download loop.");
+                        break downloadloop;
+                    }
                     if (f != null)
                     {
                         DownloaderFramework downloader = (DownloaderFramework) downloadCtr.newInstance(dd, outFolder, metaData, f);

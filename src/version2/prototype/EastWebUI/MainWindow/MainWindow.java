@@ -371,7 +371,7 @@ public class MainWindow {
      * run projects
      */
     private void runSelectedProject() {
-        JButton runButton = new JButton("Run Project");
+        JButton runButton = new JButton("Load Project");
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -380,7 +380,7 @@ public class MainWindow {
                 try {
                     ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
                     SchedulerData data = new SchedulerData(project, !chckbxIntermidiateFiles.isSelected());
-                    EASTWebManager.StartNewScheduler(data, false);
+                    EASTWebManager.LoadNewScheduler(data, false);
 
                     defaultTableModel.addRow(new Object[] {
                             String.valueOf(projectList.getSelectedItem()),
@@ -611,11 +611,11 @@ public class MainWindow {
                 if(status == null) {
                     // Do nothing
                 } else if(status.State == TaskState.RUNNING) {
-                    EASTWebManager.StopExistingScheduler(projectName, true);
+                    EASTWebManager.StopExistingScheduler(projectName, false);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 
                 } else {
-                    EASTWebManager.StartExistingScheduler(projectName, true);
+                    EASTWebManager.StartExistingScheduler(projectName, false);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
                 }
                 frame.repaint();
@@ -719,7 +719,7 @@ public class MainWindow {
                     }
                 }
                 if(removeProject != -1) {
-                    EASTWebManager.DeleteScheduler(projectName, true);
+                    EASTWebManager.DeleteScheduler(projectName, false);
                     defaultTableModel.removeRow(removeProject);
                 }
             }

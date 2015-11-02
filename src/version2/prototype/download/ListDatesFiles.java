@@ -21,6 +21,7 @@ public abstract class ListDatesFiles
     protected DataDate sDate;
     protected DownloadMetaData mData;
     protected Map<DataDate, ArrayList<String>>  mapDatesFiles;
+    protected Boolean mapDatesFilesSet;
     protected ProjectInfoFile mProject;
 
     public ListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException
@@ -31,6 +32,7 @@ public abstract class ListDatesFiles
         mapDatesFiles =  null;
         mProject =  project;
         mapDatesFiles = null;
+        mapDatesFilesSet = new Boolean(false);
     }
 
     // gets a map of each day and its associated files
@@ -39,16 +41,25 @@ public abstract class ListDatesFiles
         Map<DataDate, ArrayList<String>> filesMap = new HashMap<DataDate, ArrayList<String>>();
         ArrayList<String> files;
 
-        if(mapDatesFiles == null) {
-            if ((mData.mode).equalsIgnoreCase("FTP"))
+        if(!mapDatesFilesSet)
+        {
+            synchronized(mapDatesFilesSet)
             {
-                mapDatesFiles = ListDatesFilesFTP();
-            };
+                if(!mapDatesFilesSet)
+                {
+                    System.out.println("Creating ListDatesFiles map for '" + mData.Title + "':'" + mData.name + "'.");
+                    if ((mData.mode).equalsIgnoreCase("FTP"))
+                    {
+                        mapDatesFiles = ListDatesFilesFTP();
+                    };
 
-            if ((mData.mode).equalsIgnoreCase("HTTP"))
-            {
-                mapDatesFiles = ListDatesFilesHTTP();
-            };
+                    if ((mData.mode).equalsIgnoreCase("HTTP"))
+                    {
+                        mapDatesFiles = ListDatesFilesHTTP();
+                    };
+                }
+                mapDatesFilesSet = new Boolean(true);
+            }
         }
 
         for(DataDate dd : mapDatesFiles.keySet())
