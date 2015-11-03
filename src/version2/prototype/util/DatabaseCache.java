@@ -519,9 +519,7 @@ public class DatabaseCache extends Observable{
             }
 
             // Update progress bar
-            System.out.println("TEST for plugin '" + pluginName + "' in project '" + projectName + "'.");
             scheduler.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
-            //            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
             stmt.close();
             conn.close();

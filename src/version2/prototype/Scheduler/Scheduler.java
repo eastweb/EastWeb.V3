@@ -479,17 +479,12 @@ public class Scheduler {
     protected void UpdateStatus() throws SQLException
     {
         SchedulerStatus status = null;
-        synchronized (statusContainer)
-        {
-            System.out.println("Retrieving Scheduler status for project '" + projectInfoFile.GetProjectName() + "'.");
+        synchronized (statusContainer) {
             status = statusContainer.GetStatus();
-            System.out.println("Scheduler status for project '" + projectInfoFile.GetProjectName() + "' retrieved.");
         }
 
         if(status != null) {
-            System.out.println("Updating Scheduler status for project '" + projectInfoFile.GetProjectName() + "'.");
             manager.NotifyUI(status);
-            System.out.println("Done updating Scheduler status for project '" + projectInfoFile.GetProjectName() + "'.");
         }
     }
 
