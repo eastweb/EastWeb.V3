@@ -519,6 +519,7 @@ public class DatabaseCache extends Observable{
             }
 
             // Update progress bar
+            System.out.println("TEST for plugin '" + pluginName + "' in project '" + projectName + "'.");
             scheduler.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
             //            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
@@ -526,10 +527,10 @@ public class DatabaseCache extends Observable{
             conn.close();
 
             // Signal to observers that changes occurred
+            System.out.println("Finished checking for unprocessed downloads Files for " + dates.size() + " day" + (dates.size() > 1 ? "s" : "") + " loaded for plugin '" + pluginName
+                    + "' in project '" + projectName + "'. Notifying project Processor of the additional work.");
             if(dates.size() > 0)
             {
-                System.out.println("Files for " + dates.size() + " day" + (dates.size() > 1 ? "s" : "") + " loaded for plugin '" + pluginName + "' in project '" + projectName
-                        + "'. Notifying project Processor of the additional work.");
                 filesAvailable = true;
                 setChanged();
                 notifyObservers();

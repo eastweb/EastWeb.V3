@@ -110,7 +110,6 @@ public class TRMM3B42ListDatesFiles extends ListDatesFiles
 
             ftpC.disconnect();
             ftpC = null;
-
             return mapDatesFiles;
         }
         catch (Exception e)

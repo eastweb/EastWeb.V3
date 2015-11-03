@@ -57,6 +57,7 @@ public abstract class ListDatesFiles
                     {
                         mapDatesFiles = ListDatesFilesHTTP();
                     };
+                    System.out.println("Finished creating ListDatesFiles map for '" + mData.Title + "':'" + mData.name + "'.");
                 }
                 mapDatesFilesSet = new Boolean(true);
             }

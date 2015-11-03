@@ -815,7 +815,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         synchronized (schedulerStatesChanged)
         {
-            System.out.println("NotifyUI of changes");
+            System.out.println("Updating Scheduler status in EASTWeb Manager.");
             schedulerStatesChanged = true;
 
             synchronized (schedulerStatuses)
@@ -829,7 +829,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     }
                 }
             }
-            System.out.println("Done NotifyUI of changes");
+            System.out.println("Done updating Scheduler status in EASTWeb Manager.");
         }
     }
 
@@ -878,6 +878,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     if(gdl == null) {
                         return null;
                     }
+                    System.out.println("GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "' created.");
 
                     globalDLs.put(id, gdl);
                     globalDLFutures.put(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
@@ -900,6 +901,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
                 System.out.println("Creating new LocalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
                 localDl = factory.CreateLocalDownloader(gdl);
+                System.out.println("LocalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "' created.");
                 return localDl;
             }
             else
@@ -1051,6 +1053,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             int id = getLowestAvailableSchedulerID();
             if(IsIDValid(id, schedulerIDs))
             {
+                System.out.println("Handling start request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "'.");
                 //                schedulerStatuses.add(new SchedulerStatus(id, data.projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), TaskState.STOPPED));
                 Scheduler scheduler = null;
                 scheduler = new Scheduler(data, id, TaskState.RUNNING, this, configInstance);
@@ -1060,6 +1063,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 synchronized (numOfCreatedSchedulers) {
                     numOfCreatedSchedulers = schedulers.size();
                 }
+                System.out.println("Start request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' handled.");
             }
             else
             {
@@ -1075,6 +1079,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             int id = getLowestAvailableSchedulerID();
             if(IsIDValid(id, schedulerIDs))
             {
+                System.out.println("Handling load request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "'.");
                 Scheduler scheduler = null;
                 scheduler = new Scheduler(data, id, TaskState.STOPPED, this, configInstance);
                 schedulerStatuses.add(scheduler.GetSchedulerStatus());
@@ -1083,6 +1088,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 synchronized (numOfCreatedSchedulers) {
                     numOfCreatedSchedulers = schedulers.size();
                 }
+                System.out.println("Load request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' handled.");
             }
             else
             {
@@ -1097,7 +1103,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             if(schedulers.size() > schedulerID)
             {
+                System.out.println("Handling stop request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
                 schedulers.get(schedulerID).Stop();
+                System.out.println("Stop request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
             }
         }
     }
@@ -1108,6 +1116,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             if(schedulers.size() > schedulerID)
             {
+                System.out.println("Handling delete request of the project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
                 schedulers.get(schedulerID).Delete();
                 schedulers.remove(schedulerID);
                 releaseSchedulerID(schedulerID);
@@ -1115,6 +1124,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 synchronized (numOfCreatedSchedulers) {
                     numOfCreatedSchedulers = schedulers.size();
                 }
+                System.out.println("Delete request of the project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
             }
         }
     }
@@ -1125,7 +1135,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             if(schedulers.size() > schedulerID)
             {
+                System.out.println("Handling request to start back up the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
                 schedulers.get(schedulerID).Start();
+                System.out.println("Restart request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
             }
         }
     }

@@ -172,7 +172,6 @@ public class ModisListDatesFiles extends ListDatesFiles
             return null;
         }
 
-        System.out.println("Finished running ModisListDatesFiles.");
         return mapDatesFiles;
     }
 

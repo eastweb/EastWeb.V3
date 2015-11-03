@@ -118,7 +118,6 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
 
             ftpC.disconnect();
             ftpC = null;
-            System.out.println("connection is closed" + ftpC);
             return mapDatesFiles;
         }
         catch (Exception e)

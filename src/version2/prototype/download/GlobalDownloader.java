@@ -94,7 +94,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final void Stop()
     {
-        state = TaskState.STOPPED;
+        synchronized(state) {
+            state = TaskState.STOPPED;
+        }
     }
 
     /**
@@ -102,7 +104,9 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final void Start()
     {
-        state = TaskState.RUNNING;
+        synchronized(state) {
+            state = TaskState.RUNNING;
+        }
     }
 
     /**
@@ -112,7 +116,11 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final TaskState GetRunningState()
     {
-        return state;
+        TaskState myState;
+        synchronized(state) {
+            myState = state;
+        }
+        return myState;
     }
 
     /**
@@ -225,7 +233,14 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      *
      * @return start date for downloading
      */
-    public final LocalDate GetStartDate() { return currentStartDate; }
+    public final LocalDate GetStartDate()
+    {
+        LocalDate myCurrentStartDate;
+        synchronized(currentStartDate) {
+            myCurrentStartDate = currentStartDate;
+        }
+        return myCurrentStartDate;
+    }
 
     /**
      * Changes the start date for this GlobalDownloader and causes it to start downloading from the given date. Does not cause the GlobalDownloader to redownload anything already
@@ -236,8 +251,10 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      */
     public final void SetStartDate(LocalDate newStartDate)
     {
-        if(currentStartDate.isAfter(newStartDate)) {
-            currentStartDate = newStartDate;
+        synchronized(currentStartDate) {
+            if(currentStartDate.isAfter(newStartDate)) {
+                currentStartDate = newStartDate;
+            }
         }
     }
 

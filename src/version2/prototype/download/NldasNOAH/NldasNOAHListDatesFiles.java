@@ -135,7 +135,6 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
 
             ftpC.disconnect();
             ftpC = null;
-            System.out.println("connection is closed " + ftpC);
             return mapDatesFiles;
         }
         catch (Exception e)
