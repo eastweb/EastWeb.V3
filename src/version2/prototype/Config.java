@@ -40,6 +40,7 @@ import version2.prototype.util.FileSystem;
     private static final String SUMMARY_CALCULATION_KEY = "SummaryCalculation";
     // Instance
     private static Config instance = null;
+    private static Boolean instanceLock = new Boolean(true);        // Value doesn't matter
     //    private static final LazyCachedReference<Config, ConfigReadException> instance =
     //            new LazyCachedReference<Config, ConfigReadException>() {
     //        @Override
@@ -170,7 +171,9 @@ import version2.prototype.util.FileSystem;
     public static Config getInstance()
     {
         if(instance == null) {
-            instance = new Config(CONFIG_FILENAME);
+            synchronized(instanceLock) {
+                instance = new Config(CONFIG_FILENAME);
+            }
         }
         return instance;
     }

@@ -628,7 +628,7 @@ public class DatabaseCache extends Observable{
         stmt.close();
         conn.close();
 
-        synchronized(this) {
+        synchronized(filesAvailable) {
             filesAvailable = true;
         }
         if(processNotifyingName != null) {
