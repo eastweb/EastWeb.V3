@@ -43,6 +43,9 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
                 while(ChronoUnit.DAYS.between(sDate, dateInComposite) >= 8) {
                     sDate = sDate.plusDays(8);
                 }
+                if(ChronoUnit.DAYS.between(sDate, dateInComposite) != 0) {
+                    sDate = sDate.plusDays(8);
+                }
                 return (int) ChronoUnit.DAYS.between(sDate, LocalDate.ofYearDay(dateInComposite.getYear() + 1, 1));
             }
         }
@@ -64,7 +67,7 @@ public class CompositeOf8Days implements TemporalSummaryCompositionStrategy {
         int count = 0;
         LocalDate nextYearDay1 = LocalDate.ofYearDay(sDate.getYear() + 1, 1);
         while(ChronoUnit.DAYS.between(sDate, endDate) >= 8) {
-            if(sDate.getDayOfYear() >= 359) {
+            if(sDate.getMonthValue() == 12 && ChronoUnit.DAYS.between(sDate, LocalDate.ofYearDay(sDate.getYear() + 1, 1)) < 8) {
                 sDate = nextYearDay1;
                 nextYearDay1 = nextYearDay1.plusYears(1);
             }
