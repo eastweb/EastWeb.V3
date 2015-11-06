@@ -170,7 +170,9 @@ import version2.prototype.util.FileSystem;
     public static Config getInstance()
     {
         if(instance == null) {
-            instance = new Config(CONFIG_FILENAME);
+            synchronized(instance) {
+                instance = new Config(CONFIG_FILENAME);
+            }
         }
         return instance;
     }

@@ -58,8 +58,10 @@ public abstract class LocalDownloader extends Process {
      */
     public final void SetStartDate(LocalDate newStartDate)
     {
-        if(currentStartDate.isAfter(newStartDate)) {
-            currentStartDate = newStartDate;
+        synchronized(currentStartDate) {
+            if(currentStartDate.isAfter(newStartDate)) {
+                currentStartDate = newStartDate;
+            }
         }
     }
 
