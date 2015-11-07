@@ -518,22 +518,23 @@ public class DatabaseCache extends Observable{
                 }
             }
 
-            // Update progress bar
-            scheduler.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
-
-            stmt.close();
-            conn.close();
+            if(dates.size() > 0)
+            {
+                filesAvailable = true;
+            }
 
             // Signal to observers that changes occurred
             System.out.println("Finished checking for unprocessed downloads Files for " + dates.size() + " day" + (dates.size() > 1 ? "s" : "") + " loaded for plugin '" + pluginName
                     + "' in project '" + projectName + "'. Notifying project Processor of the additional work.");
-            if(dates.size() > 0)
-            {
-                filesAvailable = true;
-                setChanged();
-                notifyObservers();
-            }
         }
+
+        // Update progress bar
+        scheduler.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
+
+        stmt.close();
+        conn.close();
+        setChanged();
+        notifyObservers();
 
         return changes;
     }
@@ -623,7 +624,6 @@ public class DatabaseCache extends Observable{
         if(processCachingFor == ProcessName.PROCESSOR) {
             Schemas.setProcessed(mSchemaName, "DownloadCacheExtra", dateGroupID, stmt);
         }
-        //        scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
         stmt.close();
         conn.close();
