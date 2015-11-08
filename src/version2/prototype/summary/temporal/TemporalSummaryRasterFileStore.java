@@ -20,7 +20,7 @@ public class TemporalSummaryRasterFileStore {
      * The TemporalSummaryCompositionStrategy object created for this summary as specified in the project metadata.
      */
     public final TemporalSummaryCompositionStrategy compStrategy;
-    private static Map<String, ArrayList<TemporalSummaryComposition>> compositionsMap = new TreeMap<String, ArrayList<TemporalSummaryComposition>>();
+    private Map<String, ArrayList<TemporalSummaryComposition>> compositionsMap;
 
     /**
      * Creates a TemporalSummaryRasterFileStore utilizing the given composition strategy.
@@ -30,6 +30,7 @@ public class TemporalSummaryRasterFileStore {
     public TemporalSummaryRasterFileStore(TemporalSummaryCompositionStrategy compStrategy)
     {
         this.compStrategy = compStrategy;
+        compositionsMap = new TreeMap<String, ArrayList<TemporalSummaryComposition>>();
     }
 
     /**
