@@ -63,17 +63,24 @@ public class IndicesWorker extends ProcessWorker{
         super(configInstance, "IndicesWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
     }
 
-    /* (non-Javadoc)
-     * @see java.util.concurrent.Callable#call()
-     */
     @Override
-    public ProcessWorkerReturn call() throws Exception {
+    public ProcessWorkerReturn process() {
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
                 FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(),
                         projectInfoFile.GetProjectName(), pluginName, ProcessName.INDICES);
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
-        Statement stmt = con.createStatement();
+        Statement stmt = null;
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            ErrorLog.add(process, "Problem creating Statement from db connection.", e);
+        }
+
+        if(stmt == null) {
+            return null;
+        }
 
         // Use a map to group CachedFiles based on the dates
         HashMap<DataDate, ArrayList<ProcessorFileMetaData>> map =
@@ -140,7 +147,11 @@ public class IndicesWorker extends ProcessWorker{
 
             if(!(new File(outputPath).exists()))
             {
-                FileUtils.forceMkdir(new File(outputPath));
+                try {
+                    FileUtils.forceMkdir(new File(outputPath));
+                } catch (IOException e) {
+                    ErrorLog.add(process, "Problem creating output directory.", e);
+                }
             }
 
             for(String indices: indicesNames)

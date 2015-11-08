@@ -66,6 +66,15 @@ public abstract class Process implements Observer {
     }
 
     /**
+     * Returns the TaskState retrieved from the owning Scheduler object.
+     * @return TaskState  - TaskState of the Scheduler
+     */
+    public TaskState getState()
+    {
+        return scheduler.GetState();
+    }
+
+    /**
      * Method to override to handle processing new input files. Called only when Scheduler TaskState is set to RUNNING and there is at least 1 available cached file to process.
      *
      * @param cachedFiles  - List of cache files available to process. Can always assume size is 1 or greater when called.

@@ -52,4 +52,21 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
         this.cachedFiles = cachedFiles;
         this.outputCache = outputCache;
     }
+
+    /**
+     * Method to override to handle the processing to be done in the implementing class. Called only when Scheduler TaskState is set to RUNNING.
+     */
+    public abstract ProcessWorkerReturn process();
+
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
+    @Override
+    public ProcessWorkerReturn call() throws Exception {
+        if(process.getState() == TaskState.RUNNING) {
+            return process();
+        } else {
+            return null;
+        }
+    }
 }

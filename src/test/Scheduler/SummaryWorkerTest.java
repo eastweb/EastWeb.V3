@@ -30,7 +30,7 @@ public final class SummaryWorkerTest extends ProcessWorker {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public ProcessWorkerReturn call() throws Exception {
+    public ProcessWorkerReturn process() {
         System.out.println("SummaryWorkerTest executed.");
         return null;
     }

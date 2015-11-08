@@ -3,7 +3,14 @@
  */
 package test.Scheduler;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.Process;
@@ -31,11 +38,17 @@ public final class IndicesWorkerTest extends ProcessWorker {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public ProcessWorkerReturn call() throws Exception {
+    public ProcessWorkerReturn process() {
         System.out.println("IndicesWorkerTest executed.");
         ProcessorFileMetaData pData = cachedFiles.get(0).ReadMetaDataForIndices();
         cachedFiles.set(0, new DataFileMetaData(pData.dataFilePath, 1, pData.year, pData.day, "Test Index"));
-        outputCache.CacheFiles(cachedFiles);
+        try {
+            outputCache.CacheFiles(cachedFiles);
+        } catch (ClassNotFoundException | SQLException | ParseException
+                | ParserConfigurationException | SAXException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return null;
     }
 

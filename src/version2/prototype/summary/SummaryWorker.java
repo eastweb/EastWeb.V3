@@ -51,11 +51,8 @@ public class SummaryWorker extends ProcessWorker {
         this.fileStores = fileStores;
     }
 
-    /* (non-Javadoc)
-     * @see java.util.concurrent.Callable#call()
-     */
     @Override
-    public ProcessWorkerReturn call() throws Exception {
+    public ProcessWorkerReturn process() {
         Map<Integer, ArrayList<DataFileMetaData>> summaryInputMap = new HashMap<Integer, ArrayList<DataFileMetaData>>();
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
         ArrayList<DataFileMetaData> tempFiles;

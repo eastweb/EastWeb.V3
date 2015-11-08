@@ -48,11 +48,8 @@ public class DownloadWorker extends ProcessWorker {
         this.gdl = gdl;
     }
 
-    /* (non-Javadoc)
-     * @see java.util.concurrent.Callable#call()
-     */
     @Override
-    public ProcessWorkerReturn call() throws Exception {
+    public ProcessWorkerReturn process() {
         try {
             gdl.SetCompleted();
             outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(),

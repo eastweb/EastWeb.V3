@@ -3,7 +3,14 @@
  */
 package test.Scheduler;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.Process;
@@ -30,9 +37,15 @@ public final class ProcessorWorkerTest extends ProcessWorker {
      * @see java.util.concurrent.Callable#call()
      */
     @Override
-    public ProcessWorkerReturn call() throws Exception {
+    public ProcessWorkerReturn process() {
         System.out.println("ProcessorWorkerTest executed.");
-        outputCache.CacheFiles(cachedFiles);
+        try {
+            outputCache.CacheFiles(cachedFiles);
+        } catch (ClassNotFoundException | SQLException | ParseException
+                | ParserConfigurationException | SAXException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return null;
     }
 

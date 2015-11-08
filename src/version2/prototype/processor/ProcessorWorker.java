@@ -66,11 +66,8 @@ public class ProcessorWorker extends ProcessWorker {
 
     }
 
-    /* (non-Javadoc)
-     * @see java.util.concurrent.Callable#call()
-     */
     @Override
-    public ProcessWorkerReturn call() throws Exception
+    public ProcessWorkerReturn process()
     {
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
