@@ -475,7 +475,7 @@ public class ProgressUpdater {
                 LocalDate startDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
                 while(!rs.isLast()) { rs.next(); }
                 LocalDate endDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
-                //                endDate = endDate.plusDays(compStrategy.getDaysInThisComposite(endDate));
+                endDate = endDate.plusDays(compStrategy.getDaysInThisComposite(endDate));
                 long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(startDate, endDate);
                 expectedCount = (int) (completeCompositesInRange * pluginInfo.GetIndices().size());
                 rs.close();
