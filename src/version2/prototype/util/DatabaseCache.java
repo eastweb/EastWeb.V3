@@ -279,7 +279,7 @@ public class DatabaseCache extends Observable{
                             dateGroupID = rs.getInt("DateGroupID");
                             tempDataName = rs.getString("DataName");
 
-                            if(!temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("DataFilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
+                            if(!temp.add(new Record(dateGroupID, tempDataName, new DataFileMetaData(tempDataName, rs.getString("FilePath"), dateGroupID, tempYear, tempDayOfYear)))) {
                                 ErrorLog.add(processCachingFor, scheduler, "Problem adding cached file to unprocessed cached file return list.", new Exception("Element could not be added."));
                             }
                             rows.add(rs.getInt("DownloadCacheExtraID"));
