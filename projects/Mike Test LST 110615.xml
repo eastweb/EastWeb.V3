@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="ModisLST">
+			<Indicies>ModisLSTDay</Indicies>
+			<Indicies>ModisLSTNight</Indicies>
+			<Indicies>ModisLSTMean</Indicies>
+			<ModisTile> h21v07</ModisTile>
+			<ModisTile> h21v08</ModisTile>
+			<QC> HIGHEST</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Tue Apr 01 16:48:54 CDT 2014</StartDate>
+	<ProjectName>Mike Test LST 110615</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>\Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp</MasterShapeFile>
+	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
+	<Clipping>false</Clipping>
+	<FreezingDate>Sun Nov 01 16:51:01 CST 1970</FreezingDate>
+	<CoolingDegree>0</CoolingDegree>
+	<HeatingDate>Sun Nov 01 16:51:06 CST 1970</HeatingDate>
+	<HeatingDegree>0</HeatingDegree>
+	<ReSampling>BILINEAR</ReSampling>
+	<PixelSize>1000</PixelSize>
+	<Summaries>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: CompositeOf8Days</Summary>
+	</Summaries>
+</ProjectInfo>

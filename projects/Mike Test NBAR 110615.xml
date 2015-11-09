@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="ModisNBAR">
+			<Indicies>ModisNBARNDVI</Indicies>
+			<Indicies>ModisNBAREVI</Indicies>
+			<Indicies>ModisNBARNDWI5</Indicies>
+			<Indicies>ModisNBARNDWI6</Indicies>
+			<Indicies>ModisNBARSAVI</Indicies>
+			<ModisTile> h21v07</ModisTile>
+			<ModisTile> h21v08</ModisTile>
+			<QC> Highest</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Wed Oct 01 00:00:00 CDT 2014</StartDate>
+	<ProjectName>Mike Test NBAR 110615</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File>\Documentation\TestCases\Ethiopia Files\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>\Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp</MasterShapeFile>
+	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
+	<Clipping>false</Clipping>
+	<FreezingDate>Sun Nov 01 16:31:14 CST 1970</FreezingDate>
+	<CoolingDegree>0</CoolingDegree>
+	<HeatingDate>Sun Nov 01 16:31:17 CST 1970</HeatingDate>
+	<HeatingDegree>0</HeatingDegree>
+	<ReSampling>BILINEAR</ReSampling>
+	<PixelSize>1000</PixelSize>
+	<Summaries>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\Ethiopia Files\Woreda_hacked.shp; AreaCodeField: W_CODE; Temporal Summary: CompositeOf8Days</Summary>
+	</Summaries>
+</ProjectInfo>
