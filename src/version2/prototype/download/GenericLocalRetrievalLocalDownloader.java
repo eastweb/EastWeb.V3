@@ -50,17 +50,7 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        try {
-            if(scheduler.GetState() == TaskState.RUNNING)
-            {
-                outputCache.LoadUnprocessedGlobalDownloadsToLocalDownloader(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), dataName,
-                        projectInfoFile.GetStartDate(), pluginMetaData.ExtraDownloadFiles, pluginInfo.GetModisTiles(), listDatesFiles);
-            }
-        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
-            ErrorLog.add(processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
-        } catch (Exception e) {
-            ErrorLog.add(processName, scheduler, "GenericLocalRetrievalLocalDownloader.process error.", e);
-        }
+        manager.StartNewProcessWorker(new DownloadWorker(gdl, configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, null, outputCache));
     }
 
 }

@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +47,10 @@ public class SchedulerStatusContainer {
      * Plugin metadata objects use.
      */
     public final PluginMetaDataCollection pluginMetaDataCollection;
+    /**
+     * Start date the Scheduler created with.
+     */
+    public final LocalDate startDate;
 
     private final Config configInstance;
     private ProgressUpdater progressUpdater;
@@ -62,6 +67,7 @@ public class SchedulerStatusContainer {
      * Creates a SchedulerStatusContainer
      * @param configInstance
      * @param SchedulerID
+     * @param startDate
      * @param progressUpdater
      * @param projectMetaData
      * @param pluginMetaDataCollection
@@ -74,13 +80,14 @@ public class SchedulerStatusContainer {
      * @param projectUpToDate
      * @param lastModifiedTime
      */
-    public SchedulerStatusContainer(Config configInstance, int SchedulerID, ProgressUpdater progressUpdater, ProjectInfoFile projectMetaData, PluginMetaDataCollection pluginMetaDataCollection,
-            List<String> log, TaskState state, TreeMap<String, TreeMap<String, Double>> downloadProgressesByData, TreeMap<String, Double> processorProgresses,
-            TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, boolean projectUpToDate,
-            LocalDateTime lastModifiedTime)
+    public SchedulerStatusContainer(Config configInstance, int SchedulerID, LocalDate startDate, ProgressUpdater progressUpdater, ProjectInfoFile projectMetaData,
+            PluginMetaDataCollection pluginMetaDataCollection, List<String> log, TaskState state, TreeMap<String, TreeMap<String, Double>> downloadProgressesByData,
+            TreeMap<String, Double> processorProgresses, TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses,
+            boolean projectUpToDate, LocalDateTime lastModifiedTime)
     {
         this.configInstance = configInstance;
         this.SchedulerID = SchedulerID;
+        this.startDate = startDate;
         this.progressUpdater = progressUpdater;
         this.projectMetaData = projectMetaData;
         this.pluginMetaDataCollection = pluginMetaDataCollection;
@@ -98,15 +105,18 @@ public class SchedulerStatusContainer {
      * Creates a default SchedulerStatusContainer with everything set to either the current time, 0, false, or the associated value given.
      * @param configInstance
      * @param SchedulerID
+     * @param startDate
      * @param progressUpdater
      * @param projectMetaData
      * @param pluginMetaDataCollection
      * @param state
      */
-    public SchedulerStatusContainer(Config configInstance, int SchedulerID, ProgressUpdater progressUpdater, ProjectInfoFile projectMetaData, PluginMetaDataCollection pluginMetaDataCollection, TaskState state)
+    public SchedulerStatusContainer(Config configInstance, int SchedulerID, LocalDate startDate, ProgressUpdater progressUpdater, ProjectInfoFile projectMetaData,
+            PluginMetaDataCollection pluginMetaDataCollection, TaskState state)
     {
         this.configInstance = configInstance;
         this.SchedulerID = SchedulerID;
+        this.startDate = startDate;
         this.progressUpdater = progressUpdater;
         this.projectMetaData = projectMetaData;
         this.pluginMetaDataCollection = pluginMetaDataCollection;
@@ -266,12 +276,12 @@ public class SchedulerStatusContainer {
             PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
 
             // Setup Download progresses
-            progress = progressUpdater.GetCurrentDownloadProgress("data", pluginName, stmt);
+            progress = progressUpdater.GetCurrentDownloadProgress("data", pluginName, startDate, pluginInfo.GetModisTiles(), stmt);
             downloadProgressesByData.get(pluginName).put("data", progress);
             for(String dataName : pluginMetaDataCollection.pluginMetaDataMap.get(pluginName).ExtraDownloadFiles)
             {
                 dataName = dataName.toLowerCase();
-                progress = progressUpdater.GetCurrentDownloadProgress(dataName, pluginName, stmt);
+                progress = progressUpdater.GetCurrentDownloadProgress(dataName, pluginName, startDate, pluginInfo.GetModisTiles(), stmt);
                 downloadProgressesByData.get(pluginName).put(dataName, progress);
             }
 

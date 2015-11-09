@@ -200,7 +200,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
     private class MyScheduler extends Scheduler
     {
         public MyScheduler(int myID, Config configInstance) throws ParserConfigurationException, SAXException, IOException {
-            super(null, null, false, myID, configInstance, null, new SchedulerStatusContainer(configInstance, 1, null, null, null, null, TaskState.RUNNING, null, null, null, null, false, null));
+            super(null, null, false, myID, configInstance, null, new SchedulerStatusContainer(configInstance, 1, null, null, null, null, null, TaskState.RUNNING, null, null, null, null, false, null));
         }
 
         @Override

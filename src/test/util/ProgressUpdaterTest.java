@@ -177,8 +177,10 @@ public class ProgressUpdaterTest {
         progressUpdater.UpdateDBDownloadExpectedCount(pluginName, data1, listDatesFiles, modisTileNames, stmt);
         progressUpdater.UpdateDBDownloadExpectedCount(pluginName, data2, listDatesFiles, modisTileNames, stmt);
 
-        assertEquals("Initial data download progress incorrect.", 0.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName, stmt), 0.0);
-        assertEquals("Initial qc download progress incorrect.", 0.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName, stmt), 0.0);
+        assertEquals("Initial data download progress incorrect.", 0.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
+        assertEquals("Initial qc download progress incorrect.", 0.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
 
         String insertDataUpdate = "INSERT INTO \"%s\".\"DownloadCache\" (\"DataFilePath\", \"DownloadID\", \"DateGroupID\") VALUES (?,?,?);";
         PreparedStatement dataPStmt = con.prepareStatement(String.format(insertDataUpdate, projectSchemaName));
@@ -195,11 +197,14 @@ public class ProgressUpdaterTest {
         qcPStmt.setInt(4, 1);
         qcPStmt.execute();
 
-        assertEquals("Partial data download progress incorrect.", 50.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName, stmt), 0.0);
-        assertEquals("Partial qc download progress incorrect.", 50.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName, stmt), 0.0);
+        assertEquals("Partial data download progress incorrect.", 50.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
+        assertEquals("Partial qc download progress incorrect.", 50.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
         modisTileNames.add("ModisTile1");
         progressUpdater.UpdateDBDownloadExpectedCount(pluginName, data1, listDatesFiles, modisTileNames, stmt);
-        assertEquals("Completed Download progress with modis tile incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName, stmt), 0.0);
+        assertEquals("Completed Download progress with modis tile incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
         modisTileNames.clear();
         progressUpdater.UpdateDBDownloadExpectedCount(pluginName, data1, listDatesFiles, modisTileNames, stmt);
 
@@ -213,13 +218,17 @@ public class ProgressUpdaterTest {
         qcPStmt.setInt(4, 2);
         qcPStmt.execute();
 
-        assertEquals("Completed data download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName, stmt), 0.0);
-        assertEquals("Completed qc download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName, stmt), 0.0);
+        assertEquals("Completed data download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
+        assertEquals("Completed qc download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
 
         // Test persistence
         progressUpdater = new ProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection);
-        assertEquals("Completed data download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName, stmt), 0.0);
-        assertEquals("Completed qc download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName, stmt), 0.0);
+        assertEquals("Completed data download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data1, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
+        assertEquals("Completed qc download progress incorrect.", 100.0, progressUpdater.GetCurrentDownloadProgress(data2, pluginName,
+                LocalDate.ofYearDay(LocalDate.now().getYear()-1, 1), modisTileNames, stmt), 0.0);
     }
 
     /**

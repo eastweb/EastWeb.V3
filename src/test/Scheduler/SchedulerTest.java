@@ -186,7 +186,7 @@ public class SchedulerTest {
         }
 
         @Override
-        public double GetCurrentDownloadProgress(String dataName, String pluginName, Statement stmt) throws SQLException {
+        public double GetCurrentDownloadProgress(String dataName, String pluginName, LocalDate startDate, ArrayList<String> modisTileNames, Statement stmt) throws SQLException {
             return 0.0;
         }
 

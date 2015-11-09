@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -89,23 +90,27 @@ public class ProgressUpdater {
      *
      * @param dataName  - the name of the file type being downloaded (e.g. "Data" or "Qc")
      * @param pluginName  - the plugin title gotten from the plugin metadata to calculate progress in relation to
+     * @param startDate
+     * @param modisTileNames
      * @param stmt  - Statement object to reuse
      * @return double  - progress percentage of the download process in relation to the local downloader downloading the files named by the given dataName and for the specified pluginName
      * @throws SQLException
      */
-    public double GetCurrentDownloadProgress(String dataName, String pluginName, Statement stmt) throws SQLException
+    public double GetCurrentDownloadProgress(String dataName, String pluginName, LocalDate startDate, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
     {
         double progress = 0;
         String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginName);
+        PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
         int currentCount = calculateDownloadCurrentCount(mSchemaName, dataName, stmt);
         int expectedCount = getStoredDownloadExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, dataName, stmt);
+        int maxExpectedCount = calculateMaxDownloadExpectedCount(pluginMetaData, startDate, modisTileNames);
 
         if(expectedCount > 0 && currentCount > 0)
         {
             progress = (new Double(currentCount) / new Double(expectedCount)) * 100;
         }
 
-        if(progress > 100 || progress < 0) {
+        if((progress > 100 || progress < 0) && (currentCount > maxExpectedCount)) {
             ErrorLog.add(configInstance, "Invalid Download progress (current = " + currentCount + ", expected = " + expectedCount + ") of " + progress
                     + " for plugin '" + pluginName + "' and data '" + dataName + "'.", new Exception("Invalid Download progress."));
         }
@@ -364,6 +369,22 @@ public class ProgressUpdater {
             } else {
                 expectedCount += files.size();
             }
+        }
+
+        return expectedCount;
+    }
+
+    protected int calculateMaxDownloadExpectedCount(PluginMetaData pluginMetaData, LocalDate startDate, ArrayList<String> modisTileNames)
+    {
+        int expectedCount = 0;
+
+        long daysSinceStart = ChronoUnit.DAYS.between(startDate, LocalDate.now());
+        int adjustedDaysSinceStart = (int)(daysSinceStart / pluginMetaData.Download.DaysPerInputData);
+
+        if(modisTileNames != null && modisTileNames.size() > 1) {
+            expectedCount = adjustedDaysSinceStart * modisTileNames.size();
+        } else {
+            expectedCount = adjustedDaysSinceStart * pluginMetaData.Download.filesPerDay;
         }
 
         return expectedCount;

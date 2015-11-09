@@ -121,7 +121,7 @@ public class SchedulerStatusContainerTest {
         tempCompNames.add(temporalSummaryCompositionStrategyClassName);
         Schemas.CreateProjectPluginSchema(con, globalSchema, projectMetaData, pluginName, configInstance.getSummaryCalculations(), tempCompNames, 1, 1, false);
         SchedulerStatusContainerTest tester = new SchedulerStatusContainerTest();
-        container = new SchedulerStatusContainer(configInstance, 1, tester.new MyProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection), projectMetaData, pluginMetaDataCollection,
+        container = new SchedulerStatusContainer(configInstance, 1, startDate, tester.new MyProgressUpdater(configInstance, projectMetaData, pluginMetaDataCollection), projectMetaData, pluginMetaDataCollection,
                 TaskState.STOPPED);
     }
 
@@ -296,7 +296,7 @@ public class SchedulerStatusContainerTest {
         }
 
         @Override
-        public double GetCurrentDownloadProgress(String dataName, String pluginName, Statement stmt) throws SQLException {
+        public double GetCurrentDownloadProgress(String dataName, String pluginName, LocalDate startDate, ArrayList<String> modisTileNames, Statement stmt) throws SQLException {
             if(dataName.toLowerCase().equals("data")) {
                 return currentDataDownloadProgress;
             } else {

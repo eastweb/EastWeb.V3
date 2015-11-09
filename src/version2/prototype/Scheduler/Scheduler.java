@@ -120,7 +120,7 @@ public class Scheduler {
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
 
-        statusContainer = new SchedulerStatusContainer(configInstance, myID, progressUpdater, projectInfoFile, pluginMetaDataCollection, initState);
+        statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetStartDate(), progressUpdater, projectInfoFile, pluginMetaDataCollection, initState);
         localDownloaders = new ArrayList<LocalDownloader>(1);
         processorProcesses = new ArrayList<Process>(1);
         indicesProcesses = new ArrayList<Process>(1);
