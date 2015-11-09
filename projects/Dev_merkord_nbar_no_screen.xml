@@ -33,6 +33,6 @@
 	<FalseNothing>0</FalseNothing>
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: WID; Temporal Summary: WHOWeeklyStrategy</Summary>
+		<Summary ID="1">AreaNameField: W_NAME; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: WID; Temporal Summary: CompositeOf8Days</Summary>
 	</Summaries>
 </ProjectInfo>
