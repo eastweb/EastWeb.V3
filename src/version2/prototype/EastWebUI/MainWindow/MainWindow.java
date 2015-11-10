@@ -683,6 +683,7 @@ public class MainWindow {
         protected JButton button;
         private String label;
         private boolean isPushed;
+        private int removeProject = -1;
 
         public DeleteButtonEditor(JCheckBox checkBox) {
             super(checkBox);
@@ -692,6 +693,10 @@ public class MainWindow {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     fireEditingStopped();
+                    if(removeProject > -1) {
+                        defaultTableModel.removeRow(removeProject);
+                        removeProject = -1;
+                    }
                 }
             });
         }
@@ -715,7 +720,6 @@ public class MainWindow {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                int removeProject = -1;
 
                 String projectName = label.toString();
                 ArrayList<SchedulerStatus> schedulersStatus = EASTWebManager.GetSchedulerStatuses();
@@ -730,7 +734,7 @@ public class MainWindow {
                 }
                 if(removeProject != -1) {
                     EASTWebManager.DeleteScheduler(projectName, true);
-                    defaultTableModel.removeRow(removeProject);
+
                 }
             }
             isPushed = false;
