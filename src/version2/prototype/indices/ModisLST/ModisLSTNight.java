@@ -4,7 +4,7 @@ import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
 public class ModisLSTNight extends IndicesFramework {
-    final static int INPUT = 0;
+    final static int INPUT = 1;
 
     public ModisLSTNight(){}
 
