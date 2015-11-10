@@ -26,6 +26,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -58,6 +60,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
+
 import java.awt.event.WindowStateListener;
 
 public class MainWindow {
@@ -77,6 +80,13 @@ public class MainWindow {
      * Launch the application.
      */
     public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                EASTWebManager.Start();
+            }
+        });
+
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -719,7 +729,7 @@ public class MainWindow {
                     }
                 }
                 if(removeProject != -1) {
-                    EASTWebManager.DeleteScheduler(projectName, false);
+                    EASTWebManager.DeleteScheduler(projectName, true);
                     defaultTableModel.removeRow(removeProject);
                 }
             }

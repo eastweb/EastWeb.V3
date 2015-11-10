@@ -2,6 +2,7 @@ package version2.prototype;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -81,6 +82,15 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     /**
      *  If first time calling, starts up the EASTWebManager background processing thread to handle passively processing logged requests and updating
+     *  its state using default values. [numOfSimultaneousGlobalDLs = 1, msBeetweenUpdates = 5000]
+     */
+    public static void Start()
+    {
+        EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+    }
+
+    /**
+     *  If first time calling, starts up the EASTWebManager background processing thread to handle passively processing logged requests and updating
      *  its state.
      *
      * @param numOfSimultaneousGlobalDLs  - number of threads to create for GlobalDownloader objects to use (recommended value: 1)
@@ -129,9 +139,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                             + ", " + (msBeetweenUpdates > 0 ? "ms between updates: " + msBeetweenUpdates : "no automatic GUI updating") + "}");
                 }
             }
-        } catch(Exception e)
-        {
+        } catch(Exception e) {
             ErrorLog.add(instance.configInstance, "Problem while starting EASTWebManager.", e);
+        }
+
+        Config configInstance = Config.getInstance();
+        if(!testDatabaseConnection(configInstance)) {
+            ErrorLog.add(configInstance, "Could not establish connection with database.", new Exception("Could not establish connection with database."));
         }
     }
 
@@ -956,6 +970,16 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         return connectionPool.getConnection();
     }
 
+    static protected boolean testDatabaseConnection(Config configInstance)
+    {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        try {
+            return con.isValid(10);
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
     /**
      * Empty instance just to allow usage of private classes.
      */
@@ -1113,21 +1137,45 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     protected void handleDeleteSchedulerRequests(int schedulerID)
     {
+        /*
+            protected static Integer numOfCreatedSchedulers = 0;
+            protected static List<SchedulerStatus> schedulerStatuses = new ArrayList<SchedulerStatus>(1);
+            protected static BitSet schedulerIDs = new BitSet(100000);
+         */
+
+        Scheduler scheduler = schedulers.get(schedulerID);
+        String projectName = schedulers.get(schedulerID).projectInfoFile.GetProjectName();
+
         synchronized (schedulers)
         {
             if(schedulers.size() > schedulerID)
             {
-                System.out.println("Handling delete request of the project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
-                schedulers.get(schedulerID).Delete();
+                System.out.println("Handling delete request of the project '" + projectName + "'.");
                 schedulers.remove(schedulerID);
                 releaseSchedulerID(schedulerID);
-
-                synchronized (numOfCreatedSchedulers) {
-                    numOfCreatedSchedulers = schedulers.size();
-                }
-                System.out.println("Delete request of the project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
+            } else {
+                return;
             }
         }
+
+        synchronized (numOfCreatedSchedulers) {
+            numOfCreatedSchedulers = schedulers.size();
+        }
+
+        scheduler.Delete();
+
+        synchronized (schedulerStatuses)
+        {
+            for(int i=0; i < schedulerStatuses.size(); i++)
+            {
+                if(schedulerStatuses.get(i).SchedulerID == schedulerID) {
+                    schedulerStatuses.remove(i);
+                    break;
+                }
+            }
+        }
+
+        System.out.println("Delete request of the project '" + projectName + "' handled.");
     }
 
     protected void handleStartExistingSchedulerRequests(int schedulerID)
@@ -1276,8 +1324,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         return pluginNamesAndRunningState;
     }
 
-    protected int getSchedulerIDFromClonedList(
-            Map<String, Integer> schedulerNamesAndIDs, String projectName) {
+    protected int getSchedulerIDFromClonedList(Map<String, Integer> schedulerNamesAndIDs, String projectName) {
         int schedulerId;
         schedulerId = -1;
         Set<String> projectNames = schedulerNamesAndIDs.keySet();

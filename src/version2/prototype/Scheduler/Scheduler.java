@@ -10,11 +10,13 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
@@ -300,23 +302,89 @@ public class Scheduler {
     public void Delete()
     {
         Stop();
+
+        SchedulerStatus status = null;
+        boolean allStopped = true;
+        final int maxWaitTimeMS = 1200000;  // 20 minutes
+        int currentWaitedTimeMS = 0;
+
+        do {
+            try {
+                if(!allStopped)
+                {
+                    Thread.sleep(5000);
+                    currentWaitedTimeMS += 5000;
+                    allStopped = true;
+                }
+
+                synchronized (statusContainer) {
+                    status = statusContainer.GetStatus();
+                }
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+            } catch (InterruptedException e) {
+                ErrorLog.add(this, "Problem while making thread sleep.", e);
+            }
+
+            if(status != null) {
+                Iterator<ProcessName> it = status.GetWorkersInQueuePerProcess().keySet().iterator();
+                while(it.hasNext()) {
+                    if(status.GetWorkersInQueuePerProcess().get(it.next()) > 0) {
+                        allStopped = false;
+                        break;
+                    }
+                }
+
+                if(allStopped)
+                {
+                    it = status.GetActiveWorkersPerProcess().keySet().iterator();
+                    while(it.hasNext()) {
+                        if(status.GetActiveWorkersPerProcess().get(it.next()) > 0) {
+                            allStopped = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        } while(!allStopped && (currentWaitedTimeMS < maxWaitTimeMS));
+
+        if(!allStopped) {
+            ErrorLog.add(this, "Timed out waiting for Process Workers to complete.", new Exception("Timed out waiting for Process Workers to complete."));
+            return;
+        }
+
         String projectSchema;
+        int projectID;
+        File projectDir;
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
         Statement stmt = null;
-        String dropSchemaQueryFormat;
+        String dropSchemaQueryFormat = "DROP SCHEMA \"%1$s\" CASCADE;";
+        String deleteFromExpectedTotalOutput = "delete from \"" + configInstance.getGlobalSchema() + "\".\"%1$sExpectedTotalOutput\" where \"ProjectID\"=%2$d;";
         try {
             stmt = con.createStatement();
-            dropSchemaQueryFormat = "DROP SCHEMA \"%1$s\" CASCADE;";
+
             for(ProjectInfoPlugin item: projectInfoFile.GetPlugins())
             {
                 projectSchema = Schemas.getSchemaName(projectInfoFile.GetProjectName(), item.GetName());
+                projectID = Schemas.getProjectID(configInstance.getGlobalSchema(), projectInfoFile.GetProjectName(), stmt);
                 stmt.addBatch(String.format(dropSchemaQueryFormat, projectSchema));
-                FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName());
+                stmt.addBatch(String.format(deleteFromExpectedTotalOutput, "Download", projectID));
+                stmt.addBatch(String.format(deleteFromExpectedTotalOutput, "Processor", projectID));
+                stmt.addBatch(String.format(deleteFromExpectedTotalOutput, "Indices", projectID));
+                stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"SummaryExpectedTotalOutput\" where \"ProjectSummaryID\"="
+                        + "(select \"ProjectSummaryID\" from \"" + configInstance.getGlobalSchema() + "\".\"ProjectSummary\" where \"ProjectID\"=%1$d);", projectID));
+                stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"ProjectSummary\" where \"ProjectID\"=%1$d", projectID));
+                stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"Project\" where \"ProjectID\"=%1$d", projectID));
+                projectDir = new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName()));
+                FileUtils.deleteDirectory(projectDir);
             }
             stmt.executeBatch();
             stmt.close();
         } catch(SQLException e) {
             ErrorLog.add(this, "Problem while deleting project, \"" + projectInfoFile.GetProjectName() + "\".", e);
+        } catch (IOException e) {
+            ErrorLog.add(this, "Problem while deleting project directory for project '" + projectInfoFile.GetProjectName() + "'.",
+                    new Exception("Problem while deleting project directory for project '" + projectInfoFile.GetProjectName() + "'."));
         } finally {
             stmt = null;
             con.close();
