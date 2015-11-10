@@ -1,6 +1,7 @@
 package version2.prototype;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import version2.prototype.Scheduler.SchedulerStatus;
@@ -57,10 +58,10 @@ public interface EASTWebManagerI {
     /**
      * Requests that the given {@link version2#ProcesWorker ProcesWorker} be managed and executed.
      *
-     * @param worker  - {@link version2#ProcesWorker ProcesWorker} to execute on a separate available thread
+     * @param worker  - {@link java.util.concurrent.Callable Callable} to execute on a separate available thread
      * @return Future object representing the return object of the submitted ProcessWorker which is of type ProcessWorkerReturn
      */
-    public Future<ProcessWorkerReturn> StartNewProcessWorker( ProcessWorker worker);
+    public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable worker);
 
     /**
      * Gets a database connection from the connection pool.

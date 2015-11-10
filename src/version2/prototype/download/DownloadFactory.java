@@ -25,7 +25,6 @@ public abstract class DownloadFactory {
      */
     public final DownloadMetaData downloadMetaData;
 
-    protected final EASTWebManagerI manager;
     protected final Config configInstance;
     protected final ProjectInfoFile projectInfoFile;
     protected final ProjectInfoPlugin pluginInfo;
@@ -34,9 +33,8 @@ public abstract class DownloadFactory {
     protected final DatabaseCache outputCache;
     protected final LocalDate startDate;
 
-    protected DownloadFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
+    protected DownloadFactory(Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {
-        this.manager = manager;
         this.configInstance = configInstance;
         this.projectInfoFile = projectInfoFile;
         this.pluginInfo = pluginInfo;

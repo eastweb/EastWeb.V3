@@ -160,7 +160,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         LocalDate startDate2 = LocalDate.ofYearDay(year, day).minusDays(8);
         MyGlobalDownloader gdl = new MyGlobalDownloader(1, testConfig, testPluginName, new DownloadMetaData(null, null, null, null, null, "Data", null, null, null, null, filesPerDay, "", "", null, null),
                 null, startDate);
-        GenericLocalRetrievalLocalDownloader ldlData = new GenericLocalRetrievalLocalDownloader(null, testConfig, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, null);
+        GenericLocalRetrievalLocalDownloader ldlData = new GenericLocalRetrievalLocalDownloader(testConfig, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, null);
 
         // Test Global Downloader performed updates and Local Downloader loaded new updates with correct start date
         ldlData.AttemptUpdate();
@@ -185,7 +185,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
      */
     @Test
     public final void testSetStartDate() throws ParserConfigurationException, SAXException, IOException, Exception {
-        GenericLocalRetrievalLocalDownloader ldl = new GenericLocalRetrievalLocalDownloader(null, testConfig,
+        GenericLocalRetrievalLocalDownloader ldl = new GenericLocalRetrievalLocalDownloader(testConfig,
                 new MyGlobalDownloader(1, testConfig, testPluginName,
                         new DownloadMetaData(null, null, null, null, null, "Data", null, null, null, null, filesPerDay, "", "", null, null),
                         null, startDate), projectInfoFile, pluginInfo, pluginMetaData, null, outputCache, null);
@@ -253,7 +253,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         @Override
         public int LoadUnprocessedGlobalDownloadsToLocalDownloader(String globalEASTWebSchema, String projectName, String pluginName, String dataName, LocalDate startDate,
                 ArrayList<String> extraDownloadFiles, ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException,
-        IOException {
+                IOException {
             assertEquals("StartDate incorrect.", expectedStartDate, startDate);
             return 1;
         }

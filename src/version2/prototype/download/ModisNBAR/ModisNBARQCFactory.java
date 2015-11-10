@@ -27,9 +27,9 @@ import version2.prototype.util.DatabaseCache;
  */
 public class ModisNBARQCFactory extends DownloadFactory {
 
-    public ModisNBARQCFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
+    public ModisNBARQCFactory(Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {
-        super(manager, configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, startDate);
+        super(configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, startDate);
     }
 
     /* (non-Javadoc)
@@ -37,7 +37,7 @@ public class ModisNBARQCFactory extends DownloadFactory {
      */
     @Override
     public DownloaderFactory CreateDownloaderFactory(ListDatesFiles listDatesFiles) {
-        return new ModisLocalStorageDownloadFactory(manager, configInstance, "ModisNBARQCDownloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles,
+        return new ModisLocalStorageDownloadFactory(configInstance, "ModisNBARQCDownloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles,
                 startDate);
     }
 

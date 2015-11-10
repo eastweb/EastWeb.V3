@@ -23,14 +23,14 @@ import version2.prototype.util.DatabaseCache;
  */
 public final class NldasForcingFactory extends DownloadFactory {
 
-    public NldasForcingFactory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
+    public NldasForcingFactory(Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {
-        super(manager, configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache,  startDate);
+        super(configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache,  startDate);
     }
 
     @Override
     public DownloaderFactory CreateDownloaderFactory(ListDatesFiles listDatesFiles) {
-        return new LocalStorageDownloadFactory(manager, configInstance, "NldasForcingDownloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles, startDate);
+        return new LocalStorageDownloadFactory(configInstance, "NldasForcingDownloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles, startDate);
     }
 
     @Override

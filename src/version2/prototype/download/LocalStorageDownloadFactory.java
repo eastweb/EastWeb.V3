@@ -26,7 +26,6 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public final class LocalStorageDownloadFactory implements DownloaderFactory {
-    private final EASTWebManagerI manager;
     private final Config configInstance;
     private final String downloaderClassName;
     private final ProjectInfoFile projectInfoFile;
@@ -51,10 +50,9 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
      * @param listDatesFiles
      * @param startDate
      */
-    public LocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData,
+    public LocalStorageDownloadFactory(Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData,
             PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles, LocalDate startDate)
     {
-        this.manager = manager;
         this.configInstance = configInstance;
         this.downloaderClassName = downloaderClassName;
         this.projectInfoFile = projectInfoFile;
@@ -73,7 +71,7 @@ public final class LocalStorageDownloadFactory implements DownloaderFactory {
      */
     @Override
     public LocalDownloader CreateLocalDownloader(GlobalDownloader gdl) {
-        return new GenericLocalRetrievalLocalDownloader(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
+        return new GenericLocalRetrievalLocalDownloader(configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
     /* (non-Javadoc)

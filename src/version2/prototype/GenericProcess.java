@@ -27,7 +27,6 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * Creates a GenericFrameworkProcess object with the defined initial TaskState, owned by the given Scheduler, labeled by the given processName,
      * and acquiring its input from the specified process (inputProcessName).
      *
-     * @param manager  - EASTWebManager reference to use and pass on
      * @param configInstance  - Config reference to use and pass on
      * @param processName  - name of this threaded process
      * @param projectInfoFile  - the current project's information
@@ -39,10 +38,10 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
      * @param classPathNames  - fully qualified worker class names to spawn for each new input file.
      * @throws ClassNotFoundException
      */
-    public GenericProcess(EASTWebManagerI manager, Config configInstance, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    public GenericProcess(Config configInstance, ProcessName processName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache inputCache, DatabaseCache outputCache, String... classPathNames) throws ClassNotFoundException
     {
-        super(manager, configInstance, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        super(configInstance, processName, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
 
         if(inputCache != null) {
             inputCache.addObserver(this);
@@ -69,7 +68,7 @@ public class GenericProcess<WorkerType extends ProcessWorker> extends Process {
                 cstr = cl.getConstructor(version2.prototype.Config.class, version2.prototype.Process.class, version2.prototype.ProjectInfoMetaData.ProjectInfoFile.class,
                         version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin.class, version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData.class, ArrayList.class,
                         version2.prototype.util.DatabaseCache.class);
-                manager.StartNewProcessWorker((WorkerType) cstr.newInstance(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
+                scheduler.StartNewProcessWorker((WorkerType) cstr.newInstance(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache));
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             ErrorLog.add(processName, scheduler, "GenericProcess.process error while starting new ProcessWorker '" + cl + "'.", e);

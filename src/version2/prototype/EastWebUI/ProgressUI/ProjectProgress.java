@@ -18,6 +18,7 @@ import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
 import version2.prototype.ErrorLog;
 import version2.prototype.GUIUpdateHandler;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.SchedulerStatus;
 
 public class ProjectProgress {
@@ -164,6 +165,25 @@ public class ProjectProgress {
                         {
                             itemLog.addElement(log);
                         }
+
+                        StringBuilder processWorkerInfo = new StringBuilder();
+                        Iterator<ProcessName> it = status.GetWorkersInQueuePerProcess().keySet().iterator();
+                        ProcessName tempKey;
+                        processWorkerInfo.append("Workers Queued For Processes:\n");
+                        while(it.hasNext())
+                        {
+                            tempKey = it.next();
+                            processWorkerInfo.append("\t" + tempKey.toString() + ":\t" + status.GetWorkersInQueuePerProcess().get(tempKey) + "\n");
+                        }
+
+                        it = status.GetActiveWorkersPerProcess().keySet().iterator();
+                        processWorkerInfo.append("Active Workers For Processes:\n");
+                        while(it.hasNext())
+                        {
+                            tempKey = it.next();
+                            processWorkerInfo.append("\t" + tempKey.toString() + ":\t" + status.GetActiveWorkersPerProcess().get(tempKey) + "\n");
+                        }
+                        System.out.print(processWorkerInfo);
                     }
                     //                    frame.repaint();
                 } else {

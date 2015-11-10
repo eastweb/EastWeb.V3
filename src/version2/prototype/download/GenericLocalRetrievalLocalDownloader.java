@@ -33,7 +33,6 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
     /**
      * Creates a GenericLocalDownloader that expects to finds the GlobalDownloader download records in a locally and globally accessible table in the database.
      *
-     * @param manager
      * @param configInstance
      * @param gdl
      * @param projectInfoFile
@@ -43,14 +42,14 @@ public class GenericLocalRetrievalLocalDownloader extends LocalDownloader {
      * @param outputCache
      * @param listDatesFiles
      */
-    public GenericLocalRetrievalLocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    public GenericLocalRetrievalLocalDownloader(Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
-        super(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
+        super(configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        manager.StartNewProcessWorker(new DownloadWorker(gdl, configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, null, outputCache));
+        scheduler.StartNewProcessWorker(new DownloadWorker(gdl, configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, null, outputCache));
     }
 
 }

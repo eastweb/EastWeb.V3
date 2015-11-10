@@ -32,7 +32,6 @@ import version2.prototype.util.DatabaseCache;
  *
  */
 public final class ModisLocalStorageDownloadFactory implements DownloaderFactory {
-    private final EASTWebManagerI manager;
     private final Config configInstance;
     private final String downloaderClassName;
     private final ProjectInfoFile projectInfoFile;
@@ -57,10 +56,9 @@ public final class ModisLocalStorageDownloadFactory implements DownloaderFactory
      * @param listDatesFiles
      * @param startDate
      */
-    public ModisLocalStorageDownloadFactory(EASTWebManagerI manager, Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
+    public ModisLocalStorageDownloadFactory(Config configInstance, String downloaderClassName, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo,
             DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData, Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles, LocalDate startDate)
     {
-        this.manager = manager;
         this.configInstance = configInstance;
         this.downloaderClassName = downloaderClassName;
         this.projectInfoFile = projectInfoFile;
@@ -78,7 +76,7 @@ public final class ModisLocalStorageDownloadFactory implements DownloaderFactory
      */
     @Override
     public LocalDownloader CreateLocalDownloader(GlobalDownloader gdl) {
-        return new GenericLocalRetrievalLocalDownloader(manager, configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
+        return new GenericLocalRetrievalLocalDownloader(configInstance, gdl, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache, listDatesFiles);
     }
 
     /* (non-Javadoc)

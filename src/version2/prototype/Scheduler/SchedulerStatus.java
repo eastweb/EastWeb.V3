@@ -56,8 +56,13 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
     private final TreeMap<String, Double> processorProgresses;
     private final TreeMap<String, Double> indicesProgresses;
     private final TreeMap<String, TreeMap<Integer, Double>> summaryProgresses;
-    private final List<String> log;
 
+    // ProcessWorker information
+    private final TreeMap<ProcessName,Integer> workersInQueuePerProcess;
+    private final TreeMap<ProcessName,Integer> activeWorkersPerProcess;
+
+    // Status Log
+    private final List<String> log;
     private int logReaderPos;
 
     /**
@@ -71,11 +76,14 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
      * @param log
      * @param State
      * @param ProjectUpToDate
+     * @param workersInQueuePerProcess
+     * @param activeWorkersPerProcess
      * @param LastModifiedTime
      * @param RetrievedTime
      */
     public SchedulerStatus(int SchedulerID, ProjectInfoFile projectMetaData, TreeMap<String, TreeMap<String, Double>> downloadProgressesByData, TreeMap<String, Double> processorProgresses,
-            TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, List<String> log, TaskState State, boolean ProjectUpToDate, LocalDateTime LastModifiedTime,
+            TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, List<String> log, TaskState State, boolean ProjectUpToDate,
+            TreeMap<ProcessName,Integer>  workersInQueuePerProcess, TreeMap<ProcessName,Integer> activeWorkersPerProcess, LocalDateTime LastModifiedTime,
             LocalDateTime RetrievedTime)
     {
         this.SchedulerID = SchedulerID;
@@ -90,6 +98,9 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
         logReaderPos = 0;
         this.State = State;
         this.ProjectUpToDate = ProjectUpToDate;
+        this.workersInQueuePerProcess = cloneTreeMapProcessNameInteger(workersInQueuePerProcess);
+        this.activeWorkersPerProcess = cloneTreeMapProcessNameInteger(activeWorkersPerProcess);
+
         this.LastModifiedTime = LastModifiedTime;
         this.RetrievedTime = RetrievedTime;
     }
@@ -112,6 +123,9 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
         logReaderPos = 0;
         State = statusToCopy.State;
         ProjectUpToDate = statusToCopy.ProjectUpToDate;
+        workersInQueuePerProcess = cloneTreeMapProcessNameInteger(statusToCopy.GetWorkersInQueuePerProcess());
+        activeWorkersPerProcess = cloneTreeMapProcessNameInteger(statusToCopy.GetActiveWorkersPerProcess());
+
         LastModifiedTime = statusToCopy.LastModifiedTime;
         RetrievedTime = statusToCopy.RetrievedTime;
     }
@@ -191,6 +205,10 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
      */
     public TreeMap<String, TreeMap<Integer, Double>> GetSummaryProgresses() { return cloneTreeMapStringIntegerDouble(summaryProgresses); }
 
+    public TreeMap<ProcessName, Integer> GetWorkersInQueuePerProcess() { return cloneTreeMapProcessNameInteger(workersInQueuePerProcess); }
+
+    public TreeMap<ProcessName, Integer> GetActiveWorkersPerProcess() { return cloneTreeMapProcessNameInteger(activeWorkersPerProcess); }
+
     private TreeMap<String, TreeMap<Integer, Double>> cloneTreeMapStringIntegerDouble(TreeMap<String, TreeMap<Integer, Double>> input)
     {
         TreeMap<String, TreeMap<Integer, Double>> clone = new TreeMap<String, TreeMap<Integer, Double>>();
@@ -250,5 +268,17 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
         return clone;
     }
 
+    private TreeMap<ProcessName, Integer> cloneTreeMapProcessNameInteger(TreeMap<ProcessName, Integer> input)
+    {
+        TreeMap<ProcessName, Integer> clone = new TreeMap<ProcessName, Integer>();
+        Iterator<ProcessName> keysIt = input.keySet().iterator();
+        ProcessName key;
+        while(keysIt.hasNext())
+        {
+            key = keysIt.next();
+            clone.put(key, input.get(key));
+        }
+        return clone;
+    }
 
 }

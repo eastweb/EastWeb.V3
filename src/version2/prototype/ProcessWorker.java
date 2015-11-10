@@ -20,11 +20,11 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
      * The name of the ProcessWorker.
      */
     public final String processWorkerName;
-    protected final Config configInstance;
-    protected final Process process;
-    protected final ProjectInfoFile projectInfoFile;
-    protected final ProjectInfoPlugin pluginInfo;
-    protected final PluginMetaData pluginMetaData;
+    public final Config configInstance;
+    public final Process process;
+    public final ProjectInfoFile projectInfoFile;
+    public final ProjectInfoPlugin pluginInfo;
+    public final PluginMetaData pluginMetaData;
     protected ArrayList<DataFileMetaData> cachedFiles;
     protected final DatabaseCache outputCache;
 

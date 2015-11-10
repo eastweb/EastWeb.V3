@@ -129,7 +129,7 @@ public class SummaryWorkerTest {
     {
 
         protected MyProcess(ProjectInfoFile projectMetaData) {
-            super(null, null, null, projectMetaData, null, null, null, null);
+            super(null, null, projectMetaData, null, null, null, null);
         }
 
         @Override

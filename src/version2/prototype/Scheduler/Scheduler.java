@@ -10,7 +10,8 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -21,6 +22,8 @@ import version2.prototype.EASTWebManagerI;
 import version2.prototype.ErrorLog;
 import version2.prototype.GenericProcess;
 import version2.prototype.Process;
+import version2.prototype.ProcessWorker;
+import version2.prototype.ProcessWorkerReturn;
 import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
@@ -28,7 +31,6 @@ import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadFactory;
-import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.indices.IndicesWorker;
@@ -476,6 +478,23 @@ public class Scheduler {
         System.out.println("Finished attempting update of Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
     }
 
+    /**
+     * Handles starting new process workers within the Scheduler's project.
+     *
+     * @param worker  - ProcessWorker to submit to a thread pool
+     * @return future handle object
+     */
+    public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker)
+    {
+        SchedulerWorker sWorker = new SchedulerWorker(worker, statusContainer, this);
+        try {
+            UpdateStatus();
+        } catch (SQLException e) {
+            ErrorLog.add(this, "Problem while updating status after starting new ProcessWorker.", e);
+        }
+        return manager.StartNewProcessWorker(sWorker);
+    }
+
     protected void UpdateStatus() throws SQLException
     {
         SchedulerStatus status = null;
@@ -577,9 +596,9 @@ public class Scheduler {
 
         // Create "data" DownloadFactory
         Class<?> downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + pluginMetaData.Download.downloadFactoryClassName);
-        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, DownloadMetaData.class, PluginMetaData.class,
+        Constructor<?> downloadFactoryCtor = downloadFactoryClass.getConstructor(Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, DownloadMetaData.class, PluginMetaData.class,
                 Scheduler.class, DatabaseCache.class, LocalDate.class);
-        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData.Download, pluginMetaData, this, outputCache,
+        DownloadFactory downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(configInstance, projectInfoFile, pluginInfo, pluginMetaData.Download, pluginMetaData, this, outputCache,
                 projectInfoFile.GetStartDate());
 
         // Create "data" GenericGlobalDownloader
@@ -589,9 +608,9 @@ public class Scheduler {
         {
             // Create extra ListDatesFiles instance
             downloadFactoryClass = Class.forName("version2.prototype.download." + pluginInfo.GetName() + "." + dlMetaData.downloadFactoryClassName);
-            downloadFactoryCtor = downloadFactoryClass.getConstructor(EASTWebManagerI.class, Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, DownloadMetaData.class, PluginMetaData.class,
+            downloadFactoryCtor = downloadFactoryClass.getConstructor(Config.class, ProjectInfoFile.class, ProjectInfoPlugin.class, DownloadMetaData.class, PluginMetaData.class,
                     Scheduler.class, DatabaseCache.class, LocalDate.class);
-            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(manager, configInstance, projectInfoFile, pluginInfo, dlMetaData, pluginMetaData, this, outputCache, projectInfoFile.GetStartDate());
+            downloadFactory = (DownloadFactory) downloadFactoryCtor.newInstance(configInstance, projectInfoFile, pluginInfo, dlMetaData, pluginMetaData, this, outputCache, projectInfoFile.GetStartDate());
 
             // Create extra GenericGlobalDownloader
             lDownloders.add(manager.StartGlobalDownloader(downloadFactory));
@@ -615,7 +634,7 @@ public class Scheduler {
     protected Process SetupProcessorProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
 
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<ProcessorWorker>(manager, configInstance, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
+        Process process = new GenericProcess<ProcessorWorker>(configInstance, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
                 "version2.prototype.processor.ProcessorWorker");
         //        inputCache.addObserver(process);
         return process;
@@ -635,7 +654,7 @@ public class Scheduler {
      */
     protected Process SetupIndicesProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException {
         // If desired, GenericFrameworkProcess can be replaced with a custom Process extending class.
-        Process process = new GenericProcess<IndicesWorker>(manager, configInstance, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
+        Process process = new GenericProcess<IndicesWorker>(configInstance, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
                 "version2.prototype.indices.IndicesWorker");
         //        inputCache.addObserver(process);
         return process;
@@ -653,7 +672,7 @@ public class Scheduler {
      */
     protected Process SetupSummaryProcess(ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, DatabaseCache inputCache, DatabaseCache outputCache) throws ClassNotFoundException
     {
-        Summary process = new Summary(manager, configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
+        Summary process = new Summary(configInstance, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache);
         //        Process process = new GenericProcess<IndicesWorker>(manager, configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache,
         //                "version2.prototype.summary.SummaryWorker");
         //        inputCache.addObserver(process);

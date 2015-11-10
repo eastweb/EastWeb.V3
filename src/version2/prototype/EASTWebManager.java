@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -945,7 +946,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      * @see version2.prototype.EASTWebManagerI#StartNewProcessWorker(version2.prototype.ProcessWorker)
      */
     @Override
-    public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker)
+    public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable worker)
     {
         return processWorkerExecutor.submit(worker);
     }

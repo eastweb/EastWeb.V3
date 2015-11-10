@@ -556,7 +556,7 @@ public class DatabaseCacheTest {
     private class MyProcess extends Process
     {
         protected MyProcess() {
-            super(null, null, null, null, null, null, null, null);
+            super(null, null, null, null, null, null, null);
         }
 
         @Override

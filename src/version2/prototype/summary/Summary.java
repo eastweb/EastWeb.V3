@@ -33,7 +33,6 @@ public class Summary extends Process {
     /**
      * Creates a Summary object with the defined initial TaskState, owned by the given Scheduler, and acquiring its input from the specified
      * process, inputProcessName.
-     * @param manager  - EASTWebManager reference to use and pass on
      * @param configInstance  - Config reference to use and pass on
      * @param projectMetaData  - the current project's information
      * @param pluginInfo  - the current plugin's general information
@@ -42,10 +41,10 @@ public class Summary extends Process {
      * @param inputCache
      * @param outputCache
      */
-    public Summary(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectMetaData, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
+    public Summary(Config configInstance, ProjectInfoFile projectMetaData, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData, Scheduler scheduler,
             DatabaseCache inputCache, DatabaseCache outputCache)
     {
-        super(manager, configInstance, ProcessName.SUMMARY, projectMetaData, pluginInfo, pluginMetaData, scheduler, outputCache);
+        super(configInstance, ProcessName.SUMMARY, projectMetaData, pluginInfo, pluginMetaData, scheduler, outputCache);
         inputCache.addObserver(this);
 
         fileStores = new HashMap<Integer, TemporalSummaryRasterFileStore>();
@@ -73,7 +72,7 @@ public class Summary extends Process {
 
     @Override
     public void process(ArrayList<DataFileMetaData> cachedFiles) {
-        manager.StartNewProcessWorker(new SummaryWorker(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache, fileStores));
+        scheduler.StartNewProcessWorker(new SummaryWorker(configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache, fileStores));
     }
 
 }

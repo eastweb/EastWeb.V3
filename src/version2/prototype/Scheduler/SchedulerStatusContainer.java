@@ -63,6 +63,10 @@ public class SchedulerStatusContainer {
     private boolean projectUpToDate;
     private LocalDateTime lastModifiedTime;
 
+    // ProcessWorker information
+    private TreeMap<ProcessName,Integer> workersInQueuePerProcess;
+    private TreeMap<ProcessName,Integer> activeWorkersPerProcess;
+
     /**
      * Creates a SchedulerStatusContainer
      * @param configInstance
@@ -99,6 +103,18 @@ public class SchedulerStatusContainer {
         this.state = state;
         this.projectUpToDate = projectUpToDate;
         this.lastModifiedTime = lastModifiedTime;
+
+        workersInQueuePerProcess = new TreeMap<ProcessName,Integer>();
+        workersInQueuePerProcess.put(ProcessName.DOWNLOAD, 0);
+        workersInQueuePerProcess.put(ProcessName.PROCESSOR, 0);
+        workersInQueuePerProcess.put(ProcessName.INDICES, 0);
+        workersInQueuePerProcess.put(ProcessName.SUMMARY, 0);
+
+        activeWorkersPerProcess = new TreeMap<ProcessName,Integer>();
+        activeWorkersPerProcess.put(ProcessName.DOWNLOAD, 0);
+        activeWorkersPerProcess.put(ProcessName.PROCESSOR, 0);
+        activeWorkersPerProcess.put(ProcessName.INDICES, 0);
+        activeWorkersPerProcess.put(ProcessName.SUMMARY, 0);
     }
 
     /**
@@ -169,6 +185,18 @@ public class SchedulerStatusContainer {
         }
 
         updateLastModifiedTime();
+
+        workersInQueuePerProcess = new TreeMap<ProcessName,Integer>();
+        workersInQueuePerProcess.put(ProcessName.DOWNLOAD, 0);
+        workersInQueuePerProcess.put(ProcessName.PROCESSOR, 0);
+        workersInQueuePerProcess.put(ProcessName.INDICES, 0);
+        workersInQueuePerProcess.put(ProcessName.SUMMARY, 0);
+
+        activeWorkersPerProcess = new TreeMap<ProcessName,Integer>();
+        activeWorkersPerProcess.put(ProcessName.DOWNLOAD, 0);
+        activeWorkersPerProcess.put(ProcessName.PROCESSOR, 0);
+        activeWorkersPerProcess.put(ProcessName.INDICES, 0);
+        activeWorkersPerProcess.put(ProcessName.SUMMARY, 0);
     }
 
     /**
@@ -258,6 +286,30 @@ public class SchedulerStatusContainer {
         updateLastModifiedTime();
     }
 
+    public void AddWorker(ProcessName name)
+    {
+        workersInQueuePerProcess.put(name, workersInQueuePerProcess.get(name) + 1);
+        updateLastModifiedTime();
+    }
+
+    public void SubtractWorker(ProcessName name)
+    {
+        workersInQueuePerProcess.put(name, workersInQueuePerProcess.get(name) - 1);
+        updateLastModifiedTime();
+    }
+
+    public void AddActiveWorker(ProcessName name)
+    {
+        activeWorkersPerProcess.put(name, activeWorkersPerProcess.get(name) + 1);
+        updateLastModifiedTime();
+    }
+
+    public void SubtractActiveWorker(ProcessName name)
+    {
+        activeWorkersPerProcess.put(name, activeWorkersPerProcess.get(name) - 1);
+        updateLastModifiedTime();
+    }
+
     /**
      * Gets the current state of this SchedulerStatusContainer as a SchedulerStatus object which erases the log as it instantiates the returned SchedulerStatus object.
      * @return SchedulerStatus representation of this object
@@ -333,8 +385,8 @@ public class SchedulerStatusContainer {
         UpdateProjectIsUpToDate();
 
 
-        return new SchedulerStatus(SchedulerID, projectMetaData, downloadProgressesByDataTemp, processorProgresses, indicesProgresses, summaryProgressesTemp, newLog, state, projectUpToDate, lastModifiedTime,
-                LocalDateTime.now());
+        return new SchedulerStatus(SchedulerID, projectMetaData, downloadProgressesByDataTemp, processorProgresses, indicesProgresses, summaryProgressesTemp, newLog, state, projectUpToDate,
+                workersInQueuePerProcess, activeWorkersPerProcess, lastModifiedTime, LocalDateTime.now());
     }
 
     /**

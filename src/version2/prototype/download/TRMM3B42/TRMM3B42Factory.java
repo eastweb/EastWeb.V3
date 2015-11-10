@@ -19,14 +19,14 @@ import version2.prototype.util.DatabaseCache;
 
 public class TRMM3B42Factory extends DownloadFactory {
 
-    public TRMM3B42Factory(EASTWebManagerI manager, Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
+    public TRMM3B42Factory(Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {
-        super(manager, configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, startDate);
+        super(configInstance, projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, startDate);
     }
 
     @Override
     public DownloaderFactory CreateDownloaderFactory(ListDatesFiles listDatesFiles) {
-        return new LocalStorageDownloadFactory(manager, configInstance, "TRMM3B42Downloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles,
+        return new LocalStorageDownloadFactory(configInstance, "TRMM3B42Downloader", projectInfoFile, pluginInfo, downloadMetaData, pluginMetaData, scheduler, outputCache, listDatesFiles,
                 startDate);
     }
 

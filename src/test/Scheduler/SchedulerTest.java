@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -240,7 +241,7 @@ public class SchedulerTest {
             new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
             new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.PROCESSOR)).mkdirs();
 
-            Process process = new GenericProcess<ProcessorWorkerTest>(manager, configInstance, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.ProcessorWorkerTest");
+            Process process = new GenericProcess<ProcessorWorkerTest>(configInstance, ProcessName.PROCESSOR, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.ProcessorWorkerTest");
             return process;
         }
 
@@ -251,7 +252,7 @@ public class SchedulerTest {
             new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
             new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.INDICES)).mkdirs();
 
-            Process process = new GenericProcess<IndicesWorkerTest>(manager, configInstance, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.IndicesWorkerTest");
+            Process process = new GenericProcess<IndicesWorkerTest>(configInstance, ProcessName.INDICES, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, outputCache, "test.Scheduler.IndicesWorkerTest");
             return process;
         }
 
@@ -262,7 +263,7 @@ public class SchedulerTest {
             new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
             new File(FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.SUMMARY)).mkdirs();
 
-            Process process = new GenericProcess<SummaryWorkerTest>(manager, configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "test.Scheduler.SummaryWorkerTest");
+            Process process = new GenericProcess<SummaryWorkerTest>(configInstance, ProcessName.SUMMARY, projectInfoFile, pluginInfo, pluginMetaData, this, inputCache, null, "test.Scheduler.SummaryWorkerTest");
             return process;
         }
     }
@@ -352,8 +353,8 @@ public class SchedulerTest {
         }
 
         @Override
-        public Future<ProcessWorkerReturn> StartNewProcessWorker(ProcessWorker worker) {
-            switch(worker.processWorkerName)
+        public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable worker) {
+            switch(((ProcessWorker)worker).processWorkerName)
             {
             case "ProcessorWorkerTest": processorWorkerSuccess = true; break;
             case "IndicesWorkerTest": indicesWorkerSuccess = true; break;

@@ -32,9 +32,9 @@ public abstract class LocalDownloader extends Process {
     protected GlobalDownloader gdl;
     protected LocalDate currentStartDate;
 
-    protected LocalDownloader(EASTWebManagerI manager, Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
+    protected LocalDownloader(Config configInstance, GlobalDownloader gdl, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, ListDatesFiles listDatesFiles) {
-        super(manager, configInstance, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
+        super(configInstance, ProcessName.DOWNLOAD, projectInfoFile, pluginInfo, pluginMetaData, scheduler, outputCache);
         this.gdl = gdl;
         dataName = gdl.metaData.name;
         currentStartDate = projectInfoFile.GetStartDate();
@@ -71,6 +71,6 @@ public abstract class LocalDownloader extends Process {
      */
     public void AttemptUpdate()
     {
-        manager.StartNewProcessWorker(new DownloadWorker(gdl, configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, null, outputCache));
+        scheduler.StartNewProcessWorker(new DownloadWorker(gdl, configInstance, this, projectInfoFile, pluginInfo, pluginMetaData, null, outputCache));
     }
 }
