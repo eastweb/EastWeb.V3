@@ -3,6 +3,7 @@ package version2.prototype;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -144,8 +145,12 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         }
 
         Config configInstance = Config.getInstance();
-        if(!testDatabaseConnection(configInstance)) {
-            ErrorLog.add(configInstance, "Could not establish connection with database.", new Exception("Could not establish connection with database."));
+        try {
+            if(!testDatabaseConnection(configInstance)) {
+                ErrorLog.add(configInstance, "Could not establish connection with database.", new Exception("Could not establish connection with database."));
+            }
+        } catch (SQLException e) {
+            ErrorLog.add(configInstance, "Could not establish connection with database.", e);
         }
     }
 
@@ -970,14 +975,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         return connectionPool.getConnection();
     }
 
-    static protected boolean testDatabaseConnection(Config configInstance)
+    static protected boolean testDatabaseConnection(Config configInstance) throws SQLException
     {
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
-        try {
-            return con.isValid(10);
-        } catch (SQLException e) {
-            return false;
-        }
+        Statement stmt;
+        stmt = con.createStatement();
+        return stmt.execute("SELECT 1;");
+        //            return con.isValid(0);      // org.postgresql.util.PSQLException: Method org.postgresql.jdbc4.Jdbc4Connection.isValid(int) is not yet implemented.
     }
 
     /**
