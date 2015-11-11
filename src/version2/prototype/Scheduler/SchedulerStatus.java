@@ -48,6 +48,10 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
      */
     public final LocalDateTime LastModifiedTime;
     /**
+     * True if there are any active workers at time of status retrieval.
+     */
+    public final boolean schedulerWorking;
+    /**
      * A timestamp depicting the time this SchedulerStatus object was created/retrieved.
      */
     public final LocalDateTime RetrievedTime;
@@ -79,11 +83,12 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
      * @param workersInQueuePerProcess
      * @param activeWorkersPerProcess
      * @param LastModifiedTime
+     * @param schedulerWorking
      * @param RetrievedTime
      */
     public SchedulerStatus(int SchedulerID, ProjectInfoFile projectMetaData, TreeMap<String, TreeMap<String, Double>> downloadProgressesByData, TreeMap<String, Double> processorProgresses,
             TreeMap<String, Double> indicesProgresses, TreeMap<String, TreeMap<Integer, Double>> summaryProgresses, List<String> log, TaskState State, boolean ProjectUpToDate,
-            TreeMap<ProcessName,Integer>  workersInQueuePerProcess, TreeMap<ProcessName,Integer> activeWorkersPerProcess, LocalDateTime LastModifiedTime,
+            TreeMap<ProcessName,Integer>  workersInQueuePerProcess, TreeMap<ProcessName,Integer> activeWorkersPerProcess, LocalDateTime LastModifiedTime, boolean schedulerWorking,
             LocalDateTime RetrievedTime)
     {
         this.SchedulerID = SchedulerID;
@@ -100,6 +105,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
         this.ProjectUpToDate = ProjectUpToDate;
         this.workersInQueuePerProcess = cloneTreeMapProcessNameInteger(workersInQueuePerProcess);
         this.activeWorkersPerProcess = cloneTreeMapProcessNameInteger(activeWorkersPerProcess);
+        this.schedulerWorking = schedulerWorking;
 
         this.LastModifiedTime = LastModifiedTime;
         this.RetrievedTime = RetrievedTime;
@@ -125,6 +131,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
         ProjectUpToDate = statusToCopy.ProjectUpToDate;
         workersInQueuePerProcess = cloneTreeMapProcessNameInteger(statusToCopy.GetWorkersInQueuePerProcess());
         activeWorkersPerProcess = cloneTreeMapProcessNameInteger(statusToCopy.GetActiveWorkersPerProcess());
+        schedulerWorking = statusToCopy.schedulerWorking;
 
         LastModifiedTime = statusToCopy.LastModifiedTime;
         RetrievedTime = statusToCopy.RetrievedTime;

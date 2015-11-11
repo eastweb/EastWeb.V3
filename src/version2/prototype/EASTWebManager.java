@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
@@ -45,12 +47,13 @@ import version2.prototype.util.DatabaseConnector;
  */
 public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static EASTWebManager instance = null;
-    protected static ExecutorService executor;
+    protected static ScheduledExecutorService backgroundThreadExecutor;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
     protected static int defaultMSBeetweenUpdates = 5000;       // 5 seconds
 
     // Logged requests from other threads
+    protected static Boolean acceptingRequests = true;
     protected static List<SchedulerData> startNewSchedulerRequests;
     protected static List<SchedulerData> loadNewSchedulerRequests;
     protected static List<Integer> stopExistingSchedulerRequests;
@@ -71,19 +74,19 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static Boolean schedulerStatesChanged = false;
     protected boolean manualUpdate;
     protected boolean justCreateNewSchedulers;
-    protected final int msBeetweenUpdates;
+    protected final int msBetweenUpdates;
     protected final DatabaseConnectionPoolA connectionPool;
 
     // Object references of EASTWeb components
     protected HashMap<Integer, GlobalDownloader> globalDLs;
     protected HashMap<Integer, Scheduler> schedulers;
-    protected HashMap<Integer, ScheduledFuture<?>> globalDLFutures;
     protected final ScheduledExecutorService globalDLExecutor;
+    protected HashMap<Integer, ScheduledFuture<?>> globalDLFutures;
     protected final ExecutorService processWorkerExecutor;
 
     /**
      *  If first time calling, starts up the EASTWebManager background processing thread to handle passively processing logged requests and updating
-     *  its state using default values. [numOfSimultaneousGlobalDLs = 1, msBeetweenUpdates = 5000]
+     *  its state using default values. [numOfSimultaneousGlobalDLs = 1, msBetweenUpdates = 5000]
      */
     public static void Start()
     {
@@ -95,11 +98,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *  its state.
      *
      * @param numOfSimultaneousGlobalDLs  - number of threads to create for GlobalDownloader objects to use (recommended value: 1)
-     * @param msBeetweenUpdates  - milliseconds to sleep between state updates and requests processing. If 0 then EASTWebManager won't passively update
+     * @param msBetweenUpdates  - milliseconds to sleep between state updates and requests processing. If 0 then EASTWebManager won't passively update
      *  its state variables and will require UpdateState() to be manually called in whenever it is desired for requests to be processed and state
      *  variables to be updated.
      */
-    public static void Start(int numOfSimultaneousGlobalDLs, int msBeetweenUpdates)
+    public static void Start(int numOfSimultaneousGlobalDLs, int msBetweenUpdates)
     {
         try{
             if(instance == null)
@@ -110,13 +113,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 instance = new EASTWebManager(
                         numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
                         numOfWorkerThreads, // Number of ProcessWorkers allowed to be simultaneously active
-                        msBeetweenUpdates
+                        msBetweenUpdates
                         );
 
                 // If passive updating desired
-                if(msBeetweenUpdates > 0)
+                if(msBetweenUpdates > 0)
                 {
-                    executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                    backgroundThreadExecutor = Executors.newScheduledThreadPool(1, new ThreadFactory() {
                         @Override
                         public Thread newThread(Runnable target) {
                             final Thread thread = new Thread(target);
@@ -130,14 +133,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                             return thread;
                         }
                     });
-                    executor.execute(instance);
+                    backgroundThreadExecutor.scheduleWithFixedDelay(instance, 0, msBetweenUpdates, TimeUnit.MILLISECONDS);
                 }
                 if(instance != null) {
                     System.out.println("EASTWeb started. Threads being used: " + (2 + numOfSimultaneousGlobalDLs + numOfWorkerThreads)
                             + " {GUI threads: 1 reserved, EASTWebManagement threads: 1, "
                             + "GlobalDownload threads: " + numOfSimultaneousGlobalDLs
                             + ", ProcessWorker threads: " + numOfWorkerThreads
-                            + ", " + (msBeetweenUpdates > 0 ? "ms between updates: " + msBeetweenUpdates : "no automatic GUI updating") + "}");
+                            + ", " + (msBetweenUpdates > 0 ? "ms between updates: " + msBetweenUpdates : "no automatic GUI updating") + "}");
                 }
             }
         } catch(Exception e) {
@@ -159,23 +162,29 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static void Close()
     {
-        ArrayList<Integer> runningSchedulerIDs = new ArrayList<Integer>();
+        /**
+         * 1) Stop accepting new requests.
+         * 2) Stop background thread.
+         * 3) Stop all Schedulers.
+         * 4) Stop all GlobalDownloaders and their tasks.
+         * 5) Shutdown thread pool executers.
+         * 6) Wait for currently executing ProcessWorkers to finish.
+         * 7) Shutdown database connection pool.
+         */
 
-        for (int i = schedulerIDs.nextSetBit(0); i >= 0; i = schedulerIDs.nextSetBit(i+1)) {
-            runningSchedulerIDs.add(i);
-            if (i == Integer.MAX_VALUE) {
-                break; // or (i+1) would overflow
-            }
+        // Step 1
+        synchronized(acceptingRequests) {
+            acceptingRequests = false;
         }
 
-        for(Integer ID : runningSchedulerIDs) {
-            StopExistingScheduler(ID, false);
-        }
+        // Step 2
+        backgroundThreadExecutor.shutdown();
 
-        UpdateState();
+        // Steps 3-6
+        instance.stop();
+
+        // Step 7
         DatabaseConnector.Close();
-
-        //TODO: close executor services
     }
 
     /**
@@ -200,7 +209,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     /**
      * If {@link #Start Start(int, int)} has been previously called then forces EASTWebManager to process any and all currently logged requests and
-     * update state information. Note, that if Start(int, int) was called with value of 0 or less for msBeetweenUpdates then this method MUST be called
+     * update state information. Note, that if Start(int, int) was called with value of 0 or less for msBetweenUpdates then this method MUST be called
      * in order to process any of the requests made to EASTWebManager via its public methods and in order for it to show updated state information.
      */
     public static void UpdateState()
@@ -218,11 +227,15 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param data - {@link version2.prototype.Scheduler#SchedulerData SchedulerData} to create the Scheduler instance from
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void StartNewScheduler(SchedulerData data, boolean forceUpdate)
+    public static boolean StartNewScheduler(SchedulerData data, boolean forceUpdate)
     {
-        if(instance == null)
-        {
+        if(!acceptingRequests) {
+            return false;
+        }
+
+        if(instance == null){
             EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
         }
 
@@ -237,6 +250,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             }
             UpdateState();
         }
+        return true;
     }
 
     /**
@@ -246,11 +260,15 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param data - {@link version2.prototype.Scheduler#SchedulerData SchedulerData} to create the Scheduler instance from
      * @param forceUpdate  - forces an immediate update to load the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void LoadNewScheduler(SchedulerData data, boolean forceUpdate)
+    public static boolean LoadNewScheduler(SchedulerData data, boolean forceUpdate)
     {
-        if(instance == null)
-        {
+        if(!acceptingRequests) {
+            return false;
+        }
+
+        if(instance == null) {
             EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
         }
 
@@ -265,6 +283,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             }
             UpdateState();
         }
+        return true;
     }
 
     /**
@@ -274,9 +293,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param schedulerID  - targeted Scheduler's ID
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void StopExistingScheduler(int schedulerID, boolean forceUpdate)
+    public static boolean StopExistingScheduler(int schedulerID, boolean forceUpdate)
     {
+        if(!acceptingRequests) {
+            return false;
+        }
+
         if(schedulerIDs.get(schedulerID))
         {
             synchronized (stopExistingSchedulerRequests) {
@@ -288,6 +312,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 UpdateState();
             }
         }
+        return true;
     }
 
     /**
@@ -297,9 +322,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param projectName  - targeted Scheduler's project name
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void StopExistingScheduler(String projectName, boolean forceUpdate)
+    public static boolean StopExistingScheduler(String projectName, boolean forceUpdate)
     {
+        if(!acceptingRequests) {
+            return false;
+        }
+
         synchronized (stopExistingSchedulerRequestsNames) {
             stopExistingSchedulerRequestsNames.add(projectName);
 
@@ -308,6 +338,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 UpdateState();
             }
         }
+        return true;
     }
 
     /**
@@ -319,9 +350,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param schedulerID  - targeted Scheduler's ID
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void DeleteScheduler(int schedulerID, boolean forceUpdate)
+    public static boolean DeleteScheduler(int schedulerID, boolean forceUpdate)
     {
+        if(!acceptingRequests) {
+            return false;
+        }
+
         if(schedulerIDs.get(schedulerID))
         {
             synchronized (deleteExistingSchedulerRequests) {
@@ -333,6 +369,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 }
             }
         }
+        return true;
     }
 
     /**
@@ -344,9 +381,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param projectName  - targeted Scheduler's project name
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void DeleteScheduler(String projectName, boolean forceUpdate)
+    public static boolean DeleteScheduler(String projectName, boolean forceUpdate)
     {
+        if(!acceptingRequests) {
+            return false;
+        }
+
         synchronized (deleteExistingSchedulerRequestsNames) {
             deleteExistingSchedulerRequestsNames.add(projectName);
 
@@ -355,6 +397,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 UpdateState();
             }
         }
+        return true;
     }
 
     /**
@@ -364,9 +407,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param schedulerID  - targeted Scheduler's ID
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void StartExistingScheduler(int schedulerID, boolean forceUpdate)
+    public static boolean StartExistingScheduler(int schedulerID, boolean forceUpdate)
     {
+        if(!acceptingRequests) {
+            return false;
+        }
+
         if(schedulerIDs.get(schedulerID))
         {
             synchronized (startExistingSchedulerRequests) {
@@ -378,6 +426,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 }
             }
         }
+        return true;
     }
 
     /**
@@ -387,9 +436,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      *
      * @param projectName  - targeted Scheduler's project name
      * @param forceUpdate  - forces an immediate update to start the new scheduler before returning.
+     * @return true if successful, false if shutting down
      */
-    public static void StartExistingScheduler(String projectName, boolean forceUpdate)
+    public static boolean StartExistingScheduler(String projectName, boolean forceUpdate)
     {
+        if(!acceptingRequests) {
+            return false;
+        }
+
         synchronized (startExistingSchedulerRequestsNames) {
             startExistingSchedulerRequestsNames.add(projectName);
 
@@ -398,6 +452,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 UpdateState();
             }
         }
+        return true;
     }
 
     /**
@@ -439,7 +494,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     /**
      * Returns the list of {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus} objects relevant to all currently known active
      * {@link version2.prototype.Scheduler#Scheduler Scheduler} instances. This information is updated passively by EASTWebManager's background thread if
-     * {@link #Start Start(int, int)} was called with a value greater than 0 for msBeetweenUpdates, otherwise it is updated actively by calling
+     * {@link #Start Start(int, int)} was called with a value greater than 0 for msBetweenUpdates, otherwise it is updated actively by calling
      * {@link #UpdateState UpdateState()}.
      *
      * @return list of SchedulerStatus objects for the currently created Scheduler instances
@@ -567,6 +622,68 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         return registered;
     }
 
+    /**
+     * Handles stopping/shutting down the EASTWebManager instance.
+     */
+    public void stop()
+    {
+        /*
+         * 3) Stop all Schedulers.
+         * 4) Stop all GlobalDownloaders and their tasks.
+         * 5) Shutdown thread pool executers.
+         * 6) Wait for currently executing ProcessWorkers to finish.
+         */
+
+        // Step 3
+        synchronized(schedulers) {
+            for(Scheduler s : schedulers.values()) {
+                s.Stop();
+            }
+        }
+
+        // Step 4
+        for(GlobalDownloader gdl : globalDLs.values())
+        {
+            gdl.Stop();
+            globalDLFutures.get(gdl.ID).cancel(false);
+        }
+
+        // Step 5
+        globalDLExecutor.shutdown();
+        processWorkerExecutor.shutdown();
+
+        // Step 6
+
+        boolean allStopped = true;
+        final int maxWaitTimeMS = 1200000;  // 20 minutes
+        int currentWaitedTimeMS = 0;
+
+        do {
+            try {
+                if(!allStopped)
+                {
+                    Thread.sleep(5000);
+                    currentWaitedTimeMS += 5000;
+                    allStopped = true;
+                }
+            } catch (InterruptedException e) {
+                ErrorLog.add(configInstance, "Problem while making thread sleep.", e);
+            }
+
+            for(SchedulerStatus status : schedulerStatuses) {
+                if(status.schedulerWorking) {
+                    allStopped = false;
+                    break;
+                }
+            }
+        } while(!allStopped && (currentWaitedTimeMS < maxWaitTimeMS));
+
+        if(!allStopped) {
+            ErrorLog.add(configInstance, "Timed out waiting for Process Workers to complete.", new Exception("Timed out waiting for Process Workers to complete."));
+            return;
+        }
+    }
+
     /* (non-Javadoc)
      * @see version2.prototype.EASTWebManagerI#run()
      */
@@ -576,10 +693,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             try
             {
-                if(!manualUpdate) {
-                    Thread.sleep(msBeetweenUpdates);
-                }
-
                 // Handle new Scheduler requests
                 if(startNewSchedulerRequests.size() > 0)
                 {
@@ -816,12 +929,12 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     }
                 }
             }
-            catch (InterruptedException | ConcurrentModificationException e) {
+            catch (ConcurrentModificationException e) {
                 ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
             } catch (Exception e) {
                 ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
             }
-        }while((msBeetweenUpdates > 0) && !manualUpdate);
+        }while((msBetweenUpdates > 0) && !manualUpdate);
         manualUpdate = false;
         justCreateNewSchedulers = false;
     }
@@ -965,7 +1078,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      * @see version2.prototype.EASTWebManagerI#StartNewProcessWorker(version2.prototype.ProcessWorker)
      */
     @Override
-    public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable worker)
+    public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable<ProcessWorkerReturn> worker)
     {
         return processWorkerExecutor.submit(worker);
     }
@@ -989,37 +1102,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     protected EASTWebManager()
     {
-        //        manualUpdate = false;
-        //        justCreateNewSchedulers = false;
-        //        msBeetweenUpdates = Integer.MAX_VALUE;
-        //
-        //        startNewSchedulerRequests = null;
-        //        stopExistingSchedulerRequests = null;
-        //        stopExistingSchedulerRequestsNames = null;
-        //        deleteExistingSchedulerRequests = null;
-        //        deleteExistingSchedulerRequestsNames = null;
-        //        startExistingSchedulerRequests = null;
-        //        startExistingSchedulerRequestsNames = null;
-        //
-        //        // Setup for handling executing GlobalDownloaders
-        //        globalDLs = null;
-        //        globalDLExecutor = null;
-        //        globalDLFutures = null;
-        //
-        //        // Setup for handling executing Schedulers
-        //        schedulers = null;
-        //
-        //        // Setup for handling executing ProcessWorkers
-        //        processWorkerExecutor = null;
-
         this(1, 1, 1000);
     }
 
-    protected EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBeetweenUpdates)
+    protected EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBetweenUpdates)
     {
         manualUpdate = false;
         justCreateNewSchedulers = false;
-        this.msBeetweenUpdates = msBeetweenUpdates;
+        this.msBetweenUpdates = msBetweenUpdates;
         configInstance = Config.getInstance();
         //        connectionPool = new C3P0ConnectionPool(configInstance);
         connectionPool = null;

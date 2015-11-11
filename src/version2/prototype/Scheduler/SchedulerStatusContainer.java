@@ -66,6 +66,7 @@ public class SchedulerStatusContainer {
     // ProcessWorker information
     private TreeMap<ProcessName,Integer> workersInQueuePerProcess;
     private TreeMap<ProcessName,Integer> activeWorkersPerProcess;
+    private boolean schedulerWorking;
 
     /**
      * Creates a SchedulerStatusContainer
@@ -115,6 +116,8 @@ public class SchedulerStatusContainer {
         activeWorkersPerProcess.put(ProcessName.PROCESSOR, 0);
         activeWorkersPerProcess.put(ProcessName.INDICES, 0);
         activeWorkersPerProcess.put(ProcessName.SUMMARY, 0);
+
+        schedulerWorking = false;
     }
 
     /**
@@ -197,6 +200,8 @@ public class SchedulerStatusContainer {
         activeWorkersPerProcess.put(ProcessName.PROCESSOR, 0);
         activeWorkersPerProcess.put(ProcessName.INDICES, 0);
         activeWorkersPerProcess.put(ProcessName.SUMMARY, 0);
+
+        schedulerWorking = false;
     }
 
     /**
@@ -384,9 +389,23 @@ public class SchedulerStatusContainer {
 
         UpdateProjectIsUpToDate();
 
+        UpdateSchedulerWorking();
 
         return new SchedulerStatus(SchedulerID, projectMetaData, downloadProgressesByDataTemp, processorProgresses, indicesProgresses, summaryProgressesTemp, newLog, state, projectUpToDate,
-                workersInQueuePerProcess, activeWorkersPerProcess, lastModifiedTime, LocalDateTime.now());
+                workersInQueuePerProcess, activeWorkersPerProcess, lastModifiedTime, schedulerWorking, LocalDateTime.now());
+    }
+
+    private void UpdateSchedulerWorking()
+    {
+        boolean hasActive = false;
+
+        Iterator<ProcessName> it = activeWorkersPerProcess.keySet().iterator();
+        while(it.hasNext()) {
+            if(activeWorkersPerProcess.get(it.next()) > 0) {
+                hasActive = true;
+            }
+        }
+        schedulerWorking = hasActive;
     }
 
     /**
