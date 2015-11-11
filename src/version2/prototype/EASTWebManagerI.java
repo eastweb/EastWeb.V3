@@ -61,7 +61,7 @@ public interface EASTWebManagerI {
      * @param worker  - {@link java.util.concurrent.Callable Callable} to execute on a separate available thread
      * @return Future object representing the return object of the submitted ProcessWorker which is of type ProcessWorkerReturn
      */
-    public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable worker);
+    public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable<ProcessWorkerReturn> worker);
 
     /**
      * Gets a database connection from the connection pool.
