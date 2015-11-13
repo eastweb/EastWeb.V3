@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebManagerI;
 import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;

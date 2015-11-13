@@ -6,7 +6,6 @@ package version2.prototype.download;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -17,7 +16,6 @@ import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
-import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -34,7 +32,6 @@ public class DownloadWorker extends ProcessWorker {
     /**
      * @param gdl
      * @param configInstance
-     * @param processWorkerName
      * @param process
      * @param projectInfoFile
      * @param pluginInfo

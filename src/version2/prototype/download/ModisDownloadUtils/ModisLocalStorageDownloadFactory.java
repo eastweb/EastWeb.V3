@@ -5,6 +5,7 @@ package version2.prototype.download.ModisDownloadUtils;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,6 +27,8 @@ import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.LocalDownloader;
 import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 
 /**
  * @author michael.devos
@@ -84,17 +87,32 @@ public final class ModisLocalStorageDownloadFactory implements DownloaderFactory
      */
     @Override
     public GlobalDownloader CreateGlobalDownloader(int myID) {
-        GlobalDownloader downloader = null;
+        GlobalDownloader gdl = null;
+        DatabaseConnection con = null;
+        Statement stmt = null;
         try {
-            downloader = new ModisLocalStorageGlobalDownloader(myID, configInstance, projectInfoFile, pluginInfo.GetName(), downloadMetaData, listDatesFiles, startDate, downloaderClassName);
+            gdl = new ModisLocalStorageGlobalDownloader(myID, configInstance, projectInfoFile, pluginInfo.GetName(), downloadMetaData, listDatesFiles, startDate, downloaderClassName);
+            con = DatabaseConnector.getConnection(configInstance);
+            if(con == null) {
+                return null;
+            }
+            stmt = con.createStatement();
+            gdl.RegisterGlobalDownloader();
         } catch (RegistrationException e) {
             return null;
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | ParserConfigurationException | SAXException | IOException | SQLException e) {
             ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), downloadMetaData.name, "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
         } catch (Exception e) {
             ErrorLog.add(Config.getInstance(), pluginInfo.GetName(), downloadMetaData.name, "LocalStorageDownloadFactory.CreateGlobalDownloader problem with creating new GenericLocalStorageGlobalDownloader.", e);
+        } finally {
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) { /* do nothing */}
+            }
+            con.close();
         }
-        return downloader;
+        return gdl;
     }
 
 }

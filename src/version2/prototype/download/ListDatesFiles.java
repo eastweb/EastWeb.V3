@@ -24,6 +24,15 @@ public abstract class ListDatesFiles
     protected Boolean mapDatesFilesSet;
     protected ProjectInfoFile mProject;
 
+    /**
+     * Creates ListDatesFiles object but delays list creation until CloneListDatesFiles() is first called. The contained list will be of all files on data file server described by the DownloadMetaData and
+     * with a date equal to or more recent than the given DataDate.
+     *
+     * @param startDate
+     * @param data
+     * @param project
+     * @throws IOException
+     */
     public ListDatesFiles(DataDate startDate, DownloadMetaData data, ProjectInfoFile project) throws IOException
     {
         sDate = startDate;
@@ -35,7 +44,10 @@ public abstract class ListDatesFiles
         mapDatesFilesSet = new Boolean(false);
     }
 
-    // gets a map of each day and its associated files
+    /**
+     * Gets a map of each day and its associated files. First call to this starts the list creation and subsequent calls after this returns will reuse the created list from the first call.
+     * @return map of server file paths to associated file creation dates
+     */
     public Map<DataDate, ArrayList<String>> CloneListDatesFiles()
     {
         Map<DataDate, ArrayList<String>> filesMap = new HashMap<DataDate, ArrayList<String>>();

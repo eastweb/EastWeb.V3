@@ -40,6 +40,7 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
     {
+        Map<DataDate, ArrayList<String>>  tempMapDatesToFiles = new HashMap<DataDate, ArrayList<String>>();
         final Pattern yearDirPattern = mData.datePattern;
 
         FTPClient ftpC = null;
@@ -62,11 +63,15 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
                 throw new IOException("Couldn't navigate to directory: " + mRoot);
             }
 
-            mapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
+            tempMapDatesToFiles =  new HashMap<DataDate, ArrayList<String>>();
 
             // List years
-            for (FTPFile yearFile : ftpC.listFiles())
+            outerLoop: for (FTPFile yearFile : ftpC.listFiles())
             {
+                if(Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+
                 // Skip non-directory, non-year entries
                 if (!yearFile.isDirectory()
                         || !yearDirPattern.matcher(yearFile.getName())
@@ -96,6 +101,10 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
                     if (file.isFile() &&
                             mData.fileNamePattern.matcher(file.getName()).matches())
                     {
+                        if(Thread.currentThread().isInterrupted()) {
+                            break outerLoop;
+                        }
+
                         /* pattern of TRMM 3B42RT
                          * {productname}.%y4.%m2.%d2.bin
                          */
@@ -109,7 +118,7 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
                         DataDate dataDate = new DataDate(day, month, year);
                         if (dataDate.compareTo(sDate) >= 0)
                         {
-                            mapDatesFiles.put(dataDate, fileNames);
+                            tempMapDatesToFiles.put(dataDate, fileNames);
                         }
                     }
                 }
@@ -118,7 +127,7 @@ public class TRMM3B42RTListDatesFiles extends ListDatesFiles
 
             ftpC.disconnect();
             ftpC = null;
-            return mapDatesFiles;
+            return tempMapDatesToFiles;
         }
         catch (Exception e)
         {

@@ -9,10 +9,8 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Observable;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -126,6 +124,9 @@ public class DatabaseCache extends Observable{
 
         try {
             con = DatabaseConnector.getConnection();
+            if(con == null) {
+                return new ArrayList<DataFileMetaData>();
+            }
             stmt = con.createStatement();
 
             if(processCachingFor == ProcessName.DOWNLOAD)
@@ -359,6 +360,9 @@ public class DatabaseCache extends Observable{
             ArrayList<String> modisTileNames, ListDatesFiles listDatesFiles) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         int changes = 0;
         final Connection conn = DatabaseConnector.getConnection();
+        if(conn == null) {
+            return 0;
+        }
         final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(globalEASTWebSchema, pluginName, dataName, stmt);
         StringBuilder insertQuery;
@@ -533,8 +537,11 @@ public class DatabaseCache extends Observable{
 
         stmt.close();
         conn.close();
-        setChanged();
-        notifyObservers();
+
+        if(!Thread.currentThread().isInterrupted()) {
+            setChanged();
+            notifyObservers();
+        }
 
         return changes;
     }
@@ -543,6 +550,7 @@ public class DatabaseCache extends Observable{
      * Add file(s) to the cache table this DatabaseCache object is mapped to. Notifies observers that files are available for further processing.
      * All files will be submitted as a single transaction and associated to the given year and day (or the number of days in the download composite size if larger than a day).
      *
+     * @param stmt
      * @param filesForASingleComposite  - A list of all files to be inserted and handled as a single download/data composite. The extraDownloads field will not be used.
      * Each file needs its own DataFileMetaData instance. DataFileMetaData instances with data name of "Data" will be inserted into the 'Download' table and others will be
      * added to the 'ExtraDownload' table.
@@ -553,13 +561,11 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
+    public void CacheFiles(Statement stmt, ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException
     {
         if(filesForASingleComposite.size() == 0) {
             return;
         }
-        Connection conn = DatabaseConnector.getConnection();
-        Statement stmt = conn.createStatement();
 
         String processCachingForName;
         String processNotifyingName;
@@ -625,22 +631,23 @@ public class DatabaseCache extends Observable{
             Schemas.setProcessed(mSchemaName, "DownloadCacheExtra", dateGroupID, stmt);
         }
 
-        stmt.close();
-        conn.close();
-
         synchronized(filesAvailable) {
             filesAvailable = true;
         }
         if(processNotifyingName != null) {
             System.out.println("Notifying " + processNotifyingName + " calculator in project '" + projectName + "' of the additional work.");
         }
-        setChanged();
-        notifyObservers();
+
+        if(!Thread.currentThread().isInterrupted()) {
+            setChanged();
+            notifyObservers();
+        }
     }
 
     /**
      * Uploads summary results to the database as the "cache" update for summary as there is no actual cache to be used by it but results are stored in the database for UI retrieval. Summary calculators are
      * expected to produce result files which the mTableFile refers to.
+     * @param con
      * @param newResults
      * @param summaryIDNum
      * @param indexNm
@@ -657,10 +664,10 @@ public class DatabaseCache extends Observable{
      * @throws SAXException
      * @throws SQLException
      */
-    public void UploadResultsToDb(ArrayList<SummaryResult> newResults, int summaryIDNum, String indexNm, TemporalSummaryCompositionStrategy compStrategy, int year, int day, Process process, int daysPerInputData)
-            throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SQLException {
-        final Connection conn = DatabaseConnector.getConnection();
-        Statement stmt = conn.createStatement();
+    public void UploadResultsToDb(Connection con, ArrayList<SummaryResult> newResults, int summaryIDNum, String indexNm, TemporalSummaryCompositionStrategy compStrategy, int year, int day,
+            Process process, int daysPerInputData) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException,
+            SQLException {
+        Statement stmt = con.createStatement();
         PreparedStatement pStmt = null;
         //        final boolean previousAutoCommit = conn.getAutoCommit();
 
@@ -671,7 +678,7 @@ public class DatabaseCache extends Observable{
         System.out.println("Uploading summary results in project '" + projectName + "' for plugin '" + pluginName + "' of index '" + indexNm + "' (Year: " + year + ", Day: " + day + ").");
 
         try {
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
             StringBuilder insertUpdate = new StringBuilder("INSERT INTO \"%s\".\"ZonalStat\" ("
                     + "\"ProjectSummaryID\", "
@@ -698,7 +705,7 @@ public class DatabaseCache extends Observable{
             }
             insertUpdate.append(")");
 
-            pStmt = conn.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
+            pStmt = con.prepareStatement(String.format(insertUpdate.toString(), mSchemaName));
 
             int i;
             for(SummaryResult newResult : newResults)
@@ -748,7 +755,6 @@ public class DatabaseCache extends Observable{
             if(pStmt != null) {
                 pStmt.close();
             }
-            conn.close();
         }
     }
 

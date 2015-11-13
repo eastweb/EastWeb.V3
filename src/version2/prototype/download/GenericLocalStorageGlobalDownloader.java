@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +26,8 @@ import version2.prototype.ErrorLog;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
 
@@ -71,6 +74,11 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
      */
     public void run() {
         try {
+            DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+            if(con == null) {
+                return;
+            }
+            Statement stmt = con.createStatement();
             System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] GlobalDownloader of '" + metaData.name + "' files for plugin '"
                     + pluginName + "' starting from " + currentStartDate + ".");
             System.out.println("Running: " + downloadCtr.getName().substring((downloadCtr.getName().lastIndexOf(".") > -1 ? downloadCtr.getName().lastIndexOf(".") + 1 : 0)));
@@ -129,7 +137,7 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
             }
 
             // Step 4: Create downloader and run downloader for all that's left
-            downloadloop: for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
+            downloadLoop: for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
             {
                 String outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
                 DataDate dd = entry.getKey();
@@ -138,20 +146,25 @@ public class GenericLocalStorageGlobalDownloader extends GlobalDownloader {
                 {
                     if(state == TaskState.STOPPED) {
                         System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] Breaking out of download loop.");
-                        break downloadloop;
+                        break downloadLoop;
+                    } else if(Thread.currentThread().isInterrupted()) {
+                        break downloadLoop;
                     }
+
                     if (f != null)
                     {
                         DownloaderFramework downloader = (DownloaderFramework) downloadCtr.newInstance(dd, outFolder, metaData, f);
                         try {
                             downloader.download();
-                            AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                            AddDownloadFile(stmt, dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (Exception e) {
                             ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "GenericLocalStorageGlobalDownloader.run problem with running running DownloaderFramework or AddDownloadFile.", e);
                         }
                     }
                 }
             }
+            stmt.close();
+            con.close();
         } catch (ParserConfigurationException | SAXException | IOException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException | SQLException e) {
             ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);

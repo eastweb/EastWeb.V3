@@ -22,6 +22,8 @@ import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.FileSystem;
 import version2.prototype.util.IndicesFileMetaData;
 
@@ -53,6 +55,10 @@ public class SummaryWorker extends ProcessWorker {
 
     @Override
     public ProcessWorkerReturn process() {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return null;
+        }
         Map<Integer, ArrayList<DataFileMetaData>> summaryInputMap = new HashMap<Integer, ArrayList<DataFileMetaData>>();
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
         ArrayList<DataFileMetaData> tempFiles;
@@ -74,9 +80,14 @@ public class SummaryWorker extends ProcessWorker {
                     tempFiles = new ArrayList<DataFileMetaData>();
                     for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
                     {
+                        if(Thread.currentThread().isInterrupted()) {
+                            return null;
+                        }
+
                         cachedFileData = cachedFile.ReadMetaDataForSummary();
                         TemporalSummaryCalculator temporalSummaryCal = new TemporalSummaryCalculator(
                                 configInstance,                         // configInstance
+                                con,                                    // DatabaseConnection con
                                 process,                                // process
                                 projectInfoFile,                        // projectInfoFile
                                 pluginInfo.GetName(),                   // pluginName
@@ -107,11 +118,16 @@ public class SummaryWorker extends ProcessWorker {
         {
             for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
             {
+                if(Thread.currentThread().isInterrupted()) {
+                    return null;
+                }
+
                 cachedFileData = cachedFile.ReadMetaDataForSummary();
                 try{
                     outputFile = new File(FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(),
                             pluginInfo.GetName(), ProcessName.SUMMARY) + String.format("%s/%s/%04d/%03d.csv", cachedFileData.indexNm, "Summary " + summary.GetID(), cachedFileData.year, cachedFileData.day));
                     ZonalSummaryCalculator zonalSummaryCal = new ZonalSummaryCalculator(
+                            con,
                             process,
                             configInstance.getGlobalSchema(),
                             projectInfoFile.GetWorkingDir(),
@@ -135,6 +151,8 @@ public class SummaryWorker extends ProcessWorker {
                 }
             }
         }
+
+        con.close();
         return new ProcessWorkerReturn(outputFiles);
     }
 

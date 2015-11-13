@@ -57,7 +57,7 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
      * @see version2.prototype.util.DatabaseConnectionPoolA#close()
      */
     @Override
-    public void close() {
+    public void handleClosing() {
         synchronized(super.DatabaseConnectorLock) {
             comboPDS.close();
         }
@@ -67,7 +67,7 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
      * @see version2.prototype.util.DatabaseConnectionPoolA#getConnection(boolean, java.lang.Integer)
      */
     @Override
-    public DatabaseConnection getConnection() {
+    public DatabaseConnection handleGettingConnection() {
         DatabaseConnection dbCon = null;
         Integer connectionID = null;
         StackTraceElement tempTrace = new Exception().getStackTrace()[1];
@@ -98,18 +98,22 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
                     //                            "\n  num_busy_connections: " + comboPDS.getNumBusyConnections() +
                     //                            "\n  num_idle_connections: " + comboPDS.getNumIdleConnections());
                 } catch (SQLException e) {
-                    String message = "Problem getting new connection from connection pool." +
-                            "\n  connectionID: " + connectionID +
-                            "\n  connectionDescriptions: " + connectionDescriptions +
-                            "\n  connectionPullTimes: " + connectionPullTimes +
-                            "\n  pastConnectionDescriptions: " + pastConnectionDescriptions;
-                    ErrorLog.add(configInstance, message, e);
+                    if(!Thread.currentThread().isInterrupted())
+                    {
+                        String message = "Problem getting new connection from connection pool." +
+                                "\n  connectionID: " + connectionID +
+                                "\n  connectionDescriptions: " + connectionDescriptions +
+                                "\n  connectionPullTimes: " + connectionPullTimes +
+                                "\n  pastConnectionDescriptions: " + pastConnectionDescriptions;
+                        ErrorLog.add(configInstance, message, e);
+                    } else {
+                        con = null;
+                    }
                 }
 
                 if(con != null) {
                     dbCon = new DatabaseConnection(configInstance, this, con, connectionID);
                 } else {
-                    System.err.println("Problem setting up new connection (connection ID: " + connectionID + ", connection: " + (con == null ? "is null)." : "is not null)."));
                     if(connectionID > -1) {
                         releaseConnectionID(connectionID);
                     }

@@ -65,12 +65,16 @@ public class IndicesWorker extends ProcessWorker{
 
     @Override
     public ProcessWorkerReturn process() {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return null;
+        }
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
                 FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(),
                         projectInfoFile.GetProjectName(), pluginName, ProcessName.INDICES);
-        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
         Statement stmt = null;
+
 
         try {
             stmt = con.createStatement();
@@ -129,6 +133,10 @@ public class IndicesWorker extends ProcessWorker{
 
         for (Map.Entry<DataDate, ArrayList<ProcessorFileMetaData>> entry : map.entrySet())
         {
+            if(Thread.currentThread().isInterrupted()) {
+                return null;
+            }
+
             output = new ArrayList<DataFileMetaData>();
             DataDate thisDay = entry.getKey();
 
@@ -182,7 +190,7 @@ public class IndicesWorker extends ProcessWorker{
             }
 
             try{
-                outputCache.CacheFiles(output);
+                outputCache.CacheFiles(stmt, output);
             } catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(process, "Problem encountered while caching data for IndicesWorker.", e);
             } catch (Exception e) {

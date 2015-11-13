@@ -15,6 +15,7 @@ public abstract class DatabaseConnectionPoolA {
     protected final Config configInstance;
     protected Boolean DatabaseConnectorLock;  // Value doesn't matter.
     protected BitSet connectionIDs;
+    protected Boolean hasBeenClosed;
 
     protected DatabaseConnectionPoolA(Config configInstance)
     {
@@ -25,18 +26,35 @@ public abstract class DatabaseConnectionPoolA {
         this.configInstance = configInstance;
         DatabaseConnectorLock = new Boolean(true);
         connectionIDs = new BitSet(configInstance.getMaxNumOfConnectionsPerInstance());
+        hasBeenClosed = new Boolean(false);
     }
 
     /**
-     * Safely closes the connection pool and open resources if it has been instantiated.
+     * Safely closes the connection pool and managed resources if it has been instantiated.
      */
-    public abstract void close();
+    public final void close()
+    {
+        handleClosing();
+        synchronized(hasBeenClosed) {
+            hasBeenClosed = true;
+        }
+    }
 
     /**
      * Creates a valid Connection object if a connection could be established with the PostgreSQL database using information from config.xml.
-     * @return valid Connection object if successfully connected, otherwise null
+     * @return If not already closed, then a valid DatabaseConnection object if successfully connected, otherwise null
      */
-    public abstract DatabaseConnection getConnection();
+    public final DatabaseConnection getConnection()
+    {
+        synchronized(hasBeenClosed) {
+            if(!hasBeenClosed)
+            {
+                return handleGettingConnection();
+            } else {
+                return null;
+            }
+        }
+    }
 
     /**
      * Gets the current number of active database connections.
@@ -49,6 +67,17 @@ public abstract class DatabaseConnectionPoolA {
      * @param ID  - DatabaseConnection ID
      */
     public abstract void endConnection(Integer ID);
+
+    /**
+     * Called from close().
+     */
+    protected abstract void handleClosing();
+
+    /**
+     * Called from getConnection().
+     * @return valid Connection object if successfully connected, otherwise null
+     */
+    protected abstract DatabaseConnection handleGettingConnection();
 
     protected int getLowestAvailableConnectionID()
     {

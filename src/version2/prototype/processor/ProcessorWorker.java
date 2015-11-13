@@ -62,13 +62,16 @@ public class ProcessorWorker extends ProcessWorker {
             PluginMetaData pluginMetaData, ArrayList<DataFileMetaData> cachedFiles, DatabaseCache outputCache)
     {
         super(configInstance, "ProcessorWorker", process, projectInfoFile, pluginInfo, pluginMetaData, cachedFiles, outputCache);
-        // TODO Auto-generated constructor stub
-
     }
 
     @Override
     public ProcessWorkerReturn process()
     {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return null;
+        }
+
         String pluginName = pluginMetaData.Title;
         String outputFolder  =
                 FileSystem.GetProcessOutputDirectoryPath(projectInfoFile.GetWorkingDir(),
@@ -119,6 +122,10 @@ public class ProcessorWorker extends ProcessWorker {
         // for each date, process the steps associated with the plugin
         for (Map.Entry<DataDate, ArrayList<DownloadFileMetaData>> entry : map.entrySet())
         {
+            if(Thread.currentThread().isInterrupted()) {
+                return null;
+            }
+
             DataDate thisDay = entry.getKey();
 
             //create necessary folders for the date
@@ -132,7 +139,6 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             String laststepOutputFolder = null;
-            String tempFolderStr = null;
 
             // process the files for that date
             for (Entry<Integer, String> step : processStep.entrySet())
@@ -162,7 +168,6 @@ public class ProcessorWorker extends ProcessWorker {
                 if (key == 1)
                 {
                     String [] inputFolders = prepareTask.getInputFolders(key);
-                    tempFolderStr = inputFolders[0];
 
                     File dataInputFolder = new File(inputFolders[0]);
                     File qcInputFolder = null;
@@ -285,17 +290,13 @@ public class ProcessorWorker extends ProcessWorker {
             File[] dirList = dir.listFiles();
 
             // add each file into DataFileMetaData
-            DatabaseConnection con = null;
             Statement stmt = null;
             try {
-                con = DatabaseConnector.getConnection(configInstance);
                 stmt = con.createStatement();
                 for (File oFile : dirList) {
                     toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(),
                             thisDay.getDayOfYear()));
                 }
-                stmt.close();
-                con.close();
             } catch (SQLException e) {
                 ErrorLog.add(process, "Problem while creating list for output cache.", e);
             } catch (Exception e) {
@@ -304,7 +305,9 @@ public class ProcessorWorker extends ProcessWorker {
 
             // cache to the database
             try{
-                outputCache.CacheFiles(toCache);
+                outputCache.CacheFiles(stmt, toCache);
+                stmt.close();
+                con.close();
             } catch(SQLException | ParseException | ClassNotFoundException | ParserConfigurationException | SAXException | IOException e) {
                 ErrorLog.add(process, "Problem encountered while caching data for ProcessorWorker.", e);
             } catch (Exception e) {

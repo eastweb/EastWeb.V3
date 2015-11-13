@@ -3,7 +3,6 @@ package version2.prototype.summary.zonal;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -33,8 +32,8 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.GdalUtils;
-import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.GeneralUIEventObject;
 import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.util.Schemas;
@@ -46,6 +45,7 @@ import version2.prototype.util.Schemas;
  *
  */
 public class ZonalSummaryCalculator {
+    private final DatabaseConnection con;
     private final Process process;
     @SuppressWarnings("unused")
     private final String workingDir;
@@ -69,6 +69,7 @@ public class ZonalSummaryCalculator {
 
     /**
      * Creates a ZonalSummaryCalculator.
+     * @param con
      * @param process
      * @param globalSchema
      * @param workingDir
@@ -82,9 +83,10 @@ public class ZonalSummaryCalculator {
      * @param fileStore
      * @param outputCache
      */
-    public ZonalSummaryCalculator(Process process, String globalSchema, String workingDir, String projectName, String pluginName, int daysPerInputData, IndicesFileMetaData inputFile, File outTableFile,
-            SummariesCollection summariesCollection, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore, DatabaseCache outputCache)
+    public ZonalSummaryCalculator(DatabaseConnection con, Process process, String globalSchema, String workingDir, String projectName, String pluginName, int daysPerInputData, IndicesFileMetaData inputFile,
+            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore, DatabaseCache outputCache)
     {
+        this.con = con;
         this.process = process;
         this.workingDir = workingDir;
         this.inputFile = inputFile;
@@ -284,7 +286,6 @@ public class ZonalSummaryCalculator {
         double[] rasterArray = new double[WIDTH];
 
         Double[] noData = new Double[1];
-        //FIXME: Can't get the no data value from NLDAS reprojected file, manually set it to 0. It will affect the zonal result.
         rasterBand.GetNoDataValue(noData);
         final ArrayList<Double> NO_DATA = new ArrayList<Double>();
         NO_DATA.add(new Double(GdalUtils.NO_DATA));
@@ -365,8 +366,7 @@ public class ZonalSummaryCalculator {
     private void uploadResultsToDb(File mTableFile, Layer layer, String areaCodeField, String areaNameField, String indexNm, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore,
             SummariesCollection summariesCollection, int year, int day, Process process) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException,
             ParserConfigurationException, SAXException, SQLException {
-        final Connection conn = DatabaseConnector.getConnection();
-        Statement stmt = conn.createStatement();
+        Statement stmt = con.createStatement();
         ArrayList<SummaryResult> newResults = new ArrayList<SummaryResult>();
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
         Map<Integer, Double> countMap = null;
@@ -424,7 +424,6 @@ public class ZonalSummaryCalculator {
             }
         } finally {
             stmt.close();
-            conn.close();
         }
 
         TemporalSummaryCompositionStrategy compStrategy = null;
@@ -451,7 +450,7 @@ public class ZonalSummaryCalculator {
                     + "', Summary ID="+ summary.GetID() + ", date={year: " + year + ", day of year: " + day + "}"));
         }
 
-        outputCache.UploadResultsToDb(newResults, summary.GetID(), indexNm, compStrategy, year, day, process, daysPerInputData);
+        outputCache.UploadResultsToDb(con, newResults, summary.GetID(), indexNm, compStrategy, year, day, process, daysPerInputData);
     }
 
 }
