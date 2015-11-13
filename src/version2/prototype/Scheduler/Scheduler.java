@@ -11,7 +11,6 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,6 +38,7 @@ import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.summary.Summary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
+import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.FileSystem;
@@ -159,7 +159,11 @@ public class Scheduler {
         DatabaseConnection con = null;
         try {
             // Setup project
-            con = DatabaseConnector.getConnection();
+            con = DatabaseConnector.getConnection(configInstance);
+            if(con == null) {
+                return;
+            }
+
             for(ProjectInfoPlugin item: data.projectInfoFile.GetPlugins())
             {
                 pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(item.GetName());
@@ -236,6 +240,10 @@ public class Scheduler {
     {
         String projectSchema;
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return;
+        }
+
         Statement stmt = null;
         String updateQueryFormat;
         try {
@@ -301,6 +309,11 @@ public class Scheduler {
      */
     public void Delete()
     {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return;
+        }
+
         Stop();
 
         SchedulerStatus status = null;
@@ -356,7 +369,6 @@ public class Scheduler {
         String projectSchema;
         int projectID;
         File projectDir;
-        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
         Statement stmt = null;
         String dropSchemaQueryFormat = "DROP SCHEMA \"%1$s\" CASCADE;";
         String deleteFromExpectedTotalOutput = "delete from \"" + configInstance.getGlobalSchema() + "\".\"%1$sExpectedTotalOutput\" where \"ProjectID\"=%2$d;";

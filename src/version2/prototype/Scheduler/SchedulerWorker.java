@@ -34,15 +34,20 @@ public class SchedulerWorker implements Callable<ProcessWorkerReturn> {
     @Override
     public ProcessWorkerReturn call() throws Exception {
         ProcessWorkerReturn theReturn = null;
+
         synchronized(statusContainer) {
             statusContainer.AddActiveWorker(worker.process.processName);
         }
+        scheduler.NotifyUI(new GeneralUIEventObject(this, null));
+
         theReturn = worker.call();
+
         synchronized(statusContainer) {
             statusContainer.SubtractActiveWorker(worker.process.processName);
             statusContainer.SubtractWorker(worker.process.processName);
         }
         scheduler.NotifyUI(new GeneralUIEventObject(this, null));
+
         return theReturn;
     }
 

@@ -7,6 +7,7 @@ import version2.prototype.Config;
 import version2.prototype.Process;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnection;
 
 /**
  * Merging strategy template to be used in temporal summary for creating classes to define how to create composite data files.
@@ -19,6 +20,7 @@ public interface MergeStrategy {
      * Merge method. Returns metadata about created merged raster file.
      *
      * @param configInstance
+     * @param con
      * @param process
      * @param projectInfo
      * @param pluginName  - current plugin's name
@@ -28,5 +30,6 @@ public interface MergeStrategy {
      * @return metadata about single merged file created
      * @throws Exception
      */
-    DataFileMetaData Merge(Config configInstance, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles) throws Exception;
+    DataFileMetaData Merge(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles)
+            throws Exception;
 }

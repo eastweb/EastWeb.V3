@@ -1,20 +1,9 @@
 package version2.prototype.download;
 
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.TreeMap;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
 import version2.prototype.Config;
-import version2.prototype.EASTWebManagerI;
-import version2.prototype.ErrorLog;
 import version2.prototype.Process;
-import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;

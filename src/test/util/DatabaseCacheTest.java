@@ -216,7 +216,7 @@ public class DatabaseCacheTest {
         filesForASingleComposite.add(new DataFileMetaData(data1FilePath, 2, earlierStartDate.getYear(), earlierStartDate.getDayOfYear(), "Index2"));
 
         // Cache to ProcessorCache
-        testProcessorCache.CacheFiles(filesForASingleComposite);
+        testProcessorCache.CacheFiles(stmt, filesForASingleComposite);
 
         // Test getting from ProcessorCache
         ArrayList<DataFileMetaData> result = testProcessorCache.GetUnprocessedCacheFiles();
@@ -229,7 +229,7 @@ public class DatabaseCacheTest {
         assertEquals("Number of results returned is incorrect.", 0, result.size());
 
         // Cache to IndicesCache
-        testIndicesCache.CacheFiles(filesForASingleComposite);
+        testIndicesCache.CacheFiles(stmt, filesForASingleComposite);
 
         // Test getting from IndicesCache
         result = testIndicesCache.GetUnprocessedCacheFiles();
@@ -247,8 +247,8 @@ public class DatabaseCacheTest {
         filesForASingleComposite.add(new DataFileMetaData(data2FilePath, 1, startDate.getYear(), startDate.getDayOfYear(), "Index1"));
 
         // Cache to ProcessorCache
-        testProcessorCache.CacheFiles(filesForASingleComposite);
-        testIndicesCache.CacheFiles(filesForASingleComposite);
+        testProcessorCache.CacheFiles(stmt, filesForASingleComposite);
+        testIndicesCache.CacheFiles(stmt, filesForASingleComposite);
 
         // Test getting from ProcessorCache
         result = testProcessorCache.GetUnprocessedCacheFiles();
@@ -527,7 +527,7 @@ public class DatabaseCacheTest {
         newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, startDateGroupID, indexID, filePath1, summaryResults));
 
         // Upload result
-        testSummaryCache.UploadResultsToDb(newResults, 1, indexNm, compStrategy, startDate.getYear(), startDate.getDayOfYear(), process, 1);
+        testSummaryCache.UploadResultsToDb(con, newResults, 1, indexNm, compStrategy, startDate.getYear(), startDate.getDayOfYear(), process, 1);
 
         // Test upload
         String progressQuery = "SELECT \"ProjectSummaryID\", \"DateGroupID\", \"IndexID\", \"AreaCode\", \"AreaName\", \"FilePath\", " +

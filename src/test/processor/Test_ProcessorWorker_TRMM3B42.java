@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -77,7 +78,7 @@ public class Test_ProcessorWorker_TRMM3B42 {
         }
 
         @Override
-        public void CacheFiles(ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
+        public void CacheFiles(Statement stmt, ArrayList<DataFileMetaData> filesForASingleComposite) throws SQLException, ParseException, ClassNotFoundException,
         ParserConfigurationException, SAXException, IOException {
             for(DataFileMetaData data : filesForASingleComposite)
             {

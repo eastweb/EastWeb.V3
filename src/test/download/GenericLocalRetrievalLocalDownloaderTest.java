@@ -231,7 +231,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         }
 
         @Override
-        protected void RegisterGlobalDownloader(Statement stmt) throws SQLException {
+        public void RegisterGlobalDownloader() throws SQLException {
             // do nothing
         }
 

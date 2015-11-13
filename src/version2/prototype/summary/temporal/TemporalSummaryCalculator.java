@@ -8,6 +8,7 @@ import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.Process;
 
@@ -19,6 +20,7 @@ import version2.prototype.Process;
  */
 public class TemporalSummaryCalculator {
     private final Config configInstance;
+    private final DatabaseConnection con;
     private final Process process;
     private final ProjectInfoFile projectInfo;
     private final String pluginName;
@@ -33,6 +35,7 @@ public class TemporalSummaryCalculator {
      * daysPerInputData and daysPerOutputData.
      *
      * @param configInstance
+     * @param con
      * @param process  - the calling/creating Process instance (owner)
      * @param projectInfo
      * @param pluginName  - name of current plugin
@@ -42,9 +45,10 @@ public class TemporalSummaryCalculator {
      * @param mergeStrategy  - merge strategy for combining multiple files into a single one representing more days than any single file
      * @param fileStore  - common storage object to hold files waiting to be merged together into a single composite
      */
-    public TemporalSummaryCalculator(Config configInstance, Process process, ProjectInfoFile projectInfo, String pluginName, IndicesFileMetaData inputFile,
+    public TemporalSummaryCalculator(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, IndicesFileMetaData inputFile,
             int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) {
         this.configInstance = configInstance;
+        this.con = con;
         this.process = process;
         this.projectInfo = projectInfo;
         this.pluginName = pluginName;
@@ -96,7 +100,7 @@ public class TemporalSummaryCalculator {
                 for(FileDatePair fdPair : tempComp.files) {
                     files.add(fdPair.file);
                 }
-                output = mergeStrategy.Merge(configInstance, process, projectInfo, pluginName, inputFile.indexNm, tempComp.startDate, files.toArray(new File[0]));
+                output = mergeStrategy.Merge(configInstance, con, process, projectInfo, pluginName, inputFile.indexNm, tempComp.startDate, files.toArray(new File[0]));
             }
         }
         return output;

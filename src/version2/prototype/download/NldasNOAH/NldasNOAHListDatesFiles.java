@@ -35,6 +35,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesFTP()
     {
+        Map<DataDate, ArrayList<String>>  tempMapDatesToFiles = new HashMap<DataDate, ArrayList<String>>();
         System.out.println(sDate);
         final Pattern yearDirPattern = Pattern.compile("\\d{4}");
         final Pattern dayDirPattern = Pattern.compile("\\d{3}");
@@ -59,20 +60,21 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                 throw new IOException("Couldn't navigate to directory: " + mRoot);
             }
 
-            mapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
+            tempMapDatesToFiles =  new HashMap<DataDate, ArrayList<String>>();
 
-            for (FTPFile yearFile : ftpC.listFiles())
+            outerLoop: for (FTPFile yearFile : ftpC.listFiles())
             {
+                if(Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+
                 if (!yearFile.isDirectory()
-                        || !yearDirPattern.matcher(yearFile.getName())
-                        .matches())
-                {
+                        || !yearDirPattern.matcher(yearFile.getName()).matches()) {
                     continue;
                 }
 
                 int year = Integer.parseInt(yearFile.getName());
-                if (year < sDate.getYear())
-                {
+                if (year < sDate.getYear()) {
                     continue;
                 }
 
@@ -80,8 +82,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                 String yearDirectory =
                         String.format("%s/%s", mRoot, yearFile.getName());
 
-                if (!ftpC.changeWorkingDirectory(yearDirectory))
-                {
+                if (!ftpC.changeWorkingDirectory(yearDirectory)) {
                     throw new IOException(
                             "Couldn't navigate to directory: " + yearDirectory);
                 }
@@ -89,9 +90,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                 for(FTPFile dayFile : ftpC.listFiles())
                 {
                     if (!dayFile.isDirectory()
-                            || !dayDirPattern.matcher(dayFile.getName())
-                            .matches())
-                    {
+                            || !dayDirPattern.matcher(dayFile.getName()).matches()) {
                         continue;
                     }
 
@@ -99,8 +98,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                     String dayDirectory =
                             String.format("%s/%s", yearDirectory, dayFile.getName());
 
-                    if (!ftpC.changeWorkingDirectory(dayDirectory))
-                    {
+                    if (!ftpC.changeWorkingDirectory(dayDirectory)) {
                         throw new IOException(
                                 "Couldn't navigate to directory: " + dayDirectory);
                     }
@@ -109,6 +107,10 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
 
                     for (FTPFile file : ftpC.listFiles())
                     {
+                        if(Thread.currentThread().isInterrupted()) {
+                            break outerLoop;
+                        }
+
                         if (file.isFile() &&
                                 mData.fileNamePattern.matcher(file.getName()).matches())
                         {
@@ -125,7 +127,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
                             DataDate dataDate = new DataDate(hour, day, month, year);
                             if (dataDate.compareTo(sDate) >= 0)
                             {
-                                mapDatesFiles.put(dataDate, fileNames);
+                                tempMapDatesToFiles.put(dataDate, fileNames);
                             }
                         }
                     }
@@ -135,7 +137,7 @@ public class NldasNOAHListDatesFiles extends ListDatesFiles{
 
             ftpC.disconnect();
             ftpC = null;
-            return mapDatesFiles;
+            return tempMapDatesToFiles;
         }
         catch (Exception e)
         {

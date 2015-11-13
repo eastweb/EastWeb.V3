@@ -25,7 +25,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.ProgressUpdater;
@@ -291,24 +290,40 @@ public class SchedulerStatusContainer {
         updateLastModifiedTime();
     }
 
+    /**
+     * Registers the addition of a ProcessWorker in the count of queued ProcessWorkers for the named Process.
+     * @param name
+     */
     public void AddWorker(ProcessName name)
     {
         workersInQueuePerProcess.put(name, workersInQueuePerProcess.get(name) + 1);
         updateLastModifiedTime();
     }
 
+    /**
+     * Registers the removal of a ProcessWorker in the count of queued ProcessWorkers for the named Process.
+     * @param name
+     */
     public void SubtractWorker(ProcessName name)
     {
         workersInQueuePerProcess.put(name, workersInQueuePerProcess.get(name) - 1);
         updateLastModifiedTime();
     }
 
+    /**
+     * Registers the execution of a queued ProcessWorker in the count of active ProcessWorkers for the named Process.
+     * @param name
+     */
     public void AddActiveWorker(ProcessName name)
     {
         activeWorkersPerProcess.put(name, activeWorkersPerProcess.get(name) + 1);
         updateLastModifiedTime();
     }
 
+    /**
+     * Registers the completion of an executed queued ProcessWorker in the count of active ProcessWorkers for the named Process.
+     * @param name
+     */
     public void SubtractActiveWorker(ProcessName name)
     {
         activeWorkersPerProcess.put(name, activeWorkersPerProcess.get(name) - 1);
@@ -326,50 +341,53 @@ public class SchedulerStatusContainer {
         String pluginName;
         double progress;
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
-        Statement stmt = con.createStatement();
-        for(ProjectInfoPlugin pluginInfo : projectMetaData.GetPlugins())
+        if(con != null)
         {
-            pluginName = pluginInfo.GetName();
-            PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
-
-            // Setup Download progresses
-            progress = progressUpdater.GetCurrentDownloadProgress("data", pluginName, startDate, pluginInfo.GetModisTiles(), stmt);
-            downloadProgressesByData.get(pluginName).put("data", progress);
-            for(String dataName : pluginMetaDataCollection.pluginMetaDataMap.get(pluginName).ExtraDownloadFiles)
+            Statement stmt = con.createStatement();
+            for(ProjectInfoPlugin pluginInfo : projectMetaData.GetPlugins())
             {
-                dataName = dataName.toLowerCase();
-                progress = progressUpdater.GetCurrentDownloadProgress(dataName, pluginName, startDate, pluginInfo.GetModisTiles(), stmt);
-                downloadProgressesByData.get(pluginName).put(dataName, progress);
-            }
+                pluginName = pluginInfo.GetName();
+                PluginMetaData pluginMetaData = pluginMetaDataCollection.pluginMetaDataMap.get(pluginName);
 
-            // Setup Processor progresses
-            progress = progressUpdater.GetCurrentProcessorProgress(pluginName, stmt);
-            processorProgresses.put(pluginName, progress);
-
-            // Setup Indices progresses
-            progress = progressUpdater.GetCurrentIndicesProgress(pluginName, stmt);
-            indicesProgresses.put(pluginName, progress);
-
-            // Setup Summary progresses
-            for(ProjectInfoSummary summary : projectMetaData.GetSummaries())
-            {
-                if(summary.GetTemporalSummaryCompositionStrategyClassName() != null && !summary.GetTemporalSummaryCompositionStrategyClassName().isEmpty()) {
-                    try {
-                        Class<?> strategyClass = Class.forName("version2.prototype.summary.temporal.CompositionStrategies." + summary.GetTemporalSummaryCompositionStrategyClassName());
-                        Constructor<?> ctorStrategy = strategyClass.getConstructor();
-                        progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), (TemporalSummaryCompositionStrategy)ctorStrategy.newInstance(),
-                                pluginMetaData.DaysPerInputData, pluginInfo, stmt);
-                    } catch(ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        ErrorLog.add(configInstance, "Problem creating Temporal Summary Composition Strategy specified.", e);
-                    }
-                } else {
-                    progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), null, pluginMetaData.DaysPerInputData, pluginInfo, stmt);
+                // Setup Download progresses
+                progress = progressUpdater.GetCurrentDownloadProgress("data", pluginName, startDate, pluginInfo.GetModisTiles(), stmt);
+                downloadProgressesByData.get(pluginName).put("data", progress);
+                for(String dataName : pluginMetaDataCollection.pluginMetaDataMap.get(pluginName).ExtraDownloadFiles)
+                {
+                    dataName = dataName.toLowerCase();
+                    progress = progressUpdater.GetCurrentDownloadProgress(dataName, pluginName, startDate, pluginInfo.GetModisTiles(), stmt);
+                    downloadProgressesByData.get(pluginName).put(dataName, progress);
                 }
-                summaryProgresses.get(pluginName).put(summary.GetID(), progress);
+
+                // Setup Processor progresses
+                progress = progressUpdater.GetCurrentProcessorProgress(pluginName, stmt);
+                processorProgresses.put(pluginName, progress);
+
+                // Setup Indices progresses
+                progress = progressUpdater.GetCurrentIndicesProgress(pluginName, stmt);
+                indicesProgresses.put(pluginName, progress);
+
+                // Setup Summary progresses
+                for(ProjectInfoSummary summary : projectMetaData.GetSummaries())
+                {
+                    if(summary.GetTemporalSummaryCompositionStrategyClassName() != null && !summary.GetTemporalSummaryCompositionStrategyClassName().isEmpty()) {
+                        try {
+                            Class<?> strategyClass = Class.forName("version2.prototype.summary.temporal.CompositionStrategies." + summary.GetTemporalSummaryCompositionStrategyClassName());
+                            Constructor<?> ctorStrategy = strategyClass.getConstructor();
+                            progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), (TemporalSummaryCompositionStrategy)ctorStrategy.newInstance(),
+                                    pluginMetaData.DaysPerInputData, pluginInfo, stmt);
+                        } catch(ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                            ErrorLog.add(configInstance, "Problem creating Temporal Summary Composition Strategy specified.", e);
+                        }
+                    } else {
+                        progress = progressUpdater.GetCurrentSummaryProgress(summary.GetID(), null, pluginMetaData.DaysPerInputData, pluginInfo, stmt);
+                    }
+                    summaryProgresses.get(pluginName).put(summary.GetID(), progress);
+                }
             }
+            stmt.close();
+            con.close();
         }
-        stmt.close();
-        con.close();
 
         // Clone progresses if necessary
         TreeMap<String, TreeMap<String, Double>> downloadProgressesByDataTemp;

@@ -1,7 +1,6 @@
 package version2.prototype.download;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,6 +21,7 @@ import version2.prototype.ErrorLog;
 import version2.prototype.TaskState;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
 
@@ -53,6 +53,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     public final ListDatesFiles listDatesFiles;
     protected TaskState state;
     protected LocalDate currentStartDate;
+    protected Boolean isRegistered;
 
     /**
      * Sets this GlobalDownloader super to have an initial state (TaskState) of STOPPED and registers the GlobalDownloader in the database.
@@ -78,15 +79,7 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
         this.metaData = metaData;
         this.listDatesFiles = listDatesFiles;
         currentStartDate = startDate;
-
-        final Connection con = DatabaseConnector.getConnection();
-        final Statement stmt = con.createStatement();
-        try {
-            RegisterGlobalDownloader(stmt);
-        } finally {
-            stmt.close();
-            con.close();
-        }
+        isRegistered = false;
     }
 
     /**
@@ -132,11 +125,245 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
      * @throws ParserConfigurationException
      * @throws SQLException
      * @throws ClassNotFoundException
+     * @throws RegistrationException
      */
-    public void SetCompleted() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public void SetCompleted() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, RegistrationException
     {
-        final Connection conn = DatabaseConnector.getConnection();
-        final Statement stmt = conn.createStatement();
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return;
+        }
+        Statement stmt = con.createStatement();
+        SetCompleted(stmt);
+        stmt.close();
+        con.close();
+    }
+
+    /**
+     * Gets the date this GlobalDownloader will/has started downloading from.
+     *
+     * @return start date for downloading
+     */
+    public final LocalDate GetStartDate()
+    {
+        LocalDate myCurrentStartDate;
+        synchronized(currentStartDate) {
+            myCurrentStartDate = currentStartDate;
+        }
+        return myCurrentStartDate;
+    }
+
+    /**
+     * Changes the start date for this GlobalDownloader and causes it to start downloading from the given date. Does not cause the GlobalDownloader to redownload anything already
+     * downloaded but if the date is earlier than the current start date then it will start downloading from that date onward with the next set of downloads until caught up, or if
+     * it's later than the current start date then it is simply ignored and the original start date is kept.
+     *
+     * @param newStartDate  - new date to state downloading from
+     */
+    public final void SetStartDate(LocalDate newStartDate)
+    {
+        synchronized(currentStartDate) {
+            if(currentStartDate.isAfter(newStartDate)) {
+                currentStartDate = newStartDate;
+            }
+        }
+    }
+
+    /**
+     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all
+     * projects.
+     *
+     * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws RegistrationException
+     */
+    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, RegistrationException
+    {
+        return GetAllDownloadedFiles(null);
+    }
+
+    /**
+     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all
+     * projects.
+     *
+     * @param startDate  - the earliest date from which to start getting files
+     * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws RegistrationException
+     */
+    public ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException,
+    IOException, RegistrationException
+    {
+        if(!isRegistered) {
+            RegisterGlobalDownloader();
+        }
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return new ArrayList<DataFileMetaData>();
+        }
+        Statement stmt = con.createStatement();
+        final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+        TreeSet<Record> downloadsSet = new TreeSet<Record>();
+        int dateGroupID;
+        ResultSet rs;
+
+        StringBuilder query = new StringBuilder(String.format(
+                "SELECT A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" " +
+                        "FROM \"%1$s\".\"Download\" A INNER JOIN \"%1$s\".\"DateGroup\" B ON A.\"DateGroupID\"=B.\"DateGroupID\" " +
+                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID,
+                        configInstance.getGlobalSchema()
+                ));
+        if(startDate != null)
+        {
+            int year = startDate.getYear();
+            int dayOfYear = startDate.getDayOfYear();
+            query.append(" AND ((B.\"Year\" = " + year + " AND B.\"DayOfYear\" >= " + dayOfYear + ") OR (B.\"Year\" > " + year + "))");
+        }
+        query.append(";");
+        rs = stmt.executeQuery(query.toString());
+        if(rs != null)
+        {
+            while(rs.next())
+            {
+                dateGroupID = rs.getInt("DateGroupID");
+                if(!downloadsSet.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))))) {
+                    ErrorLog.add(configInstance, pluginName, "Data", "Problem adding download file to download file return list.", new Exception("Element could not be added."));
+                }
+            }
+        }
+        rs.close();
+
+        query = new StringBuilder(String.format(
+                "SELECT A.\"DataName\", A.\"FilePath\", A.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
+                        "FROM \"%1$s\".\"DownloadExtra\" A INNER JOIN \"%1$s\".\"DateGroup\" B ON A.\"DateGroupID\"=B.\"DateGroupID\" " +
+                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID,
+                        configInstance.getGlobalSchema()));
+        if(startDate != null)
+        {
+            int year = startDate.getYear();
+            int dayOfYear = startDate.getDayOfYear();
+            query.append(" AND ((B.\"Year\" = " + year + " AND B.\"DayOfYear\" >= " + dayOfYear + ") OR (B.\"Year\" > " + year + "))");
+        }
+        query.append(";");
+        rs = stmt.executeQuery(query.toString());
+        if(rs != null)
+        {
+            String dataName;
+            while(rs.next())
+            {
+                dataName = rs.getString("DataName");
+                dateGroupID = rs.getInt("DateGroupID");
+                if(!downloadsSet.add(new Record(dateGroupID, dataName, new DataFileMetaData(dataName, rs.getString("FilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))))) {
+                    ErrorLog.add(configInstance, pluginName, dataName, "Problem adding download file to download file return list.", new Exception("Element could not be added."));
+                }
+            }
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+
+        ArrayList<DataFileMetaData> output = new ArrayList<DataFileMetaData>();
+        for(Record rec : downloadsSet)
+        {
+            output.add(rec.data);
+        }
+        return output;
+    }
+
+    /**
+     * Registers the GlobalDownloader in the system.
+     * @throws SQLException
+     * @throws RegistrationException
+     */
+    public void RegisterGlobalDownloader() throws SQLException, RegistrationException
+    {
+        if(isRegistered) {
+            return;
+        }
+        synchronized(isRegistered) {
+            DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+            if(con == null) {
+                return;
+            }
+            Statement stmt = con.createStatement();
+            boolean registered = Schemas.registerGlobalDownloader(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+            if(!registered) {
+                throw new RegistrationException();
+            }
+            stmt.close();
+            con.close();
+            isRegistered = true;
+        }
+    }
+
+    /**
+     * Adds the given file to the database records and updates statuses for observing LocalDownloaders.
+     *
+     * @param con
+     * @param year  - year the file's data is associated with
+     * @param dayOfYear  - day of the year the file's data is associated with
+     * @param filePath  - full path to the file
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     * @throws RegistrationException
+     */
+    protected void AddDownloadFile(Statement stmt, int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, RegistrationException {
+        final LocalDate lDate = LocalDate.ofYearDay(year, dayOfYear);
+        final String fileName = filePath.substring((filePath.lastIndexOf("/") > -1 ? filePath.lastIndexOf("/") + 1 : filePath.lastIndexOf("\\") + 1));
+
+        if(!isRegistered) {
+            RegisterGlobalDownloader();
+        }
+        System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] Adding download file '" + fileName + "' for day " + dayOfYear + " of " + year
+                + " for plugin '" + pluginName + "'.");
+        // If inserting a "Data" labeled file then insert its record into the 'Download' table
+        if(metaData.name.toLowerCase().equals("data"))
+        {
+            int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), lDate, stmt);
+
+            // Insert new download
+            String query = String.format(
+                    "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
+                            "(" + gdlID + ", " + dateGroupID + ", '" + filePath + "');",
+                            configInstance.getGlobalSchema()
+                    );
+            stmt.executeUpdate(query);
+        }
+        // Else, insert the record into the 'ExtraDownload' table
+        else
+        {
+            int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
+            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), lDate, stmt);
+            //            int downloadID = Schemas.getDownloadID(globalSchema, gdlID, dateGroupID, stmt);
+
+            String query = String.format(
+                    "INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\") VALUES\n" +
+                            "(" + gdlID + ", " + dateGroupID + ", '" + metaData.name + "', '" + filePath + "');",
+                            configInstance.getGlobalSchema()
+                    );
+            stmt.executeUpdate(query);
+        }
+
+        SetCompleted(stmt);
+    }
+
+    protected void SetCompleted(Statement stmt) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException, RegistrationException
+    {
+        if(!isRegistered) {
+            RegisterGlobalDownloader();
+        }
         final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         int filesPerDay = metaData.filesPerDay;
         ArrayList<Integer> datesCompleted = new ArrayList<Integer>();
@@ -207,218 +434,17 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
                 if(stmt != null) {
                     stmt.close();
                 }
-                if(conn != null) {
-                    conn.close();
-                }
                 throw e;
             }
 
-            setChanged();
-            notifyObservers();
+            if(!Thread.currentThread().isInterrupted()) {
+                setChanged();
+                notifyObservers();
+            }
         }
 
         if(rs != null) {
             rs.close();
-        }
-        if(stmt != null) {
-            stmt.close();
-        }
-        if(conn != null) {
-            conn.close();
-        }
-    }
-
-    /**
-     * Gets the date this GlobalDownloader will/has started downloading from.
-     *
-     * @return start date for downloading
-     */
-    public final LocalDate GetStartDate()
-    {
-        LocalDate myCurrentStartDate;
-        synchronized(currentStartDate) {
-            myCurrentStartDate = currentStartDate;
-        }
-        return myCurrentStartDate;
-    }
-
-    /**
-     * Changes the start date for this GlobalDownloader and causes it to start downloading from the given date. Does not cause the GlobalDownloader to redownload anything already
-     * downloaded but if the date is earlier than the current start date then it will start downloading from that date onward with the next set of downloads until caught up, or if
-     * it's later than the current start date then it is simply ignored and the original start date is kept.
-     *
-     * @param newStartDate  - new date to state downloading from
-     */
-    public final void SetStartDate(LocalDate newStartDate)
-    {
-        synchronized(currentStartDate) {
-            if(currentStartDate.isAfter(newStartDate)) {
-                currentStartDate = newStartDate;
-            }
-        }
-    }
-
-    /**
-     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all
-     * projects.
-     *
-     * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     */
-    public final ArrayList<DataFileMetaData> GetAllDownloadedFiles() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
-    {
-        return GetAllDownloadedFiles(null);
-    }
-
-    /**
-     * Gets all the current Download table entries for this GlobalDownloader. Represents all the dates and files downloaded for this plugin global downloader shareable across all
-     * projects.
-     *
-     * @param startDate  - the earliest date from which to start getting files
-     * @return list of all Download table entries for the plugin name associated with this GlobalDownloader instance
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     */
-    public ArrayList<DataFileMetaData> GetAllDownloadedFiles(LocalDate startDate) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException,
-    IOException
-    {
-        final Connection conn = DatabaseConnector.getConnection();
-        final Statement stmt = conn.createStatement();
-        final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
-        TreeSet<Record> downloadsSet = new TreeSet<Record>();
-        int dateGroupID;
-        ResultSet rs;
-
-        StringBuilder query = new StringBuilder(String.format(
-                "SELECT A.\"DateGroupID\", A.\"DataFilePath\", B.\"Year\", B.\"DayOfYear\" " +
-                        "FROM \"%1$s\".\"Download\" A INNER JOIN \"%1$s\".\"DateGroup\" B ON A.\"DateGroupID\"=B.\"DateGroupID\" " +
-                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID,
-                        configInstance.getGlobalSchema()
-                ));
-        if(startDate != null)
-        {
-            int year = startDate.getYear();
-            int dayOfYear = startDate.getDayOfYear();
-            query.append(" AND ((B.\"Year\" = " + year + " AND B.\"DayOfYear\" >= " + dayOfYear + ") OR (B.\"Year\" > " + year + "))");
-        }
-        query.append(";");
-        rs = stmt.executeQuery(query.toString());
-        if(rs != null)
-        {
-            while(rs.next())
-            {
-                dateGroupID = rs.getInt("DateGroupID");
-                if(!downloadsSet.add(new Record(dateGroupID, "Data", new DataFileMetaData("Data", rs.getString("DataFilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))))) {
-                    ErrorLog.add(configInstance, pluginName, "Data", "Problem adding download file to download file return list.", new Exception("Element could not be added."));
-                }
-            }
-        }
-        rs.close();
-
-        query = new StringBuilder(String.format(
-                "SELECT A.\"DataName\", A.\"FilePath\", A.\"DateGroupID\", B.\"Year\", B.\"DayOfYear\" " +
-                        "FROM \"%1$s\".\"DownloadExtra\" A INNER JOIN \"%1$s\".\"DateGroup\" B ON A.\"DateGroupID\"=B.\"DateGroupID\" " +
-                        "WHERE A.\"GlobalDownloaderID\"=" + gdlID,
-                        configInstance.getGlobalSchema()));
-        if(startDate != null)
-        {
-            int year = startDate.getYear();
-            int dayOfYear = startDate.getDayOfYear();
-            query.append(" AND ((B.\"Year\" = " + year + " AND B.\"DayOfYear\" >= " + dayOfYear + ") OR (B.\"Year\" > " + year + "))");
-        }
-        query.append(";");
-        rs = stmt.executeQuery(query.toString());
-        if(rs != null)
-        {
-            String dataName;
-            while(rs.next())
-            {
-                dataName = rs.getString("DataName");
-                dateGroupID = rs.getInt("DateGroupID");
-                if(!downloadsSet.add(new Record(dateGroupID, dataName, new DataFileMetaData(dataName, rs.getString("FilePath"), dateGroupID, rs.getInt("Year"), rs.getInt("DayOfYear"))))) {
-                    ErrorLog.add(configInstance, pluginName, dataName, "Problem adding download file to download file return list.", new Exception("Element could not be added."));
-                }
-            }
-        }
-        rs.close();
-        stmt.close();
-        conn.close();
-
-        ArrayList<DataFileMetaData> output = new ArrayList<DataFileMetaData>();
-        for(Record rec : downloadsSet)
-        {
-            output.add(rec.data);
-        }
-        return output;
-    }
-
-    /**
-     * Adds the given file to the database records and updates statuses for observing LocalDownloaders.
-     *
-     * @param year  - year the file's data is associated with
-     * @param dayOfYear  - day of the year the file's data is associated with
-     * @param filePath  - full path to the file
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    protected void AddDownloadFile(int year, int dayOfYear, String filePath) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
-        final Connection conn = DatabaseConnector.getConnection();
-        final Statement stmt = conn.createStatement();
-        final LocalDate lDate = LocalDate.ofYearDay(year, dayOfYear);
-        final String fileName = filePath.substring((filePath.lastIndexOf("/") > -1 ? filePath.lastIndexOf("/") + 1 : filePath.lastIndexOf("\\") + 1));
-
-        System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] Adding download file '" + fileName + "' for day " + dayOfYear + " of " + year
-                + " for plugin '" + pluginName + "'.");
-        // If inserting a "Data" labeled file then insert its record into the 'Download' table
-        if(metaData.name.toLowerCase().equals("data"))
-        {
-            int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
-            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), lDate, stmt);
-
-            // Insert new download
-            String query = String.format(
-                    "INSERT INTO \"%1$s\".\"Download\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataFilePath\") VALUES\n" +
-                            "(" + gdlID + ", " + dateGroupID + ", '" + filePath + "');",
-                            configInstance.getGlobalSchema()
-                    );
-            stmt.executeUpdate(query);
-        }
-        // Else, insert the record into the 'ExtraDownload' table
-        else
-        {
-            int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
-            int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), lDate, stmt);
-            //            int downloadID = Schemas.getDownloadID(globalSchema, gdlID, dateGroupID, stmt);
-
-            String query = String.format(
-                    "INSERT INTO \"%1$s\".\"DownloadExtra\" (\"GlobalDownloaderID\", \"DateGroupID\", \"DataName\", \"FilePath\") VALUES\n" +
-                            "(" + gdlID + ", " + dateGroupID + ", '" + metaData.name + "', '" + filePath + "');",
-                            configInstance.getGlobalSchema()
-                    );
-            stmt.executeUpdate(query);
-        }
-
-        stmt.close();
-        conn.close();
-
-        SetCompleted();
-    }
-
-    protected void RegisterGlobalDownloader(Statement stmt) throws SQLException, RegistrationException
-    {
-        boolean registered = Schemas.registerGlobalDownloader(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
-        if(!registered) {
-            throw new RegistrationException();
         }
     }
 

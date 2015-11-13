@@ -45,7 +45,7 @@ public class ModisListDatesFiles extends ListDatesFiles
     @Override
     protected Map<DataDate, ArrayList<String>> ListDatesFilesHTTP()
     {
-        mapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
+        HashMap<DataDate, ArrayList<String>> tempMapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
 
         ArrayList<String> modisTiles = new ArrayList<String>();
         for(ProjectInfoPlugin pluginInfo : mProject.GetPlugins())
@@ -69,7 +69,10 @@ public class ModisListDatesFiles extends ListDatesFiles
             DownloadUtils.downloadToStream(new URL(mHostURL), folderOutStream);
 
             List<String> availableDates = Arrays.asList(folderOutStream.toString().split("[\\r\\n]+"));
-            for(String param : availableDates) {
+            outerLoop: for(String param : availableDates) {
+                if(Thread.currentThread().isInterrupted()) {
+                    break;
+                }
                 //            List<Future<HashMap<DataDate, ArrayList<String>>>> futures = Parallel.ForEach(availableDates,
                 //                    new Parallel.Operation<String, HashMap<DataDate, ArrayList<String>>>() {
                 //                @Override
@@ -106,6 +109,10 @@ public class ModisListDatesFiles extends ListDatesFiles
                             Iterable<String> folderContents = Arrays.asList(dateFolderOutstream.toString().split("[//r//n]+"));
                             for (String line : folderContents)
                             {
+                                if(Thread.currentThread().isInterrupted()) {
+                                    break outerLoop;
+                                }
+
                                 Matcher m = fileNamePattern.matcher(line);
                                 if(line.contains(".hdf") && !line.contains(".xml") && (m.find()))
                                 {
@@ -125,11 +132,11 @@ public class ModisListDatesFiles extends ListDatesFiles
 
                             // add the date and fileList pair to the map
                             //                                lock.lock();
-                            synchronized(mapDatesFiles) {
-                                mapDatesFiles.put(new DataDate(day, month, year), fileList);
-                                //                            DataDate tempD = new DataDate(day, month, year);
-                                //                            result.put(tempD, fileList);
-                            }
+                            //                            synchronized(mapDatesFiles) {
+                            tempMapDatesFiles.put(new DataDate(day, month, year), fileList);
+                            //                            DataDate tempD = new DataDate(day, month, year);
+                            //                            result.put(tempD, fileList);
+                            //                            }
                         }
                     }
                     catch(Exception e)
@@ -173,7 +180,7 @@ public class ModisListDatesFiles extends ListDatesFiles
             return null;
         }
 
-        return mapDatesFiles;
+        return tempMapDatesFiles;
     }
 
 }

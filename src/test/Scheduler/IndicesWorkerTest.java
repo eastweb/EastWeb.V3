@@ -5,6 +5,7 @@ package test.Scheduler;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -21,6 +22,8 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.ProcessorFileMetaData;
 
 /**
@@ -43,7 +46,11 @@ public final class IndicesWorkerTest extends ProcessWorker {
         ProcessorFileMetaData pData = cachedFiles.get(0).ReadMetaDataForIndices();
         cachedFiles.set(0, new DataFileMetaData(pData.dataFilePath, 1, pData.year, pData.day, "Test Index"));
         try {
-            outputCache.CacheFiles(cachedFiles);
+            DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+            Statement stmt = con.createStatement();
+            outputCache.CacheFiles(stmt, cachedFiles);
+            stmt.close();
+            con.close();
         } catch (ClassNotFoundException | SQLException | ParseException
                 | ParserConfigurationException | SAXException | IOException e) {
             // TODO Auto-generated catch block

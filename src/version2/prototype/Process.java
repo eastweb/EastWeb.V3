@@ -19,7 +19,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.download.GlobalDownloader;
-import version2.prototype.download.LocalDownloader;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.GeneralUIEventObject;
@@ -93,7 +92,7 @@ public abstract class Process implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        if(scheduler.GetState() == TaskState.RUNNING)
+        if(scheduler.GetState() == TaskState.RUNNING && !Thread.currentThread().isInterrupted())
         {
             if(o instanceof DatabaseCache)
             {

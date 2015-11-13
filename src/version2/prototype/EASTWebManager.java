@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +23,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
@@ -47,7 +45,7 @@ import version2.prototype.util.DatabaseConnector;
  */
 public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static EASTWebManager instance = null;
-    protected static ScheduledExecutorService backgroundThreadExecutor;
+    protected static ScheduledExecutorService backgroundThreadExecutor = null;
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
     protected static int defaultMSBeetweenUpdates = 5000;       // 5 seconds
@@ -72,8 +70,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static BitSet schedulerIDs = new BitSet(100000);
     protected static BitSet globalDLIDs = new BitSet(1000);
     protected static Boolean schedulerStatesChanged = false;
-    protected boolean manualUpdate;
-    protected boolean justCreateNewSchedulers;
+    protected Boolean justCreateNewSchedulers;
     protected final int msBetweenUpdates;
     protected final DatabaseConnectionPoolA connectionPool;
 
@@ -148,20 +145,22 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         }
 
         Config configInstance = Config.getInstance();
-        try {
-            if(!testDatabaseConnection(configInstance)) {
-                ErrorLog.add(configInstance, "Could not establish connection with database.", new Exception("Could not establish connection with database."));
-            }
-        } catch (SQLException e) {
-            ErrorLog.add(configInstance, "Could not establish connection with database.", e);
+        if(!testDatabaseConnection(configInstance)) {
+            instance = null;
         }
     }
 
     /**
-     * Safely handles the closing of EASTWeb and all obtained resources before returning.
+     * Safely handles the stopping and shutdown of EASTWeb and all managed resources before returning.
      */
-    public static void Close()
+    public static void StopAndShutdown()
     {
+        System.out.println("Shutting down EASTWeb.");
+
+        if(instance == null) {
+            return;
+        }
+
         /**
          * 1) Stop accepting new requests.
          * 2) Stop background thread.
@@ -178,13 +177,15 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         }
 
         // Step 2
-        backgroundThreadExecutor.shutdown();
+        backgroundThreadExecutor.shutdownNow();
 
         // Steps 3-6
-        instance.stop();
+        instance.stopAndShutdown();
 
         // Step 7
         DatabaseConnector.Close();
+
+        System.out.println("EASTWeb successfully shut down.");
     }
 
     /**
@@ -215,7 +216,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     public static void UpdateState()
     {
         if(instance != null) {
-            instance.manualUpdate = true;
             instance.run();
         }
     }
@@ -246,7 +246,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         if(forceUpdate)
         {
             if(instance != null) {
-                instance.justCreateNewSchedulers = true;
+                synchronized(instance.justCreateNewSchedulers) {
+                    instance.justCreateNewSchedulers = true;
+                }
             }
             UpdateState();
         }
@@ -279,7 +281,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         if(forceUpdate)
         {
             if(instance != null) {
-                instance.justCreateNewSchedulers = true;
+                synchronized(instance.justCreateNewSchedulers) {
+                    instance.justCreateNewSchedulers = true;
+                }
             }
             UpdateState();
         }
@@ -297,7 +301,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static boolean StopExistingScheduler(int schedulerID, boolean forceUpdate)
     {
-        if(!acceptingRequests) {
+        if(!acceptingRequests || instance == null) {
             return false;
         }
 
@@ -326,7 +330,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static boolean StopExistingScheduler(String projectName, boolean forceUpdate)
     {
-        if(!acceptingRequests) {
+        if(!acceptingRequests || instance == null) {
             return false;
         }
 
@@ -354,7 +358,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static boolean DeleteScheduler(int schedulerID, boolean forceUpdate)
     {
-        if(!acceptingRequests) {
+        if(!acceptingRequests || instance == null) {
             return false;
         }
 
@@ -385,7 +389,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static boolean DeleteScheduler(String projectName, boolean forceUpdate)
     {
-        if(!acceptingRequests) {
+        if(!acceptingRequests || instance == null) {
             return false;
         }
 
@@ -411,7 +415,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static boolean StartExistingScheduler(int schedulerID, boolean forceUpdate)
     {
-        if(!acceptingRequests) {
+        if(!acceptingRequests || instance == null) {
             return false;
         }
 
@@ -440,7 +444,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     public static boolean StartExistingScheduler(String projectName, boolean forceUpdate)
     {
-        if(!acceptingRequests) {
+        if(!acceptingRequests || instance == null) {
             return false;
         }
 
@@ -464,7 +468,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         if(instance == null)
         {
-            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+            return 0;
         }
         int num;
         synchronized (numOfCreatedGDLs) {
@@ -482,7 +486,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         if(instance == null)
         {
-            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+            return 0;
         }
         int num;
         synchronized (numOfCreatedSchedulers) {
@@ -503,7 +507,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     {
         if(instance == null)
         {
-            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+            return new ArrayList<SchedulerStatus>();
         }
         ArrayList<SchedulerStatus> output = new ArrayList<SchedulerStatus>(0);
         synchronized (schedulerStatuses)
@@ -528,7 +532,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
         if(instance == null)
         {
-            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+            return null;
         }
         synchronized (schedulerStatuses)
         {
@@ -557,7 +561,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
         if(instance == null)
         {
-            EASTWebManager.Start(defaultNumOfSimultaneousGlobalDLs, defaultMSBeetweenUpdates);
+            return null;
         }
         synchronized (schedulerStatuses)
         {
@@ -625,11 +629,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     /**
      * Handles stopping/shutting down the EASTWebManager instance.
      */
-    public void stop()
+    public void stopAndShutdown()
     {
         /*
          * 3) Stop all Schedulers.
-         * 4) Stop all GlobalDownloaders and their tasks.
+         * 4) Stop all GlobalDownloaders.
          * 5) Shutdown thread pool executers.
          * 6) Wait for currently executing ProcessWorkers to finish.
          */
@@ -642,45 +646,26 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         }
 
         // Step 4
-        for(GlobalDownloader gdl : globalDLs.values())
-        {
-            gdl.Stop();
-            globalDLFutures.get(gdl.ID).cancel(false);
+        synchronized(globalDLs) {
+            for(GlobalDownloader gdl : globalDLs.values()) {
+                gdl.Stop();
+                //            globalDLFutures.get(gdl.ID).cancel(false);
+            }
         }
 
         // Step 5
-        globalDLExecutor.shutdown();
-        processWorkerExecutor.shutdown();
+        synchronized(globalDLExecutor) {
+            globalDLExecutor.shutdownNow();
+        }
+        synchronized(processWorkerExecutor) {
+            processWorkerExecutor.shutdownNow();
+        }
 
         // Step 6
-
-        boolean allStopped = true;
-        final int maxWaitTimeMS = 1200000;  // 20 minutes
-        int currentWaitedTimeMS = 0;
-
-        do {
-            try {
-                if(!allStopped)
-                {
-                    Thread.sleep(5000);
-                    currentWaitedTimeMS += 5000;
-                    allStopped = true;
-                }
-            } catch (InterruptedException e) {
-                ErrorLog.add(configInstance, "Problem while making thread sleep.", e);
-            }
-
-            for(SchedulerStatus status : schedulerStatuses) {
-                if(status.schedulerWorking) {
-                    allStopped = false;
-                    break;
-                }
-            }
-        } while(!allStopped && (currentWaitedTimeMS < maxWaitTimeMS));
-
-        if(!allStopped) {
+        try {
+            processWorkerExecutor.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e1) {
             ErrorLog.add(configInstance, "Timed out waiting for Process Workers to complete.", new Exception("Timed out waiting for Process Workers to complete."));
-            return;
         }
     }
 
@@ -689,254 +674,266 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
      */
     @Override
     public void run() {
-        do
-        {
-            try
+        try {
+            // Handle new Scheduler requests
+            if(startNewSchedulerRequests.size() > 0)
             {
-                // Handle new Scheduler requests
-                if(startNewSchedulerRequests.size() > 0)
+                List<SchedulerData> tempRequestsList = new ArrayList<SchedulerData>();
+                synchronized (startNewSchedulerRequests)
                 {
-                    List<SchedulerData> tempRequestsList = new ArrayList<SchedulerData>();
-                    synchronized (startNewSchedulerRequests)
+                    while(startNewSchedulerRequests.size() > 0)
                     {
-                        while(startNewSchedulerRequests.size() > 0)
-                        {
-                            tempRequestsList.add(startNewSchedulerRequests.remove(0));
-                        }
-                    }
-
-                    while(tempRequestsList.size() > 0)
-                    {
-                        handleStartNewSchedulerRequests(tempRequestsList.remove(0));
+                        tempRequestsList.add(startNewSchedulerRequests.remove(0));
                     }
                 }
 
-                if(loadNewSchedulerRequests.size() > 0)
+                while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
                 {
-                    List<SchedulerData> tempRequestsList = new ArrayList<SchedulerData>();
-                    synchronized (loadNewSchedulerRequests)
-                    {
-                        while(loadNewSchedulerRequests.size() > 0)
-                        {
-                            tempRequestsList.add(loadNewSchedulerRequests.remove(0));
-                        }
-                    }
+                    handleStartNewSchedulerRequests(tempRequestsList.remove(0));
+                }
+            }
 
-                    while(tempRequestsList.size() > 0)
+            if(loadNewSchedulerRequests.size() > 0)
+            {
+                List<SchedulerData> tempRequestsList = new ArrayList<SchedulerData>();
+                synchronized (loadNewSchedulerRequests)
+                {
+                    while(loadNewSchedulerRequests.size() > 0)
                     {
-                        handleLoadNewSchedulerRequests(tempRequestsList.remove(0));
+                        tempRequestsList.add(loadNewSchedulerRequests.remove(0));
                     }
                 }
 
-                if(!justCreateNewSchedulers)
+                while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
                 {
-                    // Handle stop scheduler requests
-                    if(stopExistingSchedulerRequests.size() > 0)
-                    {
-                        List<Integer> tempRequestsList = new ArrayList<Integer>();
-                        synchronized (stopExistingSchedulerRequests)
-                        {
-                            while(stopExistingSchedulerRequests.size() > 0)
-                            {
-                                tempRequestsList.add(stopExistingSchedulerRequests.remove(0));
-                            }
-                        }
+                    handleLoadNewSchedulerRequests(tempRequestsList.remove(0));
+                }
+            }
 
-                        while(tempRequestsList.size() > 0)
+            if(!justCreateNewSchedulers)
+            {
+                // Handle stop scheduler requests
+                if(stopExistingSchedulerRequests.size() > 0)
+                {
+                    List<Integer> tempRequestsList = new ArrayList<Integer>();
+                    synchronized (stopExistingSchedulerRequests)
+                    {
+                        while(stopExistingSchedulerRequests.size() > 0)
                         {
-                            handleStopSchedulerRequests(tempRequestsList.remove(0));
+                            tempRequestsList.add(stopExistingSchedulerRequests.remove(0));
                         }
                     }
 
-                    if(stopExistingSchedulerRequestsNames.size() > 0)
+                    while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
                     {
-                        List<String> tempRequestsList = new ArrayList<String>();
-                        synchronized (stopExistingSchedulerRequestsNames)
-                        {
-                            while(stopExistingSchedulerRequestsNames.size() > 0)
-                            {
-                                tempRequestsList.add(stopExistingSchedulerRequestsNames.remove(0));
-                            }
-                        }
+                        handleStopSchedulerRequests(tempRequestsList.remove(0));
+                    }
+                }
 
-                        Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
-
-                        int schedulerId;
-                        String projectName;
-                        while(tempRequestsList.size() > 0)
+                if(stopExistingSchedulerRequestsNames.size() > 0)
+                {
+                    List<String> tempRequestsList = new ArrayList<String>();
+                    synchronized (stopExistingSchedulerRequestsNames)
+                    {
+                        while(stopExistingSchedulerRequestsNames.size() > 0)
                         {
-                            projectName = tempRequestsList.remove(0);
-                            schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
-                            if(schedulerId != -1) {
-                                handleStopSchedulerRequests(schedulerId);
-                            }
+                            tempRequestsList.add(stopExistingSchedulerRequestsNames.remove(0));
                         }
                     }
 
-                    // Handle delete scheduler requests
-                    if(deleteExistingSchedulerRequests.size() > 0)
-                    {
-                        List<Integer> tempRequestsList = new ArrayList<Integer>();
-                        synchronized (deleteExistingSchedulerRequests)
-                        {
-                            while(deleteExistingSchedulerRequests.size() > 0)
-                            {
-                                tempRequestsList.add(deleteExistingSchedulerRequests.remove(0));
-                            }
-                        }
+                    Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
 
-                        while(tempRequestsList.size() > 0)
+                    int schedulerId;
+                    String projectName;
+                    while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
+                    {
+                        projectName = tempRequestsList.remove(0);
+                        schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
+                        if(schedulerId != -1) {
+                            handleStopSchedulerRequests(schedulerId);
+                        }
+                    }
+                }
+
+                // Handle delete scheduler requests
+                if(deleteExistingSchedulerRequests.size() > 0)
+                {
+                    List<Integer> tempRequestsList = new ArrayList<Integer>();
+                    synchronized (deleteExistingSchedulerRequests)
+                    {
+                        while(deleteExistingSchedulerRequests.size() > 0)
                         {
-                            handleDeleteSchedulerRequests(tempRequestsList.remove(0));
+                            tempRequestsList.add(deleteExistingSchedulerRequests.remove(0));
                         }
                     }
 
-                    if(deleteExistingSchedulerRequestsNames.size() > 0)
+                    while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
                     {
-                        List<String> tempRequestsList = new ArrayList<String>();
-                        synchronized (deleteExistingSchedulerRequestsNames)
-                        {
-                            while(deleteExistingSchedulerRequestsNames.size() > 0)
-                            {
-                                tempRequestsList.add(deleteExistingSchedulerRequestsNames.remove(0));
-                            }
-                        }
+                        handleDeleteSchedulerRequests(tempRequestsList.remove(0));
+                    }
+                }
 
-                        Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
-
-                        int schedulerId;
-                        String projectName;
-                        while(tempRequestsList.size() > 0)
+                if(deleteExistingSchedulerRequestsNames.size() > 0)
+                {
+                    List<String> tempRequestsList = new ArrayList<String>();
+                    synchronized (deleteExistingSchedulerRequestsNames)
+                    {
+                        while(deleteExistingSchedulerRequestsNames.size() > 0)
                         {
-                            projectName = tempRequestsList.remove(0);
-                            schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
-                            if(schedulerId != -1) {
-                                handleDeleteSchedulerRequests(schedulerId);
-                            }
+                            tempRequestsList.add(deleteExistingSchedulerRequestsNames.remove(0));
                         }
                     }
 
-                    // Handle start back up existing Scheduler requests
-                    if(startExistingSchedulerRequests.size() > 0)
-                    {
-                        List<Integer> tempRequestsList = new ArrayList<Integer>();
-                        synchronized (startExistingSchedulerRequests)
-                        {
-                            while(startExistingSchedulerRequests.size() > 0)
-                            {
-                                tempRequestsList.add(startExistingSchedulerRequests.remove(0));
-                            }
-                        }
+                    Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
 
-                        while(tempRequestsList.size() > 0)
+                    int schedulerId;
+                    String projectName;
+                    while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
+                    {
+                        projectName = tempRequestsList.remove(0);
+                        schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
+                        if(schedulerId != -1) {
+                            handleDeleteSchedulerRequests(schedulerId);
+                        }
+                    }
+                }
+
+                // Handle start back up existing Scheduler requests
+                if(startExistingSchedulerRequests.size() > 0)
+                {
+                    List<Integer> tempRequestsList = new ArrayList<Integer>();
+                    synchronized (startExistingSchedulerRequests)
+                    {
+                        while(startExistingSchedulerRequests.size() > 0)
                         {
-                            handleStartExistingSchedulerRequests(tempRequestsList.remove(0));
+                            tempRequestsList.add(startExistingSchedulerRequests.remove(0));
                         }
                     }
 
-                    if(startExistingSchedulerRequestsNames.size() > 0)
+                    while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
                     {
-                        List<String> tempRequestsList = new ArrayList<String>();
-                        synchronized (startExistingSchedulerRequestsNames)
-                        {
-                            while(startExistingSchedulerRequestsNames.size() > 0)
-                            {
-                                tempRequestsList.add(startExistingSchedulerRequestsNames.remove(0));
-                            }
-                        }
+                        handleStartExistingSchedulerRequests(tempRequestsList.remove(0));
+                    }
+                }
 
-                        Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
-
-                        int schedulerId;
-                        String projectName;
-                        while(tempRequestsList.size() > 0)
+                if(startExistingSchedulerRequestsNames.size() > 0)
+                {
+                    List<String> tempRequestsList = new ArrayList<String>();
+                    synchronized (startExistingSchedulerRequestsNames)
+                    {
+                        while(startExistingSchedulerRequestsNames.size() > 0)
                         {
-                            projectName = tempRequestsList.remove(0);
-                            schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
-                            if(schedulerId != -1) {
-                                handleStartExistingSchedulerRequests(schedulerId);
-                            }
+                            tempRequestsList.add(startExistingSchedulerRequestsNames.remove(0));
                         }
                     }
 
-                    // Handle stopping and deleting GlobalDownloaders whose using projects are all stopped.
-                    // Handle stopping and deleting GlobalDownloaders that don't have any currently existing projects using them.
-                    // Handle restarting stopped GlobalDownloaders for which a using project has been started.
-                    if(globalDLs.size() > 0)
-                    {
-                        synchronized (globalDLs)
-                        {
-                            if(schedulers.size() > 0)
-                            {
-                                Map<String,TaskState> pluginNamesAndRunningState = getRunningStateForProjectPluginsList();
+                    Map<String,Integer> schedulerNamesAndIDs = getClonedSchedulersIDList();
 
-                                Collection<GlobalDownloader> gdlList = globalDLs.values();
-                                for(GlobalDownloader gdl : gdlList)
+                    int schedulerId;
+                    String projectName;
+                    while(tempRequestsList.size() > 0 && !Thread.currentThread().isInterrupted())
+                    {
+                        projectName = tempRequestsList.remove(0);
+                        schedulerId = getSchedulerIDFromClonedList(schedulerNamesAndIDs, projectName);
+                        if(schedulerId != -1) {
+                            handleStartExistingSchedulerRequests(schedulerId);
+                        }
+                    }
+                }
+
+                // Handle stopping and deleting GlobalDownloaders whose using projects are all stopped.
+                // Handle stopping and deleting GlobalDownloaders that don't have any currently existing projects using them.
+                // Handle restarting stopped GlobalDownloaders for which a using project has been started.
+                if(globalDLs.size() > 0 && !Thread.currentThread().isInterrupted())
+                {
+                    synchronized (globalDLs)
+                    {
+                        if(schedulers.size() > 0)
+                        {
+                            Map<String,TaskState> pluginNamesAndRunningState = getRunningStateForProjectPluginsList();
+
+                            Collection<GlobalDownloader> gdlList = globalDLs.values();
+                            for(GlobalDownloader gdl : gdlList)
+                            {
+                                if(!Thread.currentThread().isInterrupted())
                                 {
-                                    if(!pluginNamesAndRunningState.containsKey(gdl.pluginName)
-                                            || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPED)
+                                    if(!pluginNamesAndRunningState.containsKey(gdl.pluginName) || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPED)
                                     {
                                         if(gdl.GetRunningState() == TaskState.RUNNING)
                                         {
                                             System.out.println("Stopping GlobalDownloader '" + gdl.pluginName + "':'" + gdl.metaData.name + "'.");
                                             gdl.Stop();
-                                            globalDLFutures.remove(gdl.ID).cancel(false);
+                                            synchronized(globalDLFutures) {
+                                                globalDLFutures.remove(gdl.ID).cancel(false);
+                                            }
                                         }
-                                        //                                        gdl.deleteObservers();
-                                        //                                        globalDLs.remove(gdl.ID);
-                                        //                                        releaseGlobalDLID(gdl.ID);
                                     }
                                     else if(gdl.GetRunningState() == TaskState.STOPPED)
                                     {
                                         System.out.println("Starting GlobalDownloader '" + gdl.pluginName + "':'" + gdl.metaData.name + "'.");
                                         gdl.Start();
-                                        globalDLFutures.put(gdl.ID, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                                        synchronized(globalDLExecutor) {
+                                            if(!globalDLExecutor.isShutdown()) {
+                                                ScheduledFuture<?> future = globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS);
+
+                                                synchronized(globalDLFutures) {
+                                                    globalDLFutures.put(gdl.ID, future);
+                                                }
+                                            }
+                                        }
                                     }
+                                } else{
+                                    break;
                                 }
                             }
-                            else
+                        }
+                        else
+                        {
+                            Collection<GlobalDownloader> gdlList = globalDLs.values();
+                            for(GlobalDownloader gdl : gdlList)
                             {
-                                Collection<GlobalDownloader> gdlList = globalDLs.values();
-                                for(GlobalDownloader gdl : gdlList)
+                                if(!Thread.currentThread().isInterrupted())
                                 {
                                     if(gdl.GetRunningState() == TaskState.RUNNING)
                                     {
                                         System.out.println("Stopping GlobalDownloader '" + gdl.pluginName + "':'" + gdl.metaData.name + "'.");
                                         gdl.Stop();
-                                        globalDLFutures.remove(gdl.ID).cancel(false);
+                                        synchronized(globalDLFutures) {
+                                            globalDLFutures.remove(gdl.ID).cancel(false);
+                                        }
                                     }
-                                    //                                    gdl.deleteObservers();
-                                    //                                    globalDLs.remove(gdl.ID);
-                                    //                                    releaseGlobalDLID(gdl.ID);
+                                } else {
+                                    break;
                                 }
                             }
-
-                            synchronized (numOfCreatedGDLs) {
-                                numOfCreatedGDLs = globalDLs.size();
-                            }
                         }
-                    }
 
-                    if(schedulerStatesChanged)
-                    {
-                        synchronized (schedulerStatesChanged)
-                        {
-                            System.out.println("Running GUI Update Handlers");
-                            runGUIUpdateHandlers();
-                            schedulerStatesChanged = false;
-                            System.out.println("Done with GUI Update Handlers");
+                        synchronized (numOfCreatedGDLs) {
+                            numOfCreatedGDLs = globalDLs.size();
                         }
                     }
                 }
+
+                if(schedulerStatesChanged && !Thread.currentThread().isInterrupted())
+                {
+                    synchronized (schedulerStatesChanged)
+                    {
+                        System.out.println("Running GUI Update Handlers");
+                        runGUIUpdateHandlers();
+                        schedulerStatesChanged = false;
+                        System.out.println("Done with GUI Update Handlers");
+                    }
+                }
             }
-            catch (ConcurrentModificationException e) {
-                ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
-            } catch (Exception e) {
-                ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
-            }
-        }while((msBetweenUpdates > 0) && !manualUpdate);
-        manualUpdate = false;
-        justCreateNewSchedulers = false;
+        }
+        catch (ConcurrentModificationException e) {
+            ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
+        } catch (Exception e) {
+            ErrorLog.add(configInstance, "EASTWebManager.run error.", e);
+        }
+        synchronized(justCreateNewSchedulers) {
+            justCreateNewSchedulers = false;
+        }
     }
 
     /*
@@ -1014,7 +1011,15 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     System.out.println("GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "' created.");
 
                     globalDLs.put(id, gdl);
-                    globalDLFutures.put(id, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                    synchronized(globalDLExecutor) {
+                        if(!globalDLExecutor.isShutdown()) {
+                            ScheduledFuture<?> future = globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS);
+
+                            synchronized(globalDLFutures) {
+                                globalDLFutures.put(id, future);
+                            }
+                        }
+                    }
                 }
 
                 synchronized (numOfCreatedGDLs) {
@@ -1026,7 +1031,15 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 } else if(currentGDLIdx >= 0) {
                     System.out.println("Restarting GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
                     gdl.Start();
-                    globalDLFutures.put(gdl.ID, globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS));
+                    synchronized(globalDLExecutor) {
+                        if(!globalDLExecutor.isShutdown()) {
+                            ScheduledFuture<?> future = globalDLExecutor.scheduleWithFixedDelay(gdl, 0, 1, TimeUnit.DAYS);
+
+                            synchronized(globalDLFutures) {
+                                globalDLFutures.put(gdl.ID, future);
+                            }
+                        }
+                    }
                 } else {
                     System.out.println("Starting GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
                     gdl.Start();
@@ -1080,7 +1093,11 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     @Override
     public Future<ProcessWorkerReturn> StartNewProcessWorker(Callable<ProcessWorkerReturn> worker)
     {
-        return processWorkerExecutor.submit(worker);
+        if(!processWorkerExecutor.isShutdown()) {
+            return processWorkerExecutor.submit(worker);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -1088,12 +1105,30 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         return connectionPool.getConnection();
     }
 
-    static protected boolean testDatabaseConnection(Config configInstance) throws SQLException
+    static protected boolean testDatabaseConnection(Config configInstance)
     {
-        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
-        Statement stmt;
-        stmt = con.createStatement();
-        return stmt.execute("SELECT 1;");
+        boolean successful = false;
+        DatabaseConnection con = null;
+        Statement stmt = null;
+        con = DatabaseConnector.getConnection(configInstance);
+        if(con != null) {
+            try {
+                stmt = con.createStatement();
+                successful = stmt.execute("SELECT 1;");
+            } catch (SQLException e) {
+                ErrorLog.add(configInstance, "Could not establish connection with database.", e);
+            } finally {
+                try {
+                    if(stmt != null) {
+                        stmt.close();
+                    }
+                } catch (SQLException e) { /* do nothing */ }
+                if(con != null) {
+                    con.close();
+                }
+            }
+        }
+        return successful;
         //            return con.isValid(0);      // org.postgresql.util.PSQLException: Method org.postgresql.jdbc4.Jdbc4Connection.isValid(int) is not yet implemented.
     }
 
@@ -1107,7 +1142,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     protected EASTWebManager(int numOfGlobalDLResourses, int numOfProcessWorkerResourses, int msBetweenUpdates)
     {
-        manualUpdate = false;
         justCreateNewSchedulers = false;
         this.msBetweenUpdates = msBetweenUpdates;
         configInstance = Config.getInstance();
@@ -1293,9 +1327,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             Set<GUIUpdateHandler> handlers = guiHandlers.keySet();
             for(GUIUpdateHandler handler : handlers)
             {
-                handler.run();
-                if(guiHandlers.get(handler)) {
-                    flaggedForRemoval.add(handler);
+                if(!Thread.currentThread().isInterrupted())
+                {
+                    handler.run();
+                    if(guiHandlers.get(handler)) {
+                        flaggedForRemoval.add(handler);
+                    }
+                } else {
+                    break;
                 }
             }
 

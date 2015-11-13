@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,6 +34,7 @@ import version2.prototype.download.GlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.RegistrationException;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
@@ -92,10 +92,8 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
     }
 
     @Override
-    public void SetCompleted() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
+    public void SetCompleted(Statement stmt) throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException
     {
-        final Connection conn = DatabaseConnector.getConnection();
-        final Statement stmt = conn.createStatement();
         final int gdlID = Schemas.getGlobalDownloaderID(configInstance.getGlobalSchema(), pluginName, metaData.name, stmt);
         //        int filesPerDay = metaData.filesPerDay;
         int filesPerDay = modisTiles.size();
@@ -166,12 +164,6 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
                 if(rs != null) {
                     rs.close();
                 }
-                if(stmt != null) {
-                    stmt.close();
-                }
-                if(conn != null) {
-                    conn.close();
-                }
                 throw e;
             }
 
@@ -182,12 +174,6 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
         if(rs != null) {
             rs.close();
         }
-        if(stmt != null) {
-            stmt.close();
-        }
-        if(conn != null) {
-            conn.close();
-        }
     }
 
     /* (non-Javadoc)
@@ -196,6 +182,11 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
     @Override
     public void run() {
         try {
+            DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+            if(con == null) {
+                return;
+            }
+            Statement stmt = con.createStatement();
             System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] GlobalDownloader of '" + metaData.name + "' files for plugin '"
                     + pluginName + "' starting from " + currentStartDate + ".");
             System.out.println("Running: " + downloadCtr.getName().substring((downloadCtr.getName().lastIndexOf(".") > -1 ? downloadCtr.getName().lastIndexOf(".") + 1 : 0)));
@@ -288,7 +279,7 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
             }
 
             // Step 4: Create downloader and run downloader for all that's left
-            downloadloop: for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
+            downloadLoop: for(Map.Entry<DataDate, ArrayList<String>> entry : datesFiles.entrySet())
             {
                 String outFolder = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, metaData.name);
                 DataDate dd = entry.getKey();
@@ -297,20 +288,24 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
                 {
                     if(state == TaskState.STOPPED) {
                         System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] Breaking out of download loop.");
-                        break downloadloop;
+                        break downloadLoop;
+                    } else if(Thread.currentThread().isInterrupted()) {
+                        break downloadLoop;
                     }
                     if (f != null)
                     {
                         DownloaderFramework downloader = (DownloaderFramework) downloadCtr.newInstance(dd, outFolder, metaData, f);
                         try {
                             downloader.download();
-                            AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                            AddDownloadFile(stmt, dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
                         } catch (Exception e) {
                             ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisLocalStorageGlobalDownloader.run problem with running running DownloaderFramework or AddDownloadFile.", e);
                         }
                     }
                 }
             }
+            stmt.close();
+            con.close();
         } catch (ParserConfigurationException | SAXException | IOException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException | SQLException e) {
             ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "GenericLocalStorageGlobalDownloader.run problem with running GenericLocalStorageGlobalDownloader.", e);

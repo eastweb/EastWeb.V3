@@ -3,6 +3,7 @@ package version2.prototype.download.ModisNBAR;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +24,8 @@ import version2.prototype.download.ListDatesFiles;
 import version2.prototype.download.RegistrationException;
 import version2.prototype.download.ModisNBAR.ModisNBARDownloader;
 import version2.prototype.util.DataFileMetaData;
+import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.DownloadFileMetaData;
 import version2.prototype.util.FileSystem;
 
@@ -47,6 +50,18 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
      */
     public void run()
     {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return;
+        }
+        Statement stmt;
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while attempting to handle download.", e);
+            return;
+        }
+
         // Step 1: get all downloads from ListDatesFiles
         Map<DataDate, ArrayList<String>> datesFiles = listDatesFiles.CloneListDatesFiles();
 
@@ -55,7 +70,7 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
 
         try {
             cachedD = GetAllDownloadedFiles();
-        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException | RegistrationException e) {
             ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while setting up current list of missing download files.", e);
         }
 
@@ -114,8 +129,8 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
                         }
 
                         try {
-                            AddDownloadFile(dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
-                        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+                            AddDownloadFile(stmt, dd.getYear(), dd.getDayOfYear(), downloader.getOutputFilePath());
+                        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException | RegistrationException e) {
                             ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while attempting to add download file.", e);
                         }
                     }
@@ -124,9 +139,11 @@ public class ModisNBARGlobalDownloader extends GlobalDownloader
             } catch (IOException e) {
                 ErrorLog.add(Config.getInstance(), pluginName, metaData.name, "ModisNBARGlobalDownloader.run problem while attempting to handle download.", e);
             }
-
         }
-
+        try {
+            stmt.close();
+        } catch (SQLException e) { /* do nothing */ }
+        con.close();
     }
 
 }
