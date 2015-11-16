@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+<Plugins>
+<Plugin name="ModisLST" parser="version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.ModisLSTPluginUI">
+<QC>HIGHEST</QC>
+<Indicies>ModisLSTDay</Indicies>
+<Indicies>ModisLSTNight</Indicies>
+<ModisTiles>h01v01</ModisTiles>
+</Plugin>
+<Plugin name="NldasForcing" parser="version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.NldasForcingPluginUI">
+<QC>null</QC>
+<Indicies>NldasForcingHeatingDegreeDays</Indicies>
+<Indicies>NldasForcingFreezingDegreeDays</Indicies>
+<NldasForcing>
+<FreezingDate>Fri Nov 20 00:00:00 CST 1970</FreezingDate>
+<CoolingDegree>wer</CoolingDegree>
+<HeatingDate>Fri Nov 13 19:01:32 CST 1970</HeatingDate>
+<HeatingDegree>234</HeatingDegree>
+</NldasForcing>
+</Plugin>
+</Plugins>
+<StartDate>Wed Nov 18 00:00:00 CST 2015</StartDate>
+<ProjectName>New UI </ProjectName>
+<WorkingDir>C:\Users\sufi\git\EastWeb.Version2</WorkingDir>
+<Masking>
+<File/>
+<Resolution>123</Resolution>
+</Masking>
+<MasterShapeFile>C:\Users\sufi\Desktop\shapefile\shapefile.shp</MasterShapeFile>
+<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
+<Clipping>false</Clipping>
+<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+<PixelSize>234</PixelSize>
+<Summaries>
+<Summary ID="1">AreaNameField: STATEFP10; Shape File Path: C:\Users\sufi\Desktop\shapefile\shapefile.shp; AreaCodeField: ALAND10; Temporal Summary: (No Selection)</Summary>
+</Summaries>
+</ProjectInfo>
