@@ -916,13 +916,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
                 if(schedulerStatesChanged && !Thread.currentThread().isInterrupted())
                 {
+                    System.out.println("Running GUI Update Handlers");
                     synchronized (schedulerStatesChanged)
                     {
-                        System.out.println("Running GUI Update Handlers");
                         runGUIUpdateHandlers();
                         schedulerStatesChanged = false;
-                        System.out.println("Done with GUI Update Handlers");
                     }
+                    System.out.println("Done with GUI Update Handlers");
                 }
             }
         }
@@ -943,9 +943,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     @Override
     public void NotifyUI(SchedulerStatus updatedStatus)
     {
+        System.out.println("Updating Scheduler status in EASTWeb Manager.");
         synchronized (schedulerStatesChanged)
         {
-            System.out.println("Updating Scheduler status in EASTWeb Manager.");
             schedulerStatesChanged = true;
 
             synchronized (schedulerStatuses)
@@ -959,8 +959,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     }
                 }
             }
-            System.out.println("Done updating Scheduler status in EASTWeb Manager.");
         }
+        System.out.println("Done updating Scheduler status in EASTWeb Manager.");
     }
 
     /* (non-Javadoc)
@@ -969,6 +969,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     @Override
     public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
     {
+
+
         synchronized (globalDLs)
         {
             int id = getLowestAvailableGlobalDLID();
@@ -1063,11 +1065,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     @Override
     public void StopGlobalDownloader(int gdlID)
     {
-        synchronized (globalDLs)
+        if(globalDLs.size() > gdlID)
         {
-            if(globalDLs.size() > gdlID)
+            synchronized (globalDLs)
             {
-                globalDLs.get(gdlID).Stop();
+                if(globalDLs.get(gdlID) != null) {
+                    globalDLs.get(gdlID).Stop();
+                }
             }
         }
     }
@@ -1078,11 +1082,13 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     @Override
     public void StartExistingGlobalDownloader(int gdlID)
     {
-        synchronized (globalDLs)
+        if(globalDLs.size() > gdlID)
         {
-            if(globalDLs.size() > gdlID)
+            synchronized (globalDLs)
             {
-                globalDLs.get(gdlID).Start();
+                if(globalDLs.get(gdlID) != null) {
+                    globalDLs.get(gdlID).Start();
+                }
             }
         }
     }
@@ -1201,65 +1207,68 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     protected void handleStartNewSchedulerRequests(SchedulerData data)
     {
-        synchronized (schedulers)
-        {
-            int id = getLowestAvailableSchedulerID();
-            if(IsIDValid(id, schedulerIDs))
-            {
-                System.out.println("Handling start request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "'.");
-                //                schedulerStatuses.add(new SchedulerStatus(id, data.projectInfoFile.GetProjectName(), data.projectInfoFile.GetPlugins(), data.projectInfoFile.GetSummaries(), TaskState.STOPPED));
-                Scheduler scheduler = null;
-                scheduler = new Scheduler(data, id, TaskState.RUNNING, this, configInstance);
-                schedulerStatuses.add(scheduler.GetSchedulerStatus());
-                schedulers.put(id, scheduler);
-
-                synchronized (numOfCreatedSchedulers) {
-                    numOfCreatedSchedulers = schedulers.size();
-                }
-                System.out.println("Start request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' handled.");
-            }
-            else
-            {
+        System.out.println("Handling start request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "'.");
+        if(!handleNewSchedulerRequest(data, TaskState.RUNNING)) {
+            synchronized(startNewSchedulerRequests) {
                 startNewSchedulerRequests.add(data);
             }
+            System.out.println("Start request of new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' failed. Could not get an ID for new Scheduler.");
+        } else {
+            System.out.println("Start request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' handled.");
         }
     }
 
     protected void handleLoadNewSchedulerRequests(SchedulerData data)
     {
-        synchronized (schedulers)
+        System.out.println("Handling load request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "'.");
+        if(!handleNewSchedulerRequest(data, TaskState.STOPPED)) {
+            synchronized(loadNewSchedulerRequests) {
+                loadNewSchedulerRequests.add(data);
+            }
+            System.out.println("Load request of new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' failed. Could not get an ID for new Scheduler.");
+        } else {
+            System.out.println("Load request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' handled.");
+        }
+    }
+
+    protected boolean handleNewSchedulerRequest(SchedulerData data, TaskState initState)
+    {
+        boolean success = false;
+        int id = getLowestAvailableSchedulerID();
+        synchronized(schedulerIDs) {
+            success = IsIDValid(id, schedulerIDs);
+        }
+        if(success)
         {
-            int id = getLowestAvailableSchedulerID();
-            if(IsIDValid(id, schedulerIDs))
-            {
-                System.out.println("Handling load request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "'.");
-                Scheduler scheduler = null;
-                scheduler = new Scheduler(data, id, TaskState.STOPPED, this, configInstance);
+            Scheduler scheduler = null;
+            scheduler = new Scheduler(data, id, initState, this, configInstance);
+            synchronized(schedulerStatuses) {
                 schedulerStatuses.add(scheduler.GetSchedulerStatus());
+            }
+            synchronized (schedulers)
+            {
                 schedulers.put(id, scheduler);
 
                 synchronized (numOfCreatedSchedulers) {
                     numOfCreatedSchedulers = schedulers.size();
                 }
-                System.out.println("Load request of a new Scheduler for project '" + data.projectInfoFile.GetProjectName() + "' handled.");
-            }
-            else
-            {
-                loadNewSchedulerRequests.add(data);
             }
         }
+        return success;
     }
 
     protected void handleStopSchedulerRequests(int schedulerID)
     {
-        synchronized (schedulers)
+        if(schedulers.size() > schedulerID)
         {
-            if(schedulers.size() > schedulerID)
+            System.out.println("Handling stop request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
+            synchronized (schedulers)
             {
-                System.out.println("Handling stop request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
-                schedulers.get(schedulerID).Stop();
-                System.out.println("Stop request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
+                if(schedulers.get(schedulerID) != null) {
+                    schedulers.get(schedulerID).Stop();
+                }
             }
+            System.out.println("Stop request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
         }
     }
 
@@ -1274,16 +1283,16 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         Scheduler scheduler = schedulers.get(schedulerID);
         String projectName = schedulers.get(schedulerID).projectInfoFile.GetProjectName();
 
-        synchronized (schedulers)
+        if(schedulers.size() > schedulerID)
         {
-            if(schedulers.size() > schedulerID)
+            System.out.println("Handling delete request of the project '" + projectName + "'.");
+            synchronized (schedulers)
             {
-                System.out.println("Handling delete request of the project '" + projectName + "'.");
                 schedulers.remove(schedulerID);
                 releaseSchedulerID(schedulerID);
-            } else {
-                return;
             }
+        } else {
+            return;
         }
 
         synchronized (numOfCreatedSchedulers) {
@@ -1296,7 +1305,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         {
             for(int i=0; i < schedulerStatuses.size(); i++)
             {
-                if(schedulerStatuses.get(i).SchedulerID == schedulerID) {
+                if(schedulerStatuses.get(i) != null && schedulerStatuses.get(i).SchedulerID == schedulerID) {
                     schedulerStatuses.remove(i);
                     break;
                 }
@@ -1308,14 +1317,14 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     protected void handleStartExistingSchedulerRequests(int schedulerID)
     {
-        synchronized (schedulers)
+        if(schedulers.size() > schedulerID)
         {
-            if(schedulers.size() > schedulerID)
+            System.out.println("Handling request to start back up the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
+            synchronized (schedulers)
             {
-                System.out.println("Handling request to start back up the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "'.");
                 schedulers.get(schedulerID).Start();
-                System.out.println("Restart request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
             }
+            System.out.println("Restart request of the Scheduler for project '" + schedulers.get(schedulerID).projectInfoFile.GetProjectName() + "' handled.");
         }
     }
 

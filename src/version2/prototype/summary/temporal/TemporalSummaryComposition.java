@@ -71,6 +71,16 @@ public class TemporalSummaryComposition {
     }
 
     /**
+     * Returns true if this list contains the specified element.
+     * @param FDPair  - element whose presence in this list is to be tested
+     * @return true if this composite contains the specified element
+     */
+    public boolean contains(FileDatePair FDPair)
+    {
+        return files.contains(FDPair);
+    }
+
+    /**
      * Used to compare FileDatePairs within composite in order to sort them.
      *
      * @author michael.devos

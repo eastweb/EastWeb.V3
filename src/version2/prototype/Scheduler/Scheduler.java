@@ -218,16 +218,16 @@ public class Scheduler {
     public SchedulerStatus GetSchedulerStatus()
     {
         SchedulerStatus status = null;
+        System.out.println("Retrieving Scheduler Status.");
         synchronized (statusContainer)
         {
-            System.out.println("Retrieving Scheduler Status.");
             try {
                 status = statusContainer.GetStatus();
             } catch (SQLException e) {
                 ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
             }
-            System.out.println("Scheduler Status retrieved.");
         }
+        System.out.println("Scheduler Status retrieved.");
         return status;
     }
 
@@ -238,6 +238,14 @@ public class Scheduler {
      */
     public void Start()
     {
+        TaskState myState;
+        synchronized (statusContainer) {
+            myState = statusContainer.GetState();
+        }
+        if(myState == TaskState.RUNNING) {
+            return;
+        }
+
         String projectSchema;
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
         if(con == null) {
@@ -287,21 +295,29 @@ public class Scheduler {
      */
     public void Stop()
     {
+        TaskState myState;
+        synchronized (statusContainer) {
+            myState = statusContainer.GetState();
+        }
+        if(myState == TaskState.STOPPED) {
+            return;
+        }
+
+        SchedulerStatus status = null;
+        System.out.println("Stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
         synchronized (statusContainer)
         {
-            System.out.println("Stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
             statusContainer.UpdateSchedulerTaskState(TaskState.STOPPED);
-            SchedulerStatus status;
             try {
                 status = statusContainer.GetStatus();
-                if(status != null) {
-                    manager.NotifyUI(status);
-                }
             } catch (SQLException e) {
                 ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
             }
-            System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
         }
+        if(status != null) {
+            manager.NotifyUI(status);
+        }
+        System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
     }
 
     /**
@@ -412,12 +428,12 @@ public class Scheduler {
     public TaskState GetState()
     {
         TaskState myState;
+        //            System.out.println("Retrieving current Scheduler TaskState.");
         synchronized (statusContainer)
         {
-            //            System.out.println("Retrieving current Scheduler TaskState.");
             myState = statusContainer.GetState();
-            //            System.out.println("Current Scheduler TaskState retrieved.");
         }
+        //            System.out.println("Current Scheduler TaskState retrieved.");
         return myState;
     }
 
@@ -429,9 +445,9 @@ public class Scheduler {
     public void NotifyUI(GeneralUIEventObject event)
     {
         SchedulerStatus status = null;
+        System.out.println("Handling Scheduler event.");
         synchronized (statusContainer)
         {
-            System.out.println("Handling Scheduler event.");
             if(event.getStatus() != null) {
                 statusContainer.AddToLog(event.getStatus());
             }
@@ -441,8 +457,8 @@ public class Scheduler {
             } catch (SQLException e) {
                 ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
             }
-            System.out.println("Scheduler event handled.");
         }
+        System.out.println("Scheduler event handled.");
         if(status != null) {
             manager.NotifyUI(status);
         }
@@ -459,13 +475,13 @@ public class Scheduler {
      */
     public void UpdateDownloadProgressByData(String dataName, String pluginName, ListDatesFiles listDatesFiles, ArrayList<String> modisTileNames, Statement stmt) throws SQLException
     {
+        System.out.println("Updating Download progress of '" + dataName + "' for plugin '" + pluginName + "'.");
         synchronized (statusContainer)
         {
-            System.out.println("Updating Download progress of '" + dataName + "' for plugin '" + pluginName + "'.");
             statusContainer.UpdateDownloadProgressByData(dataName, pluginName, listDatesFiles, modisTileNames, stmt);
-            UpdateStatus();
-            System.out.println("Done updating Download progress of '" + dataName + "' for plugin '" + pluginName + "'.");
         }
+        UpdateStatus();
+        System.out.println("Done updating Download progress of '" + dataName + "' for plugin '" + pluginName + "'.");
     }
 
     /**
@@ -476,13 +492,13 @@ public class Scheduler {
      */
     public void UpdateProcessorProgress(String pluginName, Statement stmt) throws SQLException
     {
+        System.out.println("Updating Processor progress for plugin '" + pluginName + "'.");
         synchronized (statusContainer)
         {
-            System.out.println("Updating Processor progress for plugin '" + pluginName + "'.");
             statusContainer.UpdateProcessorProgress(pluginName, stmt);
-            UpdateStatus();
-            System.out.println("Done updating Processor progress for plugin '" + pluginName + "'.");
         }
+        UpdateStatus();
+        System.out.println("Done updating Processor progress for plugin '" + pluginName + "'.");
     }
 
     /**
@@ -493,13 +509,13 @@ public class Scheduler {
      */
     public void UpdateIndicesProgress(String pluginName, Statement stmt) throws SQLException
     {
+        System.out.println("Updating Indices progress for plugin '" + pluginName + "'.");
         synchronized (statusContainer)
         {
-            System.out.println("Updating Indices progress for plugin '" + pluginName + "'.");
             statusContainer.UpdateIndicesProgress(pluginName, stmt);
-            UpdateStatus();
-            System.out.println("Done updating Indices progress for plugin '" + pluginName + "'.");
         }
+        UpdateStatus();
+        System.out.println("Done updating Indices progress for plugin '" + pluginName + "'.");
     }
 
     /**
@@ -514,13 +530,13 @@ public class Scheduler {
     public void UpdateSummaryProgress(int summaryIDNum, TemporalSummaryCompositionStrategy compStrategy, int daysPerInputData, ProjectInfoPlugin pluginInfo, Statement stmt)
             throws SQLException
     {
+        System.out.println("Updating Summary progress of summary " + summaryIDNum + " for plugin '" + pluginInfo.GetName() + "'.");
         synchronized (statusContainer)
         {
-            System.out.println("Updating Summary progress of summary " + summaryIDNum + " for plugin '" + pluginInfo.GetName() + "'.");
             statusContainer.UpdateSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
-            UpdateStatus();
-            System.out.println("Done updating Summary progress of summary " + summaryIDNum + " for plugin '" + pluginInfo.GetName() + "'.");
         }
+        UpdateStatus();
+        System.out.println("Done updating Summary progress of summary " + summaryIDNum + " for plugin '" + pluginInfo.GetName() + "'.");
     }
 
     /**
