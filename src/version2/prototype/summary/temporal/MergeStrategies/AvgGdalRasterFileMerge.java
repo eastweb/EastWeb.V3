@@ -105,10 +105,10 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
             }
 
             // Write averaged array to raster file
-            synchronized (GdalUtils.lockObject) {
-                avgRasterDs.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, avgArray);
-                avgRasterDs.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_DATA);
-            }
+            //            synchronized (GdalUtils.lockObject) {
+            avgRasterDs.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, avgArray);
+            avgRasterDs.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_DATA);
+            //            }
 
             tempArray = null;
             avgArray = null;

@@ -142,6 +142,24 @@ public class Schemas {
         stmt.execute(updateQuery);
     }
 
+    public static void setProcessedComposite(final String globalSchema, final String projectSchema, final String cacheTable, final int startYear, final int startDay, final int daysInComposite,
+            final Statement stmt) throws SQLException
+    {
+        LocalDate currentDate = LocalDate.ofYearDay(startYear, startDay);
+        String updateQueryFormat = "UPDATE \"" + projectSchema + "\".\"" + cacheTable + "\" SET \"Processed\" = TRUE WHERE \"DateGroupID\"=%1$d;";
+        int dateGroupID = getDateGroupID(globalSchema, currentDate, stmt);
+        stmt.addBatch(String.format(updateQueryFormat, dateGroupID));
+
+        int numOfDaysSetFor = 1;
+        while(numOfDaysSetFor <= daysInComposite) {
+            currentDate = currentDate.plusDays(1);
+            dateGroupID = getDateGroupID(globalSchema, currentDate, stmt);
+            stmt.addBatch(String.format(updateQueryFormat, dateGroupID));
+            numOfDaysSetFor += 1;
+        }
+        stmt.executeBatch();
+    }
+
     public static boolean registerGlobalDownloader(final String globalEASTWebSchema, final String pluginName, final String dataName, final Statement stmt) throws SQLException
     {
         final int pluginID = Schemas.getPluginID(globalEASTWebSchema, pluginName, stmt);

@@ -666,7 +666,7 @@ public class DatabaseCache extends Observable{
      */
     public void UploadResultsToDb(Connection con, ArrayList<SummaryResult> newResults, int summaryIDNum, String indexNm, TemporalSummaryCompositionStrategy compStrategy, int year, int day,
             Process process, int daysPerInputData) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException,
-            SQLException {
+    SQLException {
         Statement stmt = con.createStatement();
         PreparedStatement pStmt = null;
         //        final boolean previousAutoCommit = conn.getAutoCommit();
@@ -742,7 +742,11 @@ public class DatabaseCache extends Observable{
 
             // Update progress bar
             scheduler.UpdateSummaryProgress(summaryIDNum, compStrategy, daysPerInputData, pluginInfo, stmt);
-            Schemas.setProcessed(mSchemaName, setProcessedForTableName, newResults.get(0).dateGroupID, stmt);
+            if(compStrategy != null) {
+                Schemas.setProcessedComposite(globalSchema, mSchemaName, setProcessedForTableName, year, day, compStrategy.getDaysInThisComposite(LocalDate.ofYearDay(year, day)), stmt);
+            } else {
+                Schemas.setProcessed(mSchemaName, setProcessedForTableName, newResults.get(0).dateGroupID, stmt);
+            }
             //            scheduler.NotifyUI(new GeneralUIEventObject(this, null));
         }
         catch (SQLException e) {

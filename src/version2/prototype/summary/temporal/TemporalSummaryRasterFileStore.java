@@ -62,9 +62,13 @@ public class TemporalSummaryRasterFileStore {
 
         if(matched)
         {
-            compositions.get(i).addFilePair(new FileDatePair(f, d), process);
-            if(compositions.get(i).compositeFull()) {
-                modifiedComp = compositions.remove(i);
+            FileDatePair newFDP = new FileDatePair(f, d);
+
+            if(!compositions.get(i).contains(newFDP)) {
+                compositions.get(i).addFilePair(newFDP, process);
+                if(compositions.get(i).compositeFull()) {
+                    modifiedComp = compositions.remove(i);
+                }
             }
         }
         else
