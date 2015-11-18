@@ -37,8 +37,11 @@ public class EASTWebResultsTest {
     private static ArrayList<String> extraDownloadFiles;
     private static ArrayList<String> summaryNames;
     private static boolean selectCount = true;
+    private static boolean selectMax = true;
+    private static boolean selectMin = true;
     private static boolean selectSum = true;
     private static boolean selectMean = true;
+    private static boolean selectSqrSum = true;
     private static boolean selectStdDev = true;
     private static String zoneSign = "<";
     private static int zoneVal = 300;
@@ -146,7 +149,8 @@ public class EASTWebResultsTest {
     @Test
     public final void testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         //        ZonalSummary zonalSummary = new ZonalSummary(shapeFile, areaValueField, areaNameField);
-        EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectSum, selectMean, selectStdDev, zoneSign, zoneVal,
+        EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectMax, selectMin, selectSum, selectMean, selectSqrSum,
+                selectStdDev, zoneSign, zoneVal,
                 yearSign, yearVal, daySign, dayVal, includedIndices);
         System.out.println("testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary:");
         System.out.println(query);

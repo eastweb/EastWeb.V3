@@ -199,7 +199,7 @@ public class QueryUI {
                     for(ProjectInfoSummary summary : project.GetSummaries()) {
                         try {
                             listFile =  EASTWebResults.GetResultCSVFiles(EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
-                                    chckbxCount.isSelected(), chckbxSum.isSelected(), chckbxMean.isSelected(), chckbxStdev.isSelected(),
+                                    chckbxCount.isSelected(), true, true, chckbxSum.isSelected(), chckbxMean.isSelected(), true, chckbxStdev.isSelected(),
                                     String.valueOf(zoneComboBox.getSelectedItem()),
                                     (zoneTextField.getText().equals("") ? null : Integer.parseInt(zoneTextField.getText())),
                                     String.valueOf(yearComboBox.getSelectedItem()),
