@@ -133,38 +133,38 @@ public class QueryUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 String selectedProject = String.valueOf(projectListComboBox.getSelectedItem());
-
-
                 ProjectInfoFile project = null;
-                try {
-                    project = new ProjectInfoCollection().GetProject(selectedProject);
-                    zoneComboBox.removeAllItems();
-                    zoneComboBox.addItem("");
-                    pluginComboBox.removeAll();
-                    includeListModel.removeAllElements();
-                    excludeListModel.removeAllElements();
+                if(selectedProject != "") {
+                    try{
+                        project = new ProjectInfoCollection().GetProject(selectedProject);
+                        zoneComboBox.removeAllItems();
+                        zoneComboBox.addItem("");
+                        pluginComboBox.removeAll();
+                        includeListModel.removeAllElements();
+                        excludeListModel.removeAllElements();
 
-                    for(ProjectInfoPlugin plugin : project.GetPlugins()){
-                        pluginComboBox.addItem(plugin.GetName());
-                    }
-
-                    for(ProjectInfoPlugin plugin: project.GetPlugins()){
-                        for(String indice: plugin.GetIndices()) {
-                            excludeListModel.addElement(indice);
+                        for(ProjectInfoPlugin plugin : project.GetPlugins()){
+                            pluginComboBox.addItem(plugin.GetName());
                         }
-                    }
 
-                    for(String zone: EASTWebResults.GetZonesListFromProject(selectedProject, String.valueOf(pluginComboBox.getSelectedItem()))){
-                        zoneComboBox.addItem(zone);
-                    }
-                } catch (ClassNotFoundException | NoSuchMethodException
-                        | SecurityException | InstantiationException
-                        | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | IOException
-                        | ParserConfigurationException | SAXException
-                        | ParseException | SQLException e) {
-                    ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
+                        for(ProjectInfoPlugin plugin: project.GetPlugins()){
+                            for(String indice: plugin.GetIndices()) {
+                                excludeListModel.addElement(indice);
+                            }
+                        }
 
+                        for(String zone: EASTWebResults.GetZonesListFromProject(selectedProject, String.valueOf(pluginComboBox.getSelectedItem()))){
+                            zoneComboBox.addItem(zone);
+                        }
+                    } catch (ClassNotFoundException | NoSuchMethodException
+                            | SecurityException | InstantiationException
+                            | IllegalAccessException | IllegalArgumentException
+                            | InvocationTargetException | IOException
+                            | ParserConfigurationException | SAXException
+                            | ParseException | SQLException e) {
+                        ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
+
+                    }
                 }
             }
         });
