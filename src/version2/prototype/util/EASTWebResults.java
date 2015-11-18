@@ -24,6 +24,7 @@ import version2.prototype.Config;
 public class EASTWebResults {
 
     /**
+     * Get the EASTWebQuery object that represents a query for retrieving zonal summary results.
      *
      * @param globalSchema
      * @param projectName
@@ -60,6 +61,7 @@ public class EASTWebResults {
                 yearSign, yearVal, daySign, dayVal, includedIndices);
     }
     /**
+     * Get the EASTWebQuery object that represents a query for retrieving zonal summary results.
      *
      * @param globalSchema
      * @param projectName
@@ -320,6 +322,45 @@ public class EASTWebResults {
         con.close();
 
         return resultFiles;
+    }
+
+    /**
+     * Retrieves a list of zone names found from the results table for the given project and plugin.
+     *
+     * @param projectName
+     * @param pluginName
+     * @return  ArrayList of the distinct zone names found in the results table
+     * @throws SQLException
+     */
+    public static ArrayList<String> GetZonesListFromProject(String projectName, String pluginName) throws SQLException
+    {
+        ArrayList<String> zones = new ArrayList<String>();
+        Connection con = DatabaseConnector.getConnection();
+        if(con == null) {
+            return zones;
+        }
+        Statement stmt = con.createStatement();
+        ResultSet rs;
+        String schemaName = Schemas.getSchemaName(projectName, pluginName);
+
+        rs = stmt.executeQuery("select \"ZonalStatID\" from \"" + schemaName + "\".\"ZonalStat\";");
+        if(rs == null || !rs.next()) {
+            return zones;
+        }
+        rs.close();
+
+        rs = stmt.executeQuery("select distinct \"AreaName\" from \"" + schemaName + "\".\"ZonalStat\";");
+        if(rs != null)
+        {
+            while(rs.next()) {
+                zones.add(rs.getString("AreaName"));
+            }
+            rs.close();
+        }
+        stmt.close();
+        con.close();
+
+        return zones;
     }
 
     private static EASTWebQuery getEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectMax, boolean selectMin,
