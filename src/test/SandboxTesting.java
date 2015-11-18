@@ -38,21 +38,20 @@ public class SandboxTesting {
 
     public void testEASTWebResults()
     {
-        ArrayList<String> zones = new ArrayList<String>();
-        zones.add("Adiarikay");
-        zones.add("Beyeda");
-        ArrayList<String> includedIndices = new ArrayList<String>();
-        includedIndices.add("TRMM3B42RTIndex");
-        EASTWebQuery query = EASTWebResults.GetEASTWebQuery("EASTWeb", "Try_Four_Plugins_101515", "TRMM3B42RT", true, true, true, true, true, true, true, zones, "=", 2014, ">",
-                300, includedIndices);
-        System.out.println(query.toString());
-        ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>();
         try {
+            ArrayList<String> zones = EASTWebResults.GetZonesListFromProject("Test Both TRMM 101615", "TRMM3B42RT");
+            System.out.println(zones.size() + " : " + zones);
+            ArrayList<String> includedIndices = new ArrayList<String>();
+            includedIndices.add("TRMM3B42RTIndex");
+            EASTWebQuery query = EASTWebResults.GetEASTWebQuery("EASTWeb", "Test Both TRMM 101615", "TRMM3B42RT", true, true, true, true, true, true, true, zones, "=", 2014, ">",
+                    300, includedIndices);
+            System.out.println(query.toString());
+            ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>();
             results = EASTWebResults.GetEASTWebResults(query);
+            System.out.println(results.size());
         } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
-        System.out.println(results.size());
     }
 
     public void ModisCompositeStartDays()
