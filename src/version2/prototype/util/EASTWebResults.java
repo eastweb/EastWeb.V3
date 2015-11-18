@@ -161,7 +161,7 @@ public class EASTWebResults {
      */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, ArrayList<String> zones, String... indices)
             throws ParserConfigurationException, SAXException, IOException
-    {
+            {
         // Check parameters given
         if(projectName == null || pluginName == null) {
             return null;
@@ -206,7 +206,7 @@ public class EASTWebResults {
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
         return new EASTWebQuery(query.toString());
-    }
+            }
 
     /**
      * Get the EASTWebQuery object that represents the SQL query to handle getting EASTWeb zonal summary results associated with the given project and plugin names.

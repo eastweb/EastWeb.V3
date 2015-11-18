@@ -18,10 +18,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
@@ -39,6 +42,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
+import version2.prototype.util.EASTWebQuery;
 import version2.prototype.util.EASTWebResults;
 
 public class QueryUI {
@@ -48,11 +52,15 @@ public class QueryUI {
     boolean isViewSQL = false;
 
     private JComboBox<String> projectListComboBox ;
+    private JComboBox<String> pluginComboBox;
 
     private JCheckBox chckbxCount;
     private JCheckBox chckbxSum;
     private JCheckBox chckbxMean;
     private JCheckBox chckbxStdev;
+    private JCheckBox minCheckBox;
+    private JCheckBox maxCheckBox;
+    private JCheckBox sqrSumCheckBox;
 
     String[] operationList = {"<", ">", "=", "<>", "<=", ">="};
     private JCheckBox chckbxZone;
@@ -61,7 +69,6 @@ public class QueryUI {
     private JComboBox<Object> zoneComboBox;
     private JComboBox<Object> yearComboBox;
     private  JComboBox<Object> dayComboBox;
-    private JTextField zoneTextField;
     private JTextField yearTextField;
     private JTextField dayTextField;
 
@@ -107,7 +114,7 @@ public class QueryUI {
 
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 400, 550);
+        frame.setBounds(100, 100, 400, 625);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
 
@@ -126,14 +133,18 @@ public class QueryUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 String selectedProject = String.valueOf(projectListComboBox.getSelectedItem());
+                zoneComboBox.removeAllItems();
+                zoneComboBox.addItem("");
 
+                ProjectInfoFile project = null;
                 try {
+                    project = new ProjectInfoCollection().GetProject(selectedProject);
+                    pluginComboBox.removeAll();
                     includeListModel.removeAllElements();
                     excludeListModel.removeAllElements();
-                    ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
 
-                    if(project == null) {
-                        return;
+                    for(ProjectInfoPlugin plugin : project.GetPlugins()){
+                        pluginComboBox.addItem(plugin.GetName());
                     }
 
                     for(ProjectInfoPlugin plugin: project.GetPlugins()){
@@ -142,15 +153,18 @@ public class QueryUI {
                         }
                     }
 
+                    for(String zone: EASTWebResults.GetZonesListFromProject(selectedProject, String.valueOf(pluginComboBox.getSelectedItem()))){
+                        zoneComboBox.addItem(zone);
+                    }
                 } catch (ClassNotFoundException | NoSuchMethodException
                         | SecurityException | InstantiationException
                         | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException | IOException
                         | ParserConfigurationException | SAXException
-                        | ParseException e) {
+                        | ParseException | SQLException e) {
                     ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
-                }
 
+                }
             }
         });
         projectListComboBox.setBounds(118, 11, 157, 20);
@@ -174,7 +188,7 @@ public class QueryUI {
                 }
             }
         });
-        viewSQLButton.setBounds(285, 10, 89, 23);
+        viewSQLButton.setBounds(10, 552, 89, 23);
         frame.getContentPane().add(viewSQLButton);
 
         JButton btnQuery = new JButton("Query");
@@ -193,24 +207,35 @@ public class QueryUI {
                     ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
                 }
 
-                ArrayList<File> listFile = null;
-
+                EASTWebQuery listFile = null;
+                ArrayList<String> indicies = new ArrayList<String>();
+                for(Object o : includeListModel.toArray()){
+                    indicies.add(o.toString());
+                }
                 for(ProjectInfoPlugin s : project.GetPlugins()) {
                     for(ProjectInfoSummary summary : project.GetSummaries()) {
                         try {
-                            listFile =  EASTWebResults.GetResultCSVFiles(EASTWebResults.GetEASTWebQuery(Config.getInstance().getGlobalSchema(), String.valueOf(projectListComboBox.getSelectedItem()), s.GetName(),
-                                    chckbxCount.isSelected(), true, true, chckbxSum.isSelected(), chckbxMean.isSelected(), true, chckbxStdev.isSelected(),
+                            listFile =  EASTWebResults.GetEASTWebQuery(
+                                    Config.getInstance().getGlobalSchema(),
+                                    String.valueOf(projectListComboBox.getSelectedItem()),
+                                    s.GetName(),
+                                    chckbxCount.isSelected(),
+                                    maxCheckBox.isSelected(),
+                                    minCheckBox.isSelected(),
+                                    chckbxSum.isSelected(),
+                                    chckbxMean.isSelected(),
+                                    sqrSumCheckBox.isSelected(),
+                                    chckbxStdev.isSelected(),
                                     String.valueOf(zoneComboBox.getSelectedItem()),
-                                    (zoneTextField.getText().equals("") ? null : Integer.parseInt(zoneTextField.getText())),
                                     String.valueOf(yearComboBox.getSelectedItem()),
                                     (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
                                     String.valueOf(dayComboBox.getSelectedItem()),
                                     (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
-                                    null));
-                        } catch (NumberFormatException
-                                | ClassNotFoundException | SQLException
-                                | ParserConfigurationException
-                                | SAXException | IOException e) {
+                                    indicies
+                                    );
+
+
+                        } catch (NumberFormatException e) {
                             ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
                         }
 
@@ -218,7 +243,23 @@ public class QueryUI {
                 }
 
                 if(listFile != null){
-                    new QueryResultWindow(listFile);
+                    String message = "Enter Directory";
+                    String directory = JOptionPane.showInputDialog(frame, message);
+
+                    if (directory == null) {
+                        // User clicked cancel
+                    }else{
+                        File dest = new File(directory);
+                        try {
+                            for(File v:EASTWebResults.GetResultCSVFiles(listFile)) {
+                                FileUtils.copyFileToDirectory(v, dest);
+                            }
+
+                        } catch (IOException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException e) {
+                            JOptionPane.showMessageDialog(frame, "Folder not found");
+                            ErrorLog.add(Config.getInstance(), "QueryResultWindow.initialize problem with copying files to different directory.", e);
+                        }
+                    }
                 }
                 else{
                     JOptionPane.showMessageDialog(frame, "No results generated");
@@ -226,7 +267,7 @@ public class QueryUI {
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
         });
-        btnQuery.setBounds(186, 477, 89, 23);
+        btnQuery.setBounds(150, 552, 89, 23);
         frame.getContentPane().add(btnQuery);
 
         JButton btnCancel = new JButton("Cancel");
@@ -236,17 +277,25 @@ public class QueryUI {
                 frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
         });
-        btnCancel.setBounds(285, 477, 89, 23);
+        btnCancel.setBounds(285, 552, 89, 23);
         frame.getContentPane().add(btnCancel);
 
         sqlViewTextPanel = new JTextPane();
         sqlViewTextPanel.setBounds(384, 11, 290, 489);
         frame.getContentPane().add(sqlViewTextPanel);
+
+        JLabel lblPlugin = new JLabel("Plugin: ");
+        lblPlugin.setBounds(19, 45, 46, 14);
+        frame.getContentPane().add(lblPlugin);
+
+        pluginComboBox = new JComboBox<String>();
+        pluginComboBox.setBounds(118, 42, 157, 20);
+        frame.getContentPane().add(pluginComboBox);
     }
 
     private void populateClauseUI() {
         JPanel clausePanel = new JPanel();
-        clausePanel.setBounds(10, 104, 364, 109);
+        clausePanel.setBounds(10, 188, 364, 110);
         clausePanel.setBorder(new TitledBorder(null, "Clause Statement", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         frame.getContentPane().add(clausePanel);
         clausePanel.setLayout(null);
@@ -256,18 +305,13 @@ public class QueryUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 zoneComboBox.setEnabled(chckbxZone.isSelected());
-                zoneTextField.setEnabled(chckbxZone.isSelected());
             }
         });
         chckbxZone.setBounds(6, 20, 70, 23);
         clausePanel.add(chckbxZone);
-        zoneComboBox = new JComboBox<Object>(operationList);
-        zoneComboBox.setBounds(82, 21, 97, 20);
+        zoneComboBox = new JComboBox<Object>();
+        zoneComboBox.setBounds(82, 21, 272, 20);
         clausePanel.add(zoneComboBox);
-        zoneTextField = new JTextField();
-        zoneTextField.setBounds(189, 20, 97, 22);
-        clausePanel.add(zoneTextField);
-        zoneTextField.setColumns(10);
 
         chckbxYear = new JCheckBox("Year");
         chckbxYear.addActionListener(new ActionListener() {
@@ -284,7 +328,7 @@ public class QueryUI {
         clausePanel.add(yearComboBox);
         yearTextField = new JTextField();
         yearTextField.setColumns(10);
-        yearTextField.setBounds(189, 46, 97, 22);
+        yearTextField.setBounds(189, 46, 165, 22);
         clausePanel.add(yearTextField);
 
         chckbxDay = new JCheckBox("Day");
@@ -302,11 +346,10 @@ public class QueryUI {
         clausePanel.add(dayComboBox);
         dayTextField = new JTextField();
         dayTextField.setColumns(10);
-        dayTextField.setBounds(189, 74, 97, 22);
+        dayTextField.setBounds(189, 74, 165, 22);
         clausePanel.add(dayTextField);
 
         zoneComboBox.setEnabled(false);
-        zoneTextField.setEnabled(false);
         yearComboBox.setEnabled(false);
         yearTextField.setEnabled(false);
         dayComboBox.setEnabled(false);
@@ -319,7 +362,7 @@ public class QueryUI {
         JPanel indicesPanel = new JPanel();
         indicesPanel.setLayout(null);
         indicesPanel.setBorder(new TitledBorder(null, "Enviromental Index", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        indicesPanel.setBounds(10, 224, 364, 242);
+        indicesPanel.setBounds(10, 299, 364, 242);
         indicesPanel.setLayout(null);
         frame.getContentPane().add(indicesPanel);
 
@@ -379,7 +422,7 @@ public class QueryUI {
         JPanel fieldsPanel = new JPanel();
         fieldsPanel.setLayout(null);
         fieldsPanel.setBorder(new TitledBorder(null, "Fields", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        fieldsPanel.setBounds(10, 42, 364, 51);
+        fieldsPanel.setBounds(10, 76, 364, 110);
         frame.getContentPane().add(fieldsPanel);
 
         chckbxCount = new JCheckBox("count");
@@ -387,16 +430,28 @@ public class QueryUI {
         fieldsPanel.add(chckbxCount);
 
         chckbxSum = new JCheckBox("sum");
-        chckbxSum.setBounds(71, 21, 63, 23);
+        chckbxSum.setBounds(6, 51, 63, 23);
         fieldsPanel.add(chckbxSum);
 
         chckbxMean = new JCheckBox("mean");
-        chckbxMean.setBounds(136, 21, 63, 23);
+        chckbxMean.setBounds(6, 77, 63, 23);
         fieldsPanel.add(chckbxMean);
 
         chckbxStdev = new JCheckBox("stdev");
-        chckbxStdev.setBounds(201, 21, 97, 23);
+        chckbxStdev.setBounds(131, 21, 75, 23);
         fieldsPanel.add(chckbxStdev);
+
+        JCheckBox minCheckBox = new JCheckBox("min");
+        minCheckBox.setBounds(131, 51, 75, 23);
+        fieldsPanel.add(minCheckBox);
+
+        JCheckBox maxCheckBox = new JCheckBox("max");
+        maxCheckBox.setBounds(131, 77, 75, 23);
+        fieldsPanel.add(maxCheckBox);
+
+        JCheckBox sqrSumCheckBox = new JCheckBox("sqrSum");
+        sqrSumCheckBox.setBounds(261, 21, 97, 23);
+        fieldsPanel.add(sqrSumCheckBox);
     }
 
     private void populateProjectList() {
@@ -474,7 +529,15 @@ public class QueryUI {
             if(chckbxStdev.isSelected()) {
                 query += "\tstdev,\n";
             }
-
+            if(minCheckBox.isSelected()) {
+                query += "\tmin,\n";
+            }
+            if(maxCheckBox.isSelected()) {
+                query += "\tmax,\n";
+            }
+            if(sqrSumCheckBox.isSelected()) {
+                query += "\tsqrSum,\n";
+            }
             for(int i = 0; i < includeListModel.size(); i ++){
                 query += String.format("\t%s,\n", includeListModel.elementAt(i));
             }
@@ -502,13 +565,11 @@ public class QueryUI {
                 }
                 if(chckbxZone.isSelected())
                 {
-                    query += String.format("zone%s%s\n", String.valueOf(zoneComboBox.getSelectedItem()), zoneTextField.getText());
+                    query += String.format("zone%s\n", String.valueOf(zoneComboBox.getSelectedItem()));
                 }
             }
 
             return query;
         }
     }
-
-
 }
