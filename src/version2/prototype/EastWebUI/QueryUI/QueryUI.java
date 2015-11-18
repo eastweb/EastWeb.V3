@@ -133,12 +133,13 @@ public class QueryUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 String selectedProject = String.valueOf(projectListComboBox.getSelectedItem());
-                zoneComboBox.removeAllItems();
-                zoneComboBox.addItem("");
+
 
                 ProjectInfoFile project = null;
                 try {
                     project = new ProjectInfoCollection().GetProject(selectedProject);
+                    zoneComboBox.removeAllItems();
+                    zoneComboBox.addItem("");
                     pluginComboBox.removeAll();
                     includeListModel.removeAllElements();
                     excludeListModel.removeAllElements();

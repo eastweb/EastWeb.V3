@@ -46,15 +46,15 @@ public class EASTWebResults {
      * @return  Returns a EASTWebQuery object that represents a query that can be executed to acquire results from EASTWeb
      */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectMax, boolean selectMin,
-            boolean selectSum, boolean selectMean, boolean selectSqrSum, boolean selectStdDev, String zoneSign, Integer zoneVal, String yearSign, Integer yearVal, String daySign, Integer dayVal,
+            boolean selectSum, boolean selectMean, boolean selectSqrSum, boolean selectStdDev, String zoneSign, String yearSign, Integer yearVal, String daySign, Integer dayVal,
             ArrayList<String> includedIndices)
     {
         String zoneCondition = "";
-        if(zoneSign == null || zoneVal == null) {
+        if(zoneSign == null ) {
             zoneCondition = "";
         }
         else {
-            zoneCondition = " AND A.\"AreaCode\"" + zoneSign + zoneVal;
+            zoneCondition = " AND A.\"AreaCode\"" + zoneSign;
         }
 
         return getEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectMax, selectMin, selectSum, selectMean, selectSqrSum, selectStdDev, zoneCondition,
