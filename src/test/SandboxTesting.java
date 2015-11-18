@@ -1,6 +1,8 @@
 package test;
 
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Observable;
@@ -10,6 +12,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import version2.prototype.util.EASTWebQuery;
+import version2.prototype.util.EASTWebResult;
+import version2.prototype.util.EASTWebResults;
 
 public class SandboxTesting {
     private static ArrayList<String> myList;
@@ -22,7 +32,27 @@ public class SandboxTesting {
         //        test5();
         //        tester.MinMax_NDWI();
         //        tester.MinMax_EVI();
-        tester.ModisCompositeStartDays();
+        //        tester.ModisCompositeStartDays();
+        //        tester.testEASTWebResults();
+    }
+
+    public void testEASTWebResults()
+    {
+        ArrayList<String> zones = new ArrayList<String>();
+        zones.add("Adiarikay");
+        zones.add("Beyeda");
+        ArrayList<String> includedIndices = new ArrayList<String>();
+        includedIndices.add("TRMM3B42RTIndex");
+        EASTWebQuery query = EASTWebResults.GetEASTWebQuery("EASTWeb", "Try_Four_Plugins_101515", "TRMM3B42RT", true, true, true, true, true, true, true, zones, "=", 2014, ">",
+                300, includedIndices);
+        System.out.println(query.toString());
+        ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>();
+        try {
+            results = EASTWebResults.GetEASTWebResults(query);
+        } catch (ClassNotFoundException | SQLException | ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(results.size());
     }
 
     public void ModisCompositeStartDays()
