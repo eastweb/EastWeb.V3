@@ -499,6 +499,7 @@ public class ProgressUpdater {
                 if(daysPerInputData != 1) {
                     endDate = endDate.plusDays(compStrategy.getDaysInThisComposite(endDate));
                 }
+                endDate = endDate.plusDays(1);  // Adjust for algorithms exclusive endDate condition.
                 long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(startDate, endDate);
                 expectedCount = (int) (completeCompositesInRange * pluginInfo.GetIndices().size());
                 rs.close();

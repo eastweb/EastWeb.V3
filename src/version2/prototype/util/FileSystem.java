@@ -72,6 +72,10 @@ public final class FileSystem {
      */
     public static String StandardizeName(String name)
     {
+        if(name.length() == 0) {
+            return name;
+        }
+
         // Rule 3: Replace any characters that aren't letters, numbers, or an underscore
         name = name.replaceAll("[^a-zA-Z0-9_]", "_");
 

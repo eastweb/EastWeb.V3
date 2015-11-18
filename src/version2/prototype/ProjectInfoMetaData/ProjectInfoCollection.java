@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
+import version2.prototype.util.FileSystem;
 
 public class ProjectInfoCollection {
     private ArrayList<ProjectInfoFile> files = null;
@@ -75,8 +76,12 @@ public class ProjectInfoCollection {
     public ProjectInfoFile GetProject(String projectName) throws IOException, ParserConfigurationException, SAXException, ParseException,
     ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
     InvocationTargetException{
-        for(ProjectInfoFile file : ReadInAllProjectInfoFiles()){
-            if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase(projectName)) {
+        String cleanedProjectName = FileSystem.StandardizeName(projectName);
+        ArrayList<ProjectInfoFile> allProjects = ReadInAllProjectInfoFiles();
+        ProjectInfoFile file;
+        for(int i=0; i < allProjects.size(); i++){
+            file = allProjects.get(i);
+            if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase(cleanedProjectName)) {
                 return file;
             }
         }
