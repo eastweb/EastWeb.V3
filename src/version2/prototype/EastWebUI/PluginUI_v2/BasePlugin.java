@@ -1,6 +1,5 @@
 package version2.prototype.EastWebUI.PluginUI_v2;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -9,10 +8,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import version2.prototype.EastWebUI.DocumentBuilderInstance;
 import version2.prototype.EastWebUI.GlobalUIData;
-import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Plugin;
 
 public abstract class BasePlugin implements IPlugin {
 
@@ -70,15 +70,42 @@ public abstract class BasePlugin implements IPlugin {
         listOfPIndicies = new ArrayList<String>(Indicies);
     }
 
-    @Override
-    public IPlugin GetParseObject(IPlugin plugin) {
-        // TODO Auto-generated method stub
-        return null;
+    @SuppressWarnings("unchecked")
+    public <T> T GetParseObject(Node node, Class<T> clazz) {
+        IPlugin plugin = null;
+        try {
+            plugin = (IPlugin) clazz.newInstance();
+            Element element = (Element)node;
+
+            plugin.SetPluginName(pluginName = node.getAttributes().getNamedItem("name").getTextContent());
+            plugin.SetQCLevel(qcLevel = GetNodeListValuesIgnoreIfEmpty(element.getElementsByTagName("QC")).get(0));
+            plugin.SetIndicies(GetNodeListValuesIgnoreIfEmpty(element.getElementsByTagName("Indicies")));
+        } catch (InstantiationException | IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return (T) plugin;
     }
 
-    @Override
-    public IPlugin ParsePlugin(File xmlFiles){
-        return new Plugin();
+    protected ArrayList<String> GetNodeListValuesIgnoreIfEmpty(NodeList nList)
+    {
+        ArrayList<String> values = new ArrayList<String>();
+        if(nList != null && nList.getLength() > 0)
+        {
+            for(int i=0; i < nList.getLength(); i++)
+            {
+                Element e = (Element)nList.item(i);
+                NodeList list = e.getChildNodes();
+                Node n = list.item(0);
+                if(n != null)
+                {
+                    n.normalize();
+                    values.add(n.getNodeValue().trim());
+                }
+            }
+        }
+        return values;
     }
 
     @Override

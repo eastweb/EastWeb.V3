@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.w3c.dom.NodeList;
+
 import version2.prototype.EastWebUI.PluginUI_v2.BasePlugin;
+import version2.prototype.EastWebUI.PluginUI_v2.IPlugin;
 
 public class Plugin extends BasePlugin{
 
@@ -41,5 +44,11 @@ public class Plugin extends BasePlugin{
     @Override
     public void Save() {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public IPlugin GetParseObject(NodeList nodeList, int itemNumber) {
+        Plugin plugin = super.GetParseObject(nodeList.item(itemNumber), Plugin.class);
+        return plugin;
     }
 }

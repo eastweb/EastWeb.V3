@@ -2,6 +2,8 @@ package version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -15,7 +17,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import version2.prototype.ModisTile;
 import version2.prototype.EastWebUI.DocumentBuilderInstance;
@@ -27,6 +32,8 @@ import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis.ModisListe
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
 
 public class ModisPlugin extends BasePlugin implements IPlugin {
+    private DefaultListModel<String> modisListModel;
+
     // constructor for parsing xml
     public ModisPlugin(String PluginName, String QCLevel, ArrayList<String> Indicies, ArrayList<String> ModisList) {
         super(PluginName, QCLevel, Indicies);
@@ -36,8 +43,8 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
 
     // constructor for UI
     public ModisPlugin() {
-
         GlobalUIData.Instance().AddModisListner(new modisListenerImplementation());
+
     }
 
     public ArrayList<String> GetModisList()
@@ -52,6 +59,10 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
 
     public void SetModisList(ArrayList<String> ModisList)
     {
+        if(modisListModel == null) {
+            modisListModel = new DefaultListModel<String>();
+        }
+
         modisListModel.clear();
         for(String p: ModisList) {
             modisListModel.addElement(p);
@@ -100,9 +111,29 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
         GlobalUIData.Instance().SetModisTiles(GetModisList());
     }
 
+    @Override
+    public IPlugin GetParseObject(NodeList nodeList, int itemNumber) {
+        ModisPlugin parsePlugin = null;
+
+        try {
+            File xmlFiles = new File("C:\\Users\\sufi\\git\\EastWeb.Version2\\projects\\New UI .xml");
+            Document doc = DocumentBuilderInstance.Instance().GetDocumentBuilder().parse(xmlFiles);
+            doc.getDocumentElement().normalize();
+            nodeList = doc.getElementsByTagName("Plugin");
+
+            parsePlugin = super.GetParseObject(nodeList.item(itemNumber), ModisPlugin.class);
+            parsePlugin.SetModisList(GetNodeListValuesIgnoreIfEmpty(((Element)nodeList.item(itemNumber))
+                    .getElementsByTagName("ModisTiles")));
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return parsePlugin;
+    }
+
     private JButton addNewModisButton;
     private JButton deleteSelectedModisButton;
-    private DefaultListModel<String> modisListModel;
     private JLabel lblModisTiles;
     private JScrollPane scrollPane;
 
@@ -186,5 +217,7 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
             SetModisList(GlobalUIData.Instance().GetModisTiles());
         }
     }
+
+
 
 }

@@ -1,5 +1,7 @@
 package version2.prototype.EastWebUI.PluginUI_v2.PluginExtension;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -8,14 +10,22 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.toedter.calendar.JDateChooser;
 
 import version2.prototype.EastWebUI.DocumentBuilderInstance;
 import version2.prototype.EastWebUI.PluginUI_v2.BasePlugin;
+import version2.prototype.EastWebUI.PluginUI_v2.IPlugin;
 
 public class NldasForcingPluginUI extends BasePlugin {
+    private String freezingDate;
+    private String coolingDegree;
+    private String heatingDate;
+    private String heatingDegree;
 
     public NldasForcingPluginUI(String PluginName, String QCLevel, ArrayList<String> Indicies) {
         super(PluginName, QCLevel, Indicies);
@@ -24,6 +34,74 @@ public class NldasForcingPluginUI extends BasePlugin {
 
     public NldasForcingPluginUI() {
         // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    public void Save() {
+        // TODO Auto-generated method stub
+        SetFreezingDate(freezingDateChooser.getDate().toString());
+        SetCoolingDegree(coolingTextField.getText());
+        SetHeatingDate(heatingDateChooser.getDate().toString());
+        SetHeatingDegree(heatingTextField.getText());
+    }
+
+    @Override
+    public IPlugin GetParseObject(NodeList nodeList, int itemNumber) {
+        NldasForcingPluginUI parsePlugin = null;
+
+        try {
+            File xmlFiles = new File("C:\\Users\\sufi\\git\\EastWeb.Version2\\projects\\New UI .xml");
+            Document doc = DocumentBuilderInstance.Instance().GetDocumentBuilder().parse(xmlFiles);
+            doc.getDocumentElement().normalize();
+            nodeList = doc.getElementsByTagName("Plugin");
+
+            parsePlugin = super.GetParseObject(nodeList.item(itemNumber), NldasForcingPluginUI.class);
+            parsePlugin.SetFreezingDate(GetNodeListValuesIgnoreIfEmpty(((Element)nodeList.item(itemNumber))
+                    .getElementsByTagName("FreezingDate")).get(0));
+            parsePlugin.SetCoolingDegree(GetNodeListValuesIgnoreIfEmpty(((Element)nodeList.item(itemNumber))
+                    .getElementsByTagName("CoolingDegree")).get(0));
+            parsePlugin.SetHeatingDate(GetNodeListValuesIgnoreIfEmpty(((Element)nodeList.item(itemNumber))
+                    .getElementsByTagName("HeatingDate")).get(0));
+            parsePlugin.SetHeatingDegree(GetNodeListValuesIgnoreIfEmpty(((Element)nodeList.item(itemNumber))
+                    .getElementsByTagName("HeatingDegree")).get(0));
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return parsePlugin;
+    }
+
+    private void SetHeatingDegree(String string) {
+        freezingDate = string;
+    }
+
+    private void SetHeatingDate(String string) {
+        coolingDegree = string;
+    }
+
+    private void SetCoolingDegree(String string) {
+        heatingDate = string;
+    }
+
+    private void SetFreezingDate(String string) {
+        heatingDegree = string;
+    }
+
+    private String GetHeatingDegree() {
+        return freezingDate;
+    }
+
+    private String GetHeatingDate() {
+        return coolingDegree;
+    }
+
+    private String GetCoolingDegree() {
+        return heatingDate;
+    }
+
+    private String GetFreezingDate() {
+        return heatingDegree;
     }
 
     private JDateChooser freezingDateChooser;
@@ -144,9 +222,5 @@ public class NldasForcingPluginUI extends BasePlugin {
         Panel.remove(lblFreezingStartDate);
     }
 
-    @Override
-    public void Save() {
-        // TODO Auto-generated method stub
 
-    }
 }

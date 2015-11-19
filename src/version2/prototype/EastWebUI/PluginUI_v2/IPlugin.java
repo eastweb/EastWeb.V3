@@ -1,6 +1,5 @@
 package version2.prototype.EastWebUI.PluginUI_v2;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -8,6 +7,7 @@ import javax.swing.JPanel;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public interface IPlugin {
     public int GetId();
@@ -20,9 +20,7 @@ public interface IPlugin {
     public Element GetXMLObject() throws ParserConfigurationException;
     public JPanel SetupUI(JPanel Panel, JFrame frame);
     public void ClearUI(JPanel Panel);
-    public IPlugin GetParseObject(IPlugin plugin);
+    public IPlugin GetParseObject(NodeList nodeList, int itemNumber);
     public void Save();
     public String GetUIDisplayPlugin();
-    public IPlugin ParsePlugin(File xmlFiles);
-
 }
