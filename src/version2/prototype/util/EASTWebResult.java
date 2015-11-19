@@ -17,6 +17,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
     public final String areaCodeField;
     public final String areaName;
     public final int areaCode;
+    public final int summaryID;
     public final String shapeFilePath;
     public final String temporalSummaryCompositionStrategyClassName;
     public final ArrayList<String> summaryNames;
@@ -36,6 +37,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
      * @param areaName  - the name of the zone this result is summarized for
      * @param areaCodeField  - the name of the zone code field this result is using for zonal summarization
      * @param areaCode  - the zone code this result is summarized for
+     * @param summaryID  - the ID number attributed to the summary during project creation
      * @param shapeFilePath
      * @param temporalSummaryCompositionStrategyClassName
      * @param summaryNames  - the name of the summary calculations found in the summaryCalculations list in the order they are given in it
@@ -43,7 +45,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
      * @param filePath  - file path of resulting csv file
      */
     @SuppressWarnings("unchecked")
-    @Immutable public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, String shapeFilePath,
+    @Immutable public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, int summaryID, String shapeFilePath,
             String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations, String filePath)
     {
         indexName = indexNm;
@@ -53,6 +55,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
         this.areaName = areaName;
         this.areaCodeField = areaCodeField;
         this.areaCode = areaCode;
+        this.summaryID = summaryID;
         this.shapeFilePath = shapeFilePath;
         this.temporalSummaryCompositionStrategyClassName = temporalSummaryCompositionStrategyClassName;
         this.summaryNames = (ArrayList<String>) summaryNames.clone();

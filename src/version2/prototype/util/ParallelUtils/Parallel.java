@@ -25,9 +25,9 @@ public class Parallel {
     //            new NamedThreadFactory("Parallel.For", false));
     //    private static final ExecutorService forPool = Executors.newFixedThreadPool(NUM_CORES * 2, new NamedThreadFactory("Parallel.For", false));
 
-    public static <E,R> List<Future<R>> ForEach(final List<E> elements, final Operation<E,R> operation) {
+    public static <E,R> List<Future<R>> ForEach(Config configInstance, final List<E> elements, final Operation<E,R> operation) {
         ThreadPoolExecutor forPool = new ThreadPoolExecutor(NUM_CORES, Integer.MAX_VALUE, 1l, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(),
-                new NamedThreadFactory("Parallel.For", false));
+                new NamedThreadFactory(configInstance, "Parallel.For", false));
         List<Future<R>> futures = new ArrayList<Future<R>>();
         // invokeAll blocks for us until all submitted tasks in the call complete
         try {

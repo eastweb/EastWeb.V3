@@ -206,7 +206,8 @@ public class QueryUI {
                                     (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
                                     String.valueOf(dayComboBox.getSelectedItem()),
                                     (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
-                                    null));
+                                    null,
+                                    new Integer[]{1}));
                         } catch (NumberFormatException
                                 | ClassNotFoundException | SQLException
                                 | ParserConfigurationException

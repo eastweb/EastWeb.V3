@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.util.GeneralUIEventObject;
 
 /**
@@ -31,6 +32,16 @@ public class SchedulerWorker implements Callable<ProcessWorkerReturn> {
         }
     }
 
+    public ProjectInfoFile GetProjectInfo()
+    {
+        return worker.projectInfoFile;
+    }
+
+    public String GetWorkerName()
+    {
+        return worker.processWorkerName;
+    }
+
     @Override
     public ProcessWorkerReturn call() throws Exception {
         ProcessWorkerReturn theReturn = null;
@@ -40,7 +51,10 @@ public class SchedulerWorker implements Callable<ProcessWorkerReturn> {
         }
         scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
+        String oldThreadName = Thread.currentThread().getName();
+        Thread.currentThread().setName(oldThreadName + "-" + worker. projectInfoFile.GetProjectName() + "-" + worker.processWorkerName + "");
         theReturn = worker.call();
+        Thread.currentThread().setName(oldThreadName + "-Updating-Scheduler-Status");
 
         synchronized(statusContainer) {
             statusContainer.SubtractActiveWorker(worker.process.processName);
@@ -48,6 +62,7 @@ public class SchedulerWorker implements Callable<ProcessWorkerReturn> {
         }
         scheduler.NotifyUI(new GeneralUIEventObject(this, null));
 
+        Thread.currentThread().setName(oldThreadName);
         return theReturn;
     }
 

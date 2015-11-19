@@ -44,7 +44,7 @@ public class SandboxTesting {
             ArrayList<String> includedIndices = new ArrayList<String>();
             includedIndices.add("TRMM3B42RTIndex");
             EASTWebQuery query = EASTWebResults.GetEASTWebQuery("EASTWeb", "Test Both TRMM 101615", "TRMM3B42RT", true, true, true, true, true, true, true, zones, "=", 2014, ">",
-                    300, includedIndices);
+                    300, includedIndices, new Integer[]{1});
             System.out.println(query.toString());
             ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>();
             results = EASTWebResults.GetEASTWebResults(query);

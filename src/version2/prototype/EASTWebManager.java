@@ -17,9 +17,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -33,6 +35,7 @@ import version2.prototype.download.LocalDownloader;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnectionPoolA;
 import version2.prototype.util.DatabaseConnector;
+import version2.prototype.util.ParallelUtils.NamedThreadFactory;
 
 /**
  * Threading management class for EASTWeb. All spawning, executing, and stopping of threads is handled through this class in order for it to manage
@@ -49,6 +52,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     protected static int defaultNumOfSimultaneousGlobalDLs = 1;
     //    protected static int defaultMSBeetweenUpdates = 300000;       // 5 minutes
     protected static int defaultMSBeetweenUpdates = 5000;       // 5 seconds
+    protected static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
 
     // Logged requests from other threads
     protected static Boolean acceptingRequests = true;
@@ -104,9 +108,9 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         try{
             if(instance == null)
             {
-                int numOfWorkerThreads = Runtime.getRuntime().availableProcessors() < 4 ?
-                        1 : ((Runtime.getRuntime().availableProcessors() - 2 - numOfSimultaneousGlobalDLs) < 0 ?
-                                1 : Runtime.getRuntime().availableProcessors() - 2 - numOfSimultaneousGlobalDLs);
+                int numOfWorkerThreads = NUM_CORES < 4 ?
+                        1 : ((NUM_CORES - 2 - numOfSimultaneousGlobalDLs) < 0 ?
+                                1 : NUM_CORES - 2 - numOfSimultaneousGlobalDLs);
                 instance = new EASTWebManager(
                         numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
                         numOfWorkerThreads, // Number of ProcessWorkers allowed to be simultaneously active
@@ -1154,35 +1158,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
         //        connectionPool = new C3P0ConnectionPool(configInstance);
         connectionPool = null;
 
-        ThreadFactory gDLFactory = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable target) {
-                final Thread thread = new Thread(target);
-                //                log.debug("Creating new worker thread");
-                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                    @Override
-                    public void uncaughtException(Thread t, Throwable e) {
-                        //                        log.error("Uncaught Exception", e);
-                    }
-                });
-                return thread;
-            }
-        };
-        ThreadFactory pwFactory = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable target) {
-                final Thread thread = new Thread(target);
-                //                log.debug("Creating new worker thread");
-                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-                    @Override
-                    public void uncaughtException(Thread t, Throwable e) {
-                        //                        log.error("Uncaught Exception", e);
-                    }
-                });
-                return thread;
-            }
-        };
-
         // Setup request lists
         startNewSchedulerRequests = Collections.synchronizedList(new ArrayList<SchedulerData>(0));
         loadNewSchedulerRequests = Collections.synchronizedList(new ArrayList<SchedulerData>(0));
@@ -1195,14 +1170,17 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
         // Setup for handling executing GlobalDownloaders
         globalDLs = new HashMap<Integer, GlobalDownloader>();
-        globalDLExecutor = Executors.newScheduledThreadPool(numOfGlobalDLResourses, gDLFactory);
+        globalDLExecutor = Executors.newScheduledThreadPool(numOfGlobalDLResourses, new NamedThreadFactory(configInstance, "GlobalDownloader", false));
         globalDLFutures = new HashMap<Integer, ScheduledFuture<?>>();
 
         // Setup for handling executing Schedulers
         schedulers = new HashMap<Integer, Scheduler>();
 
         // Setup for handling executing ProcessWorkers
-        processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, pwFactory);
+        //        processWorkerExecutor = Executors.newFixedThreadPool(numOfProcessWorkerResourses, new NamedThreadFactory(configInstance, "ProcessWorker", false));
+        processWorkerExecutor = new ThreadPoolExecutor(numOfProcessWorkerResourses, numOfProcessWorkerResourses, 1l, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(),
+                new NamedThreadFactory(configInstance, "ProcessWorker", false));
+        ((ThreadPoolExecutor)processWorkerExecutor).allowCoreThreadTimeOut(true);
     }
 
     protected void handleStartNewSchedulerRequests(SchedulerData data)
