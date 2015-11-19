@@ -4,6 +4,7 @@
 package version2.prototype.util;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -145,7 +146,7 @@ public class EASTWebResults {
                 "AND P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
-        return new EASTWebQuery(query.toString());
+        return new EASTWebQuery(projectName, pluginName, query.toString());
     }
 
     /**
@@ -207,7 +208,7 @@ public class EASTWebResults {
         query.append(";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
-        return new EASTWebQuery(query.toString());
+        return new EASTWebQuery(projectName, pluginName, query.toString());
     }
 
     /**
@@ -257,7 +258,6 @@ public class EASTWebResults {
         {
             while(rs.next())
             {
-                valid = true;
                 summaryCalculations = new ArrayList<Double>(0);
                 for(String summary : Config.getInstance().getSummaryCalculations())
                 {
@@ -272,14 +272,14 @@ public class EASTWebResults {
                         }
                     }
                     if(!foundColumn) {
-                        valid = false;
+                        summaryCalculations.add(null);
                     }
                 }
-                if(valid) {
-                    results.add(new EASTWebResult(rs.getString("IndexName"), rs.getInt("Year"), rs.getInt("DayOfYear"), rs.getString("AreaNameField"), rs.getString("AreaName"), rs.getString("AreaCodeField"),
-                            rs.getInt("AreaCode"), rs.getInt("SummaryIDNum"), rs.getString("ShapeFile"), rs.getString("TemporalSummaryCompositionStrategyClass"),
-                            Config.getInstance().getSummaryCalculations(), summaryCalculations, rs.getString("FilePath")));
-                }
+
+                results.add(new EASTWebResult(query.projectName, query.pluginName, rs.getString("IndexName"), rs.getInt("Year"), rs.getInt("DayOfYear"),
+                        rs.getString("AreaNameField"), rs.getString("AreaName"), rs.getString("AreaCodeField"), rs.getInt("AreaCode"), rs.getInt("SummaryIDNum"),
+                        rs.getString("ShapeFile"), rs.getString("TemporalSummaryCompositionStrategyClass"), Config.getInstance().getSummaryCalculations(), summaryCalculations,
+                        rs.getString("FilePath")));
             }
             rs.close();
         }
@@ -287,6 +287,64 @@ public class EASTWebResults {
         con.close();
 
         return results;
+    }
+
+    /**
+     * Writes the given results array to a new csv file with the specified destination.
+     *
+     * @param filePath
+     * @param results
+     * @throws IOException
+     */
+    public static boolean WriteEASTWebResultsToCSV(String filePath, ArrayList<EASTWebResult> results) throws IOException
+    {
+        if(filePath == null) {
+            return false;
+        }
+
+        if(filePath.endsWith("\\")) {
+            filePath = filePath + System.currentTimeMillis() + ".csv";
+        }
+
+        if(!filePath.endsWith(".csv")) {
+            filePath = filePath + ".csv";
+        }
+
+        File oFile = new File(filePath);
+        if(oFile.getParent() != null) {
+            new File(oFile.getParent()).mkdirs();
+        }
+        else {
+            return false;
+        }
+
+        FileWriter writer = new FileWriter(oFile);
+
+        writer.write("Project Name, Plugin Name, Index Name, Year, Day Of Year, Area Name, Area Code, Summary ID, Value Count");
+        if(results.size() > 0)
+        {
+            for(String name : results.get(0).summaryNames)
+            {
+                writer.write(", " + name);
+            }
+        }
+        writer.write("\n");
+
+        for(EASTWebResult result : results)
+        {
+            writer.write(result.projectName + ", " + result.pluginName + ", " + result.indexName + ", " + result.year + ", " + result.day + ", " + result.areaName + ", " + result.areaCode + ", " +
+                    result.summaryID);
+            for(Double value : result.summaryCalculations)
+            {
+                if(value != null){
+                    writer.write(", " + value);
+                }
+            }
+            writer.write("\n");
+        }
+
+        writer.close();
+        return true;
     }
 
     /**
@@ -442,7 +500,7 @@ public class EASTWebResults {
         query.append("AND A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\" AND P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\"" +
                 zoneCondition + summariesCondition.toString() + ";");
 
-        return new EASTWebQuery(query.toString());
+        return new EASTWebQuery(projectName, pluginName, query.toString());
     }
 
     private EASTWebResults()

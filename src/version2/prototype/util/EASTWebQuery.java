@@ -6,6 +6,8 @@ package version2.prototype.util;
  *
  */
 public final class EASTWebQuery {
+    public final String projectName;
+    public final String pluginName;
     private final String sql;
 
     /**
@@ -14,8 +16,10 @@ public final class EASTWebQuery {
      *
      * @param query  - an sql command
      */
-    protected EASTWebQuery(String sql)
+    protected EASTWebQuery(String projectName, String pluginName, String sql)
     {
+        this.projectName = projectName;
+        this.pluginName = pluginName;
         this.sql = sql;
     }
 

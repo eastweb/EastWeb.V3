@@ -10,6 +10,8 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
  *
  */
 @Immutable public class EASTWebResult {
+    public final String projectName;
+    public final String pluginName;
     public final String indexName;
     public final int year;
     public final int day;
@@ -30,6 +32,8 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
     /**
      * Creates an immutable EASTWebResult initialized with the given values.
      *
+     * @param projectName
+     * @param pluginName
      * @param indexNm  - name of the environmental index this result is for
      * @param year  - the earliest year this result is based in
      * @param day  - the earliest day this result is based on
@@ -45,9 +49,11 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
      * @param filePath  - file path of resulting csv file
      */
     @SuppressWarnings("unchecked")
-    @Immutable public EASTWebResult(String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, int summaryID, String shapeFilePath,
-            String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations, String filePath)
+    @Immutable public EASTWebResult(String projectName, String pluginName, String indexNm, int year, int day, String areaNameField, String areaName, String areaCodeField, int areaCode, int summaryID,
+            String shapeFilePath, String temporalSummaryCompositionStrategyClassName, ArrayList<String> summaryNames, ArrayList<Double> summaryCalculations, String filePath)
     {
+        this.projectName = projectName;
+        this.pluginName = pluginName;
         indexName = indexNm;
         this.year = year;
         this.day = day;
