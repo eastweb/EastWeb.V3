@@ -234,8 +234,6 @@ public class QueryUI {
                                     (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
                                     indicies,
                                     new Integer[]{summary.GetID()});
-
-
                         } catch (NumberFormatException e) {
                             ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
                         }
