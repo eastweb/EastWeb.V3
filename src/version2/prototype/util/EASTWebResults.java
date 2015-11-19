@@ -320,7 +320,7 @@ public class EASTWebResults {
 
         FileWriter writer = new FileWriter(oFile);
 
-        writer.write("Project Name, Plugin Name, Index Name, Year, Day Of Year, Area Name, Area Code, Summary ID, Value Count");
+        writer.write("Project Name, Plugin Name, Index Name, Year, Day Of Year, Area Name, Area Code, Summary ID");
         if(results.size() > 0)
         {
             for(String name : results.get(0).summaryNames)
