@@ -214,32 +214,31 @@ public class QueryUI {
                 for(int i=0; i < includeListModel.toArray().length; i++){
                     indicies[i] = includeListModel.get(i);
                 }
-                for(ProjectInfoPlugin s : project.GetPlugins()) {
-                    for(ProjectInfoSummary summary : project.GetSummaries()) {
-                        try {
-                            ewQuery.put(summary.GetID(), EASTWebResults.GetEASTWebQuery(
-                                    Config.getInstance().getGlobalSchema(),
-                                    String.valueOf(projectListComboBox.getSelectedItem()),
-                                    s.GetName(),
-                                    chckbxCount.isSelected(),
-                                    maxCheckBox.isSelected(),
-                                    minCheckBox.isSelected(),
-                                    chckbxSum.isSelected(),
-                                    chckbxMean.isSelected(),
-                                    sqrSumCheckBox.isSelected(),
-                                    chckbxStdev.isSelected(),
-                                    new String[]{String.valueOf(zoneComboBox.getSelectedItem())},
-                                    String.valueOf(yearComboBox.getSelectedItem()),
-                                    (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
-                                    String.valueOf(dayComboBox.getSelectedItem()),
-                                    (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
-                                    indicies,
-                                    new Integer[]{summary.GetID()}));
-                        } catch (NumberFormatException e) {
-                            ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
-                        }
 
+                for(ProjectInfoSummary summary : project.GetSummaries()) {
+                    try {
+                        ewQuery.put(summary.GetID(), EASTWebResults.GetEASTWebQuery(
+                                Config.getInstance().getGlobalSchema(),
+                                String.valueOf(projectListComboBox.getSelectedItem()),
+                                String.valueOf(pluginComboBox.getSelectedItem()),
+                                chckbxCount.isSelected(),
+                                maxCheckBox.isSelected(),
+                                minCheckBox.isSelected(),
+                                chckbxSum.isSelected(),
+                                chckbxMean.isSelected(),
+                                sqrSumCheckBox.isSelected(),
+                                chckbxStdev.isSelected(),
+                                new String[]{String.valueOf(zoneComboBox.getSelectedItem())},
+                                String.valueOf(yearComboBox.getSelectedItem()),
+                                (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
+                                String.valueOf(dayComboBox.getSelectedItem()),
+                                (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
+                                indicies,
+                                new Integer[]{summary.GetID()}));
+                    } catch (NumberFormatException e) {
+                        ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
                     }
+
                 }
 
                 if(ewQuery != null){

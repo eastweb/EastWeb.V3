@@ -89,7 +89,7 @@ public class EASTWebResults {
             String[] includedIndices, Integer[] summaryIDs)
     {
         StringBuilder zoneCondition = new StringBuilder();
-        if(zones.length > 0)
+        if(zones.length > 0 && !zones[0].trim().equals(""))
         {
             zoneCondition.append(" AND (A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones[0]) + "'");
             for(int i=1; i < zones.length; i++) {
