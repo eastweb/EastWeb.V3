@@ -18,12 +18,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -89,7 +87,7 @@ public class QueryUI {
             public void run() {
                 try {
                     @SuppressWarnings("unused")
-                    QueryUI window = new QueryUI(new JComboBox<String>());
+                    QueryUI window = new QueryUI();
 
                 } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "QueryUI.main problem with running a QueryUI window.", e);
@@ -101,7 +99,7 @@ public class QueryUI {
     /**
      * Create the application.
      */
-    public QueryUI(JComboBox<String> projectList) {
+    public QueryUI() {
 
         initialize();
         frame.setVisible(true);
@@ -118,13 +116,14 @@ public class QueryUI {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
 
+        populateClauseUI();
+        populateFieldsUI();
+        populateIndicesUI();
+
         CreateSQLView();
     }
 
     private void CreateSQLView() {
-        includeListModel = new DefaultListModel<String>();
-        excludeListModel = new DefaultListModel<String>();
-
         JLabel lblProject = new JLabel("Project:");
         lblProject.setBounds(19, 14, 89, 14);
         frame.getContentPane().add(lblProject);
@@ -172,9 +171,7 @@ public class QueryUI {
         populateProjectList();
         frame.getContentPane().add(projectListComboBox);
 
-        populateClauseUI();
-        populateFieldsUI();
-        populateIndicesUI();
+
 
         JButton viewSQLButton = new JButton("View SQL");
         viewSQLButton.addActionListener(new ActionListener() {
@@ -183,9 +180,9 @@ public class QueryUI {
                 isViewSQL = !isViewSQL;
 
                 if(isViewSQL) {
-                    frame.setBounds(100, 100, 700, 550);
+                    frame.setBounds(100, 100, 700, 625);
                 } else {
-                    frame.setBounds(100, 100, 400, 550);
+                    frame.setBounds(100, 100, 400, 625);
                 }
             }
         });
@@ -209,10 +206,7 @@ public class QueryUI {
                 }
 
                 EASTWebQuery listFile = null;
-                String[] indicies = new String[includeListModel.toArray().length];
-                for(int i=0; i < includeListModel.toArray().length; i++){
-                    indicies[i] = includeListModel.get(i);
-                }
+
                 for(ProjectInfoPlugin s : project.GetPlugins()) {
                     for(ProjectInfoSummary summary : project.GetSummaries()) {
                         try {
@@ -232,7 +226,7 @@ public class QueryUI {
                                     (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
                                     String.valueOf(dayComboBox.getSelectedItem()),
                                     (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
-                                    indicies,
+                                    (String []) includeListModel.toArray(),
                                     new Integer[]{summary.GetID()});
                         } catch (NumberFormatException e) {
                             ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
@@ -356,7 +350,8 @@ public class QueryUI {
     }
 
     private void populateIndicesUI() {
-
+        includeListModel = new DefaultListModel<String>();
+        excludeListModel = new DefaultListModel<String>();
 
         JPanel indicesPanel = new JPanel();
         indicesPanel.setLayout(null);
@@ -401,7 +396,6 @@ public class QueryUI {
                 if (selectedIndex != -1) {
                     includeListModel.addElement(excludeList.getSelectedValue());
                     model.remove(selectedIndex);
-
                 }
             }
         });
@@ -440,15 +434,15 @@ public class QueryUI {
         chckbxStdev.setBounds(131, 21, 75, 23);
         fieldsPanel.add(chckbxStdev);
 
-        JCheckBox minCheckBox = new JCheckBox("min");
+        minCheckBox = new JCheckBox("min");
         minCheckBox.setBounds(131, 51, 75, 23);
         fieldsPanel.add(minCheckBox);
 
-        JCheckBox maxCheckBox = new JCheckBox("max");
+        maxCheckBox = new JCheckBox("max");
         maxCheckBox.setBounds(131, 77, 75, 23);
         fieldsPanel.add(maxCheckBox);
 
-        JCheckBox sqrSumCheckBox = new JCheckBox("sqrSum");
+        sqrSumCheckBox = new JCheckBox("sqrSum");
         sqrSumCheckBox.setBounds(261, 21, 97, 23);
         fieldsPanel.add(sqrSumCheckBox);
     }

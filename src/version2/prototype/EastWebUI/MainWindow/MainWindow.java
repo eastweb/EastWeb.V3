@@ -183,9 +183,8 @@ public class MainWindow {
         mntmRunQuery.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-
-                new QueryUI(projectList);
-
+                new QueryUI();
+                //new QueryUI(projectList);
             }
         });
         mnFile.add(mntmRunQuery);
