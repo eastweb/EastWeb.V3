@@ -13,7 +13,7 @@
 <Indicies>NldasForcingFreezingDegreeDays</Indicies>
 <NldasForcing>
 <FreezingDate>Fri Nov 20 00:00:00 CST 1970</FreezingDate>
-<CoolingDegree>wer</CoolingDegree>
+<CoolingDegree>20</CoolingDegree>
 <HeatingDate>Fri Nov 13 19:01:32 CST 1970</HeatingDate>
 <HeatingDegree>234</HeatingDegree>
 </NldasForcing>

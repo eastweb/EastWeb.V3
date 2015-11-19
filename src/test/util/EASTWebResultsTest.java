@@ -50,6 +50,7 @@ public class EASTWebResultsTest {
     private static String daySign = "=";
     private static int dayVal = 180;
     private static ArrayList<String> includedIndices = new ArrayList<String>();
+    private static Integer[] includedSummaries = new Integer[]{1};
     private static String[] indices = new String[5];
     private static ProjectInfoFile projectMetaData;
     //    private static String shapeFile = "Settings\\shapeFile";
@@ -139,7 +140,8 @@ public class EASTWebResultsTest {
     }
 
     /**
-     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(String, String, String, Boolean, Boolean, Boolean, Boolean, String, Integer, String, Integer, String, Integer, ArrayList)}.
+     * Test method for {@link version2.prototype.util.EASTWebResults#GetEASTWebQuery(String, String, String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, String, Integer, String, Integer,
+     * String, Integer, ArrayList, ArrayList)}.
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
@@ -150,8 +152,8 @@ public class EASTWebResultsTest {
     public final void testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary() throws ClassNotFoundException, SQLException, ParserConfigurationException, SAXException, IOException {
         //        ZonalSummary zonalSummary = new ZonalSummary(shapeFile, areaValueField, areaNameField);
         EASTWebQuery query = EASTWebResults.GetEASTWebQuery(globalSchema, projectName, pluginName, selectCount, selectMax, selectMin, selectSum, selectMean, selectSqrSum,
-                selectStdDev, zoneSign,
-                yearSign, yearVal, daySign, dayVal, includedIndices);
+                selectStdDev, zoneSign, zoneVal,
+                yearSign, yearVal, daySign, dayVal, includedIndices, includedSummaries);
         System.out.println("testGetEASTWebQueryStringStringStringBooleanBooleanBooleanBooleanStringIntStringIntStringIntArrayListOfStringZonalSummary:");
         System.out.println(query);
         System.out.println();

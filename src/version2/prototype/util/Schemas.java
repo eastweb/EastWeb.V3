@@ -164,7 +164,7 @@ public class Schemas {
     {
         final int pluginID = Schemas.getPluginID(globalEASTWebSchema, pluginName, stmt);
 
-        String selectQuery = "SELECT \"GlobalDownloaderID\" FROM \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" WHERE \"PluginID\" = " + pluginID + " AND \"DataName\" = '" + dataName + "';";
+        String selectQuery = "SELECT \"GlobalDownloaderID\" FROM \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" WHERE \"PluginID\" = " + pluginID + " AND \"DataName\" like '" + escapeUnderScoresAndPercents(dataName) + "';";
         String insertQuery = "INSERT INTO \"" + globalEASTWebSchema + "\".\"GlobalDownloader\" (\"PluginID\", \"DataName\") VALUES (" + pluginID + ", '" + dataName + "');";
         return addRowIFNotExistent(selectQuery, insertQuery, stmt);
     }
@@ -242,7 +242,7 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"IndexID\" FROM \"%1$s\".\"Index\" " +
-                "WHERE \"Name\"='" + indexNm + "';",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(indexNm) + "';",
                 globalEASTWebSchema
                 );
         String insertQuery = String.format(
@@ -259,7 +259,7 @@ public class Schemas {
         int pluginID = getPluginID(globalEASTWebSchema, pluginName, stmt);
         String selectQuery = String.format(
                 "SELECT \"GlobalDownloaderID\" FROM \"%1$s\".\"GlobalDownloader\" WHERE \n" +
-                        "\"PluginID\"=" + pluginID + " AND \"DataName\" = '" + dataName + "' ORDER BY \"GlobalDownloaderID\" DESC;",
+                        "\"PluginID\"=" + pluginID + " AND \"DataName\" like '" + escapeUnderScoresAndPercents(dataName) + "' ORDER BY \"GlobalDownloaderID\" DESC;",
                         globalEASTWebSchema
                 );
         ID = getID(selectQuery, "GlobalDownloaderID", stmt);
@@ -277,7 +277,7 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
-                "WHERE \"Name\"='" + pluginName + "';",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(pluginName) + "';",
                 globalEASTWebSchema
                 );
         return getID(selectQuery, "PluginID", stmt);
@@ -303,7 +303,7 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"ProjectID\" FROM \"%1$s\".\"Project\" " +
-                "WHERE \"Name\"='" + projectName + "';",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(projectName) + "';",
                 globalEASTWebSchema
                 );
         return getID(selectQuery, "ProjectID", stmt);
@@ -320,7 +320,7 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"TemporalSummaryCompositionStrategyID\" FROM \"%1$s\".\"TemporalSummaryCompositionStrategy\" " +
-                "WHERE \"Name\"='" + temporalSummaryCompositionStrategyClassName + "';",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(temporalSummaryCompositionStrategyClassName) + "';",
                 globalEASTWebSchema
                 );
         return getID(selectQuery, "TemporalSummaryCompositionStrategyID", stmt);
@@ -340,12 +340,12 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"TemporalSummaryCompositionStrategyID\" FROM \"%1$s\".\"TemporalSummaryCompositionStrategy\" " +
-                "WHERE \"Name\"='" + temporalSummaryCompositionStrategyClassName + "';",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(temporalSummaryCompositionStrategyClassName) + "';",
                 globalEASTWebSchema
                 );
         String insertQuery = String.format(
                 "INSERT INTO \"%1$s\".\"TemporalSummaryCompositionStrategy\" (\"Name\") VALUES " +
-                        "('" + temporalSummaryCompositionStrategyClassName + "');",
+                        "('" + escapeUnderScoresAndPercents(temporalSummaryCompositionStrategyClassName) + "');",
                         globalEASTWebSchema
                 );
         addRowIFNotExistent(selectQuery, insertQuery, stmt);
@@ -382,6 +382,14 @@ public class Schemas {
         return FileSystem.StandardizeName(builder.toString());
     }
 
+    public static String escapeUnderScoresAndPercents(String input)
+    {
+        String output = input.replaceAll("\\\\", "\\\\\\\\");
+        output = output.replaceAll("_", "\\\\_");
+
+        return output;
+    }
+
     private static int getFilesPerDay(final String globalEASTWebSchema, final int pluginID, final Statement stmt) throws SQLException
     {
         int filesPerDay = 0;
@@ -400,7 +408,7 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"PluginID\" FROM \"%1$s\".\"Plugin\" " +
-                "WHERE \"Name\"='" + pluginName + "';",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(pluginName) + "';",
                 globalEASTWebSchema
                 );
         String insertQuery = String.format(
@@ -417,7 +425,7 @@ public class Schemas {
         }
 
         String selectQuery = String.format("SELECT \"ProjectID\" FROM \"%1$s\".\"Project\" " +
-                "WHERE \"Name\"='" + projectName + "' AND \"StartDate_DateGroupID\"=" + dateGroupID + ";",
+                "WHERE \"Name\" like '" + escapeUnderScoresAndPercents(projectName) + "' AND \"StartDate_DateGroupID\"=" + dateGroupID + ";",
                 globalEASTWebSchema
                 );
         String insertQuery = String.format(
