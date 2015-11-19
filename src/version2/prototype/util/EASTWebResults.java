@@ -48,7 +48,7 @@ public class EASTWebResults {
      */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectMax, boolean selectMin,
             boolean selectSum, boolean selectMean, boolean selectSqrSum, boolean selectStdDev, String zoneSign, Integer zoneVal, String yearSign, Integer yearVal, String daySign, Integer dayVal,
-            ArrayList<String> includedIndices, Integer[] summaryIDs)
+            String[] includedIndices, Integer[] summaryIDs)
     {
         String zoneCondition = "";
         if(zoneSign == null || zoneVal == null) {
@@ -84,15 +84,15 @@ public class EASTWebResults {
      * @return  Returns a EASTWebQuery object that represents a query that can be executed to acquire results from EASTWeb
      */
     public static EASTWebQuery GetEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectMax, boolean selectMin,
-            boolean selectSum, boolean selectMean, boolean selectSqrSum, boolean selectStdDev, ArrayList<String> zones, String yearSign, Integer yearVal, String daySign, Integer dayVal,
-            ArrayList<String> includedIndices, Integer[] summaryIDs)
+            boolean selectSum, boolean selectMean, boolean selectSqrSum, boolean selectStdDev, String[] zones, String yearSign, Integer yearVal, String daySign, Integer dayVal,
+            String[] includedIndices, Integer[] summaryIDs)
     {
         StringBuilder zoneCondition = new StringBuilder();
-        if(zones.size() > 0)
+        if(zones.length > 0)
         {
-            zoneCondition.append(" AND (A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones.get(0)) + "'");
-            for(int i=1; i < zones.size(); i++) {
-                zoneCondition.append(" OR A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones.get(i)) + "'");
+            zoneCondition.append(" AND (A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones[0]) + "'");
+            for(int i=1; i < zones.length; i++) {
+                zoneCondition.append(" OR A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones[i]) + "'");
             }
             zoneCondition.append(")");
         }
@@ -334,12 +334,12 @@ public class EASTWebResults {
      * @return  ArrayList of the distinct zone names found in the results table
      * @throws SQLException
      */
-    public static ArrayList<String> GetZonesListFromProject(String projectName, String pluginName) throws SQLException
+    public static String[] GetZonesListFromProject(String projectName, String pluginName) throws SQLException
     {
         ArrayList<String> zones = new ArrayList<String>();
         Connection con = DatabaseConnector.getConnection();
         if(con == null) {
-            return zones;
+            return null;
         }
         Statement stmt = con.createStatement();
         ResultSet rs;
@@ -347,7 +347,7 @@ public class EASTWebResults {
 
         rs = stmt.executeQuery("select \"ZonalStatID\" from \"" + schemaName + "\".\"ZonalStat\";");
         if(rs == null || !rs.next()) {
-            return zones;
+            return null;
         }
         rs.close();
 
@@ -362,12 +362,12 @@ public class EASTWebResults {
         stmt.close();
         con.close();
 
-        return zones;
+        return zones.toArray(new String[zones.size()]);
     }
 
     private static EASTWebQuery getEASTWebQuery(String globalSchema, String projectName, String pluginName, boolean selectCount, boolean selectMax, boolean selectMin,
             boolean selectSum, boolean selectMean, boolean selectSqrSum, boolean selectStdDev, String zoneCondition, String yearSign, Integer yearVal, String daySign, Integer dayVal,
-            ArrayList<String> includedIndices, Integer[] summaryIDs)
+            String[] includedIndices, Integer[] summaryIDs)
     {
         final String mSchemaName = Schemas.getSchemaName(projectName, pluginName);
         globalSchema = FileSystem.StandardizeName(globalSchema);
@@ -420,11 +420,11 @@ public class EASTWebResults {
                         globalSchema)
                 );
 
-        if(includedIndices != null && includedIndices.size() > 0)
+        if(includedIndices != null && includedIndices.length > 0)
         {
-            query.append("AND (A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"='" + includedIndices.get(0) + "'");
-            for(int i=1; i < includedIndices.size(); i++) {
-                query.append(" OR I.\"Name\"='" + includedIndices.get(i) + "'");
+            query.append("AND (A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"='" + includedIndices[0] + "'");
+            for(int i=1; i < includedIndices.length; i++) {
+                query.append(" OR I.\"Name\"='" + includedIndices[i] + "'");
             }
             query.append(")) ");
         }

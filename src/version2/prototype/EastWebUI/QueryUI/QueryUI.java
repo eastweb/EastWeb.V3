@@ -209,9 +209,9 @@ public class QueryUI {
                 }
 
                 EASTWebQuery listFile = null;
-                ArrayList<String> indicies = new ArrayList<String>();
-                for(Object o : includeListModel.toArray()){
-                    indicies.add(o.toString());
+                String[] indicies = new String[includeListModel.toArray().length];
+                for(int i=0; i < includeListModel.toArray().length; i++){
+                    indicies[i] = includeListModel.get(i);
                 }
                 for(ProjectInfoPlugin s : project.GetPlugins()) {
                     for(ProjectInfoSummary summary : project.GetSummaries()) {
@@ -227,13 +227,13 @@ public class QueryUI {
                                     chckbxMean.isSelected(),
                                     sqrSumCheckBox.isSelected(),
                                     chckbxStdev.isSelected(),
-                                    String.valueOf(zoneComboBox.getSelectedItem()),
+                                    new String[]{String.valueOf(zoneComboBox.getSelectedItem())},
                                     String.valueOf(yearComboBox.getSelectedItem()),
                                     (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
                                     String.valueOf(dayComboBox.getSelectedItem()),
                                     (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
-                                    indicies
-                                    );
+                                    indicies,
+                                    new Integer[]{summary.GetID()});
 
 
                         } catch (NumberFormatException e) {

@@ -49,7 +49,7 @@ public class EASTWebResultsTest {
     private static int yearVal = 2000;
     private static String daySign = "=";
     private static int dayVal = 180;
-    private static ArrayList<String> includedIndices = new ArrayList<String>();
+    private static String[] includedIndices = new String[]{"ModisNBARNDVICalculator", "ModisNBAREVICalculator", "ModisNBARNDWI5Calculator", "ModisNBARNDWI6Calculator", "ModisNBARSAVICalculator"};
     private static Integer[] includedSummaries = new Integer[]{1};
     private static String[] indices = new String[5];
     private static ProjectInfoFile projectMetaData;
@@ -66,12 +66,6 @@ public class EASTWebResultsTest {
 
         extraDownloadFiles = new ArrayList<String>();
         extraDownloadFiles.add("QC");
-
-        includedIndices.add("ModisNBARNDVICalculator");
-        includedIndices.add("ModisNBAREVICalculator");
-        includedIndices.add("ModisNBARNDWI5Calculator");
-        includedIndices.add("ModisNBARNDWI6Calculator");
-        includedIndices.add("ModisNBARSAVICalculator");
 
         indices[0] = "ModisNBARNDVICalculator";
         indices[1] = "ModisNBAREVICalculator";

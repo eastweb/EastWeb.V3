@@ -39,12 +39,10 @@ public class SandboxTesting {
     public void testEASTWebResults()
     {
         try {
-            ArrayList<String> zones = EASTWebResults.GetZonesListFromProject("Test Both TRMM 101615", "TRMM3B42RT");
-            System.out.println(zones.size() + " : " + zones);
-            ArrayList<String> includedIndices = new ArrayList<String>();
-            includedIndices.add("TRMM3B42RTIndex");
+            String[] zones = EASTWebResults.GetZonesListFromProject("Test Both TRMM 101615", "TRMM3B42RT");
+            System.out.println(zones.length + " : " + zones);
             EASTWebQuery query = EASTWebResults.GetEASTWebQuery("EASTWeb", "Test Both TRMM 101615", "TRMM3B42RT", true, true, true, true, true, true, true, zones, "=", 2014, ">",
-                    300, includedIndices, new Integer[]{1});
+                    300, new String[]{"TRMM3B42RTIndex"}, new Integer[]{1});
             System.out.println(query.toString());
             ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>();
             results = EASTWebResults.GetEASTWebResults(query);
