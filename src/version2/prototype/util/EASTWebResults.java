@@ -124,26 +124,36 @@ public class EASTWebResults {
         // Build query
         ArrayList<String> summaries = Config.getInstance().getSummaryCalculations();
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
-        StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"ShapeFile\", C.\"Year\", C.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
+        StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"ShapeFile\", D.\"Year\", D.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
                 "T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
         for(int i=1; i < summaries.size(); i++)
         {
             query.append(", A.\"" + summaries.get(i) + "\"");
         }
         query.append(", A.\"FilePath\"");
-        query.append(" FROM \"" + schemaName + "\".\"ZonalStat\" A, (SELECT \"Name\", \"IndexID\" FROM \"" + globalSchema + "\".\"Index\"");
+        query.append(" \nFROM \"" + schemaName + "\".\"ZonalStat\" A INNER JOIN \"" + globalSchema + "\".\"Index\" I ON A.\"IndexID\" = I.\"IndexID\""
+                + " INNER JOIN \"" + globalSchema + "\".\"DateGroup\" D ON A.\"DateGroupID\" = C.\"DateGroupID\""
+                + " INNER JOIN \"" + globalSchema + "\".\"ProjectSummary\" P ON A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\""
+                + " LEFT JOIN \"" + globalSchema + "\".\"TemporalSummaryCompositionStrategy\" T ON P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\"");
+
+        StringBuilder whereCondition = new StringBuilder();
+        StringBuilder indicesCondition = new StringBuilder();
         if(indices != null && indices.length > 0)
         {
-            query.append(" WHERE (\"Name\" = '" + indices[0] + "'");
+            indicesCondition.append("(\"Name\" like '" + Schemas.escapeUnderScoresAndPercents(indices[0]) + "'");
             for(int i=1; i < indices.length; i++)
             {
-                query.append(" OR \"Name\" = '" + indices[i] + "'");
+                indicesCondition.append(" OR \"Name\" like '" + Schemas.escapeUnderScoresAndPercents(indices[i]) + "'");
             }
-            query.append(")");
+            indicesCondition.append(")");
         }
-        query.append(") I, \"" + globalSchema + "\".\"DateGroup\" C, \"" + globalSchema + "\".\"ProjectSummary\" P, \"" + globalSchema + "\".\"TemporalSummaryCompositionStrategy\" T " +
-                "WHERE A.\"IndexID\" = I.\"IndexID\" AND A.\"DateGroupID\" = C.\"DateGroupID\" AND A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\" " +
-                "AND P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\";");
+
+        if(indicesCondition.length() > 1)
+        {
+            whereCondition.append("WHERE " + indicesCondition.toString());
+        }
+
+        query.append(" \n" + whereCondition.toString() + ";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
         return new EASTWebQuery(projectName, pluginName, query.toString());
@@ -173,39 +183,55 @@ public class EASTWebResults {
         // Build query
         ArrayList<String> summaries = Config.getInstance().getSummaryCalculations();
         String schemaName = Schemas.getSchemaName(projectName, pluginName);
-        StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"ShapeFile\", C.\"Year\", C.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
+        StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"ShapeFile\", D.\"Year\", D.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
                 "T.\"Name\" as \"TemporalSummaryCompositionStrategyClass\", A.\"" + summaries.get(0) + "\"");
         for(int i=1; i < summaries.size(); i++)
         {
             query.append(", A.\"" + summaries.get(i) + "\"");
         }
         query.append(", A.\"FilePath\"");
-        query.append(" FROM \"" + schemaName + "\".\"ZonalStat\" A, (SELECT \"Name\", \"IndexID\" FROM \"" + globalSchema + "\".\"Index\"");
+        query.append(" \nFROM \"" + schemaName + "\".\"ZonalStat\" A INNER JOIN \"" + globalSchema + "\".\"Index\" I ON A.\"IndexID\" = I.\"IndexID\""
+                + " INNER JOIN \"" + globalSchema + "\".\"DateGroup\" D ON A.\"DateGroupID\" = C.\"DateGroupID\""
+                + " INNER JOIN \"" + globalSchema + "\".\"ProjectSummary\" P ON A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\""
+                + " LEFT JOIN \"" + globalSchema + "\".\"TemporalSummaryCompositionStrategy\" T ON P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\"");
+
+        StringBuilder whereCondition = new StringBuilder();
+        StringBuilder indicesCondition = new StringBuilder();
         if(indices != null && indices.length > 0)
         {
-            query.append(" WHERE (\"Name\" = '" + indices[0] + "'");
+            indicesCondition.append("(\"Name\" like '" + Schemas.escapeUnderScoresAndPercents(indices[0]) + "'");
             for(int i=1; i < indices.length; i++)
             {
-                query.append(" OR \"Name\" = '" + indices[i] + "'");
+                indicesCondition.append(" OR \"Name\" like '" + Schemas.escapeUnderScoresAndPercents(indices[i]) + "'");
             }
-            query.append(")");
+            indicesCondition.append(")");
+        }
+
+        if(indicesCondition.length() > 1)
+        {
+            whereCondition.append("WHERE " + indicesCondition.toString());
         }
 
         StringBuilder zoneCondition = new StringBuilder();
         if(zones.size() > 0)
         {
-            zoneCondition.append(" AND (A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones.get(0)) + "'");
+            zoneCondition.append("(A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones.get(0)) + "'");
             for(int i=1; i < zones.size(); i++) {
                 zoneCondition.append(" OR A.\"AreaName\" like '" + Schemas.escapeUnderScoresAndPercents(zones.get(i)) + "'");
             }
             zoneCondition.append(")");
         }
 
-        query.append(") I, \"" + globalSchema + "\".\"DateGroup\" C, \"" + globalSchema + "\".\"ProjectSummary\" P, \"" + globalSchema + "\".\"TemporalSummaryCompositionStrategy\" T " +
-                "WHERE A.\"IndexID\" = I.\"IndexID\" AND A.\"DateGroupID\" = C.\"DateGroupID\" AND A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\" " +
-                "AND P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\"");
-        query.append(zoneCondition.toString());
-        query.append(";");
+        if(zoneCondition.length() > 1)
+        {
+            if(whereCondition.length() > 1) {
+                whereCondition.append(" \nAND " + zoneCondition.toString());
+            } else {
+                whereCondition.append("WHERE " + zoneCondition.toString());
+            }
+        }
+
+        query.append(" \n" + whereCondition.toString() + ";");
 
         // Create custom query holder object (keeps users from being able to use this class to create custom queries and directly passing them to the database).
         return new EASTWebQuery(projectName, pluginName, query.toString());
@@ -251,6 +277,8 @@ public class EASTWebResults {
         ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>(0);
         boolean valid;
         boolean foundColumn;
+
+        System.out.println("Processing query:\n" + query.toString());
 
         // Run EASTWebQuery
         rs = stmt.executeQuery(query.GetSQL());
@@ -436,14 +464,14 @@ public class EASTWebResults {
             yearCondition = "";
         }
         else {
-            yearCondition = " AND D.\"Year\"" + yearSign + yearVal;
+            yearCondition = "(D.\"Year\"" + yearSign + yearVal + ")";
         }
 
         if(daySign == null || dayVal == null) {
             dayCondition = "";
         }
         else {
-            dayCondition = " AND D.\"DayOfYear\"" + daySign + dayVal;
+            dayCondition = "(D.\"DayOfYear\"" + daySign + dayVal + ")";
         }
 
         StringBuilder query = new StringBuilder("SELECT A.\"AreaName\", A.\"AreaCode\", P.\"AreaNameField\", P.\"AreaCodeField\", P.\"SummaryIDNum\", P.\"ShapeFile\", D.\"Year\", D.\"DayOfYear\", I.\"Name\" as \"IndexName\", " +
@@ -472,33 +500,64 @@ public class EASTWebResults {
         }
 
         query.append(String.format(
-                " \nFROM \"%1$s\".\"ZonalStat\" A, \"%2$s\".\"DateGroup\" D, \"%2$s\".\"Index\" I, \"%2$s\".\"ProjectSummary\" P, \"%2$s\".\"TemporalSummaryCompositionStrategy\" T " +
-                        "WHERE (A.\"DateGroupID\" = D.\"DateGroupID\"" + yearCondition + dayCondition + ")\n",
+                " \nFROM \"%1$s\".\"ZonalStat\" A INNER JOIN \"%2$s\".\"DateGroup\" D ON A.\"DateGroupID\" = D.\"DateGroupID\""
+                        + " INNER JOIN \"%2$s\".\"Index\" I ON A.\"IndexID\"=I.\"IndexID\""
+                        + " INNER JOIN \"%2$s\".\"ProjectSummary\" P ON A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\""
+                        + " LEFT JOIN \"%2$s\".\"TemporalSummaryCompositionStrategy\" T ON P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\"",
                         mSchemaName,
                         globalSchema)
                 );
 
+        StringBuilder whereCondition = new StringBuilder();
+        if(yearCondition.length() > 1) {
+            whereCondition.append("WHERE " + yearCondition.toString());
+        }
+
+        if(dayCondition.length() > 1) {
+            if(whereCondition.length() > 1) {
+                whereCondition.append(" \nAND " + dayCondition.toString());
+            } else {
+                whereCondition.append("WHERE " + dayCondition.toString());
+            }
+        }
+
+        StringBuilder indicesCondition = new StringBuilder();
         if(includedIndices != null && includedIndices.length > 0)
         {
-            query.append("AND (A.\"IndexID\"=I.\"IndexID\" AND (I.\"Name\"='" + includedIndices[0] + "'");
+            indicesCondition.append("(I.\"Name\" like '" + Schemas.escapeUnderScoresAndPercents(includedIndices[0]) + "'");
             for(int i=1; i < includedIndices.length; i++) {
-                query.append(" OR I.\"Name\"='" + includedIndices[i] + "'");
+                indicesCondition.append(" OR I.\"Name\" like '" + Schemas.escapeUnderScoresAndPercents(includedIndices[i]) + "'");
             }
-            query.append(")) ");
+            indicesCondition.append(")");
+        }
+
+        if(indicesCondition.length() > 1) {
+            if(whereCondition.length() > 1) {
+                whereCondition.append(" \nAND " + indicesCondition.toString());
+            } else {
+                whereCondition.append("WHERE " + indicesCondition.toString());
+            }
         }
 
         StringBuilder summariesCondition = new StringBuilder();
         if(summaryIDs.length > 0)
         {
-            summariesCondition.append(" AND (P.\"SummaryIDNum\"=" + summaryIDs[0]);
+            summariesCondition.append("(P.\"SummaryIDNum\"=" + summaryIDs[0]);
             for(int i=1; i < summaryIDs.length; i++) {
                 summariesCondition.append(" OR P.\"SummaryIDNum\"=" + summaryIDs[i] + "");
             }
             summariesCondition.append(")");
         }
 
-        query.append("AND A.\"ProjectSummaryID\" = P.\"ProjectSummaryID\" AND P.\"TemporalSummaryCompositionStrategyID\" = T.\"TemporalSummaryCompositionStrategyID\"" +
-                zoneCondition + summariesCondition.toString() + ";");
+        if(summariesCondition.length() > 1) {
+            if(whereCondition.length() > 1) {
+                whereCondition.append(" \nAND " + summariesCondition.toString());
+            } else {
+                whereCondition.append("WHERE " + summariesCondition.toString());
+            }
+        }
+
+        query.append("\n" + whereCondition.toString() + ";");
 
         return new EASTWebQuery(projectName, pluginName, query.toString());
     }

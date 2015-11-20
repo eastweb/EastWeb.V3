@@ -66,10 +66,20 @@ public abstract class Reproject {
         {
             // copy files in the input folder to the output folder
             for (File f: inputFiles) {
+                File oF = new File(outputFolder, f.getName());
+                if(oF.exists()) {
+                    oF.delete();
+                }
                 FileUtils.copyFileToDirectory(f, outputDir);
             }
         }
         else {
+            for (File mInput : inputFiles) {
+                File f = new File(outputFolder, mInput.getName());
+                if(f.exists()) {
+                    f.delete();
+                }
+            }
             reprojectFiles();    // reprojection
         }
 

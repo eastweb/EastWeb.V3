@@ -58,11 +58,21 @@ public class Clip
 
         if (clipOrNot)
         {   // true for clipping
+            for (File mInput : inputFiles) {
+                File f = new File(outputFolder, mInput.getName());
+                if(f.exists()) {
+                    f.delete();
+                }
+            }
             clipFiles();
         }
         else    // skip clipping
         {   // copy the input files to the output folder
             for (File f: inputFiles) {
+                File oF = new File(outputFolder, f.getName());
+                if(oF.exists()) {
+                    oF.delete();
+                }
                 FileUtils.copyFileToDirectory(f, outputDir);
             }
         }

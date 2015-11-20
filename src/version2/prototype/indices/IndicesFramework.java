@@ -78,6 +78,8 @@ public abstract class IndicesFramework implements IndexCalculator {
                 inputs[i] = temp;
             }
 
+            GdalUtils.errorCheck();
+
             /*   System.out.println("ind:  calculate(): " + mInputFiles[0].getPath());
             Band b1 = inputs[0].GetRasterBand(1);
             int xSize = b1.GetXSize();

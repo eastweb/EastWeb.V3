@@ -79,6 +79,13 @@ public abstract class Filter {
         if (!outputDir.exists())
         {   FileUtils.forceMkdir(outputDir); }
 
+        for (File mInput : inputFiles) {
+            File f = new File(outputFolder, mInput.getName());
+            if(f.exists()) {
+                f.delete();
+            }
+        }
+
         if (qcBands != null) {
             filterByQCFlag(qcLevel);
         } else

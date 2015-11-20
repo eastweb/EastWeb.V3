@@ -39,23 +39,6 @@ public interface EASTWebManagerI {
     public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory) throws IOException;
 
     /**
-     * Requests that a {@link version2.prototype.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
-     * {@link version2#TaskState TaskState} set to STOPPED and to cease execution. If other GlobalDownloaders are waiting to execute then the next
-     * oldest one is started up.
-     *
-     * @param gdlID  - targeted GlobalDownloader's ID
-     */
-    public void StopGlobalDownloader(int gdlID);
-
-    /**
-     * Requests that a {@link version2.prototype.download#GlobalDownloader GlobalDownloader} with the specified unique ID to have its
-     * {@link version2#TaskState TaskState} set to RUNNING and to continue downloading new data files when its given a turn to run again.
-     *
-     * @param gdlID  - targeted GlobalDownloader's ID
-     */
-    public void StartExistingGlobalDownloader(int gdlID);
-
-    /**
      * Requests that the given {@link version2#ProcesWorker ProcesWorker} be managed and executed.
      *
      * @param worker  - {@link java.util.concurrent.Callable Callable} to execute on a separate available thread

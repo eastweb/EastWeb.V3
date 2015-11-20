@@ -31,21 +31,21 @@ public final class ErrorLog {
      */
     public static void add(String message, Throwable e)
     {
-        String logPath = null;
-        synchronized (sErrorLogLock) {
-            String logFileName = getLogFileName();
-            try {
-                logPath = ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath();
-                while(logPath.startsWith("\\") || logPath.startsWith("/")) {
-                    logPath = logPath.substring(1);
-                }
-            } catch (URISyntaxException e1) {
-                e1.printStackTrace();
-            }
-            String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToStderr(message, e);
-            printToLogFile(finalPath, message, e);
+        if(Thread.currentThread().isInterrupted()) {
+            return;
         }
+
+        String logPath = null;
+        String logFileName = getLogFileName();
+        try {
+            logPath = ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath();
+            while(logPath.startsWith("\\") || logPath.startsWith("/")) {
+                logPath = logPath.substring(1);
+            }
+        } catch (URISyntaxException e1) {
+            e1.printStackTrace();
+        }
+        processError(message, e, logPath, logFileName);
     }
 
     /**
@@ -56,13 +56,13 @@ public final class ErrorLog {
      */
     public static void add(Config configInstance, String message, Throwable e)
     {
-        String logPath = configInstance.getErrorLogDir();
-        synchronized (sErrorLogLock) {
-            String logFileName = getLogFileName();
-            String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToStderr(message, e);
-            printToLogFile(finalPath, message, e);
+        if(Thread.currentThread().isInterrupted()) {
+            return;
         }
+
+        String logPath = configInstance.getErrorLogDir();
+        String logFileName = getLogFileName();
+        processError(message, e, logPath, logFileName);
     }
 
     /**
@@ -75,18 +75,18 @@ public final class ErrorLog {
      */
     public static void add(Config configInstance, String pluginName, String dataName, String message, Throwable e)
     {
-        String logPath = configInstance.getErrorLogDir();
-        synchronized (sErrorLogLock) {
-            String logFileName = getLogFileName();
-            try {
-                logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, dataName);
-            } catch (ConfigReadException cause) {
-                add(configInstance, "Problem logging error.", cause);
-            }
-            String finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToStderr(message, e);
-            printToLogFile(finalPath, message, e);
+        if(Thread.currentThread().isInterrupted()) {
+            return;
         }
+
+        String logPath = configInstance.getErrorLogDir();
+        String logFileName = getLogFileName();
+        try {
+            logPath = FileSystem.GetGlobalDownloadDirectory(configInstance, pluginName, dataName);
+        } catch (ConfigReadException cause) {
+            add(configInstance, "Problem logging error.", cause);
+        }
+        processError(message, e, logPath, logFileName);
     }
 
     /**
@@ -97,14 +97,13 @@ public final class ErrorLog {
      */
     public static void add(Scheduler scheduler, String message, Throwable e)
     {
-        String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
-        String finalPath;
-        synchronized (sErrorLogLock) {
-            String logFileName = getLogFileName();
-            finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToStderr(message, e);
-            printToLogFile(finalPath, message, e);
+        if(Thread.currentThread().isInterrupted()) {
+            return;
         }
+
+        String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
+        String logFileName = getLogFileName();
+        String finalPath = processError(message, e, logPath, logFileName);
         scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
     }
 
@@ -116,14 +115,13 @@ public final class ErrorLog {
      */
     public static void add(Process process, String message, Throwable e)
     {
-        String logPath = FileSystem.GetProjectDirectoryPath(process.projectInfoFile.GetWorkingDir(), process.projectInfoFile.GetProjectName());
-        String finalPath;
-        synchronized (sErrorLogLock) {
-            String logFileName = getLogFileName();
-            finalPath = handleLogFileExtensions(logFileName, logPath);
-            printToStderr(message, e);
-            printToLogFile(finalPath, message, e);
+        if(Thread.currentThread().isInterrupted()) {
+            return;
         }
+
+        String logPath = FileSystem.GetProjectDirectoryPath(process.projectInfoFile.GetWorkingDir(), process.projectInfoFile.GetProjectName());
+        String logFileName = getLogFileName();
+        String finalPath = processError(message, e, logPath, logFileName);
         process.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
     }
 
@@ -136,15 +134,27 @@ public final class ErrorLog {
      */
     public static void add(ProcessName processName, Scheduler scheduler, String message, Throwable e)
     {
+        if(Thread.currentThread().isInterrupted()) {
+            return;
+        }
+
         String logPath = FileSystem.GetProjectDirectoryPath(scheduler.projectInfoFile.GetWorkingDir(), scheduler.projectInfoFile.GetProjectName());
+        String logFileName = processName + "_" + getLogFileName();
+        String finalPath = processError(message, e, logPath, logFileName);
+        scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
+    }
+
+    private static String processError(String message, Throwable e, String logPath, String logFileName)
+    {
         String finalPath;
-        synchronized (sErrorLogLock) {
-            String logFileName = processName + "_" + getLogFileName();
+        message = message + " [Thread: " + Thread.currentThread().getName() + "]";
+        synchronized (sErrorLogLock)
+        {
             finalPath = handleLogFileExtensions(logFileName, logPath);
             printToStderr(message, e);
             printToLogFile(finalPath, message, e);
         }
-        scheduler.NotifyUI(new GeneralUIEventObject(e.getCause() != null ? e.getCause() : e, message + " [Error Logged: " + finalPath + "]"));
+        return finalPath;
     }
 
     private static void printToLogFile(String logPath, String message, Throwable e)

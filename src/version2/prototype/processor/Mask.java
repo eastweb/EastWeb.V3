@@ -61,12 +61,22 @@ public class Mask {
         {
             // do masking only when a mask file exist
             // and the mask resolution equals to the data resolution
+            for (File mInput : inputFiles) {
+                File f = new File(outputFolder, mInput.getName());
+                if(f.exists()) {
+                    f.delete();
+                }
+            }
             maskFiles();
         }
         else  // skip masking
         {
             // copy files in the input folder to the output folder
             for (File f: inputFiles) {
+                File oF = new File(outputFolder, f.getName());
+                if(oF.exists()) {
+                    oF.delete();
+                }
                 FileUtils.copyFileToDirectory(f, outputDir);
             }
         }
