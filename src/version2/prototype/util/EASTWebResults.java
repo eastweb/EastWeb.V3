@@ -437,7 +437,7 @@ public class EASTWebResults {
         }
         rs.close();
 
-        rs = stmt.executeQuery("select distinct \"AreaName\" from \"" + schemaName + "\".\"ZonalStat\";");
+        rs = stmt.executeQuery("select distinct \"AreaName\" from \"" + schemaName + "\".\"ZonalStat\" ORDER BY \"AreaName\" ASC;");
         if(rs != null)
         {
             while(rs.next()) {
