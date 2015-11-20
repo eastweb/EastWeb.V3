@@ -80,6 +80,13 @@ public abstract class Mozaic {
             if (!outputFolder.exists())
             {   FileUtils.forceMkdir(outputFolder); }
 
+            for (File mInput : inputFiles) {
+                File f = new File(outputFolder, mInput.getName());
+                if(f.exists()) {
+                    f.delete();
+                }
+            }
+
             sortTiles();
             linkTiles();
 

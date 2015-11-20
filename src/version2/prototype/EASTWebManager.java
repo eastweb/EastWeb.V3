@@ -1064,40 +1064,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /* (non-Javadoc)
-     * @see version2.prototype.EASTWebManagerI#StopGlobalDownloader(int)
-     */
-    @Override
-    public void StopGlobalDownloader(int gdlID)
-    {
-        if(globalDLs.size() > gdlID)
-        {
-            synchronized (globalDLs)
-            {
-                if(globalDLs.get(gdlID) != null) {
-                    globalDLs.get(gdlID).Stop();
-                }
-            }
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see version2.prototype.EASTWebManagerI#StartExistingGlobalDownloader(int)
-     */
-    @Override
-    public void StartExistingGlobalDownloader(int gdlID)
-    {
-        if(globalDLs.size() > gdlID)
-        {
-            synchronized (globalDLs)
-            {
-                if(globalDLs.get(gdlID) != null) {
-                    globalDLs.get(gdlID).Start();
-                }
-            }
-        }
-    }
-
-    /* (non-Javadoc)
      * @see version2.prototype.EASTWebManagerI#StartNewProcessWorker(version2.prototype.ProcessWorker)
      */
     @Override

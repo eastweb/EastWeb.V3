@@ -288,10 +288,6 @@ public class SchedulerTest {
         }
 
         @Override
-        public void StartExistingGlobalDownloader(int gdlID) {
-        }
-
-        @Override
         public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
         {
             int id = getLowestAvailableGlobalDLID();
@@ -346,10 +342,6 @@ public class SchedulerTest {
             {
                 return null;
             }
-        }
-
-        @Override
-        public void StopGlobalDownloader(int gdlID) {
         }
 
         @Override

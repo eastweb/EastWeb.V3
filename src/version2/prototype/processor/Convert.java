@@ -42,6 +42,13 @@ public abstract class Convert {
         if (!outputDir.exists())
         {   FileUtils.forceMkdir(outputDir); }
 
+        for (File mInput : inputFiles) {
+            File f = new File(outputFolder, mInput.getName());
+            if(f.exists()) {
+                f.delete();
+            }
+        }
+
         convertFiles();
 
         // remove the input folder

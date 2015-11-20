@@ -294,8 +294,10 @@ public class ProcessorWorker extends ProcessWorker {
             try {
                 stmt = con.createStatement();
                 for (File oFile : dirList) {
-                    toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(),
-                            thisDay.getDayOfYear()));
+                    if(oFile.length() > 0) {
+                        toCache.add(new DataFileMetaData("data", oFile.getAbsolutePath(), Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(),
+                                thisDay.getDayOfYear()));
+                    }
                 }
             } catch (SQLException e) {
                 ErrorLog.add(process, "Problem while creating list for output cache.", e);
