@@ -22,7 +22,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,6 +44,7 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.util.EASTWebQuery;
+import version2.prototype.util.EASTWebResult;
 import version2.prototype.util.EASTWebResults;
 
 public class QueryUI {
@@ -197,49 +201,55 @@ public class QueryUI {
                     ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
                 }
 
-                EASTWebQuery listFile = null;
-
-                for(ProjectInfoPlugin s : project.GetPlugins()) {
-                    for(ProjectInfoSummary summary : project.GetSummaries()) {
-                        try {
-                            listFile =  EASTWebResults.GetEASTWebQuery(
-                                    Config.getInstance().getGlobalSchema(),
-                                    String.valueOf(projectListComboBox.getSelectedItem()),
-                                    s.GetName(),
-                                    chckbxCount.isSelected(),
-                                    maxCheckBox.isSelected(),
-                                    minCheckBox.isSelected(),
-                                    chckbxSum.isSelected(),
-                                    chckbxMean.isSelected(),
-                                    sqrSumCheckBox.isSelected(),
-                                    chckbxStdev.isSelected(),
-                                    new String[]{String.valueOf(zoneComboBox.getSelectedItem())},
-                                    String.valueOf(yearComboBox.getSelectedItem()),
-                                    (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
-                                    String.valueOf(dayComboBox.getSelectedItem()),
-                                    (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
-                                    (String []) includeListModel.toArray(),
-                                    new Integer[]{summary.GetID()});
-                        } catch (NumberFormatException e) {
-                            ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
-                        }
-
-                    }
+                Map<Integer, EASTWebQuery> ewQuery = new HashMap<Integer, EASTWebQuery>();
+                String[] indicies = new String[includeListModel.toArray().length];
+                for(int i=0; i < includeListModel.toArray().length; i++){
+                    indicies[i] = includeListModel.get(i);
                 }
 
-                if(listFile != null){
-                    String message = "Enter Directory";
-                    String directory = JOptionPane.showInputDialog(frame, message);
+                for(ProjectInfoSummary summary : project.GetSummaries()) {
+                    try {
+                        ewQuery.put(summary.GetID(), EASTWebResults.GetEASTWebQuery(
+                                Config.getInstance().getGlobalSchema(),
+                                String.valueOf(projectListComboBox.getSelectedItem()),
+                                String.valueOf(pluginComboBox.getSelectedItem()),
+                                chckbxCount.isSelected(),
+                                maxCheckBox.isSelected(),
+                                minCheckBox.isSelected(),
+                                chckbxSum.isSelected(),
+                                chckbxMean.isSelected(),
+                                sqrSumCheckBox.isSelected(),
+                                chckbxStdev.isSelected(),
+                                new String[]{String.valueOf(zoneComboBox.getSelectedItem())},
+                                String.valueOf(yearComboBox.getSelectedItem()),
+                                (yearTextField.getText().equals("") ? null : Integer.parseInt(yearTextField.getText())),
+                                String.valueOf(dayComboBox.getSelectedItem()),
+                                (dayTextField.getText().equals("") ? null : Integer.parseInt(dayTextField.getText())),
+                                indicies,
+                                new Integer[]{summary.GetID()}));
+                    } catch (NumberFormatException e) {
+                        ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting csv result files.", e);
+                    }
 
-                    if (directory == null) {
+                }
+
+                if(ewQuery != null){
+                    String message = "Enter file path to write csv file to:";
+                    String path = JOptionPane.showInputDialog(frame, message);
+
+                    if (path == null) {
                         // User clicked cancel
                     }else{
-                        File dest = new File(directory);
                         try {
-                            for(File v:EASTWebResults.GetResultCSVFiles(listFile)) {
-                                FileUtils.copyFileToDirectory(v, dest);
+                            Iterator<Integer> keysIt = ewQuery.keySet().iterator();
+                            Integer key;
+                            while(keysIt.hasNext())
+                            {
+                                key = keysIt.next();
+                                String tempPath = path + " - Summary " + key;
+                                ArrayList<EASTWebResult> queryResults = EASTWebResults.GetEASTWebResults(ewQuery.get(key));
+                                EASTWebResults.WriteEASTWebResultsToCSV(tempPath, queryResults);
                             }
-
                         } catch (IOException | ClassNotFoundException | SQLException | ParserConfigurationException | SAXException e) {
                             JOptionPane.showMessageDialog(frame, "Folder not found");
                             ErrorLog.add(Config.getInstance(), "QueryResultWindow.initialize problem with copying files to different directory.", e);
