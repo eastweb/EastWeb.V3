@@ -297,11 +297,11 @@ public class ZonalSummaryCalculator {
             for (int i=0; i<WIDTH; i++) {
                 int zone = zoneArray[i];
                 Double value = rasterArray[i];
-                if (zone != 0 && !NO_DATA.contains(value)) { // Neither are no data values
+                if (!NO_DATA.contains(value)) { // Neither are no data values
                     summariesCollection.add(zone, value);
                     zoneReceivedValidData.put(zone, true);
                 }
-                else if(zone != 0 && zoneReceivedValidData.get(zone) == null) {
+                else if(zoneReceivedValidData.get(zone) == null) {
                     zoneReceivedValidData.put(zone, false);
                 }
             }
