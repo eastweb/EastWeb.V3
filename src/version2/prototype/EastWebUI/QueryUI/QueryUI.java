@@ -34,7 +34,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.io.FileUtils;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
