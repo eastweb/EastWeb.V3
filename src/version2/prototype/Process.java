@@ -92,7 +92,7 @@ public abstract class Process implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        if(scheduler.GetState() == TaskState.RUNNING && !Thread.currentThread().isInterrupted())
+        if((scheduler.GetState() == TaskState.RUNNING || scheduler.GetState() == TaskState.STARTING) && !Thread.currentThread().isInterrupted())
         {
             if(o instanceof DatabaseCache)
             {

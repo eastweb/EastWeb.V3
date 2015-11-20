@@ -286,7 +286,7 @@ public class ModisLocalStorageGlobalDownloader extends GlobalDownloader {
 
                 for (String f : entry.getValue())
                 {
-                    if(state == TaskState.STOPPED) {
+                    if(state == TaskState.STOPPED || state == TaskState.STOPPING) {
                         System.out.println("[GDL " + ID + " on Thread " + Thread.currentThread().getId() + "] Breaking out of download loop.");
                         break downloadLoop;
                     } else if(Thread.currentThread().isInterrupted()) {

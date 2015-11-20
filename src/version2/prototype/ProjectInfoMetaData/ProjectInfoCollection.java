@@ -1,58 +1,100 @@
 package version2.prototype.ProjectInfoMetaData;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 import version2.prototype.util.FileSystem;
 
+/**
+ * Collection handles reading in project xml files, parsing, and storing the list of ProjectInfoFile objects. Once read in the list will not be recreated unless
+ * {@link #ClearProjectList() ClearProjectList()} is called.
+ *
+ * @author michael.devos
+ */
 public class ProjectInfoCollection {
-    private ArrayList<ProjectInfoFile> files = null;
+    private static ArrayList<ProjectInfoFile> projects = null;
+    private static Boolean projectsListLock = new Boolean(true);    // Attain lock on this object before proceeding to modify 'projects'
 
-    public ProjectInfoCollection()
+    /**
+     * Retrieves the list of loaded ProjectInfoFile objects. If the list has not been loaded then it parses the project xml files and loads the successfully parsed files into the list as
+     * ProjectInfoFile objects.
+     *
+     * @param configInstance  - Config instance to use
+     * @return Cloned ArrayList of successfully loaded ProjectInfoFile objects
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<ProjectInfoFile> GetAllProjectInfoFiles(Config configInstance)
     {
-        files = new ArrayList<ProjectInfoFile>();
-    }
-
-    public ArrayList<ProjectInfoFile> ReadInAllProjectInfoFiles() throws IOException, ParserConfigurationException,
-    SAXException, ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
-    IllegalArgumentException, InvocationTargetException
-    {
-        File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
-        File[] fl = getXMLFiles(fileDir);
-        Config configInstance = Config.getInstance();
-        if(fl.length > 0)
+        ArrayList<ProjectInfoFile> projectListClone;
+        synchronized(projectsListLock)
         {
-            ProjectInfoFile metaData;
-            for(File fi : fl)
+            if(projects == null)
             {
-                try{
-                    metaData = new ProjectInfoFile(configInstance, fi.getCanonicalPath());
-                    if(metaData.error) {
-                        ErrorLog.add(Config.getInstance(), "Parsing failure" + (metaData.GetErrorMessages().size() > 1 ? "s" : "") + " for file project meta data file '" + fi.getName() + "'. "
-                                + metaData.GetErrorMessages().toString(),
-                                new Exception("Parsing failure" + (metaData.GetErrorMessages().size() > 1 ? "s" : "") + " for file project meta data file '" + fi.getName() + "'."));
-                    } else {
-                        files.add(metaData);
+                projects = new ArrayList<ProjectInfoFile>();
+                File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
+                File[] fl = getXMLFiles(fileDir);
+                if(fl.length > 0)
+                {
+                    ProjectInfoFile metaData;
+                    for(File fi : fl)
+                    {
+                        try{
+                            metaData = new ProjectInfoFile(configInstance, fi.getCanonicalPath());
+                            if(metaData.error) {
+                                ErrorLog.add(Config.getInstance(), "Parsing failure" + (metaData.GetErrorMessages().size() > 1 ? "s" : "") + " for file project meta data file '" + fi.getName() + "'. "
+                                        + metaData.GetErrorMessages().toString(),
+                                        new Exception("Parsing failure" + (metaData.GetErrorMessages().size() > 1 ? "s" : "") + " for file project meta data file '" + fi.getName() + "'."));
+                            } else {
+                                projects.add(metaData);
+                            }
+                        } catch(Exception e) {
+                            ErrorLog.add(Config.getInstance(), "Project meta data file, " + fi.getName() + " has an error in it.", e);
+                        }
                     }
-                } catch(Exception e) {
-                    ErrorLog.add(Config.getInstance(), "Project meta data file, " + fi.getName() + " has an error in it.", e);
                 }
             }
+
+            projectListClone = (ArrayList<ProjectInfoFile>) projects.clone();
         }
-        return files;
+
+        return projectListClone;
     }
 
-    private File[] getXMLFiles(File folder) {
+    /**
+     * Gets a single ProjectInfoFile object that is associated with the given projectName if such a project can be loaded.
+     *
+     * @param configInstance  - Config instance to use
+     * @param projectName  - name of the project to search through loaded ProjectInfoFile objects for
+     * @return  ProjectInfoFile object if project can be loaded, otherwise null
+     */
+    public static ProjectInfoFile GetProject(Config configInstance, String projectName)
+    {
+        String cleanedProjectName = FileSystem.StandardizeName(projectName);
+        ArrayList<ProjectInfoFile> projectList = GetAllProjectInfoFiles(configInstance);
+        ProjectInfoFile project;
+        for(int i=0; i < projectList.size(); i++){
+            project = projectList.get(i);
+            if(project.GetProjectName() != null && project.GetProjectName().equalsIgnoreCase(cleanedProjectName)) {
+                return project;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Clears the loaded project list forcing the next read from this list to have to recreate it from the list of project xml files.
+     */
+    public static void ClearProjectList()
+    {
+        synchronized(projectsListLock){
+            projects = null;
+        }
+    }
+
+    private static File[] getXMLFiles(File folder) {
         List<File> aList = new ArrayList<File>();
         File[] files = folder.listFiles();
 
@@ -65,27 +107,11 @@ public class ProjectInfoCollection {
         return aList.toArray(new File[aList.size()]);
     }
 
-    private String getFileExtensionName(File f) {
+    private static String getFileExtensionName(File f) {
         if (f.getName().indexOf(".") == -1) {
             return "";
         } else {
             return f.getName().substring(f.getName().length() - 3, f.getName().length());
         }
-    }
-
-    public ProjectInfoFile GetProject(String projectName) throws IOException, ParserConfigurationException, SAXException, ParseException,
-    ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-    InvocationTargetException{
-        String cleanedProjectName = FileSystem.StandardizeName(projectName);
-        ArrayList<ProjectInfoFile> allProjects = ReadInAllProjectInfoFiles();
-        ProjectInfoFile file;
-        for(int i=0; i < allProjects.size(); i++){
-            file = allProjects.get(i);
-            if(file.GetProjectName() != null && file.GetProjectName().equalsIgnoreCase(cleanedProjectName)) {
-                return file;
-            }
-        }
-
-        return null;
     }
 }

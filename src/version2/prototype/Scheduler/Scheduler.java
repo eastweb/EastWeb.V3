@@ -38,7 +38,6 @@ import version2.prototype.indices.IndicesWorker;
 import version2.prototype.processor.ProcessorWorker;
 import version2.prototype.summary.Summary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.FileSystem;
@@ -239,17 +238,23 @@ public class Scheduler {
     public void Start()
     {
         TaskState myState;
-        synchronized (statusContainer) {
-            myState = statusContainer.GetState();
-        }
-        if(myState == TaskState.RUNNING) {
-            return;
-        }
-
         String projectSchema;
+
         DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
         if(con == null) {
             return;
+        }
+
+        synchronized (statusContainer) {
+            myState = statusContainer.GetState();
+        }
+
+        if(myState != TaskState.STOPPED) {
+            return;
+        }
+
+        synchronized (statusContainer) {
+            statusContainer.UpdateSchedulerTaskState(TaskState.STARTING);
         }
 
         Statement stmt = null;
@@ -289,54 +294,44 @@ public class Scheduler {
 
     /**
      * Updates the Scheduler's {@link TaskState TaskState} to STOPPED notifying all observers of said state of the change.
-     *
      * @author michael.devos
      *
+     * @return  TRUE if successful at stopping all workers.
      */
-    public void Stop()
+    public boolean Stop()
     {
         TaskState myState;
+        SchedulerStatus status = null;
+
+        System.out.println("Stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
+
         synchronized (statusContainer) {
             myState = statusContainer.GetState();
         }
-        if(myState == TaskState.STOPPED) {
-            return;
+
+        if(myState != TaskState.RUNNING) {
+            if(myState == TaskState.STARTING || myState == TaskState.STOPPING) {
+                System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
+                return false;
+            } else {
+                System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
+                return true;
+            }
         }
 
-        SchedulerStatus status = null;
-        System.out.println("Stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
         synchronized (statusContainer)
         {
-            statusContainer.UpdateSchedulerTaskState(TaskState.STOPPED);
+            statusContainer.UpdateSchedulerTaskState(TaskState.STOPPING);
             try {
                 status = statusContainer.GetStatus();
             } catch (SQLException e) {
-                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+                ErrorLog.add(this, "Problem while getting SchedulerStatus.", e);
             }
         }
-        if(status != null) {
-            manager.NotifyUI(status);
-        }
-        System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
-    }
 
-    /**
-     * Deletes the project schemas and working directory.
-     */
-    public void Delete()
-    {
-        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
-        if(con == null) {
-            return;
-        }
-
-        Stop();
-
-        SchedulerStatus status = null;
         boolean allStopped = true;
         final int maxWaitTimeMS = 1200000;  // 20 minutes
         int currentWaitedTimeMS = 0;
-
         do {
             try {
                 if(!allStopped)
@@ -350,7 +345,7 @@ public class Scheduler {
                     status = statusContainer.GetStatus();
                 }
             } catch (SQLException e) {
-                ErrorLog.add(this, "Problem while getting SchedulerStatus instance.", e);
+                ErrorLog.add(this, "Problem while getting SchedulerStatus.", e);
             } catch (InterruptedException e) {
                 ErrorLog.add(this, "Problem while making thread sleep.", e);
             }
@@ -379,7 +374,45 @@ public class Scheduler {
 
         if(!allStopped) {
             ErrorLog.add(this, "Timed out waiting for Process Workers to complete.", new Exception("Timed out waiting for Process Workers to complete."));
-            return;
+            return false;
+        }
+
+        synchronized (statusContainer) {
+            statusContainer.UpdateSchedulerTaskState(TaskState.STOPPED);
+            try {
+                status = statusContainer.GetStatus();
+            } catch (SQLException e) {
+                ErrorLog.add(this, "Problem while getting SchedulerStatus.", e);
+                return true;
+            }
+        }
+
+        if(status != null) {
+            manager.NotifyUI(status);
+        }
+
+        System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
+        return true;
+    }
+
+    /**
+     * Deletes the project schemas and working directory.
+     *
+     * @return  TRUE if successfully deleted project.
+     */
+    public boolean Delete()
+    {
+        DatabaseConnection con = DatabaseConnector.getConnection(configInstance);
+        if(con == null) {
+            return false;
+        }
+
+        if(!Stop()) {
+            return false;
+        }
+
+        synchronized (statusContainer) {
+            statusContainer.UpdateSchedulerTaskState(TaskState.DELETING);
         }
 
         String projectSchema;
@@ -417,6 +450,8 @@ public class Scheduler {
             stmt = null;
             con.close();
         }
+
+        return true;
     }
 
     /**

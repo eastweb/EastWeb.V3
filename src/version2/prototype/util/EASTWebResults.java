@@ -1,6 +1,3 @@
-/**
- *
- */
 package version2.prototype.util;
 
 import java.io.File;
@@ -17,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
+import version2.prototype.ErrorLog;
 
 /**
  * @author michael.devos
@@ -275,7 +273,6 @@ public class EASTWebResults {
         ResultSet rs;
         ArrayList<Double> summaryCalculations;
         ArrayList<EASTWebResult> results = new ArrayList<EASTWebResult>(0);
-        boolean valid;
         boolean foundColumn;
 
         System.out.println("Processing query:\n" + query.toString());
@@ -322,6 +319,7 @@ public class EASTWebResults {
      *
      * @param filePath
      * @param results
+     * @return  TRUE when successfully writen results to csv file
      * @throws IOException
      */
     public static boolean WriteEASTWebResultsToCSV(String filePath, ArrayList<EASTWebResult> results) throws IOException
@@ -418,35 +416,39 @@ public class EASTWebResults {
      * @param projectName
      * @param pluginName
      * @return  ArrayList of the distinct zone names found in the results table
-     * @throws SQLException
      */
-    public static String[] GetZonesListFromProject(String projectName, String pluginName) throws SQLException
+    public static String[] GetZonesListFromProject(String projectName, String pluginName)
     {
         ArrayList<String> zones = new ArrayList<String>();
         Connection con = DatabaseConnector.getConnection();
         if(con == null) {
-            return null;
+            return new String[0];
         }
-        Statement stmt = con.createStatement();
-        ResultSet rs;
-        String schemaName = Schemas.getSchemaName(projectName, pluginName);
 
-        rs = stmt.executeQuery("select \"ZonalStatID\" from \"" + schemaName + "\".\"ZonalStat\";");
-        if(rs == null || !rs.next()) {
-            return null;
-        }
-        rs.close();
+        try{
+            Statement stmt = con.createStatement();
+            ResultSet rs;
+            String schemaName = Schemas.getSchemaName(projectName, pluginName);
 
-        rs = stmt.executeQuery("select distinct \"AreaName\" from \"" + schemaName + "\".\"ZonalStat\" ORDER BY \"AreaName\" ASC;");
-        if(rs != null)
-        {
-            while(rs.next()) {
-                zones.add(rs.getString("AreaName"));
+            try {
+                stmt.execute("select \"ZonalStatID\" from \"" + schemaName + "\".\"ZonalStat\" offset 0 limit 1;");
+            } catch(SQLException e) {
+                return new String[0];
             }
-            rs.close();
+
+            rs = stmt.executeQuery("select distinct \"AreaName\" from \"" + schemaName + "\".\"ZonalStat\" ORDER BY \"AreaName\" ASC;");
+            if(rs != null)
+            {
+                while(rs.next()) {
+                    zones.add(rs.getString("AreaName"));
+                }
+                rs.close();
+            }
+            stmt.close();
+            con.close();
+        } catch (SQLException e) {
+            ErrorLog.add(Config.getInstance(), "Problem while getting zones list from specified project in querying tool.", e);
         }
-        stmt.close();
-        con.close();
 
         return zones.toArray(new String[zones.size()]);
     }

@@ -8,6 +8,9 @@ package version2.prototype;
  */
 
 public enum TaskState {
+    DELETING,
     RUNNING,
-    STOPPED
+    STARTING,
+    STOPPED,
+    STOPPING
 }

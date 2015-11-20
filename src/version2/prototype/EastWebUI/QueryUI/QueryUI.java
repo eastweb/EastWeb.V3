@@ -137,27 +137,17 @@ public class QueryUI {
                 String selectedProject = String.valueOf(projectListComboBox.getSelectedItem());
                 ProjectInfoFile project = null;
                 if(selectedProject != "") {
-                    try{
-                        project = new ProjectInfoCollection().GetProject(selectedProject);
-                        zoneComboBox.removeAllItems();
-                        zoneComboBox.addItem("");
-                        pluginComboBox.removeAll();
+                    project = ProjectInfoCollection.GetProject(Config.getInstance(), selectedProject);
+                    zoneComboBox.removeAllItems();
+                    zoneComboBox.addItem("");
+                    pluginComboBox.removeAll();
 
-                        for(ProjectInfoPlugin plugin : project.GetPlugins()){
-                            pluginComboBox.addItem(plugin.GetName());
-                        }
+                    for(ProjectInfoPlugin plugin : project.GetPlugins()){
+                        pluginComboBox.addItem(plugin.GetName());
+                    }
 
-                        for(String zone: EASTWebResults.GetZonesListFromProject(selectedProject, String.valueOf(pluginComboBox.getSelectedItem()))){
-                            zoneComboBox.addItem(zone);
-                        }
-                    } catch (ClassNotFoundException | NoSuchMethodException
-                            | SecurityException | InstantiationException
-                            | IllegalAccessException | IllegalArgumentException
-                            | InvocationTargetException | IOException
-                            | ParserConfigurationException | SAXException
-                            | ParseException | SQLException e) {
-                        ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
-
+                    for(String zone: EASTWebResults.GetZonesListFromProject(selectedProject, String.valueOf(pluginComboBox.getSelectedItem()))){
+                        zoneComboBox.addItem(zone);
                     }
                 }
             }
@@ -190,16 +180,7 @@ public class QueryUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 ProjectInfoFile project = null;
-                try {
-                    project = new ProjectInfoCollection().GetProject(String.valueOf(projectListComboBox.getSelectedItem()));
-                } catch (ClassNotFoundException | NoSuchMethodException
-                        | SecurityException | InstantiationException
-                        | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | IOException
-                        | ParserConfigurationException | SAXException
-                        | ParseException e) {
-                    ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
-                }
+                project = ProjectInfoCollection.GetProject(Config.getInstance(), String.valueOf(projectListComboBox.getSelectedItem()));
 
                 Map<Integer, EASTWebQuery> ewQuery = new HashMap<Integer, EASTWebQuery>();
                 String[] indicies = new String[includeListModel.toArray().length];
@@ -287,16 +268,7 @@ public class QueryUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 ProjectInfoFile project = null;
-                try {
-                    project = new ProjectInfoCollection().GetProject(String.valueOf(projectListComboBox.getSelectedItem()));
-                } catch (ClassNotFoundException | NoSuchMethodException
-                        | SecurityException | InstantiationException
-                        | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | IOException
-                        | ParserConfigurationException | SAXException
-                        | ParseException e) {
-                    ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
-                }
+                project = ProjectInfoCollection.GetProject(Config.getInstance(), String.valueOf(projectListComboBox.getSelectedItem()));
                 includeListModel.removeAllElements();
                 excludeListModel.removeAllElements();
 
@@ -478,12 +450,12 @@ public class QueryUI {
     }
 
     private void populateProjectList() {
-        File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
         projectListComboBox.removeAllItems();
         projectListComboBox.addItem("");
 
-        for(File fXmlFile: getXMLFiles(fileDir)){
-            projectListComboBox.addItem(fXmlFile.getName().replace(".xml", ""));
+        ArrayList<ProjectInfoFile> projects = ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance());
+        for(ProjectInfoFile project : projects) {
+            projectListComboBox.addItem(project.GetProjectName());
         }
     }
 

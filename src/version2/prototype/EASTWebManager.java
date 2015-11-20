@@ -109,8 +109,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
             if(instance == null)
             {
                 int numOfWorkerThreads = NUM_CORES < 4 ?
-                        1 : ((NUM_CORES - 2 - numOfSimultaneousGlobalDLs) < 0 ?
-                                1 : NUM_CORES - 2 - numOfSimultaneousGlobalDLs);
+                        1 : ((NUM_CORES - 1 - numOfSimultaneousGlobalDLs) <= 1 ?
+                                1 : NUM_CORES - 1 - numOfSimultaneousGlobalDLs);
                 instance = new EASTWebManager(
                         numOfSimultaneousGlobalDLs,  // Number of Global Downloaders allowed to be simultaneously active
                         numOfWorkerThreads, // Number of ProcessWorkers allowed to be simultaneously active
@@ -861,7 +861,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                             {
                                 if(!Thread.currentThread().isInterrupted())
                                 {
-                                    if(!pluginNamesAndRunningState.containsKey(gdl.pluginName) || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPED)
+                                    if(!pluginNamesAndRunningState.containsKey(gdl.pluginName) || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPED
+                                            || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPING)
                                     {
                                         if(gdl.GetRunningState() == TaskState.RUNNING)
                                         {
@@ -1395,7 +1396,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 {
                     if(pluginNamesAndRunningState.containsKey(pluginInfo.GetName()))
                     {
-                        if(pluginNamesAndRunningState.get(pluginInfo.GetName()) == TaskState.STOPPED)
+                        if(pluginNamesAndRunningState.get(pluginInfo.GetName()) == TaskState.STOPPED || pluginNamesAndRunningState.get(pluginInfo.GetName()) == TaskState.STOPPING)
                         {
                             pluginNamesAndRunningState.put(pluginInfo.GetName(), scheduler.GetState());
                         }

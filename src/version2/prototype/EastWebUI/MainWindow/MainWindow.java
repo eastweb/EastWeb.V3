@@ -38,12 +38,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
 
 import com.sun.glass.events.WindowEvent;
@@ -386,9 +388,10 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
 
                 String selectedProject = String.valueOf(projectList.getSelectedItem());
+                ProjectInfoFile project = ProjectInfoCollection.GetProject(Config.getInstance(), selectedProject);
+                SchedulerData data;
                 try {
-                    ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
-                    SchedulerData data = new SchedulerData(project, !chckbxIntermidiateFiles.isSelected());
+                    data = new SchedulerData(project, !chckbxIntermidiateFiles.isSelected());
                     EASTWebManager.LoadNewScheduler(data, false);
 
                     defaultTableModel.addRow(new Object[] {
@@ -397,7 +400,7 @@ public class MainWindow {
                             String.valueOf(projectList.getSelectedItem()),
                             String.valueOf(projectList.getSelectedItem()),
                             String.valueOf(projectList.getSelectedItem())});
-                } catch (IOException | ParserConfigurationException | SAXException | ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                } catch (PatternSyntaxException | DOMException | ParserConfigurationException | SAXException | IOException e) {
                     ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
                 }
             }
@@ -411,25 +414,16 @@ public class MainWindow {
      * populate project list
      */
     private void populateProjectList() {
-        ProjectInfoCollection projectCollection = new ProjectInfoCollection();
-        try {
-            ArrayList<ProjectInfoFile> projects = projectCollection.ReadInAllProjectInfoFiles();
-            //            File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
-            projectList.removeAllItems();
+        ArrayList<ProjectInfoFile> projects = ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance());
+        //            File fileDir = new File(System.getProperty("user.dir") + "\\projects\\");
+        projectList.removeAllItems();
 
-            //            for(File fXmlFile: getXMLFiles(fileDir)){
-            //                projectList.addItem(fXmlFile.getName().replace(".xml", ""));
-            //            }
-            for(ProjectInfoFile project : projects)
-            {
-                projectList.addItem(project.GetProjectName());
-            }
-        } catch (ClassNotFoundException | NoSuchMethodException
-                | SecurityException | InstantiationException
-                | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | IOException
-                | ParserConfigurationException | SAXException | ParseException e) {
-            ErrorLog.add(Config.getInstance(), "MainWindow.populateProjectList problem with reading in all project xml files from projects folder.", e);
+        //            for(File fXmlFile: getXMLFiles(fileDir)){
+        //                projectList.addItem(fXmlFile.getName().replace(".xml", ""));
+        //            }
+        for(ProjectInfoFile project : projects)
+        {
+            projectList.addItem(project.GetProjectName());
         }
     }
 

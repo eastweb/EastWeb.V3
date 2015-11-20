@@ -163,55 +163,26 @@ public class ProjectInformationPage {
             projectCollectionComboBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
-
-                    try {
-                        PopulateProjectInfo();
-                    } catch (ClassNotFoundException | NoSuchMethodException
-                            | SecurityException | InstantiationException
-                            | IllegalAccessException
-                            | IllegalArgumentException
-                            | InvocationTargetException | IOException
-                            | ParserConfigurationException | SAXException
-                            | ParseException e) {
-                        ErrorLog.add(Config.getInstance(), "ProjectInformationPage.uiConstrain problem with populating project info.", e);
-                    }
-
+                    PopulateProjectInfo();
                 }
             });
             frame.getContentPane().add(projectCollectionComboBox);
 
-            ProjectInfoCollection projectCollection = new ProjectInfoCollection();
-            try {
-                ArrayList<ProjectInfoFile> projects = projectCollection.ReadInAllProjectInfoFiles();
-                for(ProjectInfoFile project : projects)
-                {
-                    projectCollectionComboBox.addItem(project.GetProjectName());
-                }
-            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | IOException | ParserConfigurationException | SAXException | ParseException e) {
-                ErrorLog.add(Config.getInstance(), "ProjectInformationPage.uiConstrain problem with populating project collection combo box.", e);
+            ArrayList<ProjectInfoFile> projects = ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance());
+            for(ProjectInfoFile project : projects)
+            {
+                projectCollectionComboBox.addItem(project.GetProjectName());
             }
         }
     }
 
     /**
      * populate project info for edit
-     * @throws IOException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws ParseException
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     * @throws SecurityException
-     * @throws NoSuchMethodException
-     * @throws ClassNotFoundException
      */
-    private void PopulateProjectInfo() throws IOException, ParserConfigurationException, SAXException, ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-
+    private void PopulateProjectInfo()
+    {
         String selectedProject = String.valueOf(projectCollectionComboBox.getSelectedItem());
-        ProjectInfoFile project = new ProjectInfoCollection().GetProject(selectedProject);
+        ProjectInfoFile project = ProjectInfoCollection.GetProject(Config.getInstance(), selectedProject);
 
         //{{ clear all values and set edit/enable mode
         listOfAddedPluginModel.clear();
