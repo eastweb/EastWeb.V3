@@ -143,17 +143,9 @@ public class QueryUI {
                         zoneComboBox.removeAllItems();
                         zoneComboBox.addItem("");
                         pluginComboBox.removeAll();
-                        includeListModel.removeAllElements();
-                        excludeListModel.removeAllElements();
 
                         for(ProjectInfoPlugin plugin : project.GetPlugins()){
                             pluginComboBox.addItem(plugin.GetName());
-                        }
-
-                        for(ProjectInfoPlugin plugin: project.GetPlugins()){
-                            for(String indice: plugin.GetIndices()) {
-                                excludeListModel.addElement(indice);
-                            }
                         }
 
                         for(String zone: EASTWebResults.GetZonesListFromProject(selectedProject, String.valueOf(pluginComboBox.getSelectedItem()))){
@@ -267,7 +259,6 @@ public class QueryUI {
                 else{
                     JOptionPane.showMessageDialog(frame, "No results generated");
                 }
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
             }
         });
         btnQuery.setBounds(150, 552, 89, 23);
@@ -292,6 +283,35 @@ public class QueryUI {
         frame.getContentPane().add(lblPlugin);
 
         pluginComboBox = new JComboBox<String>();
+        pluginComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                ProjectInfoFile project = null;
+                try {
+                    project = new ProjectInfoCollection().GetProject(String.valueOf(projectListComboBox.getSelectedItem()));
+                } catch (ClassNotFoundException | NoSuchMethodException
+                        | SecurityException | InstantiationException
+                        | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException | IOException
+                        | ParserConfigurationException | SAXException
+                        | ParseException e) {
+                    ErrorLog.add(Config.getInstance(), "QueryUI.CreateSQLView problem with getting projectInfoFile.", e);
+                }
+                includeListModel.removeAllElements();
+                excludeListModel.removeAllElements();
+
+                String pluginName = String.valueOf(pluginComboBox.getSelectedItem());
+
+                for(ProjectInfoPlugin plugin: project.GetPlugins()){
+                    String currentPluginName = plugin.GetName();
+                    if( currentPluginName.equals(pluginName)){
+                        for(String indice: plugin.GetIndices()) {
+                            excludeListModel.addElement(indice);
+                        }
+                    }
+                }
+            }
+        });
         pluginComboBox.setBounds(118, 42, 157, 20);
         frame.getContentPane().add(pluginComboBox);
     }
