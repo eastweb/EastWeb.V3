@@ -187,6 +187,7 @@ public class QueryUI {
 
         JButton btnQuery = new JButton("Query");
         btnQuery.addActionListener(new ActionListener() {
+            @SuppressWarnings("unused")
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 ProjectInfoFile project = null;
