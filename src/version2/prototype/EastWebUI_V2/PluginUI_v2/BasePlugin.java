@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI.PluginUI_v2;
+package version2.prototype.EastWebUI_V2.PluginUI_v2;
 
 import java.util.ArrayList;
 
@@ -11,8 +11,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import version2.prototype.EastWebUI.DocumentBuilderInstance;
-import version2.prototype.EastWebUI.GlobalUIData;
+import version2.prototype.EastWebUI_V2.DocumentBuilderInstance;
+import version2.prototype.EastWebUI_V2.GlobalUIData;
+
 
 public abstract class BasePlugin implements IPlugin {
 

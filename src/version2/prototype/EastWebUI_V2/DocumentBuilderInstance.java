@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI;
+package version2.prototype.EastWebUI_V2;
 
 import java.io.File;
 

@@ -1,53 +1,34 @@
-package version2.prototype.EastWebUI.ProjectInformationUI_v2;
+package version2.prototype.EastWebUI_V2.ProjectInformationUI_v2;
 
 import java.awt.EventQueue;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.JTextField;
-import javax.swing.JList;
-import javax.swing.JComboBox;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
-import version2.prototype.Config;
-import version2.prototype.ErrorLog;
-import version2.prototype.EastWebUI.DocumentBuilderInstance;
-import version2.prototype.EastWebUI.GlobalUIData;
-import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
-import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
-import version2.prototype.EastWebUI.PluginUI_v2.*;
-import version2.prototype.EastWebUI.SummaryUI.AssociateSummaryPage;
-import version2.prototype.EastWebUI.SummaryUI.SummaryEventObject;
-import version2.prototype.EastWebUI.SummaryUI.SummaryListener;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
-
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -57,11 +38,27 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import version2.prototype.Config;
+import version2.prototype.ErrorLog;
+import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
+import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
+import version2.prototype.EastWebUI.SummaryUI.AssociateSummaryPage;
+import version2.prototype.EastWebUI.SummaryUI.SummaryEventObject;
+import version2.prototype.EastWebUI.SummaryUI.SummaryListener;
+import version2.prototype.EastWebUI_V2.DocumentBuilderInstance;
+import version2.prototype.EastWebUI_V2.GlobalUIData;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.AssociatePluginPage;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.IPlugin;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.IndiciesListener;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.PluginEventObject;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 
 import com.toedter.calendar.JDateChooser;
-
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 
 public class ProjectInformationPage {
 

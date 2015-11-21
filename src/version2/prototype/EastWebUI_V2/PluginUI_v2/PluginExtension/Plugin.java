@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI.PluginUI_v2.PluginExtension;
+package version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension;
 
 import java.util.ArrayList;
 
@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 
 import org.w3c.dom.NodeList;
 
-import version2.prototype.EastWebUI.PluginUI_v2.BasePlugin;
-import version2.prototype.EastWebUI.PluginUI_v2.IPlugin;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.BasePlugin;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.IPlugin;
 
 public class Plugin extends BasePlugin{
 

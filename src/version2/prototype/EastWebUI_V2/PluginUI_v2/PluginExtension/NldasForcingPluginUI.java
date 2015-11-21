@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI.PluginUI_v2.PluginExtension;
+package version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,11 +15,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import version2.prototype.EastWebUI_V2.DocumentBuilderInstance;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.BasePlugin;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.IPlugin;
+
 import com.toedter.calendar.JDateChooser;
 
-import version2.prototype.EastWebUI.DocumentBuilderInstance;
-import version2.prototype.EastWebUI.PluginUI_v2.BasePlugin;
-import version2.prototype.EastWebUI.PluginUI_v2.IPlugin;
 
 public class NldasForcingPluginUI extends BasePlugin {
     private String freezingDate;

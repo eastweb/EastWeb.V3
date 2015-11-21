@@ -1,10 +1,11 @@
-package version2.prototype.EastWebUI;
+package version2.prototype.EastWebUI_V2;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis.ModisEvent;
-import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis.ModisListener;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.Modis.ModisEvent;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.Modis.ModisListener;
+
 
 public class GlobalUIData {
 

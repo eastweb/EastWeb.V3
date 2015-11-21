@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis;
+package version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.Modis;
 
 import java.util.EventObject;
 

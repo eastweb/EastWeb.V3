@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI.PluginUI_v2;
+package version2.prototype.EastWebUI_V2.PluginUI_v2;
 
 import java.awt.EventQueue;
 
@@ -14,7 +14,7 @@ import javax.swing.JButton;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
-import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Plugin;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.Plugin;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 

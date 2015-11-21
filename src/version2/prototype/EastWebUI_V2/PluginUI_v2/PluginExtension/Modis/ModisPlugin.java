@@ -1,4 +1,4 @@
-package version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis;
+package version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.Modis;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,13 +23,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import version2.prototype.ModisTile;
-import version2.prototype.EastWebUI.DocumentBuilderInstance;
-import version2.prototype.EastWebUI.GlobalUIData;
-import version2.prototype.EastWebUI.PluginUI_v2.BasePlugin;
-import version2.prototype.EastWebUI.PluginUI_v2.IPlugin;
-import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis.ModisEventObject;
-import version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.Modis.ModisListener;
 import version2.prototype.EastWebUI.ProjectInformationUI.ProjectInformationPage;
+import version2.prototype.EastWebUI_V2.DocumentBuilderInstance;
+import version2.prototype.EastWebUI_V2.GlobalUIData;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.BasePlugin;
+import version2.prototype.EastWebUI_V2.PluginUI_v2.IPlugin;
 
 public class ModisPlugin extends BasePlugin implements IPlugin {
     private DefaultListModel<String> modisListModel;
