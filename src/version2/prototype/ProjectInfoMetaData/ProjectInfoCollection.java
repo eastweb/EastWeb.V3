@@ -4,6 +4,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 import version2.prototype.util.FileSystem;
@@ -94,6 +104,28 @@ public class ProjectInfoCollection {
         }
     }
 
+    public static boolean WriteProjectToFile(Document doc, String projectName)
+    {
+        File theDir = new File(System.getProperty("user.dir") + "\\projects\\" + projectName + ".xml" );
+
+        // write the content into xml file
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer;
+        try {
+            transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(theDir);
+
+            transformer.transform(source, result);
+            return true;
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private static File[] getXMLFiles(File folder) {
         List<File> aList = new ArrayList<File>();
         File[] files = folder.listFiles();
@@ -114,4 +146,6 @@ public class ProjectInfoCollection {
             return f.getName().substring(f.getName().length() - 3, f.getName().length());
         }
     }
+
+
 }
