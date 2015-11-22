@@ -14,41 +14,31 @@ public class Plugin extends BasePlugin{
 
     public Plugin(String PluginName, String QCLevel, ArrayList<String> Indicies) {
         super(PluginName, QCLevel, Indicies);
-        // TODO Auto-generated constructor stub
     }
 
-    public Plugin()
-    {
-
+    public Plugin(){
     }
 
     @Override
-    public String GetUIDisplayPlugin()
-    {
-        String s = String.format("<html>%s</html>",super.GetUIDisplayPlugin());
-        return s;
+    public String GetUIDisplayPlugin(){
+        return  String.format("<html>%s</html>",super.GetUIDisplayPlugin());
     }
 
     @Override
     public JPanel SetupUI(JPanel Panel, JFrame frame) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void ClearUI(JPanel Panel) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void Save() {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public IPlugin GetParseObject(NodeList nodeList, int itemNumber) {
-        Plugin plugin = super.GetParseObject(nodeList.item(itemNumber), Plugin.class);
-        return plugin;
+        return super.GetParseObject(nodeList.item(itemNumber), Plugin.class);
     }
 }

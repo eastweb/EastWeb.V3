@@ -11,6 +11,5 @@ public class ModisEventObject extends EventObject {
      */
     public ModisEventObject(Object source) {
         super(source);
-
     }
 }

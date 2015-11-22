@@ -61,7 +61,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import com.toedter.calendar.JDateChooser;
 
 public class ProjectInformationPage {
-
     private JFrame frame;
     private JDateChooser  startDate;
     private JTextField projectName;
@@ -72,18 +71,15 @@ public class ProjectInformationPage {
     private JComboBox<String> reSamplingComboBox;
     private JComboBox<String> projectCollectionComboBox;
     private JTextField masterShapeTextField;
-
-    private  JCheckBox isClippingCheckBox;
+    private JCheckBox isClippingCheckBox;
+    private JTextField resolutionTextField;
 
     private boolean isEditable;
-
+    private ArrayList<IPlugin> pluginList;
     private MainWindowEvent mainWindowEvent;
 
     private DefaultListModel<String> listOfAddedPluginModel;
     private DefaultListModel<String> summaryListModel;
-    private JTextField resolutionTextField;
-
-    private ArrayList<IPlugin> pluginList;
 
     /**
      * Launch the application.
@@ -111,11 +107,13 @@ public class ProjectInformationPage {
      */
     public ProjectInformationPage(boolean isEditable,  MainWindowListener l) throws IOException, ParserConfigurationException, SAXException, ParseException {
         pluginList = new ArrayList<IPlugin>();
-        this.isEditable = isEditable;
         mainWindowEvent = new MainWindowEvent();
+
+        this.isEditable = isEditable;
         mainWindowEvent.addListener(l);
-        initialize();
         frame.setVisible(true);
+
+        initialize();
         DocumentBuilderInstance.ClearInstance();
         GlobalUIData.ClearInstance();
     }

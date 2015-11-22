@@ -15,6 +15,7 @@ public class PluginEvent implements Serializable {
         if (listeners == null) {
             listeners = new Vector();
         }
+
         listeners.addElement(l);
     }
 
@@ -24,6 +25,7 @@ public class PluginEvent implements Serializable {
         if (listeners == null) {
             listeners = new Vector();
         }
+
         listeners.removeElement(l);
     }
 

@@ -28,8 +28,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 
 public class AssociatePluginPage {
-
-    public JFrame frame;
+    private JFrame frame;
     private PluginEvent indiciesEvent;
     private PluginMetaDataCollection pluginMetaDataCollection;
     private JComboBox<String> pluginComboBox ;
@@ -64,6 +63,7 @@ public class AssociatePluginPage {
     public AssociatePluginPage(IndiciesListener l) throws Exception {
         indiciesEvent = new PluginEvent();
         indiciesEvent.addListener(l);
+
         initialize();
         frame.setVisible(true);
     }
@@ -88,14 +88,13 @@ public class AssociatePluginPage {
      * populate plugin information UI
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void pluginInformation(JPanel pluginPanel) {
+    private void pluginInformation(final JPanel pluginPanel) {
+        indiciesListModel = new DefaultListModel();
+
         pluginPanel.setLayout(null);
         pluginPanel.setBorder(new TitledBorder(null, "Plugin Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         pluginPanel.setBounds(547, 420, 383, 275);
         frame.getContentPane().add(pluginPanel);
-
-        // list of indices to be added
-        indiciesListModel = new DefaultListModel();
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBounds(10, 89, 318, 237);
@@ -117,23 +116,26 @@ public class AssociatePluginPage {
         indiciesComboBox.setBounds(96, 63, 140, 20);
         pluginPanel.add(indiciesComboBox);
 
-        populatePluginComboBox(pluginPanel);
+        JLabel pluginLabel = new JLabel("Plugin");
+        pluginLabel.setBounds(10, 16, 80, 14);
+        pluginPanel.add(pluginLabel);
+        pluginComboBox = new JComboBox<String>();
+        pluginComboBox.setBounds(96, 13, 140, 20);
+        pluginComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) { populatePluginInfo(pluginPanel); }
+        });
+        for(String plugin: pluginMetaDataCollection.pluginList){
+            pluginComboBox.addItem(plugin);
+        }
+        pluginPanel.add(pluginComboBox);
 
         // add plugin to list
         final JButton btnSave = new JButton("Save");
         btnSave.setEnabled(!indiciesListModel.isEmpty());
         btnSave.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) {
-
-                newPlugin.SetQCLevel(String.valueOf(qcComboBox.getSelectedItem()));
-                newPlugin.SetIndicies(getIndicesFormat(listOfInndicies.getModel()));
-                newPlugin.SetPluginName(String.valueOf(pluginComboBox.getSelectedItem()));
-                newPlugin.Save();
-
-                indiciesEvent.fire(newPlugin);
-                frame.dispose();
-            }
+            public void actionPerformed(ActionEvent arg0) {savePlugin(listOfInndicies);}
         });
         btnSave.setBounds(10, 340, 89, 23);
         pluginPanel.add(btnSave);
@@ -142,9 +144,7 @@ public class AssociatePluginPage {
         JButton btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) {
-                frame.dispose();
-            }
+            public void actionPerformed(ActionEvent arg0) {frame.dispose();}
         });
         btnCancel.setBounds(239, 340, 89, 23);
         pluginPanel.add(btnCancel);
@@ -155,15 +155,7 @@ public class AssociatePluginPage {
         btnAddIndices.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         btnAddIndices.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) {
-
-                if(indiciesComboBox.getSelectedItem() == null) {
-                    return ;
-                }
-                indiciesListModel.addElement(String.valueOf(indiciesComboBox.getSelectedItem()));
-                indiciesComboBox.removeItem(indiciesComboBox.getSelectedItem());
-                btnSave.setEnabled(!indiciesListModel.isEmpty());
-            }
+            public void actionPerformed(ActionEvent arg0) { addIndices(btnSave);}
         });
         btnAddIndices.setBounds(246, 55, 36, 23);
         pluginPanel.add(btnAddIndices);
@@ -174,74 +166,10 @@ public class AssociatePluginPage {
         btnDeleteIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
         btnDeleteIndicies.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) {
-                indiciesComboBox.addItem(indiciesListModel.getElementAt(listOfInndicies.getSelectedIndex()).toString());
-
-                DefaultListModel<DefaultListModel> model = (DefaultListModel<DefaultListModel>) listOfInndicies.getModel();
-                model.getElementAt(listOfInndicies.getSelectedIndex());
-                int selectedIndex = listOfInndicies.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    model.remove(selectedIndex);
-                }
-                btnSave.setEnabled(!indiciesListModel.isEmpty());
-            }
+            public void actionPerformed(ActionEvent arg0) {deleteSelectedIndices(listOfInndicies, btnSave);}
         });
         btnDeleteIndicies.setBounds(292, 55, 36, 23);
         pluginPanel.add(btnDeleteIndicies);
-    }
-
-    /**
-     * populate all plugin base on the meta data
-     * @param pluginPanel
-     */
-    private void populatePluginComboBox(final JPanel pluginPanel) {
-        JLabel pluginLabel = new JLabel("Plugin");
-        pluginLabel.setBounds(10, 16, 80, 14);
-        pluginPanel.add(pluginLabel);
-        pluginComboBox = new JComboBox<String>();
-        pluginComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                indiciesListModel.removeAllElements();
-                PluginMetaData plugin = pluginMetaDataCollection.pluginMetaDataMap.get(String.valueOf(pluginComboBox.getSelectedItem()));
-
-                pluginPanel.revalidate();
-                if(newPlugin != null) {
-                    newPlugin.ClearUI(pluginPanel);
-                }
-
-                Class<?> pluginUI;
-                try {
-                    @SuppressWarnings("unused")
-                    String ClassName = String.format("version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.%sPluginUI", plugin.Title);
-                    pluginUI = Class.forName(String.format("version2.prototype.EastWebUI.PluginUI_v2.PluginExtension.%sPluginUI", plugin.Title));
-                    Constructor<?> downloadFactoryCtor = pluginUI.getConstructor();
-                    frame.setBounds(100, 100, 603, 400);
-                    newPlugin = (IPlugin) downloadFactoryCtor.newInstance();
-                    newPlugin.SetupUI(pluginPanel, frame);
-                } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    // there is no special UI for the plugin
-                    newPlugin = new Plugin();
-                    frame.setBounds(100, 100, 347, 400);
-                }
-
-                indiciesComboBox.removeAllItems();
-                for(String indicies : plugin.Indices.indicesNames) {
-                    indiciesComboBox.addItem(indicies);
-                }
-
-                qcComboBox.removeAllItems();
-                for(String qc:plugin.QualityControlMetaData) {
-                    qcComboBox.addItem(qc);
-                }
-            }
-        });
-        pluginComboBox.setBounds(96, 13, 140, 20);
-
-        for(String plugin: pluginMetaDataCollection.pluginList){
-            pluginComboBox.addItem(plugin);
-        }
-        pluginPanel.add(pluginComboBox);
     }
 
     /**
@@ -250,14 +178,80 @@ public class AssociatePluginPage {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    private ArrayList<String> getIndicesFormat(ListModel m){
+    private ArrayList<String> convertModelToArray(ListModel model){
         ArrayList<String> indicies = new ArrayList<String>();
-        ListModel model = m;
 
         for(int i=0; i < model.getSize(); i++){
             indicies.add(model.getElementAt(i).toString());
         }
 
         return indicies;
+    }
+
+    private void savePlugin(@SuppressWarnings("rawtypes") final JList<DefaultListModel> listOfInndicies) {
+        newPlugin.SetQCLevel(String.valueOf(qcComboBox.getSelectedItem()));
+        newPlugin.SetIndicies(convertModelToArray(listOfInndicies.getModel()));
+        newPlugin.SetPluginName(String.valueOf(pluginComboBox.getSelectedItem()));
+        newPlugin.Save();
+
+        indiciesEvent.fire(newPlugin);
+        frame.dispose();
+    }
+
+    private void populatePluginInfo(final JPanel pluginPanel) {
+        indiciesListModel.removeAllElements();
+        PluginMetaData plugin = pluginMetaDataCollection.pluginMetaDataMap.get(String.valueOf(pluginComboBox.getSelectedItem()));
+        pluginPanel.revalidate();
+
+        if(newPlugin != null) {
+            newPlugin.ClearUI(pluginPanel);
+        }
+
+        Class<?> pluginUI;
+        try {
+            pluginUI = Class.forName(String.format("version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.%sPluginUI", plugin.Title));
+            Constructor<?> pluginUIInstance = pluginUI.getConstructor();
+
+            newPlugin = (IPlugin) pluginUIInstance.newInstance();
+            newPlugin.SetupUI(pluginPanel, frame);
+            frame.setBounds(100, 100, 603, 400);
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            newPlugin = new Plugin();
+            frame.setBounds(100, 100, 347, 400);
+        }
+
+        indiciesComboBox.removeAllItems();
+        for(String indicies : plugin.Indices.indicesNames) {
+            indiciesComboBox.addItem(indicies);
+        }
+
+        qcComboBox.removeAllItems();
+        for(String qc:plugin.QualityControlMetaData) {
+            qcComboBox.addItem(qc);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addIndices(final JButton btnSave) {
+        if(indiciesComboBox.getSelectedItem() == null) {
+            return ;
+        }
+
+        indiciesListModel.addElement(String.valueOf(indiciesComboBox.getSelectedItem()));
+        indiciesComboBox.removeItem(indiciesComboBox.getSelectedItem());
+        btnSave.setEnabled(!indiciesListModel.isEmpty());
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void deleteSelectedIndices(final JList<DefaultListModel> listOfInndicies, final JButton btnSave) {
+        indiciesComboBox.addItem(indiciesListModel.getElementAt(listOfInndicies.getSelectedIndex()).toString());
+
+        DefaultListModel<DefaultListModel> model = (DefaultListModel<DefaultListModel>) listOfInndicies.getModel();
+        int selectedIndex = listOfInndicies.getSelectedIndex();
+
+        if (selectedIndex != -1) {
+            model.remove(selectedIndex);
+        }
+        btnSave.setEnabled(!indiciesListModel.isEmpty());
     }
 }
