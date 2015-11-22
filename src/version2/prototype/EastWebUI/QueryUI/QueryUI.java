@@ -18,9 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -140,7 +138,7 @@ public class QueryUI {
                     project = ProjectInfoCollection.GetProject(Config.getInstance(), selectedProject);
                     zoneComboBox.removeAllItems();
                     zoneComboBox.addItem("");
-                    pluginComboBox.removeAll();
+                    pluginComboBox.removeAllItems();
 
                     for(ProjectInfoPlugin plugin : project.GetPlugins()){
                         pluginComboBox.addItem(plugin.GetName());
