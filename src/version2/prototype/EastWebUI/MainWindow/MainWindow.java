@@ -13,8 +13,6 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-
 import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
@@ -26,18 +24,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JLabel;
@@ -47,8 +41,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
-
-import com.sun.glass.events.WindowEvent;
 
 import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
@@ -62,8 +54,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.SchedulerData;
 import version2.prototype.Scheduler.SchedulerStatus;
-
-import java.awt.event.WindowStateListener;
 
 public class MainWindow {
 
@@ -543,7 +533,7 @@ public class MainWindow {
 
             if(status == null) {
                 // Do nothing
-            } else if(status.State == TaskState.RUNNING) {
+            } else if(status.State == TaskState.RUNNING || status.State == TaskState.STARTING) {
                 setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
 
             } else {
@@ -594,7 +584,7 @@ public class MainWindow {
 
             if(status == null) {
                 // Do nothing
-            } else if(status.State == TaskState.RUNNING) {
+            } else if(status.State == TaskState.RUNNING || status.State == TaskState.STARTING) {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
             } else {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
@@ -613,7 +603,7 @@ public class MainWindow {
 
                 if(status == null) {
                     // Do nothing
-                } else if(status.State == TaskState.RUNNING) {
+                } else if(status.State == TaskState.RUNNING || status.State == TaskState.STARTING) {
                     EASTWebManager.StopExistingScheduler(projectName, false);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 
@@ -775,7 +765,7 @@ public class MainWindow {
                 setBackground(Color.GRAY);
                 setForeground(Color.GRAY);
                 setToolTipText("Project is not running.");
-            } else if(status.State == TaskState.RUNNING) {
+            } else if(status.State != TaskState.STOPPED) {
                 if(status.ProjectUpToDate) {
                     setBackground(Color.GREEN);
                     setForeground(Color.GREEN);
@@ -813,7 +803,7 @@ public class MainWindow {
                     button.setBackground(Color.GRAY);
                     button.setForeground(Color.GRAY);
                     button.setToolTipText("Project is not running.");
-                } else if(status.State == TaskState.RUNNING) {
+                } else if(status.State != TaskState.STOPPED) {
                     if(status.ProjectUpToDate) {
                         button.setBackground(Color.GREEN);
                         button.setForeground(Color.GREEN);
@@ -877,7 +867,7 @@ public class MainWindow {
                 button.setBackground(Color.GRAY);
                 button.setForeground(Color.GRAY);
                 button.setToolTipText("Project is not running.");
-            } else if(status.State == TaskState.RUNNING) {
+            } else if(status.State != TaskState.STOPPED) {
                 if(status.ProjectUpToDate) {
                     button.setBackground(Color.GREEN);
                     button.setForeground(Color.GREEN);
@@ -934,7 +924,7 @@ public class MainWindow {
                     button.setBackground(Color.GRAY);
                     button.setForeground(Color.GRAY);
                     button.setToolTipText("Project is not running.");
-                } else if(status.State == TaskState.RUNNING) {
+                } else if(status.State != TaskState.STOPPED) {
                     if(status.ProjectUpToDate) {
                         button.setBackground(Color.GREEN);
                         button.setForeground(Color.GREEN);

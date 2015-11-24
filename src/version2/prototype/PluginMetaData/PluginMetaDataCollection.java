@@ -140,7 +140,7 @@ public class PluginMetaDataCollection {
         pluginMetaDataMap = createMap(xmlFiles);
     }
 
-    private PluginMetaDataCollection() throws ParserConfigurationException, SAXException, IOException{
+    private PluginMetaDataCollection(){
         pluginList = new ArrayList<String>();
     }
 

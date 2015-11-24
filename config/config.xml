@@ -11,14 +11,6 @@
 		<PassWord>eastweb</PassWord>
 		<MaxNumOfConnectionsPerInstance>50</MaxNumOfConnectionsPerInstance>
 	</Database>
-	<!-- <DataBase>
-		<GlobalSchema>EASTWeb</GlobalSchema>
-		<HostName>localhost</HostName>
-		<Port>5432</Port>
-		<DatabaseName>epidemiadb</DatabaseName>
-		<userName>postgres</userName>
-		<passWord>dPpKa2Q8NW</passWord>
-	</DataBase> -->
 	<Output>
 		<TemporalSummaryCompositionStrategy>GregorianWeeklyStrategy</TemporalSummaryCompositionStrategy>
 		<TemporalSummaryCompositionStrategy>GregorianMonthlyStrategy</TemporalSummaryCompositionStrategy>

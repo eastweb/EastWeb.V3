@@ -71,13 +71,6 @@ public abstract class Process implements Observer {
     }
 
     /**
-     * Method to override to handle processing new input files. Called only when Scheduler TaskState is set to RUNNING and there is at least 1 available cached file to process.
-     *
-     * @param cachedFiles  - List of cache files available to process. Can always assume size is 1 or greater when called.
-     */
-    public abstract void process(ArrayList<DataFileMetaData> cachedFiles);
-
-    /**
      * Bubbles up progress update information to the GUI.
      *
      * @param e  - progress update
@@ -86,6 +79,24 @@ public abstract class Process implements Observer {
     {
         scheduler.NotifyUI(e);
     }
+
+    /**
+     * Retrieves the ClearIntermediateFiles flag. This flag is TRUE if directories/files in Process temp directories and in output directories for Download, Processor,
+     * & Indices should be deleted once no longer needed.
+     *
+     * @return  ClearIntermediateFiles flag value
+     */
+    public boolean GetClearIntermediateFilesFlag()
+    {
+        return scheduler.GetClearIntermediateFilesFlag();
+    }
+
+    /**
+     * Method to override to handle processing new input files. Called only when Scheduler TaskState is set to RUNNING and there is at least 1 available cached file to process.
+     *
+     * @param cachedFiles  - List of cache files available to process. Can always assume size is 1 or greater when called.
+     */
+    public abstract void process(ArrayList<DataFileMetaData> cachedFiles);
 
     /* (non-Javadoc)
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)

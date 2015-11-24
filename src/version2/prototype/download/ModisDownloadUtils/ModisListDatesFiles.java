@@ -6,12 +6,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +19,6 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.download.DownloadUtils;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.util.ParallelUtils.Parallel;
 
 /*
  * @Author: Chris Plucker, Fangyu Zhang
@@ -141,7 +136,7 @@ public class ModisListDatesFiles extends ListDatesFiles
                     }
                     catch(Exception e)
                     {
-                        ErrorLog.add(Config.getInstance(), mData.Title, mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list in Parallel.ForEach.", e);
+                        ErrorLog.add(Config.getInstance(), mData.Title, mData.name, "ModisListDatesFiles.ListDatesFilesHTTP problem while getting file list.", e);
                         //                        return;
                     }
                     finally {

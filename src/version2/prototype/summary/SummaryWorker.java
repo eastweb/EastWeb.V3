@@ -1,6 +1,8 @@
 package version2.prototype.summary;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,9 +17,9 @@ import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.Scheduler.ProcessName;
+import version2.prototype.summary.temporal.MergeStrategy;
 import version2.prototype.summary.temporal.TemporalSummaryCalculator;
 import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
-import version2.prototype.summary.temporal.MergeStrategies.AvgGdalRasterFileMerge;
 import version2.prototype.summary.zonal.SummariesCollection;
 import version2.prototype.summary.zonal.ZonalSummaryCalculator;
 import version2.prototype.util.DataFileMetaData;
@@ -65,6 +67,17 @@ public class SummaryWorker extends ProcessWorker {
         DataFileMetaData tempFile;
         IndicesFileMetaData cachedFileData = null;
 
+        Class<?> strategyClass;
+        Constructor<?> ctorStrategy;
+        MergeStrategy mergeStrategy = null;
+        try {
+            strategyClass = Class.forName("version2.prototype.summary.temporal.MergenStrategies." + pluginMetaData.Summary.mergeStrategyClass);
+            ctorStrategy = strategyClass.getConstructor();
+            mergeStrategy = (MergeStrategy)ctorStrategy.newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            ErrorLog.add(process,  "Problem creating MergeStrategy.", e);
+        }
+
         // Setup initial input mappings
         for(ProjectInfoSummary summary : projectInfoFile.GetSummaries())
         {
@@ -95,7 +108,7 @@ public class SummaryWorker extends ProcessWorker {
                                 pluginMetaData.DaysPerInputData,        // daysPerInputData
                                 fileStores.get(summary.GetID()),        // TemporalSummaryRasterFileStore
                                 null,                                   // InterpolateStrategy
-                                new AvgGdalRasterFileMerge()            // (Framework user defined)
+                                mergeStrategy
                                 );
                         tempFile = temporalSummaryCal.calculate();
                         if(tempFile != null) {
@@ -119,6 +132,7 @@ public class SummaryWorker extends ProcessWorker {
             for(DataFileMetaData cachedFile : summaryInputMap.get(summary.GetID()))
             {
                 if(Thread.currentThread().isInterrupted()) {
+                    con.close();
                     return null;
                 }
 
@@ -141,6 +155,20 @@ public class SummaryWorker extends ProcessWorker {
                             fileStores.get(summary.GetID()),        // fileStore
                             outputCache);
                     zonalSummaryCal.calculate();
+
+                    if(process.GetClearIntermediateFilesFlag())
+                    {
+                        String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName(), pluginInfo.GetName(), ProcessName.SUMMARY) +
+                                String.format("%04d%03d.tif",
+                                        cachedFileData.year,
+                                        cachedFileData.day
+                                        );
+                        File intermediateFile = new File(newFilePath);
+                        if(intermediateFile.exists()) {
+                            intermediateFile.delete();
+                        }
+                    }
+
                     outputFiles.add(new DataFileMetaData(outputFile.getCanonicalPath(), cachedFileData.dateGroupID, cachedFileData.year, cachedFileData.day, cachedFileData.indexNm));
                 }catch(Exception e) {
                     if(cachedFileData != null) {

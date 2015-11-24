@@ -67,14 +67,15 @@ public class Scheduler {
     private final int ID;
     private final Config configInstance;
     private final EASTWebManagerI manager;
+    protected boolean clearIntermediateFiles;
     protected SchedulerStatusContainer statusContainer;
-    private ArrayList<LocalDownloader> localDownloaders;
-    private ArrayList<Process> processorProcesses;
-    private ArrayList<Process> indicesProcesses;
-    private ArrayList<Process> summaryProcesses;
-    private ArrayList<DatabaseCache> downloadCaches;
-    private ArrayList<DatabaseCache> processorCaches;
-    private ArrayList<DatabaseCache> indicesCaches;
+    protected ArrayList<LocalDownloader> localDownloaders;
+    protected ArrayList<Process> processorProcesses;
+    protected ArrayList<Process> indicesProcesses;
+    protected ArrayList<Process> summaryProcesses;
+    protected ArrayList<DatabaseCache> downloadCaches;
+    protected ArrayList<DatabaseCache> processorCaches;
+    protected ArrayList<DatabaseCache> indicesCaches;
 
     /**
      * Creates and sets up a Scheduler instance with the given project data. Does not start the Scheduler and Processes.
@@ -122,6 +123,7 @@ public class Scheduler {
         this.data = data;
         projectInfoFile = data.projectInfoFile;
         pluginMetaDataCollection = data.pluginMetaDataCollection;
+        clearIntermediateFiles = data.clearIntermediateFiles;
 
         statusContainer = new SchedulerStatusContainer(configInstance, myID, projectInfoFile.GetStartDate(), progressUpdater, projectInfoFile, pluginMetaDataCollection, initState);
         localDownloaders = new ArrayList<LocalDownloader>(1);
@@ -209,6 +211,14 @@ public class Scheduler {
     public int GetID() { return ID; }
 
     /**
+     * Retrieves the ClearIntermediateFiles flag. This flag is TRUE if directories/files in Process temp directories and in output directories for Download, Processor,
+     * & Indices should be deleted once no longer needed.
+     *
+     * @return  ClearIntermediateFiles flag value
+     */
+    public boolean GetClearIntermediateFilesFlag() { return new Boolean(clearIntermediateFiles); }
+
+    /**
      * Returns the current status of this Scheduler.
      *
      * @author michael.devos
@@ -250,6 +260,7 @@ public class Scheduler {
         }
 
         if(myState != TaskState.STOPPED) {
+            con.close();
             return;
         }
 
@@ -276,7 +287,13 @@ public class Scheduler {
         } catch(SQLException e) {
             ErrorLog.add(this, "Problem while updating caches to prepare for start or restart.", e);
         } finally {
-            stmt = null;
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    ErrorLog.add(this, "Problem while updating caches to prepare for start or restart.", e);
+                }
+            }
             con.close();
         }
 
@@ -408,6 +425,7 @@ public class Scheduler {
         }
 
         if(!Stop()) {
+            con.close();
             return false;
         }
 

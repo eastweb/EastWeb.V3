@@ -35,7 +35,7 @@
 	</Indices>
 	<Summary>
 		<Temporal>
-			<MergeStrategyClass>AvgGdalRasterFileMerge</MergeStrategyClass>
+			<MergeStrategyClass>SummationGdalRasterFileMerge</MergeStrategyClass>
 			<InterpolateStrategyClass/>
 		</Temporal>
 	</Summary>

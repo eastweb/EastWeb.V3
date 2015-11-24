@@ -44,6 +44,8 @@ public final class DownloadUtils {
 
     public static final void downloadToStream(URLConnection conn, OutputStream outStream) throws IOException {
         if (conn instanceof HttpURLConnection) {
+            ((HttpURLConnection)conn).setConnectTimeout(30000);
+            ((HttpURLConnection)conn).connect();
             final int code = ((HttpURLConnection)conn).getResponseCode();
 
             if (code != 200) {
