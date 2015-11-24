@@ -11,11 +11,43 @@ import version2.prototype.util.GdalUtils;
  * @author Isaiah Snell-Feikema
  */
 
+/*
+ *  1: Band 1: Red
+ *  2: Band 2: NIR
+ *  3: Band 3: Blue
+ *  4: Band 4: Green
+ *  5: Band 5: SWIR 1
+ *  6: Band 6: SWIR 2
+ *  7: Band 7: SWIR 3
+ */
 public class ModisNBARNDWI6 extends IndicesFramework {
-    private static final int NIR = 0;
-    private static final int SWIR = 1;
+    private final int NIR;
+    private final int SWIR;
 
-    public ModisNBARNDWI6(){}
+    public ModisNBARNDWI6()
+    {
+        int tempNIR = -1;
+        int tempSWIR = -1;
+
+        for(int i=0; i < mInputFiles.length; i++)
+        {
+            if(mInputFiles[i].getName().toLowerCase().contains(new String("band2")))
+            {
+                tempNIR = i;
+            }
+            else if(mInputFiles[i].getName().toLowerCase().contains(new String("band6")))
+            {
+                tempSWIR = i;
+            }
+
+            if(tempNIR > -1 && tempSWIR > -1) {
+                break;
+            }
+        }
+
+        NIR = tempNIR;
+        SWIR = tempSWIR;
+    }
 
     /**
      * Valid input value range: 0 to 32766

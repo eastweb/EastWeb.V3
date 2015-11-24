@@ -4,10 +4,33 @@ import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
 public class ModisLSTMean extends IndicesFramework{
-    final int DAY_LST = 0;
-    final int NIGHT_LST = 1;
+    private final int DAY_LST;
+    private final int NIGHT_LST;
 
-    public ModisLSTMean(){}
+    public ModisLSTMean()
+    {
+        int tempDAY_LST = -1;
+        int tempNIGHT_LST = -1;
+
+        for(int i=0; i < mInputFiles.length; i++)
+        {
+            if(mInputFiles[i].getName().toLowerCase().contains(new String("day")))
+            {
+                tempDAY_LST = i;
+            }
+            else if(mInputFiles[i].getName().toLowerCase().contains(new String("night")))
+            {
+                tempNIGHT_LST = i;
+            }
+
+            if(tempDAY_LST > -1 && tempNIGHT_LST > -1) {
+                break;
+            }
+        }
+
+        DAY_LST = tempDAY_LST;
+        NIGHT_LST = tempNIGHT_LST;
+    }
 
     /**
      * Valid input value range: 7500 to 65535

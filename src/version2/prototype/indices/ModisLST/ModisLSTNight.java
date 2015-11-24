@@ -4,9 +4,26 @@ import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
 public class ModisLSTNight extends IndicesFramework {
-    final static int INPUT = 1;
+    private final int INPUT;
 
-    public ModisLSTNight(){}
+    public ModisLSTNight()
+    {
+        int tempINPUT = -1;
+
+        for(int i=0; i < mInputFiles.length; i++)
+        {
+            if(mInputFiles[i].getName().toLowerCase().contains(new String("night")))
+            {
+                tempINPUT = i;
+            }
+
+            if(tempINPUT > -1) {
+                break;
+            }
+        }
+
+        INPUT = tempINPUT;
+    }
 
     /**
      * Valid input value range: 7500 to 65535

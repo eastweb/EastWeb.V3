@@ -71,7 +71,7 @@ public class SummaryWorker extends ProcessWorker {
         Constructor<?> ctorStrategy;
         MergeStrategy mergeStrategy = null;
         try {
-            strategyClass = Class.forName("version2.prototype.summary.temporal.MergenStrategies." + pluginMetaData.Summary.mergeStrategyClass);
+            strategyClass = Class.forName("version2.prototype.summary.temporal.MergeStrategies." + pluginMetaData.Summary.mergeStrategyClass);
             ctorStrategy = strategyClass.getConstructor();
             mergeStrategy = (MergeStrategy)ctorStrategy.newInstance();
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

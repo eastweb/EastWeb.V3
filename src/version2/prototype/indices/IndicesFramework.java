@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.util.GdalUtils;
 
@@ -23,8 +23,6 @@ public abstract class IndicesFramework implements IndexCalculator {
     protected File[] mInputFiles;
     protected File mOutputFile;
 
-    // constructor which takes the listener to talk back to the UI
-    // listener will come from the scheduler
     public IndicesFramework()
     { }
 
@@ -55,7 +53,7 @@ public abstract class IndicesFramework implements IndexCalculator {
                 inputs[0].GetRasterXSize(),
                 inputs[0].GetRasterYSize(),
                 1,
-                gdalconst.GDT_Float32);
+                gdalconstConstants.GDT_Float32);
 
         //        System.out.println("output is  "+outputDS);
         outputDS.SetGeoTransform(inputs[0].GetGeoTransform());
