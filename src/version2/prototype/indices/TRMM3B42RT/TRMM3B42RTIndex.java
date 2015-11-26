@@ -1,5 +1,8 @@
 package version2.prototype.indices.TRMM3B42RT;
 
+import java.io.File;
+import java.util.List;
+
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
@@ -7,7 +10,10 @@ public class TRMM3B42RTIndex extends IndicesFramework
 {
     private final int INPUT = 0;
 
-    public TRMM3B42RTIndex() {}
+    public TRMM3B42RTIndex(List<File> inputFiles, File outputFile)
+    {
+        super(inputFiles, outputFile);
+    }
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {

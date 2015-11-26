@@ -1,5 +1,8 @@
 package version2.prototype.indices.ModisLST;
 
+import java.io.File;
+import java.util.List;
+
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
@@ -7,10 +10,11 @@ public class ModisLSTDay extends IndicesFramework{
 
     private final int INPUT;
 
-    public ModisLSTDay()
+    public ModisLSTDay(List<File> inputFiles, File outputFile)
     {
-        int tempINPUT = -1;
+        super(inputFiles, outputFile);
 
+        int tempINPUT = -1;
         for(int i=0; i < mInputFiles.length; i++)
         {
             if(mInputFiles[i].getName().toLowerCase().contains(new String("day")))

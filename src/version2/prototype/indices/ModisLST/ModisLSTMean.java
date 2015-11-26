@@ -1,5 +1,8 @@
 package version2.prototype.indices.ModisLST;
 
+import java.io.File;
+import java.util.List;
+
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
@@ -7,11 +10,12 @@ public class ModisLSTMean extends IndicesFramework{
     private final int DAY_LST;
     private final int NIGHT_LST;
 
-    public ModisLSTMean()
+    public ModisLSTMean(List<File> inputFiles, File outputFile)
     {
+        super(inputFiles, outputFile);
+
         int tempDAY_LST = -1;
         int tempNIGHT_LST = -1;
-
         for(int i=0; i < mInputFiles.length; i++)
         {
             if(mInputFiles[i].getName().toLowerCase().contains(new String("day")))
