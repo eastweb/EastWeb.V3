@@ -2,6 +2,7 @@ package version2.prototype.indices;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
@@ -20,23 +21,19 @@ import version2.prototype.util.GdalUtils;
 public abstract class IndicesFramework implements IndexCalculator {
     protected static final float OUTPUT_NODATA = Float.intBitsToFloat(0xff7fffff);
 
-    protected File[] mInputFiles;
-    protected File mOutputFile;
+    protected final File[] mInputFiles;
+    protected final File mOutputFile;
 
-    public IndicesFramework()
-    { }
-
-    // set input file property
-    public void setInputFiles(File[] inputFiles) {
-        assert (inputFiles.length > 0);
-        mInputFiles = new File[inputFiles.length];
-        for(int i=0; i < inputFiles.length; i++) {
-            mInputFiles[i] = new File(inputFiles[i].getPath());
+    /**
+     * @param inputFiles
+     * @param outputFile
+     */
+    public IndicesFramework(List<File> inputFiles, File outputFile)
+    {
+        mInputFiles = new File[inputFiles.size()];
+        for(int i=0; i < inputFiles.size(); i++) {
+            mInputFiles[i] = new File(inputFiles.get(i).getPath());
         }
-    }
-
-    // set output file property
-    public void setOutputFile(File outputFile) {
         mOutputFile = outputFile;
     }
 

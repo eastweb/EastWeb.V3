@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -83,6 +85,9 @@ public class IndicesWorker extends ProcessWorker{
         }
 
         if(stmt == null) {
+            if(con != null) {
+                con.close();
+            }
             return null;
         }
 
@@ -133,7 +138,18 @@ public class IndicesWorker extends ProcessWorker{
 
         for (Map.Entry<DataDate, ArrayList<ProcessorFileMetaData>> entry : map.entrySet())
         {
-            if(Thread.currentThread().isInterrupted()) {
+            if(Thread.currentThread().isInterrupted())
+            {
+                try{
+                    if(stmt != null) {
+                        stmt.close();
+                    }
+                } catch(SQLException e) {
+                    ErrorLog.add(process, "Problem closing connection.", e);
+                }
+                if(con != null) {
+                    con.close();
+                }
                 return null;
             }
 
@@ -168,19 +184,12 @@ public class IndicesWorker extends ProcessWorker{
                 try
                 {
                     clazzIndicies = Class.forName(String.format("version2.prototype.indices.%s.%s", pluginName, indices));
-                    Constructor<?> ctorIndicies = clazzIndicies.getConstructor();
+                    Constructor<?> ctorIndicies = clazzIndicies.getConstructor(List.class, File.class);
 
-                    Object indexCalculator =  ctorIndicies.newInstance();
-
-                    //set input files
-                    Method method = indexCalculator.getClass().getMethod("setInputFiles", new Class[]{File[].class});
-                    method.invoke(indexCalculator, new Object[]{inputFiles.clone()});
-                    // set output file
                     String outFile = outputPath + File.separator + indices + ".tif";
-                    method = indexCalculator.getClass().getMethod("setOutputFile", File.class);
-                    method.invoke(indexCalculator, new File(outFile));
+                    Object indexCalculator = ctorIndicies.newInstance(Arrays.asList(inputFiles.clone()), new File(outFile));
 
-                    method = indexCalculator.getClass().getMethod("calculate");
+                    Method method = indexCalculator.getClass().getMethod("calculate");
                     method.invoke(indexCalculator);
 
                     output.add(new DataFileMetaData(outFile, Schemas.getDateGroupID(configInstance.getGlobalSchema(), thisDay.getLocalDate(), stmt), thisDay.getYear(), thisDay.getDayOfYear(), indices));
@@ -202,13 +211,13 @@ public class IndicesWorker extends ProcessWorker{
             if(stmt != null) {
                 stmt.close();
             }
-            if(con != null) {
-                con.close();
-            }
         } catch(SQLException e) {
             ErrorLog.add(process, "Problem closing connection.", e);
         }
 
+        if(con != null) {
+            con.close();
+        }
         return null;
     }
 }

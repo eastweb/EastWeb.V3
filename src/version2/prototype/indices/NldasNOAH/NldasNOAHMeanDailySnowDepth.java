@@ -1,12 +1,15 @@
 package version2.prototype.indices.NldasNOAH;
 
 import java.io.File;
+import java.util.List;
 
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 
 //import java.io.File;
+
+
 
 
 import version2.prototype.indices.IndicesFramework;
@@ -16,7 +19,10 @@ public class NldasNOAHMeanDailySnowDepth extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySnowDepth() { }
+    public NldasNOAHMeanDailySnowDepth(List<File> inputFiles, File outputFile)
+    {
+        super(inputFiles, outputFile);
+    }
 
     @Override
     public void calculate() throws Exception {

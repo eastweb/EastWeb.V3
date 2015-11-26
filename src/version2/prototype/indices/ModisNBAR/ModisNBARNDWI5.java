@@ -1,5 +1,8 @@
 package version2.prototype.indices.ModisNBAR;
 
+import java.io.File;
+import java.util.List;
+
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
 
@@ -23,11 +26,12 @@ public class ModisNBARNDWI5 extends IndicesFramework {
     private final int NIR;
     private final int SWIR;
 
-    public ModisNBARNDWI5()
+    public ModisNBARNDWI5(List<File> inputFiles, File outputFile)
     {
+        super(inputFiles, outputFile);
+
         int tempNIR = -1;
         int tempSWIR = -1;
-
         for(int i=0; i < mInputFiles.length; i++)
         {
             if(mInputFiles[i].getName().toLowerCase().contains(new String("band2")))

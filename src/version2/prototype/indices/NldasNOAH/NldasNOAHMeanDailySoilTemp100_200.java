@@ -1,12 +1,15 @@
 package version2.prototype.indices.NldasNOAH;
 
 import java.io.File;
+import java.util.List;
 
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 
 //import java.io.File;
+
+
 
 import version2.prototype.indices.IndicesFramework;
 import version2.prototype.util.GdalUtils;
@@ -20,7 +23,10 @@ public class NldasNOAHMeanDailySoilTemp100_200 extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySoilTemp100_200() { }
+    public NldasNOAHMeanDailySoilTemp100_200(List<File> inputFiles, File outputFile)
+    {
+        super(inputFiles, outputFile);
+    }
 
     @Override
     public void calculate() throws Exception {

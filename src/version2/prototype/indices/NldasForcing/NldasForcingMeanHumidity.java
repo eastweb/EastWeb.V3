@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -17,7 +18,10 @@ import version2.prototype.util.GdalUtils;
 
 public class NldasForcingMeanHumidity extends IndicesFramework {
 
-    public NldasForcingMeanHumidity() {}
+    public NldasForcingMeanHumidity(List<File> inputFiles, File outputFile)
+    {
+        super(inputFiles, outputFile);
+    }
 
     @Override
     public void calculate() throws Exception
