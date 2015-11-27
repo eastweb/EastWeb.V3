@@ -13,14 +13,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebManagerI;
 import version2.prototype.ErrorLog;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
 import version2.prototype.Scheduler.Scheduler;
-import version2.prototype.download.ModisDownloadUtils.ModisLocalStorageGlobalDownloader;
 import version2.prototype.util.DatabaseCache;
 import version2.prototype.util.DatabaseConnection;
 import version2.prototype.util.DatabaseConnector;

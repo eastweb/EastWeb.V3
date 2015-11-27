@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;

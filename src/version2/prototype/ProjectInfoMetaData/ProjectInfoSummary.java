@@ -2,7 +2,6 @@ package version2.prototype.ProjectInfoMetaData;
 
 import jdk.nashorn.internal.ir.annotations.Immutable;
 import version2.prototype.ZonalSummary;
-import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 
 /**
  * Represents a summary element from the project meta data. Object is immutable.

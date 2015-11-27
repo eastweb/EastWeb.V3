@@ -10,7 +10,6 @@ import org.gdal.ogr.ogr;
 
 import version2.prototype.ConfigReadException;
 import version2.prototype.Projection;
-import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Projection.ResamplingType;
 
 import java.io.File;

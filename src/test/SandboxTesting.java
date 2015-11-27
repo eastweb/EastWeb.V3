@@ -26,14 +26,14 @@ public class SandboxTesting {
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         SandboxTesting tester = new SandboxTesting();
-        //        testPersistance();
-        //        Test3();
-        //        test4();
-        //        test5();
-        //        tester.MinMax_NDWI();
-        //        tester.MinMax_EVI();
-        //        tester.ModisCompositeStartDays();
-        //        tester.testEASTWebResults();
+        testPersistance();
+        Test3();
+        test4();
+        test5();
+        tester.MinMax_NDWI();
+        tester.MinMax_EVI();
+        tester.ModisCompositeStartDays();
+        tester.testEASTWebResults();
     }
 
     public void testEASTWebResults()
@@ -63,8 +63,8 @@ public class SandboxTesting {
     public void MinMax_NDWI() throws InterruptedException, ExecutionException
     {
         final int MAX = 32766;
-        int NIR, SWIR;
-        double ndwi;
+        //int NIR, SWIR;
+        //double ndwi;
         double currentMax = -999999999;
         double currentMin = Double.MAX_VALUE;
         int numOfCores = Runtime.getRuntime().availableProcessors();
@@ -377,6 +377,7 @@ public class SandboxTesting {
             notifyObservers(state);     // Automatically calls clearChanged
         }
 
+        @SuppressWarnings("unused")
         public Boolean GetState()
         {
             return state;

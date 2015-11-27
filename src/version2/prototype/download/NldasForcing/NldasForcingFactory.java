@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
-import version2.prototype.EASTWebManagerI;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;

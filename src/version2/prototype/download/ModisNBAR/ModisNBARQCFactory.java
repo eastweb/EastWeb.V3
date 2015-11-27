@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
-import version2.prototype.EASTWebManagerI;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -17,7 +16,6 @@ import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.download.DownloadFactory;
 import version2.prototype.download.DownloaderFactory;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.download.LocalStorageDownloadFactory;
 import version2.prototype.download.ModisDownloadUtils.ModisLocalStorageDownloadFactory;
 import version2.prototype.util.DatabaseCache;
 

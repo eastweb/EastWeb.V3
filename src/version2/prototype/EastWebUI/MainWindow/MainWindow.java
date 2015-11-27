@@ -833,7 +833,6 @@ public class MainWindow {
         private static final long serialVersionUID = 1L;
         protected JButton button;
         private String label;
-        private boolean isPushed;
 
         public StatusButtonEditor(JCheckBox checkBox) {
             super(checkBox);
@@ -884,21 +883,17 @@ public class MainWindow {
             }
             frame.repaint();
 
-            isPushed = true;
-
             return button;
         }
 
         @Override
         public Object getCellEditorValue() {
 
-            isPushed = false;
             return new String(label);
         }
 
         @Override
         public boolean stopCellEditing() {
-            isPushed = false;
             return super.stopCellEditing();
         }
 

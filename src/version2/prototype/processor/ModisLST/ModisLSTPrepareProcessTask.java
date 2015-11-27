@@ -1,7 +1,6 @@
 package version2.prototype.processor.ModisLST;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import version2.prototype.DataDate;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;

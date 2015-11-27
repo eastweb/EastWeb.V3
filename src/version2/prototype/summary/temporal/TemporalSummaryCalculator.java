@@ -27,6 +27,7 @@ public class TemporalSummaryCalculator {
     private final IndicesFileMetaData inputFile;
     private int daysPerInputData;
     private final TemporalSummaryRasterFileStore fileStore;
+    @SuppressWarnings("unused")
     private final InterpolateStrategy intStrategy;
     private final MergeStrategy mergeStrategy;
 

@@ -1,12 +1,10 @@
 package version2.prototype.processor;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 
 import version2.prototype.util.GdalUtils;
 

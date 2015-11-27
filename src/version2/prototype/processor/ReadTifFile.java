@@ -1,7 +1,5 @@
 package version2.prototype.processor;
 
-import java.time.LocalDate;
-
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;

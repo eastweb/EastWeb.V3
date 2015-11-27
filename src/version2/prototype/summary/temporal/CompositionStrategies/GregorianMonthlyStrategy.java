@@ -13,7 +13,7 @@ public class GregorianMonthlyStrategy implements TemporalSummaryCompositionStrat
 
     @Override
     public LocalDate getStartDate(LocalDate iDate) throws Exception {
-        LocalDate startDate = iDate;
+        //LocalDate startDate = iDate;
 
         //        if(!startDate.equals(LocalDate.of(iDate.getYear(), iDate.getMonthValue(), 1)))
         //        {

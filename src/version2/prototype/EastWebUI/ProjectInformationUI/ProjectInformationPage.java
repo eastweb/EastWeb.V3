@@ -14,7 +14,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
-import version2.prototype.ModisTile;
 import version2.prototype.EastWebUI.MainWindow.MainWindowEvent;
 import version2.prototype.EastWebUI.MainWindow.MainWindowListener;
 import version2.prototype.EastWebUI.PluginIndiciesUI.AssociatePluginPage;
@@ -624,27 +622,6 @@ public class ProjectInformationPage {
         });
         deleteSummaryButton.setBounds(185, 349, 75, 30);
         summaryPanel.add(deleteSummaryButton);
-    }
-
-    private File[] getXMLFiles(File folder) {
-        List<File> aList = new ArrayList<File>();
-        File[] files = folder.listFiles();
-
-        for (File pf : files) {
-
-            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
-                aList.add(pf);
-            }
-        }
-        return aList.toArray(new File[aList.size()]);
-    }
-
-    private String getFileExtensionName(File f) {
-        if (f.getName().indexOf(".") == -1) {
-            return "";
-        } else {
-            return f.getName().substring(f.getName().length() - 3, f.getName().length());
-        }
     }
 
     private void CreateNewProject(){

@@ -1,7 +1,6 @@
 package version2.prototype.download.NldasForcing;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.ArrayList;

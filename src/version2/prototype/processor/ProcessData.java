@@ -1,6 +1,5 @@
 package version2.prototype.processor;
 
-import java.time.LocalDate;
 import java.time.MonthDay;
 
 import version2.prototype.DataDate;

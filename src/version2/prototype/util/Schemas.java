@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -144,7 +145,7 @@ public class Schemas {
 
     public static void setProcessedComposite(final String globalSchema, final String projectSchema, final String cacheTable, final int startYear, final int startDay, final int daysInComposite,
             final Statement stmt) throws SQLException
-    {
+            {
         LocalDate currentDate = LocalDate.ofYearDay(startYear, startDay);
         String updateQueryFormat = "UPDATE \"" + projectSchema + "\".\"" + cacheTable + "\" SET \"Processed\" = TRUE WHERE \"DateGroupID\"=%1$d;";
         int dateGroupID = getDateGroupID(globalSchema, currentDate, stmt);
@@ -158,7 +159,7 @@ public class Schemas {
             numOfDaysSetFor += 1;
         }
         stmt.executeBatch();
-    }
+            }
 
     public static boolean registerGlobalDownloader(final String globalEASTWebSchema, final String pluginName, final String dataName, final Statement stmt) throws SQLException
     {
@@ -194,7 +195,7 @@ public class Schemas {
 
     public static boolean addProjectSummaryID(final String globalEASTWebSchema, final String projectName, final Integer summaryNumID, final String areaNameField, final String shapeFilePath,
             final String areaValueField, final String temporalCompositionStrategyClassName, final Statement stmt) throws SQLException
-    {
+            {
         if(globalEASTWebSchema == null || summaryNumID == null || projectName == null || areaNameField == null || shapeFilePath == null || areaValueField == null) {
             return false;
         }
@@ -218,7 +219,7 @@ public class Schemas {
                 compStrategyID
                 );
         return addRowIFNotExistent(selectQuery, insertQuery, stmt);
-    }
+            }
 
     public static int getDateGroupID(final String globalEASTWebSchema, final LocalDate lDate, final Statement stmt) throws SQLException {
         if(globalEASTWebSchema == null || lDate == null) {
@@ -390,6 +391,7 @@ public class Schemas {
         return output;
     }
 
+    @SuppressWarnings("unused")
     private static int getFilesPerDay(final String globalEASTWebSchema, final int pluginID, final Statement stmt) throws SQLException
     {
         int filesPerDay = 0;
@@ -810,6 +812,7 @@ public class Schemas {
         stmt.executeUpdate(query);
     }
 
+    @SuppressWarnings("unused")
     private static void dropSchemaIfExists(final String mSchemaName, final Statement stmt) throws SQLException {
         if(mSchemaName == null) {
             return;

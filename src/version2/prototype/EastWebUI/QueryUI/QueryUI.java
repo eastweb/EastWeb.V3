@@ -16,13 +16,11 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -454,37 +452,6 @@ public class QueryUI {
         ArrayList<ProjectInfoFile> projects = ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance());
         for(ProjectInfoFile project : projects) {
             projectListComboBox.addItem(project.GetProjectName());
-        }
-    }
-
-    /**
-     * get all files in a folder
-     * @param folder
-     * @return
-     */
-    private File[] getXMLFiles(File folder) {
-        List<File> aList = new ArrayList<File>();
-        File[] files = folder.listFiles();
-
-        for (File pf : files) {
-
-            if (pf.isFile() && getFileExtensionName(pf).indexOf("xml") != -1) {
-                aList.add(pf);
-            }
-        }
-        return aList.toArray(new File[aList.size()]);
-    }
-
-    /**
-     * get file extension
-     * @param f
-     * @return
-     */
-    private String getFileExtensionName(File f) {
-        if (f.getName().indexOf(".") == -1) {
-            return "";
-        } else {
-            return f.getName().substring(f.getName().length() - 3, f.getName().length());
         }
     }
 

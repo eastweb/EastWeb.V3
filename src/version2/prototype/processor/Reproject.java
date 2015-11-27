@@ -1,20 +1,9 @@
 package version2.prototype.processor;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
-import org.gdal.gdal.Band;
-import org.gdal.gdal.Dataset;
-import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
-import org.gdal.ogr.DataSource;
-import org.gdal.ogr.ogr;
-import org.gdal.osr.SpatialReference;
 
 import version2.prototype.Projection;
-import version2.prototype.Projection.ResamplingType;
 import version2.prototype.util.GdalUtils;
 
 /* Author: Y. L.

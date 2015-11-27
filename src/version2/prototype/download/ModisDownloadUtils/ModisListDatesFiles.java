@@ -42,6 +42,7 @@ public class ModisListDatesFiles extends ListDatesFiles
     {
         HashMap<DataDate, ArrayList<String>> tempMapDatesFiles =  new HashMap<DataDate, ArrayList<String>>();
 
+        @SuppressWarnings("unused")
         ArrayList<String> modisTiles = new ArrayList<String>();
         for(ProjectInfoPlugin pluginInfo : mProject.GetPlugins())
         {
@@ -76,7 +77,6 @@ public class ModisListDatesFiles extends ListDatesFiles
                 String datePattern = "((19|20)\\d\\d).(0?[1-9]|1[012]).(0?[1-9]|[12][0-9]|3[01])/";
                 Pattern pattern = Pattern.compile(datePattern);
                 Matcher matcher = pattern.matcher(param);
-                HashMap<DataDate, ArrayList<String>> result = new HashMap<DataDate, ArrayList<String>>();
 
                 if(matcher.find())
                 {

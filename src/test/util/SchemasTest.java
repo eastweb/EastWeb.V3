@@ -24,7 +24,6 @@ import version2.prototype.ZonalSummary;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.GregorianWeeklyStrategy;
 import version2.prototype.util.DatabaseConnector;
 import version2.prototype.util.Schemas;
@@ -45,7 +44,7 @@ public class SchemasTest {
     private static ArrayList<String> extraDownloadFiles;
     private static LocalDate startDate;
     private static int daysPerInputFile;
-    private static int numOfIndices;
+    //private static int numOfIndices;
     private static int filesPerDay;
     private static ProjectInfoFile projectMetaData;
 
@@ -62,7 +61,7 @@ public class SchemasTest {
         compStrategy = new GregorianWeeklyStrategy();
         startDate = LocalDate.now().minusDays(8);
         daysPerInputFile = 8;
-        numOfIndices = 3;
+        //numOfIndices = 3;
         filesPerDay = 1;
 
         summaryNames = new ArrayList<String>();

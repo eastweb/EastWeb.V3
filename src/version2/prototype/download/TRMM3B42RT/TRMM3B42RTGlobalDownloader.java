@@ -137,9 +137,6 @@ public class TRMM3B42RTGlobalDownloader extends GlobalDownloader {
             } catch (ConfigReadException e2) {
                 // TODO Auto-generated catch block
                 e2.printStackTrace();
-            } catch (IOException e2) {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
             }
         }
         try {
