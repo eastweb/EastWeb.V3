@@ -1,5 +1,6 @@
 package version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension;
 
+import java.awt.Font;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -98,47 +99,48 @@ public class NldasForcingPluginUI extends BasePlugin {
     @Override
     public JPanel SetupUI(JPanel NldasForcingPanel, JFrame frame) {
         lblNldasForcing = new JLabel("Nldas Forcing");
-        lblNldasForcing.setBounds(435, 41, 80, 14);
+        lblNldasForcing.setFont(new Font("Courier", Font.BOLD,15));
+        lblNldasForcing.setBounds(400, 53, 150, 20);
         NldasForcingPanel.add(lblNldasForcing);
         NldasForcingPanel.setLayout(null);
         NldasForcingPanel.setBounds(359, 420, 275, 390);
 
         lblFreezingStartDate = new JLabel("Freezing Date: ");
-        lblFreezingStartDate.setBounds(338, 91, 71, 14);
+        lblFreezingStartDate.setBounds(338, 107, 100, 14);
         NldasForcingPanel.add(lblFreezingStartDate);
 
         freezingDateChooser = new JDateChooser();
         freezingDateChooser.setDateFormatString("MMM d");
-        freezingDateChooser.setBounds(419, 89, 168, 20);
+        freezingDateChooser.setBounds(430, 101, 120, 27);
         NldasForcingPanel.add(freezingDateChooser);
 
         lblHeatingStartDate = new JLabel("Heating Date:");
-        lblHeatingStartDate.setBounds(338, 158, 71, 14);
+        lblHeatingStartDate.setBounds(338, 170, 100, 14);
         NldasForcingPanel.add(lblHeatingStartDate);
 
         heatingDateChooser = new JDateChooser();
         heatingDateChooser.setDateFormatString("MMM d");
-        heatingDateChooser.setBounds(419, 152, 168, 20);
+        heatingDateChooser.setBounds(430, 165, 120, 27);
         NldasForcingPanel.add(heatingDateChooser);
 
         lblCoolingDegreeThreshold = new JLabel("Cooling degree:");
         lblCoolingDegreeThreshold.setToolTipText("Cooling degree threshold");
-        lblCoolingDegreeThreshold.setBounds(338, 125, 71, 14);
+        lblCoolingDegreeThreshold.setBounds(338, 137, 100, 14);
         NldasForcingPanel.add(lblCoolingDegreeThreshold);
 
         coolingTextField = new JTextField();
         coolingTextField.setColumns(10);
-        coolingTextField.setBounds(419, 120, 100, 20);
+        coolingTextField.setBounds(430, 132, 75, 25);
         NldasForcingPanel.add(coolingTextField);
 
-        lblHeatingDegreeThreshold = new JLabel("Heating degree");
+        lblHeatingDegreeThreshold = new JLabel("Heating degree:");
         lblHeatingDegreeThreshold.setToolTipText("Heating degree threshold");
-        lblHeatingDegreeThreshold.setBounds(338, 183, 71, 14);
+        lblHeatingDegreeThreshold.setBounds(338, 202, 100, 14);
         NldasForcingPanel.add(lblHeatingDegreeThreshold);
 
         heatingTextField = new JTextField();
         heatingTextField.setColumns(10);
-        heatingTextField.setBounds(419, 180, 100, 20);
+        heatingTextField.setBounds(430, 197, 75, 25);
         NldasForcingPanel.add(heatingTextField);
 
         return NldasForcingPanel;

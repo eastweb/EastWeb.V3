@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.JButton;
 
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
+
 
 public class AssociatePluginPage {
     private JFrame frame;
@@ -47,8 +49,7 @@ public class AssociatePluginPage {
             @Override
             public void run() {
                 try {
-                    AssociatePluginPage window = new AssociatePluginPage(null);
-                    window.frame.setVisible(true);
+                    new AssociatePluginPage(null);
                 } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "AssociatePluginPage.main problem with running a AssociatePluginPage window.", e);
                 }
@@ -61,6 +62,8 @@ public class AssociatePluginPage {
      * @throws Exception
      */
     public AssociatePluginPage(IndiciesListener l) throws Exception {
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+
         indiciesEvent = new PluginEvent();
         indiciesEvent.addListener(l);
 
@@ -75,7 +78,7 @@ public class AssociatePluginPage {
     private void initialize() throws Exception {
         frame = new JFrame();
         //frame.setBounds(100, 100, 603, 400);
-        frame.setBounds(100, 100, 345, 400);
+        frame.setBounds(100, 100, 345, 415);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -97,30 +100,30 @@ public class AssociatePluginPage {
         frame.getContentPane().add(pluginPanel);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(10, 89, 318, 237);
+        scrollPane.setBounds(10, 101, 318, 240);
         pluginPanel.add(scrollPane);
         final JList<DefaultListModel> listOfInndicies = new JList<DefaultListModel>(indiciesListModel);
         scrollPane.setViewportView(listOfInndicies);
 
         JLabel qcLabel = new JLabel("Quality Control");
-        qcLabel.setBounds(10, 41, 80, 14);
+        qcLabel.setBounds(10, 53, 80, 14);
         pluginPanel.add(qcLabel);
         qcComboBox = new JComboBox<String>();
-        qcComboBox.setBounds(96, 38, 140, 20);
+        qcComboBox.setBounds(96, 50, 140, 20);
         pluginPanel.add(qcComboBox);
 
         JLabel indiciesLabel = new JLabel("Indices");
-        indiciesLabel.setBounds(10, 66, 80, 14);
+        indiciesLabel.setBounds(10, 78, 80, 14);
         pluginPanel.add(indiciesLabel);
         indiciesComboBox = new JComboBox<String>();
-        indiciesComboBox.setBounds(96, 63, 140, 20);
+        indiciesComboBox.setBounds(96, 75, 140, 20);
         pluginPanel.add(indiciesComboBox);
 
         JLabel pluginLabel = new JLabel("Plugin");
-        pluginLabel.setBounds(10, 16, 80, 14);
+        pluginLabel.setBounds(10, 28, 80, 14);
         pluginPanel.add(pluginLabel);
         pluginComboBox = new JComboBox<String>();
-        pluginComboBox.setBounds(96, 13, 140, 20);
+        pluginComboBox.setBounds(96, 25, 140, 20);
         pluginComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) { populatePluginInfo(pluginPanel); }
@@ -137,7 +140,7 @@ public class AssociatePluginPage {
             @Override
             public void actionPerformed(ActionEvent arg0) {savePlugin(listOfInndicies);}
         });
-        btnSave.setBounds(10, 340, 89, 23);
+        btnSave.setBounds(10, 352, 89, 23);
         pluginPanel.add(btnSave);
 
         // cancel button
@@ -146,7 +149,7 @@ public class AssociatePluginPage {
             @Override
             public void actionPerformed(ActionEvent arg0) {frame.dispose();}
         });
-        btnCancel.setBounds(239, 340, 89, 23);
+        btnCancel.setBounds(239, 352, 89, 23);
         pluginPanel.add(btnCancel);
 
         // add indices button
@@ -157,18 +160,18 @@ public class AssociatePluginPage {
             @Override
             public void actionPerformed(ActionEvent arg0) { addIndices(btnSave);}
         });
-        btnAddIndices.setBounds(246, 55, 36, 23);
+        btnAddIndices.setBounds(246, 67, 36, 23);
         pluginPanel.add(btnAddIndices);
 
         // delete selected indices
         JButton btnDeleteIndicies = new JButton("");
         btnDeleteIndicies.setToolTipText("delete selected indices");
-        btnDeleteIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        btnDeleteIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         btnDeleteIndicies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {deleteSelectedIndices(listOfInndicies, btnSave);}
         });
-        btnDeleteIndicies.setBounds(292, 55, 36, 23);
+        btnDeleteIndicies.setBounds(292, 67, 36, 23);
         pluginPanel.add(btnDeleteIndicies);
     }
 
@@ -214,10 +217,10 @@ public class AssociatePluginPage {
 
             newPlugin = (IPlugin) pluginUIInstance.newInstance();
             newPlugin.SetupUI(pluginPanel, frame);
-            frame.setBounds(100, 100, 603, 400);
+            frame.setBounds(100, 100, 603, 415);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             newPlugin = new Plugin();
-            frame.setBounds(100, 100, 347, 400);
+            frame.setBounds(100, 100, 347, 415);
         }
 
         indiciesComboBox.removeAllItems();

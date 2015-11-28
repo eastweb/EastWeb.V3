@@ -31,7 +31,6 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.regex.PatternSyntaxException;
 
@@ -105,7 +104,8 @@ public class MainWindow {
      * Constructor
      * Create the application.
      */
-    public MainWindow() {
+    public MainWindow() throws Exception{
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         initialize();
     }
 
@@ -150,7 +150,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     new ProjectInformationPage(true,  new mainWindowListenerImplementation());
-                } catch (IOException | ParserConfigurationException | SAXException | ParseException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -166,7 +166,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     new ProjectInformationPage(false, new mainWindowListenerImplementation());
-                } catch (IOException | ParserConfigurationException | SAXException | ParseException e) {
+                } catch (Exception e) {
                     ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new ProjectInformationPage.", e);
                 }
             }
@@ -180,7 +180,13 @@ public class MainWindow {
         mntmRunQuery.setMnemonic(KeyEvent.VK_B);
         mntmRunQuery.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) { new QueryUI();}
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    new QueryUI();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }}
         });
         mnFile.add(mntmRunQuery);
         mnFile.addSeparator();
@@ -219,9 +225,9 @@ public class MainWindow {
     private void PopulateUIControl()
     {
         final File diskPartition = new File(System.getProperty("user.dir"));
-        final JLabel lblIntermidateDumpFolder = new JLabel("Intermediate dump folder");
+        final JLabel lblIntermidateDumpFolder = new JLabel("Intermediate Dump Folder: ");
         lblIntermidateDumpFolder.setEnabled(false);
-        lblIntermidateDumpFolder.setBounds(10, 62, 138, 14);
+        lblIntermidateDumpFolder.setBounds(10, 65, 150, 14);
         frame.getContentPane().add(lblIntermidateDumpFolder);
 
         // label to show free space on drive
@@ -233,7 +239,7 @@ public class MainWindow {
         // set dump folder
         intermidateDumpPath = new JTextField(System.getProperty("user.dir"));
         intermidateDumpPath.setEditable(false);
-        intermidateDumpPath.setBounds(185, 59, 200, 20);
+        intermidateDumpPath.setBounds(185, 59, 200, 30);
         frame.getContentPane().add(intermidateDumpPath);
         intermidateDumpPath.setColumns(10);
 
@@ -244,7 +250,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent arg0) {browseWorkingFolder();}
         });
         btnBrowser.setEnabled(false);
-        btnBrowser.setBounds(395, 58, 34, 23);
+        btnBrowser.setBounds(395, 58, 34, 30);
         frame.getContentPane().add(btnBrowser);
 
         // check box to control intermediate files process (true => creates intermediate files)
@@ -269,7 +275,7 @@ public class MainWindow {
         chckbxIntermidiateFiles.setBounds(10, 32, 141, 23);
         frame.getContentPane().add(chckbxIntermidiateFiles);
 
-        JLabel lblProjectList = new JLabel("Project List");
+        JLabel lblProjectList = new JLabel("Project List: ");
         lblProjectList.setBounds(10, 95, 138, 14);
         frame.getContentPane().add(lblProjectList);
 
@@ -476,7 +482,12 @@ public class MainWindow {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                new ProjectProgress(label.toString());
+                try {
+                    new ProjectProgress(label.toString());
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
 
             isPushed = false;

@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -93,12 +94,9 @@ public class ProjectInformationPage {
 
     /**
      * Create the application.
-     * @throws ParseException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
+     * @throws Exception
      */
-    public ProjectInformationPage(boolean isEditable,  MainWindowListener l) throws IOException, ParserConfigurationException, SAXException, ParseException {
+    public ProjectInformationPage(boolean isEditable,  MainWindowListener l) throws Exception {
         frame = new JFrame();
         pluginList = new ArrayList<IPlugin>();
         mainWindowEvent = new MainWindowEvent();
@@ -119,7 +117,8 @@ public class ProjectInformationPage {
      * @throws ParserConfigurationException
      * @throws IOException
      */
-    private void initialize() throws IOException, ParserConfigurationException, SAXException, ParseException {
+    private void initialize() throws IOException, ParserConfigurationException, SAXException, ParseException, Exception{
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         frame.setBounds(100, 100, 955, 750);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
@@ -134,8 +133,9 @@ public class ProjectInformationPage {
     }
 
     private void CreateNewProjectButton() {
-        JButton createButton = new JButton(isEditable ? "Create New Project" : "Save Project");
-        createButton.addActionListener(new ActionListener() {
+        JButton saveButton = new JButton("");
+        saveButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/save_32.png")));
+        saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
@@ -147,19 +147,42 @@ public class ProjectInformationPage {
                 }
             }
         });
-        createButton.setBounds(764, 10, 175, 25);
-        frame.getContentPane().add(createButton);
+        saveButton.setToolTipText("Save Project");
+        saveButton.setBounds(907, 11, 32, 32);
+        frame.getContentPane().add(saveButton);
     }
 
     private void PopulatePluginList() {
         listOfAddedPluginModel = new DefaultListModel<String>();
 
+        JPanel panel = new JPanel();
+        panel.setBorder(new TitledBorder(null, "Plugin List", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel.setBounds(10, 58, 929, 351);
+        frame.getContentPane().add(panel);
+        panel.setLayout(null);
+
+        JButton addPluginButton = new JButton("");
+        addPluginButton.setBounds(10, 31, 75, 30);
+        panel.add(addPluginButton);
+        addPluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
+        addPluginButton.setToolTipText("Add Plugin");
+
+        JButton deletePluginButton = new JButton("");
+        deletePluginButton.setBounds(103, 31, 70, 30);
+        panel.add(deletePluginButton);
+        deletePluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
+        deletePluginButton.setToolTipText("Delete Plugin");
+
         final JList<String> listOfAddedPlugin = new JList<String>(listOfAddedPluginModel);
         listOfAddedPlugin.setBorder(new EmptyBorder(10,10, 10, 10));
 
-        JButton addPluginButton = new JButton("");
-        addPluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
-        addPluginButton.setToolTipText("Add Plugin");
+        JScrollPane scrollPane = new JScrollPane(listOfAddedPlugin);
+        scrollPane.setBounds(10, 65, 909, 275);
+        panel.add(scrollPane);
+        deletePluginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {deleteSelectedPlugin(listOfAddedPlugin);}
+        });
         addPluginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -170,22 +193,6 @@ public class ProjectInformationPage {
                 }
             }
         });
-        addPluginButton.setBounds(10, 12, 34, 23);
-        frame.getContentPane().add(addPluginButton);
-
-        JButton deletePluginButton = new JButton("");
-        deletePluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
-        deletePluginButton.setToolTipText("Delete Plugin");
-        deletePluginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {deleteSelectedPlugin(listOfAddedPlugin);}
-        });
-        deletePluginButton.setBounds(54, 12, 34, 23);
-        frame.getContentPane().add(deletePluginButton);
-
-        JScrollPane scrollPane = new JScrollPane(listOfAddedPlugin);
-        scrollPane.setBounds(10, 40, 929, 369);
-        frame.getContentPane().add(scrollPane);
     }
 
     private void BasicProjectInformation() {
@@ -199,14 +206,14 @@ public class ProjectInformationPage {
         startDateLabel.setBounds(6, 25, 132, 15);
         panel.add(startDateLabel);
         startDate = new JDateChooser ();
-        startDate.setBounds(148, 22, 200, 20);
+        startDate.setBounds(148, 22, 200, 28);
         panel.add(startDate);
 
         JLabel projectNameLabel = new JLabel("Project Name: ");
         projectNameLabel.setBounds(6, 56, 136, 14);
         panel.add(projectNameLabel);
         projectName = new JTextField();
-        projectName.setBounds(148, 53, 200, 20);
+        projectName.setBounds(148, 53, 200, 28);
         panel.add(projectName);
         projectName.setColumns(10);
 
@@ -215,7 +222,7 @@ public class ProjectInformationPage {
         panel.add(workingDirLabel);
         workingDirectory = new JTextField();
         workingDirectory.setColumns(10);
-        workingDirectory.setBounds(148, 84, 158, 20);
+        workingDirectory.setBounds(148, 84, 158, 28);
         panel.add(workingDirectory);
 
         JButton workingDirBrowsebutton = new JButton(". . .");
@@ -223,7 +230,7 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent evt) {chooseWorkingDir();}
         });
-        workingDirBrowsebutton.setBounds(316, 84, 32, 20);
+        workingDirBrowsebutton.setBounds(316, 84, 32, 28);
         panel.add(workingDirBrowsebutton);
 
         JLabel maskingFileLabel = new JLabel("Masking File:");
@@ -231,7 +238,7 @@ public class ProjectInformationPage {
         panel.add(maskingFileLabel);
         maskFile = new JTextField();
         maskFile.setColumns(10);
-        maskFile.setBounds(148, 115, 158, 20);
+        maskFile.setBounds(148, 115, 158, 28);
         panel.add(maskFile);
 
         JButton maskFileBrowseButton = new JButton(". . .");
@@ -239,11 +246,11 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent evt) {chooseMaskingFile();}
         });
-        maskFileBrowseButton.setBounds(316, 115, 32, 20);
+        maskFileBrowseButton.setBounds(316, 115, 32, 28);
         panel.add(maskFileBrowseButton);
 
         masterShapeTextField = new JTextField();
-        masterShapeTextField.setBounds(148, 176, 158, 20);
+        masterShapeTextField.setBounds(148, 176, 158, 28);
         panel.add(masterShapeTextField);
         masterShapeTextField.setColumns(10);
 
@@ -252,7 +259,7 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent evt) {chooseMasterShapeFile();}
         });
-        masterShapeFileBrowseButton.setBounds(316, 176, 32, 20);
+        masterShapeFileBrowseButton.setBounds(316, 176, 32, 28);
         panel.add(masterShapeFileBrowseButton);
 
         final JLabel chmasterShapeFileLabel = new JLabel("Master shape file:");
@@ -288,7 +295,7 @@ public class ProjectInformationPage {
         panel.add(lblResolution);
 
         resolutionTextField = new JTextField();
-        resolutionTextField.setBounds(148, 146, 200, 20);
+        resolutionTextField.setBounds(148, 146, 200, 28);
         panel.add(resolutionTextField);
         resolutionTextField.setColumns(10);
     }
@@ -311,11 +318,11 @@ public class ProjectInformationPage {
         panel.add(reSamplingComboBox);
 
         JLabel pixelSizeLabel = new JLabel("Pixel size meters:");
-        pixelSizeLabel.setBounds(6, 48, 109, 14);
+        pixelSizeLabel.setBounds(6, 55, 109, 14);
         panel.add(pixelSizeLabel);
         pixelSize = new JTextField();
         pixelSize.setColumns(10);
-        pixelSize.setBounds(146, 51, 140, 16);
+        pixelSize.setBounds(146, 51, 140, 28);
         panel.add(pixelSize);
     }
 
@@ -336,11 +343,11 @@ public class ProjectInformationPage {
             @Override
             public void actionPerformed(ActionEvent arg0) { new AssociateSummaryPage(new summaryListenerImplementation());}
         });
-        editSummaryButton.setBounds(15, 246, 75, 30);
+        editSummaryButton.setBounds(10, 246, 75, 30);
         summaryPanel.add(editSummaryButton);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(15, 25, 245, 210);
+        scrollPane.setBounds(10, 25, 261, 210);
         summaryPanel.add(scrollPane);
 
         final JList summaryList = new JList(summaryListModel);
@@ -348,13 +355,13 @@ public class ProjectInformationPage {
         summaryList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
         JButton deleteSummaryButton = new JButton("");
-        deleteSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        deleteSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         deleteSummaryButton.setToolTipText("Delete Selected Summary");
         deleteSummaryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {deleteSelectedSummary(summaryList);}
         });
-        deleteSummaryButton.setBounds(185, 246, 75, 30);
+        deleteSummaryButton.setBounds(196, 246, 75, 30);
         summaryPanel.add(deleteSummaryButton);
     }
 
@@ -364,7 +371,7 @@ public class ProjectInformationPage {
     private void UIConstrain() {
         if(!isEditable){
             projectCollectionComboBox = new JComboBox<String>();
-            projectCollectionComboBox.setBounds(507, 15, 229, 20);
+            projectCollectionComboBox.setBounds(300, 15, 229, 20);
             projectCollectionComboBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {PopulateProjectInfo();}

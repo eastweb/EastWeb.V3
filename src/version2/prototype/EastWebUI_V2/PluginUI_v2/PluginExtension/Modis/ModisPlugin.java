@@ -1,5 +1,6 @@
 package version2.prototype.EastWebUI_V2.PluginUI_v2.PluginExtension.Modis;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -117,7 +118,8 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
     @Override
     public JPanel SetupUI(JPanel modisInformationPanel, final JFrame frame) {
         lblModisTiles = new JLabel("Modis Tiles");
-        lblModisTiles.setBounds(435, 41, 80, 14);
+        lblModisTiles.setFont(new Font("Courier", Font.BOLD,15));
+        lblModisTiles.setBounds(415, 41, 100, 14);
         modisInformationPanel.add(lblModisTiles);
         modisInformationPanel.setLayout(null);
         modisInformationPanel.setBounds(359, 420, 275, 390);
@@ -130,24 +132,24 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
             @Override
             public void actionPerformed(ActionEvent arg0) {addModisTile(frame);}
         });
-        addNewModisButton.setBounds(438, 340, 25, 20);
+        addNewModisButton.setBounds(410, 352, 36, 23);
         modisInformationPanel.add(addNewModisButton);
 
         scrollPane = new JScrollPane();
-        scrollPane.setBounds(342, 89, 245, 240);
+        scrollPane.setBounds(342, 101, 245, 240);
         modisInformationPanel.add(scrollPane);
 
         final JList<String> modisList = new JList<String>(modisListModel);
         scrollPane.setViewportView(modisList);
 
         deleteSelectedModisButton = new JButton("");
-        deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/ChangeQueryType_deletequery_274.png")));
+        deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         deleteSelectedModisButton.setToolTipText("Delete Selected Modis");
         deleteSelectedModisButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {removeSelectedModis(modisList);}
         });
-        deleteSelectedModisButton.setBounds(490, 340, 25, 20);
+        deleteSelectedModisButton.setBounds(490, 352, 36, 23);
         modisInformationPanel.add(deleteSelectedModisButton);
 
         for(String tiles : GlobalUIData.Instance().GetModisTiles()) {

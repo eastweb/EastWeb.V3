@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.JList;
 
@@ -52,7 +53,9 @@ public class ProjectProgress {
     /**
      * Create the application.
      */
-    public ProjectProgress(String projectName) {
+    public ProjectProgress(String projectName) throws Exception{
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+
         frame = new JFrame();
         frame.setBounds(100, 100, 400, 500);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
@@ -94,8 +95,9 @@ public class QueryUI {
 
     /**
      * Create the application.
+     * @throws Exception
      */
-    public QueryUI() {
+    public QueryUI() throws Exception {
         initialize();
 
         // And From your main() method or any other method
@@ -103,7 +105,9 @@ public class QueryUI {
         timer.schedule(new UpdateQuery(), 0, 100);
     }
 
-    private void initialize() {
+    private void initialize()throws Exception{
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+
         frame = new JFrame();
         frame.setVisible(true);
         frame.setBounds(100, 100, 400, 800);

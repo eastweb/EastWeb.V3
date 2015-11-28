@@ -12,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
 
 import version2.prototype.Config;
@@ -49,7 +51,13 @@ public class AssociateSummaryPage {
     /**
      * Create the application.
      */
-    public AssociateSummaryPage(SummaryListener l) {
+    public AssociateSummaryPage(SummaryListener l){
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
         summaryEvent = new SummaryEvent();
         summaryEvent.addListener(l);
 
@@ -76,7 +84,7 @@ public class AssociateSummaryPage {
         filePathLabel.setEnabled(true);
         myPanel.add(filePathLabel);
         filePathText =  new JTextField();
-        filePathText.setBounds(172, 24, 150, 20);
+        filePathText.setBounds(172, 24, 150, 27);
         filePathText.setEnabled(true);
         filePathText.setColumns(10);
         myPanel.add(filePathText);
@@ -95,6 +103,7 @@ public class AssociateSummaryPage {
         areaCodeFieldLabel.setBounds(10, 58, 152, 14);
         myPanel.add(areaCodeFieldLabel);
         areaCodeFieldComboBox = new JComboBox<String>();
+        areaCodeFieldComboBox.setEnabled(false);
         areaCodeFieldComboBox.setToolTipText("Area Code is a numeric value");
         areaCodeFieldComboBox.addActionListener(new ActionListener() {
             @Override
@@ -107,6 +116,7 @@ public class AssociateSummaryPage {
         areaNameFieldLabel.setBounds(10, 89, 152, 14);
         myPanel.add(areaNameFieldLabel);
         areaNameFieldComboBox = new JComboBox<String>();
+        areaNameFieldComboBox.setEnabled(false);
         areaNameFieldComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {setTemporalView(areaNameFieldComboBox.getSelectedItem());}
