@@ -67,7 +67,6 @@ public class MainWindow {
     private JMenuItem mntmRunQuery;
     private JMenuItem mntmOpenSetFolder;
     private JMenuItem mntmDeleteAllFiles;
-    private JMenuItem createNewPlugin;
     private JMenuItem mntmSettings;
     private JMenuItem mntmManual;
     private JLabel lblHardDriveCapacity;
@@ -191,16 +190,6 @@ public class MainWindow {
         mnFile.add(mntmRunQuery);
         mnFile.addSeparator();
 
-        // create a new plugin meta data file
-        createNewPlugin = new JMenuItem("Create New Plugin Template");
-        createNewPlugin.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {createNewPluginTemplate();}
-        });
-        createNewPlugin.setMnemonic(KeyEvent.VK_B);
-        mnFile.add(createNewPlugin);
-        mnFile.addSeparator();
-
         //Build second menu in the menu bar.
         mnHelp = new JMenu("Help");
         mnHelp.setMnemonic(KeyEvent.VK_N);
@@ -227,7 +216,7 @@ public class MainWindow {
         final File diskPartition = new File(System.getProperty("user.dir"));
         final JLabel lblIntermidateDumpFolder = new JLabel("Intermediate Dump Folder: ");
         lblIntermidateDumpFolder.setEnabled(false);
-        lblIntermidateDumpFolder.setBounds(10, 65, 150, 14);
+        lblIntermidateDumpFolder.setBounds(10, 69, 150, 14);
         frame.getContentPane().add(lblIntermidateDumpFolder);
 
         // label to show free space on drive
@@ -239,18 +228,23 @@ public class MainWindow {
         // set dump folder
         intermidateDumpPath = new JTextField(System.getProperty("user.dir"));
         intermidateDumpPath.setEditable(false);
-        intermidateDumpPath.setBounds(185, 59, 200, 30);
+        intermidateDumpPath.setBounds(185, 61, 200, 30);
         frame.getContentPane().add(intermidateDumpPath);
         intermidateDumpPath.setColumns(10);
 
         // browser button for intermediate dump folder
-        final JButton btnBrowser = new JButton(". . .");
+        final JButton btnBrowser = new JButton();
+        btnBrowser.setToolTipText("Browse Folder");
+        btnBrowser.setOpaque(false);
+        btnBrowser.setContentAreaFilled(false);
+        btnBrowser.setBorderPainted(false);
+        btnBrowser.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/folder_explore32.png")));
         btnBrowser.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {browseWorkingFolder();}
         });
         btnBrowser.setEnabled(false);
-        btnBrowser.setBounds(395, 58, 34, 30);
+        btnBrowser.setBounds(405, 61, 45, 30);
         frame.getContentPane().add(btnBrowser);
 
         // check box to control intermediate files process (true => creates intermediate files)
@@ -276,19 +270,24 @@ public class MainWindow {
         frame.getContentPane().add(chckbxIntermidiateFiles);
 
         JLabel lblProjectList = new JLabel("Project List: ");
-        lblProjectList.setBounds(10, 95, 138, 14);
+        lblProjectList.setBounds(10, 106, 138, 14);
         frame.getContentPane().add(lblProjectList);
 
         projectList = new JComboBox<String>();
-        projectList.setBounds(185, 93, 200, 19);
+        projectList.setBounds(185, 104, 200, 19);
         projectList.removeAllItems();
         for(ProjectInfoFile project : ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance())){
             projectList.addItem(project.GetProjectName());
         }
         frame.getContentPane().add(projectList);
 
-        JButton runButton = new JButton("Load Project");
-        runButton.setBounds(395, 93, 139, 19);
+        JButton runButton = new JButton();
+        runButton.setToolTipText("Run Selected Project");
+        runButton.setBounds(405, 95, 45, 38);
+        runButton.setOpaque(false);
+        runButton.setContentAreaFilled(false);
+        runButton.setBorderPainted(false);
+        runButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/run32.png")));
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {loadProject(); }
@@ -323,22 +322,8 @@ public class MainWindow {
         table.getColumn("Delete").setCellEditor(new DeleteButtonEditor(new JCheckBox()));
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 123, 1181, 567);
+        scrollPane.setBounds(10, 158, 1181, 532);
         frame.getContentPane().add(scrollPane);
-    }
-
-    private void createNewPluginTemplate() {
-        String fileName = JOptionPane.showInputDialog("Enter plugin name", JOptionPane.YES_NO_OPTION );
-        File theDir = new File(System.getProperty("user.dir") + "\\plugins\\" + fileName + ".xml" );
-
-        try {
-            theDir.createNewFile();
-            // TODO: could create a mock template
-        } catch (IOException e1) {
-            ErrorLog.add(Config.getInstance(),
-                    String.format("MainWindow.FileMenu problem with creating new file,'%s', from Desktop.", theDir.getPath()),
-                    e1);
-        }
     }
 
     private void manageIntermidiateFiles() {

@@ -1,8 +1,10 @@
 package version2.prototype.EastWebUI_V2.QueryUI_v2;
 
 import java.awt.EventQueue;
+import java.awt.Font;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -36,6 +38,7 @@ import org.xml.sax.SAXException;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
+import version2.prototype.EastWebUI_V2.ProjectInformationUI_v2.ProjectInformationPage;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoPlugin;
@@ -45,7 +48,7 @@ import version2.prototype.util.EASTWebResult;
 import version2.prototype.util.EASTWebResults;
 
 public class QueryUI {
-    boolean isViewSQL = false;
+    boolean isViewSQL = true;
     String[] operationList = {"<", ">", "=", "<>", "<=", ">="};
 
     private JFrame frame;
@@ -70,12 +73,15 @@ public class QueryUI {
     private JList<String> includeListZone;
     private JList<String> excludeListZone;
     private JTextPane sqlViewTextPanel;
+    private JTextPane resultTextPane;
 
     private DefaultListModel<String> includeIndicesListModel ;
     private DefaultListModel<String> excludeIndicesListModel ;
 
     private DefaultListModel<String> includeZoneListModel ;
     private DefaultListModel<String> excludeZoneListModel ;
+    private JPanel panel;
+    private JLabel lblQueryWindow;
 
     /**
      * Launch the application.
@@ -110,22 +116,70 @@ public class QueryUI {
 
         frame = new JFrame();
         frame.setVisible(true);
-        frame.setBounds(100, 100, 400, 800);
+        frame.setBounds(100, 100, 1149, 800);
+        //frame.setBounds(100, 100, 400, 800);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
+        frame.setResizable(false); //Disable the Resize Button
 
-        PopulateFieldsUI();
-        PopulateClauseUI();
-        PopulateIndicesUI();
+        includeZoneListModel = new DefaultListModel<String>();
+        excludeZoneListModel = new DefaultListModel<String>();
+        includeIndicesListModel = new DefaultListModel<String>();
+        excludeIndicesListModel = new DefaultListModel<String>();
+
+        PopulateQueryBuilderUI();
         CreateSQLView();
     }
 
-    private void PopulateFieldsUI() {
+    private void PopulateQueryBuilderUI() {
+        panel = new JPanel();
+        panel.setBorder(new TitledBorder(null, "Query Builder", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel.setBounds(10, 73, 1113, 370);
+        frame.getContentPane().add(panel);
+        panel.setLayout(null);
+
+        lblQueryWindow = new JLabel("Query Window");
+        lblQueryWindow.setFont(new Font("Courier", Font.BOLD,25));
+        lblQueryWindow.setBounds(10, 11, 255, 51);
+        frame.getContentPane().add(lblQueryWindow);
+
+        JButton btnClose = new JButton("");
+        btnClose.setToolTipText("Close Window");
+        btnClose.setOpaque(false);
+        btnClose.setContentAreaFilled(false);
+        btnClose.setBorderPainted(false);
+        btnClose.setBounds(1061, 21, 48, 41);
+        btnClose.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/remove_32.png")));
+        btnClose.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));}
+        });
+        frame.getContentPane().add(btnClose);
+
+        JButton viewSQLButton = new JButton("");
+        viewSQLButton.setOpaque(false);
+        viewSQLButton.setContentAreaFilled(false);
+        viewSQLButton.setBorderPainted(false);
+        viewSQLButton.setToolTipText("View Results");
+        viewSQLButton.setBounds(1003, 21, 48, 41);
+        viewSQLButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/Very-Basic-Binoculars-icon.png")));
+        viewSQLButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {setSQLView();}
+        });
+        frame.getContentPane().add(viewSQLButton);
+
+        populateFields();
+        populateClause();
+        populateIndices();
+    }
+
+    private void populateFields() {
         JPanel fieldsPanel = new JPanel();
+        fieldsPanel.setBounds(10, 84, 364, 275);
         fieldsPanel.setLayout(null);
         fieldsPanel.setBorder(new TitledBorder(null, "Fields", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        fieldsPanel.setBounds(10, 76, 364, 110);
-        frame.getContentPane().add(fieldsPanel);
+        panel.add(fieldsPanel);
 
         chckbxCount = new JCheckBox("count");
         chckbxCount.setBounds(6, 21, 63, 23);
@@ -156,15 +210,12 @@ public class QueryUI {
         fieldsPanel.add(sqrSumCheckBox);
     }
 
-    private void PopulateClauseUI() {
-        includeZoneListModel = new DefaultListModel<String>();
-        excludeZoneListModel = new DefaultListModel<String>();
-
+    private void populateClause() {
         JPanel clausePanel = new JPanel();
+        clausePanel.setBounds(375, 84, 364, 275);
         clausePanel.setLayout(null);
-        clausePanel.setBounds(10, 188, 364, 275);
         clausePanel.setBorder(new TitledBorder(null, "Clause Statement", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        frame.getContentPane().add(clausePanel);
+        panel.add(clausePanel);
 
         chckbxYear = new JCheckBox("Year");
         chckbxYear.addActionListener(new ActionListener() {
@@ -210,126 +261,16 @@ public class QueryUI {
         dayTextField.setEnabled(false);
         clausePanel.add(dayTextField);
 
-        populateZoneUI(clausePanel);
-    }
-
-
-    private void PopulateIndicesUI() {
-        includeIndicesListModel = new DefaultListModel<String>();
-        excludeIndicesListModel = new DefaultListModel<String>();
-
-        JPanel indicesPanel = new JPanel();
-        indicesPanel.setLayout(null);
-        indicesPanel.setBorder(new TitledBorder(null, "Enviromental Index", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        indicesPanel.setBounds(10, 474, 364, 242);
-        indicesPanel.setLayout(null);
-        frame.getContentPane().add(indicesPanel);
-
-        JScrollPane includeScrollPanel = new JScrollPane();
-        includeScrollPanel.setBounds(10, 40, 127, 191);
-        indicesPanel.add(includeScrollPanel);
-        includeListIndices = new JList<String>(includeIndicesListModel);
-        includeScrollPanel.setViewportView(includeListIndices);
-
-        JScrollPane excludeScrollPanel = new JScrollPane();
-        excludeScrollPanel.setBounds(227, 40, 127, 191);
-        indicesPanel.add(excludeScrollPanel);
-        excludeListIndices = new JList<String>(excludeIndicesListModel);
-        excludeScrollPanel.setViewportView(excludeListIndices);
-
-        JButton excludeButton = new JButton(">>");
-        excludeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {removeSelectedIndices();}
-        });
-        excludeButton.setBounds(147, 55, 70, 23);
-        indicesPanel.add(excludeButton);
-
-        JButton includeButton = new JButton("<<");
-        includeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {addSelectedIndices();}
-        });
-        includeButton.setBounds(147, 178, 70, 23);
-        indicesPanel.add(includeButton);
-
-        JLabel lblInclude = new JLabel("Include");
-        lblInclude.setBounds(10, 26, 127, 14);
-        indicesPanel.add(lblInclude);
-
-        JLabel lblExclude = new JLabel("Exclude");
-        lblExclude.setBounds(228, 26, 126, 14);
-        indicesPanel.add(lblExclude);
-    }
-
-    private void CreateSQLView() {
-        JLabel lblProject = new JLabel("Project:");
-        lblProject.setBounds(19, 14, 89, 14);
-        frame.getContentPane().add(lblProject);
-
-        projectListComboBox = new JComboBox<String>();
-        projectListComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {populateInfoForProject();}
-        });
-        projectListComboBox.setBounds(118, 11, 157, 20);
-        projectListComboBox.removeAllItems();
-        projectListComboBox.addItem("");
-        for(ProjectInfoFile project : ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance())) {
-            projectListComboBox.addItem(project.GetProjectName());
-        }
-        frame.getContentPane().add(projectListComboBox);
-
-        JButton viewSQLButton = new JButton("View SQL");
-        viewSQLButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {setSQLView();}
-        });
-        viewSQLButton.setBounds(10, 727, 89, 23);
-        frame.getContentPane().add(viewSQLButton);
-
-        JButton btnQuery = new JButton("Query");
-        btnQuery.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {queryProject();}
-        });
-        btnQuery.setBounds(150, 727, 89, 23);
-        frame.getContentPane().add(btnQuery);
-
-        JButton btnCancel = new JButton("Cancel");
-        btnCancel.setBounds(285, 727, 89, 23);
-        btnCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));}
-        });
-        frame.getContentPane().add(btnCancel);
-
-        sqlViewTextPanel = new JTextPane();
-        sqlViewTextPanel.setBounds(384, 11, 290, 489);
-        frame.getContentPane().add(sqlViewTextPanel);
-
-        JLabel lblPlugin = new JLabel("Plugin: ");
-        lblPlugin.setBounds(19, 45, 46, 14);
-        frame.getContentPane().add(lblPlugin);
-
-        pluginComboBox = new JComboBox<String>();
-        pluginComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {populateIndicesInfo();}
-        });
-        pluginComboBox.setBounds(118, 42, 157, 20);
-        frame.getContentPane().add(pluginComboBox);
-    }
-
-    private void populateZoneUI(JPanel clausePanel) {
         final JLabel includeLbl = new JLabel("Include");
         includeLbl.setBounds(16, 104, 127, 14);
         includeLbl.setEnabled(false);
         clausePanel.add(includeLbl);
+
         final JScrollPane includeScrollPaneZone = new JScrollPane();
         includeScrollPaneZone.setBounds(10, 125, 125, 139);
         includeScrollPaneZone.setEnabled(false);
         clausePanel.add(includeScrollPaneZone);
+
         includeListZone = new JList<String>(includeZoneListModel);
         includeScrollPaneZone.setViewportView(includeListZone);
         includeListZone.setEnabled(false);
@@ -338,10 +279,12 @@ public class QueryUI {
         excludeLbl.setBounds(228, 104, 126, 14);
         clausePanel.add(excludeLbl);
         excludeLbl.setEnabled(false);
+
         final JScrollPane excludedScrollPaneZone = new JScrollPane();
         excludedScrollPaneZone.setBounds(229, 127, 125, 137);
         excludedScrollPaneZone.setEnabled(false);
         clausePanel.add(excludedScrollPaneZone);
+
         excludeListZone = new JList<String>(excludeZoneListModel);
         excludedScrollPaneZone.setViewportView(excludeListZone);
         excludeListZone.setEnabled(false);
@@ -379,6 +322,123 @@ public class QueryUI {
         });
         chckbxZone.setBounds(6, 74, 70, 23);
         clausePanel.add(chckbxZone);
+    }
+
+    private void populateIndices() {
+        JPanel indicesPanel = new JPanel();
+        indicesPanel.setBounds(739, 84, 364, 275);
+        indicesPanel.setLayout(null);
+        indicesPanel.setBorder(new TitledBorder(null, "Enviromental Index", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel.add(indicesPanel);
+
+        JLabel lblInclude = new JLabel("Include");
+        lblInclude.setBounds(10, 26, 127, 14);
+        indicesPanel.add(lblInclude);
+
+        JScrollPane includeScrollPanel = new JScrollPane();
+        includeScrollPanel.setBounds(10, 40, 127, 224);
+        includeListIndices = new JList<String>(includeIndicesListModel);
+        includeScrollPanel.setViewportView(includeListIndices);
+        indicesPanel.add(includeScrollPanel);
+
+        JButton includeButton = new JButton("<<");
+        includeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {addSelectedIndices();}
+        });
+        includeButton.setBounds(147, 226, 70, 23);
+        indicesPanel.add(includeButton);
+
+        JLabel lblExclude = new JLabel("Exclude");
+        lblExclude.setBounds(228, 26, 126, 14);
+        indicesPanel.add(lblExclude);
+
+        JScrollPane excludeScrollPanel = new JScrollPane();
+        excludeScrollPanel.setBounds(227, 40, 127, 224);
+        excludeListIndices = new JList<String>(excludeIndicesListModel);
+        excludeScrollPanel.setViewportView(excludeListIndices);
+        indicesPanel.add(excludeScrollPanel);
+
+        JButton excludeButton = new JButton(">>");
+        excludeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {removeSelectedIndices();}
+        });
+        excludeButton.setBounds(147, 55, 70, 23);
+        indicesPanel.add(excludeButton);
+
+        JLabel lblProject = new JLabel("Project:");
+        lblProject.setBounds(10, 25, 89, 14);
+        panel.add(lblProject);
+
+        projectListComboBox = new JComboBox<String>();
+        projectListComboBox.setBounds(109, 22, 157, 20);
+        projectListComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {populateInfoForProject();}
+        });
+        projectListComboBox.removeAllItems();
+        projectListComboBox.addItem("");
+        panel.add(projectListComboBox);
+
+        JLabel lblPlugin = new JLabel("Plugin: ");
+        lblPlugin.setBounds(10, 56, 46, 14);
+        panel.add(lblPlugin);
+
+        pluginComboBox = new JComboBox<String>();
+        pluginComboBox.setBounds(109, 53, 157, 20);
+        pluginComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {populateIndicesInfo();}
+        });
+        panel.add(pluginComboBox);
+
+        JButton btnQuery = new JButton();
+        btnQuery.setToolTipText("Query Database");
+        btnQuery.setBounds(1057, 29, 46, 41);
+        btnQuery.setOpaque(false);
+        btnQuery.setContentAreaFilled(false);
+        btnQuery.setBorderPainted(false);
+        btnQuery.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/Database-icon.png")));
+        btnQuery.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {queryProject();}
+        });
+        panel.add(btnQuery);
+    }
+
+    private void CreateSQLView() {
+        for(ProjectInfoFile project : ProjectInfoCollection.GetAllProjectInfoFiles(Config.getInstance())) {
+            projectListComboBox.addItem(project.GetProjectName());
+        }
+
+        JPanel resultPanel = new JPanel();
+        resultPanel.setBorder(new TitledBorder(null, "Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        resultPanel.setBounds(10, 454, 1113, 296);
+        frame.getContentPane().add(resultPanel);
+        resultPanel.setLayout(null);
+
+        JLabel lblQueryStatement = new JLabel("Query Statement");
+        lblQueryStatement.setBounds(10, 35, 109, 14);
+        resultPanel.add(lblQueryStatement);
+
+        JScrollPane sqlScrollPane = new JScrollPane();
+        sqlScrollPane.setBounds(10, 60, 500, 225);
+        resultPanel.add(sqlScrollPane);
+
+        sqlViewTextPanel = new JTextPane();
+        sqlScrollPane.setViewportView(sqlViewTextPanel);
+
+        JLabel lblQueryResults = new JLabel("Query Results");
+        lblQueryResults.setBounds(603, 35, 109, 14);
+        resultPanel.add(lblQueryResults);
+
+        JScrollPane resultScrollPane = new JScrollPane();
+        resultScrollPane.setBounds(603, 60, 500, 225);
+        resultPanel.add(resultScrollPane);
+
+        resultTextPane = new JTextPane();
+        resultScrollPane.setViewportView(resultTextPane);
     }
 
     private void removeSelectedIndices() {
@@ -446,9 +506,9 @@ public class QueryUI {
         isViewSQL = !isViewSQL;
 
         if(isViewSQL) {
-            frame.setBounds(100, 100, 700, 800);
+            frame.setBounds(100, 100, 1149, 800);
         } else {
-            frame.setBounds(100, 100, 400, 800);
+            frame.setBounds(100, 100, 1149, 485);
         }
     }
 
@@ -534,39 +594,44 @@ public class QueryUI {
     class UpdateQuery extends TimerTask {
         @Override
         public void run() {
-            sqlViewTextPanel.setText(String.format("%s\n %s\n %s", SelectStatement(), FromStatement(), WhereStatement()));
+            sqlViewTextPanel.setText(String.format("%s\n%s\n%s", SelectStatement(), FromStatement(), WhereStatement()));
         }
 
         private String FromStatement() {
-            return String.format("FROM \n \"%s\"\n", String.valueOf(projectListComboBox.getSelectedItem()));
+            return String.format("FROM %s", String.valueOf(projectListComboBox.getSelectedItem()));
         }
 
         private String SelectStatement() {
-            String query = String.format("SELECT  \n \t name,\n \t year,\n \t day,\n \t index,\n");
+            String query = String.format("SELECT  name, year, day, index");
 
             if(chckbxCount.isSelected()) {
-                query += "\tcount,\n";
+                query += ", count";
             }
             if(chckbxSum.isSelected()) {
-                query += "\tsum,\n";
+                query += ", sum";
             }
             if(chckbxMean.isSelected()) {
-                query += "\tmean,\n";
+                query += ", mean";
             }
             if(chckbxStdev.isSelected()) {
-                query += "\tstdev,\n";
+                query += ", stdev";
             }
             if(minCheckBox.isSelected()) {
-                query += "\tmin,\n";
+                query += ", min";
             }
             if(maxCheckBox.isSelected()) {
-                query += "\tmax,\n";
+                query += ", max";
             }
             if(sqrSumCheckBox.isSelected()) {
-                query += "\tsqrSum,\n";
+                query += ", sqrSum";
             }
-            for(int i = 0; i < includeIndicesListModel.size(); i ++){
-                query += String.format("\t%s,\n", includeIndicesListModel.elementAt(i));
+            if(includeIndicesListModel.size() > 0){
+                query += "\n\t,";
+                for(int i = 0; i < includeIndicesListModel.size(); i ++){
+                    query += String.format("%s,", includeIndicesListModel.elementAt(i));
+                }
+
+                query = query.substring(0, query.length()-1);
             }
             return query;
         }
@@ -574,21 +639,21 @@ public class QueryUI {
         private String WhereStatement() {
             String query = "";
 
-            if(chckbxZone.isSelected() || chckbxYear.isSelected() || chckbxDay.isSelected()){
-                query = String.format("WHERE\n");
-
-                if(chckbxYear.isSelected()){
-                    query += String.format("year%s%s\n", String.valueOf(yearComboBox.getSelectedItem()), yearTextField.getText());
-                }
-                if(chckbxDay.isSelected()){
-                    query += String.format("day%s%s\n", String.valueOf(dayComboBox.getSelectedItem()), dayTextField.getText());
-                }
-                if(chckbxZone.isSelected()) {
-                    for(int i = 0; i < includeZoneListModel.size(); i ++){
-                        query += String.format("\t%s,\n", includeZoneListModel.elementAt(i));
-                    }
-                }
+            if(chckbxYear.isSelected()){
+                query += String.format("    year%s%s\n", String.valueOf(yearComboBox.getSelectedItem()), yearTextField.getText());
             }
+            if(chckbxDay.isSelected()){
+                query += String.format("    day%s%s\n", String.valueOf(dayComboBox.getSelectedItem()), dayTextField.getText());
+            }
+            if(chckbxZone.isSelected()) {
+                for(int i = 0; i < includeZoneListModel.size(); i ++){
+                    query += String.format("    Zone = %s,\n", includeZoneListModel.elementAt(i));
+                }
+                query = query.substring(0, query.length()-1);
+            }
+
+            query = String.format("WHERE\n") + query;
+
             return query;
         }
     }

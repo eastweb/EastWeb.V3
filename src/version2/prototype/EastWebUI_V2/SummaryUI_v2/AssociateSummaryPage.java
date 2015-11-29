@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -19,6 +20,7 @@ import javax.swing.border.TitledBorder;
 import version2.prototype.Config;
 import version2.prototype.EASTWebManager;
 import version2.prototype.ErrorLog;
+import version2.prototype.EastWebUI_V2.ProjectInformationUI_v2.ProjectInformationPage;
 import version2.prototype.util.ReadShapefile;
 import version2.prototype.util.ShapefileException;
 
@@ -89,10 +91,14 @@ public class AssociateSummaryPage {
         filePathText.setColumns(10);
         myPanel.add(filePathText);
 
-        browseButton = new JButton(". . .");
+        browseButton = new JButton();
         browseButton.setToolTipText("browse file");
-        browseButton.setBounds(344, 23, 41, 23);
+        browseButton.setBounds(344, 27, 41, 24);
         browseButton.setEnabled(true);
+        browseButton.setOpaque(false);
+        browseButton.setContentAreaFilled(false);
+        browseButton.setBorderPainted(false);
+        browseButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/folder-explore-icon.png")));
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {browserShapeFile();}

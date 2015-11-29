@@ -155,23 +155,29 @@ public class AssociatePluginPage {
         // add indices button
         final JButton btnAddIndices = new JButton("");
         btnAddIndices.setToolTipText("add indices ");
+        btnAddIndices.setOpaque(false);
+        btnAddIndices.setContentAreaFilled(false);
+        btnAddIndices.setBorderPainted(false);
         btnAddIndices.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         btnAddIndices.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) { addIndices(btnSave);}
         });
-        btnAddIndices.setBounds(246, 67, 36, 23);
+        btnAddIndices.setBounds(256, 78, 36, 23);
         pluginPanel.add(btnAddIndices);
 
         // delete selected indices
         JButton btnDeleteIndicies = new JButton("");
         btnDeleteIndicies.setToolTipText("delete selected indices");
+        btnDeleteIndicies.setOpaque(false);
+        btnDeleteIndicies.setContentAreaFilled(false);
+        btnDeleteIndicies.setBorderPainted(false);
         btnDeleteIndicies.setIcon(new ImageIcon(AssociatePluginPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         btnDeleteIndicies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {deleteSelectedIndices(listOfInndicies, btnSave);}
         });
-        btnDeleteIndicies.setBounds(292, 67, 36, 23);
+        btnDeleteIndicies.setBounds(292, 78, 36, 23);
         pluginPanel.add(btnDeleteIndicies);
     }
 

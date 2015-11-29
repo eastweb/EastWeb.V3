@@ -125,6 +125,11 @@ public class ProjectInformationPage {
         frame.getContentPane().setLayout(null);
         frame.setResizable(false);
 
+        JLabel lblProjectInformation = new JLabel("Project Information ");
+        lblProjectInformation.setFont(new Font("Courier", Font.BOLD,25));
+        lblProjectInformation.setBounds(10, 11, 315, 32);
+        frame.getContentPane().add(lblProjectInformation);
+
         CreateNewProjectButton();
         PopulatePluginList();
         BasicProjectInformation();
@@ -163,14 +168,20 @@ public class ProjectInformationPage {
         panel.setLayout(null);
 
         JButton addPluginButton = new JButton("");
-        addPluginButton.setBounds(10, 31, 75, 30);
+        addPluginButton.setBounds(10, 31, 37, 30);
         panel.add(addPluginButton);
+        addPluginButton.setOpaque(false);
+        addPluginButton.setContentAreaFilled(false);
+        addPluginButton.setBorderPainted(false);
         addPluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         addPluginButton.setToolTipText("Add Plugin");
 
         JButton deletePluginButton = new JButton("");
-        deletePluginButton.setBounds(103, 31, 70, 30);
+        deletePluginButton.setBounds(57, 31, 37, 30);
         panel.add(deletePluginButton);
+        deletePluginButton.setOpaque(false);
+        deletePluginButton.setContentAreaFilled(false);
+        deletePluginButton.setBorderPainted(false);
         deletePluginButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         deletePluginButton.setToolTipText("Delete Plugin");
 
@@ -223,10 +234,14 @@ public class ProjectInformationPage {
         panel.add(workingDirLabel);
         workingDirectory = new JTextField();
         workingDirectory.setColumns(10);
-        workingDirectory.setBounds(148, 84, 158, 28);
+        workingDirectory.setBounds(148, 84, 168, 28);
         panel.add(workingDirectory);
 
-        JButton workingDirBrowsebutton = new JButton(". . .");
+        JButton workingDirBrowsebutton = new JButton();
+        workingDirBrowsebutton.setOpaque(false);
+        workingDirBrowsebutton.setContentAreaFilled(false);
+        workingDirBrowsebutton.setBorderPainted(false);
+        workingDirBrowsebutton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/folder-explore-icon.png")));
         workingDirBrowsebutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {chooseWorkingDir();}
@@ -239,10 +254,14 @@ public class ProjectInformationPage {
         panel.add(maskingFileLabel);
         maskFile = new JTextField();
         maskFile.setColumns(10);
-        maskFile.setBounds(148, 115, 158, 28);
+        maskFile.setBounds(148, 115, 168, 28);
         panel.add(maskFile);
 
-        JButton maskFileBrowseButton = new JButton(". . .");
+        JButton maskFileBrowseButton = new JButton();
+        maskFileBrowseButton.setOpaque(false);
+        maskFileBrowseButton.setContentAreaFilled(false);
+        maskFileBrowseButton.setBorderPainted(false);
+        maskFileBrowseButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/folder-explore-icon.png")));
         maskFileBrowseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {chooseMaskingFile();}
@@ -251,11 +270,15 @@ public class ProjectInformationPage {
         panel.add(maskFileBrowseButton);
 
         masterShapeTextField = new JTextField();
-        masterShapeTextField.setBounds(148, 176, 158, 28);
+        masterShapeTextField.setBounds(148, 176, 168, 28);
         panel.add(masterShapeTextField);
         masterShapeTextField.setColumns(10);
 
-        final JButton masterShapeFileBrowseButton = new JButton(". . .");
+        final JButton masterShapeFileBrowseButton = new JButton();
+        masterShapeFileBrowseButton.setOpaque(false);
+        masterShapeFileBrowseButton.setContentAreaFilled(false);
+        masterShapeFileBrowseButton.setBorderPainted(false);
+        masterShapeFileBrowseButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/folder-explore-icon.png")));
         masterShapeFileBrowseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {chooseMasterShapeFile();}
@@ -338,17 +361,20 @@ public class ProjectInformationPage {
         frame.getContentPane().add(summaryPanel);
 
         JButton editSummaryButton = new JButton("");
+        editSummaryButton.setOpaque(false);
+        editSummaryButton.setContentAreaFilled(false);
+        editSummaryButton.setBorderPainted(false);
         editSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         editSummaryButton.setToolTipText("Add summary");
         editSummaryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) { new AssociateSummaryPage(new summaryListenerImplementation());}
         });
-        editSummaryButton.setBounds(10, 246, 75, 30);
+        editSummaryButton.setBounds(205, 11, 33, 30);
         summaryPanel.add(editSummaryButton);
 
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(10, 25, 261, 210);
+        scrollPane.setBounds(10, 52, 261, 227);
         summaryPanel.add(scrollPane);
 
         final JList summaryList = new JList(summaryListModel);
@@ -356,19 +382,17 @@ public class ProjectInformationPage {
         summaryList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
         JButton deleteSummaryButton = new JButton("");
+        deleteSummaryButton.setOpaque(false);
+        deleteSummaryButton.setContentAreaFilled(false);
+        deleteSummaryButton.setBorderPainted(false);
         deleteSummaryButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         deleteSummaryButton.setToolTipText("Delete Selected Summary");
         deleteSummaryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {deleteSelectedSummary(summaryList);}
         });
-        deleteSummaryButton.setBounds(196, 246, 75, 30);
+        deleteSummaryButton.setBounds(238, 11, 33, 30);
         summaryPanel.add(deleteSummaryButton);
-
-        JLabel lblProjectInformation = new JLabel("Project Information ");
-        lblProjectInformation.setFont(new Font("Courier", Font.BOLD,25));
-        lblProjectInformation.setBounds(10, 11, 315, 32);
-        frame.getContentPane().add(lblProjectInformation);
     }
 
     /**

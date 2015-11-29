@@ -126,6 +126,9 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
 
         modisListModel = new DefaultListModel<String>();
         addNewModisButton = new JButton("");
+        addNewModisButton.setOpaque(false);
+        addNewModisButton.setContentAreaFilled(false);
+        addNewModisButton.setBorderPainted(false);
         addNewModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/action_add_16xLG.png")));
         addNewModisButton.setToolTipText("Add modis");
         addNewModisButton.addActionListener(new ActionListener() {
@@ -143,6 +146,9 @@ public class ModisPlugin extends BasePlugin implements IPlugin {
         scrollPane.setViewportView(modisList);
 
         deleteSelectedModisButton = new JButton("");
+        deleteSelectedModisButton.setOpaque(false);
+        deleteSelectedModisButton.setContentAreaFilled(false);
+        deleteSelectedModisButton.setBorderPainted(false);
         deleteSelectedModisButton.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/trashCan.png")));
         deleteSelectedModisButton.setToolTipText("Delete Selected Modis");
         deleteSelectedModisButton.addActionListener(new ActionListener() {
