@@ -1,6 +1,7 @@
 package version2.prototype.EastWebUI_V2.ProjectInformationUI_v2;
 
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -363,6 +364,11 @@ public class ProjectInformationPage {
         });
         deleteSummaryButton.setBounds(196, 246, 75, 30);
         summaryPanel.add(deleteSummaryButton);
+
+        JLabel lblProjectInformation = new JLabel("Project Information ");
+        lblProjectInformation.setFont(new Font("Courier", Font.BOLD,25));
+        lblProjectInformation.setBounds(10, 11, 315, 32);
+        frame.getContentPane().add(lblProjectInformation);
     }
 
     /**
@@ -370,8 +376,12 @@ public class ProjectInformationPage {
      */
     private void UIConstrain() {
         if(!isEditable){
+            JLabel lblProject = new JLabel("Project: ");
+            lblProject.setBounds(616, 25, 46, 14);
+            frame.getContentPane().add(lblProject);
+
             projectCollectionComboBox = new JComboBox<String>();
-            projectCollectionComboBox.setBounds(300, 15, 229, 20);
+            projectCollectionComboBox.setBounds(668, 23, 229, 20);
             projectCollectionComboBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {PopulateProjectInfo();}
