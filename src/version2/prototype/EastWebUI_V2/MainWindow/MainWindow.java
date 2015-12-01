@@ -200,6 +200,10 @@ public class MainWindow {
         mnHelp.add(mntmSettings);
 
         mntmManual = new JMenuItem("Manual", KeyEvent.VK_T);
+        mntmManual.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) { openManual(); }
+        });
         mnHelp.add(mntmManual);
 
         manageIntermidiateFiles();
@@ -393,6 +397,29 @@ public class MainWindow {
                     String.valueOf(projectList.getSelectedItem())});
         } catch (PatternSyntaxException | DOMException | ParserConfigurationException | SAXException | IOException e) {
             ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
+        }
+    }
+
+    private void openManual() {
+        try {
+            String dir =  System.getProperty("user.dir");
+            File pdfFile = new File(String.format("%s\\Documentation\\EASTWebV2.0_Manual.pdf", dir));
+            if (pdfFile.exists()) {
+
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(pdfFile);
+                } else {
+                    System.out.println("Awt Desktop is not supported!");
+                }
+
+            } else {
+                System.out.println("File is not exists!");
+            }
+
+            System.out.println("Done");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
