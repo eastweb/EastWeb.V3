@@ -50,6 +50,7 @@ import version2.prototype.TaskState;
 import version2.prototype.EastWebUI_V2.ProgressUI_v2.ProjectProgress;
 import version2.prototype.EastWebUI_V2.ProjectInformationUI_v2.ProjectInformationPage;
 import version2.prototype.EastWebUI_V2.QueryUI_v2.QueryUI;
+import version2.prototype.EastWebUI_V2.SettingsUI_v2.SettingsUI;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoCollection;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.Scheduler.SchedulerData;
@@ -197,6 +198,15 @@ public class MainWindow {
         menuBar.add(mnHelp);
 
         mntmSettings = new JMenuItem("Settings", KeyEvent.VK_T);
+        mntmSettings.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    new SettingsUI();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }}
+        });
         mnHelp.add(mntmSettings);
 
         mntmManual = new JMenuItem("Manual", KeyEvent.VK_T);
