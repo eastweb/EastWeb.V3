@@ -38,5 +38,6 @@
 			<attribute name="javadoc_location" value="file:/C:/Users/michael.devos/Google%20Drive/EASTWeb/EASTWeb-Projects/EastWeb.V2/doc/c3p0/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="xmleditorkit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

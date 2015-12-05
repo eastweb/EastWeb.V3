@@ -2,11 +2,13 @@ package version2.prototype.EastWebUI_V2.SettingsUI_v2;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.HeadlessException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -15,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import version2.prototype.Config;
@@ -23,7 +26,11 @@ import version2.prototype.EastWebUI_V2.ProjectInformationUI_v2.ProjectInformatio
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+import javax.swing.JTextArea;
 
 public class SettingsUI {
     private JFrame frame;
@@ -36,16 +43,7 @@ public class SettingsUI {
     private JTextField textFieldUserName;
     private JTextField textFieldPassword;
     private JTextField textFieldMaxNumOfConnectionsPerInstance;
-    private JTextField textFieldPreferredTestQuery;
-    private JTextField textFieldMinPoolSize;
-    private JTextField textFieldInitialPoolSize;
-    private JTextField textFieldAcquireIncrement;
-    private JTextField textFieldMaxIdleTime;
-    private JTextField textFieldIdleConnectionTestPeriod;
-    private JTextField textFieldTestConnectionOnCheckout;
-    private JTextField textFieldForceSynchronousCheckins;
-    private JTextField textFieldCheckoutTimeout;
-    private JTextField textFieldNumHelperThreads;
+    private JTextArea textArea;
 
     private boolean isAdvance = false;
 
@@ -92,7 +90,7 @@ public class SettingsUI {
     private void initialize() {
         frame = new JFrame();
         frame.setVisible(true);
-        frame.setBounds(100, 100, 545, 750);
+        frame.setBounds(100, 100, 545, 395);
         frame.getContentPane().setLayout(null);
 
         JLabel lblProjectInformation = new JLabel("System Settings");
@@ -109,8 +107,18 @@ public class SettingsUI {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                JOptionPane.showMessageDialog(frame, "Settings was saved");
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                try {
+                    if(Config.getInstance().WriteConfigFile(GetXMLObject()) && Config.getInstance().Writec3p0File(textArea.getText())){
+                        JOptionPane.showMessageDialog(frame, "Settings was saved");
+                        System.out.println("File saved!");
+                    }else{
+                        System.out.println("Erorr in saving");
+                    }
+                } catch (HeadlessException | ParserConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                frame.dispose();
             }
         });
         saveButton.setToolTipText("Save Settings");
@@ -199,7 +207,7 @@ public class SettingsUI {
         databasePanel.add(labelMaxNumOfConnectionsPerInstance);
 
         GlobalSchematextField = new JTextField();
-        GlobalSchematextField.setBounds(173, 15, 238, 27);
+        GlobalSchematextField.setBounds(173, 18, 238, 27);
         databasePanel.add(GlobalSchematextField);
         GlobalSchematextField.setColumns(10);
 
@@ -232,6 +240,8 @@ public class SettingsUI {
         textFieldMaxNumOfConnectionsPerInstance.setColumns(10);
         textFieldMaxNumOfConnectionsPerInstance.setBounds(173, 168, 238, 27);
         databasePanel.add(textFieldMaxNumOfConnectionsPerInstance);
+
+
     }
 
     private void advanceUI() {
@@ -243,106 +253,28 @@ public class SettingsUI {
         btnAdvanceSettings.setBounds(10, 328, 163, 23);
         frame.getContentPane().add(btnAdvanceSettings);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        panel.setBorder(new TitledBorder(null, "Advance Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(10, 412, 509, 288);
-        frame.getContentPane().add(panel);
-
-        JLabel preferredTestQueryLabel = new JLabel("Preferred Test Query");
-        preferredTestQueryLabel.setBounds(10, 30, 210, 14);
-        panel.add(preferredTestQueryLabel);
-
-        JLabel minPoolSizeLabel = new JLabel("In Pool Size");
-        minPoolSizeLabel.setBounds(10, 55, 210, 14);
-        panel.add(minPoolSizeLabel);
-
-        JLabel labelInitialPoolSize = new JLabel("Initial Pool Size");
-        labelInitialPoolSize.setBounds(10, 80, 210, 14);
-        panel.add(labelInitialPoolSize);
-
-        JLabel labelAcquireIncrement = new JLabel("Acquire Increment");
-        labelAcquireIncrement.setBounds(10, 105, 210, 14);
-        panel.add(labelAcquireIncrement);
-
-        JLabel labelMaxIdleTime = new JLabel("Max Idle Time");
-        labelMaxIdleTime.setBounds(10, 130, 210, 14);
-        panel.add(labelMaxIdleTime);
-
-        JLabel labelIdleConnectionTestPeriod = new JLabel("Idle Connection Test Period");
-        labelIdleConnectionTestPeriod.setBounds(10, 155, 210, 14);
-        panel.add(labelIdleConnectionTestPeriod);
-
-        JLabel labelTestConnectionOnCheckout = new JLabel("Test Connection On Checkout");
-        labelTestConnectionOnCheckout.setBounds(10, 180, 210, 14);
-        panel.add(labelTestConnectionOnCheckout);
-
-        JLabel labelForceSynchronousCheckins = new JLabel("Force Synchronous Checkins");
-        labelForceSynchronousCheckins.setBounds(10, 205, 210, 14);
-        panel.add(labelForceSynchronousCheckins);
-
-        JLabel labelCheckoutTimeout = new JLabel("Checkout Timeout");
-        labelCheckoutTimeout.setBounds(10, 233, 210, 14);
-        panel.add(labelCheckoutTimeout);
-
-        JLabel labelNumHelperThreads = new JLabel("Number Helper Threads");
-        labelNumHelperThreads.setBounds(10, 258, 210, 14);
-        panel.add(labelNumHelperThreads);
-
-        textFieldPreferredTestQuery = new JTextField();
-        textFieldPreferredTestQuery.setColumns(10);
-        textFieldPreferredTestQuery.setBounds(230, 27, 150, 25);
-        panel.add(textFieldPreferredTestQuery);
-
-        textFieldMinPoolSize = new JTextField();
-        textFieldMinPoolSize.setColumns(10);
-        textFieldMinPoolSize.setBounds(230, 55, 150, 25);
-        panel.add(textFieldMinPoolSize);
-
-        textFieldInitialPoolSize = new JTextField();
-        textFieldInitialPoolSize.setColumns(10);
-        textFieldInitialPoolSize.setBounds(230, 80, 150, 25);
-        panel.add(textFieldInitialPoolSize);
-
-        textFieldAcquireIncrement = new JTextField();
-        textFieldAcquireIncrement.setColumns(10);
-        textFieldAcquireIncrement.setBounds(230, 105, 150, 25);
-        panel.add(textFieldAcquireIncrement);
-
-        textFieldMaxIdleTime = new JTextField();
-        textFieldMaxIdleTime.setColumns(10);
-        textFieldMaxIdleTime.setBounds(230, 130, 150, 25);
-        panel.add(textFieldMaxIdleTime);
-
-        textFieldIdleConnectionTestPeriod = new JTextField();
-        textFieldIdleConnectionTestPeriod.setColumns(10);
-        textFieldIdleConnectionTestPeriod.setBounds(230, 155, 150, 25);
-        panel.add(textFieldIdleConnectionTestPeriod);
-
-        textFieldTestConnectionOnCheckout = new JTextField();
-        textFieldTestConnectionOnCheckout.setColumns(10);
-        textFieldTestConnectionOnCheckout.setBounds(230, 180, 150, 25);
-        panel.add(textFieldTestConnectionOnCheckout);
-
-        textFieldForceSynchronousCheckins = new JTextField();
-        textFieldForceSynchronousCheckins.setColumns(10);
-        textFieldForceSynchronousCheckins.setBounds(230, 205, 150, 25);
-        panel.add(textFieldForceSynchronousCheckins);
-
-        textFieldCheckoutTimeout = new JTextField();
-        textFieldCheckoutTimeout.setColumns(10);
-        textFieldCheckoutTimeout.setBounds(230, 230, 150, 25);
-        panel.add(textFieldCheckoutTimeout);
-
-        textFieldNumHelperThreads = new JTextField();
-        textFieldNumHelperThreads.setColumns(10);
-        textFieldNumHelperThreads.setBounds(230, 255, 150, 25);
-        panel.add(textFieldNumHelperThreads);
-
         JLabel lblAdvanceSystemSettings = new JLabel("Advance System Settings");
         lblAdvanceSystemSettings.setFont(new Font("Monospaced", Font.BOLD, 25));
         lblAdvanceSystemSettings.setBounds(10, 362, 389, 32);
         frame.getContentPane().add(lblAdvanceSystemSettings);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(10, 405, 509, 295);
+        frame.getContentPane().add(scrollPane);
+
+        textArea = new JTextArea();
+        scrollPane.setViewportView(textArea);
+
+        try {
+            FileReader reader = new FileReader(System.getProperty("user.dir") + "\\config\\" + "c3p0-config.xml");
+            BufferedReader br = new BufferedReader(reader);
+            textArea.read(reader, null);
+            br.close();
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void browseFolderDir(JTextField dirTextField) {
@@ -371,71 +303,65 @@ public class SettingsUI {
         }
     }
 
-    public Element GetXMLObject() throws ParserConfigurationException {
-        Element config = DocumentBuilderInstance.Instance().GetDocument().createElement("config");
+    public Document GetXMLObject() throws ParserConfigurationException {
+        Document doc = DocumentBuilderInstance.Instance().GetDocument();
+        Element config = doc.createElement("config");
+        doc.appendChild(config);
 
-        Element ErrorLogDir = DocumentBuilderInstance.Instance().GetDocument().createElement("ErrorLogDir");
-        ErrorLogDir.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(errorLogDirTextField.getText()));
+        Element ErrorLogDir = doc.createElement("ErrorLogDir");
+        ErrorLogDir.appendChild(doc.createTextNode(errorLogDirTextField.getText()));
         config.appendChild(ErrorLogDir);
 
-        Element DownloadDir = DocumentBuilderInstance.Instance().GetDocument().createElement("DownloadDir");
-        DownloadDir.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(downloadDirtextField.getText()));
+        Element DownloadDir = doc.createElement("DownloadDir");
+        DownloadDir.appendChild(doc.createTextNode(downloadDirtextField.getText()));
         config.appendChild(DownloadDir);
 
-        Element Database = DocumentBuilderInstance.Instance().GetDocument().createElement("Database");
+        Element Database = doc.createElement("Database");
         config.appendChild(Database);
 
-        Element GlobalSchema = DocumentBuilderInstance.Instance().GetDocument().createElement("GlobalSchema");
-        GlobalSchema.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(GlobalSchematextField.getText()));
+        Element GlobalSchema = doc.createElement("GlobalSchema");
+        GlobalSchema.appendChild(doc.createTextNode(GlobalSchematextField.getText()));
         Database.appendChild(GlobalSchema);
 
-        Element HostName = DocumentBuilderInstance.Instance().GetDocument().createElement("HostName");
-        HostName.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(textFieldHostName.getText()));
-        config.appendChild(HostName);
+        Element HostName = doc.createElement("HostName");
+        HostName.appendChild(doc.createTextNode(textFieldHostName.getText()));
+        Database.appendChild(HostName);
 
-        Element Port = DocumentBuilderInstance.Instance().GetDocument().createElement("Port");
-        Port.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(textFieldPort.getText()));
-        config.appendChild(Port);
+        Element Port = doc.createElement("Port");
+        Port.appendChild(doc.createTextNode(textFieldPort.getText()));
+        Database.appendChild(Port);
 
-        Element DatabaseName = DocumentBuilderInstance.Instance().GetDocument().createElement("DatabaseName");
-        DatabaseName.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(textFieldDatabaseName.getText()));
-        config.appendChild(DatabaseName);
+        Element DatabaseName = doc.createElement("DatabaseName");
+        DatabaseName.appendChild(doc.createTextNode(textFieldDatabaseName.getText()));
+        Database.appendChild(DatabaseName);
 
-        Element UserName = DocumentBuilderInstance.Instance().GetDocument().createElement("UserName");
-        UserName.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(textFieldUserName.getText()));
-        config.appendChild(UserName);
+        Element UserName = doc.createElement("UserName");
+        UserName.appendChild(doc.createTextNode(textFieldUserName.getText()));
+        Database.appendChild(UserName);
 
-        Element PassWord = DocumentBuilderInstance.Instance().GetDocument().createElement("PassWord");
-        PassWord.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(textFieldPassword.getText()));
-        config.appendChild(PassWord);
+        Element PassWord = doc.createElement("PassWord");
+        PassWord.appendChild(doc.createTextNode(textFieldPassword.getText()));
+        Database.appendChild(PassWord);
 
-        Element MaxNumOfConnectionsPerInstance = DocumentBuilderInstance.Instance().GetDocument().createElement("MaxNumOfConnectionsPerInstance");
-        MaxNumOfConnectionsPerInstance.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(textFieldMaxNumOfConnectionsPerInstance.getText()));
-        config.appendChild(MaxNumOfConnectionsPerInstance);
+        Element MaxNumOfConnectionsPerInstance = doc.createElement("MaxNumOfConnectionsPerInstance");
+        MaxNumOfConnectionsPerInstance.appendChild(doc.createTextNode(textFieldMaxNumOfConnectionsPerInstance.getText()));
+        Database.appendChild(MaxNumOfConnectionsPerInstance);
 
-        Element Output = DocumentBuilderInstance.Instance().GetDocument().createElement("Output");
+        Element Output = doc.createElement("Output");
         config.appendChild(Output);
 
-        Element qc = DocumentBuilderInstance.Instance().GetDocument().createElement("QC");
-        //qc.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(qcLevel));
-        config.appendChild(qc);
+        for(String ts : Config.getInstance().getSummaryTempCompStrategies()) {
+            Element TemporalSummaryCompositionStrategy = doc.createElement("TemporalSummaryCompositionStrategy");
+            TemporalSummaryCompositionStrategy.appendChild(doc.createTextNode(ts));
+            Output.appendChild(TemporalSummaryCompositionStrategy);
+        }
 
+        for(String sc : Config.getInstance().getSummaryCalculations()) {
+            Element SummaryCalculation = doc.createElement("SummaryCalculation");
+            SummaryCalculation.appendChild(doc.createTextNode(sc));
+            Output.appendChild(SummaryCalculation);
+        }
 
-        Element indicies = DocumentBuilderInstance.Instance().GetDocument().createElement("Indicies");
-        //indicies.appendChild(DocumentBuilderInstance.Instance().GetDocument().createTextNode(i.toString()));
-        config.appendChild(indicies);
-
-
-        ;
-        ;
-        ;
-        ;
-        ;
-        ;
-        ;
-        ;
-
-
-        return config;
+        return doc;
     }
 }

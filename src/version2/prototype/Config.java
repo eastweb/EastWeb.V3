@@ -6,11 +6,19 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.*;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import jdk.nashorn.internal.ir.annotations.Immutable;
+import version2.prototype.EastWebUI_V2.DocumentBuilderInstance;
 import version2.prototype.util.FileSystem;
 
 //import version2.prototype.util.LazyCachedReference;
@@ -255,5 +263,52 @@ import version2.prototype.util.FileSystem;
     @SuppressWarnings("unchecked")
     public ArrayList<String> getSummaryCalculations() {
         return (ArrayList<String>) summaryCalculations.clone();
+    }
+
+    public boolean WriteConfigFile(Document doc)
+    {
+        File theDir = new File(System.getProperty("user.dir") + "\\config\\" + "config.xml" );
+
+        // write the content into xml file
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer;
+        try {
+            transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(theDir);
+
+            transformer.transform(source, result);
+            return true;
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean Writec3p0File(String xmlSource)
+    {
+        try {
+            // Parse the given input
+            DocumentBuilderFactory factory = DocumentBuilderInstance.Instance().GetDocumentBuilderFactory();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new InputSource(new StringReader(xmlSource)));
+
+            // Write the parsed document to an xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+
+            StreamResult result =  new StreamResult(new File(System.getProperty("user.dir") + "\\config\\" + "c3p0-config.xml" ));
+            transformer.transform(source, result);
+
+            return true;
+        } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return false;
+        }
+
     }
 }
