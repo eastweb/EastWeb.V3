@@ -86,7 +86,6 @@ public class SettingsUI {
         frame.setVisible(true);
         frame.setBounds(100, 100, 545, 750);
         frame.getContentPane().setLayout(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JLabel lblProjectInformation = new JLabel("System Settings");
         lblProjectInformation.setFont(new Font("Courier", Font.BOLD,25));
