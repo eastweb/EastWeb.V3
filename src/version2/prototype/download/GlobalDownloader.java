@@ -93,12 +93,12 @@ public abstract class GlobalDownloader extends Observable implements Runnable{
     }
 
     /**
-     * Sets this GlobalDownloader instance running state to RUNNING.
+     * Sets this GlobalDownloader instance running state to STARTED.
      */
     public final void Start()
     {
         synchronized(state) {
-            state = TaskState.RUNNING;
+            state = TaskState.STARTED;
         }
     }
 

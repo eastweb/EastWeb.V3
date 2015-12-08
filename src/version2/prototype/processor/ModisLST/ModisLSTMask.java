@@ -5,8 +5,8 @@ import version2.prototype.processor.ProcessData;
 
 public class ModisLSTMask extends Mask{
 
-    public ModisLSTMask(ProcessData data) {
-        super(data);
+    public ModisLSTMask(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
 }

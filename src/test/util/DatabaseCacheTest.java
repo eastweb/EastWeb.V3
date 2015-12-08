@@ -114,7 +114,7 @@ public class DatabaseCacheTest {
         downloadExpectedDataFiles.put(testPluginName, 2);
         TreeMap<String, Integer> processorExpectedNumOfOutputs = new TreeMap<String, Integer>();
         processorExpectedNumOfOutputs.put(testPluginName, 2);
-        SchedulerStatusContainer statusContainer = new SchedulerStatusContainer(null, 1, startDate, null, null, null, new ArrayList<String>(), TaskState.RUNNING, new TreeMap<String, TreeMap<String, Double>>(),
+        SchedulerStatusContainer statusContainer = new SchedulerStatusContainer(null, 1, startDate, null, null, null, new ArrayList<String>(), TaskState.STARTED, new TreeMap<String, TreeMap<String, Double>>(),
                 new TreeMap<String, Double>(), new TreeMap<String, Double>(), new TreeMap<String, TreeMap<Integer, Double>>(), false, null);
         scheduler = tester.new MyScheduler(1, statusContainer);
         ArrayList<String> extraDownloadFiles = new ArrayList<String>();

@@ -158,8 +158,8 @@ public class SchedulerTest {
                 PluginMetaDataCollection.getInstance("src/test/Scheduler/" + testPluginName + ".xml")));
 
         scheduler.Start();
-        assertEquals("Scheduler state is STOPPED.", TaskState.RUNNING, scheduler.GetState());
-        assertEquals("SchedulerStatus state is STOPPED.", TaskState.RUNNING, scheduler.GetSchedulerStatus().State);
+        assertEquals("Scheduler state is STOPPED.", TaskState.STARTED, scheduler.GetState());
+        assertEquals("SchedulerStatus state is STOPPED.", TaskState.STARTED, scheduler.GetSchedulerStatus().State);
 
         LocalDate startDate = projectInfoFile.GetStartDate();
         String testFilePath = configInstance.getDownloadDir() + testPluginName+ "\\" + startDate.getYear() + "\\" + startDate.getDayOfYear() +
@@ -175,8 +175,8 @@ public class SchedulerTest {
         assertTrue("summaryWorkerSuccess", manager.summaryWorkerSuccess);
 
         scheduler.Stop();
-        assertEquals("Scheduler state is RUNNING.", TaskState.STOPPED, scheduler.GetState());
-        assertEquals("SchedulerStatus state is RUNNING.", TaskState.STOPPED, scheduler.GetSchedulerStatus().State);
+        assertEquals("Scheduler state is STARTED.", TaskState.STOPPED, scheduler.GetState());
+        assertEquals("SchedulerStatus state is STARTED.", TaskState.STOPPED, scheduler.GetSchedulerStatus().State);
     }
 
     private class MyProgressUpdater extends ProgressUpdater

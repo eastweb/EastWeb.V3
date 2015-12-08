@@ -326,14 +326,10 @@ public class Scheduler {
             myState = statusContainer.GetState();
         }
 
-        if(myState != TaskState.RUNNING) {
-            if(myState == TaskState.STARTING || myState == TaskState.STOPPING) {
-                System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
-                return false;
-            } else {
-                System.out.println("Finished stopping Scheduler for project '" + projectInfoFile.GetProjectName() + "'.");
-                return true;
-            }
+        if(myState == TaskState.STARTING || myState == TaskState.STOPPING) {
+            return false;
+        } else if(myState == TaskState.STOPPED){
+            return true;
         }
 
         synchronized (statusContainer)
@@ -424,15 +420,18 @@ public class Scheduler {
             return false;
         }
 
+        // First stop Scheduler
         if(!Stop()) {
             con.close();
             return false;
         }
 
+        // Set to DELETING state
         synchronized (statusContainer) {
             statusContainer.UpdateSchedulerTaskState(TaskState.DELETING);
         }
 
+        // Go about deleting project
         String projectSchema;
         int projectID;
         File projectDir;
@@ -451,7 +450,7 @@ public class Scheduler {
                 stmt.addBatch(String.format(deleteFromExpectedTotalOutput, "Processor", projectID));
                 stmt.addBatch(String.format(deleteFromExpectedTotalOutput, "Indices", projectID));
                 stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"SummaryExpectedTotalOutput\" where \"ProjectSummaryID\"="
-                        + "(select \"ProjectSummaryID\" from \"" + configInstance.getGlobalSchema() + "\".\"ProjectSummary\" where \"ProjectID\"=%1$d);", projectID));
+                        + " any (select \"ProjectSummaryID\" from \"" + configInstance.getGlobalSchema() + "\".\"ProjectSummary\" where \"ProjectID\"=%1$d);", projectID));
                 stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"ProjectSummary\" where \"ProjectID\"=%1$d", projectID));
                 stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"Project\" where \"ProjectID\"=%1$d", projectID));
                 projectDir = new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName()));

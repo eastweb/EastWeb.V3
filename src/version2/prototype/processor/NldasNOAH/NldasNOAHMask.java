@@ -5,8 +5,8 @@ import version2.prototype.processor.ProcessData;
 
 public class NldasNOAHMask extends Mask{
 
-    public NldasNOAHMask(ProcessData data) {
-        super(data);
+    public NldasNOAHMask(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
 }

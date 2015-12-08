@@ -5,7 +5,7 @@ import version2.prototype.processor.ProcessData;
 
 public class NldasForcingClip extends Clip {
 
-    public NldasForcingClip(ProcessData data) {
-        super(data);
+    public NldasForcingClip(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 }

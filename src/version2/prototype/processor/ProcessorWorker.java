@@ -141,6 +141,8 @@ public class ProcessorWorker extends ProcessWorker {
             String laststepOutputFolder = null;
 
             // process the files for that date
+            String outputPath = String.format("%s"+ "%04d" + File.separator+"%03d",
+                    outputFolder, thisDay.getYear(), thisDay.getDayOfYear());
             for (Entry<Integer, String> step : processStep.entrySet())
             {
                 Integer key = step.getKey();
@@ -157,7 +159,7 @@ public class ProcessorWorker extends ProcessWorker {
 
                 Constructor<?> cnstProcess = null;
                 try {
-                    cnstProcess = classProcess.getConstructor(ProcessData.class);
+                    cnstProcess = classProcess.getConstructor(ProcessData.class, Boolean.class);
                 } catch (NoSuchMethodException | SecurityException e) {
                     ErrorLog.add(process, "Problem with reflection of classProcess.", e);
                 } catch (Exception e) {
@@ -226,11 +228,11 @@ public class ProcessorWorker extends ProcessWorker {
                             prepareTask.getFreezingDegree(),
                             prepareTask.getHeatingDegree()
                             );
-                    process = cnstProcess.newInstance(pData);
+                    process = cnstProcess.newInstance(pData, this.process.GetClearIntermediateFilesFlag());
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    ErrorLog.add(this.process, "Problem with cnstProcess instantion.", e);
+                    ErrorLog.add(this.process, "Problem with cnstProcess instantion.", (e.getCause() != null ? e.getCause() : e));
                 } catch (Exception e) {
-                    ErrorLog.add(this.process, "Problem with cnstProcess instantion.", e);
+                    ErrorLog.add(this.process, "Problem with cnstProcess instantion.", (e.getCause() != null ? e.getCause() : e));
                 }
 
                 Method methodProcess;
@@ -245,9 +247,6 @@ public class ProcessorWorker extends ProcessWorker {
             }
 
             // check if the laststepOutputFolder is the  final outputFolder for the processor
-            String outputPath = String.format("%s"+ "%04d" + File.separator+"%03d",
-                    outputFolder, thisDay.getYear(), thisDay.getDayOfYear());
-
             // if not match, copy the files from the last step to the final outputfolder for  processor
             if (!outputPath.equals(laststepOutputFolder))
             {

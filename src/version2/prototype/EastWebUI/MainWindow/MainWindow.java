@@ -533,7 +533,7 @@ public class MainWindow {
 
             if(status == null) {
                 // Do nothing
-            } else if(status.State == TaskState.RUNNING || status.State == TaskState.STARTING) {
+            } else if(status.State == TaskState.STARTED || status.State == TaskState.STARTING || status.State == TaskState.RUNNING) {
                 setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
 
             } else {
@@ -584,7 +584,7 @@ public class MainWindow {
 
             if(status == null) {
                 // Do nothing
-            } else if(status.State == TaskState.RUNNING || status.State == TaskState.STARTING) {
+            } else if(status.State == TaskState.STARTED || status.State == TaskState.STARTING || status.State == TaskState.RUNNING) {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/stop.png")));
             } else {
                 button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
@@ -603,7 +603,7 @@ public class MainWindow {
 
                 if(status == null) {
                     // Do nothing
-                } else if(status.State == TaskState.RUNNING || status.State == TaskState.STARTING) {
+                } else if(status.State == TaskState.STARTED || status.State == TaskState.STARTING || status.State == TaskState.RUNNING) {
                     EASTWebManager.StopExistingScheduler(projectName, false);
                     button.setIcon(new ImageIcon(ProjectInformationPage.class.getResource("/version2/prototype/Images/StatusAnnotations_Play_32xSM_color.png")));
 

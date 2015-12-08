@@ -22,8 +22,9 @@ public abstract class Convert {
     protected String outputFolder;
     // the file in the input folder
     protected File [] inputFiles;
+    protected Boolean deleteInputDirectory;
 
-    public Convert(ProcessData data) {
+    public Convert(ProcessData data, Boolean deleteInputDirectory) {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
 
@@ -33,6 +34,7 @@ public abstract class Convert {
         assert (listOfFiles.length >= 1);
         //set the input files
         inputFiles = listOfFiles;
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for the scheduler
@@ -52,7 +54,9 @@ public abstract class Convert {
         convertFiles();
 
         // remove the input folder
-        FileUtils.deleteDirectory(inputFolder);
+        if(deleteInputDirectory) {
+            FileUtils.deleteDirectory(inputFolder);
+        }
 
     }
 

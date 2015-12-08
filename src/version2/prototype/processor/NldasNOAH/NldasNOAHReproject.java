@@ -5,8 +5,8 @@ import version2.prototype.processor.Reproject;
 
 public class NldasNOAHReproject extends Reproject{
 
-    public NldasNOAHReproject(ProcessData data) {
-        super(data);
+    public NldasNOAHReproject(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
         NoProj =  false;
     }
 

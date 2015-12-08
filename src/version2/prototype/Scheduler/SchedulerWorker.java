@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import version2.prototype.ProcessWorker;
 import version2.prototype.ProcessWorkerReturn;
+import version2.prototype.TaskState;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.util.GeneralUIEventObject;
 
@@ -53,7 +54,12 @@ public class SchedulerWorker implements Callable<ProcessWorkerReturn> {
 
         String oldThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName(oldThreadName + "-" + worker. projectInfoFile.GetProjectName() + "-" + worker.processWorkerName + "");
+        TaskState temp = worker.getTaskState();
+        worker.setTaskState(TaskState.RUNNING);
+
         theReturn = worker.call();
+
+        worker.setTaskState(temp);
         Thread.currentThread().setName(oldThreadName + "-Updating-Scheduler-Status");
 
         synchronized(statusContainer) {

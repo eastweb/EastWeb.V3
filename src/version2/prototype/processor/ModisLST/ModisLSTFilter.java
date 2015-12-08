@@ -8,6 +8,7 @@ import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.processor.Filter;
 import version2.prototype.processor.ProcessData;
@@ -17,8 +18,8 @@ import version2.prototype.util.GdalUtils;
 
 public class ModisLSTFilter extends Filter{
 
-    public ModisLSTFilter(ProcessData data) {
-        super(data);
+    public ModisLSTFilter(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
     @Override
@@ -77,7 +78,7 @@ public class ModisLSTFilter extends Filter{
             // name the output file as the same as the input's plus "day"
             Dataset outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "day.tif",
-                            xSize, ySize, 1, gdalconst.GDT_Int32);
+                            xSize, ySize, 1, gdalconstConstants.GDT_Int32);
 
             outputDS.SetGeoTransform(inputDS.GetGeoTransform());
             outputDS.SetProjection(inputDS.GetProjection());
@@ -94,7 +95,7 @@ public class ModisLSTFilter extends Filter{
             // name the output file as the same as the input's plus "night"
             outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "night.tif",
-                            xSize, ySize, 1,gdalconst.GDT_Int32);
+                            xSize, ySize, 1,gdalconstConstants.GDT_Int32);
             outputDS.SetGeoTransform(inputDS.GetGeoTransform());
             outputDS.SetProjection(inputDS.GetProjection());
             outputDS.SetMetadata(inputDS.GetMetadata_Dict());

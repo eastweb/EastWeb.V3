@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 import version2.prototype.Config;
-import version2.prototype.EASTWebManagerI;
 import version2.prototype.PluginMetaData.DownloadMetaData;
 import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
@@ -25,13 +24,14 @@ public abstract class DownloadFactory {
      */
     public final DownloadMetaData downloadMetaData;
 
-    protected final Config configInstance;
-    protected final ProjectInfoFile projectInfoFile;
-    protected final ProjectInfoPlugin pluginInfo;
-    protected final PluginMetaData pluginMetaData;
+    public final Config configInstance;
+    public final ProjectInfoFile projectInfoFile;
+    public final ProjectInfoPlugin pluginInfo;
+    public final PluginMetaData pluginMetaData;
+    public final LocalDate startDate;
+
     protected final Scheduler scheduler;
     protected final DatabaseCache outputCache;
-    protected final LocalDate startDate;
 
     protected DownloadFactory(Config configInstance, ProjectInfoFile projectInfoFile, ProjectInfoPlugin pluginInfo, DownloadMetaData downloadMetaData, PluginMetaData pluginMetaData,
             Scheduler scheduler, DatabaseCache outputCache, LocalDate startDate) {

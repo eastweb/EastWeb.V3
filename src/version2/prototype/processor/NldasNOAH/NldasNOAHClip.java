@@ -5,8 +5,8 @@ import version2.prototype.processor.ProcessData;
 
 public class NldasNOAHClip extends Clip{
 
-    public NldasNOAHClip(ProcessData data) {
-        super(data);
+    public NldasNOAHClip(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
 }

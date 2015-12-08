@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import version2.prototype.Config;
@@ -62,6 +63,7 @@ public class SummaryWorker extends ProcessWorker {
             return null;
         }
         Map<Integer, ArrayList<DataFileMetaData>> summaryInputMap = new HashMap<Integer, ArrayList<DataFileMetaData>>();
+        Map<Integer, ArrayList<DataFileMetaData>> tempFilesMap = new HashMap<Integer, ArrayList<DataFileMetaData>>();
         ArrayList<DataFileMetaData> outputFiles = new ArrayList<DataFileMetaData>(1);
         ArrayList<DataFileMetaData> tempFiles;
         DataFileMetaData tempFile;
@@ -116,6 +118,7 @@ public class SummaryWorker extends ProcessWorker {
                         }
                     }
                     summaryInputMap.put(summary.GetID(), tempFiles);
+                    tempFilesMap.put(summary.GetID(), tempFiles);
                 }
             }catch(Exception e) {
                 if(cachedFileData != null) {
@@ -175,6 +178,26 @@ public class SummaryWorker extends ProcessWorker {
                         ErrorLog.add(process, "Problem during zonal summary calculation for summary " + summary.toString() + ", date {day of year=" + cachedFileData.day + ", year=" + cachedFileData.year + "}.", e);
                     } else {
                         ErrorLog.add(process, "Problem during zonal summary calculation for summary " + summary.toString() + ".", e);
+                    }
+                }
+            }
+        }
+
+        if(process.GetClearIntermediateFilesFlag() && tempFilesMap.size() > 0)
+        {
+            Iterator<Integer> tempIt = tempFilesMap.keySet().iterator();
+            Integer key;
+            ArrayList<DataFileMetaData> intermediateFiles;
+            File dFile;
+            while(tempIt.hasNext())
+            {
+                key = tempIt.next();
+                intermediateFiles = tempFilesMap.get(key);
+                for(DataFileMetaData dfmd : intermediateFiles)
+                {
+                    dFile = new File(dfmd.ReadMetaDataForSummary().dataFilePath);
+                    if(dFile.exists()) {
+                        dFile.delete();
                     }
                 }
             }

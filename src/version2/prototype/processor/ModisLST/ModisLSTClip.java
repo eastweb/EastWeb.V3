@@ -5,8 +5,8 @@ import version2.prototype.processor.ProcessData;
 
 public class ModisLSTClip extends Clip{
 
-    public ModisLSTClip(ProcessData data) {
-        super(data);
+    public ModisLSTClip(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
 }

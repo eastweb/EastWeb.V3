@@ -5,8 +5,8 @@ import version2.prototype.processor.Reproject;
 
 public class NldasForcingReproject extends Reproject {
 
-    public NldasForcingReproject(ProcessData data) {
-        super(data);
+    public NldasForcingReproject(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
         NoProj =  false;
     }
 
