@@ -13,6 +13,7 @@ import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
@@ -27,8 +28,8 @@ public class ModisNBARFilterMozaic extends Mozaic {
     private File[] qcFiles;
     private String qcLevel;
 
-    public ModisNBARFilterMozaic(ProcessData data) throws InterruptedException {
-        super(data);
+    public ModisNBARFilterMozaic(ProcessData data, Boolean deleteInputDirectory) throws InterruptedException {
+        super(data, deleteInputDirectory);
 
         //check if there is ate least one input file in the given folder
         File[] listOfFiles2= new File(data.getInputFolders()[1]).listFiles();
@@ -73,7 +74,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
                     outputXSize,
                     outputYSize,
                     1, // band number
-                    gdalconst.GDT_Int16, option);
+                    gdalconstConstants.GDT_Int16, option);
             Dataset input = gdal.Open(tileList[0].sdsName[0]);
 
             output.SetGeoTransform(input.GetGeoTransform());

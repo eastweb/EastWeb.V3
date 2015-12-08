@@ -31,8 +31,9 @@ public abstract class Filter {
     // qc level
     protected String qcLevel;
     protected int [] qcBands;
+    protected Boolean deleteInputDirectory;
 
-    public Filter(ProcessData data) {
+    public Filter(ProcessData data, Boolean deleteInputDirectory) {
 
         this.data = data;
         /* locations for the input files.
@@ -67,6 +68,8 @@ public abstract class Filter {
         qcBands = data.getQCBands();
 
         outputFolder = data.getOutputFolder();
+
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for the scheduler
@@ -92,9 +95,12 @@ public abstract class Filter {
         }
 
         //remove the input folder
-        //        FileUtils.deleteDirectory(inputFolder1);
-        //        if (inputFolder2.exists())
-        //        {   FileUtils.deleteDirectory(inputFolder2);    }
+        if(deleteInputDirectory) {
+            FileUtils.deleteDirectory(inputFolder1);
+            if(inputFolder2 != null && inputFolder2.exists()) {
+                FileUtils.deleteDirectory(inputFolder2);
+            }
+        }
 
     }
 

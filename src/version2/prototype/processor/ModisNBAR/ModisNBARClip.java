@@ -5,7 +5,7 @@ import version2.prototype.processor.ProcessData;
 
 public class ModisNBARClip extends Clip {
 
-    public ModisNBARClip(ProcessData data) {
-        super(data);
+    public ModisNBARClip(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 }

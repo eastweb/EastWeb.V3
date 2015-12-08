@@ -5,7 +5,7 @@ import version2.prototype.processor.ProcessData;
 
 public class ModisNBARMask extends Mask {
 
-    public ModisNBARMask(ProcessData data) {
-        super(data);
+    public ModisNBARMask(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 }

@@ -5,7 +5,7 @@ import version2.prototype.processor.ProcessData;
 
 public class TRMM3B42Clip extends Clip{
 
-    public TRMM3B42Clip(ProcessData data) {
-        super(data);
+    public TRMM3B42Clip(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 }

@@ -25,8 +25,9 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
     public final ProjectInfoFile projectInfoFile;
     public final ProjectInfoPlugin pluginInfo;
     public final PluginMetaData pluginMetaData;
-    protected ArrayList<DataFileMetaData> cachedFiles;
+    protected final ArrayList<DataFileMetaData> cachedFiles;
     protected final DatabaseCache outputCache;
+    protected TaskState tState;
 
     /**
      * Creates a ProcessWorker object labeled by the given processWorkerName, owned by the given process, and set to work on the given cachedFiles.
@@ -51,19 +52,36 @@ public abstract class ProcessWorker implements Callable<ProcessWorkerReturn> {
         this.pluginMetaData = pluginMetaData;
         this.cachedFiles = cachedFiles;
         this.outputCache = outputCache;
+        tState = TaskState.STOPPED;
     }
 
     /**
-     * Method to override to handle the processing to be done in the implementing class. Called only when Scheduler TaskState is set to RUNNING.
+     * Method to override to handle the processing to be done in the implementing class. Called only when Scheduler TaskState is set to STARTED.
      */
     public abstract ProcessWorkerReturn process();
+
+    public void setTaskState(TaskState state)
+    {
+        synchronized(tState) {
+            tState = state;
+        }
+    }
+
+    public TaskState getTaskState()
+    {
+        TaskState temp;
+        synchronized(tState) {
+            temp = tState;
+        }
+        return temp;
+    }
 
     /* (non-Javadoc)
      * @see java.util.concurrent.Callable#call()
      */
     @Override
     public ProcessWorkerReturn call() throws Exception {
-        if((process.getState() == TaskState.RUNNING || process.getState() == TaskState.STARTING) && !Thread.currentThread().isInterrupted()) {
+        if((process.getState() == TaskState.STARTED || process.getState() == TaskState.STARTING || process.getState() == TaskState.RUNNING) && !Thread.currentThread().isInterrupted()) {
             return process();
         } else {
             return null;

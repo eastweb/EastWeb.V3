@@ -10,6 +10,7 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Transformer;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
@@ -29,8 +30,9 @@ public class Clip
     // mask file
     protected File shapeFile;
     protected Boolean clipOrNot;
+    protected Boolean deleteInputDirectory;
 
-    public Clip(ProcessData data)
+    public Clip(ProcessData data, Boolean deleteInputDirectory)
     {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
@@ -46,6 +48,7 @@ public class Clip
         inputFiles = listOfFiles;
 
         shapeFile = new File(data.getShapefile());
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for the scheduler
@@ -77,8 +80,9 @@ public class Clip
             }
         }
         // remove the input folder
-        // WRITE BACK:
-        // FileUtils.deleteDirectory(inputFolder);
+        if(deleteInputDirectory) {
+            FileUtils.deleteDirectory(inputFolder);
+        }
     }
 
 
@@ -110,7 +114,7 @@ public class Clip
                         (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
-                        gdalconst.GDT_Int32
+                        gdalconstConstants.GDT_Int32
                         );
 
                 try{
@@ -141,7 +145,7 @@ public class Clip
                         (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
-                        gdalconst.GDT_Int32);
+                        gdalconstConstants.GDT_Int32);
 
                 try{
                     GdalUtils.errorCheck();

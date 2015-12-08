@@ -5,8 +5,8 @@ import version2.prototype.processor.Reproject;
 
 public class ModisLSTReproject extends Reproject{
 
-    public ModisLSTReproject(ProcessData data) {
-        super(data);
+    public ModisLSTReproject(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
         NoProj =  false;
     }
 

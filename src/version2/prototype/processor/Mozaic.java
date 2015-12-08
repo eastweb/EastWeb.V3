@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.util.GdalUtils;
 
@@ -41,8 +41,9 @@ public abstract class Mozaic {
     protected ModisTileData[][] tileMetrix;
     protected int tileMetrixRow;
     protected int tileMetrixClo;
+    protected Boolean deleteInputDirectory;
 
-    public Mozaic(ProcessData data) throws InterruptedException {
+    public Mozaic(ProcessData data, Boolean deleteInputDirectory) throws InterruptedException {
 
         //locations for the input files. for this step, will only use inputFolders[0]
         inputFolders = data.getInputFolders();
@@ -70,27 +71,30 @@ public abstract class Mozaic {
 
         xSize = tileList[0].xSize;
         ySize = tileList[0].ySize;
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for the scheduler
     public void run() throws Exception{
-        synchronized (GdalUtils.lockObject) {
 
-            //create outputDirectory
-            if (!outputFolder.exists())
-            {   FileUtils.forceMkdir(outputFolder); }
+        //create outputDirectory
+        if (!outputFolder.exists())
+        {   FileUtils.forceMkdir(outputFolder); }
 
-            for (File mInput : inputFiles) {
-                File f = new File(outputFolder, mInput.getName());
-                if(f.exists()) {
-                    f.delete();
-                }
+        for (File mInput : inputFiles) {
+            File f = new File(outputFolder, mInput.getName());
+            if(f.exists()) {
+                f.delete();
             }
+        }
 
-            sortTiles();
+        sortTiles();
+        synchronized (GdalUtils.lockObject) {
             linkTiles();
+        }
 
-            // remove the input folder
+        // remove the input folder
+        if(deleteInputDirectory) {
             FileUtils.deleteDirectory(inputFolder);
         }
     }
@@ -151,7 +155,7 @@ public abstract class Mozaic {
                     outputXSize,
                     outputYSize,
                     1, // band number
-                    gdalconst.GDT_Float32, option);
+                    gdalconstConstants.GDT_Float32, option);
 
             Dataset input = gdal.Open(tileList[0].sdsName[0]);
 

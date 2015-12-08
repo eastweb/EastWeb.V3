@@ -23,8 +23,9 @@ public abstract class Reproject {
     private Projection projection;
     protected String wktStr;
     protected boolean NoProj;  // no reprojection =  true
+    protected Boolean deleteInputDirectory;
 
-    public Reproject(ProcessData data) {
+    public Reproject(ProcessData data, Boolean deleteInputDirectory) {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
         shapefile = data.getShapefile();
@@ -40,6 +41,8 @@ public abstract class Reproject {
 
         // FIXME:  allow the users to choose whether to do reprojection
         NoProj =  true;
+
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for the scheduler
@@ -73,8 +76,9 @@ public abstract class Reproject {
         }
 
         // remove the input folder
-        // WRITE BACK after fixing the issue
-        //FileUtils.deleteDirectory(inputFolder);
+        if(deleteInputDirectory) {
+            FileUtils.deleteDirectory(inputFolder);
+        }
     }
 
     // reproject all the input Files and save them to the outputFolder

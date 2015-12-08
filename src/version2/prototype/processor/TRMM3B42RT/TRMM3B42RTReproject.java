@@ -6,8 +6,8 @@ import version2.prototype.processor.Reproject;
 // For reflection
 public class TRMM3B42RTReproject extends Reproject{
 
-    public TRMM3B42RTReproject(ProcessData data) {
-        super(data);
+    public TRMM3B42RTReproject(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
         NoProj =  false;
     }
 

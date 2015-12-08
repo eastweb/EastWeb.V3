@@ -92,7 +92,7 @@ public abstract class Process implements Observer {
     }
 
     /**
-     * Method to override to handle processing new input files. Called only when Scheduler TaskState is set to RUNNING and there is at least 1 available cached file to process.
+     * Method to override to handle processing new input files. Called only when Scheduler TaskState is set to STARTED and there is at least 1 available cached file to process.
      *
      * @param cachedFiles  - List of cache files available to process. Can always assume size is 1 or greater when called.
      */
@@ -103,7 +103,7 @@ public abstract class Process implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        if((scheduler.GetState() == TaskState.RUNNING || scheduler.GetState() == TaskState.STARTING) && !Thread.currentThread().isInterrupted())
+        if((scheduler.GetState() == TaskState.STARTED || scheduler.GetState() == TaskState.STARTING || scheduler.GetState() == TaskState.RUNNING) && !Thread.currentThread().isInterrupted())
         {
             if(o instanceof DatabaseCache)
             {

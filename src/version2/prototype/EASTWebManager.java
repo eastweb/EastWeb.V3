@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +82,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     // Object references of EASTWeb components
     protected HashMap<Integer, GlobalDownloader> globalDLs;
     protected HashMap<Integer, Scheduler> schedulers;
-    protected final ScheduledExecutorService globalDLExecutor;
+    protected final ScheduledThreadPoolExecutor globalDLExecutor;
     protected HashMap<Integer, ScheduledFuture<?>> globalDLFutures;
     protected final ExecutorService processWorkerExecutor;
 
@@ -260,7 +261,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     }
 
     /**
-     * Requests for a new {@link version2.prototype.Scheduler#Scheduler Scheduler} to be created but the project not set to RUNNING status and keeps its reference
+     * Requests for a new {@link version2.prototype.Scheduler#Scheduler Scheduler} to be created but the project not set to STARTED status and keeps its reference
      * for later status retrieval and stopping. The created Scheduler can be identified via its {@link version2.prototype.Scheduler#SchedulerStatus SchedulerStatus}
      * object gotten from calling {@link #GetSchedulerStatus GetSchedulerStatus()}.
      *
@@ -410,7 +411,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     /**
      * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified unique schedulerID to have its
-     * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
+     * {@link version2#TaskState TaskState} value set to STARTED. Starts a currently stopped Scheduler picking up where it stopped at according to the
      * cache information in the database.
      *
      * @param schedulerID  - targeted Scheduler's ID
@@ -439,7 +440,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
     /**
      * Requests for the {@link version2.prototype.Scheduler#Scheduler Scheduler} with the specified specified project name to have its
-     * {@link version2#TaskState TaskState} value set to RUNNING. Starts a currently stopped Scheduler picking up where it stopped at according to the
+     * {@link version2#TaskState TaskState} value set to STARTED. Starts a currently stopped Scheduler picking up where it stopped at according to the
      * cache information in the database.
      *
      * @param projectName  - targeted Scheduler's project name
@@ -864,7 +865,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                                     if(!pluginNamesAndRunningState.containsKey(gdl.pluginName) || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPED
                                             || pluginNamesAndRunningState.get(gdl.pluginName) == TaskState.STOPPING)
                                     {
-                                        if(gdl.GetRunningState() == TaskState.RUNNING)
+                                        if(gdl.GetRunningState() == TaskState.STARTED || gdl.GetRunningState() == TaskState.RUNNING)
                                         {
                                             System.out.println("Stopping GlobalDownloader '" + gdl.pluginName + "':'" + gdl.metaData.name + "'.");
                                             gdl.Stop();
@@ -899,7 +900,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                             {
                                 if(!Thread.currentThread().isInterrupted())
                                 {
-                                    if(gdl.GetRunningState() == TaskState.RUNNING)
+                                    if(gdl.GetRunningState() == TaskState.STARTED || gdl.GetRunningState() == TaskState.RUNNING)
                                     {
                                         System.out.println("Stopping GlobalDownloader '" + gdl.pluginName + "':'" + gdl.metaData.name + "'.");
                                         gdl.Stop();
@@ -974,14 +975,12 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
     @Override
     public LocalDownloader StartGlobalDownloader(DownloadFactory dlFactory)
     {
-
-
         synchronized (globalDLs)
         {
             int id = getLowestAvailableGlobalDLID();
             if(IsIDValid(id, globalDLIDs))
             {
-                GlobalDownloader gdl;
+                GlobalDownloader gdl = null;
                 LocalDownloader localDl;
                 int currentGDLIdx = -1;
                 String tempDownloadFactoryClassName;
@@ -1004,10 +1003,20 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     ErrorLog.add(configInstance, "EASTWebManager.StartGlobalDownloader error while creating DownloadFactory or ListDatesFiles.", e);
                 }
 
+                if(factory == null) {
+                    return null;
+                }
+
                 if(currentGDLIdx >= 0)
                 {
                     releaseGlobalDLID(id);
                     gdl = globalDLs.get(currentGDLIdx);
+                    ScheduledFuture<?> future = globalDLFutures.get(gdl.ID);
+                    future.cancel(false);
+                    if(gdl.GetStartDate().isAfter(dlFactory.startDate)) {
+                        gdl.SetStartDate(dlFactory.startDate);
+                    }
+                    //                    globalDLFutures.remove(gdl.ID).cancel(false);
                 }
                 else {
                     System.out.println("Creating new GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
@@ -1033,7 +1042,7 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     numOfCreatedGDLs = globalDLs.size();
                 }
 
-                if(gdl.GetRunningState() == TaskState.RUNNING) {
+                if(gdl.GetRunningState() == TaskState.STARTED || gdl.GetRunningState() == TaskState.RUNNING) {
                     System.out.println("GlobalDownloader already running for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
                 } else if(currentGDLIdx >= 0) {
                     System.out.println("Restarting GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");
@@ -1137,7 +1146,8 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
 
         // Setup for handling executing GlobalDownloaders
         globalDLs = new HashMap<Integer, GlobalDownloader>();
-        globalDLExecutor = Executors.newScheduledThreadPool(numOfGlobalDLResourses, new NamedThreadFactory(configInstance, "GlobalDownloader", false));
+        globalDLExecutor = new ScheduledThreadPoolExecutor(numOfGlobalDLResourses, new NamedThreadFactory(configInstance, "GlobalDownloader", false));
+        globalDLExecutor.setRemoveOnCancelPolicy(true);
         globalDLFutures = new HashMap<Integer, ScheduledFuture<?>>();
 
         // Setup for handling executing Schedulers

@@ -5,8 +5,8 @@ import version2.prototype.processor.ProcessData;
 
 public class TRMM3B42Mask extends Mask{
 
-    public TRMM3B42Mask(ProcessData data) {
-        super(data);
+    public TRMM3B42Mask(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
 }

@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.processor.Convert;
 import version2.prototype.processor.ProcessData;
@@ -15,8 +16,8 @@ import version2.prototype.util.GdalUtils;
 
 public class TRMM3B42Convert extends Convert{
 
-    public TRMM3B42Convert(ProcessData data) {
-        super(data);
+    public TRMM3B42Convert(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class TRMM3B42Convert extends Convert{
                         mOutput.getPath(),
                         xSize, ySize,
                         1,
-                        gdalconst.GDT_Float32
+                        gdalconstConstants.GDT_Float32
                         );
 
                 double[] array = new double[xSize];

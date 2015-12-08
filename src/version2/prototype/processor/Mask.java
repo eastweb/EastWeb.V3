@@ -25,8 +25,9 @@ public class Mask {
     protected Integer maskRes;
     // data file resolution;
     protected Integer dataRes;
+    protected Boolean deleteInputDirectory;
 
-    public Mask(ProcessData data)
+    public Mask(ProcessData data, Boolean deleteInputDirectory)
     {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
@@ -47,6 +48,7 @@ public class Mask {
         maskRes = data.getMaskResolution();
         dataRes = data.getDataResolution();
 
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for the scheduler
@@ -82,8 +84,9 @@ public class Mask {
         }
 
         // remove the input folder
-        // WRITE BACK: after fixing the problems
-        // FileUtils.deleteDirectory(inputFolder);
+        if(deleteInputDirectory) {
+            FileUtils.deleteDirectory(inputFolder);
+        }
     }
 
     protected void maskFiles() throws IOException

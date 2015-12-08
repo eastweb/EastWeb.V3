@@ -5,7 +5,7 @@ import version2.prototype.processor.ProcessData;
 
 public class NldasForcingMask extends Mask {
 
-    public NldasForcingMask(ProcessData data) {
-        super(data);
+    public NldasForcingMask(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
     }
 }

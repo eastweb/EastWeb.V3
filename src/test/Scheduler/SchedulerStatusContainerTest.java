@@ -227,11 +227,11 @@ public class SchedulerStatusContainerTest {
         SchedulerStatus status = container.GetStatus();
         LocalDateTime originalLastModifiedTime = status.LastModifiedTime;
         Thread.sleep(1000);
-        container.UpdateSchedulerTaskState(TaskState.RUNNING);
+        container.UpdateSchedulerTaskState(TaskState.STARTED);
 
         // Test
         status = container.GetStatus();
-        assertEquals("TaskState incorrect.", TaskState.RUNNING, status.State);
+        assertEquals("TaskState incorrect.", TaskState.STARTED, status.State);
         assertNotEquals("LastModifiedTime has not changed.", originalLastModifiedTime, status.LastModifiedTime);
     }
 
