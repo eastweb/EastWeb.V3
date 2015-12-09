@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE config>
 <config>
-	<ErrorLogDir>C:\EASTWeb\</ErrorLogDir>
-	<DownloadDir>C:\EASTWeb\Downloads\</DownloadDir>
+	<ErrorLogDir>C:\EASTWeb</ErrorLogDir>
+	<DownloadDir>C:\EASTWeb\Downloads</DownloadDir>
 	<Database>
 		<GlobalSchema>EASTWeb</GlobalSchema>
-		<HostName>jdbc:postgresql://localhost</HostName>
+		<HostName>localhost</HostName>
 		<Port>5432</Port>
 		<DatabaseName>postgres</DatabaseName>
 		<UserName>postgres</UserName>
@@ -17,7 +18,6 @@
 		<TemporalSummaryCompositionStrategy>CDCWeeklyStrategy</TemporalSummaryCompositionStrategy>
 		<TemporalSummaryCompositionStrategy>WHOWeeklyStrategy</TemporalSummaryCompositionStrategy>
 		<TemporalSummaryCompositionStrategy>CompositeOf8Days</TemporalSummaryCompositionStrategy>
-		<SummaryCalculation>Count</SummaryCalculation>
 		<SummaryCalculation>Max</SummaryCalculation>
 		<SummaryCalculation>Mean</SummaryCalculation>
 		<SummaryCalculation>Min</SummaryCalculation>
