@@ -14,11 +14,9 @@ import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 import version2.prototype.Process;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
-import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.summary.temporal.MergeStrategy;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseConnection;
-import version2.prototype.util.FileSystem;
 import version2.prototype.util.GdalUtils;
 import version2.prototype.util.Schemas;
 
@@ -29,24 +27,20 @@ import version2.prototype.util.Schemas;
 public class SummationGdalRasterFileMerge implements MergeStrategy {
 
     @Override
-    public DataFileMetaData Merge(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles)
-            throws Exception {
-
+    public DataFileMetaData Merge(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles,
+            String outputFilePath) throws Exception
+    {
         DataFileMetaData mergedFile = null;
         GdalUtils.register();
 
-        String newFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(projectInfo.GetWorkingDir(), projectInfo.GetProjectName(), pluginName, ProcessName.SUMMARY) +
-                String.format("%04d%03d.tif",
-                        firstDate.getYear(),
-                        firstDate.getDayOfYear()
-                        );
-        new File(newFilePath).delete();
+        new File(outputFilePath).delete();
 
         synchronized (GdalUtils.lockObject) {
             // Create output copy based on rasterFiles[0]
             Dataset rasterDs = gdal.Open(rasterFiles[0].getPath());
             GdalUtils.errorCheck();
-            Dataset sumRasterDs = gdal.GetDriverByName("GTiff").CreateCopy(newFilePath, rasterDs);
+            Dataset sumRasterDs = gdal.GetDriverByName("GTiff").CreateCopy(outputFilePath, rasterDs);
+            GdalUtils.errorCheck();
             rasterDs.delete();
 
             // Populate avgArray with first file's data
@@ -106,7 +100,7 @@ public class SummationGdalRasterFileMerge implements MergeStrategy {
             Statement stmt = con.createStatement();
             try{
                 int dateGroupID = Schemas.getDateGroupID(configInstance.getGlobalSchema(), firstDate, stmt);
-                mergedFile = new DataFileMetaData(newFilePath, dateGroupID, firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
+                mergedFile = new DataFileMetaData(outputFilePath, dateGroupID, firstDate.getYear(), firstDate.getDayOfYear(), indexNm);
             } finally {
                 stmt.close();
             }

@@ -110,7 +110,8 @@ public class SummaryWorker extends ProcessWorker {
                                 pluginMetaData.DaysPerInputData,        // daysPerInputData
                                 fileStores.get(summary.GetID()),        // TemporalSummaryRasterFileStore
                                 null,                                   // InterpolateStrategy
-                                mergeStrategy
+                                mergeStrategy,
+                                summary
                                 );
                         tempFile = temporalSummaryCal.calculate();
                         if(tempFile != null) {

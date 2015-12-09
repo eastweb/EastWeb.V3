@@ -66,6 +66,7 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
     /* (non-Javadoc)
      * @see version2.prototype.util.DatabaseConnectionPoolA#getConnection(boolean, java.lang.Integer)
      */
+    @SuppressWarnings("resource")
     @Override
     public DatabaseConnection handleGettingConnection() {
         DatabaseConnection dbCon = null;

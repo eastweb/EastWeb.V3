@@ -262,6 +262,7 @@ public class ProgressUpdater {
         if(pluginInfo == null) {
             ErrorLog.add(configInstance, "Mising project plugin info for plugin '" + pluginName + "'.", new Exception("Plugin '" + pluginName + "' info could not be found in project "
                     + "metadata."));
+            return;
         }
         String mSchemaName = Schemas.getSchemaName(projectMetaData.GetProjectName(), pluginInfo.GetName());
         int storedExpectedCount = getStoredProcessorExpectedTotalOutput(projectMetaData.GetProjectName(), pluginName, stmt);
@@ -337,9 +338,11 @@ public class ProgressUpdater {
         }
 
         ResultSet rs = stmt.executeQuery(progressQuery);
-        if(rs != null && rs.next())
+        if(rs != null)
         {
-            currentCount = rs.getInt(columnName);
+            if(rs.next()) {
+                currentCount = rs.getInt(columnName);
+            }
             rs.close();
         }
 
@@ -395,9 +398,11 @@ public class ProgressUpdater {
         String progressQuery = "SELECT Count(\"ProcessorCacheID\") AS \"ProcessorCacheIDCount\" FROM \"" + mSchemaName + "\".\"ProcessorCache\";";
         int currentCount = 0;
         ResultSet rs = stmt.executeQuery(progressQuery);
-        if(rs != null && rs.next())
+        if(rs != null)
         {
-            currentCount = rs.getInt("ProcessorCacheIDCount");
+            if(rs.next()) {
+                currentCount = rs.getInt("ProcessorCacheIDCount");
+            }
             rs.close();
         }
         return currentCount;
@@ -418,9 +423,11 @@ public class ProgressUpdater {
         String progressQuery = "SELECT Count(Distinct \"DateGroupID\") \"DateGroupIDCount\" FROM \"" + mSchemaName + "\".\"DownloadCache\";";
         int daysDownloadFor = 0;
         ResultSet rs = stmt.executeQuery(progressQuery);
-        if(rs != null && rs.next())
+        if(rs != null)
         {
-            daysDownloadFor = rs.getInt("DateGroupIDCount");
+            if(rs.next()) {
+                daysDownloadFor = rs.getInt("DateGroupIDCount");
+            }
             rs.close();
         }
         return pluginMetaData.Processor.numOfOutput * daysDownloadFor;
@@ -431,9 +438,11 @@ public class ProgressUpdater {
         String progressQuery = "SELECT Count(\"IndicesCacheID\") AS \"IndicesCacheIDCount\" FROM \"" + mSchemaName + "\".\"IndicesCache\";";
         int currentCount = 0;
         ResultSet rs = stmt.executeQuery(progressQuery);
-        if(rs != null && rs.next())
+        if(rs != null)
         {
-            currentCount = rs.getInt("IndicesCacheIDCount");
+            if(rs.next()) {
+                currentCount = rs.getInt("IndicesCacheIDCount");
+            }
             rs.close();
         }
         return currentCount;
@@ -455,8 +464,10 @@ public class ProgressUpdater {
         int dateGroups = 0;
         ResultSet rs = stmt.executeQuery("SELECT Count(Distinct \"DateGroupID\") \"DateGroupIDCount\"" +
                 "FROM \"" + mSchemaName + "\".\"ProcessorCache\";");
-        if(rs != null && rs.next()) {
-            dateGroups = rs.getInt("DateGroupIDCount");
+        if(rs != null) {
+            if(rs.next()) {
+                dateGroups = rs.getInt("DateGroupIDCount");
+            }
             rs.close();
         }
 
@@ -492,16 +503,19 @@ public class ProgressUpdater {
                     "FROM \"" + mSchemaName + "\".\"IndicesCache\" A INNER JOIN \"" + configInstance.getGlobalSchema() + "\".\"DateGroup\" D " +
                     "ON D.\"DateGroupID\"=A.\"DateGroupID\" " +
                     "ORDER BY D.\"Year\" ASC, D.\"DayOfYear\" ASC;");
-            if(rs != null && rs.next()) {
-                LocalDate startDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
-                while(!rs.isLast()) { rs.next(); }
-                LocalDate endDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
-                if(daysPerInputData != 1) {
-                    endDate = endDate.plusDays(compStrategy.getDaysInThisComposite(endDate));
+            if(rs != null) {
+                if(rs.next())
+                {
+                    LocalDate startDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
+                    while(!rs.isLast()) { rs.next(); }
+                    LocalDate endDate = LocalDate.ofYearDay(rs.getInt("Year"), rs.getInt("DayOfYear"));
+                    if(daysPerInputData != 1) {
+                        endDate = endDate.plusDays(compStrategy.getDaysInThisComposite(endDate));
+                    }
+                    endDate = endDate.plusDays(1);  // Adjust for algorithms exclusive endDate condition.
+                    long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(startDate, endDate);
+                    expectedCount = (int) (completeCompositesInRange * pluginInfo.GetIndices().size());
                 }
-                endDate = endDate.plusDays(1);  // Adjust for algorithms exclusive endDate condition.
-                long completeCompositesInRange = compStrategy.getNumberOfCompleteCompositesInRange(startDate, endDate);
-                expectedCount = (int) (completeCompositesInRange * pluginInfo.GetIndices().size());
                 rs.close();
             }
         }
@@ -587,15 +601,20 @@ public class ProgressUpdater {
         int value = 0;
 
         ResultSet rs = stmt.executeQuery(selectQuery);
-        if(rs != null && rs.next()) {
-            value = rs.getInt(valueField);
+        if(rs != null) {
+            if(rs.next()) {
+                value = rs.getInt(valueField);
+            }
             rs.close();
         }
         else {
             stmt.execute(insertQuery);
             rs = stmt.executeQuery(selectQuery);
-            if(rs != null && rs.next()) {
-                value = rs.getInt(valueField);
+            if(rs != null)
+            {
+                if(rs.next()) {
+                    value = rs.getInt(valueField);
+                }
                 rs.close();
             }
         }

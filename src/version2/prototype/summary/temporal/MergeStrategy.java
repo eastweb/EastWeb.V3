@@ -27,9 +27,10 @@ public interface MergeStrategy {
      * @param indexNm  - current index name
      * @param firstDate  - date of first data file in composite
      * @param rasterFiles  - list of files to create composite from
+     * @param outputFilePath  - string path for the merged file
      * @return metadata about single merged file created
      * @throws Exception
      */
-    DataFileMetaData Merge(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles)
-            throws Exception;
+    DataFileMetaData Merge(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, String indexNm, LocalDate firstDate, File[] rasterFiles,
+            String outputFilePath) throws Exception;
 }

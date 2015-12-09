@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import version2.prototype.Config;
 import version2.prototype.DataDate;
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
+import version2.prototype.ProjectInfoMetaData.ProjectInfoSummary;
+import version2.prototype.Scheduler.ProcessName;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DatabaseConnection;
+import version2.prototype.util.FileSystem;
 import version2.prototype.util.IndicesFileMetaData;
 import version2.prototype.Process;
 
@@ -19,17 +22,18 @@ import version2.prototype.Process;
  *
  */
 public class TemporalSummaryCalculator {
-    private final Config configInstance;
-    private final DatabaseConnection con;
-    private final Process process;
-    private final ProjectInfoFile projectInfo;
-    private final String pluginName;
-    private final IndicesFileMetaData inputFile;
-    private int daysPerInputData;
-    private final TemporalSummaryRasterFileStore fileStore;
+    protected final Config configInstance;
+    protected final DatabaseConnection con;
+    protected final Process process;
+    protected final ProjectInfoFile projectInfo;
+    protected final String pluginName;
+    protected final IndicesFileMetaData inputFile;
+    protected int daysPerInputData;
+    protected final TemporalSummaryRasterFileStore fileStore;
     @SuppressWarnings("unused")
-    private final InterpolateStrategy intStrategy;
-    private final MergeStrategy mergeStrategy;
+    protected final InterpolateStrategy intStrategy;
+    protected final MergeStrategy mergeStrategy;
+    protected final ProjectInfoSummary summary;
 
     /**
      * Creates a TemporalSummaryCalculator. Uses a shared TemporalSummaryRasterFileStore and breaks apart and combines files depending on the values for
@@ -45,9 +49,10 @@ public class TemporalSummaryCalculator {
      * @param intStrategy  - interpolation strategy (method for splitting apart data files into multiple days if they are of more than 1)
      * @param mergeStrategy  - merge strategy for combining multiple files into a single one representing more days than any single file
      * @param fileStore  - common storage object to hold files waiting to be merged together into a single composite
+     * @param summary ProjectInfoSummary object for current summarization
      */
     public TemporalSummaryCalculator(Config configInstance, DatabaseConnection con, Process process, ProjectInfoFile projectInfo, String pluginName, IndicesFileMetaData inputFile,
-            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy) {
+            int daysPerInputData, TemporalSummaryRasterFileStore fileStore, InterpolateStrategy intStrategy, MergeStrategy mergeStrategy, ProjectInfoSummary summary) {
         this.configInstance = configInstance;
         this.con = con;
         this.process = process;
@@ -58,6 +63,7 @@ public class TemporalSummaryCalculator {
         this.fileStore = fileStore;
         this.intStrategy = intStrategy;
         this.mergeStrategy = mergeStrategy;
+        this.summary = summary;
     }
 
     /**
@@ -101,7 +107,14 @@ public class TemporalSummaryCalculator {
                 for(FileDatePair fdPair : tempComp.files) {
                     files.add(fdPair.file);
                 }
-                output = mergeStrategy.Merge(configInstance, con, process, projectInfo, pluginName, inputFile.indexNm, tempComp.startDate, files.toArray(new File[0]));
+                String outputFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(projectInfo.GetWorkingDir(), projectInfo.GetProjectName(), pluginName, ProcessName.SUMMARY) +
+                        "Summary " + summary.GetID() + "\\" +
+                        String.format("%04d%03d.tif",
+                                tempComp.startDate.getYear(),
+                                tempComp.startDate.getDayOfYear()
+                                );
+                new File(outputFilePath).mkdirs();
+                output = mergeStrategy.Merge(configInstance, con, process, projectInfo, pluginName, inputFile.indexNm, tempComp.startDate, files.toArray(new File[0]), outputFilePath);
             }
         }
         return output;

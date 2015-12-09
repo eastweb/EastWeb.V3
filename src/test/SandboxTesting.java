@@ -25,15 +25,19 @@ public class SandboxTesting {
     private static ArrayList<String> myList;
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        SandboxTesting tester = new SandboxTesting();
-        testPersistance();
-        Test3();
-        test4();
-        test5();
-        tester.MinMax_NDWI();
-        tester.MinMax_EVI();
-        tester.ModisCompositeStartDays();
-        tester.testEASTWebResults();
+        //        SandboxTesting tester = new SandboxTesting();
+        //        testPersistance();
+        //        Test3();
+        //        test4();
+        //        test5();
+        //        tester.MinMax_NDWI();
+        //        tester.MinMax_EVI();
+        //        tester.ModisCompositeStartDays();
+        //        tester.testEASTWebResults();
+
+        //        for(int i=1; i<367; i+=8) {
+        //            System.out.println(i);
+        //        }
     }
 
     public void testEASTWebResults()
