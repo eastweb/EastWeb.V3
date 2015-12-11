@@ -49,8 +49,15 @@ public class ModisNBARFilterMozaic extends Mozaic {
                 ModisNBARLinkTiles();
 
                 // remove the input folder
-                if(inputFolder.exists()) {
-                    FileUtils.deleteDirectory(inputFolder);
+                File deleteDir = inputFolder;
+                if(deleteDir != null && deleteDir.exists())
+                {
+                    if(deleteDir.isFile()) {
+                        deleteDir = deleteDir.getParentFile();
+                    }
+                    if(deleteDir != null && deleteDir.exists()) {
+                        FileUtils.deleteDirectory(deleteDir);
+                    }
                 }
             } catch (IOException e) {
                 ErrorLog.add(Config.getInstance(), "ModisNBARFilterMozaic.run error.", e);

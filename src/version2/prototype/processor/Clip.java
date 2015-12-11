@@ -79,8 +79,18 @@ public class Clip
             }
         }
         // remove the input folder
-        if(deleteInputDirectory && inputFolder.exists()) {
-            FileUtils.deleteDirectory(inputFolder);
+        if(deleteInputDirectory)
+        {
+            File deleteDir = inputFolder;
+            if(deleteDir != null && deleteDir.exists())
+            {
+                if(deleteDir.isFile()) {
+                    deleteDir = deleteDir.getParentFile();
+                }
+                if(deleteDir != null && deleteDir.exists()) {
+                    FileUtils.deleteDirectory(deleteDir);
+                }
+            }
         }
     }
 
