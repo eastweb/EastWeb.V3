@@ -454,7 +454,9 @@ public class Scheduler {
                 stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"ProjectSummary\" where \"ProjectID\"=%1$d", projectID));
                 stmt.addBatch(String.format("delete from \"" + configInstance.getGlobalSchema() + "\".\"Project\" where \"ProjectID\"=%1$d", projectID));
                 projectDir = new File(FileSystem.GetProjectDirectoryPath(projectInfoFile.GetWorkingDir(), projectInfoFile.GetProjectName()));
-                FileUtils.deleteDirectory(projectDir);
+                if(projectDir.exists()) {
+                    FileUtils.deleteDirectory(projectDir);
+                }
             }
             stmt.executeBatch();
             stmt.close();

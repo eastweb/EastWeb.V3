@@ -94,7 +94,7 @@ public abstract class Mozaic {
         }
 
         // remove the input folder
-        if(deleteInputDirectory) {
+        if(deleteInputDirectory && inputFolder.exists()) {
             FileUtils.deleteDirectory(inputFolder);
         }
     }

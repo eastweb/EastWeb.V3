@@ -96,7 +96,9 @@ public abstract class Filter {
 
         //remove the input folder
         if(deleteInputDirectory) {
-            FileUtils.deleteDirectory(inputFolder1);
+            if(inputFolder1 != null && inputFolder1.exists()) {
+                FileUtils.deleteDirectory(inputFolder1);
+            }
             if(inputFolder2 != null && inputFolder2.exists()) {
                 FileUtils.deleteDirectory(inputFolder2);
             }

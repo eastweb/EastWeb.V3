@@ -40,7 +40,6 @@ import version2.prototype.PluginMetaData.PluginMetaDataCollection.PluginMetaData
 import version2.prototype.ProjectInfoMetaData.ProjectInfoFile;
 import version2.prototype.download.GenericLocalStorageGlobalDownloader;
 import version2.prototype.download.ListDatesFiles;
-import version2.prototype.download.RegistrationException;
 import version2.prototype.download.TRMM3B42RT.TRMM3B42RTListDatesFiles;
 import version2.prototype.util.DataFileMetaData;
 import version2.prototype.util.DownloadFileMetaData;
@@ -250,7 +249,10 @@ public class GenericLocalStorageGlobalDownloaderTest {
      */
     @Test
     public final void testRunAndPerformUpdates() throws ParserConfigurationException, SAXException, IOException, Exception {
-        FileUtils.deleteDirectory(new File(testConfig.getDownloadDir() + testPluginName));
+        File temp = new File(testConfig.getDownloadDir() + testPluginName);
+        if(temp.exists()) {
+            FileUtils.deleteDirectory(temp);
+        }
 
         // Setup
         String downloaderClassName = testPluginName + "Downloader";
@@ -267,8 +269,8 @@ public class GenericLocalStorageGlobalDownloaderTest {
         // For testing with TRMM3B42RT plugin
         //        String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/" + testYear + "/" + testDay + "/3B42RT_daily.2015.07.01.bin";
         String testFilePath = testConfig.getDownloadDir() + testPluginName+ "/data/" + startDate.getYear() + "/" + startDate.getDayOfYear() + "/3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue())
-        + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
-        File temp = new File(testFilePath);
+                + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
+        temp = new File(testFilePath);
         assertTrue("Expected file doesn't exist at '" + temp.getCanonicalPath() + "'.", temp.exists());
         Statement stmt = con.createStatement();
         int gdlID = Schemas.getGlobalDownloaderID(testConfig.getGlobalSchema(), testPluginName, dData.name, stmt);

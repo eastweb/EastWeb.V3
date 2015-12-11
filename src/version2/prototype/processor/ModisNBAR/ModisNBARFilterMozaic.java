@@ -12,7 +12,6 @@ import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.Config;
@@ -50,7 +49,9 @@ public class ModisNBARFilterMozaic extends Mozaic {
                 ModisNBARLinkTiles();
 
                 // remove the input folder
-                FileUtils.deleteDirectory(inputFolder);
+                if(inputFolder.exists()) {
+                    FileUtils.deleteDirectory(inputFolder);
+                }
             } catch (IOException e) {
                 ErrorLog.add(Config.getInstance(), "ModisNBARFilterMozaic.run error.", e);
             }

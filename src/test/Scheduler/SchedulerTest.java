@@ -152,7 +152,10 @@ public class SchedulerTest {
      */
     @Test
     public final void testSchedulerSchedulerDataIntTaskStateEASTWebManager() throws Exception {
-        FileUtils.deleteDirectory(new File(configInstance.getDownloadDir() + testPluginName));
+        File temp = new File(configInstance.getDownloadDir() + testPluginName);
+        if(temp.exists()) {
+            FileUtils.deleteDirectory(temp);
+        }
         SchedulerData sData = new SchedulerData(projectInfoFile);
         MyScheduler scheduler = new MyScheduler(sData, 1, TaskState.STOPPED, manager, configInstance, new MyProgressUpdater(configInstance, projectInfoFile,
                 PluginMetaDataCollection.getInstance("src/test/Scheduler/" + testPluginName + ".xml")));
@@ -164,7 +167,7 @@ public class SchedulerTest {
         LocalDate startDate = projectInfoFile.GetStartDate();
         String testFilePath = configInstance.getDownloadDir() + testPluginName+ "\\" + startDate.getYear() + "\\" + startDate.getDayOfYear() +
                 "\\3B42RT_daily." + startDate.getYear() + "." + String.format("%02d", startDate.getMonthValue()) + "." + String.format("%02d", startDate.getDayOfMonth()) + ".bin";
-        File temp = new File(testFilePath);
+        temp = new File(testFilePath);
         for(int i=0; !temp.exists() && i < 6; i++)
         {
             Thread.sleep(10000);

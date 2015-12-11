@@ -51,7 +51,9 @@ public abstract class Composite {
         composeFiles();
 
         // remove the input folder
-        FileUtils.deleteDirectory(inputFolder);
+        if(inputFolder.exists()) {
+            FileUtils.deleteDirectory(inputFolder);
+        }
 
     }
 
