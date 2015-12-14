@@ -30,9 +30,10 @@ import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JTextArea;
-import javax.swing.JTabbedPane;
 
 public class SettingsUI {
     private JFrame frame;
@@ -47,8 +48,9 @@ public class SettingsUI {
     private JTextField textFieldMaxNumOfConnectionsPerInstance;
     private JTextArea textArea;
     private JTree tree;
-    private JScrollPane qPane;
-    private JTabbedPane tabbedPane;
+    private JScrollPane treePanel;
+    private JPanel advancePanel;
+    private JScrollPane textAreaPane;
 
     private boolean isAdvance = false;
 
@@ -75,6 +77,10 @@ public class SettingsUI {
         UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         initialize();
         initializeUIValue();
+
+        // And From your main() method or any other method
+        Timer timer = new Timer();
+        timer.schedule(new UpdateModel(), 0, 100);
     }
 
     /**
@@ -84,7 +90,7 @@ public class SettingsUI {
     private void initialize() throws IOException {
         frame = new JFrame();
         frame.setVisible(true);
-        frame.setBounds(100, 100, 545, 750);
+        frame.setBounds(100, 100, 875, 326);
         frame.getContentPane().setLayout(null);
 
         JLabel lblProjectInformation = new JLabel("System Settings");
@@ -93,7 +99,7 @@ public class SettingsUI {
         frame.getContentPane().add(lblProjectInformation);
 
         JButton saveButton = new JButton();
-        saveButton.setBounds(475, 11, 44, 33);
+        saveButton.setBounds(805, 11, 44, 33);
         saveButton.setOpaque(false);
         saveButton.setContentAreaFilled(false);
         saveButton.setBorderPainted(false);
@@ -110,12 +116,12 @@ public class SettingsUI {
         frame.getContentPane().add(lblErrorLogDir);
 
         errorLogDirTextField = new JTextField();
-        errorLogDirTextField.setBounds(163, 57, 257, 25);
+        errorLogDirTextField.setBounds(163, 57, 357, 25);
         errorLogDirTextField.setColumns(10);
         frame.getContentPane().add(errorLogDirTextField);
 
         JButton browseErrorLogDirButton = new JButton("");
-        browseErrorLogDirButton.setBounds(430, 54, 27, 23);
+        browseErrorLogDirButton.setBounds(530, 54, 27, 23);
         browseErrorLogDirButton.setOpaque(false);
         browseErrorLogDirButton.setContentAreaFilled(false);
         browseErrorLogDirButton.setBorderPainted(false);
@@ -132,11 +138,11 @@ public class SettingsUI {
 
         downloadDirtextField = new JTextField();
         downloadDirtextField.setColumns(10);
-        downloadDirtextField.setBounds(163, 82, 257, 25);
+        downloadDirtextField.setBounds(163, 82, 357, 25);
         frame.getContentPane().add(downloadDirtextField);
 
         JButton browseDownloadDirButton = new JButton("");
-        browseDownloadDirButton.setBounds(430, 85, 27, 23);
+        browseDownloadDirButton.setBounds(530, 85, 27, 23);
         browseDownloadDirButton.setOpaque(false);
         browseDownloadDirButton.setContentAreaFilled(false);
         browseDownloadDirButton.setBorderPainted(false);
@@ -166,7 +172,7 @@ public class SettingsUI {
     private void databaseUI() {
         JPanel databasePanel = new JPanel();
         databasePanel.setBorder(new TitledBorder(null, "Database Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        databasePanel.setBounds(10, 110, 509, 207);
+        databasePanel.setBounds(10, 110, 839, 133);
         databasePanel.setLayout(null);
         frame.getContentPane().add(databasePanel);
 
@@ -207,30 +213,30 @@ public class SettingsUI {
         databasePanel.add(textFieldDatabaseName);
 
         JLabel labelUserName = new JLabel("User Name");
-        labelUserName.setBounds(10, 124, 153, 14);
+        labelUserName.setBounds(421, 24, 153, 14);
         databasePanel.add(labelUserName);
 
         textFieldUserName = new JTextField();
-        textFieldUserName.setBounds(173, 118, 238, 27);
+        textFieldUserName.setBounds(584, 18, 238, 27);
         textFieldUserName.setColumns(10);
         databasePanel.add(textFieldUserName);
 
         JLabel labelPassword = new JLabel("Password");
-        labelPassword.setBounds(10, 149, 153, 14);
+        labelPassword.setBounds(421, 49, 153, 14);
         databasePanel.add(labelPassword);
 
         textFieldPassword = new JTextField();
-        textFieldPassword.setBounds(173, 143, 238, 27);
+        textFieldPassword.setBounds(584, 43, 238, 27);
         textFieldPassword.setColumns(10);
         databasePanel.add(textFieldPassword);
 
         JLabel labelMaxNumOfConnectionsPerInstance = new JLabel("Connections Per Instance");
-        labelMaxNumOfConnectionsPerInstance.setBounds(10, 174, 153, 14);
+        labelMaxNumOfConnectionsPerInstance.setBounds(421, 74, 153, 14);
         databasePanel.add(labelMaxNumOfConnectionsPerInstance);
 
         textFieldMaxNumOfConnectionsPerInstance = new JTextField();
         textFieldMaxNumOfConnectionsPerInstance.setColumns(10);
-        textFieldMaxNumOfConnectionsPerInstance.setBounds(173, 168, 238, 27);
+        textFieldMaxNumOfConnectionsPerInstance.setBounds(584, 68, 238, 27);
         databasePanel.add(textFieldMaxNumOfConnectionsPerInstance);
     }
 
@@ -240,23 +246,44 @@ public class SettingsUI {
             @Override
             public void actionPerformed(ActionEvent arg0) { showAdvanceUI(); }
         });
-        btnAdvanceSettings.setBounds(10, 328, 163, 23);
+        btnAdvanceSettings.setBounds(10, 254, 163, 23);
         frame.getContentPane().add(btnAdvanceSettings);
 
         JLabel lblAdvanceSystemSettings = new JLabel("Advance System Settings");
         lblAdvanceSystemSettings.setFont(new Font("Monospaced", Font.BOLD, 25));
-        lblAdvanceSystemSettings.setBounds(10, 362, 389, 32);
+        lblAdvanceSystemSettings.setBounds(10, 288, 389, 32);
         frame.getContentPane().add(lblAdvanceSystemSettings);
 
-        tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        tabbedPane.setBounds(10, 422, 509, 278);
-        frame.getContentPane().add(tabbedPane);
+        advancePanel = new JPanel();
+        advancePanel.setBorder(new TitledBorder(null, "Advance Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        advancePanel.setBounds(10, 329, 839, 297);
+        advancePanel.setLayout(null);
+        frame.getContentPane().add(advancePanel);
 
-        JScrollPane scrollPane = new JScrollPane();
-        tabbedPane.addTab("Raw Xml", null, scrollPane, null);
+        setModelForAdvanceConfig();
+
+        JButton refreshButton = new JButton("");
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                advancePanel.remove(textAreaPane);
+                advancePanel.remove(treePanel);
+                setModelForAdvanceConfig();
+            }
+        });
+        refreshButton.setIcon(new ImageIcon(SettingsUI.class.getResource("/version2/prototype/Images/Refresh.png")));
+        refreshButton.setToolTipText("Refresh Model");
+        refreshButton.setBounds(387, 125, 52, 40);
+        advancePanel.add(refreshButton);
+    }
+
+    private void setModelForAdvanceConfig() {
+        textAreaPane = new JScrollPane();
+        textAreaPane.setBounds(10, 28, 367, 255);
+        advancePanel.add(textAreaPane);
 
         textArea = new JTextArea();
-        scrollPane.setViewportView(textArea);
+        textAreaPane.setViewportView(textArea);
 
         try {
             FileReader reader = new FileReader(System.getProperty("user.dir") + "\\config\\" + "c3p0-config.xml");
@@ -269,16 +296,9 @@ public class SettingsUI {
         }
 
         tree = new XMLTree(textArea.getText());
-        qPane = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        tabbedPane.addTab("Xml hierarchy", null, qPane, null);
-
-        JButton btnUpdateModel = new JButton("Update Model");
-        btnUpdateModel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) { updateModel();}
-        });
-        btnUpdateModel.setBounds(395, 388, 124, 23);
-        frame.getContentPane().add(btnUpdateModel);
+        treePanel = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        treePanel.setBounds(449, 28, 375, 255);
+        advancePanel.add(treePanel);
     }
 
     private void browseFolderDir(JTextField dirTextField) {
@@ -300,9 +320,9 @@ public class SettingsUI {
         isAdvance = !isAdvance;
 
         if(isAdvance){
-            frame.setBounds(100, 100, 545, 750);
+            frame.setBounds(100, 100, 875, 675);
         }else {
-            frame.setBounds(100, 100, 545, 395);
+            frame.setBounds(100, 100, 875, 326);
         }
     }
 
@@ -382,12 +402,25 @@ public class SettingsUI {
         frame.dispose();
     }
 
-    private void updateModel() {
-        qPane.remove(tree);
-        tabbedPane.remove(qPane);
+    class UpdateModel extends TimerTask {
+        String advanceConfig = "";
 
-        tree = new XMLTree(textArea.getText());
-        qPane = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        tabbedPane.addTab("Xml hierarchy", null, qPane, null);
+        public UpdateModel() {
+            advanceConfig = textArea.getText();
+        }
+
+        @Override
+        public void run() {
+            // update only when there is something to update
+            if(!advanceConfig.equals(textArea.getText())){
+                advanceConfig = textArea.getText();
+                advancePanel.remove(treePanel);
+
+                tree = new XMLTree(advanceConfig);
+                treePanel = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                treePanel.setBounds(460, 28, 375, 255);
+                advancePanel.add(treePanel);
+            }
+        }
     }
 }

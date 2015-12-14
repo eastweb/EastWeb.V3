@@ -215,14 +215,14 @@ public class ProjectInformationPage {
         panel.setLayout(null);
 
         JLabel startDateLabel = new JLabel("Start Date:");
-        startDateLabel.setBounds(6, 25, 132, 15);
+        startDateLabel.setBounds(12, 25, 132, 15);
         panel.add(startDateLabel);
         startDate = new JDateChooser ();
         startDate.setBounds(148, 22, 200, 28);
         panel.add(startDate);
 
         JLabel projectNameLabel = new JLabel("Project Name: ");
-        projectNameLabel.setBounds(6, 56, 136, 14);
+        projectNameLabel.setBounds(12, 56, 136, 14);
         panel.add(projectNameLabel);
         projectName = new JTextField();
         projectName.setBounds(148, 53, 200, 28);
@@ -230,7 +230,7 @@ public class ProjectInformationPage {
         projectName.setColumns(10);
 
         JLabel workingDirLabel = new JLabel("Working Dir: ");
-        workingDirLabel.setBounds(6, 87, 132, 15);
+        workingDirLabel.setBounds(12, 87, 132, 15);
         panel.add(workingDirLabel);
         workingDirectory = new JTextField();
         workingDirectory.setColumns(10);
@@ -250,7 +250,7 @@ public class ProjectInformationPage {
         panel.add(workingDirBrowsebutton);
 
         JLabel maskingFileLabel = new JLabel("Masking File:");
-        maskingFileLabel.setBounds(6, 118, 132, 15);
+        maskingFileLabel.setBounds(12, 118, 132, 15);
         panel.add(maskingFileLabel);
         maskFile = new JTextField();
         maskFile.setColumns(10);
@@ -287,11 +287,11 @@ public class ProjectInformationPage {
         panel.add(masterShapeFileBrowseButton);
 
         final JLabel chmasterShapeFileLabel = new JLabel("Master shape file:");
-        chmasterShapeFileLabel.setBounds(6, 175, 136, 23);
+        chmasterShapeFileLabel.setBounds(12, 175, 136, 23);
         panel.add(chmasterShapeFileLabel);
 
         JLabel lblTimeZone = new JLabel("Time Zone:");
-        lblTimeZone.setBounds(6, 209, 132, 14);
+        lblTimeZone.setBounds(12, 209, 132, 14);
         panel.add(lblTimeZone);
 
         timeZoneComboBox = new JComboBox<String>();
@@ -311,11 +311,11 @@ public class ProjectInformationPage {
         panel.add(isClippingCheckBox);
 
         JLabel lblClipping = new JLabel("Clipping:");
-        lblClipping.setBounds(6, 234, 132, 14);
+        lblClipping.setBounds(12, 234, 132, 14);
         panel.add(lblClipping);
 
-        JLabel lblResolution = new JLabel("Masking File Resolution:");
-        lblResolution.setBounds(6, 150, 132, 14);
+        JLabel lblResolution = new JLabel("Masking Resolution:");
+        lblResolution.setBounds(12, 150, 132, 14);
         panel.add(lblResolution);
 
         resolutionTextField = new JTextField();
@@ -332,7 +332,7 @@ public class ProjectInformationPage {
         frame.getContentPane().add(panel);
 
         JLabel reSamplingLabel = new JLabel("Re-sampling Type:");
-        reSamplingLabel.setBounds(6, 23, 109, 14);
+        reSamplingLabel.setBounds(12, 23, 109, 14);
         panel.add(reSamplingLabel);
         reSamplingComboBox = new JComboBox<String>();
         reSamplingComboBox.setBounds(146, 20, 140, 20);
@@ -342,7 +342,7 @@ public class ProjectInformationPage {
         panel.add(reSamplingComboBox);
 
         JLabel pixelSizeLabel = new JLabel("Pixel size meters:");
-        pixelSizeLabel.setBounds(6, 55, 109, 14);
+        pixelSizeLabel.setBounds(12, 58, 109, 14);
         panel.add(pixelSizeLabel);
         pixelSize = new JTextField();
         pixelSize.setColumns(10);
@@ -518,15 +518,15 @@ public class ProjectInformationPage {
         }else{
             startDate.setEnabled(false);
             startDate.setDate(Date.from(project.GetStartDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-            projectName.setEditable(false);
+            projectName.setEnabled(false);
             projectName.setText(project.GetProjectName());
-            workingDirectory.setEditable(false);
+            workingDirectory.setEnabled(false);
             workingDirectory.setText(project.GetWorkingDir());
-            maskFile.setEditable(false);
+            maskFile.setEnabled(false);
             maskFile.setText(project.GetMaskingFile());
-            resolutionTextField.setEditable(false);
+            resolutionTextField.setEnabled(false);
             resolutionTextField.setText((project.GetMaskingResolution() != null) ? project.GetMaskingResolution().toString() : null);
-            masterShapeTextField.setEditable(false);
+            masterShapeTextField.setEnabled(false);
             masterShapeTextField.setText(project.GetMasterShapeFile());
             timeZoneComboBox.setEnabled(false);
             timeZoneComboBox.setSelectedItem(project.GetTimeZone());
@@ -535,7 +535,7 @@ public class ProjectInformationPage {
 
             reSamplingComboBox.setEnabled(false);
             reSamplingComboBox.setSelectedItem(project.GetProjection().getResamplingType());
-            pixelSize.setEditable(false);
+            pixelSize.setEnabled(false);
             pixelSize.setText(String.valueOf(project.GetProjection().getPixelSize()));
 
             summaryListModel.clear();

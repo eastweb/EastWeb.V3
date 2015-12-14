@@ -100,7 +100,8 @@ public class NldasForcingPluginUI extends BasePlugin {
     public JPanel SetupUI(JPanel NldasForcingPanel, JFrame frame) {
         lblNldasForcing = new JLabel("Nldas Forcing");
         lblNldasForcing.setFont(new Font("Courier", Font.BOLD,15));
-        lblNldasForcing.setBounds(400, 53, 150, 20);
+        lblNldasForcing.setBounds(400, 41, 150, 20);
+
         NldasForcingPanel.add(lblNldasForcing);
         NldasForcingPanel.setLayout(null);
         NldasForcingPanel.setBounds(359, 420, 275, 390);

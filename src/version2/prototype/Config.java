@@ -267,8 +267,8 @@ import version2.prototype.util.FileSystem;
 
     public boolean WriteConfigFile(Document doc)
     {
-        //File theDir = new File(System.getProperty("user.dir") + "\\config\\" + "config.xml" );
-        File theDir = new File("C:\\Users\\sufi\\OneDrive\\config.xml" );
+        File theDir = new File(System.getProperty("user.dir") + "\\config\\" + "config.xml" );
+        //File theDir = new File("C:\\Users\\sufi\\OneDrive\\config.xml" );
 
         // write the content into xml file
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -301,8 +301,8 @@ import version2.prototype.util.FileSystem;
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
 
-            //StreamResult result =  new StreamResult(new File(System.getProperty("user.dir") + "\\config\\" + "c3p0-config.xml" ));
-            StreamResult result =  new StreamResult(new File("C:\\Users\\sufi\\OneDrive\\c3p0-config.xml" ));
+            StreamResult result =  new StreamResult(new File(System.getProperty("user.dir") + "\\config\\" + "c3p0-config.xml" ));
+            //StreamResult result =  new StreamResult(new File("C:\\Users\\sufi\\OneDrive\\c3p0-config.xml" ));
             transformer.transform(source, result);
 
             return true;
