@@ -9,6 +9,7 @@ import java.util.List;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.Config;
 import version2.prototype.DataDate;
@@ -27,8 +28,8 @@ public class NldasForcingComposite extends Composite
 
     private int[] mBands;
 
-    public NldasForcingComposite(ProcessData data) {
-        super(data);
+    public NldasForcingComposite(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
 
         mBands = data.getDataBands();
 
@@ -90,7 +91,7 @@ public class NldasForcingComposite extends Composite
                                 temp.getAbsolutePath(),
                                 rasterX, rasterY,
                                 1,
-                                gdalconst.GDT_Float32
+                                gdalconstConstants.GDT_Float32
                                 );
 
                         outputDS.SetGeoTransform(inputDSs.get(0).GetGeoTransform());

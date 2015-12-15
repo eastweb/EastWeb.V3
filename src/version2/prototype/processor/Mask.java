@@ -25,7 +25,7 @@ public class Mask {
     protected Integer maskRes;
     // data file resolution;
     protected Integer dataRes;
-    protected Boolean deleteInputDirectory;
+    protected final Boolean deleteInputDirectory;
 
     public Mask(ProcessData data, Boolean deleteInputDirectory)
     {

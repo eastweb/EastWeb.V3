@@ -20,8 +20,9 @@ public abstract class Composite {
     protected File inputFolder;
     // the files in the input folder for composition
     protected File [] inputFiles;
+    protected final Boolean deleteInputDirectory;
 
-    public Composite(ProcessData data) {
+    public Composite(ProcessData data, Boolean deleteInputDirectory) {
         inputFolders = data.getInputFolders();
         outputFolder = data.getOutputFolder();
 
@@ -31,6 +32,7 @@ public abstract class Composite {
         assert (listOfFiles.length > 1);
         //set the input files
         inputFiles = listOfFiles;
+        this.deleteInputDirectory = deleteInputDirectory;
     }
 
     // run method for scheduler

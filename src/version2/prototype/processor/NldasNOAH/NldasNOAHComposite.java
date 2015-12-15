@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
@@ -18,8 +18,8 @@ public class NldasNOAHComposite extends Composite{
 
     private int[] dataBands = null;
 
-    public NldasNOAHComposite(ProcessData data) {
-        super(data);
+    public NldasNOAHComposite(ProcessData data, Boolean deleteInputDirectory) {
+        super(data, deleteInputDirectory);
         // TODO Auto-generated constructor stub
 
         dataBands = data.getDataBands();
@@ -84,7 +84,7 @@ public class NldasNOAHComposite extends Composite{
                 }
 
                 Dataset outputDS = gdal.GetDriverByName("GTiff").Create(outputFile.getAbsolutePath(),
-                        xSize, ySize, 1, gdalconst.GDT_Float32);
+                        xSize, ySize, 1, gdalconstConstants.GDT_Float32);
 
                 outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, tempArray.get(i));
 

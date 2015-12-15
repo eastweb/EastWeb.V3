@@ -22,7 +22,7 @@ public abstract class Convert {
     protected String outputFolder;
     // the file in the input folder
     protected File [] inputFiles;
-    protected Boolean deleteInputDirectory;
+    protected final Boolean deleteInputDirectory;
 
     public Convert(ProcessData data, Boolean deleteInputDirectory) {
         inputFolders = data.getInputFolders();
