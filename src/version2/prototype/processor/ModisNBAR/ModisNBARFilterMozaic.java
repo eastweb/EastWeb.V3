@@ -43,117 +43,118 @@ public class ModisNBARFilterMozaic extends Mozaic {
     @Override
     public void run()
     {
-        synchronized (GdalUtils.lockObject) {
-            sortTiles();
-            try {
-                ModisNBARLinkTiles();
+        sortTiles();
+        try {
+            ModisNBARLinkTiles();
 
-                // remove the input folder
-                File deleteDir = inputFolder;
-                if(deleteDir != null && deleteDir.exists())
-                {
-                    if(deleteDir.isFile()) {
-                        deleteDir = deleteDir.getParentFile();
-                    }
-                    if(deleteDir != null && deleteDir.exists()) {
-                        FileUtils.deleteDirectory(deleteDir);
-                    }
+            // remove the input folder
+            File deleteDir = inputFolder;
+            if(deleteDir != null && deleteDir.exists())
+            {
+                if(deleteDir.isFile()) {
+                    deleteDir = deleteDir.getParentFile();
                 }
-            } catch (IOException e) {
-                ErrorLog.add(Config.getInstance(), "ModisNBARFilterMozaic.run error.", e);
+                if(deleteDir != null && deleteDir.exists()) {
+                    FileUtils.deleteDirectory(deleteDir);
+                }
             }
+        } catch (IOException e) {
+            ErrorLog.add(Config.getInstance(), "ModisNBARFilterMozaic.run error.", e);
         }
     }
 
 
     private void ModisNBARLinkTiles() throws IOException {
-        // loop for each band needed be reprojected
-        for (int i = 0; i < bands.length; i++) {
-            int currentBand = bands[i];
-            String bandFilePath = new String(FileSystem.CheckDirPath(outputFolder.getPath()) + "band" + currentBand + ".tif");
+        GdalUtils.register();
+        synchronized (GdalUtils.lockObject) {
+            // loop for each band needed be reprojected
+            for (int i = 0; i < bands.length; i++) {
+                int currentBand = bands[i];
+                String bandFilePath = new String(FileSystem.CheckDirPath(outputFolder.getPath()) + "band" + currentBand + ".tif");
 
-            System.out.println("create temp: " + bandFilePath.toString());
-            //            bandFilePath.deleteOnExit();
+                System.out.println("create temp: " + bandFilePath.toString());
+                //            bandFilePath.deleteOnExit();
 
-            String[] option = { "INTERLEAVE=PIXEL" };
-            Dataset output = gdal.GetDriverByName("GTiff").Create(
-                    //                    temp.getAbsolutePath(),
-                    bandFilePath,
-                    outputXSize,
-                    outputYSize,
-                    1, // band number
-                    gdalconstConstants.GDT_Int16, option);
-            Dataset input = gdal.Open(tileList[0].sdsName[0]);
+                String[] option = { "INTERLEAVE=PIXEL" };
+                Dataset output = gdal.GetDriverByName("GTiff").Create(
+                        //                    temp.getAbsolutePath(),
+                        bandFilePath,
+                        outputXSize,
+                        outputYSize,
+                        1, // band number
+                        gdalconstConstants.GDT_Int16, option);
+                Dataset input = gdal.Open(tileList[0].sdsName[0]);
 
-            output.SetGeoTransform(input.GetGeoTransform());
-            output.SetProjection(input.GetProjection());
-            output.SetMetadata(input.GetMetadata_Dict());
+                output.SetGeoTransform(input.GetGeoTransform());
+                output.SetProjection(input.GetProjection());
+                output.SetMetadata(input.GetMetadata_Dict());
 
-            // if error happens, change to input=null
-            input.delete();
+                // if error happens, change to input=null
+                input.delete();
 
-            // outputTemp is used to store double array data of output file
-            ImageArray outputTemp = new ImageArray(output.getRasterXSize(), output.getRasterYSize());
+                // outputTemp is used to store double array data of output file
+                ImageArray outputTemp = new ImageArray(output.getRasterXSize(), output.getRasterYSize());
 
-            // loop for each tile
-            for (int col = 0; col < tileMetrixClo; col++) {
-                for (int row = 0; row < tileMetrixRow; row++) {
-                    ImageArray tempArray = null;
+                // loop for each tile
+                for (int col = 0; col < tileMetrixClo; col++) {
+                    for (int row = 0; row < tileMetrixRow; row++) {
+                        ImageArray tempArray = null;
 
-                    if (tileMetrix[row][col] != null) {
-                        System.out.println("current= "
-                                + currentBand
-                                + " "
-                                + tileMetrix[row][col].sdsName[currentBand - 1]);
+                        if (tileMetrix[row][col] != null) {
+                            System.out.println("current= "
+                                    + currentBand
+                                    + " "
+                                    + tileMetrix[row][col].sdsName[currentBand - 1]);
 
-                        Dataset tempTile = gdal.Open(tileMetrix[row][col].sdsName[currentBand - 1]);
+                            Dataset tempTile = gdal.Open(tileMetrix[row][col].sdsName[currentBand - 1]);
 
-                        int[] filteredArray = FilterByQCFlag(tempTile, tileMetrix[row][col], currentBand);
-                        double[] dataArray = new double[tileMetrix[row][col].xSize * tileMetrix[row][col].ySize];
+                            int[] filteredArray = FilterByQCFlag(tempTile, tileMetrix[row][col], currentBand);
+                            double[] dataArray = new double[tileMetrix[row][col].xSize * tileMetrix[row][col].ySize];
 
-                        for(int index = 0; index < filteredArray.length; index++){
-                            dataArray[index] = filteredArray[index];
-                        }
-
-                        tempArray = new ImageArray(tileMetrix[row][col].xSize, tileMetrix[row][col].ySize, dataArray);
-                        tempTile.delete();
-                    }
-
-                    // loop for each row of temp array image
-                    for (int j = ySize * row; j < ySize * (row + 1); j++) {
-                        double[] rowTemp = outputTemp.getRow(j);
-
-                        if (tempArray != null) {
-                            double[] tileRow = tempArray.getRow(j - row * ySize);
-                            System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
-                        } else {
-                            // set value for the no tile data area
-                            double[] tileRow = new double[xSize];
-
-                            for (int k = 0; k < xSize; k++) {
-                                tileRow[k] = GdalUtils.NO_VALUE;
+                            for(int index = 0; index < filteredArray.length; index++){
+                                dataArray[index] = filteredArray[index];
                             }
-                            System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
+
+                            tempArray = new ImageArray(tileMetrix[row][col].xSize, tileMetrix[row][col].ySize, dataArray);
+                            tempTile.delete();
                         }
 
-                        outputTemp.setRow(j, rowTemp);
-                        rowTemp = null;
+                        // loop for each row of temp array image
+                        for (int j = ySize * row; j < ySize * (row + 1); j++) {
+                            double[] rowTemp = outputTemp.getRow(j);
+
+                            if (tempArray != null) {
+                                double[] tileRow = tempArray.getRow(j - row * ySize);
+                                System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
+                            } else {
+                                // set value for the no tile data area
+                                double[] tileRow = new double[xSize];
+
+                                for (int k = 0; k < xSize; k++) {
+                                    tileRow[k] = GdalUtils.NO_VALUE;
+                                }
+                                System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
+                            }
+
+                            outputTemp.setRow(j, rowTemp);
+                            rowTemp = null;
+                        }
                     }
                 }
+
+                output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
+                output.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+                output.GetRasterBand(1).ComputeStatistics(true);
+                output.delete();
+
+                // add this band mozaic product into outputFile arraylist
+                outputFiles.add(new File(bandFilePath));
             }
-
-            output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
-            output.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
-            output.GetRasterBand(1).ComputeStatistics(true);
-            output.delete();
-
-            // add this band mozaic product into outputFile arraylist
-            outputFiles.add(new File(bandFilePath));
         }
-
+        GdalUtils.errorCheck();
     }
 
-    protected int[] FilterByQCFlag(Dataset bandData, ModisTileData tile, int currentBand) {
+    protected int[] FilterByQCFlag(Dataset bandData, ModisTileData tile, int currentBand) throws IllegalArgumentException, UnsupportedOperationException, IOException {
         List<String> allowedFlags = GetAllowedFlags(qcLevel);
         int[] dataArray = new int[tile.xSize * tile.ySize];
 
@@ -208,8 +209,11 @@ public class ModisNBARFilterMozaic extends Mozaic {
                     }
                     bandData.delete();
                 }
+                qaDS.delete();
+                qaHdf.delete();
             }
         }
+        GdalUtils.errorCheck();
 
         return dataArray;
     }

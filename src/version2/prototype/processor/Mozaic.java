@@ -41,7 +41,7 @@ public abstract class Mozaic {
     protected ModisTileData[][] tileMetrix;
     protected int tileMetrixRow;
     protected int tileMetrixClo;
-    protected Boolean deleteInputDirectory;
+    protected final Boolean deleteInputDirectory;
 
     public Mozaic(ProcessData data, Boolean deleteInputDirectory) throws InterruptedException {
 
@@ -89,9 +89,7 @@ public abstract class Mozaic {
         }
 
         sortTiles();
-        synchronized (GdalUtils.lockObject) {
-            linkTiles();
-        }
+        linkTiles();
 
         // remove the input folder
         if(deleteInputDirectory)
@@ -153,74 +151,77 @@ public abstract class Mozaic {
     }
 
     private void linkTiles() throws IOException {
+        GdalUtils.register();
+        synchronized (GdalUtils.lockObject) {
+            // loop for each band needed be reprojected
+            for (int i = 0; i < bands.length; i++) {
+                int currentBand = bands[i];
+                File outputFile = new File(outputFolder, "band" + currentBand + ".tif");
 
-        // loop for each band needed be reprojected
-        for (int i = 0; i < bands.length; i++) {
-            int currentBand = bands[i];
-            File outputFile = new File(outputFolder, "band" + currentBand + ".tif");
+                String[] option = { "INTERLEAVE=PIXEL" };
+                Dataset output = gdal.GetDriverByName("GTiff").Create(
+                        outputFile.getAbsolutePath(),
+                        outputXSize,
+                        outputYSize,
+                        1, // band number
+                        gdalconstConstants.GDT_Float32, option);
 
-            String[] option = { "INTERLEAVE=PIXEL" };
-            Dataset output = gdal.GetDriverByName("GTiff").Create(
-                    outputFile.getAbsolutePath(),
-                    outputXSize,
-                    outputYSize,
-                    1, // band number
-                    gdalconstConstants.GDT_Float32, option);
+                Dataset input = gdal.Open(tileList[0].sdsName[0]);
 
-            Dataset input = gdal.Open(tileList[0].sdsName[0]);
+                output.SetGeoTransform(input.GetGeoTransform());
+                output.SetProjection(input.GetProjection());
+                output.SetMetadata(input.GetMetadata_Dict());
 
-            output.SetGeoTransform(input.GetGeoTransform());
-            output.SetProjection(input.GetProjection());
-            output.SetMetadata(input.GetMetadata_Dict());
+                // if error happens, change to input=null
+                input.delete();
 
-            // if error happens, change to input=null
-            input.delete();
+                // outputTemp is used to store double array data of output file
+                ImageArray outputTemp = new ImageArray(output.getRasterXSize(), output.getRasterYSize());
 
-            // outputTemp is used to store double array data of output file
-            ImageArray outputTemp = new ImageArray(output.getRasterXSize(), output.getRasterYSize());
+                // loop for each tile
+                for (int col = 0; col < tileMetrixClo; col++) {
+                    for (int row = 0; row < tileMetrixRow; row++) {
+                        ImageArray tempArray = null;
 
-            // loop for each tile
-            for (int col = 0; col < tileMetrixClo; col++) {
-                for (int row = 0; row < tileMetrixRow; row++) {
-                    ImageArray tempArray = null;
+                        if (tileMetrix[row][col] != null) {
+                            //                        System.out.println("current= "
+                            //                                + currentBand
+                            //                                + " "
+                            //                                + tileMetrix[row][col].sdsName[currentBand - 1]);
 
-                    if (tileMetrix[row][col] != null) {
-                        //                        System.out.println("current= "
-                        //                                + currentBand
-                        //                                + " "
-                        //                                + tileMetrix[row][col].sdsName[currentBand - 1]);
-
-                        Dataset tempTile = gdal.Open(tileMetrix[row][col].sdsName[currentBand - 1]);
-                        tempArray = new ImageArray(tempTile.GetRasterBand(1));
-                        tempTile.delete();
-                    }
-
-                    // loop for each row of temp array image
-                    for (int j = ySize * row; j < ySize * (row + 1); j++) {
-                        double[] rowTemp = outputTemp.getRow(j);
-
-                        if (tempArray != null) {
-                            double[] tileRow = tempArray.getRow(j - row * ySize);
-                            System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
-                        } else {
-                            // set value for the no tile data area
-                            double[] tileRow = new double[xSize];
-
-                            for (int k = 0; k < xSize; k++) {
-                                tileRow[k] = -3.40282346639e+038;
-                            }
-                            System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
+                            Dataset tempTile = gdal.Open(tileMetrix[row][col].sdsName[currentBand - 1]);
+                            tempArray = new ImageArray(tempTile.GetRasterBand(1));
+                            tempTile.delete();
                         }
 
-                        outputTemp.setRow(j, rowTemp);
-                        rowTemp = null;
+                        // loop for each row of temp array image
+                        for (int j = ySize * row; j < ySize * (row + 1); j++) {
+                            double[] rowTemp = outputTemp.getRow(j);
+
+                            if (tempArray != null) {
+                                double[] tileRow = tempArray.getRow(j - row * ySize);
+                                System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
+                            } else {
+                                // set value for the no tile data area
+                                double[] tileRow = new double[xSize];
+
+                                for (int k = 0; k < xSize; k++) {
+                                    tileRow[k] = -3.40282346639e+038;
+                                }
+                                System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
+                            }
+
+                            outputTemp.setRow(j, rowTemp);
+                            rowTemp = null;
+                        }
                     }
                 }
-            }
 
-            output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
-            output.GetRasterBand(1).ComputeStatistics(true);
-            output.delete();
+                output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
+                output.GetRasterBand(1).ComputeStatistics(true);
+                output.delete();
+            }
         }
+        GdalUtils.errorCheck();
     }
 }
