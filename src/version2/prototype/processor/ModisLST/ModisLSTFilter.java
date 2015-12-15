@@ -2,12 +2,12 @@ package version2.prototype.processor.ModisLST;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import org.apache.commons.io.FilenameUtils;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.processor.Filter;
@@ -29,7 +29,7 @@ public class ModisLSTFilter extends Filter{
     }
 
     @Override
-    protected void filterByQCFlag(String qcLevel)
+    protected void filterByQCFlag(String qcLevel) throws Exception
     {
         // filter pixel by pixel
         GdalUtils.register();
@@ -40,6 +40,7 @@ public class ModisLSTFilter extends Filter{
             Band [] bands = new Band[4];
 
             Dataset inputDS = null;
+            ArrayList<Dataset> cache = new ArrayList<Dataset>(0);
 
             for (File mInput : inputFiles)   // after Mozaic, they should be in separate bands
             {
@@ -61,6 +62,7 @@ public class ModisLSTFilter extends Filter{
                     bands[3] = inputDS.GetRasterBand(1);
                     break;
                 }
+                cache.add(inputDS);
             }
 
             int xSize = bands[0].getXSize();
@@ -80,9 +82,17 @@ public class ModisLSTFilter extends Filter{
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "day.tif",
                             xSize, ySize, 1, gdalconstConstants.GDT_Int32);
 
-            outputDS.SetGeoTransform(inputDS.GetGeoTransform());
-            outputDS.SetProjection(inputDS.GetProjection());
-            outputDS.SetMetadata(inputDS.GetMetadata_Dict());
+            double [] gTrans = inputDS.GetGeoTransform();
+            String proj = inputDS.GetProjection();
+            Hashtable<?, ?> mData = inputDS.GetMetadata_Dict();
+
+            for(Dataset ds : cache) {
+                ds.delete();
+            }
+
+            outputDS.SetGeoTransform(gTrans);
+            outputDS.SetProjection(proj);
+            outputDS.SetMetadata(mData);
 
             // filter day band, and write to the day.tif file
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
@@ -96,9 +106,9 @@ public class ModisLSTFilter extends Filter{
             outputDS =
                     gdal.GetDriverByName("GTiff").Create(outputFolder + File.separator + "night.tif",
                             xSize, ySize, 1,gdalconstConstants.GDT_Int32);
-            outputDS.SetGeoTransform(inputDS.GetGeoTransform());
-            outputDS.SetProjection(inputDS.GetProjection());
-            outputDS.SetMetadata(inputDS.GetMetadata_Dict());
+            outputDS.SetGeoTransform(gTrans);
+            outputDS.SetProjection(proj);
+            outputDS.SetMetadata(mData);
 
             // filter night band, and write to the night.tif file
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
@@ -107,10 +117,9 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
-            inputDS.delete();
 
         }
-
+        GdalUtils.errorCheck();
     }
 
     /*

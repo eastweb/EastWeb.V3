@@ -1,7 +1,6 @@
 package version2.prototype.processor;
 
 import java.io.File;
-
 import org.apache.commons.io.FileUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -31,7 +30,7 @@ public abstract class Filter {
     // qc level
     protected String qcLevel;
     protected int [] qcBands;
-    protected Boolean deleteInputDirectory;
+    protected final Boolean deleteInputDirectory;
 
     public Filter(ProcessData data, Boolean deleteInputDirectory) {
 
@@ -89,8 +88,7 @@ public abstract class Filter {
 
         if (qcBands != null) {
             filterByQCFlag(qcLevel);
-        } else
-        {
+        } else {
             filterByValue();
         }
 
@@ -154,14 +152,13 @@ public abstract class Filter {
                     }
                 }
 
-                synchronized (GdalUtils.lockObject) {
-                    outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, array);
-                }
+                outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, array);
 
                 inputDS.delete();
                 outputDS.delete();
             }
         }
+        GdalUtils.errorCheck();
     }
 
     /*Override this:
@@ -170,11 +167,11 @@ public abstract class Filter {
      * postcondition:
      *   return the result value after applying filtering strategy on the given value
      */
-    protected abstract double filterValue(double value);
+    protected abstract double filterValue(double value) throws Exception;
 
     /*Override this:
      * use the qcFiles to filter the inputFiles based on the given qcLevel by the end user
      * the Set of the QC levels are defined in the plugin metadata.
      */
-    protected abstract void filterByQCFlag(String qcLevel);
+    protected abstract void filterByQCFlag(String qcLevel) throws Exception;
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.ogr;
 
@@ -31,12 +32,14 @@ public class GdalUtils {
     private static boolean sRegistered = false;
 
     public static void register() {
-        synchronized (lockObject) {
-            if (!sRegistered) {
-                ogr.RegisterAll();
-                gdal.AllRegister();
-                ogr.UseExceptions();
-                sRegistered = true;
+        if (!sRegistered) {
+            synchronized (lockObject) {
+                if (!sRegistered) {
+                    ogr.RegisterAll();
+                    gdal.AllRegister();
+                    ogr.UseExceptions();
+                    sRegistered = true;
+                }
             }
         }
     }
@@ -57,24 +60,24 @@ public class GdalUtils {
     IllegalArgumentException, UnsupportedOperationException {
         synchronized (lockObject) {
             int type = gdal.GetLastErrorType();
-            if (type != gdalconst.CE_None) {
+            if (type != gdalconstConstants.CE_None) {
                 int number = gdal.GetLastErrorNo();
                 String message = gdal.GetLastErrorMsg();
                 gdal.ErrorReset();
 
-                if (number == gdalconst.CPLE_AppDefined
-                        || number == gdalconst.CPLE_FileIO
-                        || number == gdalconst.CPLE_OpenFailed
-                        || number == gdalconst.CPLE_NoWriteAccess
-                        || number == gdalconst.CPLE_UserInterrupt) {
+                if (number == gdalconstConstants.CPLE_AppDefined
+                        || number == gdalconstConstants.CPLE_FileIO
+                        || number == gdalconstConstants.CPLE_OpenFailed
+                        || number == gdalconstConstants.CPLE_NoWriteAccess
+                        || number == gdalconstConstants.CPLE_UserInterrupt) {
                     throw new IOException(message);
-                } else if (number == gdalconst.CPLE_OutOfMemory) {
+                } else if (number == gdalconstConstants.CPLE_OutOfMemory) {
                     throw new OutOfMemoryError(message);
-                } else if (number == gdalconst.CPLE_IllegalArg) {
+                } else if (number == gdalconstConstants.CPLE_IllegalArg) {
                     throw new IllegalArgumentException(message);
-                } else if (number == gdalconst.CPLE_NotSupported) {
+                } else if (number == gdalconstConstants.CPLE_NotSupported) {
                     throw new UnsupportedOperationException(message);
-                } else if (number == gdalconst.CPLE_AssertionFailed) {
+                } else if (number == gdalconstConstants.CPLE_AssertionFailed) {
                     throw new AssertionError(message);
                 }
             }
@@ -157,7 +160,7 @@ public class GdalUtils {
                                         / (projection.getPixelSize())),
                                         (int) Math.ceil((top - bottom)
                                                 / (projection.getPixelSize())),
-                                                1, gdalconst.GDT_Float32);
+                                                1, gdalconstConstants.GDT_Float32);
 
                 // TODO: get projection from project info, and get transform from
                 // shape file
@@ -175,13 +178,13 @@ public class GdalUtils {
                 ResamplingType resample = projection.getResamplingType();
                 switch (resample) {
                 case NEAREST_NEIGHBOR:
-                    resampleAlg = gdalconst.GRA_NearestNeighbour;
+                    resampleAlg = gdalconstConstants.GRA_NearestNeighbour;
                     break;              // added by YL
                 case BILINEAR:
-                    resampleAlg = gdalconst.GRA_Bilinear;
+                    resampleAlg = gdalconstConstants.GRA_Bilinear;
                     break;              // added by YL
                 case CUBIC_CONVOLUTION:
-                    resampleAlg = gdalconst.GRA_CubicSpline;
+                    resampleAlg = gdalconstConstants.GRA_CubicSpline;
                 }
                 gdal.ReprojectImage(inputDS, outputDS, null, null, resampleAlg);
                 outputDS.GetRasterBand(1).ComputeStatistics(false);
