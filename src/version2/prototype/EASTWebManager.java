@@ -1011,8 +1011,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                 {
                     releaseGlobalDLID(id);
                     gdl = globalDLs.get(currentGDLIdx);
-                    ScheduledFuture<?> future = globalDLFutures.get(gdl.ID);
-                    future.cancel(false);
                     if(gdl.GetStartDate().isAfter(dlFactory.startDate)) {
                         gdl.SetStartDate(dlFactory.startDate);
                     }
