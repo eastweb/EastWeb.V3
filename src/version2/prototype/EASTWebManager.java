@@ -1014,7 +1014,6 @@ public class EASTWebManager implements Runnable, EASTWebManagerI{
                     if(gdl.GetStartDate().isAfter(dlFactory.startDate)) {
                         gdl.SetStartDate(dlFactory.startDate);
                     }
-                    //                    globalDLFutures.remove(gdl.ID).cancel(false);
                 }
                 else {
                     System.out.println("Creating new GlobalDownloader for '" + dlFactory.downloadMetaData.name + "' for plugin '" + dlFactory.downloadMetaData.Title + "'.");

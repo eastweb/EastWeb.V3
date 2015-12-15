@@ -159,16 +159,25 @@ public final class ErrorLog {
 
     private static void printToLogFile(String logPath, String message, Throwable e)
     {
+        PrintStream sErrorLogPrintStream = null;
         try {
             System.out.println(logPath);
             final FileOutputStream fos = new FileOutputStream(logPath);
-            PrintStream sErrorLogPrintStream = new PrintStream(fos);
+            sErrorLogPrintStream = new PrintStream(fos);
 
             sErrorLogPrintStream.println(message);
             Throwable tempError = e;
+            int exceptionNum = 1;
             do{
-                if (tempError != null) {
-                    tempError.printStackTrace(sErrorLogPrintStream);
+                if (tempError != null)
+                {
+                    sErrorLogPrintStream.println("Exception " + exceptionNum + ":");
+                    if(tempError.getCause() != null) {
+                        tempError.getCause().printStackTrace(sErrorLogPrintStream);
+                    }
+                    else {
+                        tempError.printStackTrace(sErrorLogPrintStream);
+                    }
 
                     if(tempError instanceof SQLException)
                     {
@@ -182,23 +191,35 @@ public final class ErrorLog {
                 }
             }while(tempError != null);
             sErrorLogPrintStream.println();
-            sErrorLogPrintStream.flush();
         } catch (Exception cause) {
             System.err.println("Failed to write to the error log");
+        }
+
+        if(sErrorLogPrintStream != null)
+        {
+            sErrorLogPrintStream.flush();
+            sErrorLogPrintStream.close();
         }
     }
 
     private static void printToStderr(String message, Throwable r) {
         System.err.println("ERROR: " + message);
         if (r != null) {
-            r.printStackTrace();
+            if(r.getCause() != null)
+            {
+                r.getCause().printStackTrace(System.err);
+            }
+            else
+            {
+                r.printStackTrace(System.err);
+            }
         }
     }
 
     private static String getLogFileName() {
         LocalDateTime temp = LocalDateTime.now();
         return "Error_Log_" + LocalDate.now().getYear() + "_" + LocalDate.now().getMonthValue() + "_" + LocalDate.now().getDayOfMonth() + "_" + String.format("%02d", temp.getHour())
-        + String.format("%02d", temp.getMinute()) + String.format("%02d", temp.getSecond());
+                + String.format("%02d", temp.getMinute()) + String.format("%02d", temp.getSecond());
     }
 
     private static String handleLogFileExtensions(String logFileName, String logPath) {

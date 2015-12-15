@@ -353,6 +353,15 @@ public class ProgressUpdater {
     {
         int expectedCount = 0;
 
+        // Clean up and format tiles list if necessary
+        if(modisTileNames != null)
+        {
+            for(int i=0; i < modisTileNames.size(); i++) {
+                modisTileNames.set(i, modisTileNames.get(i).trim().toLowerCase());
+            }
+        }
+
+        // Check for desired files
         for(ArrayList<String> files : listDatesFiles.CloneListDatesFiles().values())
         {
             if(modisTileNames != null && modisTileNames.size() > 0)
@@ -361,9 +370,10 @@ public class ProgressUpdater {
                 for(String file : files)
                 {
                     tileIt = modisTileNames.iterator();
+                    String temp = file.trim().toLowerCase();
                     while(tileIt.hasNext())
                     {
-                        if(file.contains(tileIt.next())) {
+                        if(temp.contains(tileIt.next())) {
                             expectedCount += 1;
                             break;
                         }
@@ -601,13 +611,14 @@ public class ProgressUpdater {
         int value = 0;
 
         ResultSet rs = stmt.executeQuery(selectQuery);
-        if(rs != null) {
-            if(rs.next()) {
-                value = rs.getInt(valueField);
-            }
+        if(rs != null && rs.next()) {
+            value = rs.getInt(valueField);
             rs.close();
         }
         else {
+            if(rs != null) {
+                rs.close();
+            }
             stmt.execute(insertQuery);
             rs = stmt.executeQuery(selectQuery);
             if(rs != null)
