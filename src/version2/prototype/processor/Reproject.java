@@ -23,7 +23,7 @@ public abstract class Reproject {
     private Projection projection;
     protected String wktStr;
     protected boolean NoProj;  // no reprojection =  true
-    protected Boolean deleteInputDirectory;
+    protected final Boolean deleteInputDirectory;
 
     public Reproject(ProcessData data, Boolean deleteInputDirectory) {
         inputFolders = data.getInputFolders();

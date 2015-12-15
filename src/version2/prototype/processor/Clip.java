@@ -29,7 +29,7 @@ public class Clip
     // mask file
     protected File shapeFile;
     protected Boolean clipOrNot;
-    protected Boolean deleteInputDirectory;
+    protected final Boolean deleteInputDirectory;
 
     public Clip(ProcessData data, Boolean deleteInputDirectory)
     {
