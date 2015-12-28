@@ -41,6 +41,7 @@ public class XMLTree extends JTree {
             // method invokes the parser and returns a fully parsed
             // Document object. We'll then recursively descend the
             // tree and copy non-text nodes into JTree nodes.
+            DocumentBuilderInstance.ClearInstance();
             Document document = DocumentBuilderInstance.Instance().GetDocumentBuilder().parse(in);
             document.getDocumentElement().normalize();
             Element rootElement = document.getDocumentElement();
