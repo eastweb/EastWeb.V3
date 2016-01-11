@@ -722,16 +722,21 @@ public class MainWindow {
 
         @Override
         public Object getCellEditorValue() {
-            if (isPushed) {
-                ArrayList<SchedulerStatus> schedulersStatus = EASTWebManager.GetSchedulerStatuses();
+            int dialogButton = JOptionPane.YES_NO_OPTION;
+            int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you would like to delete this project ?","Warning",dialogButton);
 
-                for(SchedulerStatus item : schedulersStatus){
-                    if(item.ProjectName.equals(label.toString())) {
-                        removeProject = schedulersStatus.indexOf(item);
+            if(dialogResult == JOptionPane.YES_OPTION){
+                if (isPushed) {
+                    ArrayList<SchedulerStatus> schedulersStatus = EASTWebManager.GetSchedulerStatuses();
+
+                    for(SchedulerStatus item : schedulersStatus){
+                        if(item.ProjectName.equals(label.toString())) {
+                            removeProject = schedulersStatus.indexOf(item);
+                        }
                     }
-                }
-                if(removeProject != -1) {
-                    EASTWebManager.DeleteScheduler(label.toString(), true);
+                    if(removeProject != -1) {
+                        EASTWebManager.DeleteScheduler(label.toString(), true);
+                    }
                 }
             }
 
@@ -755,6 +760,7 @@ public class MainWindow {
                 defaultTableModel.removeRow(removeProject);
                 removeProject = -1;
             }
+
         }
     }
 
