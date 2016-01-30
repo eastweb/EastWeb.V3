@@ -22,7 +22,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputBaseFilename=EastWeb Installer
-SetupIconFile= sdsu_logo_trans2.ico
+SetupIconFile= ..\sdsu_logo_trans2.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -33,8 +33,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "EastWeb.jar"; DestDir: "{app}"; Flags: ignoreversion
-Source: "EastWeb.V2\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\EastWeb.jar"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\EastWeb.V2\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "postgresql-9.5.0-1-windows-x64.exe"; DestDir: "{tmp}"
 Source: "jre-8u66-windows-x64.exe"; DestDir: "{tmp}"
 

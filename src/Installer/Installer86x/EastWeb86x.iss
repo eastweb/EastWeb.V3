@@ -33,8 +33,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "EastWeb.jar"; DestDir: "{app}"; Flags: ignoreversion
-Source: "EastWeb.V2\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\EastWeb.jar"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\EastWeb.V2\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "postgresql-9.5.0-1-windows.exe"; DestDir: "{tmp}"
 Source: "jre-8u65-windows-i586.exe"; DestDir: "{tmp}"
 
