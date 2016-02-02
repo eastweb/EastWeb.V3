@@ -6,12 +6,12 @@ rem delete old output and project
 pause
 
 rem copy project to desktop
-robocopy "%~dp0..\..\..\..\EastWeb.V2" "%temp%\EastWeb.V2" /s /xf *.iss *exe *bat
+robocopy "%~dp0..\..\..\..\EastWeb.V2" "%temp%\EastWeb.V2" /s /mt[:18] /xf *.iss *exe *bat
 pause
 
 rem copy project from desktop to installer folder (this prevents infinite loop)
 rem then remove project form desktop
-robocopy "%temp%\EastWeb.V2" "%~dp0..\EastWeb.V2" /mir
+robocopy "%temp%\EastWeb.V2" "%~dp0..\EastWeb.V2" /mir /mt[:18]
 @RD /S /Q "%temp%\EastWeb.V2"
 pause
 

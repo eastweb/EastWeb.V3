@@ -46,5 +46,5 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFil
 
 [Run]
 Filename: "{tmp}\postgresql-9.5.0-1-windows.exe"; StatusMsg: Install PostgreSQL; 
-Filename: "{tmp}\jre-8u66-windows-x64.exe"; StatusMsg: Install JRE; 
+Filename: "{tmp}\jre-8u65-windows-i586.exe"; StatusMsg: Install JRE; 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall skipifsilent

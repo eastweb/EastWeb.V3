@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "EastWeb"
-#define MyAppVersion "EastWeb 2.1.0.0"
+#define MyAppVersion "2.1.0.0"
 #define MyAppPublisher "South Dakota State University "
-#define MyAppURL "http://www.example.com/"
+#define MyAppURL "https://epidemia.sdstate.edu/eastweb/download.php"
 #define MyAppExeName "EastWeb.jar"
 
 [Setup]
@@ -14,7 +14,7 @@
 AppId={{52DB3703-0D8B-4F76-BFDE-A9E9F1C77B7C}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
@@ -22,7 +22,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputBaseFilename=EastWeb Installer
-SetupIconFile= ..\sdsu_logo_trans2.ico
+SetupIconFile= sdsu_logo_trans2.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -45,6 +45,6 @@ Name: "{group}\{#MyAppName}"; IconFilename: sdsu_logo_trans2.ico; Filename: "{ap
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: sdsu_logo_trans2.ico; Tasks: desktopicon
 
 [Run]
-Filename: "{tmp}\postgresql-9.5.0-1-windows.exe"; StatusMsg: Install PostgreSQL; 
+Filename: "{tmp}\postgresql-9.5.0-1-windows-x64.exe"; StatusMsg: Install PostgreSQL; 
 Filename: "{tmp}\jre-8u66-windows-x64.exe"; StatusMsg: Install JRE; 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall skipifsilent
