@@ -168,28 +168,35 @@ public final class ErrorLog {
             sErrorLogPrintStream.println(message);
             Throwable tempError = e;
             int exceptionNum = 1;
-            do{
-                if (tempError != null)
-                {
-                    sErrorLogPrintStream.println("Exception " + exceptionNum + ":");
-                    if(tempError.getCause() != null) {
-                        tempError.getCause().printStackTrace(sErrorLogPrintStream);
-                    }
-                    else {
-                        tempError.printStackTrace(sErrorLogPrintStream);
-                    }
+            while(tempError != null)
+            {
+                sErrorLogPrintStream.println("Exception " + exceptionNum + ":");
 
-                    if(tempError instanceof SQLException)
-                    {
-                        SQLException sqlError = (SQLException) tempError;
-                        tempError = sqlError.getNextException();
-                    }
-                    else
-                    {
-                        tempError = null;
-                    }
+                if(tempError.getMessage() != null) {
+                    sErrorLogPrintStream.println(tempError.getMessage());
                 }
-            }while(tempError != null);
+
+                if(tempError.getLocalizedMessage() != null) {
+                    sErrorLogPrintStream.println(tempError.getLocalizedMessage());
+                }
+
+                if(tempError.getCause() != null) {
+                    tempError.getCause().printStackTrace(sErrorLogPrintStream);
+                }
+                else {
+                    tempError.printStackTrace(sErrorLogPrintStream);
+                }
+
+                if(tempError instanceof SQLException)
+                {
+                    SQLException sqlError = (SQLException) tempError;
+                    tempError = sqlError.getNextException();
+                }
+                else
+                {
+                    tempError = null;
+                }
+            }
             sErrorLogPrintStream.println();
         } catch (Exception cause) {
             System.err.println("Failed to write to the error log");
