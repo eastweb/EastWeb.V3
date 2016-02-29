@@ -145,7 +145,7 @@ public class Schemas {
 
     public static void setProcessedComposite(final String globalSchema, final String projectSchema, final String cacheTable, final int startYear, final int startDay, final int daysInComposite,
             final Statement stmt) throws SQLException
-            {
+    {
         LocalDate currentDate = LocalDate.ofYearDay(startYear, startDay);
         String updateQueryFormat = "UPDATE \"" + projectSchema + "\".\"" + cacheTable + "\" SET \"Processed\" = TRUE WHERE \"DateGroupID\"=%1$d;";
         int dateGroupID = getDateGroupID(globalSchema, currentDate, stmt);
@@ -159,7 +159,7 @@ public class Schemas {
             numOfDaysSetFor += 1;
         }
         stmt.executeBatch();
-            }
+    }
 
     public static boolean registerGlobalDownloader(final String globalEASTWebSchema, final String pluginName, final String dataName, final Statement stmt) throws SQLException
     {
@@ -195,7 +195,7 @@ public class Schemas {
 
     public static boolean addProjectSummaryID(final String globalEASTWebSchema, final String projectName, final Integer summaryNumID, final String areaNameField, final String shapeFilePath,
             final String areaValueField, final String temporalCompositionStrategyClassName, final Statement stmt) throws SQLException
-            {
+    {
         if(globalEASTWebSchema == null || summaryNumID == null || projectName == null || areaNameField == null || shapeFilePath == null || areaValueField == null) {
             return false;
         }
@@ -219,7 +219,7 @@ public class Schemas {
                 compStrategyID
                 );
         return addRowIFNotExistent(selectQuery, insertQuery, stmt);
-            }
+    }
 
     public static int getDateGroupID(final String globalEASTWebSchema, final LocalDate lDate, final Statement stmt) throws SQLException {
         if(globalEASTWebSchema == null || lDate == null) {
@@ -620,7 +620,7 @@ public class Schemas {
                         ));
         for(String summary : summaryNames)
         {
-            query_.append(",\n  \"" + summary + "\" double precision NOT NULL");
+            query_.append(",\n  \"" + summary + "\" double precision");
         }
         query_.append("\n)");
         stmt.executeUpdate(query_.toString());

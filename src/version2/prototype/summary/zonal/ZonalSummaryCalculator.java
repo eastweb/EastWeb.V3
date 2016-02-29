@@ -19,6 +19,7 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Transformer;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Feature;
 import org.gdal.ogr.Layer;
@@ -253,7 +254,7 @@ public class ZonalSummaryCalculator {
                 (int) Math.ceil((layerExtent[1]-layerExtent[0]) / Math.abs(transform[1])),
                 (int) Math.ceil((layerExtent[3]-layerExtent[2]) / Math.abs(transform[5])),
                 1,
-                gdalconst.GDT_UInt32
+                gdalconstConstants.GDT_UInt32
                 );
         GdalUtils.errorCheck();
 
@@ -416,6 +417,19 @@ public class ZonalSummaryCalculator {
                         result = pair.getResult();
                         value = result.get(areaCode);
                         summaryAreaResult.put(pair.getSimpleName(), value);
+                    }
+                    newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, dateGroupID, indexID, filePath, summaryAreaResult));
+                }
+                // If there were no valid values for this area code then insert a null
+                else
+                {
+                    // Insert null values
+                    projectSummaryID = Schemas.getProjectSummaryID(globalSchema, projectName, summary.GetID(), stmt);
+                    dateGroupID = Schemas.getDateGroupID(globalSchema, LocalDate.ofYearDay(year, day), stmt);
+                    for(int i=0; i < results.size(); i++)
+                    {
+                        pair = results.get(i);
+                        summaryAreaResult.put(pair.getSimpleName(), null);
                     }
                     newResults.add(new SummaryResult(projectSummaryID, areaName, areaCode, dateGroupID, indexID, filePath, summaryAreaResult));
                 }
