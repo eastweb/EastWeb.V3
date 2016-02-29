@@ -51,14 +51,13 @@ public class NldasForcingComposite extends Composite
                 //                catch (IOException e) { ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error", e); }
             }
 
+            List<Dataset> inputDSs = new ArrayList<Dataset>();
+            for (File input : inputFiles) {
+                inputDSs.add(gdal.Open(input.getPath()));
+            }
+
             for(int band : mBands)
             {
-                List<Dataset> inputDSs = new ArrayList<Dataset>();
-
-                for (File input : inputFiles) {
-                    inputDSs.add(gdal.Open(input.getPath()));
-                }
-
                 int rasterX = inputDSs.get(0).GetRasterXSize();
                 int rasterY = inputDSs.get(0).GetRasterYSize();
 
@@ -67,10 +66,6 @@ public class NldasForcingComposite extends Composite
                 if(band == 1) {
                     // Used to differentiate Min--Mean/DegreeDays--Max Air Temp
                     outputs = 3;
-                }
-
-                for (File input : inputFiles) {
-                    inputDSs.add(gdal.Open(input.getPath()));
                 }
 
                 for(int output = 0; output < outputs; output++)
