@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.Config;
@@ -70,6 +69,10 @@ public class NldasForcingComposite extends Composite
                     outputs = 3;
                 }
 
+                for (File input : inputFiles) {
+                    inputDSs.add(gdal.Open(input.getPath()));
+                }
+
                 for(int output = 0; output < outputs; output++)
                 {
                     ArrayList<String> prefixList = GetFilePrefix(band, output);
@@ -83,9 +86,6 @@ public class NldasForcingComposite extends Composite
                             ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error while creating new file.", e);
                         }
 
-                        for (File input : inputFiles) {
-                            inputDSs.add(gdal.Open(input.getPath()));
-                        }
 
                         Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                                 temp.getAbsolutePath(),
