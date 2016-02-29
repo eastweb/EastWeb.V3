@@ -9,6 +9,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.JList;
 
@@ -58,7 +59,7 @@ public class ProjectProgress {
 
         frame = new JFrame();
         frame.setBounds(100, 100, 400, 500);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setVisible(true);
 
@@ -165,14 +166,14 @@ public class ProjectProgress {
                         Iterator<ProcessName> it = status.GetWorkersInQueuePerProcess().keySet().iterator();
                         ProcessName tempKey;
 
-                        processWorkerInfo.append("Workers Queued For Processes:\n");
+                        processWorkerInfo.append("Project '" + status.ProjectName + "' Workers Queued For Processes:\n");
                         while(it.hasNext()){
                             tempKey = it.next();
                             processWorkerInfo.append("\t" + tempKey.toString() + ":\t" + status.GetWorkersInQueuePerProcess().get(tempKey) + "\n");
                         }
 
                         it = status.GetActiveWorkersPerProcess().keySet().iterator();
-                        processWorkerInfo.append("Active Workers For Processes:\n");
+                        processWorkerInfo.append("Project '" + status.ProjectName + "' Active Workers For Processes:\n");
                         while(it.hasNext()){
                             tempKey = it.next();
                             processWorkerInfo.append("\t" + tempKey.toString() + ":\t" + status.GetActiveWorkersPerProcess().get(tempKey) + "\n");
