@@ -666,14 +666,14 @@ public class DatabaseCache extends Observable{
      */
     public void UploadResultsToDb(Connection con, ArrayList<SummaryResult> newResults, int summaryIDNum, String indexNm, TemporalSummaryCompositionStrategy compStrategy, int year, int day,
             Process process, int daysPerInputData) throws IllegalArgumentException, UnsupportedOperationException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException,
-    SQLException {
-        Statement stmt = con.createStatement();
-        PreparedStatement pStmt = null;
-        //        final boolean previousAutoCommit = conn.getAutoCommit();
-
+            SQLException {
         if(newResults.size() == 0) {
             return;
         }
+
+        Statement stmt = con.createStatement();
+        PreparedStatement pStmt = null;
+        //        final boolean previousAutoCommit = conn.getAutoCommit();
 
         System.out.println("Uploading summary results in project '" + projectName + "' for plugin '" + pluginName + "' of index '" + indexNm + "' (Year: " + year + ", Day: " + day + ").");
 
@@ -720,7 +720,15 @@ public class DatabaseCache extends Observable{
                 i = 0;
                 for(Double value : newResult.summaryResults.values())
                 {
-                    pStmt.setDouble(7 + i++, value);
+                    if(value == null) {
+                        pStmt.setNull(7 + i++, java.sql.Types.DOUBLE);
+                    } else if(value == Double.NEGATIVE_INFINITY) {
+                        pStmt.setDouble(7 + i++, Double.MIN_VALUE);
+                    } else if(value == Double.POSITIVE_INFINITY) {
+                        pStmt.setDouble(7 + i++, Double.MAX_VALUE);
+                    } else {
+                        pStmt.setDouble(7 + i++, value);
+                    }
                 }
                 pStmt.addBatch();
             }
