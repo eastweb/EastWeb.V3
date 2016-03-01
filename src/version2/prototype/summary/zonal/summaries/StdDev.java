@@ -72,12 +72,16 @@ public class StdDev extends SummaryCalculation {
                         }
                     }
                     // Calculate variance and std dev
-                    tempResult = Math.sqrt(tempSum / tempValuesList.size());
+                    if(tempValuesList.size() > 0) {
+                        tempResult = Math.sqrt(tempSum / tempValuesList.size());
+                    } else {
+                        tempResult = null;
+                    }
                 } else {
                     tempResult = 0.0;
                 }
                 if(new Double(tempResult).equals(Double.NaN)) {
-                    resultMap.put(key, 0.0);
+                    resultMap.put(key, null);
                 }
                 else{
                     resultMap.put(key, tempResult);
