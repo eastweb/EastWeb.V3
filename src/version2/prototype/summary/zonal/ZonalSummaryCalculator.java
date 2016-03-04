@@ -211,16 +211,18 @@ public class ZonalSummaryCalculator {
         int indexID = Schemas.getIndexID(globalSchema, indexNm, stmt);
         int projectSummaryID;
         int dateGroupID;
-        double value;
-        String areaName;
+        Integer areaCodeTemp = null;
+        Double value;
+        String areaName = null;
         String filePath = mTableFile.getCanonicalPath();
-        SummaryNameResultPair pair;
-        Map<Integer, Double> result;
-        Map<String, Double> summaryAreaResult;
+        SummaryNameResultPair pair = null;
+        Map<Integer, Double> result = null;
+        Map<String, Double> summaryAreaResult = null;
         Map<Integer, String> areas = layerData.getAreas();
         try{
             for(Integer areaCode : areas.keySet())
             {
+                areaCodeTemp = areaCode;
                 areaName = areas.get(areaCode);
                 summaryAreaResult = new HashMap<String, Double>();
                 if(zoneNameMap.get(areaCode) == null) {
