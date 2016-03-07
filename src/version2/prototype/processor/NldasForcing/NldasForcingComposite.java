@@ -52,9 +52,6 @@ public class NldasForcingComposite extends Composite
             }
 
             List<Dataset> inputDSs = new ArrayList<Dataset>();
-            for (File input : inputFiles) {
-                inputDSs.add(gdal.Open(input.getPath()));
-            }
 
             for(int band : mBands)
             {
@@ -81,6 +78,9 @@ public class NldasForcingComposite extends Composite
                             ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error while creating new file.", e);
                         }
 
+                        for (File input : inputFiles) {
+                            inputDSs.add(gdal.Open(input.getPath()));
+                        }
 
                         Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
                                 temp.getAbsolutePath(),
@@ -96,11 +96,11 @@ public class NldasForcingComposite extends Composite
                         outputDS.GetRasterBand(1).WriteRaster(0, 0, rasterX, rasterY, GetOutputArray(band, output, inputDSs, rasterX, rasterY, prefix));
 
                         outputDS.delete();
-                    }
-                }
 
-                for (Dataset inputDS : inputDSs) {
-                    inputDS.delete();
+                        for (Dataset inputDS : inputDSs) {
+                            inputDS.delete();
+                        }
+                    }
                 }
             }
         }
