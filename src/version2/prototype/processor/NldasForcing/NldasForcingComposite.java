@@ -96,12 +96,11 @@ public class NldasForcingComposite extends Composite
                         outputDS.GetRasterBand(1).WriteRaster(0, 0, rasterX, rasterY, GetOutputArray(band, output, inputDSs, rasterX, rasterY, prefix));
 
                         outputDS.delete();
-
-                        for (Dataset inputDS : inputDSs) {
-                            inputDS.delete();
-                        }
                     }
                 }
+            }
+            for (Dataset inputDS : inputDSs) {
+                inputDS.delete();
             }
         }
     }
