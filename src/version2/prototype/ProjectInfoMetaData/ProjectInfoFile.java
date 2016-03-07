@@ -542,6 +542,7 @@ import version2.prototype.ZonalSummary;
                     {
                         if(temporalSummaryCompositionStrategyClassName.equals(strategyName)) {
                             valid = true;
+                            break;
                         }
                     }
                     if(!valid) {

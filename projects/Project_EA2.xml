@@ -2,22 +2,22 @@
 <ProjectInfo>
 	<Plugins>
 		<Plugin name="NldasNOAH">
-			<Indicies>NldasNOAHMeanDailySnowDepthCalculator</Indicies>
-			<Indicies>NldasNOAHMeanDailySnowCoverCalculator</Indicies>
-			<Indicies>NldasNOAHMeanDailyVolumetric0_10Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailyVolumetric10_40Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailyVolumetric40_100Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailyVolumetric100_200Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailySoilTemp0_10Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailySoilTemp10_40Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailySoilTemp40_100Calculator</Indicies>
-			<Indicies>NldasNOAHMeanDailySoilTemp100_200Calculator</Indicies>
+			<Indicies>NldasNOAHMeanDailySnowDepth</Indicies>
+			<Indicies>NldasNOAHMeanDailySnowCover</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric0_10</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric10_40</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric40_100</Indicies>
+			<Indicies>NldasNOAHMeanDailyVolumetric100_200</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp0_10</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp10_40</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp40_100</Indicies>
+			<Indicies>NldasNOAHMeanDailySoilTemp100_200</Indicies>
 			<QC> null</QC>
 			<ModisTile/>
 		</Plugin>
 	</Plugins>
-	<StartDate>Sun Jan 18 12:56:49 CST 2015</StartDate>
-	<ProjectName>Project_EA</ProjectName>
+	<StartDate>Fri Jan 01 12:56:49 CST 2016</StartDate>
+	<ProjectName>Project_EA2</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<Masking>
 		<File>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
@@ -42,8 +42,6 @@
 	<FalseNothing>0.0</FalseNothing>
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: WID; Shape File Path:
-			\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp;
-			AreaCodeField: WID; Temporal Summary: GregorianWeeklyStrategy</Summary>
+		<Summary ID="1">AreaNameField: WID; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: WID; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>
