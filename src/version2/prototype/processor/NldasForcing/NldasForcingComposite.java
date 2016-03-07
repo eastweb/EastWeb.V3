@@ -98,10 +98,10 @@ public class NldasForcingComposite extends Composite
                         outputDS.delete();
                     }
                 }
+            }
 
-                for (Dataset inputDS : inputDSs) {
-                    inputDS.delete();
-                }
+            for (Dataset inputDS : inputDSs) {
+                inputDS.delete();
             }
         }
     }
