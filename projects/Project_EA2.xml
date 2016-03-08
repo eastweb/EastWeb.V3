@@ -41,6 +41,6 @@
 	<FalseNothing>0.0</FalseNothing>
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: WID; Shape File Path: \Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; AreaCodeField: WID; Temporal Summary: GregorianWeeklyStrategy</Summary>
+		<Summary ID="1">AreaNameField: NAME10; Shape File Path: \Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; AreaCodeField: COUNTYFP10; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>
