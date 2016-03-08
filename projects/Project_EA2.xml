@@ -13,17 +13,16 @@
 			<Indicies>NldasNOAHMeanDailySoilTemp40_100</Indicies>
 			<Indicies>NldasNOAHMeanDailySoilTemp100_200</Indicies>
 			<QC> null</QC>
-			<ModisTile/>
 		</Plugin>
 	</Plugins>
 	<StartDate>Fri Jan 01 12:56:49 CST 2016</StartDate>
 	<ProjectName>Project_EA2</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<Masking>
-		<File>\Documentation\TestCases\ethiopia_amhara\settings\watermask\Ethiopia_watermask.tif</File>
+		<File>\Documentation\TestCases\Georgia_shp_wmask\watermask\w0010011.tif</File>
 		<Resolution>1000</Resolution>
 	</Masking>
-	<MasterShapeFile>\Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp</MasterShapeFile>
+	<MasterShapeFile>\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
 	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
 	<Clipping>true</Clipping>
 	<FreezingDate>Tue Sep 01 12:58:25 CDT 1970</FreezingDate>
@@ -42,6 +41,6 @@
 	<FalseNothing>0.0</FalseNothing>
 	<ScalingFactor>0.9996</ScalingFactor>
 	<Summaries>
-		<Summary ID="1">AreaNameField: WID; Shape File Path: \Documentation\TestCases\ethiopia_amhara\settings\shapefiles\Woreda_new\Woreda_new.shp; AreaCodeField: WID; Temporal Summary: GregorianWeeklyStrategy</Summary>
+		<Summary ID="1">AreaNameField: WID; Shape File Path: \Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; AreaCodeField: WID; Temporal Summary: GregorianWeeklyStrategy</Summary>
 	</Summaries>
 </ProjectInfo>

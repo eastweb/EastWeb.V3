@@ -4,10 +4,9 @@
 		<Plugin name="NldasForcing">
 			<Indicies>NldasForcingMeanAirTemperature</Indicies>
 			<QC> null</QC>
-			<ModisTile>h21v09</ModisTile>
 		</Plugin>
 	</Plugins>
-	<StartDate>Mon Sep 14 00:00:00 CDT 2015</StartDate>
+	<StartDate>Fri Jan 01 00:00:00 CDT 2016</StartDate>
 	<ProjectName>NLDAS_Test_09042015</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<Masking>

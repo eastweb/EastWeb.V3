@@ -52,6 +52,9 @@ public class NldasForcingComposite extends Composite
             }
 
             List<Dataset> inputDSs = new ArrayList<Dataset>();
+            for (File input : inputFiles) {
+                inputDSs.add(gdal.Open(input.getPath()));
+            }
 
             for(int band : mBands)
             {
@@ -76,10 +79,6 @@ public class NldasForcingComposite extends Composite
                             temp.createNewFile();
                         } catch (IOException e) {
                             ErrorLog.add(Config.getInstance(), "NldasForcingComposite.composeFiles error while creating new file.", e);
-                        }
-
-                        for (File input : inputFiles) {
-                            inputDSs.add(gdal.Open(input.getPath()));
                         }
 
                         Dataset outputDS = gdal.GetDriverByName("GTiff").Create(
