@@ -44,6 +44,13 @@ public class NldasNOAHComposite extends Composite{
 
             ArrayList<double[]> tempArray = new ArrayList<double[]>();
 
+            // add for geotransformation and projection
+            Dataset iDS = gdal.Open(inputFiles[0].getPath());
+            double [] geoTrans = iDS.GetGeoTransform();
+            String projection = iDS.GetProjection();
+
+            iDS.delete();
+
             for(int i = 0; i < 10; i++)
             {
                 tempArray.add(new double[xSize*ySize]);
@@ -86,6 +93,8 @@ public class NldasNOAHComposite extends Composite{
                 Dataset outputDS = gdal.GetDriverByName("GTiff").Create(outputFile.getAbsolutePath(),
                         xSize, ySize, 1, gdalconstConstants.GDT_Float32);
 
+                outputDS.SetGeoTransform(geoTrans);
+                outputDS.SetProjection(projection);
                 outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, tempArray.get(i));
 
                 outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
@@ -97,3 +106,5 @@ public class NldasNOAHComposite extends Composite{
     }
 
 }
+
+
