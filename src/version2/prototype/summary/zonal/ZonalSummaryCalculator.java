@@ -169,7 +169,7 @@ public class ZonalSummaryCalculator {
 
         ArrayList<SummaryNameResultPair> results = summariesCollection.getResults();
 
-        writer.print("Area Name, Area Code, Value Count, ");
+        writer.print("Area Name, Area Code, ");
         for(int i=0; i < results.size(); i++)
         {
             String name = results.get(i).getSimpleName();
