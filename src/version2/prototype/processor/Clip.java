@@ -123,7 +123,7 @@ public class Clip
                         (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
-                        gdalconstConstants.GDT_Int32
+                        gdalconstConstants.GDT_Float32
                         );
 
                 try{
@@ -154,7 +154,7 @@ public class Clip
                         (int) Math.ceil((featureExtent[1]-featureExtent[0])/pixelSize),
                         (int) Math.ceil((featureExtent[3]-featureExtent[2])/pixelSize),
                         1,
-                        gdalconstConstants.GDT_Int32);
+                        gdalconstConstants.GDT_Float32);
 
                 try{
                     GdalUtils.errorCheck();
@@ -174,7 +174,7 @@ public class Clip
                 gdal.RasterizeLayer(maskDS, new int[] {1}, featureLyr);
 
                 int[] maskArray = new int[maskDS.GetRasterXSize()];
-                int[] rasterArray = new int[maskDS.GetRasterXSize()];
+                double[] rasterArray = new double[maskDS.GetRasterXSize()];
 
                 int xSize = maskDS.GetRasterXSize();
                 int ySize = maskDS.GetRasterYSize();

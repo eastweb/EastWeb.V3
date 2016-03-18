@@ -26,8 +26,8 @@
 	<Processor>
 		<ProcessStep>NldasForcingComposite</ProcessStep>
 		<ProcessStep>NldasForcingReproject</ProcessStep>
-		<ProcessStep>NldasForcingClip</ProcessStep>
 		<ProcessStep>NldasForcingMask</ProcessStep>
+		<ProcessStep>NldasForcingClip</ProcessStep>
 		<NumberOfOutput>7</NumberOfOutput>
 	</Processor>
 	<Indices>
