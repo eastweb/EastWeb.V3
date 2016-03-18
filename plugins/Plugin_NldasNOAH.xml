@@ -26,8 +26,8 @@
 	<Processor>
 		<ProcessStep>NldasNOAHComposite</ProcessStep>
 		<ProcessStep>NldasNOAHReproject</ProcessStep>
-		<ProcessStep>NldasNOAHClip</ProcessStep>
 		<ProcessStep>NldasNOAHMask</ProcessStep>
+		<ProcessStep>NldasNOAHClip</ProcessStep>
 		<NumberOfOutput>10</NumberOfOutput>
 	</Processor>
 	<Indices>
