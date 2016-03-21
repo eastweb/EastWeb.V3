@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="ModisLST">
+			<Indicies>ModisLSTDay</Indicies>
+			<Indicies>ModisLSTNight</Indicies>
+			<Indicies>ModisLSTMean</Indicies>
+			<ModisTile> h21v07</ModisTile>
+			<ModisTile> h21v08</ModisTile>
+			<QC> LOW</QC>
+		</Plugin>
+		<Plugin name="ModisNBAR">
+			<Indicies>ModisNBARNDVI</Indicies>
+			<Indicies>ModisNBAREVI</Indicies>
+			<Indicies>ModisNBARNDWI5</Indicies>
+			<Indicies>ModisNBARNDWI6</Indicies>
+			<Indicies>ModisNBARSAVI</Indicies>
+			<ModisTile> h21v07</ModisTile>
+			<ModisTile> h21v08</ModisTile>
+			<QC>  Low</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Thu Jan 01 00:00:00 CDT 2015</StartDate>
+	<ProjectName>EPIDEMIA MODIS 20151125</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File>C:\Users\michael.devos\git\EastWeb.V2\Documentation\TestCases\EPIDEMIA\Ethiopia_watermask.tif</File>
+		<Resolution>1000</Resolution>
+	</Masking>
+	<MasterShapeFile>C:\Users\michael.devos\git\EastWeb.V2\Documentation\TestCases\EPIDEMIA\woreda_epidemia_20151125.shp</MasterShapeFile>
+	<TimeZone>(GMT+0:00) Africa/Abidjan</TimeZone>
+	<Clipping>false</Clipping>
+	<FreezingDate>Sun Nov 01 00:00:00 CST 1970</FreezingDate>
+	<CoolingDegree>0</CoolingDegree>
+	<HeatingDate>Sun Nov 01 12:10:20 CST 1970</HeatingDate>
+	<HeatingDegree>0</HeatingDegree>
+	<ReSampling>NEAREST_NEIGHBOR</ReSampling>
+	<PixelSize>1000</PixelSize>
+	<Summaries>
+		<Summary ID="1">AreaNameField: woreda; Shape File Path: C:\Users\michael.devos\git\EastWeb.V2\Documentation\TestCases\EPIDEMIA\woreda_epidemia_20151125.shp; AreaCodeField: WID; Temporal Summary: CompositeOf8Days</Summary>
+	</Summaries>
+</ProjectInfo>

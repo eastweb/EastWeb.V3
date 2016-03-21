@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ProjectInfo>
+	<Plugins>
+		<Plugin name="NldasForcing">
+			<Indicies>NldasForcingMeanAirTemperature</Indicies>
+			<Indicies>NldasForcingHeatingDegreeDays</Indicies>
+			<Indicies>NldasForcingFreezingDegreeDays</Indicies>
+			<Indicies>NldasForcingMinAirTemperature</Indicies>
+			<Indicies>NldasForcingMaxAirTemperature</Indicies>
+			<Indicies>NldasForcingMeanHumidity</Indicies>
+			<Indicies>NldasForcingTotalPrecipitation</Indicies>
+			<QC> null</QC>
+		</Plugin>
+	</Plugins>
+	<StartDate>Fri Jan 01 00:00:00 CDT 2016</StartDate>
+	<ProjectName>NLDAS Forcing Test</ProjectName>
+	<WorkingDir>C:\EASTWeb</WorkingDir>
+	<Masking>
+		<File>\Documentation\TestCases\Georgia_shp_wmask\watermask\w0010011.tif</File>
+		<Resolution>62500</Resolution>
+	</Masking>
+	<MasterShapeFile>\Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp</MasterShapeFile>
+	<TimeZone>(GMT-5:00) America/Detroit</TimeZone>
+	<Clipping>true</Clipping>
+	<FreezingDate>Mon Oct 05 14:04:18 CDT 1970</FreezingDate>
+	<CoolingDegree>0</CoolingDegree>
+	<HeatingDate>Sun Apr 12 00:00:00 CST 1970</HeatingDate>
+	<HeatingDegree>14.3</HeatingDegree>
+	<CoordinateSystem>TRANSVERSE_MERCATOR</CoordinateSystem>
+	<ReSampling>BILINEAR</ReSampling>
+	<Datum>NAD83</Datum>
+	<PixelSize>1000</PixelSize>
+	<StandardParallel1>0</StandardParallel1>
+	<CentalMeridian>-81</CentalMeridian>
+	<FalseEasting>500000</FalseEasting>
+	<StandardParallel2>0</StandardParallel2>
+	<LatitudeOfOrigin>0</LatitudeOfOrigin>
+	<FalseNothing>0</FalseNothing>
+	<ScalingFactor>0.9996</ScalingFactor>
+	<Summaries>
+		<Summary ID="1">AreaNameField: NAME10; 
+		Shape File Path: \Documentation\TestCases\Georgia_shp_wmask\shapefiles\GA_Counties\GA_Counties.shp; 
+		AreaCodeField: COUNTYFP10; 
+		Temporal Summary: CDCWeeklyStrategy</Summary>
+	</Summaries>
+</ProjectInfo>
