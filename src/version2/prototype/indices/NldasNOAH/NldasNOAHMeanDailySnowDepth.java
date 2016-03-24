@@ -19,9 +19,9 @@ public class NldasNOAHMeanDailySnowDepth extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailySnowDepth(List<File> inputFiles, File outputFile)
+    public NldasNOAHMeanDailySnowDepth(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class NldasNOAHMeanDailySnowDepth extends IndicesFramework{
             for (int i = 1; i <= outputDS.GetRasterCount(); i++) {
                 Band band = outputDS.GetRasterBand(i);
 
-                band.SetNoDataValue(OUTPUT_NODATA);
+                band.SetNoDataValue(noDataValue);
                 band.ComputeStatistics(false);
             }
 
@@ -62,13 +62,13 @@ public class NldasNOAHMeanDailySnowDepth extends IndicesFramework{
     protected double calculatePixelValue(double[] values) throws Exception {
         // TODO Auto-generated method stub
 
-        if(values[INPUT] == GdalUtils.NO_VALUE)
+        if(values[INPUT] == noDataValue)
         {
             //            return -3.4028234663852886E38;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         }
         else if(values[INPUT] < 0) {
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         }
         else
         {

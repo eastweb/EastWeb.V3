@@ -156,6 +156,7 @@ public class SummaryWorker extends ProcessWorker {
                             outputFile,                             // outTableFile
                             new SummariesCollection(Config.getInstance().getSummaryCalculations()),
                             summary,                                // summariesCollection
+                            pluginMetaData.NoDataValue,
                             fileStores.get(summary.GetID()),        // fileStore
                             outputCache);
                     zonalSummaryCal.calculate();

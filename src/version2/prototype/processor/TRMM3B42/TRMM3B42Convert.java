@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 
 import version2.prototype.processor.Convert;
@@ -15,9 +14,11 @@ import version2.prototype.processor.ProcessData;
 import version2.prototype.util.GdalUtils;
 
 public class TRMM3B42Convert extends Convert{
+    private Integer noDataValue;
 
     public TRMM3B42Convert(ProcessData data, Boolean deleteInputDirectory) {
         super(data, deleteInputDirectory);
+        noDataValue = data.getNoDataValue();
     }
 
     @Override
@@ -58,7 +59,7 @@ public class TRMM3B42Convert extends Convert{
 
                 dis.close();
 
-                outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+                outputDS.GetRasterBand(1).SetNoDataValue(noDataValue);
                 //TRMM 3B42
                 outputDS.SetGeoTransform(new double[] {
                         0.125, 0.25, 0,

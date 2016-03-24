@@ -25,13 +25,14 @@ public class ProcessData {
     private MonthDay heatingDate;
     private double freezingDegree;
     private double heatingDegree;
+    private Integer noDataValue;
 
     public ProcessData() { }
 
     public ProcessData(String [] inputFolders, String outputFolder, DataDate date, String qcLevel, String shapefile,
             String maskfile, int dataBands[], int qcBands[], Projection projection,
             Integer maskResolution, Integer dataResolution, Boolean clipOrNot,
-            MonthDay freezingDate, MonthDay heatingDate, double freezingDegree, double heatingDegree)
+            MonthDay freezingDate, MonthDay heatingDate, double freezingDegree, double heatingDegree, Integer noDataValue)
     {
         this.inputFolders = inputFolders;
         this.outputFolder = outputFolder;
@@ -49,6 +50,7 @@ public class ProcessData {
         this.heatingDate = heatingDate;
         this.freezingDegree = freezingDegree;
         this.heatingDegree = heatingDegree;
+        this.noDataValue = noDataValue;
     }
 
     public String [] getInputFolders()
@@ -99,5 +101,8 @@ public class ProcessData {
 
     public double getHeatingDegree()
     {   return heatingDegree;   }
+
+    public Integer getNoDataValue()
+    {   return noDataValue;     }
 
 }

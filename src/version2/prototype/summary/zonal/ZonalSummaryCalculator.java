@@ -53,6 +53,7 @@ public class ZonalSummaryCalculator {
     private final String pluginName;
     private final int daysPerInputData;
     private final ProjectInfoSummary summary;
+    private final Integer noDataValue;
     private final TemporalSummaryRasterFileStore fileStore;
     private final DatabaseCache outputCache;
 
@@ -77,7 +78,7 @@ public class ZonalSummaryCalculator {
      * @param outputCache
      */
     public ZonalSummaryCalculator(DatabaseConnection con, Process process, String globalSchema, String workingDir, String projectName, String pluginName, int daysPerInputData, IndicesFileMetaData inputFile,
-            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary, TemporalSummaryRasterFileStore fileStore, DatabaseCache outputCache)
+            File outTableFile, SummariesCollection summariesCollection, ProjectInfoSummary summary, Integer noDataValue, TemporalSummaryRasterFileStore fileStore, DatabaseCache outputCache)
     {
         this.con = con;
         this.process = process;
@@ -93,6 +94,7 @@ public class ZonalSummaryCalculator {
         this.pluginName = pluginName;
         this.daysPerInputData = daysPerInputData;
         this.summary = summary;
+        this.noDataValue = noDataValue;
         this.fileStore = fileStore;
         this.outputCache = outputCache;
 
@@ -121,7 +123,7 @@ public class ZonalSummaryCalculator {
                 layer = layerSource.GetLayer(0);
 
                 // Get data from layer file
-                layerData = new LayerFileData(inputFile, shapeFilePath, layer, areaCodeField, areaNameField, summariesCollection, raster);
+                layerData = new LayerFileData(inputFile, shapeFilePath, layer, areaCodeField, areaNameField, summariesCollection, raster, noDataValue);
             }
             catch (IllegalArgumentException | UnsupportedOperationException | IOException e)
             {

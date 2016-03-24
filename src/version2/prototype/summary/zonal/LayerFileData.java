@@ -34,13 +34,16 @@ public class LayerFileData {
     private Map<Integer, String> areas; // <AreaCode, AreaName>
     private Map<Integer, Double> countMap;
 
-    public LayerFileData(IndicesFileMetaData inputFile, String shapeFilePath, Layer layer, String areaCodeField, String areaNameField, SummariesCollection summariesCollection, Dataset raster)
-            throws IllegalArgumentException, UnsupportedOperationException, IOException
+    private Integer noDataValue;
+
+    public LayerFileData(IndicesFileMetaData inputFile, String shapeFilePath, Layer layer, String areaCodeField, String areaNameField, SummariesCollection summariesCollection, Dataset raster,
+            Integer noDataValue) throws IllegalArgumentException, UnsupportedOperationException, IOException
     {
         this.areaCodeField = areaCodeField;
         this.areaNameField = areaNameField;
         this.summariesCollection = summariesCollection;
         zoneReceivedValidData = new HashMap<Integer, Boolean>();
+        this.noDataValue = noDataValue;
         Dataset zoneRaster = null;
 
         // Validate inputs
@@ -223,6 +226,7 @@ public class LayerFileData {
         rasterBand.GetNoDataValue(noData);
         final ArrayList<Double> NO_DATA = new ArrayList<Double>();
         NO_DATA.add(new Double(GdalUtils.NO_DATA));
+        NO_DATA.add(new Double(noDataValue));
 
         for (int y=0; y<HEIGHT; y++) {
             zoneBand.ReadRaster(0, y, WIDTH, 1, zoneArray); GdalUtils.errorCheck();

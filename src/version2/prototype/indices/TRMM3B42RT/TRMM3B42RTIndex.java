@@ -4,23 +4,22 @@ import java.io.File;
 import java.util.List;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 public class TRMM3B42RTIndex extends IndicesFramework
 {
     private final int INPUT = 0;
 
-    public TRMM3B42RTIndex(List<File> inputFiles, File outputFile)
+    public TRMM3B42RTIndex(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
     }
 
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[INPUT] == GdalUtils.NO_VALUE) {
+        if (values[INPUT] == noDataValue) {
             //   System.out.println("novalue : " + values[INPUT]);
             //            return -3.4028234663852886E38;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         } else {
             return values[INPUT];
         }

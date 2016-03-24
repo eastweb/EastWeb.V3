@@ -14,13 +14,12 @@ import org.apache.commons.io.FileUtils;
 import version2.prototype.Config;
 import version2.prototype.ErrorLog;
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 public class NldasForcingHeatingDegreeDays extends IndicesFramework {
 
-    public NldasForcingHeatingDegreeDays(List<File> inputFiles, File outputFile)
+    public NldasForcingHeatingDegreeDays(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
     }
 
     @Override
@@ -60,10 +59,10 @@ public class NldasForcingHeatingDegreeDays extends IndicesFramework {
 
         if(gdd == -9999){
             //            return -3.4028234663852886E38;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         }
         else if(gdd < 0) {
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         }
 
         return gdd;

@@ -78,7 +78,7 @@ public class SummationGdalRasterFileMerge implements MergeStrategy {
                     for(int x=0; x < xSize; x++)
                     {
                         index = y * xSize + x;
-                        if(tempArray[index] != GdalUtils.NO_DATA) {
+                        if(tempArray[index] != process.pluginMetaData.NoDataValue) {
                             avgArray[index] += tempArray[index];
                             pixelsPerPos[index] += 1;
                         }
@@ -90,7 +90,7 @@ public class SummationGdalRasterFileMerge implements MergeStrategy {
             // Write averaged array to raster file
             //            synchronized (GdalUtils.lockObject) {
             sumRasterDs.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, avgArray);
-            sumRasterDs.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_DATA);
+            sumRasterDs.GetRasterBand(1).SetNoDataValue(process.pluginMetaData.NoDataValue);
             //            }
 
             tempArray = null;

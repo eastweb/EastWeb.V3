@@ -17,9 +17,11 @@ import version2.prototype.util.GdalUtils;
 //Rewritten by Yi Liu
 
 public class ModisLSTFilter extends Filter{
+    private Integer noDataValue;
 
     public ModisLSTFilter(ProcessData data, Boolean deleteInputDirectory) {
         super(data, deleteInputDirectory);
+        noDataValue = data.getNoDataValue();
     }
 
     @Override
@@ -98,7 +100,7 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(0), arrays.get(2), qcLevel));
 
-            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+            outputDS.GetRasterBand(1).SetNoDataValue(noDataValue);
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
 
@@ -114,7 +116,7 @@ public class ModisLSTFilter extends Filter{
             outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize,
                     filterWithFlags(arrays.get(1), arrays.get(3), qcLevel));
 
-            outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+            outputDS.GetRasterBand(1).SetNoDataValue(noDataValue);
             outputDS.GetRasterBand(1).ComputeStatistics(false);
             outputDS.delete();
 
@@ -174,7 +176,7 @@ public class ModisLSTFilter extends Filter{
                 if (   (!(bits3.equals("00"))) &&
                         ( (bits1.equals("00")) && (bits2.equals("00")) ) )
                 {
-                    dBand[i] = GdalUtils.NO_VALUE;
+                    dBand[i] = noDataValue;
                 };
                 break;
             case "MODERATE":
@@ -186,7 +188,7 @@ public class ModisLSTFilter extends Filter{
                 if (  (!(bits2.equals("00"))) &&
                         ( (bits2.equals("01")) && (!((bits1.equals("01")) || (bits1.equals("00")))) ))
                 {
-                    dBand[i] = GdalUtils.NO_VALUE;
+                    dBand[i] = noDataValue;
                 };
                 break;
 
@@ -196,7 +198,7 @@ public class ModisLSTFilter extends Filter{
 
                 if  (!bits2.equals("00"))
                 {
-                    dBand[i] = GdalUtils.NO_VALUE;
+                    dBand[i] = noDataValue;
                 }
                 break;
             }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 /*
  *  1: Band 1: Red
@@ -20,9 +19,9 @@ public class ModisNBARSAVI extends IndicesFramework {
     private final int RED;
     private final int NIR;
 
-    public ModisNBARSAVI(List<File> inputFiles, File outputFile)
+    public ModisNBARSAVI(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
 
         int tempRED = -1;
         int tempNIR = -1;
@@ -52,9 +51,9 @@ public class ModisNBARSAVI extends IndicesFramework {
      */
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] > 32766 || values[NIR] < 0 || values[RED] > 32766 || values[RED] < 0 || values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE) {
+        if (values[NIR] > 32766 || values[NIR] < 0 || values[RED] > 32766 || values[RED] < 0 || values[NIR] == noDataValue || values[RED] == noDataValue) {
             //            return -3.40282346639e+038;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         } else {
             return ((values[NIR] - values[RED])
                     / (values[NIR] + values[RED] + L)) * (1 + L);

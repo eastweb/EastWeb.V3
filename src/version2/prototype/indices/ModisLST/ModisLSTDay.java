@@ -4,15 +4,14 @@ import java.io.File;
 import java.util.List;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 public class ModisLSTDay extends IndicesFramework{
 
     private final int INPUT;
 
-    public ModisLSTDay(List<File> inputFiles, File outputFile)
+    public ModisLSTDay(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
 
         int tempINPUT = -1;
         for(int i=0; i < mInputFiles.length; i++)
@@ -36,10 +35,10 @@ public class ModisLSTDay extends IndicesFramework{
      */
     @Override
     protected double calculatePixelValue(double[] values) {
-        if (values[INPUT] < 7500 || values[INPUT] > 65535 || values[INPUT] == GdalUtils.NO_VALUE) {
+        if (values[INPUT] < 7500 || values[INPUT] > 65535 || values[INPUT] == noDataValue) {
             //        if(values[INPUT] == GdalUtils.NoValue) {
             //            return -3.4028234663852886E38;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         } else {
             return (values[INPUT] * 0.02) - 273.16;
         }

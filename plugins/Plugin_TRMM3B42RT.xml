@@ -2,6 +2,7 @@
 <PluginMetadata>
 	<Title>TRMM3B42RT</Title>
 	<DaysPerInputData>1</DaysPerInputData>
+	<NoDataValue>-99999</NoDataValue>
 	<Resolution>25000</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>

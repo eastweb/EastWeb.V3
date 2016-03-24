@@ -226,7 +226,8 @@ public class ProcessorWorker extends ProcessWorker {
                             prepareTask.getFreezingDate(),
                             prepareTask.getHeatingDate(),
                             prepareTask.getFreezingDegree(),
-                            prepareTask.getHeatingDegree()
+                            prepareTask.getHeatingDegree(),
+                            pluginMetaData.NoDataValue
                             );
                     process = cnstProcess.newInstance(pData, this.process.GetClearIntermediateFilesFlag());
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

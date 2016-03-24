@@ -27,6 +27,8 @@ public class NldasForcingComposite extends Composite
 
     private int[] mBands;
 
+    private Integer noDataValue;
+
     public NldasForcingComposite(ProcessData data, Boolean deleteInputDirectory) {
         super(data, deleteInputDirectory);
 
@@ -37,6 +39,8 @@ public class NldasForcingComposite extends Composite
 
         fDate = data.getFreezingDate();
         fDegree = data.getFreezingDegree();
+
+        noDataValue = data.getNoDataValue();
     }
 
     @Override
@@ -90,9 +94,10 @@ public class NldasForcingComposite extends Composite
 
                         outputDS.SetGeoTransform(inputDSs.get(0).GetGeoTransform());
                         outputDS.SetProjection(inputDSs.get(0).GetProjection());
-                        outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
-
+                        outputDS.SetMetadata(inputDSs.get(0).GetMetadata_Dict());
                         outputDS.GetRasterBand(1).WriteRaster(0, 0, rasterX, rasterY, GetOutputArray(band, output, inputDSs, rasterX, rasterY, prefix));
+                        outputDS.GetRasterBand(1).SetNoDataValue(noDataValue);
+                        outputDS.GetRasterBand(1).ComputeStatistics(true);
 
                         outputDS.delete();
                     }

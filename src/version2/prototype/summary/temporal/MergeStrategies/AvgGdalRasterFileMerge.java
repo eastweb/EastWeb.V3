@@ -77,7 +77,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
                     for(int x=0; x < xSize; x++)
                     {
                         index = y * xSize + x;
-                        if(tempArray[index] != GdalUtils.NO_DATA) {
+                        if(tempArray[index] != process.pluginMetaData.NoDataValue) {
                             avgArray[index] += tempArray[index];
                             pixelsPerPos[index] += 1;
                         }
@@ -93,7 +93,7 @@ public class AvgGdalRasterFileMerge implements MergeStrategy {
                     if(pixelsPerPos[index] != 0) {
                         avgArray[index] = avgArray[index] / pixelsPerPos[index];
                     } else {
-                        avgArray[index] = GdalUtils.NO_DATA;
+                        avgArray[index] = process.pluginMetaData.NoDataValue;
                     }
                 }
             }

@@ -3,6 +3,7 @@ package version2.prototype.processor.NldasNOAH;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -17,12 +18,14 @@ import version2.prototype.util.GdalUtils;
 public class NldasNOAHComposite extends Composite{
 
     private int[] dataBands = null;
+    private Integer noDataValue;
 
     public NldasNOAHComposite(ProcessData data, Boolean deleteInputDirectory) {
         super(data, deleteInputDirectory);
         // TODO Auto-generated constructor stub
 
         dataBands = data.getDataBands();
+        noDataValue = data.getNoDataValue();
     }
 
     @Override
@@ -48,7 +51,7 @@ public class NldasNOAHComposite extends Composite{
             Dataset iDS = gdal.Open(inputFiles[0].getPath());
             double [] geoTrans = iDS.GetGeoTransform();
             String projection = iDS.GetProjection();
-
+            Hashtable inputMetaData = iDS.GetMetadata_Dict();
             iDS.delete();
 
             for(int i = 0; i < 10; i++)
@@ -95,9 +98,10 @@ public class NldasNOAHComposite extends Composite{
 
                 outputDS.SetGeoTransform(geoTrans);
                 outputDS.SetProjection(projection);
+                outputDS.SetMetadata(inputMetaData);
                 outputDS.GetRasterBand(1).WriteRaster(0, 0, xSize, ySize, tempArray.get(i));
-
-                outputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+                outputDS.GetRasterBand(1).SetNoDataValue(noDataValue);
+                outputDS.GetRasterBand(1).ComputeStatistics(true);
 
                 outputDS.delete();
             }

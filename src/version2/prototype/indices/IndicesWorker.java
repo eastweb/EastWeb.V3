@@ -184,10 +184,10 @@ public class IndicesWorker extends ProcessWorker{
                 try
                 {
                     clazzIndicies = Class.forName(String.format("version2.prototype.indices.%s.%s", pluginName, indices));
-                    Constructor<?> ctorIndicies = clazzIndicies.getConstructor(List.class, File.class);
+                    Constructor<?> ctorIndicies = clazzIndicies.getConstructor(List.class, File.class, Integer.class);
 
                     String outFile = outputPath + File.separator + indices + ".tif";
-                    Object indexCalculator = ctorIndicies.newInstance(Arrays.asList(inputFiles.clone()), new File(outFile));
+                    Object indexCalculator = ctorIndicies.newInstance(Arrays.asList(inputFiles.clone()), new File(outFile), pluginMetaData.NoDataValue);
 
                     Method method = indexCalculator.getClass().getMethod("calculate");
                     method.invoke(indexCalculator);

@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 /**
  * EVI = G * (NIR - RED)/(NIR + C1*RED - C2*BLUE + L) where L=1, C1=6, C2=7.5, and G=2.5
@@ -32,9 +31,9 @@ public class ModisNBAREVI extends IndicesFramework
     private final int NIR;
     private final int BLUE;
 
-    public ModisNBAREVI(List<File> inputFiles, File outputFile)
+    public ModisNBAREVI(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
 
         int tempRED = -1;
         int tempNIR = -1;
@@ -72,9 +71,9 @@ public class ModisNBAREVI extends IndicesFramework
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
         if (values[NIR] > 32766 || values[NIR] < 0 || values[RED] > 32766 || values[RED] < 0 || values[BLUE] > 32766 || values[BLUE] < 0 ||
-                values[NIR] == GdalUtils.NO_VALUE || values[RED] == GdalUtils.NO_VALUE || values[BLUE] == GdalUtils.NO_VALUE) {
+                values[NIR] == noDataValue || values[RED] == noDataValue || values[BLUE] == noDataValue) {
             //            return -3.40282346639e+038;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         } else {
             return G * (values[NIR] - values[RED])
                     / (values[NIR] + C1 * values[RED] - C2 * values[BLUE] + L);

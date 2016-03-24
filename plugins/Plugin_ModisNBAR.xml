@@ -2,6 +2,7 @@
 <PluginMetadata>
 	<Title>ModisNBAR</Title>
 	<DaysPerInputData>8</DaysPerInputData>
+	<NoDataValue>-99999</NoDataValue>
 	<Resolution>1000</Resolution>
 	<ExtraDownloadFiles>
 		<Name>QC</Name>

@@ -25,9 +25,9 @@ public class NldasNOAHMeanDailyVolumetric0_10 extends IndicesFramework{
 
     private final static int INPUT = 0;
 
-    public NldasNOAHMeanDailyVolumetric0_10(List<File> inputFiles, File outputFile)
+    public NldasNOAHMeanDailyVolumetric0_10(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class NldasNOAHMeanDailyVolumetric0_10 extends IndicesFramework{
             for (int i = 1; i <= outputDS.GetRasterCount(); i++) {
                 Band band = outputDS.GetRasterBand(i);
 
-                band.SetNoDataValue(OUTPUT_NODATA);
+                band.SetNoDataValue(noDataValue);
                 band.ComputeStatistics(false);
             }
 
@@ -68,12 +68,12 @@ public class NldasNOAHMeanDailyVolumetric0_10 extends IndicesFramework{
     protected double calculatePixelValue(double[] values) throws Exception {
         // TODO Auto-generated method stub
 
-        if(values[INPUT] == GdalUtils.NO_VALUE)
+        if(values[INPUT] == noDataValue)
         {
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         }
         else if(values[INPUT] < 0) {
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         }
         else
         {

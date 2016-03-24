@@ -26,6 +26,7 @@ public class Mask {
     // data file resolution;
     protected Integer dataRes;
     protected final Boolean deleteInputDirectory;
+    private Integer noDataValue;
 
     public Mask(ProcessData data, Boolean deleteInputDirectory)
     {
@@ -49,6 +50,7 @@ public class Mask {
         dataRes = data.getDataResolution();
 
         this.deleteInputDirectory = deleteInputDirectory;
+        noDataValue = data.getNoDataValue();
     }
 
     // run method for the scheduler
@@ -152,14 +154,14 @@ public class Mask {
 
                         for (int x=0; x<intersectWidth; x++) {
                             if (mask[x] == 0) {
-                                output[x] = GdalUtils.NO_VALUE;
+                                output[x] = noDataValue;
                             }
                         }
 
                         mOutputDS.GetRasterBand(1).WriteRaster(intersectX, intersectY + y, intersectWidth, 1, output);
                     }
 
-                    mOutputDS.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+                    mOutputDS.GetRasterBand(1).SetNoDataValue(noDataValue);
                     mOutputDS.GetRasterBand(1).ComputeStatistics(false);
                     mInputDS.delete();
                     mMaskDS.delete();

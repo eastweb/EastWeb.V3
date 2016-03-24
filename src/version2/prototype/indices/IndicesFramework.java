@@ -23,18 +23,20 @@ public abstract class IndicesFramework implements IndexCalculator {
 
     protected final File[] mInputFiles;
     protected final File mOutputFile;
+    protected final Integer noDataValue;
 
     /**
      * @param inputFiles
      * @param outputFile
      */
-    public IndicesFramework(List<File> inputFiles, File outputFile)
+    public IndicesFramework(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
         mInputFiles = new File[inputFiles.size()];
         for(int i=0; i < inputFiles.size(); i++) {
             mInputFiles[i] = new File(inputFiles.get(i).getPath());
         }
         mOutputFile = outputFile;
+        this.noDataValue = noDataValue;
     }
 
     // creates the output file

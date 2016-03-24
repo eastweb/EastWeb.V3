@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 
 /**
@@ -27,9 +26,9 @@ public class ModisNBARNDWI6 extends IndicesFramework {
     private final int NIR;
     private final int SWIR;
 
-    public ModisNBARNDWI6(List<File> inputFiles, File outputFile)
+    public ModisNBARNDWI6(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
 
         int tempNIR = -1;
         int tempSWIR = -1;
@@ -59,9 +58,9 @@ public class ModisNBARNDWI6 extends IndicesFramework {
      */
     @Override
     protected double calculatePixelValue(double[] values) throws Exception {
-        if (values[NIR] > 32766 || values[NIR] < 0 || values[SWIR] > 32766 || values[SWIR] < 0 || values[NIR] == GdalUtils.NO_VALUE || values[SWIR] == GdalUtils.NO_VALUE) {
+        if (values[NIR] > 32766 || values[NIR] < 0 || values[SWIR] > 32766 || values[SWIR] < 0 || values[NIR] == noDataValue || values[SWIR] == noDataValue) {
             //            return -3.40282346639e+038;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         } else {
             return (values[NIR] - values[SWIR]) / (values[SWIR] + values[NIR]);
         }

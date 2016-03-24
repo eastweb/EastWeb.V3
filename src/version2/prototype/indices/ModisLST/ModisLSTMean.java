@@ -4,15 +4,14 @@ import java.io.File;
 import java.util.List;
 
 import version2.prototype.indices.IndicesFramework;
-import version2.prototype.util.GdalUtils;
 
 public class ModisLSTMean extends IndicesFramework{
     private final int DAY_LST;
     private final int NIGHT_LST;
 
-    public ModisLSTMean(List<File> inputFiles, File outputFile)
+    public ModisLSTMean(List<File> inputFiles, File outputFile, Integer noDataValue)
     {
-        super(inputFiles, outputFile);
+        super(inputFiles, outputFile, noDataValue);
 
         int tempDAY_LST = -1;
         int tempNIGHT_LST = -1;
@@ -43,11 +42,11 @@ public class ModisLSTMean extends IndicesFramework{
     @Override
     protected double calculatePixelValue(double[] values) {
         //        if (values[DAY_LST] == GdalUtils.NoValue || values[NIGHT_LST] == GdalUtils.NoValue) {
-        if (values[DAY_LST] == GdalUtils.NO_VALUE || values[NIGHT_LST] == GdalUtils.NO_VALUE
+        if (values[DAY_LST] == noDataValue || values[NIGHT_LST] == noDataValue
                 || values[DAY_LST] < 7500 || values[DAY_LST] > 65535
                 || values[NIGHT_LST] < 7500 || values[NIGHT_LST] > 65535) {
             //            return -3.4028234663852886E38;
-            return GdalUtils.NO_DATA;
+            return noDataValue;
         } else {
             double day_lst = (values[DAY_LST] * 0.02) - 273.16;
             double night_lst = (values[NIGHT_LST] * 0.02) - 273.16;

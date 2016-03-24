@@ -15,7 +15,7 @@
 			<QC> null</QC>
 		</Plugin>
 	</Plugins>
-	<StartDate>Fri Jan 01 00:00:00 CDT 2016</StartDate>
+	<StartDate>Tue Mar 01 00:00:00 CDT 2016</StartDate>
 	<ProjectName>NLDAS NOAH Test</ProjectName>
 	<WorkingDir>C:\EASTWeb</WorkingDir>
 	<Masking>

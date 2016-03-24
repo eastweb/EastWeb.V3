@@ -30,6 +30,7 @@ public class Clip
     protected File shapeFile;
     protected Boolean clipOrNot;
     protected final Boolean deleteInputDirectory;
+    private Integer noDataValue;
 
     public Clip(ProcessData data, Boolean deleteInputDirectory)
     {
@@ -48,6 +49,7 @@ public class Clip
 
         shapeFile = new File(data.getShapefile());
         this.deleteInputDirectory = deleteInputDirectory;
+        noDataValue = data.getNoDataValue();
     }
 
     // run method for the scheduler
@@ -191,7 +193,7 @@ public class Clip
                     for (int i=0; i<maskArray.length; i++) {
                         if (maskArray[i] == 0)
                         {
-                            rasterArray[i] = GdalUtils.NO_VALUE;
+                            rasterArray[i] = noDataValue;
                         }
                     }
 
@@ -202,7 +204,7 @@ public class Clip
                 for (int i=1; i<=outputDS.GetRasterCount(); i++) {
                     Band band = outputDS.GetRasterBand(i);
 
-                    band.SetNoDataValue(GdalUtils.NO_VALUE); // FIXME
+                    band.SetNoDataValue(noDataValue); // FIXME
                     band.ComputeStatistics(false);
                 }
 

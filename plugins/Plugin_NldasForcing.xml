@@ -2,6 +2,7 @@
 <PluginMetadata>
 	<Title>NldasForcing</Title>
 	<DaysPerInputData>1</DaysPerInputData>
+	<NoDataValue>9999</NoDataValue>
 	<Resolution>12500</Resolution>
 	<ExtraDownloadFiles/>
 	<Download>

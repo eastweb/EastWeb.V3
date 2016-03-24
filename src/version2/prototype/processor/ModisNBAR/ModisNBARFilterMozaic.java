@@ -26,6 +26,7 @@ import version2.prototype.util.GdalUtils;
 public class ModisNBARFilterMozaic extends Mozaic {
     private File[] qcFiles;
     private String qcLevel;
+    private Integer noDataValue;
 
     public ModisNBARFilterMozaic(ProcessData data, Boolean deleteInputDirectory) throws InterruptedException {
         super(data, deleteInputDirectory);
@@ -38,6 +39,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
         }
 
         qcLevel = data.getQCLevel();
+        noDataValue = data.getNoDataValue();
     }
 
     @Override
@@ -131,7 +133,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
                                 double[] tileRow = new double[xSize];
 
                                 for (int k = 0; k < xSize; k++) {
-                                    tileRow[k] = GdalUtils.NO_VALUE;
+                                    tileRow[k] = noDataValue;
                                 }
                                 System.arraycopy(tileRow, 0, rowTemp, col * xSize, xSize);
                             }
@@ -143,7 +145,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
                 }
 
                 output.GetRasterBand(1).WriteRaster(0, 0, output.getRasterXSize(), output.getRasterYSize(), outputTemp.getArray());
-                output.GetRasterBand(1).SetNoDataValue(GdalUtils.NO_VALUE);
+                output.GetRasterBand(1).SetNoDataValue(noDataValue);
                 output.GetRasterBand(1).ComputeStatistics(true);
                 output.delete();
 
@@ -205,7 +207,7 @@ public class ModisNBARFilterMozaic extends Mozaic {
 
                     // Replace each "bad" pixel with the fill value.
                     for(Entry<Integer, Integer> pair : pairList) {
-                        dataArray[((pair.getKey() * dataY) + pair.getValue())] = GdalUtils.NO_VALUE;
+                        dataArray[((pair.getKey() * dataY) + pair.getValue())] = noDataValue;
                     }
                     bandData.delete();
                 }
