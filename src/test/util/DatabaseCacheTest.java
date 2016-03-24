@@ -45,7 +45,6 @@ import version2.prototype.Scheduler.Scheduler;
 import version2.prototype.Scheduler.SchedulerStatusContainer;
 import version2.prototype.download.ListDatesFiles;
 import version2.prototype.summary.temporal.TemporalSummaryCompositionStrategy;
-import version2.prototype.summary.temporal.TemporalSummaryRasterFileStore;
 import version2.prototype.summary.temporal.CompositionStrategies.CDCWeeklyStrategy;
 import version2.prototype.summary.zonal.SummaryResult;
 import version2.prototype.util.DataFileMetaData;
@@ -122,7 +121,7 @@ public class DatabaseCacheTest {
         DownloadMetaData downloadMD = new DownloadMetaData(null, null, null, null, null, null, null, null, null, null, filesPerDay, null, null, null);
         ProcessorMetaData processorMD = new ProcessorMetaData(null, null, null, null, null, null, 1);
         IndicesMetaData indicesMD = new IndicesMetaData(null, null, null, null, null, indicesNames);
-        PluginMetaData pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, null, null, extraDownloadFiles, downloadMD, processorMD, indicesMD, null, null, null);
+        PluginMetaData pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, null, null, null, extraDownloadFiles, downloadMD, processorMD, indicesMD, null, null, null);
         testDownloadCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.DOWNLOAD);
         testProcessorCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.PROCESSOR);
         testIndicesCache = new DatabaseCache(scheduler, testGlobalSchema, testProjectName, plugins.get(0), pluginMetaData, workingDir, ProcessName.INDICES);

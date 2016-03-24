@@ -85,7 +85,7 @@ public class GenericLocalRetrievalLocalDownloaderTest {
         indices.add("TRMM3B42RTCalculator");
         ArrayList<String> modis  = new ArrayList<String>();
         indices.add("h01v01");
-        pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, 1, null, extraDownloadFiles, null, null, null, null, null, null);
+        pluginMetaData = PluginMetaDataCollection.CreatePluginMetaData(null, 1, null, null, extraDownloadFiles, null, null, null, null, null, null);
         pluginInfo = new ProjectInfoPlugin(testPluginName, indices, "Level 1", modis);
         ArrayList<ProjectInfoPlugin> plugins = new ArrayList<ProjectInfoPlugin>();
         plugins.add(pluginInfo);
