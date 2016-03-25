@@ -225,7 +225,7 @@ public class LayerFileData {
         Double[] noData = new Double[1];
         rasterBand.GetNoDataValue(noData);
         final ArrayList<Double> NO_DATA = new ArrayList<Double>();
-        NO_DATA.add(new Double(GdalUtils.NO_DATA));
+        //        NO_DATA.add(new Double(GdalUtils.NO_DATA));
         NO_DATA.add(new Double(noDataValue));
 
         for (int y=0; y<HEIGHT; y++) {
