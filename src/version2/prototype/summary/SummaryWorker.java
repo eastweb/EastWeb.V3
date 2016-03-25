@@ -154,8 +154,8 @@ public class SummaryWorker extends ProcessWorker {
                             pluginMetaData.DaysPerInputData,        // daysPerInputData
                             cachedFileData,                         // inputFile
                             outputFile,                             // outTableFile
-                            new SummariesCollection(Config.getInstance().getSummaryCalculations()),
-                            summary,                                // summariesCollection
+                            new SummariesCollection(Config.getInstance().getSummaryCalculations()),     // summariesCollection
+                            summary,
                             pluginMetaData.NoDataValue,
                             fileStores.get(summary.GetID()),        // fileStore
                             outputCache);

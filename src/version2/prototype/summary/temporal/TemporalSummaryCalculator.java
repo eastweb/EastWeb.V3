@@ -108,8 +108,8 @@ public class TemporalSummaryCalculator {
                     files.add(fdPair.file);
                 }
                 String outputFilePath = FileSystem.GetProcessWorkerTempDirectoryPath(projectInfo.GetWorkingDir(), projectInfo.GetProjectName(), pluginName, ProcessName.SUMMARY) +
-                        "Summary " + summary.GetID() + "\\" +
-                        String.format("%04d%03d.tif",
+                        "Summary " + summary.GetID() + "\\" + inputFile.indexNm + "\\" +
+                        String.format("%04d_%03d.tif",
                                 tempComp.startDate.getYear(),
                                 tempComp.startDate.getDayOfYear()
                                 );
