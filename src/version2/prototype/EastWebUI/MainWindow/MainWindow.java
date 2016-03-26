@@ -392,6 +392,8 @@ public class MainWindow {
                             String.valueOf(projectList.getSelectedItem())});
                 } catch (PatternSyntaxException | DOMException | ParserConfigurationException | SAXException | IOException e) {
                     ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
+                } catch (Exception e) {
+                    ErrorLog.add(Config.getInstance(), "MainWindow.FileMenu problem with creating new file from Desktop.", e);
                 }
             }
         });
