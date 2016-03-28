@@ -17,6 +17,8 @@ import version2.prototype.ErrorLog;
 /**
  * @author michael.devos
  *
+ * http://www.mchange.com/projects/c3p0/
+ *
  */
 public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
     private final ComboPooledDataSource comboPDS;
@@ -36,7 +38,7 @@ public class C3P0ConnectionPool extends DatabaseConnectionPoolA {
         }
 
         // Setup connection pool
-        comboPDS = new ComboPooledDataSource();
+        comboPDS = new ComboPooledDataSource();     // C3P0 Connection Pool object
         try {
             comboPDS.setDriverClass("org.postgresql.Driver");
         } catch (PropertyVetoException e) {

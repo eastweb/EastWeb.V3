@@ -97,7 +97,7 @@ public abstract class IndicesFramework implements IndexCalculator {
             // Calculate statistics
             Band band = outputDS.GetRasterBand(1);
             //            band.SetNoDataValue(OUTPUT_NODATA);
-            band.SetNoDataValue(GdalUtils.NO_DATA);
+            band.SetNoDataValue(noDataValue);
             band.ComputeStatistics(false);
 
             // Close and flush output and inputs
