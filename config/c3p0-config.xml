@@ -1,5 +1,4 @@
-<!-- http://www.mchange.com/projects/c3p0/#configuration_properties -->
-<?xml version="1.0" encoding="UTF-8"?>
+
 <c3p0-config>
 	<default-config>
 		<property name="preferredTestQuery">SELECT 1;</property>
